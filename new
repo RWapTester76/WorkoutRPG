@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏋️ Календарь тренировок</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background: #f2f2f7;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .app {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .month-nav button {
+            background: #007aff;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .month-nav .month-label {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #8e8e93;
+            margin-bottom: 8px;
+        }
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            background: #f2f2f7;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .day.workout {
+            background: #34c759;
+            color: white;
+        }
+        .day.other-month {
+            color: #c6c6c8;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 24px;
+            padding: 16px;
+            background: #f8f8fc;
+            border-radius: 16px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat .value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .stat .label {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        .xp-bar {
+            margin-top: 16px;
+            background: #e5e5ea;
+            border-radius: 12px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007aff, #34c759);
+            width: 0%;
+            transition: 0.3s;
+        }
+        .xp-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 4px;
+        }
+        .reset-btn {
+            margin-top: 16px;
+            width: 100%;
+            padding: 12px;
+            background: #ff3b30;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="header">
+        <h1>🏋️ Тренировки</h1>
+    </div>
+
+    <div class="month-nav">
+        <button id="prevMonth">‹</button>
+        <span class="month-label" id="monthLabel">Январь 2025</span>
+        <button id="nextMonth">›</button>
+    </div>
+
+    <div class="weekdays">
+        <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+    </div>
+
+    <div class="days" id="daysGrid"></div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="value" id="totalCount">0</div>
+            <div class="label">Тренировок</div>
+        </div>
+        <div class="stat">
+            <div class="value" id="streakCount">0</div>
+            <div class="label">Серия</div>
+        </div>
+        <div class="stat">
+            <div class="value" id="levelCount">1</div>
+            <div class="label">Уровень</div>
+        </div>
+    </div>
+
+    <div class="xp-label">
+        <span>XP</span>
+        <span id="xpText">0 / 100</span>
+    </div>
+    <div class="xp-bar">
+        <div class="xp-fill" id="xpFill"></div>
+    </div>
+
+    <button class="reset-btn" id="resetBtn">🔄 Сбросить прогресс</button>
+</div>
+
+<script>
+    // ==================== ДАННЫЕ ====================
+    let workouts = {}; // ключ: "YYYY-MM-DD" → true
+    let xp = 0;
+    let level = 1;
+    let xpToNext = 100;
+
+    let currentDate = new Date();
+    let currentYear = currentDate.getFullYear();
+    let currentMonth = currentDate.getMonth();
+
+    // ==================== ЗАГРУЗКА/СОХРАНЕНИЕ ====================
+    function loadData() {
+        try {
+            const saved = localStorage.getItem('workoutData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                workouts = data.workouts || {};
+                xp = data.xp || 0;
+                level = data.level || 1;
+                xpToNext = data.xpToNext || 100;
+            }
+        } catch (e) {}
+    }
+
+    function saveData() {
+        try {
+            localStorage.setItem('workoutData', JSON.stringify({
+                workouts: workouts,
+                xp: xp,
+                level: level,
+                xpToNext: xpToNext
+            }));
+        } catch (e) {}
+    }
+
+    // ==================== ЛОГИКА XP ====================
+    function addXP(amount) {
+        xp += amount;
+        while (xp >= xpToNext) {
+            level += 1;
+            xp -= xpToNext;
+            xpToNext = Math.floor(xpToNext * 1.5);
+        }
+        saveData();
+        updateUI();
+    }
+
+    // ==================== КАЛЕНДАРЬ ====================
+    function getDaysInMonth(year, month) {
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const days = [];
+        const firstWeekday = firstDay.getDay(); // 0=вс, 1=пн...
+
+        // Смещение для понедельника (в JS воскресенье = 0)
+        let startOffset = firstWeekday === 0 ? 6 : firstWeekday - 1;
+
+        // Пустые ячейки до первого дня
+        for (let i = 0; i < startOffset; i++) {
+            days.push(null);
+        }
+
+        for (let d = 1; d <= lastDay.getDate(); d++) {
+            days.push(new Date(year, month, d));
+        }
+
+        return days;
+    }
+
+    function formatDateKey(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function toggleWorkout(date) {
+        const key = formatDateKey(date);
+        if (workouts[key]) {
+            delete workouts[key];
+        } else {
+            workouts[key] = true;
+            addXP(20);
+        }
+        saveData();
+        renderCalendar();
+        updateUI();
+    }
+
+    function getStreak() {
+        const today = new Date();
+        const dates = Object.keys(workouts).map(k => new Date(k + 'T00:00:00'));
+        let streak = 0;
+        let checkDate = new Date(today);
+        checkDate.setHours(0, 0, 0, 0);
+
+        while (true) {
+            const key = formatDateKey(checkDate);
+            if (workouts[key]) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        return streak;
+    }
+
+    // ==================== ОТРИСОВКА ====================
+    function renderCalendar() {
+        const grid = document.getElementById('daysGrid');
+        grid.innerHTML = '';
+
+        const days = getDaysInMonth(currentYear, currentMonth);
+        const monthLabel = document.getElementById('monthLabel');
+        monthLabel.textContent = new Date(currentYear, currentMonth).toLocaleString('ru', { month: 'long', year: 'numeric' });
+
+        days.forEach(date => {
+            const div = document.createElement('div');
+            div.className = 'day';
+
+            if (date === null) {
+                div.style.visibility = 'hidden';
+            } else {
+                div.textContent = date.getDate();
+
+                const key = formatDateKey(date);
+                if (workouts[key]) {
+                    div.classList.add('workout');
+                }
+
+                // Проверка, что день в текущем месяце
+                if (date.getMonth() !== currentMonth) {
+                    div.classList.add('other-month');
+                }
+
+                div.addEventListener('click', () => {
+                    toggleWorkout(date);
+                });
+            }
+
+            grid.appendChild(div);
+        });
+    }
+
+    function updateUI() {
+        document.getElementById('totalCount').textContent = Object.keys(workouts).length;
+        document.getElementById('streakCount').textContent = getStreak();
+        document.getElementById('levelCount').textContent = level;
+        document.getElementById('xpText').textContent = `${xp} / ${xpToNext}`;
+
+        const percent = Math.min((xp / xpToNext) * 100, 100);
+        document.getElementById('xpFill').style.width = percent + '%';
+    }
+
+    // ==================== НАВИГАЦИЯ ====================
+    document.getElementById('prevMonth').addEventListener('click', () => {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        renderCalendar();
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', () => {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        renderCalendar();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        if (confirm('Точно сбросить весь прогресс?')) {
+            workouts = {};
+            xp = 0;
+            level = 1;
+            xpToNext = 100;
+            saveData();
+            renderCalendar();
+            updateUI();
+        }
+    });
+
+    // ==================== СТАРТ ====================
+    loadData();
+    renderCalendar();
+    updateUI();
+</script>
+
+</body>
+</html>
