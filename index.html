@@ -472,6 +472,49 @@
             margin-bottom: 6px;
         }
 
+        /* Ачивки */
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f2f2f7;
+        }
+
+        .achievement-item .ach-icon {
+            font-size: 32px;
+            width: 44px;
+            text-align: center;
+        }
+
+        .achievement-item .ach-info {
+            flex: 1;
+        }
+
+        .achievement-item .ach-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .achievement-item .ach-desc {
+            font-size: 13px;
+            color: #8e8e93;
+        }
+
+        .achievement-item .ach-status {
+            font-size: 14px;
+            color: #34c759;
+        }
+
+        .achievement-item.locked .ach-status {
+            color: #c6c6c8;
+        }
+
+        .achievement-item.locked .ach-icon {
+            filter: grayscale(1);
+            opacity: 0.5;
+        }
+
         @media (max-width: 440px) {
             .app {
                 padding: 16px 12px 24px;
@@ -495,6 +538,7 @@
         <button class="context-menu-item" data-modal="activitiesModal"><span class="icon">⚡</span> Активности</button>
         <button class="context-menu-item" data-modal="viewModal"><span class="icon">📅</span> Вид календаря</button>
         <button class="context-menu-item" data-modal="galleryModal"><span class="icon">🖼️</span> Галерея</button>
+        <button class="context-menu-item" data-modal="achievementsModal"><span class="icon">🏆</span> Достижения</button>
         <button class="context-menu-item" data-modal="syncModal"><span class="icon">⌚</span> Синхронизация</button>
         <div class="context-menu-divider"></div>
         <button class="context-menu-item" data-modal="infoModal"><span class="icon">ℹ️</span> Инфо</button>
@@ -634,6 +678,17 @@
         </div>
     </div>
 
+    <!-- НОВАЯ МОДАЛКА: ДОСТИЖЕНИЯ -->
+    <div class="modal-overlay" id="achievementsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>🏆 Достижения</h2>
+                <button class="modal-close" data-close="achievementsModal">✕</button>
+            </div>
+            <div id="achievementsList"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="syncModal">
         <div class="modal">
             <div class="modal-header">
@@ -660,10 +715,10 @@
                     <li><strong>XP</strong> — очки опыта, начисляются за каждую отмеченную тренировку.</li>
                     <li><strong>Уровень</strong> — повышается при накоплении XP.</li>
                     <li><strong>Серия</strong> — количество дней подряд с тренировками.</li>
-                    <li><strong>Достижения</strong> — скоро появятся за рекорды.</li>
+                    <li><strong>Достижения</strong> — автоматически выдаются за рекорды.</li>
                 </ul>
                 <p style="margin-top:12px;">🔥 Тренируйся регулярно, повышай уровень и становись сильнее!</p>
-                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.2 · HTML-прототип</p>
+                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.3 · HTML-прототип</p>
             </div>
         </div>
     </div>
@@ -687,6 +742,22 @@
         let galleryItems = [];
         let activities = [];
 
+        // ===== АЧИВКИ =====
+        const ACHIEVEMENTS = [
+            { id: 'first_workout', icon: '🌟', name: 'Первая тренировка', desc: 'Отметь свою первую тренировку', check: (data) => data.total >= 1 },
+            { id: 'five_workouts', icon: '💪', name: 'Пять тренировок', desc: 'Отметь 5 тренировок', check: (data) => data.total >= 5 },
+            { id: 'ten_workouts', icon: '🔥', name: 'Десять тренировок', desc: 'Отметь 10 тренировок', check: (data) => data.total >= 10 },
+            { id: 'twenty_five', icon: '⚡', name: '25 тренировок', desc: 'Отметь 25 тренировок', check: (data) => data.total >= 25 },
+            { id: 'fifty', icon: '🏅', name: '50 тренировок', desc: 'Отметь 50 тренировок', check: (data) => data.total >= 50 },
+            { id: 'streak_3', icon: '📅', name: 'Серия 3 дня', desc: 'Тренируйся 3 дня подряд', check: (data) => data.streak >= 3 },
+            { id: 'streak_7', icon: '📆', name: 'Серия 7 дней', desc: 'Тренируйся 7 дней подряд', check: (data) => data.streak >= 7 },
+            { id: 'streak_14', icon: '🏆', name: 'Серия 14 дней', desc: 'Тренируйся 14 дней подряд', check: (data) => data.streak >= 14 },
+            { id: 'level_5', icon: '⬆️', name: 'Уровень 5', desc: 'Достигни 5 уровня', check: (data) => data.level >= 5 },
+            { id: 'level_10', icon: '⭐', name: 'Уровень 10', desc: 'Достигни 10 уровня', check: (data) => data.level >= 10 },
+        ];
+
+        let unlockedAchievements = [];
+
         // ===== ЗАГРУЗКА / СОХРАНЕНИЕ =====
         function loadData() {
             try {
@@ -700,6 +771,7 @@
                     profile = data.profile || profile;
                     galleryItems = data.gallery || [];
                     activities = data.activities || [];
+                    unlockedAchievements = data.unlockedAchievements || [];
                 }
             } catch (e) {}
         }
@@ -713,7 +785,8 @@
                     xpToNext,
                     profile,
                     gallery: galleryItems,
-                    activities
+                    activities,
+                    unlockedAchievements
                 }));
             } catch (e) {}
         }
@@ -725,9 +798,55 @@
                 level += 1;
                 xp -= xpToNext;
                 xpToNext = Math.floor(xpToNext * 1.5);
+                checkAchievements();
             }
             saveData();
             updateUI();
+        }
+
+        // ===== АЧИВКИ =====
+        function checkAchievements() {
+            const data = {
+                total: Object.keys(workouts).length,
+                streak: getStreak(),
+                level: level
+            };
+
+            let newAchievement = null;
+            ACHIEVEMENTS.forEach(ach => {
+                if (!unlockedAchievements.includes(ach.id) && ach.check(data)) {
+                    unlockedAchievements.push(ach.id);
+                    newAchievement = ach;
+                }
+            });
+
+            if (newAchievement) {
+                saveData();
+                renderAchievements();
+                // Уведомление
+                setTimeout(() => {
+                    alert(`🏆 НОВОЕ ДОСТИЖЕНИЕ!\n\n${newAchievement.icon} ${newAchievement.name}\n${newAchievement.desc}`);
+                }, 300);
+            }
+        }
+
+        function renderAchievements() {
+            const container = document.getElementById('achievementsList');
+            if (!container) return;
+
+            container.innerHTML = ACHIEVEMENTS.map(ach => {
+                const unlocked = unlockedAchievements.includes(ach.id);
+                return `
+                    <div class="achievement-item ${unlocked ? '' : 'locked'}">
+                        <div class="ach-icon">${ach.icon}</div>
+                        <div class="ach-info">
+                            <div class="ach-name">${ach.name}</div>
+                            <div class="ach-desc">${ach.desc}</div>
+                        </div>
+                        <div class="ach-status">${unlocked ? '✅' : '🔒'}</div>
+                    </div>
+                `;
+            }).join('');
         }
 
         // ===== КАЛЕНДАРЬ =====
@@ -758,6 +877,7 @@
             } else {
                 workouts[key] = true;
                 addXP(20);
+                checkAchievements();
             }
             saveData();
             renderCalendar();
@@ -815,7 +935,6 @@
             const percent = Math.min((xp / xpToNext) * 100, 100);
             document.getElementById('xpFill').style.width = percent + '%';
 
-            // BMI
             const bmi = calcBMI();
             document.getElementById('bmiValue').textContent = bmi.toFixed(1);
             const bmiPercent = Math.min((bmi / 40) * 100, 100);
@@ -826,7 +945,6 @@
             else if (bmi < 30) fill.style.background = '#ffcc00';
             else fill.style.background = '#ff3b30';
 
-            // Заполняем поля профиля
             document.getElementById('userName').value = profile.name || '';
             document.getElementById('userGender').value = profile.gender || 'male';
             document.getElementById('userAge').value = profile.age || '';
@@ -885,6 +1003,23 @@
             closeAllModals();
             const el = document.getElementById(id);
             if (el) el.classList.add('open');
+            if (id === 'achievementsModal') renderAchievements();
+        }
+
+        // ===== АКТИВНОСТИ =====
+        function renderActivities() {
+            const container = document.getElementById('activityList');
+            if (!container) return;
+            if (activities.length === 0) {
+                container.innerHTML = '<p style="color:#8e8e93; text-align:center; padding:12px;">Нет активностей</p>';
+                return;
+            }
+            container.innerHTML = activities.map((a, i) =>
+                `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f2f2f7;">
+                    <span>🏋️ ${a.name}</span>
+                    <span style="color:#8e8e93; font-size:13px;">${new Date(a.date).toLocaleDateString()}</span>
+                </div>`
+            ).join('');
         }
 
         // ===== ИНИЦИАЛИЗАЦИЯ =====
@@ -942,13 +1077,15 @@
                     xp = 0;
                     level = 1;
                     xpToNext = 100;
+                    unlockedAchievements = [];
                     saveData();
                     renderCalendar();
                     updateUI();
+                    renderAchievements();
                 }
             });
 
-            // Вид календаря (из модалки)
+            // Вид календаря
             document.querySelectorAll('.view-pick-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const view = btn.getAttribute('data-view');
@@ -956,12 +1093,10 @@
                     document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
                     document.querySelector(`.view-tab[data-view="${view}"]`)?.classList.add('active');
                     closeAllModals();
-                    // Для демо просто показываем текущий месяц
                     renderCalendar();
                 });
             });
 
-            // Вкладки вида (на главной)
             document.querySelectorAll('.view-tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     const view = tab.getAttribute('data-view');
@@ -987,7 +1122,7 @@
                 alert('✅ Профиль сохранён!');
             });
 
-            // Добавление активности (заглушка)
+            // Активности
             document.getElementById('addActivityBtn').addEventListener('click', () => {
                 const name = prompt('Введите название активности:');
                 if (name && name.trim()) {
@@ -1017,28 +1152,15 @@
                 this.value = '';
             });
 
-            // Рендерим всё
+            // Рендер
             renderCalendar();
             renderGallery();
             renderActivities();
+            renderAchievements();
             updateUI();
+            checkAchievements();
         }
 
-        function renderActivities() {
-            const container = document.getElementById('activityList');
-            if (activities.length === 0) {
-                container.innerHTML = '<p style="color:#8e8e93; text-align:center; padding:12px;">Нет активностей</p>';
-                return;
-            }
-            container.innerHTML = activities.map((a, i) =>
-                `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f2f2f7;">
-                    <span>🏋️ ${a.name}</span>
-                    <span style="color:#8e8e93; font-size:13px;">${new Date(a.date).toLocaleDateString()}</span>
-                </div>`
-            ).join('');
-        }
-
-        // Запуск
         document.addEventListener('DOMContentLoaded', init);
     })();
 </script>
