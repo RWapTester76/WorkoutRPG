@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>🏋️ Календарь тренировок</title>
     <style>
         * {
@@ -11,145 +11,515 @@
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
+
         body {
             background: #f2f2f7;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 20px;
+            padding: 20px 12px;
         }
+
         .app {
-            max-width: 400px;
+            max-width: 420px;
             width: 100%;
             background: white;
             border-radius: 32px;
-            padding: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 20px 16px 28px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            position: relative;
         }
-        .header {
+
+        /* ===== Аватар ===== */
+        .avatar-wrapper {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            z-index: 10;
+        }
+
+        .avatar-btn {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(145deg, #007aff, #0055b3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            transition: 0.2s;
+            border: 2px solid white;
+        }
+
+        .avatar-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* ===== Контекстное меню ===== */
+        .context-menu {
+            position: absolute;
+            top: 70px;
+            left: 10px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            width: 240px;
+            padding: 8px 0;
+            display: none;
+            z-index: 999;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .context-menu.open {
+            display: block;
+        }
+
+        .context-menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1c1c1e;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            transition: 0.1s;
+        }
+
+        .context-menu-item:active {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .context-menu-item .icon {
+            font-size: 20px;
+            width: 28px;
+            text-align: center;
+        }
+
+        .context-menu-divider {
+            height: 1px;
+            background: rgba(0, 0, 0, 0.06);
+            margin: 4px 16px;
+        }
+
+        /* ===== Модалки ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 32px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 28px 24px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
+            animation: modalFade 0.2s ease;
+        }
+
+        @keyframes modalFade {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
-        .header h1 {
-            font-size: 24px;
+
+        .modal-header h2 {
+            font-size: 22px;
             font-weight: 700;
         }
+
+        .modal-close {
+            font-size: 28px;
+            cursor: pointer;
+            color: #8e8e93;
+            background: none;
+            border: none;
+            padding: 0 8px;
+        }
+
+        .modal-close:active {
+            opacity: 0.5;
+        }
+
+        .modal-field {
+            margin-bottom: 16px;
+        }
+
+        .modal-field label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1c1c1e;
+            margin-bottom: 4px;
+        }
+
+        .modal-field input,
+        .modal-field select {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 16px;
+            border: 1px solid #e5e5ea;
+            border-radius: 14px;
+            background: #f8f8fc;
+            outline: none;
+            transition: 0.15s;
+        }
+
+        .modal-field input:focus {
+            border-color: #007aff;
+            background: white;
+        }
+
+        .bmi-block {
+            margin: 16px 0;
+            padding: 16px;
+            background: #f8f8fc;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .bmi-block .bmi-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #007aff;
+        }
+
+        .bmi-block .bmi-label {
+            font-size: 14px;
+            color: #8e8e93;
+            margin-top: 4px;
+        }
+
+        .bmi-bar {
+            height: 6px;
+            background: #e5e5ea;
+            border-radius: 6px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .bmi-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+            opacity: 0.8;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #007aff;
+            border: 1px solid #007aff;
+            padding: 12px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .btn-outline:active {
+            background: rgba(0, 122, 255, 0.08);
+        }
+
+        /* ===== Вкладки переключения вида ===== */
+        .view-tabs {
+            display: flex;
+            gap: 6px;
+            background: #f2f2f7;
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+
+        .view-tab {
+            flex: 1;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: #8e8e93;
+            transition: 0.2s;
+        }
+
+        .view-tab.active {
+            background: white;
+            color: #1c1c1e;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .view-tab:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== Календарь ===== */
         .month-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
         }
+
         .month-nav button {
-            background: #007aff;
-            color: white;
+            background: #f2f2f7;
             border: none;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            font-size: 18px;
+            font-size: 20px;
             cursor: pointer;
+            transition: 0.15s;
         }
+
+        .month-nav button:active {
+            transform: scale(0.92);
+            background: #e5e5ea;
+        }
+
         .month-nav .month-label {
             font-size: 18px;
             font-weight: 600;
         }
+
         .weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             text-align: center;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             color: #8e8e93;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
+
         .days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 4px;
         }
+
         .day {
             aspect-ratio: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 16px;
             font-weight: 500;
-            background: #f2f2f7;
+            background: #f8f8fc;
             cursor: pointer;
-            transition: 0.15s;
+            transition: 0.1s;
+            user-select: none;
         }
+
+        .day:active {
+            transform: scale(0.92);
+        }
+
         .day.workout {
             background: #34c759;
             color: white;
         }
+
         .day.other-month {
             color: #c6c6c8;
         }
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 24px;
-            padding: 16px;
-            background: #f8f8fc;
+
+        .day.today {
+            border: 2px solid #007aff;
+        }
+
+        /* ===== Галерея ===== */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            background: #f2f2f7;
             border-radius: 16px;
-        }
-        .stat {
-            text-align: center;
-        }
-        .stat .value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-        .stat .label {
-            font-size: 12px;
-            color: #8e8e93;
-        }
-        .xp-bar {
-            margin-top: 16px;
-            background: #e5e5ea;
-            border-radius: 12px;
-            height: 8px;
             overflow: hidden;
-        }
-        .xp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #007aff, #34c759);
-            width: 0%;
-            transition: 0.3s;
-        }
-        .xp-label {
             display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #8e8e93;
-            margin-top: 4px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
-        .reset-btn {
-            margin-top: 16px;
+
+        .gallery-item img {
             width: 100%;
-            padding: 12px;
-            background: #ff3b30;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
             color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 11px;
+            padding: 4px 8px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .gallery-add {
+            border: 2px dashed #c6c6c8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #c6c6c8;
             cursor: pointer;
+            border-radius: 16px;
+            aspect-ratio: 1;
+            transition: 0.15s;
+        }
+
+        .gallery-add:active {
+            background: #f2f2f7;
+        }
+
+        /* ===== Инфо ===== */
+        .info-text {
+            color: #1c1c1e;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .info-text strong {
+            color: #007aff;
+        }
+
+        .info-text ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .info-text ul li {
+            margin-bottom: 6px;
+        }
+
+        /* ===== Адаптив ===== */
+        @media (max-width: 440px) {
+            .app {
+                padding: 16px 12px 24px;
+            }
+            .context-menu {
+                width: 200px;
+                left: 4px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="app">
-    <div class="header">
-        <h1>🏋️ Тренировки</h1>
+<div class="app" id="app">
+
+    <!-- ===== АВАТАР ===== -->
+    <div class="avatar-wrapper">
+        <div class="avatar-btn" id="avatarBtn">🏋️</div>
     </div>
 
+    <!-- ===== КОНТЕКСТНОЕ МЕНЮ ===== -->
+    <div class="context-menu" id="contextMenu">
+        <button class="context-menu-item" data-modal="profileModal">
+            <span class="icon">👤</span> Профиль
+        </button>
+        <button class="context-menu-item" data-modal="activitiesModal">
+            <span class="icon">⚡</span> Активности
+        </button>
+        <button class="context-menu-item" data-modal="viewModal">
+            <span class="icon">📅</span> Вид календаря
+        </button>
+        <button class="context-menu-item" data-modal="galleryModal">
+            <span class="icon">🖼️</span> Галерея
+        </button>
+        <button class="context-menu-item" data-modal="syncModal">
+            <span class="icon">⌚</span> Синхронизация
+        </button>
+        <div class="context-menu-divider"></div>
+        <button class="context-menu-item" data-modal="infoModal">
+            <span class="icon">ℹ️</span> Инфо
+        </button>
+    </div>
+
+    <!-- ===== ЗАГОЛОВОК ===== -->
+    <div style="text-align:center; margin-bottom: 12px; margin-top: 8px;">
+        <h1 style="font-size:24px; font-weight:700;">🏋️ Тренировки</h1>
+    </div>
+
+    <!-- ===== ВКЛАДКИ ВИДА ===== -->
+    <div class="view-tabs" id="viewTabs">
+        <button class="view-tab" data-view="day">День</button>
+        <button class="view-tab" data-view="week">Неделя</button>
+        <button class="view-tab active" data-view="month">Месяц</button>
+        <button class="view-tab" data-view="year">Год</button>
+    </div>
+
+    <!-- ===== КАЛЕНДАРЬ ===== -->
     <div class="month-nav">
         <button id="prevMonth">‹</button>
         <span class="month-label" id="monthLabel">Январь 2025</span>
@@ -162,224 +532,476 @@
 
     <div class="days" id="daysGrid"></div>
 
-    <div class="stats">
-        <div class="stat">
-            <div class="value" id="totalCount">0</div>
-            <div class="label">Тренировок</div>
+    <!-- ===== СТАТИСТИКА ===== -->
+    <div style="display:flex; justify-content:space-around; margin-top:20px; padding:14px; background:#f8f8fc; border-radius:18px;">
+        <div style="text-align:center;">
+            <div style="font-size:22px; font-weight:700;" id="totalCount">0</div>
+            <div style="font-size:12px; color:#8e8e93;">Тренировок</div>
         </div>
-        <div class="stat">
-            <div class="value" id="streakCount">0</div>
-            <div class="label">Серия</div>
+        <div style="text-align:center;">
+            <div style="font-size:22px; font-weight:700;" id="streakCount">0</div>
+            <div style="font-size:12px; color:#8e8e93;">Серия</div>
         </div>
-        <div class="stat">
-            <div class="value" id="levelCount">1</div>
-            <div class="label">Уровень</div>
+        <div style="text-align:center;">
+            <div style="font-size:22px; font-weight:700;" id="levelCount">1</div>
+            <div style="font-size:12px; color:#8e8e93;">Уровень</div>
         </div>
     </div>
 
-    <div class="xp-label">
-        <span>XP</span>
-        <span id="xpText">0 / 100</span>
-    </div>
-    <div class="xp-bar">
-        <div class="xp-fill" id="xpFill"></div>
+    <div style="margin-top:12px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; color:#8e8e93;">
+            <span>XP</span>
+            <span id="xpText">0 / 100</span>
+        </div>
+        <div style="background:#e5e5ea; border-radius:10px; height:8px; overflow:hidden; margin-top:4px;">
+            <div class="xp-fill" id="xpFill" style="height:100%; width:0%; background:linear-gradient(90deg,#007aff,#34c759); transition:0.3s;"></div>
+        </div>
     </div>
 
-    <button class="reset-btn" id="resetBtn">🔄 Сбросить прогресс</button>
+    <button class="reset-btn" id="resetBtn" style="margin-top:16px; width:100%; padding:12px; background:#ff3b30; color:white; border:none; border-radius:14px; font-size:16px; font-weight:600; cursor:pointer;">🔄 Сбросить прогресс</button>
+
+    <!-- ============================================================ -->
+    <!-- ===== МОДАЛКИ ===== -->
+
+    <!-- ПРОФИЛЬ -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>👤 Профиль</h2>
+                <button class="modal-close" data-close="profileModal">✕</button>
+            </div>
+            <div class="modal-field">
+                <label>Имя</label>
+                <input type="text" id="userName" placeholder="Ваше имя" />
+            </div>
+            <div class="modal-field">
+                <label>Пол</label>
+                <select id="userGender">
+                    <option value="male">Мужской</option>
+                    <option value="female">Женский</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Возраст</label>
+                <input type="number" id="userAge" placeholder="25" />
+            </div>
+            <div class="modal-field">
+                <label>Вес (кг)</label>
+                <input type="number" id="userWeight" placeholder="75" step="0.1" />
+            </div>
+            <div class="modal-field">
+                <label>Замеры (см)</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    <input type="number" id="userChest" placeholder="Грудь" step="0.1" />
+                    <input type="number" id="userBiceps" placeholder="Бицепс" step="0.1" />
+                    <input type="number" id="userThigh" placeholder="Бедро" step="0.1" />
+                </div>
+            </div>
+
+            <div class="bmi-block">
+                <div class="bmi-value" id="bmiValue">0.0</div>
+                <div class="bmi-label">Индекс массы тела (ИМТ)</div>
+                <div class="bmi-bar">
+                    <div class="bmi-fill" id="bmiFill" style="width:0%; background:#34c759;"></div>
+                </div>
+            </div>
+
+            <button class="btn-primary" id="saveProfileBtn">💾 Сохранить профиль</button>
+        </div>
+    </div>
+
+    <!-- АКТИВНОСТИ -->
+    <div class="modal-overlay" id="activitiesModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>⚡ Активности</h2>
+                <button class="modal-close" data-close="activitiesModal">✕</button>
+            </div>
+            <p style="color:#8e8e93; margin-bottom:16px;">Здесь будут твои шаблоны тренировок.</p>
+            <button class="btn-primary" id="addActivityBtn">➕ Добавить активность</button>
+            <div id="activityList" style="margin-top:16px;"></div>
+        </div>
+    </div>
+
+    <!-- ВИД КАЛЕНДАРЯ -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📅 Вид календаря</h2>
+                <button class="modal-close" data-close="viewModal">✕</button>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="view-pick-btn btn-primary" data-view="day">День (по часам)</button>
+                <button class="view-pick-btn btn-primary" data-view="week">Неделя</button>
+                <button class="view-pick-btn btn-primary" data-view="month">Месяц</button>
+                <button class="view-pick-btn btn-primary" data-view="year">Год</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ГАЛЕРЕЯ -->
+    <div class="modal-overlay" id="galleryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>🖼️ Галерея</h2>
+                <button class="modal-close" data-close="galleryModal">✕</button>
+            </div>
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Динамически -->
+            </div>
+            <input type="file" id="galleryFileInput" accept="image/*" style="display:none;" multiple />
+            <button class="btn-outline" id="galleryAddBtn" style="margin-top:12px;">➕ Добавить фото</button>
+        </div>
+    </div>
+
+    <!-- СИНХРОНИЗАЦИЯ -->
+    <div class="modal-overlay" id="syncModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>⌚ Синхронизация</h2>
+                <button class="modal-close" data-close="syncModal">✕</button>
+            </div>
+            <p style="color:#8e8e93;">В будущем здесь появится синхронизация с умными часами.</p>
+            <div style="margin-top:16px; padding:20px; background:#f8f8fc; border-radius:16px; text-align:center;">
+                <span style="font-size:48px;">⌚</span>
+                <p style="margin-top:8px; color:#1c1c1e;">Пока недоступно</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ИНФО -->
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>ℹ️ Инфо</h2>
+                <button class="modal-close" data-close="infoModal">✕</button>
+            </div>
+            <div class="info-text">
+                <p><strong>🏋️ RPG-система тренировок</strong></p>
+                <ul>
+                    <li><strong>XP</strong> — очки опыта, начисляются за каждую отмеченную тренировку.</li>
+                    <li><strong>Уровень</strong> — повышается при накоплении XP.</li>
+                    <li><strong>Серия</strong> — количество дней подряд с тренировками.</li>
+                    <li><strong>Достижения</strong> — скоро появятся за рекорды.</li>
+                </ul>
+                <p style="margin-top:12px;">
+                    🔥 Тренируйся регулярно, повышай уровень и становись сильнее!
+                </p>
+                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">
+                    Версия 0.2 · HTML-прототип
+                </p>
+            </div>
+        </div>
+    </div>
+
 </div>
 
+<!-- ============================================================ -->
 <script>
-    // ==================== ДАННЫЕ ====================
-    let workouts = {}; // ключ: "YYYY-MM-DD" → true
-    let xp = 0;
-    let level = 1;
-    let xpToNext = 100;
+    (function() {
+        'use strict';
 
-    let currentDate = new Date();
-    let currentYear = currentDate.getFullYear();
-    let currentMonth = currentDate.getMonth();
+        // ==================== ДАННЫЕ ====================
+        let workouts = {};
+        let xp = 0;
+        let level = 1;
+        let xpToNext = 100;
 
-    // ==================== ЗАГРУЗКА/СОХРАНЕНИЕ ====================
-    function loadData() {
-        try {
-            const saved = localStorage.getItem('workoutData');
-            if (saved) {
-                const data = JSON.parse(saved);
-                workouts = data.workouts || {};
-                xp = data.xp || 0;
-                level = data.level || 1;
-                xpToNext = data.xpToNext || 100;
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth();
+
+        let currentView = 'month'; // day, week, month, year
+
+        // Профиль
+        let profile = {
+            name: '',
+            gender: 'male',
+            age: '',
+            weight: '',
+            chest: '',
+            biceps: '',
+            thigh: ''
+        };
+
+        // Галерея
+        let galleryItems = [];
+
+        // Активности (заглушка)
+        let activities = [];
+
+        // ==================== ЗАГРУЗКА / СОХРАНЕНИЕ ====================
+        function loadData() {
+            try {
+                const raw = localStorage.getItem('workoutData');
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    workouts = data.workouts || {};
+                    xp = data.xp || 0;
+                    level = data.level || 1;
+                    xpToNext = data.xpToNext || 100;
+                    profile = data.profile || profile;
+                    galleryItems = data.gallery || [];
+                    activities = data.activities || [];
+                }
+            } catch (e) { /* тихо */ }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem('workoutData', JSON.stringify({
+                    workouts,
+                    xp,
+                    level,
+                    xpToNext,
+                    profile,
+                    gallery: galleryItems,
+                    activities
+                }));
+            } catch (e) { /* тихо */ }
+        }
+
+        // ==================== XP / УРОВЕНЬ ====================
+        function addXP(amount) {
+            xp += amount;
+            while (xp >= xpToNext) {
+                level += 1;
+                xp -= xpToNext;
+                xpToNext = Math.floor(xpToNext * 1.5);
             }
-        } catch (e) {}
-    }
-
-    function saveData() {
-        try {
-            localStorage.setItem('workoutData', JSON.stringify({
-                workouts: workouts,
-                xp: xp,
-                level: level,
-                xpToNext: xpToNext
-            }));
-        } catch (e) {}
-    }
-
-    // ==================== ЛОГИКА XP ====================
-    function addXP(amount) {
-        xp += amount;
-        while (xp >= xpToNext) {
-            level += 1;
-            xp -= xpToNext;
-            xpToNext = Math.floor(xpToNext * 1.5);
-        }
-        saveData();
-        updateUI();
-    }
-
-    // ==================== КАЛЕНДАРЬ ====================
-    function getDaysInMonth(year, month) {
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const days = [];
-        const firstWeekday = firstDay.getDay(); // 0=вс, 1=пн...
-
-        // Смещение для понедельника (в JS воскресенье = 0)
-        let startOffset = firstWeekday === 0 ? 6 : firstWeekday - 1;
-
-        // Пустые ячейки до первого дня
-        for (let i = 0; i < startOffset; i++) {
-            days.push(null);
+            saveData();
+            updateUI();
         }
 
-        for (let d = 1; d <= lastDay.getDate(); d++) {
-            days.push(new Date(year, month, d));
+        // ==================== КАЛЕНДАРЬ ====================
+        function getDaysInMonth(year, month) {
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const days = [];
+            let firstWeekday = firstDay.getDay(); // 0=вс
+            let startOffset = firstWeekday === 0 ? 6 : firstWeekday - 1;
+
+            for (let i = 0; i < startOffset; i++) days.push(null);
+            for (let d = 1; d <= lastDay.getDate(); d++) {
+                days.push(new Date(year, month, d));
+            }
+            return days;
         }
 
-        return days;
-    }
-
-    function formatDateKey(date) {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    }
-
-    function toggleWorkout(date) {
-        const key = formatDateKey(date);
-        if (workouts[key]) {
-            delete workouts[key];
-        } else {
-            workouts[key] = true;
-            addXP(20);
+        function formatDateKey(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
         }
-        saveData();
-        renderCalendar();
-        updateUI();
-    }
 
-    function getStreak() {
-        const today = new Date();
-        const dates = Object.keys(workouts).map(k => new Date(k + 'T00:00:00'));
-        let streak = 0;
-        let checkDate = new Date(today);
-        checkDate.setHours(0, 0, 0, 0);
-
-        while (true) {
-            const key = formatDateKey(checkDate);
+        function toggleWorkout(date) {
+            const key = formatDateKey(date);
             if (workouts[key]) {
-                streak++;
-                checkDate.setDate(checkDate.getDate() - 1);
+                delete workouts[key];
             } else {
-                break;
+                workouts[key] = true;
+                addXP(20);
             }
-        }
-        return streak;
-    }
-
-    // ==================== ОТРИСОВКА ====================
-    function renderCalendar() {
-        const grid = document.getElementById('daysGrid');
-        grid.innerHTML = '';
-
-        const days = getDaysInMonth(currentYear, currentMonth);
-        const monthLabel = document.getElementById('monthLabel');
-        monthLabel.textContent = new Date(currentYear, currentMonth).toLocaleString('ru', { month: 'long', year: 'numeric' });
-
-        days.forEach(date => {
-            const div = document.createElement('div');
-            div.className = 'day';
-
-            if (date === null) {
-                div.style.visibility = 'hidden';
-            } else {
-                div.textContent = date.getDate();
-
-                const key = formatDateKey(date);
-                if (workouts[key]) {
-                    div.classList.add('workout');
-                }
-
-                // Проверка, что день в текущем месяце
-                if (date.getMonth() !== currentMonth) {
-                    div.classList.add('other-month');
-                }
-
-                div.addEventListener('click', () => {
-                    toggleWorkout(date);
-                });
-            }
-
-            grid.appendChild(div);
-        });
-    }
-
-    function updateUI() {
-        document.getElementById('totalCount').textContent = Object.keys(workouts).length;
-        document.getElementById('streakCount').textContent = getStreak();
-        document.getElementById('levelCount').textContent = level;
-        document.getElementById('xpText').textContent = `${xp} / ${xpToNext}`;
-
-        const percent = Math.min((xp / xpToNext) * 100, 100);
-        document.getElementById('xpFill').style.width = percent + '%';
-    }
-
-    // ==================== НАВИГАЦИЯ ====================
-    document.getElementById('prevMonth').addEventListener('click', () => {
-        currentMonth--;
-        if (currentMonth < 0) {
-            currentMonth = 11;
-            currentYear--;
-        }
-        renderCalendar();
-    });
-
-    document.getElementById('nextMonth').addEventListener('click', () => {
-        currentMonth++;
-        if (currentMonth > 11) {
-            currentMonth = 0;
-            currentYear++;
-        }
-        renderCalendar();
-    });
-
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        if (confirm('Точно сбросить весь прогресс?')) {
-            workouts = {};
-            xp = 0;
-            level = 1;
-            xpToNext = 100;
             saveData();
             renderCalendar();
             updateUI();
         }
-    });
 
-    // ==================== СТАРТ ====================
-    loadData();
-    renderCalendar();
-    updateUI();
-</script>
+        function getStreak() {
+            const today = new Date();
+            let streak = 0;
+            let check = new Date(today);
+            check.setHours(0, 0, 0, 0);
 
-</body>
-</html>
+            while (true) {
+                const key = formatDateKey(check);
+                if (workouts[key]) {
+                    streak++;
+                    check.setDate(check.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            return streak;
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('daysGrid');
+            grid.innerHTML = '';
+
+            const days = getDaysInMonth(currentYear, currentMonth);
+            const label = document.getElementById('monthLabel');
+            label.textContent = new Date(currentYear, currentMonth).toLocaleString('ru', { month: 'long', year: 'numeric' });
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            days.forEach(date => {
+                const div = document.createElement('div');
+                div.className = 'day';
+
+                if (date === null) {
+                    div.style.visibility = 'hidden';
+                } else {
+                    div.textContent = date.getDate();
+
+                    const key = formatDateKey(date);
+                    if (workouts[key]) div.classList.add('workout');
+
+                    if (date.getMonth() !== currentMonth) div.classList.add('other-month');
+
+                    if (date.getTime() === today.getTime()) div.classList.add('today');
+
+                    div.addEventListener('click', () => toggleWorkout(date));
+                }
+                grid.appendChild(div);
+            });
+        }
+
+        // ==================== UI ====================
+        function updateUI() {
+            document.getElementById('totalCount').textContent = Object.keys(workouts).length;
+            document.getElementById('streakCount').textContent = getStreak();
+            document.getElementById('levelCount').textContent = level;
+            document.getElementById('xpText').textContent = xp + ' / ' + xpToNext;
+
+            const percent = Math.min((xp / xpToNext) * 100, 100);
+            document.getElementById('xpFill').style.width = percent + '%';
+
+            // Профиль
+            const bmi = calcBMI();
+            document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+            const bmiPercent = Math.min((bmi / 40) * 100, 100);
+            const fill = document.getElementById('bmiFill');
+            fill.style.width = bmiPercent + '%';
+            if (bmi < 18.5) fill.style.background = '#ff9500';
+            else if (bmi < 25) fill.style.background = '#34c759';
+            else if (bmi < 30) fill.style.background = '#ffcc00';
+            else fill.style.background = '#ff3b30';
+        }
+
+        function calcBMI() {
+            const w = parseFloat(profile.weight);
+            // Рост не вводим, используем условный рост 175 см для демонстрации
+            const h = 1.75;
+            if (!w || w <= 0) return 0;
+            return w / (h * h);
+        }
+
+        // ==================== ГАЛЕРЕЯ ====================
+        function renderGallery() {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '';
+
+            galleryItems.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'gallery-item';
+                div.innerHTML = `
+                    <img src="${item.data}" alt="${item.caption || 'Фото'}" />
+                    <div class="caption">${item.caption || ''}</div>
+                `;
+                // Удаление по долгому тапу
+                div.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    if (confirm('Удалить это фото?')) {
+                        galleryItems.splice(idx, 1);
+                        saveData();
+                        renderGallery();
+                    }
+                });
+                grid.appendChild(div);
+            });
+
+            // Кнопка добавления
+            const addDiv = document.createElement('div');
+            addDiv.className = 'gallery-add';
+            addDiv.textContent = '+';
+            addDiv.addEventListener('click', () => {
+                document.getElementById('galleryFileInput').click();
+            });
+            grid.appendChild(addDiv);
+        }
+
+        // ==================== МЕНЮ И МОДАЛКИ ====================
+        function toggleMenu() {
+            const menu = document.getElementById('contextMenu');
+            menu.classList.toggle('open');
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+            document.getElementById('contextMenu').classList.remove('open');
+        }
+
+        function openModal(id) {
+            closeAllModals();
+            const el = document.getElementById(id);
+            if (el) el.classList.add('open');
+        }
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        function init() {
+            loadData();
+
+            // Аватар
+            document.getElementById('avatarBtn').addEventListener('click', toggleMenu);
+
+            // Пункты меню
+            document.querySelectorAll('.context-menu-item[data-modal]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-modal');
+                    openModal(id);
+                });
+            });
+
+            // Закрытие модалок
+            document.querySelectorAll('.modal-close[data-close]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-close');
+                    document.getElementById(id).classList.remove('open');
+                    document.getElementById('contextMenu').classList.remove('open');
+                });
+            });
+
+            // Клик вне модалки
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        overlay.classList.remove('open');
+                        document.getElementById('contextMenu').classList.remove('open');
+                    }
+                });
+            });
+
+            // Навигация календаря
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                currentMonth--;
+                if (currentMonth < 0) { currentMonth = 11;
+                    currentYear--; }
+                renderCalendar();
+            });
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                currentMonth++;
+                if (currentMonth > 11) { currentMonth = 0;
+                    currentYear++; }
+                renderCalendar();
+            });
+
+            // Сброс
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                if (confirm('Точно сбросить весь прогресс?')) {
+                    workouts = {};
+                    xp = 0;
+                    level = 1;
+                    xpToNext = 100;
+                    saveData();
+                    renderCalendar();
+                    updateUI();
+                }
+            });
+
+            // Вид календаря (из модалки)
+            document.querySelectorAll('.view-pick-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const view = btn.getAttribute
