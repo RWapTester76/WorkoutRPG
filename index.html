@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>🏋️ Календарь тренировок</title>
+    <title>🏋️ Дневник активностей</title>
     <style>
         * {
             margin: 0;
@@ -334,6 +334,7 @@
             cursor: pointer;
             transition: 0.1s;
             user-select: none;
+            position: relative;
         }
         .day:active {
             transform: scale(0.92);
@@ -347,6 +348,21 @@
         }
         .day.today {
             border: 2px solid #007aff;
+        }
+        .day .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #1c1c1e;
+            border-radius: 8px;
+            padding: 1px 5px;
+            font-weight: 700;
+        }
+        .day.workout .badge {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
         }
         .gallery-grid {
             display: grid;
@@ -524,6 +540,29 @@
             padding: 40px 0;
             width: 100%;
         }
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f2f2f7;
+        }
+        .activity-item .info {
+            flex: 1;
+        }
+        .activity-item .name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .activity-item .meta {
+            font-size: 13px;
+            color: #8e8e93;
+        }
+        .activity-item .time {
+            font-weight: 600;
+            color: #007aff;
+            margin-left: 8px;
+        }
         .template-item {
             display: flex;
             justify-content: space-between;
@@ -571,6 +610,11 @@
             border-bottom: 1px solid #f2f2f7;
             font-size: 14px;
         }
+        .day-stats {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 2px;
+        }
         @media (max-width: 440px) {
             .app {
                 padding: 16px 12px 24px;
@@ -602,7 +646,7 @@
     </div>
 
     <div style="text-align:center; margin-bottom: 12px; margin-top: 8px;">
-        <h1 style="font-size:24px; font-weight:700;">🏋️ Тренировки</h1>
+        <h1 style="font-size:24px; font-weight:700;">📋 Дневник</h1>
     </div>
 
     <div class="view-tabs" id="viewTabs">
@@ -627,7 +671,7 @@
     <div style="display:flex; justify-content:space-around; margin-top:20px; padding:14px; background:#f8f8fc; border-radius:18px;">
         <div style="text-align:center;">
             <div style="font-size:22px; font-weight:700;" id="totalCount">0</div>
-            <div style="font-size:12px; color:#8e8e93;">Тренировок</div>
+            <div style="font-size:12px; color:#8e8e93;">Активностей</div>
         </div>
         <div style="text-align:center;">
             <div style="font-size:22px; font-weight:700;" id="streakCount">0</div>
@@ -732,25 +776,33 @@
         </div>
     </div>
 
-    <!-- ВЫБОР ШАБЛОНА ДЛЯ ДНЯ -->
-    <div class="modal-overlay" id="selectTemplateModal">
+    <!-- ДОБАВЛЕНИЕ АКТИВНОСТИ В ДЕНЬ -->
+    <div class="modal-overlay" id="addActivityModal">
         <div class="modal">
             <div class="modal-header">
-                <h2>📋 Выбери тренировку</h2>
-                <button class="modal-close" data-close="selectTemplateModal">✕</button>
+                <h2>➕ Добавить активность</h2>
+                <button class="modal-close" data-close="addActivityModal">✕</button>
             </div>
-            <div id="selectTemplateList"></div>
+            <div class="modal-field">
+                <label>Что делал?</label>
+                <input type="text" id="activityName" placeholder="Игра на гитаре, чтение, тренировка..." />
+            </div>
+            <div class="modal-field">
+                <label>Время (минуты)</label>
+                <input type="number" id="activityTime" placeholder="30" />
+            </div>
+            <button class="btn-primary" id="saveActivityBtn">💾 Добавить</button>
         </div>
     </div>
 
-    <!-- ДЕТАЛИ ТРЕНИРОВКИ -->
-    <div class="modal-overlay" id="workoutDetailModal">
+    <!-- ДЕТАЛИ ДНЯ -->
+    <div class="modal-overlay" id="dayDetailModal">
         <div class="modal">
             <div class="modal-header">
-                <h2>📝 Детали</h2>
-                <button class="modal-close" data-close="workoutDetailModal">✕</button>
+                <h2 id="dayDetailTitle">📅 День</h2>
+                <button class="modal-close" data-close="dayDetailModal">✕</button>
             </div>
-            <div id="workoutDetailContent"></div>
+            <div id="dayDetailContent"></div>
         </div>
     </div>
 
@@ -829,16 +881,16 @@
                 <button class="modal-close" data-close="infoModal">✕</button>
             </div>
             <div class="info-text">
-                <p><strong>🏋️ RPG-система тренировок</strong></p>
+                <p><strong>📋 Дневник активностей</strong></p>
                 <ul>
-                    <li><strong>Шаблоны</strong> — создавай свои тренировки с упражнениями.</li>
-                    <li><strong>XP</strong> — очки опыта за выполнение шаблонов.</li>
+                    <li><strong>Активности</strong> — отмечай любые дела: тренировки, гитара, чтение.</li>
+                    <li><strong>Время</strong> — указывай сколько минут потратил.</li>
+                    <li><strong>XP</strong> — очки опыта за каждую активность.</li>
                     <li><strong>Уровень</strong> — повышается при накоплении XP.</li>
-                    <li><strong>Серия</strong> — количество дней подряд с тренировками.</li>
-                    <li><strong>Достижения</strong> — автоматически выдаются за рекорды.</li>
+                    <li><strong>Серия</strong> — количество дней подряд с активностями.</li>
                 </ul>
-                <p style="margin-top:12px;">🔥 Тренируйся регулярно, повышай уровень и становись сильнее!</p>
-                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.5 · HTML-прототип</p>
+                <p style="margin-top:12px;">🔥 Развивайся каждый день!</p>
+                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.6 · HTML-прототип</p>
             </div>
         </div>
     </div>
@@ -849,7 +901,9 @@
         'use strict';
 
         // ===== ДАННЫЕ =====
-        let workouts = {}; // key: "YYYY-MM-DD" => { templateId, xp }
+        // workouts хранит массив активностей для каждого дня
+        // key: "YYYY-MM-DD" => [{ id, name, time, xp, templateId? }]
+        let workouts = {};
         let templates = [];
         let xp = 0;
         let level = 1;
@@ -863,19 +917,21 @@
         let unlockedAchievements = [];
 
         let editingTemplateId = null;
-        let selectedDateForTemplate = null;
+        let currentDayKey = null;
 
         const ACHIEVEMENTS = [
-            { id: 'first_workout', icon: '🌟', name: 'Первая тренировка', desc: 'Отметь свою первую тренировку', check: (data) => data.total >= 1 },
-            { id: 'five_workouts', icon: '💪', name: 'Пять тренировок', desc: 'Отметь 5 тренировок', check: (data) => data.total >= 5 },
-            { id: 'ten_workouts', icon: '🔥', name: 'Десять тренировок', desc: 'Отметь 10 тренировок', check: (data) => data.total >= 10 },
-            { id: 'twenty_five', icon: '⚡', name: '25 тренировок', desc: 'Отметь 25 тренировок', check: (data) => data.total >= 25 },
-            { id: 'fifty', icon: '🏅', name: '50 тренировок', desc: 'Отметь 50 тренировок', check: (data) => data.total >= 50 },
-            { id: 'streak_3', icon: '📅', name: 'Серия 3 дня', desc: 'Тренируйся 3 дня подряд', check: (data) => data.streak >= 3 },
-            { id: 'streak_7', icon: '📆', name: 'Серия 7 дней', desc: 'Тренируйся 7 дней подряд', check: (data) => data.streak >= 7 },
-            { id: 'streak_14', icon: '🏆', name: 'Серия 14 дней', desc: 'Тренируйся 14 дней подряд', check: (data) => data.streak >= 14 },
+            { id: 'first_activity', icon: '🌟', name: 'Первая активность', desc: 'Отметь свою первую активность', check: (data) => data.total >= 1 },
+            { id: 'five_activities', icon: '💪', name: 'Пять активностей', desc: 'Отметь 5 активностей', check: (data) => data.total >= 5 },
+            { id: 'ten_activities', icon: '🔥', name: 'Десять активностей', desc: 'Отметь 10 активностей', check: (data) => data.total >= 10 },
+            { id: 'twenty_five', icon: '⚡', name: '25 активностей', desc: 'Отметь 25 активностей', check: (data) => data.total >= 25 },
+            { id: 'fifty', icon: '🏅', name: '50 активностей', desc: 'Отметь 50 активностей', check: (data) => data.total >= 50 },
+            { id: 'streak_3', icon: '📅', name: 'Серия 3 дня', desc: 'Активность 3 дня подряд', check: (data) => data.streak >= 3 },
+            { id: 'streak_7', icon: '📆', name: 'Серия 7 дней', desc: 'Активность 7 дней подряд', check: (data) => data.streak >= 7 },
+            { id: 'streak_14', icon: '🏆', name: 'Серия 14 дней', desc: 'Активность 14 дней подряд', check: (data) => data.streak >= 14 },
             { id: 'level_5', icon: '⬆️', name: 'Уровень 5', desc: 'Достигни 5 уровня', check: (data) => data.level >= 5 },
             { id: 'level_10', icon: '⭐', name: 'Уровень 10', desc: 'Достигни 10 уровня', check: (data) => data.level >= 10 },
+            { id: 'total_time_1h', icon: '⏱️', name: '1 час дел', desc: 'Суммарно 60 минут активностей', check: (data) => data.totalTime >= 60 },
+            { id: 'total_time_5h', icon: '⌛', name: '5 часов дел', desc: 'Суммарно 300 минут активностей', check: (data) => data.totalTime >= 300 },
         ];
 
         // ===== ЗАГРУЗКА / СОХРАНЕНИЕ =====
@@ -924,12 +980,47 @@
             updateUI();
         }
 
+        // ===== ПОДСЧЁТЫ =====
+        function getTotalActivities() {
+            let count = 0;
+            for (let key in workouts) {
+                count += workouts[key].length;
+            }
+            return count;
+        }
+
+        function getTotalTime() {
+            let total = 0;
+            for (let key in workouts) {
+                workouts[key].forEach(a => { total += a.time || 0; });
+            }
+            return total;
+        }
+
+        function getStreak() {
+            const today = new Date();
+            let streak = 0;
+            let check = new Date(today);
+            check.setHours(0, 0, 0, 0);
+            while (true) {
+                const key = formatDateKey(check);
+                if (workouts[key] && workouts[key].length > 0) {
+                    streak++;
+                    check.setDate(check.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            return streak;
+        }
+
         // ===== АЧИВКИ =====
         function checkAchievements() {
             const data = {
-                total: Object.keys(workouts).length,
+                total: getTotalActivities(),
                 streak: getStreak(),
-                level: level
+                level: level,
+                totalTime: getTotalTime()
             };
             let newAchievement = null;
             ACHIEVEMENTS.forEach(ach => {
@@ -986,21 +1077,8 @@
             return y + '-' + m + '-' + d;
         }
 
-        function getStreak() {
-            const today = new Date();
-            let streak = 0;
-            let check = new Date(today);
-            check.setHours(0, 0, 0, 0);
-            while (true) {
-                const key = formatDateKey(check);
-                if (workouts[key]) {
-                    streak++;
-                    check.setDate(check.getDate() - 1);
-                } else {
-                    break;
-                }
-            }
-            return streak;
+        function getActivitiesForDay(key) {
+            return workouts[key] || [];
         }
 
         function renderCalendar() {
@@ -1017,9 +1095,20 @@
                 if (date === null) {
                     div.style.visibility = 'hidden';
                 } else {
-                    div.textContent = date.getDate();
                     const key = formatDateKey(date);
-                    if (workouts[key]) div.classList.add('workout');
+                    const activities = getActivitiesForDay(key);
+                    const count = activities.length;
+
+                    div.textContent = date.getDate();
+                    if (count > 0) div.classList.add('workout');
+
+                    if (count > 0) {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge';
+                        badge.textContent = count;
+                        div.appendChild(badge);
+                    }
+
                     if (date.getMonth() !== currentMonth) div.classList.add('other-month');
                     if (date.getTime() === today.getTime()) div.classList.add('today');
                     div.addEventListener('click', () => handleDayClick(date));
@@ -1030,80 +1119,94 @@
 
         function handleDayClick(date) {
             const key = formatDateKey(date);
-            if (workouts[key]) {
-                // Уже есть тренировка — показываем детали
-                showWorkoutDetail(key);
+            currentDayKey = key;
+            showDayDetail(key);
+        }
+
+        function showDayDetail(key) {
+            const date = new Date(key + 'T00:00:00');
+            const title = document.getElementById('dayDetailTitle');
+            title.textContent = '📅 ' + date.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            const container = document.getElementById('dayDetailContent');
+            const activities = getActivitiesForDay(key);
+
+            let html = '';
+            if (activities.length === 0) {
+                html = '<p style="color:#8e8e93; text-align:center; padding:16px;">Нет активностей</p>';
             } else {
-                // Нет тренировки — предлагаем выбрать шаблон
-                selectedDateForTemplate = date;
-                openSelectTemplate();
-            }
-        }
+                html = activities.map((a, idx) => `
+                    <div class="activity-item">
+                        <div class="info">
+                            <div class="name">${a.name}</div>
+                            <div class="meta">${a.time || 0} мин · +${a.xp || 0} XP</div>
+                        </div>
+                        <button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="deleteActivity('${key}', ${idx})">✕</button>
+                    </div>
+                `).join('');
 
-        function showWorkoutDetail(key) {
-            const data = workouts[key];
-            const template = templates.find(t => t.id === data.templateId);
-            const container = document.getElementById('workoutDetailContent');
-            container.innerHTML = `
-                <p><strong>📅 ${key}</strong></p>
-                <p>🏋️ ${template ? template.name : 'Шаблон удалён'}</p>
-                <p>⭐ +${data.xp} XP</p>
-                <button class="btn-danger" id="deleteWorkoutBtn" style="margin-top:12px;">🗑️ Удалить тренировку</button>
-            `;
-            document.getElementById('deleteWorkoutBtn')?.addEventListener('click', () => {
-                if (confirm('Удалить эту тренировку?')) {
-                    delete workouts[key];
-                    saveData();
-                    renderCalendar();
-                    updateUI();
-                    closeAllModals();
-                }
-            });
-            openModal('workoutDetailModal');
-        }
-
-        function openSelectTemplate() {
-            const container = document.getElementById('selectTemplateList');
-            if (templates.length === 0) {
-                container.innerHTML = `
-                    <p style="color:#8e8e93; text-align:center; padding:20px;">Нет шаблонов. Создай первый!</p>
-                    <button class="btn-primary" onclick="document.getElementById('addTemplateBtn').click(); closeAllModals();">➕ Создать шаблон</button>
+                const totalTime = activities.reduce((sum, a) => sum + (a.time || 0), 0);
+                const totalXp = activities.reduce((sum, a) => sum + (a.xp || 0), 0);
+                html += `
+                    <div style="margin-top:12px; padding:12px; background:#f8f8fc; border-radius:12px; display:flex; justify-content:space-around;">
+                        <div><strong>${activities.length}</strong> актив.</div>
+                        <div><strong>${totalTime}</strong> мин</div>
+                        <div><strong>+${totalXp}</strong> XP</div>
+                    </div>
                 `;
-            } else {
-                container.innerHTML = templates.map(t =>
-                    `<button class="template-select-btn" data-id="${t.id}">
-                        🏋️ ${t.name}
-                        <span class="sub">— ${t.exercises.length} упр., ${t.xp} XP</span>
-                    </button>`
-                ).join('');
-                container.querySelectorAll('.template-select-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = btn.dataset.id;
-                        applyTemplate(id);
-                    });
-                });
             }
-            openModal('selectTemplateModal');
+
+            html += `
+                <button class="btn-primary" id="addActivityToDayBtn" style="margin-top:16px;">➕ Добавить активность</button>
+            `;
+
+            container.innerHTML = html;
+
+            document.getElementById('addActivityToDayBtn').addEventListener('click', () => {
+                openAddActivity(key);
+            });
+
+            openModal('dayDetailModal');
         }
 
-        function applyTemplate(templateId) {
-            const template = templates.find(t => t.id === templateId);
-            if (!template) return;
-            if (!selectedDateForTemplate) return;
+        window.deleteActivity = function(key, index) {
+            if (!confirm('Удалить эту активность?')) return;
+            const activities = workouts[key] || [];
+            if (index >= 0 && index < activities.length) {
+                activities.splice(index, 1);
+                if (activities.length === 0) {
+                    delete workouts[key];
+                }
+                saveData();
+                renderCalendar();
+                updateUI();
+                showDayDetail(key);
+                checkAchievements();
+            }
+        };
 
-            const key = formatDateKey(selectedDateForTemplate);
-            if (workouts[key]) return;
+        function openAddActivity(key) {
+            currentDayKey = key;
+            document.getElementById('activityName').value = '';
+            document.getElementById('activityTime').value = '';
+            // Закрываем детали дня, открываем добавление
+            document.getElementById('dayDetailModal').classList.remove('open');
+            openModal('addActivityModal');
+        }
 
-            workouts[key] = {
-                templateId: templateId,
-                xp: template.xp || 20
-            };
-
-            addXP(template.xp || 20);
+        function addActivityToDay(key, name, time) {
+            if (!workouts[key]) workouts[key] = [];
+            const xpEarned = Math.floor(time / 5) + 5; // 5 XP за каждые 5 минут + бонус
+            workouts[key].push({
+                id: 'act_' + Date.now(),
+                name: name.trim(),
+                time: time,
+                xp: xpEarned
+            });
+            addXP(xpEarned);
             saveData();
             renderCalendar();
             updateUI();
-            closeAllModals();
             checkAchievements();
         }
 
@@ -1183,7 +1286,8 @@
                 const d = new Date(today);
                 d.setDate(d.getDate() - i);
                 const key = formatDateKey(d);
-                data.push({ date: d, count: workouts[key] ? 1 : 0 });
+                const activities = getActivitiesForDay(key);
+                data.push({ date: d, count: activities.length });
             }
             if (data.every(d => d.count === 0)) {
                 container.innerHTML = '<div class="chart-empty">📊 Нет данных за этот период</div>';
@@ -1193,7 +1297,7 @@
             let html = '';
             data.forEach(item => {
                 const height = (item.count / maxCount) * 100;
-                const barColor = item.count >= 2 ? '#2ecc71' : (item.count === 1 ? '#34c759' : '#e5e5ea');
+                const barColor = item.count >= 3 ? '#2ecc71' : (item.count >= 1 ? '#34c759' : '#e5e5ea');
                 const label = item.date.getDate();
                 html += `
                     <div class="chart-bar-wrapper">
@@ -1207,7 +1311,7 @@
 
         // ===== UI =====
         function updateUI() {
-            document.getElementById('totalCount').textContent = Object.keys(workouts).length;
+            document.getElementById('totalCount').textContent = getTotalActivities();
             document.getElementById('streakCount').textContent = getStreak();
             document.getElementById('levelCount').textContent = level;
             document.getElementById('xpText').textContent = xp + ' / ' + xpToNext;
@@ -1410,7 +1514,6 @@
 
                 let template = templates.find(t => t.id === editingTemplateId);
                 if (!template && editingTemplateId === null) {
-                    // Создаём временный шаблон
                     template = { id: 'temp_' + Date.now(), name: 'Временный', exercises: [], xp: 20 };
                     templates.push(template);
                     editingTemplateId = template.id;
@@ -1442,6 +1545,21 @@
                 saveData();
                 renderTemplates();
                 closeAllModals();
+            });
+
+            // ===== ДОБАВЛЕНИЕ АКТИВНОСТИ =====
+            document.getElementById('saveActivityBtn').addEventListener('click', () => {
+                const name = document.getElementById('activityName').value.trim();
+                const time = parseInt(document.getElementById('activityTime').value) || 0;
+
+                if (!name) { alert('Введите название активности'); return; }
+                if (time <= 0) { alert('Введите время (в минутах)'); return; }
+
+                if (currentDayKey) {
+                    addActivityToDay(currentDayKey, name, time);
+                    closeAllModals();
+                    showDayDetail(currentDayKey);
+                }
             });
 
             // Галерея
