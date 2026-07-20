@@ -1151,7 +1151,7 @@
     </div>
 
     <button class="reset-btn" id="resetBtn">🔄 Сбросить прогресс</button>
-        <!-- ===== МОДАЛКИ ===== -->
+       <!-- ===== МОДАЛКИ ===== -->
 
     <!-- ПРОФИЛЬ (с вкладками) -->
     <div class="modal-overlay" id="profileModal">
@@ -1458,13 +1458,13 @@
                     <li><strong>Шаблоны</strong> — создавай шаблоны и добавляй их в день.</li>
                 </ul>
                 <p style="margin-top:12px;">🔥 Развивайся каждый день!</p>
-                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 2.1 · HTML-прототип</p>
+                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 2.2 · HTML-прототип</p>
             </div>
         </div>
     </div>
 
-</div>
-<script>
+</div> 
+    <script>
     (function() {
         'use strict';
 
@@ -1689,9 +1689,26 @@
             return workouts[key] || [];
         }
 
+        // ===== НОВАЯ ЛОГИКА РАСПИСАНИЯ =====
         function getScheduledForDay(date) {
             const dayOfWeek = date.getDay();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
             return scheduledActivities.filter(a => {
+                // Проверяем, активен ли период
+                if (a.endDate) {
+                    const end = new Date(a.endDate);
+                    end.setHours(0, 0, 0, 0);
+                    if (date > end) return false;
+                }
+                // Проверяем, есть ли уже отметка в истории
+                const key = formatDateKey(date);
+                const activities = getActivitiesForDay(key);
+                const alreadyCompleted = activities.some(act => act.scheduleId === a.id);
+                // Если уже выполнено, не показываем как запланированное
+                if (alreadyCompleted) return false;
+                // Проверяем день недели
                 if (!a.days || a.days.length === 0) return false;
                 return a.days.includes(String(dayOfWeek));
             });
@@ -1777,6 +1794,7 @@
 
             let html = '';
 
+            // Выполненные активности
             if (activities.length > 0) {
                 html += `<div style="margin-bottom:12px;"><strong>✅ Выполнено:</strong></div>`;
                 activities.forEach((a, idx) => {
@@ -1793,16 +1811,16 @@
                 });
             }
 
+            // Запланированные активности
             if (scheduled.length > 0) {
                 if (activities.length > 0) html += `<div style="margin:12px 0;"><strong>📋 Запланировано:</strong></div>`;
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                scheduled.forEach((s, idx) => {
+                scheduled.forEach((s) => {
                     const isPast = date < today;
-                    const isCompleted = activities.some(a => a.scheduleId === s.id);
-                    const status = isCompleted ? 'completed' : (isPast ? 'missed' : 'pending');
-                    const statusLabel = isCompleted ? '✅ Выполнено' : (isPast ? '❌ Пропущено' : '⏳ Ожидает');
-                    const statusClass = isCompleted ? 'completed' : (isPast ? 'missed' : 'pending');
+                    const status = isPast ? 'missed' : 'pending';
+                    const statusLabel = isPast ? '❌ Пропущено' : '⏳ Ожидает';
+                    const statusClass = isPast ? 'missed' : 'pending';
 
                     html += `
                         <div class="activity-item">
@@ -1811,8 +1829,7 @@
                                 <div class="meta">${s.time || 0} мин · ${s.timeOfDay || ''}</div>
                             </div>
                             <span class="status-badge ${statusClass}">${statusLabel}</span>
-                            ${!isCompleted && !isPast ? `<button class="btn-success" style="padding:4px 10px; font-size:12px; margin-left:6px;" onclick="completeScheduled('${key}', '${s.id}')">✅</button>` : ''}
-                            ${!isCompleted ? `<button class="btn-danger" style="padding:4px 10px; font-size:12px; margin-left:6px;" onclick="removeScheduled('${s.id}')">✕</button>` : ''}
+                            ${!isPast ? `<button class="btn-success" style="padding:4px 10px; font-size:12px; margin-left:6px;" onclick="completeScheduled('${key}', '${s.id}')">✅</button>` : ''}
                         </div>
                     `;
                 });
@@ -1862,12 +1879,15 @@
             }
         };
 
+        // ===== НОВАЯ ЛОГИКА ОТМЕТКИ ВЫПОЛНЕНИЯ =====
         window.completeScheduled = function(key, scheduleId) {
             const scheduled = scheduledActivities.find(s => s.id === scheduleId);
             if (!scheduled) return;
 
             if (!workouts[key]) workouts[key] = [];
             const xpEarned = scheduled.xp || 20;
+            
+            // Добавляем в историю
             workouts[key].push({
                 id: 'act_' + Date.now(),
                 emoji: scheduled.emoji || '📌',
@@ -1885,14 +1905,6 @@
             const date = new Date(key + 'T00:00:00');
             showDayDetail(key, date);
             checkAchievements();
-        };
-
-        window.removeScheduled = function(scheduleId) {
-            if (!confirm('Удалить это расписание?')) return;
-            scheduledActivities = scheduledActivities.filter(s => s.id !== scheduleId);
-            saveData();
-            renderCurrentView();
-            updateUI();
         };
 
         function openAddActivity(key) {
@@ -1917,6 +1929,17 @@
             return { days, time };
         }
 
+        function getEndDateFromPeriod(period) {
+            const now = new Date();
+            switch(period) {
+                case '1m': return new Date(now.setMonth(now.getMonth() + 1));
+                case '3m': return new Date(now.setMonth(now.getMonth() + 3));
+                case '6m': return new Date(now.setMonth(now.getMonth() + 6));
+                case '1y': return new Date(now.setFullYear(now.getFullYear() + 1));
+                default: return null; // forever
+            }
+        }
+
         function addActivityToDay(key, emoji, name, time, period, schedule, saveAsTemplate) {
             if (!workouts[key]) workouts[key] = [];
             const xpEarned = Math.floor(time / 5) + 5;
@@ -1934,8 +1957,10 @@
                 }
             }
 
+            // Если есть расписание — добавляем в scheduledActivities
             if (schedule.days && schedule.days.length > 0) {
                 const scheduleId = 'sch_' + Date.now();
+                const endDate = getEndDateFromPeriod(period);
                 scheduledActivities.push({
                     id: scheduleId,
                     emoji: emoji || '📌',
@@ -1944,8 +1969,10 @@
                     xp: xpEarned,
                     period: period || 'forever',
                     days: schedule.days,
-                    timeOfDay: schedule.time || '15:00'
+                    timeOfDay: schedule.time || '15:00',
+                    endDate: endDate ? endDate.toISOString() : null
                 });
+                // Добавляем в историю как выполненную
                 workouts[key].push({
                     id: 'act_' + Date.now(),
                     emoji: emoji || '📌',
@@ -2169,12 +2196,10 @@
             if (scheduled.length > 0) {
                 if (activities.length > 0) html += `<div style="margin:12px 0;"><strong>📋 Запланировано:</strong></div>`;
                 scheduled.forEach(s => {
-                    const isCompleted = activities.some(a => a.scheduleId === s.id);
-                    const status = isCompleted ? '✅' : '⏳';
                     html += `
                         <div class="day-schedule">
                             <span class="time">${s.timeOfDay || '—'}</span>
-                            ${s.emoji || '📌'} ${s.name} — ${s.time} мин (${s.xp} XP) ${status}
+                            ${s.emoji || '📌'} ${s.name} — ${s.time} мин (${s.xp} XP) ⏳
                         </div>
                     `;
                 });
