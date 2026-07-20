@@ -1689,7 +1689,7 @@
             return workouts[key] || [];
         }
 
-        // ===== НОВАЯ ЛОГИКА РАСПИСАНИЯ =====
+              // ===== НОВАЯ ЛОГИКА РАСПИСАНИЯ (ИСПРАВЛЕННАЯ) =====
         function getScheduledForDay(date) {
             const dayOfWeek = date.getDay();
             const today = new Date();
@@ -1700,18 +1700,33 @@
                 if (a.endDate) {
                     const end = new Date(a.endDate);
                     end.setHours(0, 0, 0, 0);
+                    // Если дата ПОСЛЕ окончания периода - активность уже не актуальна
                     if (date > end) return false;
                 }
-                // Проверяем, есть ли уже отметка в истории
-                const key = formatDateKey(date);
-                const activities = getActivitiesForDay(key);
-                const alreadyCompleted = activities.some(act => act.scheduleId === a.id);
-                // Если уже выполнено, не показываем как запланированное
-                if (alreadyCompleted) return false;
                 // Проверяем день недели
                 if (!a.days || a.days.length === 0) return false;
                 return a.days.includes(String(dayOfWeek));
             });
+        }
+
+        function getDayStatus(date) {
+            const key = formatDateKey(date);
+            const activities = getActivitiesForDay(key); // Выполненные
+            const scheduled = getScheduledForDay(date); // Запланированные (с учётом периода)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // 1. Есть выполненные активности
+            if (activities.length > 0) return 'workout';
+
+            // 2. Нет запланированных на этот день
+            if (scheduled.length === 0) return 'empty';
+
+            // 3. Если день уже прошёл (и нет записей в workouts) -> это пропуск
+            if (date < today) return 'missed';
+
+            // 4. Иначе -> будущий запланированный день
+            return 'scheduled';
         }
 
         function getDayStatus(date) {
