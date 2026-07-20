@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>📋 Дневник активностей</title>
     <style>
-        /* ===== ТЕМНАЯ ТЕМА ===== */
         .dark-theme {
             background: #1c1c1e;
         }
@@ -29,6 +28,14 @@
         }
         .dark-theme .day.workout {
             background: #34c759;
+            color: white;
+        }
+        .dark-theme .day.scheduled {
+            background: #ffcc00;
+            color: #1c1c1e;
+        }
+        .dark-theme .day.missed {
+            background: #ff3b30;
             color: white;
         }
         .dark-theme .day.other-month {
@@ -377,6 +384,20 @@
         .btn-success:active {
             opacity: 0.7;
         }
+        .btn-warning {
+            background: #ffcc00;
+            color: #1c1c1e;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-warning:active {
+            opacity: 0.7;
+        }
         .view-tabs {
             display: flex;
             gap: 6px;
@@ -466,6 +487,14 @@
             background: #34c759;
             color: white;
         }
+        .day.scheduled {
+            background: #ffcc00;
+            color: #1c1c1e;
+        }
+        .day.missed {
+            background: #ff3b30;
+            color: white;
+        }
         .day.other-month {
             color: #c6c6c8;
         }
@@ -484,6 +513,13 @@
             font-weight: 700;
         }
         .day.workout .badge {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        .day.scheduled .badge {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .day.missed .badge {
             background: rgba(255, 255, 255, 0.3);
             color: white;
         }
@@ -685,10 +721,23 @@
             font-size: 13px;
             color: #8e8e93;
         }
-        .activity-item .time {
+        .activity-item .status-badge {
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
             font-weight: 600;
-            color: #007aff;
-            margin-left: 8px;
+        }
+        .activity-item .status-badge.completed {
+            background: #34c759;
+            color: white;
+        }
+        .activity-item .status-badge.pending {
+            background: #ffcc00;
+            color: #1c1c1e;
+        }
+        .activity-item .status-badge.missed {
+            background: #ff3b30;
+            color: white;
         }
         .template-item {
             display: flex;
@@ -921,7 +970,6 @@
         <div class="avatar-btn" id="avatarBtn">🏋️</div>
     </div>
 
-    <!-- ===== КНОПКА ТЕМЫ ===== -->
     <button class="theme-toggle" id="themeToggle" title="Переключить тему">🌙</button>
 
     <div class="context-menu" id="contextMenu">
@@ -1262,14 +1310,13 @@
                 <p><strong>📋 Дневник активностей</strong></p>
                 <ul>
                     <li><strong>Активности</strong> — отмечай любые дела с эмодзи.</li>
+                    <li><strong>Расписание</strong> — активности с днями недели автоматически появляются в календаре.</li>
+                    <li><strong>Статусы</strong> — 🟢 выполнено, 🟡 запланировано, 🔴 пропущено.</li>
                     <li><strong>Шаблоны</strong> — создавай шаблоны и добавляй их в день.</li>
-                    <li><strong>Время</strong> — указывай сколько минут потратил.</li>
-                    <li><strong>Дневник успеха</strong> — отслеживай прогресс по навыкам.</li>
                     <li><strong>Тёмная тема</strong> — переключение в правом верхнем углу.</li>
-                    <li><strong>Напоминания</strong> — уведомления в браузере.</li>
                 </ul>
                 <p style="margin-top:12px;">🔥 Развивайся каждый день!</p>
-                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 1.1 · HTML-прототип</p>
+                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 2.0 · HTML-прототип</p>
             </div>
         </div>
     </div>
@@ -1282,6 +1329,7 @@
         // ===== ДАННЫЕ =====
         let workouts = {};
         let templates = [];
+        let scheduledActivities = [];
         let xp = 0;
         let level = 1;
         let xpToNext = 100;
@@ -1297,6 +1345,7 @@
 
         let editingTemplateId = null;
         let currentDayKey = null;
+        let currentScheduleId = null;
 
         const ACHIEVEMENTS = [
             { id: 'first_activity', icon: '🌟', name: 'Первая активность', desc: 'Отметь свою первую активность', check: (data) => data.total >= 1 },
@@ -1326,6 +1375,7 @@
                     const data = JSON.parse(raw);
                     workouts = data.workouts || {};
                     templates = data.templates || [];
+                    scheduledActivities = data.scheduledActivities || [];
                     xp = data.xp || 0;
                     level = data.level || 1;
                     xpToNext = data.xpToNext || 100;
@@ -1347,6 +1397,7 @@
                 localStorage.setItem('workoutData', JSON.stringify({
                     workouts,
                     templates,
+                    scheduledActivities,
                     xp,
                     level,
                     xpToNext,
@@ -1497,6 +1548,31 @@
             return workouts[key] || [];
         }
 
+        function getScheduledForDay(date) {
+            const key = formatDateKey(date);
+            const dayOfWeek = date.getDay(); // 0=вс
+            return scheduledActivities.filter(a => {
+                if (!a.days || a.days.length === 0) return false;
+                return a.days.includes(String(dayOfWeek));
+            });
+        }
+
+        function getDayStatus(date) {
+            const key = formatDateKey(date);
+            const activities = getActivitiesForDay(key);
+            const scheduled = getScheduledForDay(date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (activities.length > 0) return 'workout';
+            if (scheduled.length === 0) return 'empty';
+
+            // Проверяем, прошёл ли день
+            const isPast = date < today;
+            if (isPast) return 'missed';
+            return 'scheduled';
+        }
+
         function renderMonthView() {
             const grid = document.getElementById('daysGrid');
             grid.innerHTML = '';
@@ -1513,15 +1589,31 @@
                 } else {
                     const key = formatDateKey(date);
                     const activities = getActivitiesForDay(key);
-                    const count = activities.length;
+                    const scheduled = getScheduledForDay(date);
+                    const status = getDayStatus(date);
+
                     div.textContent = date.getDate();
-                    if (count > 0) div.classList.add('workout');
-                    if (count > 0) {
+
+                    if (status === 'workout') {
+                        div.classList.add('workout');
+                    } else if (status === 'scheduled') {
+                        div.classList.add('scheduled');
+                    } else if (status === 'missed') {
+                        div.classList.add('missed');
+                    }
+
+                    const total = activities.length + scheduled.length;
+                    if (total > 0) {
                         const badge = document.createElement('span');
                         badge.className = 'badge';
-                        badge.textContent = count;
+                        if (status === 'workout') {
+                            badge.textContent = activities.length + (scheduled.length > 0 ? '+' + scheduled.length : '');
+                        } else {
+                            badge.textContent = scheduled.length;
+                        }
                         div.appendChild(badge);
                     }
+
                     if (date.getMonth() !== currentMonth) div.classList.add('other-month');
                     if (date.getTime() === today.getTime()) div.classList.add('today');
                     div.addEventListener('click', () => handleDayClick(date));
@@ -1533,51 +1625,64 @@
         function handleDayClick(date) {
             const key = formatDateKey(date);
             currentDayKey = key;
-            showDayDetail(key);
+            showDayDetail(key, date);
         }
 
-        function showDayDetail(key) {
-            const date = new Date(key + 'T00:00:00');
+        function showDayDetail(key, date) {
             const title = document.getElementById('dayDetailTitle');
             title.textContent = '📅 ' + date.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' });
 
             const container = document.getElementById('dayDetailContent');
             const activities = getActivitiesForDay(key);
+            const scheduled = getScheduledForDay(date);
 
             let html = '';
-            if (activities.length === 0) {
-                html = '<p style="color:#8e8e93; text-align:center; padding:16px;">Нет активностей</p>';
-            } else {
-                html = activities.map((a, idx) => {
-                    let scheduleHtml = '';
-                    if (a.schedule && a.schedule.days && a.schedule.days.length > 0) {
-                        const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-                        const daysStr = a.schedule.days.map(d => dayNames[parseInt(d)]).join(', ');
-                        scheduleHtml = `<span class="schedule-tag">📅 ${daysStr} ${a.schedule.time || ''}</span>`;
-                    }
-                    return `
+
+            // Выполненные активности
+            if (activities.length > 0) {
+                html += `<div style="margin-bottom:12px;"><strong>✅ Выполнено:</strong></div>`;
+                activities.forEach((a, idx) => {
+                    html += `
                         <div class="activity-item">
                             <div class="info">
                                 <div class="name">${a.emoji || '📌'} ${a.name}</div>
-                                <div class="meta">
-                                    ${a.time || 0} мин · +${a.xp || 0} XP · ${a.period || 'Бессрочно'}
-                                    ${scheduleHtml}
-                                </div>
+                                <div class="meta">${a.time || 0} мин · +${a.xp || 0} XP</div>
                             </div>
-                            <button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="deleteActivity('${key}', ${idx})">✕</button>
+                            <span class="status-badge completed">✅</span>
+                            <button class="btn-danger" style="padding:4px 10px; font-size:12px; margin-left:6px;" onclick="deleteActivity('${key}', ${idx})">✕</button>
                         </div>
                     `;
-                }).join('');
+                });
+            }
 
-                const totalTime = activities.reduce((sum, a) => sum + (a.time || 0), 0);
-                const totalXp = activities.reduce((sum, a) => sum + (a.xp || 0), 0);
-                html += `
-                    <div style="margin-top:12px; padding:12px; background:#f8f8fc; border-radius:12px; display:flex; justify-content:space-around;">
-                        <div><strong>${activities.length}</strong> актив.</div>
-                        <div><strong>${totalTime}</strong> мин</div>
-                        <div><strong>+${totalXp}</strong> XP</div>
-                    </div>
-                `;
+            // Запланированные активности
+            if (scheduled.length > 0) {
+                if (activities.length > 0) html += `<div style="margin:12px 0;"><strong>📋 Запланировано:</strong></div>`;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                scheduled.forEach((s, idx) => {
+                    const isPast = date < today;
+                    const isCompleted = activities.some(a => a.scheduleId === s.id);
+                    const status = isCompleted ? 'completed' : (isPast ? 'missed' : 'pending');
+                    const statusLabel = isCompleted ? '✅ Выполнено' : (isPast ? '❌ Пропущено' : '⏳ Ожидает');
+                    const statusClass = isCompleted ? 'completed' : (isPast ? 'missed' : 'pending');
+
+                    html += `
+                        <div class="activity-item">
+                            <div class="info">
+                                <div class="name">${s.emoji || '📌'} ${s.name}</div>
+                                <div class="meta">${s.time || 0} мин · ${s.timeOfDay || ''}</div>
+                            </div>
+                            <span class="status-badge ${statusClass}">${statusLabel}</span>
+                            ${!isCompleted && !isPast ? `<button class="btn-success" style="padding:4px 10px; font-size:12px; margin-left:6px;" onclick="completeScheduled('${key}', '${s.id}')">✅</button>` : ''}
+                            ${!isCompleted ? `<button class="btn-danger" style="padding:4px 10px; font-size:12px; margin-left:6px;" onclick="removeScheduled('${s.id}')">✕</button>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            if (activities.length === 0 && scheduled.length === 0) {
+                html = '<p style="color:#8e8e93; text-align:center; padding:16px;">Нет активностей</p>';
             }
 
             html += `
@@ -1614,9 +1719,43 @@
                 saveData();
                 renderCurrentView();
                 updateUI();
-                showDayDetail(key);
+                const date = new Date(key + 'T00:00:00');
+                showDayDetail(key, date);
                 checkAchievements();
             }
+        };
+
+        window.completeScheduled = function(key, scheduleId) {
+            const scheduled = scheduledActivities.find(s => s.id === scheduleId);
+            if (!scheduled) return;
+
+            if (!workouts[key]) workouts[key] = [];
+            const xpEarned = scheduled.xp || 20;
+            workouts[key].push({
+                id: 'act_' + Date.now(),
+                emoji: scheduled.emoji || '📌',
+                name: scheduled.name,
+                time: scheduled.time || 0,
+                xp: xpEarned,
+                period: scheduled.period || 'forever',
+                scheduleId: scheduleId
+            });
+
+            addXP(xpEarned);
+            saveData();
+            renderCurrentView();
+            updateUI();
+            const date = new Date(key + 'T00:00:00');
+            showDayDetail(key, date);
+            checkAchievements();
+        };
+
+        window.removeScheduled = function(scheduleId) {
+            if (!confirm('Удалить это расписание?')) return;
+            scheduledActivities = scheduledActivities.filter(s => s.id !== scheduleId);
+            saveData();
+            renderCurrentView();
+            updateUI();
         };
 
         function openAddActivity(key) {
@@ -1658,16 +1797,43 @@
                 }
             }
 
-            workouts[key].push({
-                id: 'act_' + Date.now(),
-                emoji: emoji || '📌',
-                name: name.trim(),
-                time: time,
-                xp: xpEarned,
-                period: period || 'forever',
-                schedule: schedule || { days: [], time: '' }
-            });
-            addXP(xpEarned);
+            // Если есть расписание — добавляем в scheduledActivities
+            if (schedule.days && schedule.days.length > 0) {
+                const scheduleId = 'sch_' + Date.now();
+                scheduledActivities.push({
+                    id: scheduleId,
+                    emoji: emoji || '📌',
+                    name: name.trim(),
+                    time: time,
+                    xp: xpEarned,
+                    period: period || 'forever',
+                    days: schedule.days,
+                    timeOfDay: schedule.time || '15:00'
+                });
+                // Добавляем активность в день как выполненную
+                workouts[key].push({
+                    id: 'act_' + Date.now(),
+                    emoji: emoji || '📌',
+                    name: name.trim(),
+                    time: time,
+                    xp: xpEarned,
+                    period: period || 'forever',
+                    scheduleId: scheduleId
+                });
+                addXP(xpEarned);
+            } else {
+                workouts[key].push({
+                    id: 'act_' + Date.now(),
+                    emoji: emoji || '📌',
+                    name: name.trim(),
+                    time: time,
+                    xp: xpEarned,
+                    period: period || 'forever',
+                    schedule: schedule || { days: [], time: '' }
+                });
+                addXP(xpEarned);
+            }
+
             saveData();
             renderCurrentView();
             updateUI();
@@ -1722,7 +1888,8 @@
             updateUI();
             checkAchievements();
             closeAllModals();
-            showDayDetail(key);
+            const date = new Date(key + 'T00:00:00');
+            showDayDetail(key, date);
         }
 
         // ===== ДНЕВНИК УСПЕХА =====
@@ -1814,10 +1981,38 @@
             const today = new Date();
             const key = formatDateKey(today);
             const activities = getActivitiesForDay(key);
+            const scheduled = getScheduledForDay(today);
             document.getElementById('dayViewTitle').textContent = '📅 ' + today.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' });
 
-            if (activities.length === 0) {
-                container.innerHTML = `
+            let html = '';
+
+            if (activities.length > 0) {
+                html += `<div style="margin-bottom:12px;"><strong>✅ Выполнено:</strong></div>`;
+                activities.forEach(a => {
+                    html += `
+                        <div class="day-schedule">
+                            ${a.emoji || '📌'} ${a.name} — ${a.time || 0} мин (${a.xp} XP)
+                        </div>
+                    `;
+                });
+            }
+
+            if (scheduled.length > 0) {
+                if (activities.length > 0) html += `<div style="margin:12px 0;"><strong>📋 Запланировано:</strong></div>`;
+                scheduled.forEach(s => {
+                    const isCompleted = activities.some(a => a.scheduleId === s.id);
+                    const status = isCompleted ? '✅' : '⏳';
+                    html += `
+                        <div class="day-schedule">
+                            <span class="time">${s.timeOfDay || '—'}</span>
+                            ${s.emoji || '📌'} ${s.name} — ${s.time} мин (${s.xp} XP) ${status}
+                        </div>
+                    `;
+                });
+            }
+
+            if (activities.length === 0 && scheduled.length === 0) {
+                html = `
                     <div style="text-align:center; padding:30px 0; color:#8e8e93;">
                         <div style="font-size:48px;">📭</div>
                         <p>Нет активностей на сегодня</p>
@@ -1827,51 +2022,21 @@
                         </div>
                     </div>
                 `;
-                return;
+            } else {
+                const totalTime = activities.reduce((sum, a) => sum + (a.time || 0), 0);
+                const totalXp = activities.reduce((sum, a) => sum + (a.xp || 0), 0);
+                html += `
+                    <div style="margin-top:16px; padding:12px; background:#f8f8fc; border-radius:12px; display:flex; justify-content:space-around;">
+                        <div><strong>${activities.length}</strong> актив.</div>
+                        <div><strong>${totalTime}</strong> мин</div>
+                        <div><strong>+${totalXp}</strong> XP</div>
+                    </div>
+                    <div class="flex-btns">
+                        <button class="btn-primary" onclick="openAddActivity('${key}')">➕ Добавить</button>
+                        ${templates.length > 0 ? `<button class="btn-outline" onclick="openSelectTemplate('${key}')">📋 Из шаблона</button>` : ''}
+                    </div>
+                `;
             }
-
-            const withTime = activities.filter(a => a.schedule && a.schedule.time);
-            const withoutTime = activities.filter(a => !a.schedule || !a.schedule.time);
-
-            let html = '';
-
-            if (withTime.length > 0) {
-                withTime.sort((a, b) => (a.schedule.time || '00:00').localeCompare(b.schedule.time || '00:00'));
-                html += `<div style="margin-bottom:12px;"><strong>По расписанию:</strong></div>`;
-                withTime.forEach(a => {
-                    html += `
-                        <div class="day-schedule">
-                            <span class="time">${a.schedule.time || '—'}</span>
-                            ${a.emoji || '📌'} ${a.name} — ${a.time} мин (${a.xp} XP)
-                        </div>
-                    `;
-                });
-            }
-
-            if (withoutTime.length > 0) {
-                if (withTime.length > 0) html += `<div style="margin:12px 0;"><strong>Остальные:</strong></div>`;
-                withoutTime.forEach(a => {
-                    html += `
-                        <div class="day-schedule">
-                            ${a.emoji || '📌'} ${a.name} — ${a.time} мин (${a.xp} XP)
-                        </div>
-                    `;
-                });
-            }
-
-            const totalTime = activities.reduce((sum, a) => sum + (a.time || 0), 0);
-            const totalXp = activities.reduce((sum, a) => sum + (a.xp || 0), 0);
-            html += `
-                <div style="margin-top:16px; padding:12px; background:#f8f8fc; border-radius:12px; display:flex; justify-content:space-around;">
-                    <div><strong>${activities.length}</strong> актив.</div>
-                    <div><strong>${totalTime}</strong> мин</div>
-                    <div><strong>+${totalXp}</strong> XP</div>
-                </div>
-                <div class="flex-btns">
-                    <button class="btn-primary" onclick="openAddActivity('${key}')">➕ Добавить</button>
-                    ${templates.length > 0 ? `<button class="btn-outline" onclick="openSelectTemplate('${key}')">📋 Из шаблона</button>` : ''}
-                </div>
-            `;
 
             container.innerHTML = html;
         }
@@ -1898,7 +2063,9 @@
                 const d = new Date(monday);
                 d.setDate(monday.getDate() + i);
                 const key = formatDateKey(d);
-                const count = (workouts[key] || []).length;
+                const activities = getActivitiesForDay(key);
+                const scheduled = getScheduledForDay(d);
+                const count = activities.length + scheduled.length;
                 totalWeek += count;
                 const isToday = d.getTime() === today.getTime();
 
@@ -2064,7 +2231,8 @@
                 d.setDate(d.getDate() - i);
                 const key = formatDateKey(d);
                 const activities = getActivitiesForDay(key);
-                data.push({ date: d, count: activities.length });
+                const scheduled = getScheduledForDay(d);
+                data.push({ date: d, count: activities.length + scheduled.length });
             }
             if (data.every(d => d.count === 0)) {
                 container.innerHTML = '<div class="chart-empty">📊 Нет данных за этот период</div>';
@@ -2184,6 +2352,7 @@
             const data = {
                 workouts: workouts,
                 templates: templates,
+                scheduledActivities: scheduledActivities,
                 xp: xp,
                 level: level,
                 xpToNext: xpToNext,
@@ -2214,6 +2383,7 @@
                         if (confirm('Импортировать данные? Текущие данные будут перезаписаны.')) {
                             workouts = data.workouts || {};
                             templates = data.templates || [];
+                            scheduledActivities = data.scheduledActivities || [];
                             xp = data.xp || 0;
                             level = data.level || 1;
                             xpToNext = data.xpToNext || 100;
@@ -2320,6 +2490,7 @@
             document.getElementById('resetBtn').addEventListener('click', () => {
                 if (confirm('Точно сбросить весь прогресс?')) {
                     workouts = {};
+                    scheduledActivities = [];
                     xp = 0;
                     level = 1;
                     xpToNext = 100;
@@ -2371,7 +2542,6 @@
                 alert('✅ Профиль сохранён!');
             });
 
-            // ===== ЭКСПОРТ / ИМПОРТ =====
             document.getElementById('exportBtn').addEventListener('click', () => {
                 exportData();
                 document.getElementById('contextMenu').classList.remove('open');
@@ -2387,7 +2557,6 @@
                 document.getElementById('contextMenu').classList.remove('open');
             });
 
-            // ===== ШАБЛОНЫ =====
             document.getElementById('addTemplateBtn').addEventListener('click', () => {
                 editingTemplateId = null;
                 document.getElementById('editorTitle').textContent = '➕ Новый шаблон';
@@ -2441,7 +2610,6 @@
                 checkAchievements();
             });
 
-            // ===== ДОБАВЛЕНИЕ АКТИВНОСТИ =====
             document.getElementById('saveActivityBtn').addEventListener('click', () => {
                 const emoji = document.getElementById('activityEmoji').value;
                 const name = document.getElementById('activityName').value.trim();
@@ -2456,11 +2624,11 @@
                 if (currentDayKey) {
                     addActivityToDay(currentDayKey, emoji, name, time, period, schedule, saveAsTemplate);
                     closeAllModals();
-                    showDayDetail(currentDayKey);
+                    const date = new Date(currentDayKey + 'T00:00:00');
+                    showDayDetail(currentDayKey, date);
                 }
             });
 
-            // Галерея
             document.getElementById('galleryAddBtn').addEventListener('click', () => {
                 document.getElementById('galleryFileInput').click();
             });
