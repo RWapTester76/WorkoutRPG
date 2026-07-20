@@ -694,6 +694,68 @@
             width: 16px;
             height: 16px;
         }
+        /* ===== ВИДЫ КАЛЕНДАРЯ ===== */
+        .view-container {
+            min-height: 300px;
+        }
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .week-day {
+            text-align: center;
+            padding: 8px 0;
+            background: #f8f8fc;
+            border-radius: 12px;
+        }
+        .week-day .day-name {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        .week-day .day-count {
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .week-day.today {
+            background: #007aff;
+            color: white;
+        }
+        .week-day.today .day-name {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .year-month {
+            text-align: center;
+            padding: 12px 0;
+            background: #f8f8fc;
+            border-radius: 12px;
+        }
+        .year-month .month-name {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        .year-month .month-count {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .day-schedule {
+            padding: 8px 0;
+            border-bottom: 1px solid #f2f2f7;
+        }
+        .day-schedule .time {
+            font-weight: 600;
+            color: #007aff;
+            margin-right: 12px;
+        }
         @media (max-width: 440px) {
             .app {
                 padding: 16px 12px 24px;
@@ -736,17 +798,39 @@
         <button class="view-tab" data-view="year">Год</button>
     </div>
 
-    <div class="month-nav">
-        <button id="prevMonth">‹</button>
-        <span class="month-label" id="monthLabel">Январь 2025</span>
-        <button id="nextMonth">›</button>
-    </div>
+    <!-- Контейнер для разных видов -->
+    <div class="view-container" id="viewContainer">
+        <!-- Месяц (по умолчанию) -->
+        <div id="monthView">
+            <div class="month-nav">
+                <button id="prevMonth">‹</button>
+                <span class="month-label" id="monthLabel">Январь 2025</span>
+                <button id="nextMonth">›</button>
+            </div>
+            <div class="weekdays">
+                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+            </div>
+            <div class="days" id="daysGrid"></div>
+        </div>
 
-    <div class="weekdays">
-        <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
-    </div>
+        <!-- День (скрыт по умолчанию) -->
+        <div id="dayView" style="display:none;">
+            <h3 style="font-size:18px; font-weight:600; margin-bottom:12px;" id="dayViewTitle">📅 Сегодня</h3>
+            <div id="dayViewContent"></div>
+        </div>
 
-    <div class="days" id="daysGrid"></div>
+        <!-- Неделя (скрыта по умолчанию) -->
+        <div id="weekView" style="display:none;">
+            <h3 style="font-size:18px; font-weight:600; margin-bottom:12px;" id="weekViewTitle">📅 Неделя</h3>
+            <div id="weekViewContent"></div>
+        </div>
+
+        <!-- Год (скрыт по умолчанию) -->
+        <div id="yearView" style="display:none;">
+            <h3 style="font-size:18px; font-weight:600; margin-bottom:12px;" id="yearViewTitle">📅 Год</h3>
+            <div id="yearViewContent"></div>
+        </div>
+    </div>
 
     <div style="display:flex; justify-content:space-around; margin-top:20px; padding:14px; background:#f8f8fc; border-radius:18px;">
         <div style="text-align:center;">
@@ -1024,7 +1108,7 @@
                     <li><strong>Дневник успеха</strong> — отслеживай прогресс по навыкам.</li>
                 </ul>
                 <p style="margin-top:12px;">🔥 Развивайся каждый день!</p>
-                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.8 · HTML-прототип</p>
+                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.9 · HTML-прототип</p>
             </div>
         </div>
     </div>
@@ -1043,6 +1127,7 @@
         let currentDate = new Date();
         let currentYear = currentDate.getFullYear();
         let currentMonth = currentDate.getMonth();
+        let currentView = 'month';
 
         let profile = { name: '', gender: 'male', age: '', weight: '', chest: '', biceps: '', thigh: '' };
         let galleryItems = [];
@@ -1050,8 +1135,6 @@
 
         let editingTemplateId = null;
         let currentDayKey = null;
-
-        const EMOJIS = ['🏋️', '🎸', '📚', '🧘', '🏃', '🎨', '💻', '🌍', '🎹', '🧠', '✍️', '🎯'];
 
         const ACHIEVEMENTS = [
             { id: 'first_activity', icon: '🌟', name: 'Первая активность', desc: 'Отметь свою первую активность', check: (data) => data.total >= 1 },
@@ -1148,6 +1231,23 @@
             return streak;
         }
 
+        function getCountForDay(date) {
+            const key = formatDateKey(date);
+            return (workouts[key] || []).length;
+        }
+
+        function getCountForMonth(month, year) {
+            let count = 0;
+            const days = getDaysInMonth(year, month);
+            days.forEach(d => {
+                if (d) {
+                    const key = formatDateKey(d);
+                    count += (workouts[key] || []).length;
+                }
+            });
+            return count;
+        }
+
         // ===== АЧИВКИ =====
         function checkAchievements() {
             const data = {
@@ -1190,7 +1290,7 @@
             }).join('');
         }
 
-        // ===== КАЛЕНДАРЬ =====
+        // ===== КАЛЕНДАРЬ (МЕСЯЦ) =====
         function getDaysInMonth(year, month) {
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
@@ -1215,7 +1315,7 @@
             return workouts[key] || [];
         }
 
-        function renderCalendar() {
+        function renderMonthView() {
             const grid = document.getElementById('daysGrid');
             grid.innerHTML = '';
             const days = getDaysInMonth(currentYear, currentMonth);
@@ -1232,17 +1332,14 @@
                     const key = formatDateKey(date);
                     const activities = getActivitiesForDay(key);
                     const count = activities.length;
-
                     div.textContent = date.getDate();
                     if (count > 0) div.classList.add('workout');
-
                     if (count > 0) {
                         const badge = document.createElement('span');
                         badge.className = 'badge';
                         badge.textContent = count;
                         div.appendChild(badge);
                     }
-
                     if (date.getMonth() !== currentMonth) div.classList.add('other-month');
                     if (date.getTime() === today.getTime()) div.classList.add('today');
                     div.addEventListener('click', () => handleDayClick(date));
@@ -1323,7 +1420,7 @@
                     delete workouts[key];
                 }
                 saveData();
-                renderCalendar();
+                renderCurrentView();
                 updateUI();
                 showDayDetail(key);
                 checkAchievements();
@@ -1365,7 +1462,7 @@
             });
             addXP(xpEarned);
             saveData();
-            renderCalendar();
+            renderCurrentView();
             updateUI();
             checkAchievements();
         }
@@ -1452,6 +1549,185 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // ===== ВИДЫ =====
+        function renderDayView() {
+            const container = document.getElementById('dayViewContent');
+            const today = new Date();
+            const key = formatDateKey(today);
+            const activities = getActivitiesForDay(key);
+            document.getElementById('dayViewTitle').textContent = '📅 ' + today.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            if (activities.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:30px 0; color:#8e8e93;">
+                        <div style="font-size:48px;">📭</div>
+                        <p>Нет активностей на сегодня</p>
+                        <button class="btn-primary" style="margin-top:16px;" onclick="openAddActivity('${key}')">➕ Добавить</button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Группируем по времени (если есть расписание)
+            const withTime = activities.filter(a => a.schedule && a.schedule.time);
+            const withoutTime = activities.filter(a => !a.schedule || !a.schedule.time);
+
+            let html = '';
+
+            if (withTime.length > 0) {
+                // Сортируем по времени
+                withTime.sort((a, b) => (a.schedule.time || '00:00').localeCompare(b.schedule.time || '00:00'));
+                html += `<div style="margin-bottom:12px;"><strong>По расписанию:</strong></div>`;
+                withTime.forEach(a => {
+                    html += `
+                        <div class="day-schedule">
+                            <span class="time">${a.schedule.time || '—'}</span>
+                            ${a.emoji || '📌'} ${a.name} — ${a.time} мин (${a.xp} XP)
+                        </div>
+                    `;
+                });
+            }
+
+            if (withoutTime.length > 0) {
+                if (withTime.length > 0) html += `<div style="margin:12px 0;"><strong>Остальные:</strong></div>`;
+                withoutTime.forEach(a => {
+                    html += `
+                        <div class="day-schedule">
+                            ${a.emoji || '📌'} ${a.name} — ${a.time} мин (${a.xp} XP)
+                        </div>
+                    `;
+                });
+            }
+
+            const totalTime = activities.reduce((sum, a) => sum + (a.time || 0), 0);
+            const totalXp = activities.reduce((sum, a) => sum + (a.xp || 0), 0);
+            html += `
+                <div style="margin-top:16px; padding:12px; background:#f8f8fc; border-radius:12px; display:flex; justify-content:space-around;">
+                    <div><strong>${activities.length}</strong> актив.</div>
+                    <div><strong>${totalTime}</strong> мин</div>
+                    <div><strong>+${totalXp}</strong> XP</div>
+                </div>
+                <button class="btn-primary" style="margin-top:16px;" onclick="openAddActivity('${key}')">➕ Добавить активность</button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderWeekView() {
+            const container = document.getElementById('weekViewContent');
+            const today = new Date();
+            const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+            // Находим понедельник текущей недели
+            const dayOfWeek = today.getDay(); // 0 = вс
+            const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() - mondayOffset);
+            monday.setHours(0, 0, 0, 0);
+
+            document.getElementById('weekViewTitle').textContent = '📅 ' +
+                monday.toLocaleDateString('ru', { day: 'numeric', month: 'short' }) + ' — ' +
+                new Date(monday.getTime() + 6 * 86400000).toLocaleDateString('ru', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            let totalWeek = 0;
+            let html = '<div class="week-grid">';
+
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const key = formatDateKey(d);
+                const count = (workouts[key] || []).length;
+                totalWeek += count;
+                const isToday = d.getTime() === today.getTime();
+
+                html += `
+                    <div class="week-day ${isToday ? 'today' : ''}">
+                        <div class="day-name">${dayNames[i]}</div>
+                        <div class="day-count">${count}</div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            html += `
+                <div style="margin-top:16px; padding:12px; background:#f8f8fc; border-radius:12px; text-align:center;">
+                    <strong>Всего за неделю: ${totalWeek} активностей</strong>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderYearView() {
+            const container = document.getElementById('yearViewContent');
+            const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+            const year = currentYear;
+
+            document.getElementById('yearViewTitle').textContent = '📅 ' + year;
+
+            let totalYear = 0;
+            let html = '<div class="year-grid">';
+
+            for (let m = 0; m < 12; m++) {
+                const count = getCountForMonth(m, year);
+                totalYear += count;
+                const isCurrentMonth = (m === currentMonth && year === new Date().getFullYear());
+
+                html += `
+                    <div class="year-month" style="${isCurrentMonth ? 'background:#007aff; color:white;' : ''}">
+                        <div class="month-name" style="${isCurrentMonth ? 'color:rgba(255,255,255,0.7);' : ''}">${monthNames[m]}</div>
+                        <div class="month-count" style="${isCurrentMonth ? 'color:white;' : ''}">${count}</div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            html += `
+                <div style="margin-top:16px; padding:12px; background:#f8f8fc; border-radius:12px; text-align:center;">
+                    <strong>Всего за год: ${totalYear} активностей</strong>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // ===== ПЕРЕКЛЮЧЕНИЕ ВИДОВ =====
+        function renderCurrentView() {
+            // Скрываем все
+            document.getElementById('monthView').style.display = 'none';
+            document.getElementById('dayView').style.display = 'none';
+            document.getElementById('weekView').style.display = 'none';
+            document.getElementById('yearView').style.display = 'none';
+
+            // Показываем нужный
+            switch (currentView) {
+                case 'day':
+                    document.getElementById('dayView').style.display = 'block';
+                    renderDayView();
+                    break;
+                case 'week':
+                    document.getElementById('weekView').style.display = 'block';
+                    renderWeekView();
+                    break;
+                case 'month':
+                    document.getElementById('monthView').style.display = 'block';
+                    renderMonthView();
+                    break;
+                case 'year':
+                    document.getElementById('yearView').style.display = 'block';
+                    renderYearView();
+                    break;
+                default:
+                    document.getElementById('monthView').style.display = 'block';
+                    renderMonthView();
+            }
+
+            // Обновляем активную вкладку
+            document.querySelectorAll('.view-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.view === currentView);
+            });
         }
 
         // ===== ШАБЛОНЫ =====
@@ -1670,17 +1946,22 @@
                 });
             });
 
+            // Навигация по месяцам (только для month view)
             document.getElementById('prevMonth').addEventListener('click', () => {
-                currentMonth--;
-                if (currentMonth < 0) { currentMonth = 11;
-                    currentYear--; }
-                renderCalendar();
+                if (currentView === 'month') {
+                    currentMonth--;
+                    if (currentMonth < 0) { currentMonth = 11;
+                        currentYear--; }
+                    renderCurrentView();
+                }
             });
             document.getElementById('nextMonth').addEventListener('click', () => {
-                currentMonth++;
-                if (currentMonth > 11) { currentMonth = 0;
-                    currentYear++; }
-                renderCalendar();
+                if (currentView === 'month') {
+                    currentMonth++;
+                    if (currentMonth > 11) { currentMonth = 0;
+                        currentYear++; }
+                    renderCurrentView();
+                }
             });
 
             document.getElementById('resetBtn').addEventListener('click', () => {
@@ -1691,28 +1972,27 @@
                     xpToNext = 100;
                     unlockedAchievements = [];
                     saveData();
-                    renderCalendar();
+                    renderCurrentView();
                     updateUI();
                     renderAchievements();
                 }
             });
 
+            // ===== ПЕРЕКЛЮЧЕНИЕ ВИДОВ =====
             document.querySelectorAll('.view-pick-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const view = btn.getAttribute('data-view');
-                    document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-                    document.querySelector(`.view-tab[data-view="${view}"]`)?.classList.add('active');
+                    currentView = view;
+                    renderCurrentView();
                     closeAllModals();
-                    renderCalendar();
                 });
             });
 
             document.querySelectorAll('.view-tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     const view = tab.getAttribute('data-view');
-                    document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    renderCalendar();
+                    currentView = view;
+                    renderCurrentView();
                 });
             });
 
@@ -1830,7 +2110,7 @@
                 this.value = '';
             });
 
-            renderCalendar();
+            renderCurrentView();
             renderGallery();
             renderTemplates();
             renderAchievements();
@@ -1838,6 +2118,19 @@
             updateUI();
             checkAchievements();
         }
+
+        // Добавляем openAddActivity в глобальную область для вызова из onclick
+        window.openAddActivity = function(key) {
+            currentDayKey = key;
+            document.getElementById('activityName').value = '';
+            document.getElementById('activityTime').value = '';
+            document.getElementById('activityEmoji').value = '🏋️';
+            document.getElementById('activityPeriod').value = '1m';
+            document.getElementById('activityTimeOfDay').value = '15:00';
+            document.querySelectorAll('.schedule-day').forEach(cb => cb.checked = false);
+            document.getElementById('dayDetailModal').classList.remove('open');
+            openModal('addActivityModal');
+        };
 
         document.addEventListener('DOMContentLoaded', init);
     })();
