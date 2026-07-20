@@ -629,7 +629,6 @@
             color: #8e8e93;
             margin-top: 2px;
         }
-        /* Дневник успеха */
         .skill-item {
             display: flex;
             align-items: center;
@@ -674,6 +673,26 @@
             padding: 2px 10px;
             border-radius: 12px;
             white-space: nowrap;
+        }
+        .schedule-tag {
+            font-size: 11px;
+            color: #8e8e93;
+            background: #f2f2f7;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 2px 0;
+        }
+        .day-checkbox {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        .day-checkbox input {
+            width: 16px;
+            height: 16px;
         }
         @media (max-width: 440px) {
             .app {
@@ -890,6 +909,22 @@
                     <option value="forever">Бессрочно</option>
                 </select>
             </div>
+            <div class="modal-field">
+                <label>Расписание (дни недели)</label>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; padding:4px 0;">
+                    <label class="day-checkbox"><input type="checkbox" class="schedule-day" value="1" /> Пн</label>
+                    <label class="day-checkbox"><input type="checkbox" class="schedule-day" value="2" /> Вт</label>
+                    <label class="day-checkbox"><input type="checkbox" class="schedule-day" value="3" /> Ср</label>
+                    <label class="day-checkbox"><input type="checkbox" class="schedule-day" value="4" /> Чт</label>
+                    <label class="day-checkbox"><input type="checkbox" class="schedule-day" value="5" /> Пт</label>
+                    <label class="day-checkbox"><input type="checkbox" class="schedule-day" value="6" /> Сб</label>
+                    <label class="day-checkbox"><input type="checkbox" class="schedule-day" value="0" /> Вс</label>
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:14px; font-weight:500; display:block; margin-bottom:4px;">Время (например 15:00)</label>
+                    <input type="time" id="activityTimeOfDay" value="15:00" />
+                </div>
+            </div>
             <button class="btn-primary" id="saveActivityBtn">💾 Добавить</button>
         </div>
     </div>
@@ -985,11 +1020,11 @@
                     <li><strong>Активности</strong> — отмечай любые дела с эмодзи.</li>
                     <li><strong>Время</strong> — указывай сколько минут потратил.</li>
                     <li><strong>Период</strong> — задай срок для каждой активности.</li>
+                    <li><strong>Расписание</strong> — выбери дни недели и время.</li>
                     <li><strong>Дневник успеха</strong> — отслеживай прогресс по навыкам.</li>
-                    <li><strong>XP</strong> — очки опыта за каждую активность.</li>
                 </ul>
                 <p style="margin-top:12px;">🔥 Развивайся каждый день!</p>
-                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.7 · HTML-прототип</p>
+                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.8 · HTML-прототип</p>
             </div>
         </div>
     </div>
@@ -1234,15 +1269,26 @@
             if (activities.length === 0) {
                 html = '<p style="color:#8e8e93; text-align:center; padding:16px;">Нет активностей</p>';
             } else {
-                html = activities.map((a, idx) => `
-                    <div class="activity-item">
-                        <div class="info">
-                            <div class="name">${a.emoji || '📌'} ${a.name}</div>
-                            <div class="meta">${a.time || 0} мин · +${a.xp || 0} XP · ${a.period || 'Бессрочно'}</div>
+                html = activities.map((a, idx) => {
+                    let scheduleHtml = '';
+                    if (a.schedule && a.schedule.days && a.schedule.days.length > 0) {
+                        const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+                        const daysStr = a.schedule.days.map(d => dayNames[parseInt(d)]).join(', ');
+                        scheduleHtml = `<span class="schedule-tag">📅 ${daysStr} ${a.schedule.time || ''}</span>`;
+                    }
+                    return `
+                        <div class="activity-item">
+                            <div class="info">
+                                <div class="name">${a.emoji || '📌'} ${a.name}</div>
+                                <div class="meta">
+                                    ${a.time || 0} мин · +${a.xp || 0} XP · ${a.period || 'Бессрочно'}
+                                    ${scheduleHtml}
+                                </div>
+                            </div>
+                            <button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="deleteActivity('${key}', ${idx})">✕</button>
                         </div>
-                        <button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="deleteActivity('${key}', ${idx})">✕</button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
 
                 const totalTime = activities.reduce((sum, a) => sum + (a.time || 0), 0);
                 const totalXp = activities.reduce((sum, a) => sum + (a.xp || 0), 0);
@@ -1290,11 +1336,22 @@
             document.getElementById('activityTime').value = '';
             document.getElementById('activityEmoji').value = '🏋️';
             document.getElementById('activityPeriod').value = '1m';
+            document.getElementById('activityTimeOfDay').value = '15:00';
+            document.querySelectorAll('.schedule-day').forEach(cb => cb.checked = false);
             document.getElementById('dayDetailModal').classList.remove('open');
             openModal('addActivityModal');
         }
 
-        function addActivityToDay(key, emoji, name, time, period) {
+        function getSelectedSchedule() {
+            const days = [];
+            document.querySelectorAll('.schedule-day:checked').forEach(cb => {
+                days.push(cb.value);
+            });
+            const time = document.getElementById('activityTimeOfDay').value || '15:00';
+            return { days, time };
+        }
+
+        function addActivityToDay(key, emoji, name, time, period, schedule) {
             if (!workouts[key]) workouts[key] = [];
             const xpEarned = Math.floor(time / 5) + 5;
             workouts[key].push({
@@ -1303,7 +1360,8 @@
                 name: name.trim(),
                 time: time,
                 xp: xpEarned,
-                period: period || 'forever'
+                period: period || 'forever',
+                schedule: schedule || { days: [], time: '' }
             });
             addXP(xpEarned);
             saveData();
@@ -1317,7 +1375,6 @@
             const container = document.getElementById('successDiaryContent');
             if (!container) return;
 
-            // Собираем все уникальные активности за последние 30 дней
             const now = new Date();
             const thirtyDaysAgo = new Date(now);
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -1337,7 +1394,8 @@
                             totalTime: 0,
                             count: 0,
                             period: act.period || 'forever',
-                            days: new Set()
+                            days: new Set(),
+                            schedule: act.schedule || { days: [], time: '' }
                         };
                     }
                     skillsMap[skillKey].totalTime += act.time || 0;
@@ -1352,23 +1410,28 @@
                 return;
             }
 
-            // Сортируем по количеству дней
             skills.sort((a, b) => b.days.size - a.days.size);
-
-            // Максимальное количество дней для шкалы
             const maxDays = Math.max(...skills.map(s => s.days.size), 1);
+
+            const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+            const periodMap = {
+                '1m': '1 месяц',
+                '3m': '3 месяца',
+                '6m': '6 месяцев',
+                '1y': '1 год',
+                'forever': 'Бессрочно'
+            };
 
             container.innerHTML = skills.map(skill => {
                 const daysCount = skill.days.size;
                 const percent = Math.round((daysCount / 30) * 100);
-                const periodMap = {
-                    '1m': '1 месяц',
-                    '3m': '3 месяца',
-                    '6m': '6 месяцев',
-                    '1y': '1 год',
-                    'forever': 'Бессрочно'
-                };
                 const periodLabel = periodMap[skill.period] || 'Бессрочно';
+
+                let scheduleHtml = '';
+                if (skill.schedule && skill.schedule.days && skill.schedule.days.length > 0) {
+                    const daysStr = skill.schedule.days.map(d => dayNames[parseInt(d)]).join(', ');
+                    scheduleHtml = `<span class="schedule-tag">📅 ${daysStr} ${skill.schedule.time || ''}</span>`;
+                }
 
                 return `
                     <div class="skill-item">
@@ -1381,8 +1444,11 @@
                             <div class="skill-progress-bar">
                                 <div class="skill-progress-fill" style="width:${percent}%;"></div>
                             </div>
+                            <div style="margin-top:4px;">
+                                <span class="schedule-tag">⏳ ${periodLabel}</span>
+                                ${scheduleHtml}
+                            </div>
                         </div>
-                        <div class="skill-period">${periodLabel}</div>
                     </div>
                 `;
             }).join('');
@@ -1732,12 +1798,13 @@
                 const name = document.getElementById('activityName').value.trim();
                 const time = parseInt(document.getElementById('activityTime').value) || 0;
                 const period = document.getElementById('activityPeriod').value;
+                const schedule = getSelectedSchedule();
 
                 if (!name) { alert('Введите название активности'); return; }
                 if (time <= 0) { alert('Введите время (в минутах)'); return; }
 
                 if (currentDayKey) {
-                    addActivityToDay(currentDayKey, emoji, name, time, period);
+                    addActivityToDay(currentDayKey, emoji, name, time, period, schedule);
                     closeAllModals();
                     showDayDetail(currentDayKey);
                 }
