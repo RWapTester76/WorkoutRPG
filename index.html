@@ -472,7 +472,6 @@
             margin-bottom: 6px;
         }
 
-        /* Ачивки */
         .achievement-item {
             display: flex;
             align-items: center;
@@ -515,6 +514,80 @@
             opacity: 0.5;
         }
 
+        /* ===== ГРАФИК ===== */
+        .chart-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .chart-controls button {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #e5e5ea;
+            border-radius: 12px;
+            background: #f8f8fc;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            color: #8e8e93;
+        }
+
+        .chart-controls button.active {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+
+        .chart-controls button:active {
+            transform: scale(0.95);
+        }
+
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 150px;
+            padding: 8px 4px;
+            background: #f8f8fc;
+            border-radius: 16px;
+            overflow-x: auto;
+        }
+
+        .chart-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            min-width: 20px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .chart-bar {
+            width: 100%;
+            max-width: 24px;
+            border-radius: 4px 4px 0 0;
+            background: #34c759;
+            transition: 0.2s;
+            min-height: 2px;
+        }
+
+        .chart-bar-label {
+            font-size: 8px;
+            color: #8e8e93;
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        .chart-empty {
+            text-align: center;
+            color: #8e8e93;
+            padding: 40px 0;
+            width: 100%;
+        }
+
         @media (max-width: 440px) {
             .app {
                 padding: 16px 12px 24px;
@@ -539,6 +612,7 @@
         <button class="context-menu-item" data-modal="viewModal"><span class="icon">📅</span> Вид календаря</button>
         <button class="context-menu-item" data-modal="galleryModal"><span class="icon">🖼️</span> Галерея</button>
         <button class="context-menu-item" data-modal="achievementsModal"><span class="icon">🏆</span> Достижения</button>
+        <button class="context-menu-item" data-modal="progressModal"><span class="icon">📊</span> Прогресс</button>
         <button class="context-menu-item" data-modal="syncModal"><span class="icon">⌚</span> Синхронизация</button>
         <div class="context-menu-divider"></div>
         <button class="context-menu-item" data-modal="infoModal"><span class="icon">ℹ️</span> Инфо</button>
@@ -678,7 +752,6 @@
         </div>
     </div>
 
-    <!-- НОВАЯ МОДАЛКА: ДОСТИЖЕНИЯ -->
     <div class="modal-overlay" id="achievementsModal">
         <div class="modal">
             <div class="modal-header">
@@ -686,6 +759,24 @@
                 <button class="modal-close" data-close="achievementsModal">✕</button>
             </div>
             <div id="achievementsList"></div>
+        </div>
+    </div>
+
+    <!-- НОВАЯ МОДАЛКА: ПРОГРЕСС -->
+    <div class="modal-overlay" id="progressModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📊 Прогресс</h2>
+                <button class="modal-close" data-close="progressModal">✕</button>
+            </div>
+            <div class="chart-controls">
+                <button class="active" data-chart-range="7">7 дн</button>
+                <button data-chart-range="30">30 дн</button>
+                <button data-chart-range="90">90 дн</button>
+            </div>
+            <div class="chart-container" id="chartContainer">
+                <div class="chart-empty">Нет данных</div>
+            </div>
         </div>
     </div>
 
@@ -718,7 +809,7 @@
                     <li><strong>Достижения</strong> — автоматически выдаются за рекорды.</li>
                 </ul>
                 <p style="margin-top:12px;">🔥 Тренируйся регулярно, повышай уровень и становись сильнее!</p>
-                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.3 · HTML-прототип</p>
+                <p style="margin-top:12px; color:#8e8e93; font-size:14px;">Версия 0.4 · HTML-прототип</p>
             </div>
         </div>
     </div>
@@ -741,8 +832,8 @@
         let profile = { name: '', gender: 'male', age: '', weight: '', chest: '', biceps: '', thigh: '' };
         let galleryItems = [];
         let activities = [];
+        let unlockedAchievements = [];
 
-        // ===== АЧИВКИ =====
         const ACHIEVEMENTS = [
             { id: 'first_workout', icon: '🌟', name: 'Первая тренировка', desc: 'Отметь свою первую тренировку', check: (data) => data.total >= 1 },
             { id: 'five_workouts', icon: '💪', name: 'Пять тренировок', desc: 'Отметь 5 тренировок', check: (data) => data.total >= 5 },
@@ -755,8 +846,6 @@
             { id: 'level_5', icon: '⬆️', name: 'Уровень 5', desc: 'Достигни 5 уровня', check: (data) => data.level >= 5 },
             { id: 'level_10', icon: '⭐', name: 'Уровень 10', desc: 'Достигни 10 уровня', check: (data) => data.level >= 10 },
         ];
-
-        let unlockedAchievements = [];
 
         // ===== ЗАГРУЗКА / СОХРАНЕНИЕ =====
         function loadData() {
@@ -823,7 +912,6 @@
             if (newAchievement) {
                 saveData();
                 renderAchievements();
-                // Уведомление
                 setTimeout(() => {
                     alert(`🏆 НОВОЕ ДОСТИЖЕНИЕ!\n\n${newAchievement.icon} ${newAchievement.name}\n${newAchievement.desc}`);
                 }, 300);
@@ -833,7 +921,6 @@
         function renderAchievements() {
             const container = document.getElementById('achievementsList');
             if (!container) return;
-
             container.innerHTML = ACHIEVEMENTS.map(ach => {
                 const unlocked = unlockedAchievements.includes(ach.id);
                 return `
@@ -926,6 +1013,47 @@
             });
         }
 
+        // ===== ГРАФИК =====
+        function renderChart(range) {
+            const container = document.getElementById('chartContainer');
+            if (!container) return;
+
+            const dates = Object.keys(workouts).map(k => new Date(k + 'T00:00:00'));
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const data = [];
+            for (let i = range - 1; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const key = formatDateKey(d);
+                const count = workouts[key] ? 1 : 0;
+                data.push({ date: d, count: count });
+            }
+
+            if (data.every(d => d.count === 0)) {
+                container.innerHTML = '<div class="chart-empty">📊 Нет данных за этот период</div>';
+                return;
+            }
+
+            const maxCount = Math.max(...data.map(d => d.count), 1);
+
+            let html = '';
+            data.forEach(item => {
+                const height = (item.count / maxCount) * 100;
+                const barColor = item.count >= 2 ? '#2ecc71' : (item.count === 1 ? '#34c759' : '#e5e5ea');
+                const label = item.date.getDate();
+                html += `
+                    <div class="chart-bar-wrapper">
+                        <div class="chart-bar" style="height:${Math.max(height, 2)}%; background:${barColor};"></div>
+                        <div class="chart-bar-label">${label}</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
         // ===== UI =====
         function updateUI() {
             document.getElementById('totalCount').textContent = Object.keys(workouts).length;
@@ -1004,6 +1132,11 @@
             const el = document.getElementById(id);
             if (el) el.classList.add('open');
             if (id === 'achievementsModal') renderAchievements();
+            if (id === 'progressModal') {
+                const active = document.querySelector('.chart-controls .active');
+                const range = active ? parseInt(active.dataset.chartRange) : 30;
+                renderChart(range);
+            }
         }
 
         // ===== АКТИВНОСТИ =====
@@ -1104,6 +1237,16 @@
                     document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     renderCalendar();
+                });
+            });
+
+            // График - переключение диапазона
+            document.querySelectorAll('.chart-controls button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.chart-controls button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const range = parseInt(btn.dataset.chartRange);
+                    renderChart(range);
                 });
             });
 
