@@ -1709,89 +1709,81 @@
             });
         }
 
-        function getDayStatus(date) {
-            const key = formatDateKey(date);
-            const activities = getActivitiesForDay(key); // Выполненные
-            const scheduled = getScheduledForDay(date); // Запланированные (с учётом периода)
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+       // ===== ИСПРАВЛЕННАЯ ЛОГИКА СТАТУСА ДНЯ =====
+function getDayStatus(date) {
+    const key = formatDateKey(date);
+    const activities = getActivitiesForDay(key);
+    const scheduled = getScheduledForDay(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isPast = date < today;
 
-            // 1. Есть выполненные активности
-            if (activities.length > 0) return 'workout';
+    // 1. Если есть выполненные активности — всегда зелёный
+    if (activities.length > 0) return 'workout';
 
-            // 2. Нет запланированных на этот день
-            if (scheduled.length === 0) return 'empty';
+    // 2. Если нет запланированных — пусто
+    if (scheduled.length === 0) return 'empty';
 
-            // 3. Если день уже прошёл (и нет записей в workouts) -> это пропуск
-            if (date < today) return 'missed';
+    // 3. Если запланированные есть:
+    //    — если день прошёл и нет выполненных → пропуск (красный)
+    //    — если день ещё не наступил → запланирован (жёлтый)
+    if (isPast) return 'missed';
+    return 'scheduled';
+}
 
-            // 4. Иначе -> будущий запланированный день
-            return 'scheduled';
-        }
+// ===== ИСПРАВЛЕННАЯ ОТРИСОВКА КАЛЕНДАРЯ =====
+function renderMonthView() {
+    const grid = document.getElementById('daysGrid');
+    grid.innerHTML = '';
+    const days = getDaysInMonth(currentYear, currentMonth);
+    document.getElementById('monthLabel').textContent =
+        new Date(currentYear, currentMonth).toLocaleString('ru', { month: 'long', year: 'numeric' });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-        function getDayStatus(date) {
+    days.forEach(date => {
+        const div = document.createElement('div');
+        div.className = 'day';
+        if (date === null) {
+            div.style.visibility = 'hidden';
+        } else {
             const key = formatDateKey(date);
             const activities = getActivitiesForDay(key);
             const scheduled = getScheduledForDay(date);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const status = getDayStatus(date);
 
-            if (activities.length > 0) return 'workout';
-            if (scheduled.length === 0) return 'empty';
+            div.textContent = date.getDate();
 
-            const isPast = date < today;
-            if (isPast) return 'missed';
-            return 'scheduled';
-        }
+            if (status === 'workout') {
+                div.classList.add('workout');
+            } else if (status === 'scheduled') {
+                div.classList.add('scheduled');
+            } else if (status === 'missed') {
+                div.classList.add('missed');
+            }
 
-        function renderMonthView() {
-            const grid = document.getElementById('daysGrid');
-            grid.innerHTML = '';
-            const days = getDaysInMonth(currentYear, currentMonth);
-            document.getElementById('monthLabel').textContent =
-                new Date(currentYear, currentMonth).toLocaleString('ru', { month: 'long', year: 'numeric' });
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            days.forEach(date => {
-                const div = document.createElement('div');
-                div.className = 'day';
-                if (date === null) {
-                    div.style.visibility = 'hidden';
-                } else {
-                    const key = formatDateKey(date);
-                    const activities = getActivitiesForDay(key);
-                    const scheduled = getScheduledForDay(date);
-                    const status = getDayStatus(date);
-
-                    div.textContent = date.getDate();
-
-                    if (status === 'workout') {
-                        div.classList.add('workout');
-                    } else if (status === 'scheduled') {
-                        div.classList.add('scheduled');
-                    } else if (status === 'missed') {
-                        div.classList.add('missed');
-                    }
-
-                    const total = activities.length + scheduled.length;
-                    if (total > 0) {
-                        const badge = document.createElement('span');
-                        badge.className = 'badge';
-                        if (status === 'workout') {
-                            badge.textContent = activities.length + (scheduled.length > 0 ? '+' + scheduled.length : '');
-                        } else {
-                            badge.textContent = scheduled.length;
-                        }
-                        div.appendChild(badge);
-                    }
-
-                    if (date.getMonth() !== currentMonth) div.classList.add('other-month');
-                    if (date.getTime() === today.getTime()) div.classList.add('today');
-                    div.addEventListener('click', () => handleDayClick(date));
+            // Бейдж с количеством
+            const total = activities.length + scheduled.length;
+            if (total > 0) {
+                const badge = document.createElement('span');
+                badge.className = 'badge';
+                if (status === 'workout') {
+                    badge.textContent = activities.length + (scheduled.length > 0 ? '+' + scheduled.length : '');
+                } else if (status === 'scheduled') {
+                    badge.textContent = '📅' + scheduled.length;
+                } else if (status === 'missed') {
+                    badge.textContent = '❌' + scheduled.length;
                 }
-                grid.appendChild(div);
-            });
+                div.appendChild(badge);
+            }
+
+            if (date.getMonth() !== currentMonth) div.classList.add('other-month');
+            if (date.getTime() === today.getTime()) div.classList.add('today');
+            div.addEventListener('click', () => handleDayClick(date));
         }
+        grid.appendChild(div);
+    });
+}
 
         function handleDayClick(date) {
             const key = formatDateKey(date);
