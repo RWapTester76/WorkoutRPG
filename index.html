@@ -1944,7 +1944,7 @@ function renderMonthView() {
     }
 }
 
-       function addActivityToDay(key, emoji, name, time, period, schedule, saveAsTemplate) {
+    function addActivityToDay(key, emoji, name, time, period, schedule, saveAsTemplate) {
     if (!workouts[key]) workouts[key] = [];
     const xpEarned = Math.floor(time / 5) + 5;
 
@@ -1961,7 +1961,6 @@ function renderMonthView() {
         }
     }
 
-    // Если есть расписание — добавляем в scheduledActivities
     if (schedule.days && schedule.days.length > 0) {
         const scheduleId = 'sch_' + Date.now();
         const endDate = getEndDateFromPeriod(period);
@@ -1976,7 +1975,6 @@ function renderMonthView() {
             timeOfDay: schedule.time || '15:00',
             endDate: endDate ? endDate.toISOString() : null
         });
-        // Добавляем в историю как выполненную
         workouts[key].push({
             id: 'act_' + Date.now(),
             emoji: emoji || '📌',
@@ -2005,36 +2003,6 @@ function renderMonthView() {
     updateUI();
     checkAchievements();
 }
-                // Добавляем в историю как выполненную
-                workouts[key].push({
-                    id: 'act_' + Date.now(),
-                    emoji: emoji || '📌',
-                    name: name.trim(),
-                    time: time,
-                    xp: xpEarned,
-                    period: period || 'forever',
-                    scheduleId: scheduleId
-                });
-                addXP(xpEarned);
-            } else {
-                workouts[key].push({
-                    id: 'act_' + Date.now(),
-                    emoji: emoji || '📌',
-                    name: name.trim(),
-                    time: time,
-                    xp: xpEarned,
-                    period: period || 'forever',
-                    schedule: schedule || { days: [], time: '' }
-                });
-                addXP(xpEarned);
-            }
-
-            saveData();
-            renderCurrentView();
-            updateUI();
-            checkAchievements();
-        }
-
         // ===== ВЫБОР ШАБЛОНА ДЛЯ ДНЯ =====
         function openSelectTemplate(key) {
             currentDayKey = key;
