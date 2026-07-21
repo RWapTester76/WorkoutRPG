@@ -1686,18 +1686,19 @@
 
               // ===== НОВАЯ ЛОГИКА РАСПИСАНИЯ (ИСПРАВЛЕННАЯ) =====
         function getScheduledForDay(date) {
-            const dayOfWeek = date.getDay();
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            return scheduledActivities.filter(a => {
-                // Проверяем, активен ли период
-                if (a.endDate) {
-                    const end = new Date(a.endDate);
-                    end.setHours(0, 0, 0, 0);
-                    // Если дата ПОСЛЕ окончания периода - активность уже не актуальна
-                    if (date > end) return false;
-                }
+    const dayOfWeek = date.getDay();
+    return scheduledActivities.filter(a => {
+        // Проверяем, активен ли период
+        if (a.endDate) {
+            const end = new Date(a.endDate);
+            end.setHours(0, 0, 0, 0);
+            // Если дата ПОСЛЕ окончания периода — активность уже не актуальна
+            if (date > end) return false;
+        }
+        if (!a.days || a.days.length === 0) return false;
+        return a.days.includes(String(dayOfWeek));
+    });
+}
                 // Проверяем день недели
                 if (!a.days || a.days.length === 0) return false;
                 return a.days.includes(String(dayOfWeek));
@@ -1713,8 +1714,15 @@ function getDayStatus(date) {
     today.setHours(0, 0, 0, 0);
     const isPast = date < today;
 
+    // 1. Если есть выполненные — зелёный (приоритет)
     if (activities.length > 0) return 'workout';
+
+    // 2. Если нет запланированных на этот день — пусто
     if (scheduled.length === 0) return 'empty';
+
+    // 3. Если запланированные есть:
+    //    — если день прошёл и нет выполненных → пропуск (красный)
+    //    — если день ещё не наступил → запланирован (жёлтый)
     if (isPast) return 'missed';
     return 'scheduled';
 }
@@ -1936,37 +1944,65 @@ function renderMonthView() {
         }
 
         function addActivityToDay(key, emoji, name, time, period, schedule, saveAsTemplate) {
-            if (!workouts[key]) workouts[key] = [];
-            const xpEarned = Math.floor(time / 5) + 5;
+    if (!workouts[key]) workouts[key] = [];
+    const xpEarned = Math.floor(time / 5) + 5;
 
-            if (saveAsTemplate) {
-                const existing = templates.find(t => t.name === name);
-                if (!existing) {
-                    templates.push({
-                        id: 'tpl_' + Date.now(),
-                        name: name,
-                        exercises: [{ name: name, metricType: 'time', target: time }],
-                        xp: xpEarned
-                    });
-                    checkAchievements();
-                }
-            }
+    if (saveAsTemplate) {
+        const existing = templates.find(t => t.name === name);
+        if (!existing) {
+            templates.push({
+                id: 'tpl_' + Date.now(),
+                name: name,
+                exercises: [{ name: name, metricType: 'time', target: time }],
+                xp: xpEarned
+            });
+            checkAchievements();
+        }
+    }
 
-            // Если есть расписание — добавляем в scheduledActivities
-            if (schedule.days && schedule.days.length > 0) {
-                const scheduleId = 'sch_' + Date.now();
-                const endDate = getEndDateFromPeriod(period);
-                scheduledActivities.push({
-                    id: scheduleId,
-                    emoji: emoji || '📌',
-                    name: name.trim(),
-                    time: time,
-                    xp: xpEarned,
-                    period: period || 'forever',
-                    days: schedule.days,
-                    timeOfDay: schedule.time || '15:00',
-                    endDate: endDate ? endDate.toISOString() : null
-                });
+    // Если есть расписание — добавляем в scheduledActivities
+    if (schedule.days && schedule.days.length > 0) {
+        const scheduleId = 'sch_' + Date.now();
+        const endDate = getEndDateFromPeriod(period); // <-- ЭТО ВАЖНО!
+        scheduledActivities.push({
+            id: scheduleId,
+            emoji: emoji || '📌',
+            name: name.trim(),
+            time: time,
+            xp: xpEarned,
+            period: period || 'forever',
+            days: schedule.days,
+            timeOfDay: schedule.time || '15:00',
+            endDate: endDate ? endDate.toISOString() : null // <-- ЭТО ВАЖНО!
+        });
+        workouts[key].push({
+            id: 'act_' + Date.now(),
+            emoji: emoji || '📌',
+            name: name.trim(),
+            time: time,
+            xp: xpEarned,
+            period: period || 'forever',
+            scheduleId: scheduleId
+        });
+        addXP(xpEarned);
+    } else {
+        workouts[key].push({
+            id: 'act_' + Date.now(),
+            emoji: emoji || '📌',
+            name: name.trim(),
+            time: time,
+            xp: xpEarned,
+            period: period || 'forever',
+            schedule: schedule || { days: [], time: '' }
+        });
+        addXP(xpEarned);
+    }
+
+    saveData();
+    renderCurrentView();
+    updateUI();
+    checkAchievements();
+}
                 // Добавляем в историю как выполненную
                 workouts[key].push({
                     id: 'act_' + Date.now(),
