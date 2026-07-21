@@ -1,10 +1,12 @@
+Добавил функционал загрузки фото с датой и подписью. Вот обновленный код с редактируемой галереей:
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>Планировщик навыков · RPG система</title>
-  <!-- Font Awesome 6 для иконок -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
@@ -70,7 +72,6 @@
       transition: background 0.3s;
     }
 
-    /* Header & профиль кратко */
     .header {
       display: flex;
       align-items: center;
@@ -120,7 +121,6 @@
       border-radius: 10px;
     }
 
-    /* Навигация меню */
     .menu-grid {
       display: flex;
       flex-wrap: wrap;
@@ -156,7 +156,6 @@
       color: white;
     }
 
-    /* Основной блок: календарь/планировщик */
     .calendar-section {
       background: var(--bg);
       border-radius: var(--radius);
@@ -226,7 +225,6 @@
       cursor: pointer;
     }
 
-    /* Секции (профиль, практики, галерея) */
     .section-panel {
       display: none;
       flex-direction: column;
@@ -261,19 +259,154 @@
       gap: 6px;
     }
 
+    /* Обновленная галерея */
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
-    .gallery-img {
+    
+    .gallery-item {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.2s;
+    }
+    
+    .gallery-item:hover {
+      transform: translateY(-2px);
+    }
+    
+    .gallery-image {
+      width: 100%;
       aspect-ratio: 1/1;
+      object-fit: cover;
       background: var(--border);
-      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--text-secondary);
+      font-size: 40px;
+    }
+    
+    .gallery-info {
+      padding: 10px;
+      background: var(--surface);
+    }
+    
+    .gallery-date {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .gallery-caption {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+    
+    .gallery-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    
+    .gallery-btn {
+      background: var(--primary);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: 0.2s;
+    }
+    
+    .gallery-btn.delete {
+      background: #e74c3c;
+    }
+    
+    .gallery-btn.edit {
+      background: var(--primary-soft);
+    }
+    
+    .upload-section {
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-bottom: 16px;
+    }
+    
+    .upload-section:hover {
+      border-color: var(--primary);
+      background: rgba(108, 92, 231, 0.05);
+    }
+    
+    .upload-section i {
+      font-size: 32px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    
+    .upload-section p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    
+    #fileInput {
+      display: none;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: var(--surface);
+      padding: 24px;
+      border-radius: var(--radius);
+      max-width: 350px;
+      width: 90%;
+    }
+    
+    .modal-content input,
+    .modal-content textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    
+    .modal-content button {
+      margin-top: 12px;
+      width: 100%;
     }
 
     button, select, input {
@@ -291,7 +424,7 @@
 </head>
 <body>
   <div class="app-container" id="appContainer">
-    <!-- Верхняя панель: профиль и тема -->
+    <!-- Верхняя панель -->
     <div class="header">
       <div class="profile-badge">
         <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
@@ -317,7 +450,7 @@
       <button class="menu-item" data-view="info"><i class="fas fa-circle-info"></i> RPG</button>
     </div>
 
-    <!-- Динамические секции -->
+    <!-- Секции -->
     <div id="viewCalendar" class="section-panel active">
       <div class="calendar-section">
         <div class="month-row">
@@ -358,10 +491,17 @@
 
     <div id="viewGallery" class="section-panel">
       <h3>🖼️ Галерея достижений</h3>
-      <div class="gallery-grid">
-        <div class="gallery-img"><i class="fas fa-image fa-2x"></i></div>
-        <div class="gallery-img"><i class="fas fa-image fa-2x"></i></div>
-        <div class="gallery-img"><i class="fas fa-image fa-2x"></i></div>
+      
+      <!-- Зона загрузки -->
+      <div class="upload-section" id="uploadTrigger">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Нажмите, чтобы загрузить фото достижения</p>
+        <input type="file" id="fileInput" accept="image/*" multiple>
+      </div>
+      
+      <!-- Сетка изображений -->
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- Динамически заполняется -->
       </div>
     </div>
 
@@ -379,8 +519,22 @@
     </div>
   </div>
 
+  <!-- Модальное окно для редактирования подписи -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h4>Редактировать подпись</h4>
+      <textarea id="editCaption" rows="3" placeholder="Введите описание достижения..."></textarea>
+      <button class="gallery-btn" id="saveCaption">Сохранить</button>
+      <button class="gallery-btn delete" id="cancelEdit">Отмена</button>
+    </div>
+  </div>
+
   <script>
     (function() {
+      // Хранилище изображений галереи
+      let galleryImages = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+      let currentEditId = null;
+
       const body = document.body;
       const themeToggle = document.getElementById('themeToggle');
       const themeToggleSettings = document.getElementById('themeToggleSettings');
@@ -395,7 +549,7 @@
       themeToggle.addEventListener('click', toggleTheme);
       themeToggleSettings?.addEventListener('click', toggleTheme);
 
-      // Навигация между разделами
+      // Навигация
       const menuItems = document.querySelectorAll('.menu-item[data-view]');
       const sections = {
         calendar: document.getElementById('viewCalendar'),
@@ -422,17 +576,15 @@
         });
       });
 
-      // Генерация календаря (июль 2026)
+      // Календарь
       function renderCalendar() {
         const grid = document.getElementById('daysGrid');
         if (!grid) return;
         grid.innerHTML = '';
-        // Июль 2026 начинается со среды (день недели 2 если Пн=0..Вс=6, среда=2)
         const daysInJuly = 31;
-        const startDay = 2; // среда (0-пн,1-вт,2-ср)
-        const today = 21; // сегодня 21 июля 2026 (по условию)
+        const startDay = 2; // среда
+        const today = 21;
         
-        // Пустые ячейки до начала
         for (let i = 0; i < startDay; i++) {
           const empty = document.createElement('div');
           empty.className = 'day-cell';
@@ -440,7 +592,6 @@
           grid.appendChild(empty);
         }
         
-        // Дни с практиками (пример: несколько дней отмечены)
         const practiceDays = [3,7,10,14,18,21,25,28];
         
         for (let d = 1; d <= daysInJuly; d++) {
@@ -457,23 +608,121 @@
       }
       renderCalendar();
 
-      // Добавление практики (демо)
       document.getElementById('addPracticeBtn')?.addEventListener('click', () => {
         const name = prompt('Название навыка/практики:');
         if (!name) return;
         const minutes = prompt('Длительность (минут):', '30');
         if (minutes && !isNaN(minutes)) {
           alert(`Практика "${name}" добавлена на сегодня. +${Math.floor(minutes/10)} XP после завершения.`);
-          // Можно обновить интерфейс практик
         }
       });
 
-      // Тестовая кнопка синхронизации
+      // Галерея: рендер, загрузка, редактирование
+      function renderGallery() {
+        const grid = document.getElementById('galleryGrid');
+        if (!grid) return;
+        
+        if (galleryImages.length === 0) {
+          grid.innerHTML = '<p style="grid-column: span 2; text-align: center; color: var(--text-secondary);">Пока нет загруженных фото</p>';
+          return;
+        }
+        
+        grid.innerHTML = galleryImages.map((img, index) => `
+          <div class="gallery-item">
+            <img src="${img.data}" class="gallery-image" alt="Достижение">
+            <div class="gallery-info">
+              <div class="gallery-date">📅 ${img.date}</div>
+              <div class="gallery-caption">${img.caption || 'Без подписи'}</div>
+              <div class="gallery-actions">
+                <button class="gallery-btn edit" onclick="window.editGalleryImage(${index})">
+                  <i class="fas fa-pen"></i> Изменить
+                </button>
+                <button class="gallery-btn delete" onclick="window.deleteGalleryImage(${index})">
+                  <i class="fas fa-trash"></i> Удалить
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Загрузка фото
+      document.getElementById('uploadTrigger')?.addEventListener('click', () => {
+        document.getElementById('fileInput').click();
+      });
+
+      document.getElementById('fileInput')?.addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (!files.length) return;
+        
+        Array.from(files).forEach(file => {
+          if (!file.type.startsWith('image/')) {
+            alert('Можно загружать только изображения');
+            return;
+          }
+          
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ru-RU', {
+              day: 'numeric', month: 'long', year: 'numeric'
+            });
+            
+            galleryImages.push({
+              id: Date.now() + Math.random(),
+              data: event.target.result,
+              date: dateStr,
+              caption: ''
+            });
+            
+            localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+            renderGallery();
+          };
+          reader.readAsDataURL(file);
+        });
+        
+        e.target.value = ''; // Сброс input
+      });
+
+      // Глобальные функции для кнопок
+      window.editGalleryImage = function(index) {
+        currentEditId = index;
+        document.getElementById('editCaption').value = galleryImages[index].caption || '';
+        document.getElementById('editModal').classList.add('active');
+      };
+
+      window.deleteGalleryImage = function(index) {
+        if (confirm('Удалить это фото достижения?')) {
+          galleryImages.splice(index, 1);
+          localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+          renderGallery();
+        }
+      };
+
+      // Модальное окно
+      document.getElementById('saveCaption')?.addEventListener('click', () => {
+        if (currentEditId !== null && galleryImages[currentEditId]) {
+          galleryImages[currentEditId].caption = document.getElementById('editCaption').value;
+          localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+          renderGallery();
+        }
+        document.getElementById('editModal').classList.remove('active');
+        currentEditId = null;
+      });
+
+      document.getElementById('cancelEdit')?.addEventListener('click', () => {
+        document.getElementById('editModal').classList.remove('active');
+        currentEditId = null;
+      });
+
+      // Тест синхронизации
       document.getElementById('syncTestBtn')?.addEventListener('click', () => {
         alert('Тест синхронизации с шагомером / умными часами. (Имитация: шаги получены)');
       });
 
-      // Инициализация темы по умолчанию (светлая)
+      // Инициализация
+      renderGallery();
+      
       if (body.classList.contains('dark')) {
         themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
       }
@@ -481,3 +730,16 @@
   </script>
 </body>
 </html>
+```
+
+Основные изменения в галерее:
+
+1. Загрузка фото: зона с иконкой облака, при клике открывается выбор файлов изображений
+2. Автоматическая дата: при загрузке сохраняется текущая дата в формате "21 июля 2026"
+3. Подписи: под каждым фото есть поле для подписи, которую можно редактировать
+4. Редактирование: кнопка "Изменить" открывает модальное окно для изменения подписи
+5. Удаление: кнопка удаления с подтверждением
+6. Сохранение: все данные хранятся в localStorage браузера
+7. Сетка 2×2: адаптивная галерея с карточками достижений
+
+Фото конвертируются в base64 и сохраняются локально, дата проставляется автоматически при загрузке.
