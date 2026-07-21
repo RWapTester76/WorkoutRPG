@@ -1085,11 +1085,18 @@
         <button class="context-menu-item" data-modal="infoModal"><span class="icon">ℹ️</span> Инфо</button>
     </div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; margin-top: 8px;">
-    <div style="width:80px;"></div> <!-- отступ слева, чтобы заголовок был по центру -->
+   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; margin-top: 8px;">
+    <div style="width:48px;"></div>
     <h1 style="font-size:24px; font-weight:700; margin:0;">📋 Дневник</h1>
-    <button id="goTodayBtn" style="background:#007aff; border:none; color:white; padding:6px 16px; border-radius:20px; font-size:14px; font-weight:600; cursor:pointer;">📅 Сегодня</button>
+    <button id="goTodayBtn" style="width:44px; height:44px; border-radius:50%; background:#007aff; border:none; color:white; font-size:20px; cursor:pointer; box-shadow:0 2px 8px rgba(0,122,255,0.3); display:flex; align-items:center; justify-content:center;">📅</button>
 </div>
+
+    <div class="view-tabs" id="viewTabs">
+        <button class="view-tab" data-view="day">День</button>
+        <button class="view-tab" data-view="week">Неделя</button>
+        <button class="view-tab active" data-view="month">Месяц</button>
+        <button class="view-tab" data-view="year">Год</button>
+    </div>
 
     <div class="view-container" id="viewContainer">
         <div id="monthView">
@@ -1686,19 +1693,18 @@
 
               // ===== НОВАЯ ЛОГИКА РАСПИСАНИЯ (ИСПРАВЛЕННАЯ) =====
         function getScheduledForDay(date) {
-    const dayOfWeek = date.getDay();
-    return scheduledActivities.filter(a => {
-        // Проверяем, активен ли период
-        if (a.endDate) {
-            const end = new Date(a.endDate);
-            end.setHours(0, 0, 0, 0);
-            // Если дата ПОСЛЕ окончания периода — активность уже не актуальна
-            if (date > end) return false;
-        }
-        if (!a.days || a.days.length === 0) return false;
-        return a.days.includes(String(dayOfWeek));
-    });
-}
+            const dayOfWeek = date.getDay();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            return scheduledActivities.filter(a => {
+                // Проверяем, активен ли период
+                if (a.endDate) {
+                    const end = new Date(a.endDate);
+                    end.setHours(0, 0, 0, 0);
+                    // Если дата ПОСЛЕ окончания периода - активность уже не актуальна
+                    if (date > end) return false;
+                }
                 // Проверяем день недели
                 if (!a.days || a.days.length === 0) return false;
                 return a.days.includes(String(dayOfWeek));
@@ -1714,10 +1720,10 @@ function getDayStatus(date) {
     today.setHours(0, 0, 0, 0);
     const isPast = date < today;
 
-    // 1. Если есть выполненные — зелёный (приоритет)
+    // 1. Если есть выполненные активности — всегда зелёный
     if (activities.length > 0) return 'workout';
 
-    // 2. Если нет запланированных на этот день — пусто
+    // 2. Если нет запланированных — пусто
     if (scheduled.length === 0) return 'empty';
 
     // 3. Если запланированные есть:
@@ -1726,7 +1732,7 @@ function getDayStatus(date) {
     if (isPast) return 'missed';
     return 'scheduled';
 }
-        
+
 // ===== ИСПРАВЛЕННАЯ ОТРИСОВКА КАЛЕНДАРЯ =====
 function renderMonthView() {
     const grid = document.getElementById('daysGrid');
@@ -1944,65 +1950,37 @@ function renderMonthView() {
         }
 
         function addActivityToDay(key, emoji, name, time, period, schedule, saveAsTemplate) {
-    if (!workouts[key]) workouts[key] = [];
-    const xpEarned = Math.floor(time / 5) + 5;
+            if (!workouts[key]) workouts[key] = [];
+            const xpEarned = Math.floor(time / 5) + 5;
 
-    if (saveAsTemplate) {
-        const existing = templates.find(t => t.name === name);
-        if (!existing) {
-            templates.push({
-                id: 'tpl_' + Date.now(),
-                name: name,
-                exercises: [{ name: name, metricType: 'time', target: time }],
-                xp: xpEarned
-            });
-            checkAchievements();
-        }
-    }
+            if (saveAsTemplate) {
+                const existing = templates.find(t => t.name === name);
+                if (!existing) {
+                    templates.push({
+                        id: 'tpl_' + Date.now(),
+                        name: name,
+                        exercises: [{ name: name, metricType: 'time', target: time }],
+                        xp: xpEarned
+                    });
+                    checkAchievements();
+                }
+            }
 
-    // Если есть расписание — добавляем в scheduledActivities
-    if (schedule.days && schedule.days.length > 0) {
-        const scheduleId = 'sch_' + Date.now();
-        const endDate = getEndDateFromPeriod(period); // <-- ЭТО ВАЖНО!
-        scheduledActivities.push({
-            id: scheduleId,
-            emoji: emoji || '📌',
-            name: name.trim(),
-            time: time,
-            xp: xpEarned,
-            period: period || 'forever',
-            days: schedule.days,
-            timeOfDay: schedule.time || '15:00',
-            endDate: endDate ? endDate.toISOString() : null // <-- ЭТО ВАЖНО!
-        });
-        workouts[key].push({
-            id: 'act_' + Date.now(),
-            emoji: emoji || '📌',
-            name: name.trim(),
-            time: time,
-            xp: xpEarned,
-            period: period || 'forever',
-            scheduleId: scheduleId
-        });
-        addXP(xpEarned);
-    } else {
-        workouts[key].push({
-            id: 'act_' + Date.now(),
-            emoji: emoji || '📌',
-            name: name.trim(),
-            time: time,
-            xp: xpEarned,
-            period: period || 'forever',
-            schedule: schedule || { days: [], time: '' }
-        });
-        addXP(xpEarned);
-    }
-
-    saveData();
-    renderCurrentView();
-    updateUI();
-    checkAchievements();
-}
+            // Если есть расписание — добавляем в scheduledActivities
+            if (schedule.days && schedule.days.length > 0) {
+                const scheduleId = 'sch_' + Date.now();
+                const endDate = getEndDateFromPeriod(period);
+                scheduledActivities.push({
+                    id: scheduleId,
+                    emoji: emoji || '📌',
+                    name: name.trim(),
+                    time: time,
+                    xp: xpEarned,
+                    period: period || 'forever',
+                    days: schedule.days,
+                    timeOfDay: schedule.time || '15:00',
+                    endDate: endDate ? endDate.toISOString() : null
+                });
                 // Добавляем в историю как выполненную
                 workouts[key].push({
                     id: 'act_' + Date.now(),
@@ -2919,16 +2897,23 @@ function renderMonthView() {
 
             openModal('selectTemplateModal');
         };
-
-// ===== КНОПКА СЕГОДНЯ =====
-document.getElementById('goTodayBtn').addEventListener('click', function() {
-    const d = new Date();
-    currentYear = d.getFullYear();
-    currentMonth = d.getMonth();
-    renderCurrentView();
-    closeAllModals();
-});
-        
+        // ===== КНОПКА СЕГОДНЯ =====
+        const todayBtn = document.getElementById('goTodayBtn');
+        if (todayBtn) {
+            todayBtn.addEventListener('click', function() {
+                const d = new Date();
+                currentYear = d.getFullYear();
+                currentMonth = d.getMonth();
+                // Переключаем на вид "Месяц", чтобы точно показать календарь
+                currentView = 'month';
+                // Активируем нужную вкладку
+                document.querySelectorAll('.view-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.view === 'month');
+                });
+                renderCurrentView();
+                closeAllModals();
+            });
+        }
         document.addEventListener('DOMContentLoaded', init);
     })();
 </script>
