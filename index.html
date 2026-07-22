@@ -2,49 +2,37 @@
 <html lang="ru" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkillQuest — RPG Планировщик</title>
-    
     <style>
         /* ============================================
-           ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+           ПЕРЕМЕННЫЕ ТЕМ
            ============================================ */
         :root {
-            --bg-primary: #f5f5f5;
-            --bg-secondary: #ffffff;
+            --bg: #f0f2f5;
+            --bg-card: #ffffff;
             --bg-header: #ffffff;
-            --text-primary: #1a1a1a;
-            --text-secondary: #555555;
-            --border-color: #e0e0e0;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --accent-color: #6c5ce7;
+            --text: #1a1a2e;
+            --text-secondary: #555;
+            --border: #ddd;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --accent: #6c5ce7;
             --accent-hover: #5a4bd1;
-            --card-bg: #ffffff;
-            --calendar-bg: #ffffff;
-            --calendar-today: #6c5ce7;
-            --calendar-today-text: #ffffff;
-            --calendar-other-month: #cccccc;
-            --success-color: #4CAF50;
-            --danger-color: #ff4444;
+            --success: #00b894;
+            --danger: #e17055;
+            --radius: 16px;
         }
 
         [data-theme="dark"] {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #16213e;
-            --bg-header: #0f3460;
-            --text-primary: #eaeaea;
-            --text-secondary: #aaaaaa;
-            --border-color: #2a2a4a;
-            --shadow-color: rgba(0, 0, 0, 0.5);
-            --accent-color: #a29bfe;
+            --bg: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-header: #16213e;
+            --text: #eaeaea;
+            --text-secondary: #aaa;
+            --border: #2a2a4a;
+            --shadow: 0 2px 12px rgba(0,0,0,0.4);
+            --accent: #a29bfe;
             --accent-hover: #8c85e6;
-            --card-bg: #16213e;
-            --calendar-bg: #1a1a2e;
-            --calendar-today: #a29bfe;
-            --calendar-today-text: #1a1a2e;
-            --calendar-other-month: #555555;
-            --success-color: #66bb6a;
-            --danger-color: #ef5350;
         }
 
         /* ============================================
@@ -58,11 +46,11 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background: var(--bg);
+            color: var(--text);
+            padding: 12px;
             min-height: 100vh;
-            padding: 0 16px 20px;
+            transition: background 0.3s, color 0.3s;
         }
 
         /* ============================================
@@ -72,12 +60,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
-            background-color: var(--bg-header);
-            border-radius: 16px;
-            box-shadow: 0 2px 12px var(--shadow-color);
+            background: var(--bg-header);
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             margin-bottom: 16px;
-            transition: background-color 0.3s ease;
             position: sticky;
             top: 8px;
             z-index: 10;
@@ -88,21 +75,15 @@
             border: none;
             font-size: 28px;
             cursor: pointer;
-            color: var(--text-primary);
+            color: var(--text);
             padding: 4px 8px;
-            transition: transform 0.2s;
-        }
-        .header__menu-btn:hover {
-            transform: scale(1.1);
         }
 
-        .header__user-card {
+        .header__user {
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
-            flex: 1;
-            justify-content: center;
         }
 
         .header__avatar {
@@ -110,49 +91,37 @@
             height: 44px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid var(--accent-color);
-            background-color: var(--bg-secondary);
+            border: 2px solid var(--accent);
+            background: var(--bg);
         }
 
-        .header__user-info {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.2;
-        }
-
-        .header__username {
+        .header__name {
             font-weight: 600;
-            font-size: 16px;
+            font-size: 15px;
         }
 
-        .header__level-bar {
-            display: flex;
-            gap: 12px;
+        .header__level {
             font-size: 13px;
             color: var(--text-secondary);
         }
 
         .header__level span {
-            color: var(--accent-color);
+            color: var(--accent);
             font-weight: 700;
         }
 
-        .header__theme-btn {
+        .header__theme {
             background: none;
             border: none;
             font-size: 24px;
             cursor: pointer;
             padding: 4px 8px;
-            transition: transform 0.3s;
-        }
-        .header__theme-btn:hover {
-            transform: rotate(30deg);
         }
 
         /* ============================================
            РЕЖИМЫ КАЛЕНДАРЯ
            ============================================ */
-        .calendar-mode {
+        .modes {
             display: flex;
             gap: 8px;
             margin-bottom: 12px;
@@ -160,11 +129,11 @@
             flex-wrap: wrap;
         }
 
-        .calendar-mode__btn {
+        .modes__btn {
             padding: 8px 20px;
-            border: 2px solid var(--border-color);
+            border: 2px solid var(--border);
             border-radius: 20px;
-            background: var(--bg-secondary);
+            background: var(--bg-card);
             color: var(--text-secondary);
             font-weight: 500;
             cursor: pointer;
@@ -172,45 +141,42 @@
             font-size: 14px;
         }
 
-        .calendar-mode__btn:hover {
-            background: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
+        .modes__btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
         }
 
-        .calendar-mode__btn--active {
-            background: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
+        .modes__btn--active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
         }
 
         /* ============================================
            КАЛЕНДАРЬ
            ============================================ */
-        .calendar-container {
-            background: var(--calendar-bg);
-            border-radius: 20px;
+        .calendar {
+            background: var(--bg-card);
+            border-radius: var(--radius);
             padding: 16px;
-            box-shadow: 0 4px 16px var(--shadow-color);
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
         }
 
-        .calendar-header {
+        .calendar__header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
-            padding: 0 4px;
         }
 
-        .calendar-header__title {
+        .calendar__title {
             font-size: 20px;
             font-weight: 600;
-            color: var(--text-primary);
         }
 
-        .calendar-header__nav {
+        .calendar__nav {
             background: none;
             border: none;
             font-size: 22px;
@@ -218,19 +184,19 @@
             color: var(--text-secondary);
             padding: 4px 12px;
             border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .calendar-header__nav:hover {
-            background: var(--border-color);
         }
 
-        .calendar-grid {
+        .calendar__nav:hover {
+            background: var(--border);
+        }
+
+        .calendar__grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 4px;
         }
 
-        .calendar-grid__weekday {
+        .calendar__weekday {
             text-align: center;
             font-weight: 600;
             font-size: 13px;
@@ -238,7 +204,7 @@
             padding: 6px 0;
         }
 
-        .calendar-day {
+        .calendar__day {
             aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
@@ -248,67 +214,49 @@
             font-weight: 500;
             cursor: pointer;
             background: transparent;
-            color: var(--text-primary);
+            color: var(--text);
             position: relative;
             transition: background 0.2s;
         }
 
-        .calendar-day:hover {
-            background: var(--border-color);
+        .calendar__day:hover {
+            background: var(--border);
         }
 
-        .calendar-day--today {
-            background: var(--calendar-today);
-            color: var(--calendar-today-text);
+        .calendar__day--today {
+            background: var(--accent);
+            color: #fff;
             font-weight: 700;
-            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
         }
 
-        .calendar-day--other-month {
-            color: var(--calendar-other-month);
+        .calendar__day--other {
+            color: var(--text-secondary);
+            opacity: 0.4;
         }
 
-        /* Маркеры задач на календаре */
-        .task-marker {
+        .calendar__marker {
             position: absolute;
             bottom: 2px;
             font-size: 12px;
         }
 
-        .task-marker--completed {
-            color: var(--success-color);
-        }
-
-        .task-marker--pending {
-            color: var(--accent-color);
-        }
-
         /* ============================================
-           ИНФОГРАФИКА ПРОДУКТИВНОСТИ
+           ПРОДУКТИВНОСТЬ
            ============================================ */
-        .productivity-section {
-            background: var(--card-bg);
-            border-radius: 20px;
+        .productivity {
+            background: var(--bg-card);
+            border-radius: var(--radius);
             padding: 16px;
-            box-shadow: 0 4px 16px var(--shadow-color);
-            transition: background-color 0.3s ease;
+            box-shadow: var(--shadow);
         }
 
         .productivity__title {
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text-primary);
+            margin-bottom: 8px;
         }
 
-        .productivity__chart {
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .productivity__placeholder {
+        .productivity__text {
             color: var(--text-secondary);
             font-size: 14px;
         }
@@ -332,9 +280,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0,0,0,0.4);
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s;
             pointer-events: none;
         }
 
@@ -344,9 +292,9 @@
             left: -280px;
             width: 280px;
             height: 100%;
-            background: var(--bg-secondary);
-            box-shadow: 4px 0 20px var(--shadow-color);
-            transition: left 0.3s ease;
+            background: var(--bg-card);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+            transition: left 0.3s;
             padding: 20px 0;
             pointer-events: auto;
             overflow-y: auto;
@@ -355,31 +303,28 @@
         .sidebar--open {
             pointer-events: auto;
         }
+
         .sidebar--open .sidebar__overlay {
             opacity: 1;
             pointer-events: auto;
         }
+
         .sidebar--open .sidebar__menu {
             left: 0;
         }
 
-        .sidebar__list {
-            list-style: none;
-            padding: 0 16px;
-        }
-
         .sidebar__item {
-            padding: 14px 16px;
+            padding: 14px 20px;
             font-size: 17px;
-            border-radius: 12px;
             cursor: pointer;
+            border-radius: 12px;
+            margin: 0 12px 4px;
             transition: background 0.2s;
-            color: var(--text-primary);
-            margin-bottom: 4px;
+            color: var(--text);
         }
 
         .sidebar__item:hover {
-            background: var(--border-color);
+            background: var(--border);
         }
 
         /* ============================================
@@ -392,38 +337,26 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.5);
             z-index: 200;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.2s ease;
         }
 
         .modal-overlay--open {
             display: flex;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
         .modal {
-            background: var(--bg-secondary);
-            padding: 30px;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px var(--shadow-color);
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: var(--radius);
             max-width: 92%;
-            width: 450px;
+            width: 440px;
             max-height: 85vh;
             overflow-y: auto;
             position: relative;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
         .modal__close {
@@ -435,172 +368,18 @@
             font-size: 28px;
             cursor: pointer;
             color: var(--text-secondary);
-            transition: transform 0.2s;
-        }
-        .modal__close:hover {
-            transform: rotate(90deg);
         }
 
         .modal__title {
             font-size: 22px;
             font-weight: 600;
             margin-bottom: 16px;
-            color: var(--text-primary);
+            color: var(--text);
         }
 
         .modal__content {
             color: var(--text-secondary);
             line-height: 1.6;
-        }
-
-        /* ============================================
-           ГАЛЕРЕЯ
-           ============================================ */
-        .gallery-item {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px var(--shadow-color);
-            transition: transform 0.2s;
-            position: relative;
-        }
-
-        .gallery-item:hover {
-            transform: scale(1.02);
-        }
-
-        .gallery-item__image {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            display: block;
-        }
-
-        .gallery-item__info {
-            padding: 10px;
-            position: relative;
-        }
-
-        .gallery-item__date {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .gallery-item__comment {
-            font-size: 14px;
-            color: var(--text-primary);
-            word-break: break-word;
-            padding-right: 32px;
-        }
-
-        .gallery-item__delete {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(255, 0, 0, 0.1);
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.2s;
-            color: var(--danger-color);
-        }
-
-        .gallery-item__delete:hover {
-            background: rgba(255, 0, 0, 0.2);
-            transform: scale(1.1);
-        }
-
-        .gallery-empty {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px 20px;
-            background: var(--bg-primary);
-            border-radius: 16px;
-        }
-
-        /* ============================================
-           ЗАДАЧИ
-           ============================================ */
-        .task-item {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 14px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--accent-color);
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .task-item:hover {
-            box-shadow: 0 2px 12px var(--shadow-color);
-        }
-
-        .task-item--completed {
-            border-left-color: var(--success-color);
-            opacity: 0.8;
-        }
-
-        .task-item__title {
-            font-weight: 600;
-            font-size: 16px;
-            color: var(--text-primary);
-        }
-
-        .task-item__description {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        .task-item__meta {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-        }
-
-        .task-item__actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-            margin-left: 12px;
-        }
-
-        .task-item__btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .task-item__btn--complete {
-            background: var(--accent-color);
-            color: white;
-        }
-
-        .task-item__btn--complete:hover {
-            background: var(--accent-hover);
-            transform: scale(1.05);
-        }
-
-        .task-item__btn--done {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .task-item__btn--delete {
-            background: rgba(255, 0, 0, 0.1);
-            color: var(--danger-color);
-            font-size: 16px;
-        }
-
-        .task-item__btn--delete:hover {
-            background: rgba(255, 0, 0, 0.2);
         }
 
         /* ============================================
@@ -614,90 +393,207 @@
             display: block;
             margin-bottom: 4px;
             font-weight: 500;
-            color: var(--text-primary);
+            color: var(--text);
         }
 
         .form-input {
             width: 100%;
-            padding: 10px;
-            border: 2px solid var(--border-color);
+            padding: 10px 12px;
+            border: 2px solid var(--border);
             border-radius: 10px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            background: var(--bg);
+            color: var(--text);
             font-size: 15px;
             transition: border-color 0.2s;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: var(--accent);
         }
 
         .form-btn {
             width: 100%;
-            padding: 14px;
-            background: var(--accent-color);
-            color: white;
+            padding: 12px;
+            background: var(--accent);
+            color: #fff;
             border: none;
             border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.2s;
         }
 
         .form-btn:hover {
             background: var(--accent-hover);
-            transform: scale(1.02);
         }
 
-        .schedule-checkboxes {
+        .checkbox-group {
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
         }
 
-        .schedule-checkboxes label {
+        .checkbox-group label {
             display: flex;
             align-items: center;
             gap: 4px;
             font-size: 14px;
-            color: var(--text-primary);
             cursor: pointer;
+            color: var(--text);
+        }
+
+        /* ============================================
+           ЗАДАЧИ
+           ============================================ */
+        .task-item {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .task-item--done {
+            border-left-color: var(--success);
+            opacity: 0.8;
+        }
+
+        .task-item__title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        .task-item__desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .task-item__meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .task-item__actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .task-item__btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .task-item__btn--complete {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .task-item__btn--complete:hover {
+            background: var(--accent-hover);
+        }
+
+        .task-item__btn--done {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .task-item__btn--delete {
+            background: rgba(225, 112, 85, 0.15);
+            color: var(--danger);
+        }
+
+        .task-item__btn--delete:hover {
+            background: rgba(225, 112, 85, 0.25);
+        }
+
+        /* ============================================
+           ГАЛЕРЕЯ
+           ============================================ */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .gallery-item {
+            background: var(--bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .gallery-item__img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item__info {
+            padding: 8px 10px 10px;
+        }
+
+        .gallery-item__date {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .gallery-item__comment {
+            font-size: 13px;
+            color: var(--text);
+            word-break: break-word;
+            padding-right: 28px;
+        }
+
+        .gallery-item__delete {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #fff;
+            transition: background 0.2s;
+        }
+
+        .gallery-item__delete:hover {
+            background: rgba(225, 112, 85, 0.8);
+        }
+
+        .gallery-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
         }
 
         /* ============================================
            АДАПТИВ
            ============================================ */
         @media (max-width: 480px) {
-            .header {
-                padding: 8px 12px;
-            }
-            .header__username {
-                font-size: 14px;
-            }
-            .header__level-bar {
-                font-size: 11px;
-                gap: 8px;
-            }
-            .calendar-day {
-                font-size: 14px;
-            }
-            .calendar-mode__btn {
-                padding: 6px 14px;
-                font-size: 12px;
-            }
-            .modal {
-                padding: 20px;
-                width: 95%;
-            }
-            .task-item {
-                padding: 12px;
-            }
-            .task-item__actions {
-                flex-direction: column;
-                gap: 4px;
-            }
+            .header__name { font-size: 14px; }
+            .header__level { font-size: 12px; }
+            .calendar__day { font-size: 14px; }
+            .modal { padding: 20px; }
         }
     </style>
 </head>
@@ -707,138 +603,108 @@
     ШАПКА
     ========================================== -->
     <header class="header">
-        <button class="header__menu-btn" id="menuToggle">☰</button>
+        <button class="header__menu-btn" id="menuBtn">☰</button>
 
-        <div class="header__user-card">
-            <img class="header__avatar" id="userAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236c5ce7'/%3E%3Ccircle cx='50' cy='35' r='20' fill='%23ffffff'/%3E%3Ccircle cx='35' cy='30' r='4' fill='%231a1a2e'/%3E%3Ccircle cx='65' cy='30' r='4' fill='%231a1a2e'/%3E%3C/svg%3E" alt="Аватар">
-            <div class="header__user-info">
-                <span class="header__username" id="userName">Игрок</span>
-                <div class="header__level-bar">
-                    <span class="header__level">Ур. <span id="userLevel">1</span></span>
-                    <span>Опыт: <span id="userExp">0</span></span>
-                </div>
+        <div class="header__user" id="userCard">
+            <img class="header__avatar" id="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236c5ce7'/%3E%3Ccircle cx='50' cy='35' r='20' fill='%23fff'/%3E%3Ccircle cx='35' cy='30' r='4' fill='%231a1a2e'/%3E%3Ccircle cx='65' cy='30' r='4' fill='%231a1a2e'/%3E%3C/svg%3E" alt="Аватар">
+            <div>
+                <div class="header__name" id="userName">Игрок</div>
+                <div class="header__level">Ур. <span id="userLevel">1</span> · Опыт: <span id="userExp">0</span></div>
             </div>
         </div>
 
-        <button class="header__theme-btn" id="themeToggle">🌙</button>
+        <button class="header__theme" id="themeBtn">🌙</button>
     </header>
 
     <!-- ==========================================
     ОСНОВНОЙ КОНТЕНТ
     ========================================== -->
-    <main class="main">
-        <!-- Кнопки режимов календаря -->
-        <div class="calendar-mode">
-            <button class="calendar-mode__btn" data-mode="day">День</button>
-            <button class="calendar-mode__btn" data-mode="week">Неделя</button>
-            <button class="calendar-mode__btn calendar-mode__btn--active" data-mode="month">Месяц</button>
-            <button class="calendar-mode__btn" data-mode="year">Год</button>
+    <main>
+        <!-- Режимы календаря -->
+        <div class="modes" id="modesContainer">
+            <button class="modes__btn" data-mode="day">День</button>
+            <button class="modes__btn" data-mode="week">Неделя</button>
+            <button class="modes__btn modes__btn--active" data-mode="month">Месяц</button>
+            <button class="modes__btn" data-mode="year">Год</button>
         </div>
 
         <!-- Календарь -->
-        <section class="calendar-container">
-            <div class="calendar-header">
-                <button class="calendar-header__nav" id="prevMonth">◀</button>
-                <h2 class="calendar-header__title" id="monthTitle">Январь 2026</h2>
-                <button class="calendar-header__nav" id="nextMonth">▶</button>
+        <section class="calendar" id="calendar">
+            <div class="calendar__header">
+                <button class="calendar__nav" id="prevMonth">◀</button>
+                <h2 class="calendar__title" id="monthTitle">Январь 2026</h2>
+                <button class="calendar__nav" id="nextMonth">▶</button>
             </div>
-            <div class="calendar-grid" id="calendarGrid">
-                <div class="calendar-grid__weekday">Пн</div>
-                <div class="calendar-grid__weekday">Вт</div>
-                <div class="calendar-grid__weekday">Ср</div>
-                <div class="calendar-grid__weekday">Чт</div>
-                <div class="calendar-grid__weekday">Пт</div>
-                <div class="calendar-grid__weekday">Сб</div>
-                <div class="calendar-grid__weekday">Вс</div>
+            <div class="calendar__grid" id="calendarGrid">
+                <div class="calendar__weekday">Пн</div>
+                <div class="calendar__weekday">Вт</div>
+                <div class="calendar__weekday">Ср</div>
+                <div class="calendar__weekday">Чт</div>
+                <div class="calendar__weekday">Пт</div>
+                <div class="calendar__weekday">Сб</div>
+                <div class="calendar__weekday">Вс</div>
             </div>
         </section>
 
-        <!-- Инфографика продуктивности -->
-        <section class="productivity-section">
-            <h3 class="productivity__title">📊 Продуктивность за неделю</h3>
-            <div class="productivity__chart">
-                <p class="productivity__placeholder" id="productivityPlaceholder">Выполнено 0 из 0 задач</p>
-            </div>
+        <!-- Продуктивность -->
+        <section class="productivity">
+            <div class="productivity__title">📊 Продуктивность за неделю</div>
+            <div class="productivity__text" id="productivityText">Выполнено 0 из 0 задач (0%)</div>
         </section>
     </main>
 
     <!-- ==========================================
-    САЙДБАР (МЕНЮ)
+    САЙДБАР
     ========================================== -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar__overlay" id="sidebarOverlay"></div>
         <nav class="sidebar__menu">
-            <ul class="sidebar__list">
-                <li class="sidebar__item" data-page="profile">👤 Профиль</li>
-                <li class="sidebar__item" data-page="tasks">📋 Задачи</li>
-                <li class="sidebar__item" data-page="gallery">🖼️ Галерея</li>
-                <li class="sidebar__item" data-page="settings">⚙️ Настройки</li>
-                <li class="sidebar__item" data-page="info">ℹ️ Информация</li>
-            </ul>
+            <div class="sidebar__item" data-page="profile">👤 Профиль</div>
+            <div class="sidebar__item" data-page="tasks">📋 Задачи</div>
+            <div class="sidebar__item" data-page="gallery">🖼️ Галерея</div>
+            <div class="sidebar__item" data-page="settings">⚙️ Настройки</div>
+            <div class="sidebar__item" data-page="info">ℹ️ Информация</div>
         </nav>
     </aside>
 
     <!-- ==========================================
     ОСНОВНОЕ МОДАЛЬНОЕ ОКНО
     ========================================== -->
-    <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-overlay" id="mainModal">
         <div class="modal">
             <button class="modal__close" id="modalClose">✕</button>
             <h2 class="modal__title" id="modalTitle">Заголовок</h2>
-            <div class="modal__content" id="modalContent">
-                <p>Содержимое модального окна</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==========================================
-    МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ ФОТО
-    ========================================== -->
-    <div class="modal-overlay" id="addPhotoOverlay">
-        <div class="modal">
-            <button class="modal__close" onclick="closeAddPhotoModal()">✕</button>
-            <h2 class="modal__title">📸 Добавить фото</h2>
-            <div class="modal__content">
-                <div class="form-group">
-                    <label class="form-label">Выберите фото:</label>
-                    <input type="file" id="photoFileInput" accept="image/*" class="form-input" style="padding: 10px; cursor: pointer;">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Комментарий:</label>
-                    <input type="text" id="photoCommentInput" placeholder="Например: Научился садиться на шпагат!" class="form-input">
-                </div>
-                <button onclick="handlePhotoUpload()" class="form-btn">✅ Сохранить</button>
-            </div>
+            <div class="modal__content" id="modalContent"></div>
         </div>
     </div>
 
     <!-- ==========================================
     МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ ЗАДАЧИ
     ========================================== -->
-    <div class="modal-overlay" id="addTaskOverlay">
+    <div class="modal-overlay" id="addTaskModal">
         <div class="modal">
-            <button class="modal__close" onclick="closeAddTaskModal()">✕</button>
+            <button class="modal__close" onclick="closeAddTask()">✕</button>
             <h2 class="modal__title">📝 Новая задача</h2>
             <div class="modal__content">
                 <div class="form-group">
                     <label class="form-label">Название *</label>
-                    <input type="text" id="taskTitle" placeholder="Например: Утренняя зарядка" class="form-input">
+                    <input class="form-input" id="taskTitle" placeholder="Утренняя зарядка">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Описание</label>
-                    <input type="text" id="taskDescription" placeholder="Краткое описание" class="form-input">
+                    <input class="form-input" id="taskDesc" placeholder="Краткое описание">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">⏱️ Длительность (минуты) *</label>
-                    <input type="number" id="taskDuration" value="30" min="1" class="form-input">
+                    <label class="form-label">⏱️ Длительность (мин) *</label>
+                    <input class="form-input" id="taskDuration" type="number" value="30" min="1">
                 </div>
                 <div class="form-group">
                     <label class="form-label">🕐 Время</label>
-                    <input type="time" id="taskTime" value="08:00" class="form-input">
+                    <input class="form-input" id="taskTime" type="time" value="08:00">
                 </div>
                 <div class="form-group">
                     <label class="form-label">📆 Дни недели</label>
-                    <div class="schedule-checkboxes" id="taskSchedule">
+                    <div class="checkbox-group" id="taskSchedule">
                         <label><input type="checkbox" value="0"> Вс</label>
                         <label><input type="checkbox" value="1" checked> Пн</label>
                         <label><input type="checkbox" value="2"> Вт</label>
@@ -850,13 +716,34 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">📅 Дата начала</label>
-                    <input type="date" id="taskStartDate" class="form-input">
+                    <input class="form-input" id="taskStart" type="date">
                 </div>
                 <div class="form-group">
                     <label class="form-label">📅 Дата окончания</label>
-                    <input type="date" id="taskEndDate" class="form-input">
+                    <input class="form-input" id="taskEnd" type="date">
                 </div>
-                <button onclick="handleAddTask()" class="form-btn">✅ Создать задачу</button>
+                <button class="form-btn" onclick="handleAddTask()">✅ Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+    МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ ФОТО
+    ========================================== -->
+    <div class="modal-overlay" id="addPhotoModal">
+        <div class="modal">
+            <button class="modal__close" onclick="closeAddPhoto()">✕</button>
+            <h2 class="modal__title">📸 Добавить фото</h2>
+            <div class="modal__content">
+                <div class="form-group">
+                    <label class="form-label">Выберите фото</label>
+                    <input class="form-input" id="photoInput" type="file" accept="image/*" style="padding:8px;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Комментарий</label>
+                    <input class="form-input" id="photoComment" placeholder="Научился садиться на шпагат!">
+                </div>
+                <button class="form-btn" onclick="handleAddPhoto()">✅ Сохранить</button>
             </div>
         </div>
     </div>
@@ -865,309 +752,172 @@
     JAVASCRIPT
     ========================================== -->
     <script>
-        /**
-         * ============================================
-         * SKILLQUEST — ПОЛНАЯ ЛОГИКА ПРИЛОЖЕНИЯ
-         * Версия: 1.1 (исправленная)
-         * Модули: Пользователь, Календарь, Задачи, Галерея
-         * ============================================
-         */
-
         // ============================================
-        // 1. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ
+        // 1. ПОЛЬЗОВАТЕЛЬ
         // ============================================
-        const userData = {
+        const user = {
             name: 'Игрок',
             level: 1,
             exp: 0,
-            avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%236c5ce7\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'20\' fill=\'%23ffffff\'/%3E%3Ccircle cx=\'35\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3Ccircle cx=\'65\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3C/svg%3E'
+            avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%236c5ce7\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'20\' fill=\'%23fff\'/%3E%3Ccircle cx=\'35\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3Ccircle cx=\'65\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3C/svg%3E'
         };
 
-        const STORAGE_KEY = 'skillquest_user';
-
-        function loadUserData() {
-            const saved = localStorage.getItem(STORAGE_KEY);
+        function loadUser() {
+            const saved = localStorage.getItem('user');
             if (saved) {
                 try {
-                    const parsed = JSON.parse(saved);
-                    Object.assign(userData, parsed);
-                } catch (e) {
-                    console.warn('Ошибка загрузки данных пользователя');
-                }
+                    Object.assign(user, JSON.parse(saved));
+                } catch (e) {}
             }
             updateUserUI();
         }
 
-        function saveUserData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+        function saveUser() {
+            localStorage.setItem('user', JSON.stringify(user));
         }
 
         function updateUserUI() {
-            document.getElementById('userName').textContent = userData.name;
-            document.getElementById('userLevel').textContent = userData.level;
-            document.getElementById('userExp').textContent = Math.round(userData.exp * 100) / 100;
-            document.getElementById('userAvatar').src = userData.avatar;
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userLevel').textContent = user.level;
+            document.getElementById('userExp').textContent = Math.round(user.exp * 100) / 100;
+            document.getElementById('avatar').src = user.avatar;
         }
 
         // ============================================
-        // 2. ГАЛЕРЕЯ
-        // ============================================
-        let galleryItems = [];
-        const GALLERY_STORAGE_KEY = 'skillquest_gallery';
-
-        function loadGallery() {
-            const saved = localStorage.getItem(GALLERY_STORAGE_KEY);
-            if (saved) {
-                try {
-                    galleryItems = JSON.parse(saved);
-                } catch (e) {
-                    console.warn('Ошибка загрузки галереи');
-                    galleryItems = [];
-                }
-            }
-            if (galleryItems.length === 0) {
-                galleryItems = [{
-                    id: Date.now() + 1,
-                    image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%236c5ce7\'/%3E%3Ctext x=\'50\' y=\'120\' font-size=\'40\' fill=\'white\'%3E🏆%3C/text%3E%3C/svg%3E',
-                    date: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0],
-                    comment: 'Первое достижение! Научился делать планку 1 минуту 💪'
-                }, {
-                    id: Date.now() + 2,
-                    image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23a29bfe\'/%3E%3Ctext x=\'50\' y=\'120\' font-size=\'40\' fill=\'white\'%3E📚%3C/text%3E%3C/svg%3E',
-                    date: new Date(Date.now() - 86400000 * 5).toISOString().split('T')[0],
-                    comment: 'Прочитал 50 страниц за день! 📖'
-                }];
-                saveGallery();
-            }
-        }
-
-        function saveGallery() {
-            localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(galleryItems));
-        }
-
-        function addGalleryItem(imageData, comment) {
-            const newItem = {
-                id: Date.now(),
-                image: imageData,
-                date: new Date().toISOString().split('T')[0],
-                comment: comment || 'Без комментария'
-            };
-            galleryItems.unshift(newItem);
-            saveGallery();
-            renderGallery();
-        }
-
-        function deleteGalleryItem(id) {
-            if (confirm('Удалить это фото?')) {
-                galleryItems = galleryItems.filter(item => item.id !== id);
-                saveGallery();
-                renderGallery();
-            }
-        }
-
-        function renderGallery() {
-            const container = document.getElementById('galleryContainer');
-            if (!container) return;
-
-            if (galleryItems.length === 0) {
-                container.innerHTML = `
-                    <div class="gallery-empty">
-                        <p style="font-size: 48px; margin-bottom: 12px;">🖼️</p>
-                        <p style="color: var(--text-secondary);">Пока нет фотографий</p>
-                        <p style="color: var(--text-secondary); font-size: 14px;">Добавь своё первое достижение!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            galleryItems.forEach(item => {
-                html += `
-                    <div class="gallery-item" data-id="${item.id}">
-                        <img class="gallery-item__image" src="${item.image}" alt="${item.comment}">
-                        <div class="gallery-item__info">
-                            <div class="gallery-item__date">📅 ${item.date}</div>
-                            <div class="gallery-item__comment">${item.comment}</div>
-                            <button class="gallery-item__delete" onclick="deleteGalleryItem(${item.id})">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        // ============================================
-        // 3. ЗАДАЧИ
+        // 2. ЗАДАЧИ
         // ============================================
         let tasks = [];
-        const TASKS_STORAGE_KEY = 'skillquest_tasks';
 
         function loadTasks() {
-            const saved = localStorage.getItem(TASKS_STORAGE_KEY);
+            const saved = localStorage.getItem('tasks');
             if (saved) {
                 try {
                     tasks = JSON.parse(saved);
-                } catch (e) {
-                    console.warn('Ошибка загрузки задач');
-                    tasks = [];
-                }
+                } catch (e) {}
             }
             if (tasks.length === 0) {
-                const today = new Date();
-                const todayStr = today.toISOString().split('T')[0];
+                const today = new Date().toISOString().split('T')[0];
                 tasks = [{
-                    id: Date.now() + 1,
+                    id: Date.now(),
                     title: '🏋️ Тренировка',
-                    description: 'Сделать 100 приседаний и 50 отжиманий',
+                    desc: '100 приседаний, 50 отжиманий',
                     duration: 30,
                     schedule: [1, 3, 5],
                     time: '08:00',
-                    startDate: todayStr,
-                    endDate: new Date(today.getTime() + 7 * 86400000).toISOString().split('T')[0],
-                    completed: false,
-                    completedDates: []
+                    start: today,
+                    end: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+                    done: []
                 }];
                 saveTasks();
             }
         }
 
         function saveTasks() {
-            localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
         }
 
-        function addTask(title, description, duration, schedule, time, startDate, endDate) {
-            const newTask = {
+        function getTasksForDate(date) {
+            const d = new Date(date + 'T00:00:00');
+            const day = d.getDay();
+            return tasks.filter(t => {
+                if (date < t.start || date > t.end) return false;
+                return t.schedule.includes(day);
+            });
+        }
+
+        function addTask(title, desc, duration, schedule, time, start, end) {
+            tasks.push({
                 id: Date.now(),
                 title: title || 'Без названия',
-                description: description || '',
+                desc: desc || '',
                 duration: parseInt(duration) || 30,
                 schedule: schedule || [],
                 time: time || '12:00',
-                startDate: startDate || new Date().toISOString().split('T')[0],
-                endDate: endDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-                completed: false,
-                completedDates: []
-            };
-            tasks.push(newTask);
+                start: start || new Date().toISOString().split('T')[0],
+                end: end || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+                done: []
+            });
             saveTasks();
-            renderTasks();
-            renderCalendarWithTasks();
-            updateProductivity();
+            renderAll();
         }
 
-        function completeTask(taskId, dateStr) {
-            const task = tasks.find(t => t.id === taskId);
+        function completeTask(id, date) {
+            const task = tasks.find(t => t.id === id);
             if (!task) return;
-
-            if (task.completedDates.includes(dateStr)) {
-                alert('✅ Задача уже выполнена на эту дату!');
+            if (task.done.includes(date)) {
+                alert('✅ Уже выполнено!');
                 return;
             }
+            task.done.push(date);
 
-            task.completedDates.push(dateStr);
-
-            const today = new Date().toISOString().split('T')[0];
-            if (dateStr === today) {
-                task.completed = true;
+            const exp = Math.round(task.duration * 0.01 * 100) / 100;
+            user.exp += exp;
+            while (user.exp >= user.level) {
+                user.exp -= user.level;
+                user.level++;
             }
-
-            const expEarned = Math.round(task.duration * 0.01 * 100) / 100;
-            userData.exp += expEarned;
-
-            while (userData.exp >= userData.level) {
-                userData.exp -= userData.level;
-                userData.level++;
-            }
-
-            saveUserData();
+            saveUser();
             saveTasks();
             updateUserUI();
-            renderTasks();
-            renderCalendarWithTasks();
-            updateProductivity();
-
-            alert(`🎉 Задача выполнена! +${expEarned} опыта. Уровень: ${userData.level}`);
+            renderAll();
+            alert('🎉 +' + exp + ' опыта! Уровень: ' + user.level);
         }
 
-        function deleteTask(taskId) {
-            if (confirm('Удалить задачу?')) {
-                tasks = tasks.filter(t => t.id !== taskId);
-                saveTasks();
-                renderTasks();
-                renderCalendarWithTasks();
-                updateProductivity();
+        function deleteTask(id) {
+            if (!confirm('Удалить задачу?')) return;
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderAll();
+        }
+
+        // ============================================
+        // 3. ГАЛЕРЕЯ
+        // ============================================
+        let gallery = [];
+
+        function loadGallery() {
+            const saved = localStorage.getItem('gallery');
+            if (saved) {
+                try {
+                    gallery = JSON.parse(saved);
+                } catch (e) {}
+            }
+            if (gallery.length === 0) {
+                gallery = [{
+                    id: Date.now() + 1,
+                    image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%236c5ce7\'/%3E%3Ctext x=\'60\' y=\'120\' font-size=\'50\' fill=\'%23fff\'%3E🏆%3C/text%3E%3C/svg%3E',
+                    date: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0],
+                    comment: 'Первое достижение! Планка 1 минута 💪'
+                }, {
+                    id: Date.now() + 2,
+                    image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23a29bfe\'/%3E%3Ctext x=\'60\' y=\'120\' font-size=\'50\' fill=\'%23fff\'%3E📚%3C/text%3E%3C/svg%3E',
+                    date: new Date(Date.now() - 86400000 * 5).toISOString().split('T')[0],
+                    comment: 'Прочитал 50 страниц за день!'
+                }];
+                saveGallery();
             }
         }
 
-        function isTaskScheduledForDate(task, dateStr) {
-            const date = new Date(dateStr + 'T00:00:00');
-            const dayOfWeek = date.getDay();
-
-            if (dateStr < task.startDate || dateStr > task.endDate) return false;
-            return task.schedule.includes(dayOfWeek);
+        function saveGallery() {
+            localStorage.setItem('gallery', JSON.stringify(gallery));
         }
 
-        function getTasksForDate(dateStr) {
-            return tasks.filter(task => isTaskScheduledForDate(task, dateStr));
-        }
-
-        function renderTasks() {
-            const container = document.getElementById('tasksContainer');
-            if (!container) return;
-
-            if (tasks.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 30px 0; color: var(--text-secondary);">
-                        <p style="font-size: 48px; margin-bottom: 12px;">📋</p>
-                        <p>Нет задач</p>
-                        <p style="font-size: 14px;">Добавь свою первую задачу!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            const today = new Date().toISOString().split('T')[0];
-            const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-
-            tasks.forEach(task => {
-                const isCompletedToday = task.completedDates.includes(today);
-                const completionCount = task.completedDates.length;
-                const scheduleStr = task.schedule.map(d => dayNames[d]).join(', ');
-
-                html += `
-                    <div class="task-item ${isCompletedToday ? 'task-item--completed' : ''}">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div style="flex: 1;">
-                                <div class="task-item__title">
-                                    ${task.title}
-                                    ${isCompletedToday ? ' ✅' : ''}
-                                </div>
-                                <div class="task-item__description">${task.description}</div>
-                                <div class="task-item__meta">
-                                    ⏱️ ${task.duration} мин • 🕐 ${task.time} • 📅 ${task.startDate} → ${task.endDate}
-                                </div>
-                                <div class="task-item__meta">
-                                    📆 ${scheduleStr} • Выполнено: ${completionCount} раз
-                                </div>
-                            </div>
-                            <div class="task-item__actions">
-                                ${!isCompletedToday ? `
-                                    <button class="task-item__btn task-item__btn--complete" onclick="completeTask(${task.id}, '${today}')">
-                                        ✅ Выполнить
-                                    </button>
-                                ` : `
-                                    <span class="task-item__btn task-item__btn--done">✅ Готово</span>
-                                `}
-                                <button class="task-item__btn task-item__btn--delete" onclick="deleteTask(${task.id})">🗑️</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+        function addGalleryItem(image, comment) {
+            gallery.unshift({
+                id: Date.now(),
+                image: image,
+                date: new Date().toISOString().split('T')[0],
+                comment: comment || 'Без комментария'
             });
+            saveGallery();
+            renderGallery();
+        }
 
-            container.innerHTML = html;
+        function deleteGalleryItem(id) {
+            if (!confirm('Удалить фото?')) return;
+            gallery = gallery.filter(g => g.id !== id);
+            saveGallery();
+            renderGallery();
         }
 
         // ============================================
@@ -1175,451 +925,509 @@
         // ============================================
         let currentDate = new Date();
         let currentMode = 'month';
-        const calendarGrid = document.getElementById('calendarGrid');
-        const monthTitle = document.getElementById('monthTitle');
 
-        function renderMonthCalendar(year, month) {
-            const weekdays = calendarGrid.querySelectorAll('.calendar-grid__weekday');
-            calendarGrid.innerHTML = '';
-            weekdays.forEach(el => calendarGrid.appendChild(el));
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const grid = document.getElementById('calendarGrid');
+
+            // Сохраняем заголовки
+            const weekdays = grid.querySelectorAll('.calendar__weekday');
+            grid.innerHTML = '';
+            weekdays.forEach(el => grid.appendChild(el));
 
             const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const daysInMonth = lastDay.getDate();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            let offset = firstDay.getDay() - 1;
+            if (offset < 0) offset = 6;
 
-            let startOffset = firstDay.getDay() - 1;
-            if (startOffset < 0) startOffset = 6;
-
-            for (let i = 0; i < startOffset; i++) {
+            // Пустые ячейки
+            for (let i = 0; i < offset; i++) {
                 const empty = document.createElement('div');
-                empty.className = 'calendar-day calendar-day--other-month';
-                calendarGrid.appendChild(empty);
+                empty.className = 'calendar__day calendar__day--other';
+                grid.appendChild(empty);
             }
 
             const today = new Date();
-            const todayDate = today.getDate();
-            const todayMonth = today.getMonth();
-            const todayYear = today.getFullYear();
+            const todayStr = today.toISOString().split('T')[0];
 
             for (let d = 1; d <= daysInMonth; d++) {
-                const dayEl = document.createElement('div');
-                dayEl.className = 'calendar-day';
-                dayEl.textContent = d;
+                const day = document.createElement('div');
+                day.className = 'calendar__day';
+                day.textContent = d;
 
-                if (d === todayDate && month === todayMonth && year === todayYear) {
-                    dayEl.classList.add('calendar-day--today');
+                const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+
+                // Сегодня
+                if (dateStr === todayStr) {
+                    day.classList.add('calendar__day--today');
                 }
 
-                calendarGrid.appendChild(dayEl);
-            }
-
-            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-            ];
-            monthTitle.textContent = `${monthNames[month]} ${year}`;
-
-            renderCalendarWithTasks();
-            updateProductivity();
-        }
-
-        function renderCalendarWithTasks() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const dayCells = calendarGrid.querySelectorAll('.calendar-day:not(.calendar-day--other-month)');
-
-            dayCells.forEach(cell => {
-                const dayNum = parseInt(cell.textContent);
-                const dateStr =
-                    `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-
-                const oldMarkers = cell.querySelectorAll('.task-marker');
-                oldMarkers.forEach(m => m.remove());
-
+                // Маркеры задач
                 const dayTasks = getTasksForDate(dateStr);
                 if (dayTasks.length > 0) {
-                    const allCompleted = dayTasks.every(task => task.completedDates.includes(dateStr));
-
-                    const marker = document.createElement('div');
-                    marker.className = 'task-marker';
-                    marker.textContent = allCompleted ? '✅' : '●';
-                    marker.style.color = allCompleted ? 'var(--success-color)' : 'var(--accent-color)';
-                    cell.appendChild(marker);
+                    const allDone = dayTasks.every(t => t.done.includes(dateStr));
+                    const marker = document.createElement('span');
+                    marker.className = 'calendar__marker';
+                    marker.textContent = allDone ? '✅' : '●';
+                    marker.style.color = allDone ? 'var(--success)' : 'var(--accent)';
+                    day.appendChild(marker);
                 }
-            });
+
+                // Клик по дню — показываем задачи
+                day.addEventListener('click', function() {
+                    const tasks = getTasksForDate(dateStr);
+                    if (tasks.length === 0) {
+                        alert('📭 На этот день нет задач');
+                        return;
+                    }
+                    let msg = '📋 Задачи на ' + dateStr + ':\n\n';
+                    tasks.forEach(t => {
+                        const done = t.done.includes(dateStr) ? '✅' : '⬜';
+                        msg += done + ' ' + t.title + ' (' + t.duration + ' мин)\n';
+                    });
+                    alert(msg);
+                });
+
+                grid.appendChild(day);
+            }
+
+            // Заголовок месяца
+            const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+            ];
+            document.getElementById('monthTitle').textContent = months[month] + ' ' + year;
+
+            updateProductivity();
         }
 
         function changeMonth(delta) {
             currentDate.setMonth(currentDate.getMonth() + delta);
-            renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
+            renderCalendar();
         }
 
         // ============================================
         // 5. ПРОДУКТИВНОСТЬ
         // ============================================
         function updateProductivity() {
-            const placeholder = document.getElementById('productivityPlaceholder');
-            if (!placeholder) return;
-
             const today = new Date();
             const weekStart = new Date(today);
             weekStart.setDate(today.getDate() - today.getDay());
 
-            let totalTasks = 0;
-            let completedTasks = 0;
+            let total = 0,
+                done = 0;
 
             for (let i = 0; i < 7; i++) {
                 const date = new Date(weekStart);
                 date.setDate(weekStart.getDate() + i);
                 const dateStr = date.toISOString().split('T')[0];
-
                 const dayTasks = getTasksForDate(dateStr);
-                totalTasks += dayTasks.length;
-
-                dayTasks.forEach(task => {
-                    if (task.completedDates.includes(dateStr)) {
-                        completedTasks++;
-                    }
+                total += dayTasks.length;
+                dayTasks.forEach(t => {
+                    if (t.done.includes(dateStr)) done++;
                 });
             }
 
-            const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-            placeholder.textContent = `📊 Выполнено ${completedTasks} из ${totalTasks} задач (${percent}%)`;
+            const pct = total > 0 ? Math.round(done / total * 100) : 0;
+            document.getElementById('productivityText').textContent =
+                'Выполнено ' + done + ' из ' + total + ' задач (' + pct + '%)';
         }
 
         // ============================================
-        // 6. ТЕМА
+        // 6. ОТРИСОВКА ЗАДАЧ И ГАЛЕРЕИ
         // ============================================
-        const themeToggle = document.getElementById('themeToggle');
-        const htmlElement = document.documentElement;
-        let currentTheme = localStorage.getItem('skillquest_theme') || 'light';
+        function renderTasks() {
+            const container = document.getElementById('tasksContainer');
+            if (!container) return;
 
-        function applyTheme(theme) {
-            htmlElement.setAttribute('data-theme', theme);
-            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
-            localStorage.setItem('skillquest_theme', theme);
-            currentTheme = theme;
-        }
-
-        themeToggle.addEventListener('click', () => {
-            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
-        });
-
-        // ============================================
-        // 7. САЙДБАР
-        // ============================================
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-
-        function openSidebar() {
-            sidebar.classList.add('sidebar--open');
-        }
-
-        function closeSidebar() {
-            sidebar.classList.remove('sidebar--open');
-        }
-
-        menuToggle.addEventListener('click', openSidebar);
-        overlay.addEventListener('click', closeSidebar);
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeSidebar();
-        });
-
-        // ============================================
-        // 8. МОДАЛЬНЫЕ ОКНА (ОСНОВНЫЕ)
-        // ============================================
-        const modalOverlay = document.getElementById('modalOverlay');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalContent = document.getElementById('modalContent');
-        const modalClose = document.getElementById('modalClose');
-
-        function openModal(title, htmlContent) {
-            modalTitle.textContent = title;
-            modalContent.innerHTML = htmlContent;
-            modalOverlay.classList.add('modal-overlay--open');
-        }
-
-        function closeModal() {
-            modalOverlay.classList.remove('modal-overlay--open');
-        }
-
-        modalClose.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) closeModal();
-        });
-
-        // ============================================
-        // 9. МОДАЛЬНЫЕ ОКНА (ДОБАВЛЕНИЕ ФОТО)
-        // ============================================
-        function openAddPhotoModal() {
-            document.getElementById('addPhotoOverlay').classList.add('modal-overlay--open');
-        }
-
-        function closeAddPhotoModal() {
-            document.getElementById('addPhotoOverlay').classList.remove('modal-overlay--open');
-        }
-
-        function handlePhotoUpload() {
-            const fileInput = document.getElementById('photoFileInput');
-            const commentInput = document.getElementById('photoCommentInput');
-            const file = fileInput.files[0];
-
-            if (!file) {
-                alert('Пожалуйста, выберите фото');
+            if (tasks.length === 0) {
+                container.innerHTML =
+                    '<div style="text-align:center;padding:30px 0;color:var(--text-secondary);">📋 Нет задач</div>';
                 return;
             }
 
+            const today = new Date().toISOString().split('T')[0];
+            const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+            let html = '';
+
+            tasks.forEach(t => {
+                const doneToday = t.done.includes(today);
+                const schedule = t.schedule.map(d => days[d]).join(', ');
+
+                html += `
+                    <div class="task-item ${doneToday ? 'task-item--done' : ''}">
+                        <div class="task-item__title">${t.title} ${doneToday ? '✅' : ''}</div>
+                        <div class="task-item__desc">${t.desc}</div>
+                        <div class="task-item__meta">
+                            ⏱️ ${t.duration} мин · 🕐 ${t.time} · 📅 ${t.start} → ${t.end}
+                        </div>
+                        <div class="task-item__meta">📆 ${schedule} · Выполнено: ${t.done.length} раз</div>
+                        <div class="task-item__actions">
+                            ${!doneToday ? `
+                                <button class="task-item__btn task-item__btn--complete" onclick="completeTask(${t.id}, '${today}')">
+                                    ✅ Выполнить
+                                </button>
+                            ` : `
+                                <span class="task-item__btn task-item__btn--done">✅ Готово</span>
+                            `}
+                            <button class="task-item__btn task-item__btn--delete" onclick="deleteTask(${t.id})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderGallery() {
+            const container = document.getElementById('galleryContainer');
+            if (!container) return;
+
+            if (gallery.length === 0) {
+                container.innerHTML = `
+                    <div class="gallery-empty">
+                        <div style="font-size:48px;margin-bottom:8px;">🖼️</div>
+                        <div>Нет фотографий</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            gallery.forEach(g => {
+                html += `
+                    <div class="gallery-item">
+                        <img class="gallery-item__img" src="${g.image}" alt="${g.comment}">
+                        <button class="gallery-item__delete" onclick="deleteGalleryItem(${g.id})">✕</button>
+                        <div class="gallery-item__info">
+                            <div class="gallery-item__date">📅 ${g.date}</div>
+                            <div class="gallery-item__comment">${g.comment}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderAll() {
+            renderCalendar();
+            const title = document.getElementById('modalTitle').textContent;
+            if (title.includes('Задачи')) {
+                renderTasks();
+            }
+            if (title.includes('Галерея')) {
+                renderGallery();
+            }
+        }
+
+        // ============================================
+        // 7. МОДАЛЬНЫЕ ОКНА
+        // ============================================
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('mainModal').classList.add('modal-overlay--open');
+        }
+
+        function closeModal() {
+            document.getElementById('mainModal').classList.remove('modal-overlay--open');
+        }
+
+        // ============================================
+        // 8. ДОБАВЛЕНИЕ ЗАДАЧИ
+        // ============================================
+        function openAddTask() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('taskStart').value = today;
+            document.getElementById('taskEnd').value = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+            document.getElementById('addTaskModal').classList.add('modal-overlay--open');
+        }
+
+        function closeAddTask() {
+            document.getElementById('addTaskModal').classList.remove('modal-overlay--open');
+        }
+
+        function handleAddTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            const desc = document.getElementById('taskDesc').value.trim();
+            const duration = document.getElementById('taskDuration').value;
+            const time = document.getElementById('taskTime').value;
+            const start = document.getElementById('taskStart').value;
+            const end = document.getElementById('taskEnd').value;
+
+            if (!title) { alert('Введите название'); return; }
+            if (!duration || duration < 1) { alert('Длительность должна быть > 0'); return; }
+
+            const checks = document.querySelectorAll('#taskSchedule input[type="checkbox"]');
+            const schedule = [];
+            checks.forEach(cb => { if (cb.checked) schedule.push(parseInt(cb.value)); });
+            if (schedule.length === 0) { alert('Выберите хотя бы один день'); return; }
+
+            addTask(title, desc, duration, schedule, time, start, end);
+            closeAddTask();
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDesc').value = '';
+
+            // Обновляем модальное окно задач, если открыто
+            if (document.getElementById('modalTitle').textContent.includes('Задачи')) {
+                openModal('📋 Задачи', getTasksHTML());
+                renderTasks();
+            }
+            alert('✅ Задача создана!');
+        }
+
+        function getTasksHTML() {
+            return `
+                <div style="margin-bottom:16px;">
+                    <button class="form-btn" onclick="openAddTask()">➕ Добавить задачу</button>
+                </div>
+                <div id="tasksContainer"></div>
+            `;
+        }
+
+        // ============================================
+        // 9. ДОБАВЛЕНИЕ ФОТО
+        // ============================================
+        function openAddPhoto() {
+            document.getElementById('addPhotoModal').classList.add('modal-overlay--open');
+        }
+
+        function closeAddPhoto() {
+            document.getElementById('addPhotoModal').classList.remove('modal-overlay--open');
+        }
+
+        function handleAddPhoto() {
+            const input = document.getElementById('photoInput');
+            const comment = document.getElementById('photoComment').value.trim();
+
+            if (!input.files || !input.files[0]) {
+                alert('Выберите фото');
+                return;
+            }
+
+            const file = input.files[0];
             if (!file.type.startsWith('image/')) {
-                alert('Пожалуйста, выберите изображение');
+                alert('Выберите изображение');
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const imageData = e.target.result;
-                const comment = commentInput.value.trim() || 'Без комментария';
+                addGalleryItem(e.target.result, comment || 'Без комментария');
+                closeAddPhoto();
+                input.value = '';
+                document.getElementById('photoComment').value = '';
 
-                addGalleryItem(imageData, comment);
-                closeAddPhotoModal();
-
-                fileInput.value = '';
-                commentInput.value = '';
-
-                // Обновляем модальное окно галереи
-                const currentTitle = modalTitle.textContent;
-                if (currentTitle.includes('Галерея')) {
-                    openModal('🖼️ Галерея', menuPages.gallery.content);
+                if (document.getElementById('modalTitle').textContent.includes('Галерея')) {
+                    openModal('🖼️ Галерея', getGalleryHTML());
                     renderGallery();
                 }
             };
             reader.readAsDataURL(file);
         }
 
-        // ============================================
-        // 10. МОДАЛЬНЫЕ ОКНА (ДОБАВЛЕНИЕ ЗАДАЧИ)
-        // ============================================
-        function openAddTaskModal() {
-            const today = new Date().toISOString().split('T')[0];
-            const future = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
-            document.getElementById('taskStartDate').value = today;
-            document.getElementById('taskEndDate').value = future;
-
-            document.getElementById('addTaskOverlay').classList.add('modal-overlay--open');
-        }
-
-        function closeAddTaskModal() {
-            document.getElementById('addTaskOverlay').classList.remove('modal-overlay--open');
-        }
-
-        function handleAddTask() {
-            const title = document.getElementById('taskTitle').value.trim();
-            const description = document.getElementById('taskDescription').value.trim();
-            const duration = document.getElementById('taskDuration').value;
-            const time = document.getElementById('taskTime').value;
-            const startDate = document.getElementById('taskStartDate').value;
-            const endDate = document.getElementById('taskEndDate').value;
-
-            if (!title) {
-                alert('Пожалуйста, введите название задачи');
-                return;
-            }
-            if (!duration || duration < 1) {
-                alert('Длительность должна быть больше 0');
-                return;
-            }
-
-            const scheduleCheckboxes = document.querySelectorAll('#taskSchedule input[type="checkbox"]');
-            const schedule = [];
-            scheduleCheckboxes.forEach(cb => {
-                if (cb.checked) {
-                    schedule.push(parseInt(cb.value));
-                }
-            });
-            if (schedule.length === 0) {
-                alert('Выберите хотя бы один день недели');
-                return;
-            }
-
-            addTask(title, description, duration, schedule, time, startDate, endDate);
-            closeAddTaskModal();
-
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDescription').value = '';
-
-            // Обновляем модальное окно задач
-            const currentTitle = modalTitle.textContent;
-            if (currentTitle.includes('Задачи')) {
-                openModal('📋 Задачи', menuPages.tasks.content);
-                renderTasks();
-            }
-
-            alert('✅ Задача создана!');
+        function getGalleryHTML() {
+            return `
+                <div style="margin-bottom:16px;">
+                    <button class="form-btn" onclick="openAddPhoto()">➕ Добавить фото</button>
+                </div>
+                <div id="galleryContainer" class="gallery-grid"></div>
+            `;
         }
 
         // ============================================
-        // 11. ПУНКТЫ МЕНЮ
+        // 10. ПУНКТЫ МЕНЮ
         // ============================================
-        const menuPages = {
-            profile: {
-                title: '👤 Профиль',
-                content: `
-                    <p><strong>Имя:</strong> <span id="profileName">${userData.name}</span></p>
-                    <p><strong>Уровень:</strong> ${userData.level}</p>
-                    <p><strong>Опыт:</strong> ${Math.round(userData.exp * 100) / 100}</p>
-                    <hr style="margin: 16px 0; border-color: var(--border-color);">
-                    <p style="color: var(--text-secondary);">Здесь будет форма редактирования профиля, загрузка аватара, ИМТ и статистика.</p>
-                    <button onclick="addExp(10)" style="margin-top:12px; padding:10px 20px; background:var(--accent-color); color:white; border:none; border-radius:12px; cursor:pointer;">
-                        +10 опыта (тест)
-                    </button>
-                `
-            },
-            tasks: {
-                title: '📋 Задачи',
-                content: `
-                    <div style="margin-bottom: 16px;">
-                        <button onclick="openAddTaskModal()" class="form-btn">➕ Добавить задачу</button>
-                    </div>
-                    <div id="tasksContainer"></div>
-                `
-            },
-            gallery: {
-                title: '🖼️ Галерея',
-                content: `
-                    <div style="margin-bottom: 16px;">
-                        <button onclick="openAddPhotoModal()" class="form-btn">➕ Добавить фото</button>
-                    </div>
-                    <div id="galleryContainer" style="
-                        display: grid;
-                        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                        gap: 12px;
-                        max-height: 400px;
-                        overflow-y: auto;
-                        padding: 4px;
-                    "></div>
-                `
-            },
-            settings: {
-                title: '⚙️ Настройки',
-                content: `
-                    <p><strong>Тема:</strong> ${currentTheme === 'light' ? 'Светлая' : 'Тёмная'}</p>
-                    <p style="color:var(--text-secondary); margin-top:12px;">
-                        🔄 Синхронизация с трекерами активности (в планах)<br>
-                        📦 Импорт/экспорт данных
-                    </p>
-                    <hr style="margin:16px 0; border-color:var(--border-color);">
-                    <p style="color:var(--text-secondary); font-size:14px;">Сделано с ❤️ разработчиками Дэн и AI</p>
-                `
-            },
-            info: {
-                title: 'ℹ️ Информация',
-                content: `
-                    <h3 style="margin-bottom:8px;">🎮 RPG Система</h3>
-                    <p style="color:var(--text-secondary);">
-                        <strong>Опыт:</strong> 1 минута задачи = 0.01 опыта<br>
-                        <strong>Уровни:</strong> для уровня N нужно N опыта<br>
-                        <strong>Достижения:</strong> будут добавлены позже
-                    </p>
-                    <p style="margin-top:12px; color:var(--text-secondary);">
-                        Выполняй задачи, прокачивай навыки и становись лучше каждый день! 💪
-                    </p>
-                `
-            }
-        };
+        function openProfile() {
+            openModal('👤 Профиль', `
+                <p><strong>Имя:</strong> ${user.name}</p>
+                <p><strong>Уровень:</strong> ${user.level}</p>
+                <p><strong>Опыт:</strong> ${Math.round(user.exp * 100) / 100}</p>
+                <hr style="margin:16px 0;border-color:var(--border);">
+                <p style="color:var(--text-secondary);">Редактирование профиля в разработке</p>
+                <button class="form-btn" style="margin-top:12px;" onclick="addTestExp()">+10 опыта (тест)</button>
+            `);
+        }
 
-        window.addExp = function(amount) {
-            userData.exp += amount;
-            while (userData.exp >= userData.level) {
-                userData.exp -= userData.level;
-                userData.level++;
+        function addTestExp() {
+            user.exp += 10;
+            while (user.exp >= user.level) {
+                user.exp -= user.level;
+                user.level++;
             }
-            saveUserData();
+            saveUser();
             updateUserUI();
-            const currentTitle = modalTitle.textContent;
-            if (currentTitle.includes('Профиль')) {
-                openModal('👤 Профиль', menuPages.profile.content);
+            openProfile();
+            alert('✅ +10 опыта! Уровень: ' + user.level);
+        }
+
+        function openTasks() {
+            openModal('📋 Задачи', getTasksHTML());
+            renderTasks();
+        }
+
+        function openGallery() {
+            openModal('🖼️ Галерея', getGalleryHTML());
+            renderGallery();
+        }
+
+        function openSettings() {
+            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+            openModal('⚙️ Настройки', `
+                <p><strong>Тема:</strong> ${theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная'}</p>
+                <button class="form-btn" style="margin-top:12px;" onclick="toggleTheme()">
+                    Сменить тему
+                </button>
+                <hr style="margin:16px 0;border-color:var(--border);">
+                <p style="color:var(--text-secondary);font-size:14px;">
+                    🔄 Синхронизация с трекерами (в планах)<br>
+                    📦 Импорт/экспорт данных
+                </p>
+                <p style="color:var(--text-secondary);font-size:13px;margin-top:12px;">
+                    Сделано с ❤️ Дэн и AI
+                </p>
+            `);
+        }
+
+        function openInfo() {
+            openModal('ℹ️ Информация', `
+                <h3 style="margin-bottom:8px;color:var(--text);">🎮 RPG Система</h3>
+                <p style="color:var(--text-secondary);">
+                    <strong>Опыт:</strong> 1 минута = 0.01 опыта<br>
+                    <strong>Уровни:</strong> для N уровня нужно N опыта
+                </p>
+                <p style="margin-top:12px;color:var(--text-secondary);">
+                    Выполняй задачи, прокачивай навыки! 💪
+                </p>
+            `);
+        }
+
+        // ============================================
+        // 11. ТЕМА
+        // ============================================
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme') || 'light';
+            const next = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            document.getElementById('themeBtn').textContent = next === 'light' ? '🌙' : '☀️';
+            // Обновляем модальное окно настроек, если открыто
+            if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
+                openSettings();
             }
-            alert(`✅ Получено ${amount} опыта! Текущий уровень: ${userData.level}`);
-        };
+        }
 
-        document.querySelectorAll('.sidebar__item').forEach(item => {
-            item.addEventListener('click', function() {
-                const page = this.dataset.page;
-                const data = menuPages[page];
-                if (data) {
-                    openModal(data.title, data.content);
-                    if (page === 'gallery') {
-                        renderGallery();
-                    }
-                    if (page === 'tasks') {
-                        renderTasks();
-                    }
-                }
-                closeSidebar();
-            });
-        });
+        function loadTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('themeBtn').textContent = theme === 'light' ? '🌙' : '☀️';
+        }
 
         // ============================================
-        // 12. РЕЖИМЫ КАЛЕНДАРЯ
+        // 12. ОБРАБОТЧИКИ
         // ============================================
-        document.querySelectorAll('.calendar-mode__btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.calendar-mode__btn').forEach(b => {
-                    b.classList.remove('calendar-mode__btn--active');
-                });
-                this.classList.add('calendar-mode__btn--active');
-
-                const mode = this.dataset.mode;
-                currentMode = mode;
-
-                if (mode === 'month') {
-                    renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
-                } else {
-                    openModal('📅 Режим', `
-                        <p>Режим <strong>${mode}</strong> в разработке.</p>
-                        <p style="color:var(--text-secondary); margin-top:8px;">
-                            ${mode === 'day' ? 'Будет показывать расписание на выбранный день по часам' : 
-                              mode === 'week' ? 'Будет показывать расписание на неделю по дням' : 
-                              'Будет показывать все месяцы года с инфографикой'}
-                        </p>
-                    `);
-                }
-            });
-        });
-
-        // ============================================
-        // 13. НАВИГАЦИЯ КАЛЕНДАРЯ
-        // ============================================
-        document.getElementById('prevMonth').addEventListener('click', function() {
-            changeMonth(-1);
-        });
-        document.getElementById('nextMonth').addEventListener('click', function() {
-            changeMonth(1);
-        });
-
-        // ============================================
-        // 14. ЗАПУСК
-        // ============================================
-        function initApp() {
-            loadUserData();
-            loadGallery();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Загрузка данных
+            loadTheme();
+            loadUser();
             loadTasks();
-            applyTheme(currentTheme);
-            renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
+            loadGallery();
 
-            console.log('🚀 SkillQuest успешно запущен!');
-            console.log('👤 Пользователь:', userData.name, 'Уровень:', userData.level);
-            console.log('📸 В галерее:', galleryItems.length, 'фото');
-            console.log('📋 Всего задач:', tasks.length);
-            console.log('💡 Открой меню (☰) чтобы управлять задачами и галереей');
-        }
+            // Календарь
+            renderCalendar();
 
-        // Запускаем приложение после полной загрузки страницы
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
+            // Навигация
+            document.getElementById('prevMonth').addEventListener('click', function() {
+                changeMonth(-1);
+            });
+            document.getElementById('nextMonth').addEventListener('click', function() {
+                changeMonth(1);
+            });
+
+            // Сайдбар
+            document.getElementById('menuBtn').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.add('sidebar--open');
+            });
+            document.getElementById('sidebarOverlay').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.remove('sidebar--open');
+            });
+
+            // Пункты меню
+            document.querySelectorAll('.sidebar__item').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    const page = this.dataset.page;
+                    document.getElementById('sidebar').classList.remove('sidebar--open');
+
+                    switch (page) {
+                        case 'profile':
+                            openProfile();
+                            break;
+                        case 'tasks':
+                            openTasks();
+                            break;
+                        case 'gallery':
+                            openGallery();
+                            break;
+                        case 'settings':
+                            openSettings();
+                            break;
+                        case 'info':
+                            openInfo();
+                            break;
+                    }
+                });
+            });
+
+            // Закрытие модальных окон
+            document.getElementById('modalClose').addEventListener('click', closeModal);
+            document.getElementById('mainModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+
+            // Режимы календаря
+            document.querySelectorAll('.modes__btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.modes__btn').forEach(b => {
+                        b.classList.remove('modes__btn--active');
+                    });
+                    this.classList.add('modes__btn--active');
+                    const mode = this.dataset.mode;
+                    if (mode === 'month') {
+                        renderCalendar();
+                    } else {
+                        alert('Режим "' + mode + '" в разработке');
+                    }
+                });
+            });
+
+            // Тема
+            document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+
+            console.log('🚀 SkillQuest запущен!');
+            console.log('👤 ' + user.name + ', Уровень: ' + user.level);
+            console.log('📋 Задач: ' + tasks.length + ', 📸 Фото: ' + gallery.length);
+        });
+
+        // Экспортируем функции в глобальный объект для onclick
+        window.openAddTask = openAddTask;
+        window.closeAddTask = closeAddTask;
+        window.handleAddTask = handleAddTask;
+        window.completeTask = completeTask;
+        window.deleteTask = deleteTask;
+        window.openAddPhoto = openAddPhoto;
+        window.closeAddPhoto = closeAddPhoto;
+        window.handleAddPhoto = handleAddPhoto;
+        window.deleteGalleryItem = deleteGalleryItem;
+        window.addTestExp = addTestExp;
+        window.toggleTheme = toggleTheme;
+        window.openProfile = openProfile;
+        window.openTasks = openTasks;
+        window.openGallery = openGallery;
+        window.openSettings = openSettings;
+        window.openInfo = openInfo;
+        window.closeModal = closeModal;
     </script>
 
 </body>
