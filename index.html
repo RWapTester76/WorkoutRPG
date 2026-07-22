@@ -1,244 +1,846 @@
-/**
- * ============================================
- * SKILLQUEST — ГЛАВНЫЙ ФАЙЛ ПРИЛОЖЕНИЯ
- * ============================================
- * Назначение: управление календарём, пользователем,
- * темами, меню и базовой логикой.
- * ============================================
- */
-
-// ============================================
-// 1. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (хранятся в localStorage)
-// ============================================
-
-/** Объект с данными пользователя */
-const userData = {
-    name: 'Игрок',
-    level: 1,
-    exp: 0,
-    avatar: 'assets/default-avatar.png', // путь к аватарке
-};
-
-/** Ключ для сохранения в localStorage */
-const STORAGE_KEY = 'skillquest_user';
-
-/**
- * Загружает данные пользователя из localStorage
- * Если данных нет — создаёт дефолтные
- */
-function loadUserData() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-        try {
-            const parsed = JSON.parse(saved);
-            Object.assign(userData, parsed);
-        } catch (e) {
-            console.warn('Ошибка загрузки данных, используем дефолтные');
-        }
-    }
-    updateUserUI();
-}
-
-/**
- * Сохраняет данные пользователя в localStorage
- */
-function saveUserData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
-}
-
-/**
- * Обновляет интерфейс карточки пользователя
- */
-function updateUserUI() {
-    document.getElementById('userName').textContent = userData.name;
-    document.getElementById('userLevel').textContent = userData.level;
-    document.getElementById('userExp').textContent = userData.exp;
-    document.getElementById('userAvatar').src = userData.avatar;
-}
-
-// ============================================
-// 2. КАЛЕНДАРЬ
-// ============================================
-
-let currentDate = new Date(); // текущая дата (для навигации)
-let currentMode = 'month'; // 'day' | 'week' | 'month' | 'year'
-
-/** Элементы календаря */
-const calendarGrid = document.getElementById('calendarGrid');
-const monthTitle = document.getElementById('monthTitle');
-
-/**
- * Отрисовывает календарь на месяц
- * @param {number} year - год
- * @param {number} month - месяц (0-11)
- */
-function renderMonthCalendar(year, month) {
-    // Очищаем сетку, но оставляем заголовки дней недели
-    const weekdays = calendarGrid.querySelectorAll('.calendar-grid__weekday');
-    calendarGrid.innerHTML = '';
-    weekdays.forEach(el => calendarGrid.appendChild(el));
-
-    // Первый день месяца
-    const firstDay = new Date(year, month, 1);
-    // Последний день месяца
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-
-    // День недели первого числа (0 - воскресенье, 1 - понедельник)
-    // Сдвигаем, чтобы неделя начиналась с понедельника
-    let startOffset = firstDay.getDay() - 1;
-    if (startOffset < 0) startOffset = 6; // если воскресенье
-
-    // Заполняем пустые ячейки до первого дня
-    for (let i = 0; i < startOffset; i++) {
-        const empty = document.createElement('div');
-        empty.className = 'calendar-day calendar-day--other-month';
-        calendarGrid.appendChild(empty);
-    }
-
-    // Дни месяца
-    const today = new Date();
-    const todayDate = today.getDate();
-    const todayMonth = today.getMonth();
-    const todayYear = today.getFullYear();
-
-    for (let d = 1; d <= daysInMonth; d++) {
-        const dayEl = document.createElement('div');
-        dayEl.className = 'calendar-day';
-        dayEl.textContent = d;
-
-        // Подсветка сегодняшнего дня
-        if (d === todayDate && month === todayMonth && year === todayYear) {
-            dayEl.classList.add('calendar-day--today');
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SkillQuest — RPG Планировщик</title>
+    
+    <style>
+        /* ============================================
+           ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И СБРОС
+           ============================================ */
+        :root {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --bg-header: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #555555;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --accent-color: #6c5ce7;
+            --accent-hover: #5a4bd1;
+            --card-bg: #ffffff;
+            --calendar-bg: #ffffff;
+            --calendar-today: #6c5ce7;
+            --calendar-today-text: #ffffff;
+            --calendar-other-month: #cccccc;
         }
 
-        // TODO: добавить маркеры задач (кружочки)
-        // if (hasTask(year, month, d)) { dayEl.dataset.hasTask = 'true'; }
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-header: #0f3460;
+            --text-primary: #eaeaea;
+            --text-secondary: #aaaaaa;
+            --border-color: #2a2a4a;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --accent-color: #a29bfe;
+            --accent-hover: #8c85e6;
+            --card-bg: #16213e;
+            --calendar-bg: #1a1a2e;
+            --calendar-today: #a29bfe;
+            --calendar-today-text: #1a1a2e;
+            --calendar-other-month: #555555;
+        }
 
-        calendarGrid.appendChild(dayEl);
-    }
+        /* ============================================
+           БАЗОВЫЕ СТИЛИ
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    // Заголовок месяца
-    const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-                        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-    monthTitle.textContent = `${monthNames[month]} ${year}`;
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            padding: 0 16px 20px;
+        }
 
-/**
- * Переключает месяц (вперёд/назад)
- */
-function changeMonth(delta) {
-    currentDate.setMonth(currentDate.getMonth() + delta);
-    renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
-}
+        /* ============================================
+           ШАПКА (HEADER)
+           ============================================ */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background-color: var(--bg-header);
+            border-radius: 16px;
+            box-shadow: 0 2px 12px var(--shadow-color);
+            margin-bottom: 16px;
+            transition: background-color 0.3s ease;
+            position: sticky;
+            top: 8px;
+            z-index: 10;
+        }
 
-// ============================================
-// 3. ПЕРЕКЛЮЧЕНИЕ ТЕМЫ (День/Ночь)
-// ============================================
+        .header__menu-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-primary);
+            padding: 4px 8px;
+            transition: transform 0.2s;
+        }
+        .header__menu-btn:hover {
+            transform: scale(1.1);
+        }
 
-const themeToggle = document.getElementById('themeToggle');
-const htmlElement = document.documentElement;
+        .header__user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            flex: 1;
+            justify-content: center;
+        }
 
-/** Текущая тема: 'light' или 'dark' */
-let currentTheme = localStorage.getItem('skillquest_theme') || 'light';
+        .header__avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color);
+            background-color: var(--bg-secondary);
+        }
 
-function applyTheme(theme) {
-    htmlElement.setAttribute('data-theme', theme);
-    themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
-    localStorage.setItem('skillquest_theme', theme);
-    currentTheme = theme;
-}
+        .header__user-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
 
-themeToggle.addEventListener('click', () => {
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    applyTheme(newTheme);
-});
+        .header__username {
+            font-weight: 600;
+            font-size: 16px;
+        }
 
-// ============================================
-// 4. МЕНЮ (САЙДБАР)
-// ============================================
+        .header__level-bar {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
 
-const menuToggle = document.getElementById('menuToggle');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('sidebarOverlay');
+        .header__level span {
+            color: var(--accent-color);
+            font-weight: 700;
+        }
 
-function openSidebar() {
-    sidebar.classList.add('sidebar--open');
-}
+        .header__theme-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: transform 0.3s;
+        }
+        .header__theme-btn:hover {
+            transform: rotate(30deg);
+        }
 
-function closeSidebar() {
-    sidebar.classList.remove('sidebar--open');
-}
+        /* ============================================
+           РЕЖИМЫ КАЛЕНДАРЯ
+           ============================================ */
+        .calendar-mode {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-menuToggle.addEventListener('click', openSidebar);
-overlay.addEventListener('click', closeSidebar);
+        .calendar-mode__btn {
+            padding: 8px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
 
-// Закрытие по Escape
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeSidebar();
-});
+        .calendar-mode__btn:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
 
-// ============================================
-// 5. ОБРАБОТЧИКИ ПУНКТОВ МЕНЮ (заглушки)
-// ============================================
+        .calendar-mode__btn--active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
 
-document.querySelectorAll('.sidebar__item').forEach(item => {
-    item.addEventListener('click', () => {
-        const page = item.dataset.page;
-        console.log(`📱 Открыт пункт: ${page}`);
-        closeSidebar();
-        // TODO: открыть соответствующее модальное окно
-        alert(`Пункт "${page}" — будет реализован позже`);
-    });
-});
+        /* ============================================
+           КАЛЕНДАРЬ
+           ============================================ */
+        .calendar-container {
+            background: var(--calendar-bg);
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 4px 16px var(--shadow-color);
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
 
-// ============================================
-// 6. ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ КАЛЕНДАРЯ
-// ============================================
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
 
-document.querySelectorAll('.calendar-mode__btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        // Снимаем активный класс со всех
-        document.querySelectorAll('.calendar-mode__btn').forEach(b => {
-            b.classList.remove('calendar-mode__btn--active');
-        });
-        btn.classList.add('calendar-mode__btn--active');
+        .calendar-header__title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
 
-        const mode = btn.dataset.mode;
-        currentMode = mode;
-        console.log(`📅 Режим календаря: ${mode}`);
+        .calendar-header__nav {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 4px 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .calendar-header__nav:hover {
+            background: var(--border-color);
+        }
 
-        // TODO: реализовать переключение между Day/Week/Month/Year
-        if (mode === 'month') {
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-grid__weekday {
+            text-align: center;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 6px 0;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .calendar-day:hover {
+            background: var(--border-color);
+        }
+
+        .calendar-day--today {
+            background: var(--calendar-today);
+            color: var(--calendar-today-text);
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+        }
+
+        .calendar-day--other-month {
+            color: var(--calendar-other-month);
+        }
+
+        /* ============================================
+           ИНФОГРАФИКА
+           ============================================ */
+        .productivity-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 4px 16px var(--shadow-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .productivity__title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .productivity__chart {
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .productivity__placeholder {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* ============================================
+           САЙДБАР
+           ============================================ */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .sidebar__overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar__menu {
+            position: absolute;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: var(--bg-secondary);
+            box-shadow: 4px 0 20px var(--shadow-color);
+            transition: left 0.3s ease;
+            padding: 20px 0;
+            pointer-events: auto;
+            overflow-y: auto;
+        }
+
+        .sidebar--open {
+            pointer-events: auto;
+        }
+        .sidebar--open .sidebar__overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .sidebar--open .sidebar__menu {
+            left: 0;
+        }
+
+        .sidebar__list {
+            list-style: none;
+            padding: 0 16px;
+        }
+
+        .sidebar__item {
+            padding: 14px 16px;
+            font-size: 17px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .sidebar__item:hover {
+            background: var(--border-color);
+        }
+
+        /* ============================================
+           МОДАЛЬНЫЕ ОКНА
+           ============================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay--open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px var(--shadow-color);
+            max-width: 90%;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal__close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal__title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .modal__content {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           АДАПТИВ
+           ============================================ */
+        @media (max-width: 480px) {
+            .header {
+                padding: 8px 12px;
+            }
+            .header__username {
+                font-size: 14px;
+            }
+            .header__level-bar {
+                font-size: 11px;
+                gap: 8px;
+            }
+            .calendar-day {
+                font-size: 14px;
+            }
+            .calendar-mode__btn {
+                padding: 6px 14px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================
+    ШАПКА
+    ========================================== -->
+    <header class="header">
+        <button class="header__menu-btn" id="menuToggle">☰</button>
+
+        <div class="header__user-card">
+            <img class="header__avatar" id="userAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236c5ce7'/%3E%3Ccircle cx='50' cy='35' r='20' fill='%23ffffff'/%3E%3Ccircle cx='35' cy='30' r='4' fill='%231a1a2e'/%3E%3Ccircle cx='65' cy='30' r='4' fill='%231a1a2e'/%3E%3C/svg%3E" alt="Аватар">
+            <div class="header__user-info">
+                <span class="header__username" id="userName">Игрок</span>
+                <div class="header__level-bar">
+                    <span class="header__level">Ур. <span id="userLevel">1</span></span>
+                    <span>Опыт: <span id="userExp">0</span></span>
+                </div>
+            </div>
+        </div>
+
+        <button class="header__theme-btn" id="themeToggle">🌙</button>
+    </header>
+
+    <!-- ==========================================
+    ОСНОВНОЙ КОНТЕНТ
+    ========================================== -->
+    <main class="main">
+        <!-- Кнопки режимов -->
+        <div class="calendar-mode">
+            <button class="calendar-mode__btn" data-mode="day">День</button>
+            <button class="calendar-mode__btn" data-mode="week">Неделя</button>
+            <button class="calendar-mode__btn calendar-mode__btn--active" data-mode="month">Месяц</button>
+            <button class="calendar-mode__btn" data-mode="year">Год</button>
+        </div>
+
+        <!-- Календарь -->
+        <section class="calendar-container">
+            <div class="calendar-header">
+                <button class="calendar-header__nav" id="prevMonth">◀</button>
+                <h2 class="calendar-header__title" id="monthTitle">Январь 2026</h2>
+                <button class="calendar-header__nav" id="nextMonth">▶</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <div class="calendar-grid__weekday">Пн</div>
+                <div class="calendar-grid__weekday">Вт</div>
+                <div class="calendar-grid__weekday">Ср</div>
+                <div class="calendar-grid__weekday">Чт</div>
+                <div class="calendar-grid__weekday">Пт</div>
+                <div class="calendar-grid__weekday">Сб</div>
+                <div class="calendar-grid__weekday">Вс</div>
+            </div>
+        </section>
+
+        <!-- Инфографика -->
+        <section class="productivity-section">
+            <h3 class="productivity__title">📊 Продуктивность за неделю</h3>
+            <div class="productivity__chart">
+                <p class="productivity__placeholder">Выполнено 0 из 0 задач</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- ==========================================
+    САЙДБАР (МЕНЮ)
+    ========================================== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar__overlay" id="sidebarOverlay"></div>
+        <nav class="sidebar__menu">
+            <ul class="sidebar__list">
+                <li class="sidebar__item" data-page="profile">👤 Профиль</li>
+                <li class="sidebar__item" data-page="tasks">📋 Задачи</li>
+                <li class="sidebar__item" data-page="gallery">🖼️ Галерея</li>
+                <li class="sidebar__item" data-page="settings">⚙️ Настройки</li>
+                <li class="sidebar__item" data-page="info">ℹ️ Информация</li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- ==========================================
+    МОДАЛЬНЫЕ ОКНА (для пунктов меню)
+    ========================================== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="modal__close" id="modalClose">✕</button>
+            <h2 class="modal__title" id="modalTitle">Заголовок</h2>
+            <div class="modal__content" id="modalContent">
+                <p>Содержимое модального окна</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+    JAVASCRIPT
+    ========================================== -->
+    <script>
+        /**
+         * ============================================
+         * SKILLQUEST — ВСЯ ЛОГИКА ПРИЛОЖЕНИЯ
+         * ============================================
+         */
+
+        // ============================================
+        // 1. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ
+        // ============================================
+        const userData = {
+            name: 'Игрок',
+            level: 1,
+            exp: 0,
+            avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%236c5ce7\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'20\' fill=\'%23ffffff\'/%3E%3Ccircle cx=\'35\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3Ccircle cx=\'65\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3C/svg%3E'
+        };
+
+        const STORAGE_KEY = 'skillquest_user';
+
+        function loadUserData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(userData, parsed);
+                } catch (e) {
+                    console.warn('Ошибка загрузки данных');
+                }
+            }
+            updateUserUI();
+        }
+
+        function saveUserData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+        }
+
+        function updateUserUI() {
+            document.getElementById('userName').textContent = userData.name;
+            document.getElementById('userLevel').textContent = userData.level;
+            document.getElementById('userExp').textContent = userData.exp;
+            document.getElementById('userAvatar').src = userData.avatar;
+        }
+
+        // ============================================
+        // 2. КАЛЕНДАРЬ
+        // ============================================
+        let currentDate = new Date();
+        let currentMode = 'month';
+
+        const calendarGrid = document.getElementById('calendarGrid');
+        const monthTitle = document.getElementById('monthTitle');
+
+        function renderMonthCalendar(year, month) {
+            // Сохраняем заголовки дней недели
+            const weekdays = calendarGrid.querySelectorAll('.calendar-grid__weekday');
+            calendarGrid.innerHTML = '';
+            weekdays.forEach(el => calendarGrid.appendChild(el));
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+
+            let startOffset = firstDay.getDay() - 1;
+            if (startOffset < 0) startOffset = 6;
+
+            // Пустые ячейки
+            for (let i = 0; i < startOffset; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day calendar-day--other-month';
+                calendarGrid.appendChild(empty);
+            }
+
+            // Дни месяца
+            const today = new Date();
+            const todayDate = today.getDate();
+            const todayMonth = today.getMonth();
+            const todayYear = today.getFullYear();
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                dayEl.textContent = d;
+
+                if (d === todayDate && month === todayMonth && year === todayYear) {
+                    dayEl.classList.add('calendar-day--today');
+                }
+
+                calendarGrid.appendChild(dayEl);
+            }
+
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+            ];
+            monthTitle.textContent = `${monthNames[month]} ${year}`;
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
             renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
-        } else {
-            // Заглушка для других режимов
-            alert(`Режим "${mode}" в разработке`);
         }
-    });
-});
 
-// ============================================
-// 7. ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-// ============================================
+        // ============================================
+        // 3. ТЕМА
+        // ============================================
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+        let currentTheme = localStorage.getItem('skillquest_theme') || 'light';
 
-function initApp() {
-    // Загружаем данные пользователя
-    loadUserData();
+        function applyTheme(theme) {
+            htmlElement.setAttribute('data-theme', theme);
+            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('skillquest_theme', theme);
+            currentTheme = theme;
+        }
 
-    // Применяем сохранённую тему
-    applyTheme(currentTheme);
+        themeToggle.addEventListener('click', () => {
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        });
 
-    // Рендерим календарь на текущий месяц
-    renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
+        // ============================================
+        // 4. САЙДБАР
+        // ============================================
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
 
-    // Навигация по месяцам
-    document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
-    document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+        function openSidebar() {
+            sidebar.classList.add('sidebar--open');
+        }
 
-    console.log('🚀 SkillQuest запущен!');
-    console.log(`👤 Пользователь: ${userData.name}, Уровень: ${userData.level}`);
-}
+        function closeSidebar() {
+            sidebar.classList.remove('sidebar--open');
+        }
 
-// Запускаем приложение после загрузки DOM
-document.addEventListener('DOMContentLoaded', initApp);
+        menuToggle.addEventListener('click', openSidebar);
+        overlay.addEventListener('click', closeSidebar);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSidebar();
+        });
+
+        // ============================================
+        // 5. МОДАЛЬНЫЕ ОКНА
+        // ============================================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        const modalClose = document.getElementById('modalClose');
+
+        function openModal(title, htmlContent) {
+            modalTitle.textContent = title;
+            modalContent.innerHTML = htmlContent;
+            modalOverlay.classList.add('modal-overlay--open');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('modal-overlay--open');
+        }
+
+        modalClose.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        // ============================================
+        // 6. ПУНКТЫ МЕНЮ
+        // ============================================
+        const menuPages = {
+            profile: {
+                title: '👤 Профиль',
+                content: `
+                    <p><strong>Имя:</strong> <span id="profileName">${userData.name}</span></p>
+                    <p><strong>Уровень:</strong> ${userData.level}</p>
+                    <p><strong>Опыт:</strong> ${userData.exp}</p>
+                    <hr style="margin: 16px 0; border-color: var(--border-color);">
+                    <p style="color: var(--text-secondary);">Здесь будет форма редактирования профиля, загрузка аватара, ИМТ и статистика.</p>
+                    <button onclick="addExp(10)" style="margin-top:12px; padding:10px 20px; background:var(--accent-color); color:white; border:none; border-radius:12px; cursor:pointer;">
+                        +10 опыта (тест)
+                    </button>
+                `
+            },
+            tasks: {
+                title: '📋 Задачи',
+                content: `
+                    <p>Здесь будет система управления задачами:</p>
+                    <ul style="margin:12px 0 0 20px; color:var(--text-secondary);">
+                        <li>Добавление задачи (название, описание, время, дни недели)</li>
+                        <li>Отметка о выполнении</li>
+                        <li>Начисление опыта</li>
+                    </ul>
+                    <p style="margin-top:12px; color:var(--text-secondary);">В разработке...</p>
+                `
+            },
+            gallery: {
+                title: '🖼️ Галерея',
+                content: `
+                    <p>Фотофиксация достижений:</p>
+                    <p style="color:var(--text-secondary); margin-top:8px;">Загружай фото с датой и комментарием, чтобы отслеживать прогресс.</p>
+                    <p style="color:var(--text-secondary);">В разработке...</p>
+                `
+            },
+            settings: {
+                title: '⚙️ Настройки',
+                content: `
+                    <p><strong>Тема:</strong> ${currentTheme === 'light' ? 'Светлая' : 'Тёмная'}</p>
+                    <p style="color:var(--text-secondary); margin-top:12px;">
+                        🔄 Синхронизация с трекерами активности (в планах)<br>
+                        📦 Импорт/экспорт данных
+                    </p>
+                    <hr style="margin:16px 0; border-color:var(--border-color);">
+                    <p style="color:var(--text-secondary); font-size:14px;">Сделано с ❤️ разработчиками Дэн и AI</p>
+                `
+            },
+            info: {
+                title: 'ℹ️ Информация',
+                content: `
+                    <h3 style="margin-bottom:8px;">🎮 RPG Система</h3>
+                    <p style="color:var(--text-secondary);">
+                        <strong>Опыт:</strong> 1 минута задачи = 0.01 опыта<br>
+                        <strong>Уровни:</strong> для уровня N нужно N опыта<br>
+                        <strong>Достижения:</strong> будут добавлены позже
+                    </p>
+                    <p style="margin-top:12px; color:var(--text-secondary);">
+                        Выполняй задачи, прокачивай навыки и становись лучше каждый день! 💪
+                    </p>
+                `
+            }
+        };
+
+        // Тестовая функция для добавления опыта
+        window.addExp = function(amount) {
+            userData.exp += amount;
+            // Проверка на повышение уровня
+            while (userData.exp >= userData.level) {
+                userData.exp -= userData.level;
+                userData.level++;
+            }
+            saveUserData();
+            updateUserUI();
+            // Обновляем модальное окно (если открыто)
+            const currentTitle = modalTitle.textContent;
+            if (currentTitle.includes('Профиль')) {
+                const profileName = document.getElementById('profileName');
+                if (profileName) profileName.textContent = userData.name;
+                // Переоткрываем с обновлённым содержимым
+                openModal('👤 Профиль', menuPages.profile.content);
+            }
+            alert(`✅ Получено ${amount} опыта! Текущий уровень: ${userData.level}`);
+        };
+
+        document.querySelectorAll('.sidebar__item').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+                const data = menuPages[page];
+                if (data) {
+                    openModal(data.title, data.content);
+                }
+                closeSidebar();
+            });
+        });
+
+        // ============================================
+        // 7. РЕЖИМЫ КАЛЕНДАРЯ
+        // ============================================
+        document.querySelectorAll('.calendar-mode__btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.calendar-mode__btn').forEach(b => {
+                    b.classList.remove('calendar-mode__btn--active');
+                });
+                btn.classList.add('calendar-mode__btn--active');
+
+                const mode = btn.dataset.mode;
+                currentMode = mode;
+
+                if (mode === 'month') {
+                    renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
+                } else {
+                    openModal('📅 Режим', `
+                        <p>Режим <strong>${mode}</strong> в разработке.</p>
+                        <p style="color:var(--text-secondary); margin-top:8px;">
+                            ${mode === 'day' ? 'Будет показывать расписание на выбранный день по часам' : 
+                              mode === 'week' ? 'Будет показывать расписание на неделю по дням' : 
+                              'Будет показывать все месяцы года с инфографикой'}
+                        </p>
+                    `);
+                }
+            });
+        });
+
+        // ============================================
+        // 8. НАВИГАЦИЯ КАЛЕНДАРЯ
+        // ============================================
+        document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+        document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+
+        // ============================================
+        // 9. ЗАПУСК
+        // ============================================
+        function initApp() {
+            loadUserData();
+            applyTheme(currentTheme);
+            renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
+            console.log('🚀 SkillQuest запущен!');
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+
+</body>
+</html>
