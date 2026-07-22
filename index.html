@@ -756,7 +756,7 @@
         <!-- Инфографика продуктивности -->
         <section class="productivity-section">
             <h3 class="productivity__title">📊 Продуктивность за неделю</h3>
-            <div class="productivity__chart" id="productivityChart">
+            <div class="productivity__chart">
                 <p class="productivity__placeholder" id="productivityPlaceholder">Выполнено 0 из 0 задач</p>
             </div>
         </section>
@@ -868,7 +868,7 @@
         /**
          * ============================================
          * SKILLQUEST — ПОЛНАЯ ЛОГИКА ПРИЛОЖЕНИЯ
-         * Версия: 1.0
+         * Версия: 1.1 (исправленная)
          * Модули: Пользователь, Календарь, Задачи, Галерея
          * ============================================
          */
@@ -1386,6 +1386,7 @@
                 fileInput.value = '';
                 commentInput.value = '';
 
+                // Обновляем модальное окно галереи
                 const currentTitle = modalTitle.textContent;
                 if (currentTitle.includes('Галерея')) {
                     openModal('🖼️ Галерея', menuPages.gallery.content);
@@ -1446,6 +1447,7 @@
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskDescription').value = '';
 
+            // Обновляем модальное окно задач
             const currentTitle = modalTitle.textContent;
             if (currentTitle.includes('Задачи')) {
                 openModal('📋 Задачи', menuPages.tasks.content);
@@ -1541,8 +1543,8 @@
         };
 
         document.querySelectorAll('.sidebar__item').forEach(item => {
-            item.addEventListener('click', () => {
-                const page = item.dataset.page;
+            item.addEventListener('click', function() {
+                const page = this.dataset.page;
                 const data = menuPages[page];
                 if (data) {
                     openModal(data.title, data.content);
@@ -1561,13 +1563,13 @@
         // 12. РЕЖИМЫ КАЛЕНДАРЯ
         // ============================================
         document.querySelectorAll('.calendar-mode__btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', function() {
                 document.querySelectorAll('.calendar-mode__btn').forEach(b => {
                     b.classList.remove('calendar-mode__btn--active');
                 });
-                btn.classList.add('calendar-mode__btn--active');
+                this.classList.add('calendar-mode__btn--active');
 
-                const mode = btn.dataset.mode;
+                const mode = this.dataset.mode;
                 currentMode = mode;
 
                 if (mode === 'month') {
@@ -1588,8 +1590,12 @@
         // ============================================
         // 13. НАВИГАЦИЯ КАЛЕНДАРЯ
         // ============================================
-        document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
-        document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+        document.getElementById('prevMonth').addEventListener('click', function() {
+            changeMonth(-1);
+        });
+        document.getElementById('nextMonth').addEventListener('click', function() {
+            changeMonth(1);
+        });
 
         // ============================================
         // 14. ЗАПУСК
@@ -1602,13 +1608,18 @@
             renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
 
             console.log('🚀 SkillQuest успешно запущен!');
-            console.log(`👤 Пользователь: ${userData.name}, Уровень: ${userData.level}`);
-            console.log(`📸 В галерее: ${galleryItems.length} фото`);
-            console.log(`📋 Всего задач: ${tasks.length}`);
+            console.log('👤 Пользователь:', userData.name, 'Уровень:', userData.level);
+            console.log('📸 В галерее:', galleryItems.length, 'фото');
+            console.log('📋 Всего задач:', tasks.length);
             console.log('💡 Открой меню (☰) чтобы управлять задачами и галереей');
         }
 
-        document.addEventListener('DOMContentLoaded', initApp);
+        // Запускаем приложение после полной загрузки страницы
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
     </script>
 
 </body>
