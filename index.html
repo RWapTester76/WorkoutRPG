@@ -1,934 +1,244 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Планировщик навыков · RPG система</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
+/**
+ * ============================================
+ * SKILLQUEST — ГЛАВНЫЙ ФАЙЛ ПРИЛОЖЕНИЯ
+ * ============================================
+ * Назначение: управление календарём, пользователем,
+ * темами, меню и базовой логикой.
+ * ============================================
+ */
 
-    :root {
-      --bg: #f4f2f7;
-      --surface: #ffffff;
-      --text: #1e1b2e;
-      --text-secondary: #5e5a6b;
-      --primary: #6c5ce7;
-      --primary-soft: #a29bfe;
-      --accent: #fd79a8;
-      --exp-bar: #00cec9;
-      --gold: #fdcb6e;
-      --border: #e0d9f0;
-      --shadow: 0 10px 25px -8px rgba(108, 92, 231, 0.15);
-      --card-shadow: 0 4px 12px rgba(0,0,0,0.04);
-      --radius: 20px;
-      --radius-sm: 14px;
-    }
+// ============================================
+// 1. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (хранятся в localStorage)
+// ============================================
 
-    body.dark {
-      --bg: #1a1726;
-      --surface: #252033;
-      --text: #ede8f5;
-      --text-secondary: #b2adc2;
-      --primary: #a29bfe;
-      --primary-soft: #6c5ce7;
-      --accent: #fd79a8;
-      --exp-bar: #00cec9;
-      --gold: #fdcb6e;
-      --border: #3a334c;
-      --shadow: 0 10px 25px -8px rgba(0,0,0,0.4);
-    }
+/** Объект с данными пользователя */
+const userData = {
+    name: 'Игрок',
+    level: 1,
+    exp: 0,
+    avatar: 'assets/default-avatar.png', // путь к аватарке
+};
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 12px;
-      transition: background 0.3s, color 0.2s;
-    }
+/** Ключ для сохранения в localStorage */
+const STORAGE_KEY = 'skillquest_user';
 
-    .app-container {
-      max-width: 450px;
-      width: 100%;
-      background: var(--surface);
-      border-radius: 32px;
-      box-shadow: var(--shadow);
-      padding: 18px 16px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      position: relative;
-      transition: background 0.3s;
-    }
-
-    /* Хедер */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .menu-burger {
-      background: var(--bg);
-      border: none;
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      font-size: 20px;
-      color: var(--text);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .profile-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--bg);
-      padding: 8px 16px 8px 8px;
-      border-radius: 40px;
-    }
-    .avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: white;
-      overflow: hidden;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-    }
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .user-info h4 {
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .xp-line {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-    .xp-bar-bg {
-      width: 70px;
-      height: 6px;
-      background: var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .xp-fill {
-      height: 100%;
-      background: var(--exp-bar);
-      border-radius: 10px;
-      transition: width 0.3s;
-    }
-
-    /* Выпадающее меню */
-    .popup-menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 999;
-      display: none;
-      justify-content: center;
-      align-items: flex-end;
-    }
-    .popup-menu.active {
-      display: flex;
-    }
-    .menu-content {
-      background: var(--surface);
-      width: 100%;
-      max-width: 450px;
-      border-radius: 32px 32px 0 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      animation: slideUp 0.3s ease;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-    .menu-item {
-      background: var(--bg);
-      border: none;
-      padding: 14px 18px;
-      border-radius: 16px;
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      transition: 0.2s;
-      width: 100%;
-    }
-    .menu-item i {
-      color: var(--primary);
-      width: 24px;
-    }
-    .menu-item:hover {
-      background: var(--primary);
-      color: white;
-    }
-    .menu-item:hover i {
-      color: white;
-    }
-    .menu-close {
-      align-self: flex-end;
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: var(--text);
-      cursor: pointer;
-    }
-
-    /* Дашборд */
-    .dashboard {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .stat-card {
-      background: var(--bg);
-      padding: 14px;
-      border-radius: var(--radius-sm);
-      text-align: center;
-    }
-    .stat-card .value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-    .stat-card .label {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    .progress-week {
-      grid-column: span 2;
-      background: var(--bg);
-      padding: 14px;
-      border-radius: var(--radius-sm);
-    }
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background: var(--border);
-      border-radius: 5px;
-      margin-top: 8px;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--exp-bar);
-      border-radius: 5px;
-    }
-
-    /* Календарь */
-    .calendar-section {
-      background: var(--bg);
-      border-radius: var(--radius);
-      padding: 16px;
-    }
-    .month-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-    }
-    .days-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-    }
-    .day-cell {
-      aspect-ratio: 1/1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      font-weight: 500;
-      background: var(--surface);
-      cursor: pointer;
-      font-size: 14px;
-      transition: 0.2s;
-      border: 1px solid transparent;
-    }
-    .day-cell.today {
-      border: 2px solid var(--primary);
-      font-weight: 700;
-    }
-    .day-cell.has-practice {
-      background: #e8e0ff;
-      color: #4a3bb0;
-      font-weight: 600;
-    }
-    body.dark .day-cell.has-practice {
-      background: #3a2e5c;
-      color: #d4caff;
-    }
-
-    /* Секции */
-    .section-panel {
-      display: none;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .section-panel.active {
-      display: flex;
-    }
-
-    /* Профиль */
-    .profile-avatar-upload {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .profile-avatar-upload .avatar {
-      width: 80px;
-      height: 80px;
-      font-size: 36px;
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .form-group label {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-    .form-group input, .form-group select {
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .bmi-result {
-      background: var(--bg);
-      padding: 12px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    .skills-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .skill-tag {
-      background: var(--primary-soft);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-    }
-
-    /* Практики */
-    .practice-card {
-      background: var(--bg);
-      padding: 14px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .category-badge {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      background: var(--primary-soft);
-      color: white;
-    }
-    .add-btn {
-      background: var(--primary);
-      border: none;
-      color: white;
-      padding: 14px;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-    }
-
-    /* Галерея */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-    .gallery-item {
-      background: var(--bg);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    .gallery-image {
-      width: 100%;
-      aspect-ratio: 1/1;
-      object-fit: cover;
-      background: var(--border);
-    }
-    .gallery-info {
-      padding: 8px;
-      font-size: 12px;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal.active {
-      display: flex;
-    }
-    .modal-content {
-      background: var(--surface);
-      padding: 20px;
-      border-radius: var(--radius);
-      max-width: 380px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    button {
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div class="app-container" id="appContainer">
-    <!-- Хедер -->
-    <div class="header">
-      <button class="menu-burger" id="menuBurger"><i class="fas fa-bars"></i></button>
-      <div class="profile-badge">
-        <div class="avatar" id="headerAvatar"><i class="fas fa-user-astronaut"></i></div>
-        <div class="user-info">
-          <h4 id="headerName">Алекс</h4>
-          <div class="xp-line">
-            <span id="headerLevel">Ур.4</span>
-            <div class="xp-bar-bg"><div class="xp-fill" id="headerXpFill" style="width: 60%;"></div></div>
-            <span id="headerXp">320/500 XP</span>
-          </div>
-        </div>
-      </div>
-      <button class="menu-burger" id="themeToggle"><i class="fas fa-moon"></i></button>
-    </div>
-
-    <!-- Дашборд -->
-    <div class="dashboard">
-      <div class="stat-card">
-        <div class="value" id="activePractices">3</div>
-        <div class="label">Активных практик</div>
-      </div>
-      <div class="stat-card">
-        <div class="value" id="monthlyXp">1240</div>
-        <div class="label">XP за месяц</div>
-      </div>
-      <div class="progress-week">
-        <strong>Продуктивность за неделю</strong>
-        <div style="display:flex; justify-content:space-between; margin-top:6px;">
-          <span id="weekDone">5 выполнено</span>
-          <span id="weekLeft">2 осталось</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="weekProgress" style="width: 71%;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Календарь -->
-    <div class="calendar-section">
-      <div class="month-row">
-        <span><strong>Июль 2026</strong></span>
-        <div><i class="fas fa-chevron-left"></i> <i class="fas fa-chevron-right"></i></div>
-      </div>
-      <div class="weekdays">
-        <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
-      </div>
-      <div class="days-grid" id="daysGrid"></div>
-    </div>
-
-    <!-- Секции (скрыты, показываются через меню) -->
-    <div id="viewProfile" class="section-panel"></div>
-    <div id="viewPractices" class="section-panel"></div>
-    <div id="viewGallery" class="section-panel"></div>
-    <div id="viewSettings" class="section-panel"></div>
-    <div id="viewInfo" class="section-panel"></div>
-  </div>
-
-  <!-- Выпадающее меню -->
-  <div class="popup-menu" id="popupMenu">
-    <div class="menu-content">
-      <button class="menu-close" id="menuClose"><i class="fas fa-times"></i></button>
-      <button class="menu-item" data-view="profile"><i class="fas fa-id-card"></i> Профиль</button>
-      <button class="menu-item" data-view="practices"><i class="fas fa-dumbbell"></i> Практики</button>
-      <button class="menu-item" data-view="gallery"><i class="fas fa-images"></i> Галерея</button>
-      <button class="menu-item" data-view="settings"><i class="fas fa-cog"></i> Настройки</button>
-      <button class="menu-item" data-view="info"><i class="fas fa-circle-info"></i> RPG система</button>
-    </div>
-  </div>
-
-  <!-- Модалка для добавления/редактирования практики -->
-  <div class="modal" id="practiceModal">
-    <div class="modal-content">
-      <h4 id="practiceModalTitle">Новая практика</h4>
-      <div class="form-group">
-        <label>Название</label>
-        <input type="text" id="practiceName" placeholder="Например: Гитара">
-      </div>
-      <div class="form-group">
-        <label>Категория</label>
-        <select id="practiceCategory">
-          <option value="sport">Спорт</option>
-          <option value="art">Искусство</option>
-          <option value="cooking">Кулинария</option>
-          <option value="custom">Пользовательская</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Длительность (минут за сессию)</label>
-        <input type="number" id="practiceDuration" value="30" min="1">
-      </div>
-      <div class="form-group">
-        <label>Срок выполнения</label>
-        <select id="practiceDeadline">
-          <option value="7">Неделя</option>
-          <option value="30">Месяц</option>
-          <option value="90">3 месяца</option>
-          <option value="custom">Свой срок (дней)</option>
-        </select>
-      </div>
-      <div class="form-group" id="customDaysGroup" style="display:none;">
-        <label>Количество дней</label>
-        <input type="number" id="customDays" value="14" min="1">
-      </div>
-      <div class="form-group">
-        <label>Напоминание</label>
-        <input type="time" id="practiceReminder" value="09:00">
-      </div>
-      <button class="add-btn" id="savePractice">Сохранить</button>
-      <button class="add-btn" style="background:gray; margin-top:6px;" id="cancelPractice">Отмена</button>
-    </div>
-  </div>
-
-  <script>
-    (function() {
-      // Данные
-      let userData = JSON.parse(localStorage.getItem('userData') || '{"name":"Алекс","xp":320,"level":4,"xpToNext":500,"avatar":"","height":175,"weight":70,"age":25,"gender":"male","skills":["Гитара","Бег","Рисование"]}');
-      let practices = JSON.parse(localStorage.getItem('practices') || '[]');
-      let galleryImages = JSON.parse(localStorage.getItem('galleryImages') || '[]');
-      let editPracticeId = null;
-
-      // Элементы
-      const body = document.body;
-      const popupMenu = document.getElementById('popupMenu');
-      const menuBurger = document.getElementById('menuBurger');
-      const menuClose = document.getElementById('menuClose');
-      const themeToggle = document.getElementById('themeToggle');
-      const practiceModal = document.getElementById('practiceModal');
-      
-      // Обновление UI
-      function updateUI() {
-        document.getElementById('headerName').textContent = userData.name;
-        document.getElementById('headerLevel').textContent = 'Ур.' + userData.level;
-        document.getElementById('headerXp').textContent = userData.xp + '/' + userData.xpToNext + ' XP';
-        document.getElementById('headerXpFill').style.width = (userData.xp / userData.xpToNext * 100) + '%';
-        
-        if (userData.avatar) {
-          document.getElementById('headerAvatar').innerHTML = `<img src="${userData.avatar}" alt="avatar">`;
+/**
+ * Загружает данные пользователя из localStorage
+ * Если данных нет — создаёт дефолтные
+ */
+function loadUserData() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            Object.assign(userData, parsed);
+        } catch (e) {
+            console.warn('Ошибка загрузки данных, используем дефолтные');
         }
-        
-        // Дашборд
-        const activeCount = practices.filter(p => new Date(p.deadlineDate) >= new Date()).length;
-        document.getElementById('activePractices').textContent = activeCount;
-        
-        const now = new Date();
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const monthlyXp = practices.reduce((sum, p) => {
-          if (new Date(p.createdAt) >= monthStart) return sum + (p.completedMinutes || 0) * 0.01;
-          return sum;
-        }, 0);
-        document.getElementById('monthlyXp').textContent = Math.floor(monthlyXp);
-        
-        // Недельная продуктивность
-        const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
-        const weekPractices = practices.filter(p => new Date(p.deadlineDate) >= weekStart);
-        const done = weekPractices.filter(p => p.completedMinutes >= p.duration).length;
-        const left = weekPractices.length - done;
-        document.getElementById('weekDone').textContent = done + ' выполнено';
-        document.getElementById('weekLeft').textContent = left + ' осталось';
-        document.getElementById('weekProgress').style.width = weekPractices.length ? (done/weekPractices.length*100) + '%' : '0%';
-      }
+    }
+    updateUserUI();
+}
 
-      // Меню
-      menuBurger.addEventListener('click', () => popupMenu.classList.add('active'));
-      menuClose.addEventListener('click', () => popupMenu.classList.remove('active'));
-      popupMenu.addEventListener('click', (e) => { if (e.target === popupMenu) popupMenu.classList.remove('active'); });
-      
-      document.querySelectorAll('.menu-item[data-view]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const view = btn.dataset.view;
-          renderSection(view);
-          popupMenu.classList.remove('active');
-        });
-      });
+/**
+ * Сохраняет данные пользователя в localStorage
+ */
+function saveUserData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+}
 
-      // Тема
-      function toggleTheme() {
-        body.classList.toggle('dark');
-        themeToggle.innerHTML = body.classList.contains('dark') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-      }
-      themeToggle.addEventListener('click', toggleTheme);
+/**
+ * Обновляет интерфейс карточки пользователя
+ */
+function updateUserUI() {
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('userLevel').textContent = userData.level;
+    document.getElementById('userExp').textContent = userData.exp;
+    document.getElementById('userAvatar').src = userData.avatar;
+}
 
-      // Рендер секций
-      function renderSection(view) {
-        const container = document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1));
-        if (!container) return;
-        
-        // Скрываем все секции
-        document.querySelectorAll('.section-panel').forEach(s => s.classList.remove('active'));
-        container.classList.add('active');
-        
-        switch(view) {
-          case 'profile': renderProfile(container); break;
-          case 'practices': renderPractices(container); break;
-          case 'gallery': renderGallery(container); break;
-          case 'settings': renderSettings(container); break;
-          case 'info': renderInfo(container); break;
+// ============================================
+// 2. КАЛЕНДАРЬ
+// ============================================
+
+let currentDate = new Date(); // текущая дата (для навигации)
+let currentMode = 'month'; // 'day' | 'week' | 'month' | 'year'
+
+/** Элементы календаря */
+const calendarGrid = document.getElementById('calendarGrid');
+const monthTitle = document.getElementById('monthTitle');
+
+/**
+ * Отрисовывает календарь на месяц
+ * @param {number} year - год
+ * @param {number} month - месяц (0-11)
+ */
+function renderMonthCalendar(year, month) {
+    // Очищаем сетку, но оставляем заголовки дней недели
+    const weekdays = calendarGrid.querySelectorAll('.calendar-grid__weekday');
+    calendarGrid.innerHTML = '';
+    weekdays.forEach(el => calendarGrid.appendChild(el));
+
+    // Первый день месяца
+    const firstDay = new Date(year, month, 1);
+    // Последний день месяца
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+
+    // День недели первого числа (0 - воскресенье, 1 - понедельник)
+    // Сдвигаем, чтобы неделя начиналась с понедельника
+    let startOffset = firstDay.getDay() - 1;
+    if (startOffset < 0) startOffset = 6; // если воскресенье
+
+    // Заполняем пустые ячейки до первого дня
+    for (let i = 0; i < startOffset; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'calendar-day calendar-day--other-month';
+        calendarGrid.appendChild(empty);
+    }
+
+    // Дни месяца
+    const today = new Date();
+    const todayDate = today.getDate();
+    const todayMonth = today.getMonth();
+    const todayYear = today.getFullYear();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day';
+        dayEl.textContent = d;
+
+        // Подсветка сегодняшнего дня
+        if (d === todayDate && month === todayMonth && year === todayYear) {
+            dayEl.classList.add('calendar-day--today');
         }
-      }
 
-      // Профиль
-      function renderProfile(container) {
-        const bmi = userData.weight / ((userData.height/100) ** 2);
-        let bmiZone = '';
-        if (bmi < 18.5) bmiZone = 'Недостаточный вес';
-        else if (bmi < 25) bmiZone = 'Норма';
-        else if (bmi < 30) bmiZone = 'Избыточный вес';
-        else bmiZone = 'Ожирение';
-        
-        container.innerHTML = `
-          <h3>Профиль</h3>
-          <div class="profile-avatar-upload">
-            <div class="avatar" id="profileAvatar">${userData.avatar ? `<img src="${userData.avatar}">` : '<i class="fas fa-user-astronaut"></i>'}</div>
-            <button class="menu-item" id="uploadAvatarBtn"><i class="fas fa-camera"></i> Загрузить аватар</button>
-            <input type="file" id="avatarInput" accept="image/*" style="display:none">
-          </div>
-          <div class="form-group"><label>Имя</label><input type="text" id="profileName" value="${userData.name}"></div>
-          <div class="form-group"><label>Рост (см)</label><input type="number" id="profileHeight" value="${userData.height}"></div>
-          <div class="form-group"><label>Вес (кг)</label><input type="number" id="profileWeight" value="${userData.weight}"></div>
-          <div class="form-group"><label>Возраст</label><input type="number" id="profileAge" value="${userData.age}"></div>
-          <div class="form-group"><label>Пол</label><select id="profileGender"><option value="male" ${userData.gender==='male'?'selected':''}>Мужской</option><option value="female" ${userData.gender==='female'?'selected':''}>Женский</option></select></div>
-          <div class="form-group">
-            <label>Навыки (через запятую)</label>
-            <input type="text" id="profileSkills" value="${userData.skills.join(', ')}">
-            <div class="skills-list">${userData.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
-          </div>
-          <div class="bmi-result">
-            <strong>ИМТ: ${bmi.toFixed(1)}</strong> — ${bmiZone}
-          </div>
-          <button class="add-btn" id="saveProfile">Сохранить профиль</button>
-        `;
-        
-        document.getElementById('uploadAvatarBtn').addEventListener('click', () => document.getElementById('avatarInput').click());
-        document.getElementById('avatarInput').addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              userData.avatar = ev.target.result;
-              document.getElementById('profileAvatar').innerHTML = `<img src="${ev.target.result}">`;
-            };
-            reader.readAsDataURL(file);
-          }
-        });
-        
-        document.getElementById('saveProfile').addEventListener('click', () => {
-          userData.name = document.getElementById('profileName').value;
-          userData.height = +document.getElementById('profileHeight').value;
-          userData.weight = +document.getElementById('profileWeight').value;
-          userData.age = +document.getElementById('profileAge').value;
-          userData.gender = document.getElementById('profileGender').value;
-          userData.skills = document.getElementById('profileSkills').value.split(',').map(s => s.trim()).filter(s => s);
-          localStorage.setItem('userData', JSON.stringify(userData));
-          updateUI();
-          alert('Профиль сохранён!');
-        });
-      }
+        // TODO: добавить маркеры задач (кружочки)
+        // if (hasTask(year, month, d)) { dayEl.dataset.hasTask = 'true'; }
 
-      // Практики
-      function renderPractices(container) {
-        container.innerHTML = `
-          <h3>Практики</h3>
-          <div id="practicesList"></div>
-          <button class="add-btn" id="addPracticeBtn"><i class="fas fa-plus"></i> Добавить практику</button>
-        `;
-        
-        const listDiv = document.getElementById('practicesList');
-        practices.forEach((p, i) => {
-          const deadline = new Date(p.deadlineDate);
-          const remaining = Math.max(0, Math.ceil((deadline - new Date()) / (1000*60*60*24)));
-          listDiv.innerHTML += `
-            <div class="practice-card">
-              <div>
-                <strong>${p.name}</strong> <span class="category-badge">${p.category}</span>
-                <div style="font-size:12px; color:var(--text-secondary);">${p.duration} мин · ${remaining} дн. осталось</div>
-                <div style="font-size:12px;">Напоминание: ${p.reminder}</div>
-              </div>
-              <div>
-                <button class="menu-item" onclick="window.completePractice(${i})"><i class="fas fa-check"></i></button>
-                <button class="menu-item" onclick="window.deletePractice(${i})"><i class="fas fa-trash"></i></button>
-              </div>
-            </div>`;
-        });
-        
-        document.getElementById('addPracticeBtn').addEventListener('click', () => openPracticeModal());
-      }
+        calendarGrid.appendChild(dayEl);
+    }
 
-      function openPracticeModal(practice = null) {
-        editPracticeId = practice ? practices.indexOf(practice) : null;
-        document.getElementById('practiceModalTitle').textContent = practice ? 'Редактировать практику' : 'Новая практика';
-        document.getElementById('practiceName').value = practice?.name || '';
-        document.getElementById('practiceCategory').value = practice?.category || 'sport';
-        document.getElementById('practiceDuration').value = practice?.duration || 30;
-        document.getElementById('practiceReminder').value = practice?.reminder || '09:00';
-        
-        if (practice?.deadlineDays) {
-          document.getElementById('practiceDeadline').value = 'custom';
-          document.getElementById('customDays').value = practice.deadlineDays;
-          document.getElementById('customDaysGroup').style.display = 'block';
+    // Заголовок месяца
+    const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    monthTitle.textContent = `${monthNames[month]} ${year}`;
+}
+
+/**
+ * Переключает месяц (вперёд/назад)
+ */
+function changeMonth(delta) {
+    currentDate.setMonth(currentDate.getMonth() + delta);
+    renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
+}
+
+// ============================================
+// 3. ПЕРЕКЛЮЧЕНИЕ ТЕМЫ (День/Ночь)
+// ============================================
+
+const themeToggle = document.getElementById('themeToggle');
+const htmlElement = document.documentElement;
+
+/** Текущая тема: 'light' или 'dark' */
+let currentTheme = localStorage.getItem('skillquest_theme') || 'light';
+
+function applyTheme(theme) {
+    htmlElement.setAttribute('data-theme', theme);
+    themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+    localStorage.setItem('skillquest_theme', theme);
+    currentTheme = theme;
+}
+
+themeToggle.addEventListener('click', () => {
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    applyTheme(newTheme);
+});
+
+// ============================================
+// 4. МЕНЮ (САЙДБАР)
+// ============================================
+
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+function openSidebar() {
+    sidebar.classList.add('sidebar--open');
+}
+
+function closeSidebar() {
+    sidebar.classList.remove('sidebar--open');
+}
+
+menuToggle.addEventListener('click', openSidebar);
+overlay.addEventListener('click', closeSidebar);
+
+// Закрытие по Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
+});
+
+// ============================================
+// 5. ОБРАБОТЧИКИ ПУНКТОВ МЕНЮ (заглушки)
+// ============================================
+
+document.querySelectorAll('.sidebar__item').forEach(item => {
+    item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        console.log(`📱 Открыт пункт: ${page}`);
+        closeSidebar();
+        // TODO: открыть соответствующее модальное окно
+        alert(`Пункт "${page}" — будет реализован позже`);
+    });
+});
+
+// ============================================
+// 6. ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ КАЛЕНДАРЯ
+// ============================================
+
+document.querySelectorAll('.calendar-mode__btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Снимаем активный класс со всех
+        document.querySelectorAll('.calendar-mode__btn').forEach(b => {
+            b.classList.remove('calendar-mode__btn--active');
+        });
+        btn.classList.add('calendar-mode__btn--active');
+
+        const mode = btn.dataset.mode;
+        currentMode = mode;
+        console.log(`📅 Режим календаря: ${mode}`);
+
+        // TODO: реализовать переключение между Day/Week/Month/Year
+        if (mode === 'month') {
+            renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
         } else {
-          document.getElementById('practiceDeadline').value = '30';
-          document.getElementById('customDaysGroup').style.display = 'none';
+            // Заглушка для других режимов
+            alert(`Режим "${mode}" в разработке`);
         }
-        practiceModal.classList.add('active');
-      }
+    });
+});
 
-      document.getElementById('practiceDeadline').addEventListener('change', function() {
-        document.getElementById('customDaysGroup').style.display = this.value === 'custom' ? 'block' : 'none';
-      });
+// ============================================
+// 7. ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+// ============================================
 
-      document.getElementById('savePractice').addEventListener('click', () => {
-        const name = document.getElementById('practiceName').value;
-        if (!name) return alert('Введите название');
-        
-        const deadlineVal = document.getElementById('practiceDeadline').value;
-        const days = deadlineVal === 'custom' ? +document.getElementById('customDays').value : +deadlineVal;
-        const deadlineDate = new Date();
-        deadlineDate.setDate(deadlineDate.getDate() + days);
-        
-        const practice = {
-          name,
-          category: document.getElementById('practiceCategory').value,
-          duration: +document.getElementById('practiceDuration').value,
-          deadlineDays: days,
-          deadlineDate: deadlineDate.toISOString(),
-          reminder: document.getElementById('practiceReminder').value,
-          completedMinutes: 0,
-          createdAt: new Date().toISOString()
-        };
-        
-        if (editPracticeId !== null) {
-          practices[editPracticeId] = { ...practices[editPracticeId], ...practice };
-        } else {
-          practices.push(practice);
-        }
-        
-        localStorage.setItem('practices', JSON.stringify(practices));
-        practiceModal.classList.remove('active');
-        updateUI();
-        renderPractices(document.getElementById('viewPractices'));
-      });
+function initApp() {
+    // Загружаем данные пользователя
+    loadUserData();
 
-      document.getElementById('cancelPractice').addEventListener('click', () => practiceModal.classList.remove('active'));
+    // Применяем сохранённую тему
+    applyTheme(currentTheme);
 
-      window.completePractice = function(index) {
-        practices[index].completedMinutes += practices[index].duration;
-        userData.xp += Math.floor(practices[index].duration * 0.01);
-        if (userData.xp >= userData.xpToNext) {
-          userData.level++;
-          userData.xp -= userData.xpToNext;
-          userData.xpToNext = Math.floor(userData.xpToNext * 1.5);
-        }
-        localStorage.setItem('practices', JSON.stringify(practices));
-        localStorage.setItem('userData', JSON.stringify(userData));
-        updateUI();
-        renderPractices(document.getElementById('viewPractices'));
-      };
+    // Рендерим календарь на текущий месяц
+    renderMonthCalendar(currentDate.getFullYear(), currentDate.getMonth());
 
-      window.deletePractice = function(index) {
-        if (confirm('Удалить практику?')) {
-          practices.splice(index, 1);
-          localStorage.setItem('practices', JSON.stringify(practices));
-          updateUI();
-          renderPractices(document.getElementById('viewPractices'));
-        }
-      };
+    // Навигация по месяцам
+    document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+    document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
 
-      // Галерея
-      function renderGallery(container) {
-        container.innerHTML = `
-          <h3>Галерея</h3>
-          <div class="upload-section" id="galleryUpload" style="background:var(--bg); border:2px dashed var(--border); border-radius:12px; padding:20px; text-align:center; cursor:pointer;">
-            <i class="fas fa-cloud-upload-alt fa-2x"></i><p>Загрузить фото</p>
-          </div>
-          <input type="file" id="galleryInput" accept="image/*" multiple style="display:none">
-          <div class="gallery-grid" id="galleryGrid"></div>
-        `;
-        
-        document.getElementById('galleryUpload').addEventListener('click', () => document.getElementById('galleryInput').click());
-        document.getElementById('galleryInput').addEventListener('change', (e) => {
-          Array.from(e.target.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              galleryImages.push({
-                data: ev.target.result,
-                date: new Date().toLocaleDateString('ru-RU'),
-                caption: ''
-              });
-              localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
-              renderGalleryGrid();
-            };
-            reader.readAsDataURL(file);
-          });
-        });
-        
-        renderGalleryGrid();
-      }
+    console.log('🚀 SkillQuest запущен!');
+    console.log(`👤 Пользователь: ${userData.name}, Уровень: ${userData.level}`);
+}
 
-      function renderGalleryGrid() {
-        const grid = document.getElementById('galleryGrid');
-        if (!grid) return;
-        grid.innerHTML = galleryImages.map((img, i) => `
-          <div class="gallery-item">
-            <img src="${img.data}" class="gallery-image">
-            <div class="gallery-info">${img.date}</div>
-          </div>
-        `).join('');
-      }
-
-      // Настройки
-      function renderSettings(container) {
-        container.innerHTML = `
-          <h3>Настройки</h3>
-          <button class="menu-item" id="settingsTheme"><i class="fas fa-moon"></i> Дневной/Ночной режим</button>
-          <button class="menu-item" id="exportData"><i class="fas fa-download"></i> Выгрузить данные</button>
-          <button class="menu-item" id="importData"><i class="fas fa-upload"></i> Загрузить данные</button>
-          <button class="menu-item" id="syncTest"><i class="fas fa-heart-pulse"></i> Синхр. с часами (тест)</button>
-        `;
-        document.getElementById('settingsTheme').addEventListener('click', toggleTheme);
-        document.getElementById('exportData').addEventListener('click', () => {
-          const data = JSON.stringify({ userData, practices, galleryImages });
-          const blob = new Blob([data], {type: 'application/json'});
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url; a.download = 'planner_backup.json'; a.click();
-        });
-        document.getElementById('importData').addEventListener('click', () => {
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.accept = '.json';
-          input.onchange = (e) => {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              const data = JSON.parse(ev.target.result);
-              userData = data.userData; practices = data.practices; galleryImages = data.galleryImages;
-              localStorage.setItem('userData', JSON.stringify(userData));
-              localStorage.setItem('practices', JSON.stringify(practices));
-              localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
-              updateUI();
-              alert('Данные загружены!');
-            };
-            reader.readAsText(e.target.files[0]);
-          };
-          input.click();
-        });
-        document.getElementById('syncTest').addEventListener('click', () => alert('Тест синхронизации...'));
-      }
-
-      // Инфо
-      function renderInfo(container) {
-        container.innerHTML = `
-          <h3>RPG система</h3>
-          <p>🎯 0.01 XP за минуту практики</p>
-          <p>⭐ Систематичность приносит ачивки</p>
-          <p>📅 Календарь фиксирует прогресс</p>
-          <p>🏆 Эмблемы за серии выполненных практик</p>
-        `;
-      }
-
-      // Календарь
-      function renderCalendar() {
-        const grid = document.getElementById('daysGrid');
-        if (!grid) return;
-        grid.innerHTML = '';
-        const startDay = 2; // среда
-        const today = 21;
-        const practiceDays = practices.map(p => new Date(p.deadlineDate).getDate());
-        
-        for (let i = 0; i < startDay; i++) {
-          const empty = document.createElement('div');
-          empty.className = 'day-cell';
-          empty.style.visibility = 'hidden';
-          grid.appendChild(empty);
-        }
-        for (let d = 1; d <= 31; d++) {
-          const dayDiv = document.createElement('div');
-          dayDiv.className = 'day-cell';
-          if (d === today) dayDiv.classList.add('today');
-          if (practiceDays.includes(d)) dayDiv.classList.add('has-practice');
-          dayDiv.textContent = d;
-          grid.appendChild(dayDiv);
-        }
-      }
-
-      // Инициализация
-      updateUI();
-      renderCalendar();
-      if (body.classList.contains('dark')) themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-    })();
-  </script>
-</body>
-</html>
+// Запускаем приложение после загрузки DOM
+document.addEventListener('DOMContentLoaded', initApp);
