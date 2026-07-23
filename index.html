@@ -72,6 +72,7 @@
             position: sticky;
             top: 8px;
             z-index: 10;
+            gap: 8px;
         }
 
         .header__menu-btn {
@@ -81,6 +82,7 @@
             cursor: pointer;
             color: var(--text);
             padding: 4px 8px;
+            flex-shrink: 0;
         }
 
         .header__user {
@@ -121,12 +123,38 @@
             font-weight: 700;
         }
 
-        .header__theme {
+        .header__actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .header__btn {
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
             padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            color: var(--text);
+        }
+
+        .header__btn:hover {
+            background: var(--border);
+        }
+
+        .header__btn--today {
+            font-size: 16px;
+            font-weight: 600;
+            padding: 4px 12px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 8px;
+        }
+
+        .header__btn--today:hover {
+            background: var(--accent-hover);
         }
 
         /* ============================================
@@ -253,6 +281,37 @@
             font-size: 14px;
             font-weight: 700;
             line-height: 1;
+        }
+
+        /* Шилд с количеством задач */
+        .calendar__badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .calendar__badge--done {
+            background: var(--success);
+        }
+
+        .calendar__badge--missed {
+            background: var(--danger);
+        }
+
+        .calendar__badge--mixed {
+            background: var(--warning);
+            color: var(--text);
         }
 
         /* ============================================
@@ -460,76 +519,61 @@
         }
 
         /* ============================================
-           ЗАДАЧИ
+           ЗАДАЧИ (упрощённый список)
            ============================================ */
-        .task-item {
+        .task-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
             background: var(--bg);
             border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
             border-left: 4px solid var(--accent);
         }
 
-        .task-item--done {
-            border-left-color: var(--success);
-            opacity: 0.8;
+        .task-list-item:hover {
+            background: var(--border);
         }
 
-        .task-item__title {
-            font-weight: 600;
-            font-size: 16px;
+        .task-list-item--done {
+            border-left-color: var(--success);
+            opacity: 0.7;
+        }
+
+        .task-list-item--missed {
+            border-left-color: var(--danger);
+        }
+
+        .task-list-item__title {
+            font-weight: 500;
+            font-size: 15px;
             color: var(--text);
         }
 
-        .task-item__desc {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-top: 4px;
+        .task-list-item__status {
+            font-size: 18px;
         }
 
-        .task-item__meta {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 6px;
-        }
-
-        .task-item__actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
-        .task-item__btn {
-            padding: 6px 14px;
+        .task-list-item__delete {
+            background: none;
             border: none;
-            border-radius: 8px;
-            font-size: 13px;
+            font-size: 18px;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .task-item__btn--complete {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .task-item__btn--complete:hover {
-            background: var(--accent-hover);
-        }
-
-        .task-item__btn--done {
-            background: var(--success);
-            color: #fff;
-        }
-
-        .task-item__btn--delete {
-            background: rgba(225, 112, 85, 0.15);
             color: var(--danger);
+            padding: 0 4px;
         }
 
-        .task-item__btn--delete:hover {
-            background: rgba(225, 112, 85, 0.25);
+        .task-list-item__delete:hover {
+            transform: scale(1.2);
+        }
+
+        .task-empty {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-secondary);
         }
 
         /* ============================================
@@ -607,9 +651,11 @@
         @media (max-width: 480px) {
             .header__name { font-size: 14px; }
             .header__level { font-size: 12px; }
+            .header__btn--today { font-size: 13px; padding: 4px 8px; }
             .modal { padding: 20px; }
             .calendar__day { font-size: 14px; }
             .modes__btn { padding: 6px 14px; font-size: 12px; }
+            .calendar__badge { width: 16px; height: 16px; font-size: 8px; top: -3px; right: -3px; }
             
             .calendar__grid[style*="display:block"] [style*="grid-template-columns:60px 1fr"] {
                 grid-template-columns: 40px 1fr !important;
@@ -648,7 +694,10 @@
             </div>
         </div>
 
-        <button class="header__theme" id="themeBtn">🌙</button>
+        <div class="header__actions">
+            <button class="header__btn header__btn--today" id="todayBtn">📅 Сегодня</button>
+            <button class="header__btn" id="themeBtn">🌙</button>
+        </div>
     </header>
 
     <!-- ==========================================
@@ -775,6 +824,17 @@
     </div>
 
     <!-- ==========================================
+    МОДАЛЬНОЕ ОКНО РЕДАКТОРА ЗАДАЧИ
+    ========================================== -->
+    <div class="modal-overlay" id="taskEditorModal">
+        <div class="modal">
+            <button class="modal__close" onclick="closeTaskEditor()">✕</button>
+            <h2 class="modal__title" id="editorTitle">📋 Редактор задачи</h2>
+            <div class="modal__content" id="editorContent"></div>
+        </div>
+    </div>
+
+    <!-- ==========================================
     JAVASCRIPT
     ========================================== -->
     <script>
@@ -855,54 +915,48 @@
             });
         }
 
-        // ============================================
-        // НОВАЯ ФУНКЦИЯ: СТАТУС ЗАДАЧИ НА ДАТУ
-        // ============================================
         function getTaskStatusForDate(task, dateStr) {
             const today = new Date().toISOString().split('T')[0];
-            const isScheduled = dateStr >= task.start && dateStr <= task.end && task.schedule.includes(new Date(dateStr + 'T00:00:00').getDay());
-            
-            if (!isScheduled) return null; // задача не запланирована на этот день
-            
+            const isScheduled = dateStr >= task.start && dateStr <= task.end && task.schedule.includes(new Date(dateStr +
+                'T00:00:00').getDay());
+
+            if (!isScheduled) return null;
+
             const isDone = task.done.includes(dateStr);
-            
+
             if (isDone) {
-                return 'done'; // ✅ выполнена
+                return 'done';
             }
-            
-            // Если дата прошла, но задача не выполнена — пропущена
+
             if (dateStr < today) {
-                return 'missed'; // ❌ пропущена
+                return 'missed';
             }
-            
-            // Если дата сегодня или в будущем — запланирована
-            return 'planned'; // ⏳ запланирована
+
+            return 'planned';
         }
 
         function getMarkerForDate(dateStr) {
             const dayTasks = getTasksForDate(dateStr);
             if (dayTasks.length === 0) return null;
-            
+
             let hasDone = false;
             let hasMissed = false;
             let hasPlanned = false;
-            
+
             dayTasks.forEach(task => {
                 const status = getTaskStatusForDate(task, dateStr);
                 if (status === 'done') hasDone = true;
                 else if (status === 'missed') hasMissed = true;
                 else if (status === 'planned') hasPlanned = true;
             });
-            
-            // Приоритет: если есть пропущенные — показываем красный
-            if (hasMissed) return { text: '❌', color: 'var(--danger)', status: 'missed' };
-            // Если все выполнены — зелёный
-            if (hasDone && !hasMissed && !hasPlanned) return { text: '✅', color: 'var(--success)', status: 'done' };
-            // Если есть и выполненные, и запланированные — жёлтый
-            if (hasDone && hasPlanned) return { text: '⏳', color: 'var(--warning)', status: 'mixed' };
-            // Если только запланированные — жёлтый
-            if (hasPlanned) return { text: '●', color: 'var(--warning)', status: 'planned' };
-            
+
+            if (hasMissed) return { text: '❌', color: 'var(--danger)', status: 'missed', count: dayTasks.length };
+            if (hasDone && !hasMissed && !hasPlanned) return { text: '✅', color: 'var(--success)', status: 'done',
+                count: dayTasks.length };
+            if (hasDone && hasPlanned) return { text: '⏳', color: 'var(--warning)', status: 'mixed', count: dayTasks
+                    .length };
+            if (hasPlanned) return { text: '●', color: 'var(--warning)', status: 'planned', count: dayTasks.length };
+
             return null;
         }
 
@@ -952,7 +1006,69 @@
         }
 
         // ============================================
-        // 3. ГАЛЕРЕЯ
+        // 3. РЕДАКТОР ЗАДАЧИ
+        // ============================================
+        function openTaskEditor(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            const today = new Date().toISOString().split('T')[0];
+            const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+            const scheduleStr = task.schedule.map(d => days[d]).join(', ');
+            const statuses = task.done.map(d => '✅ ' + d).join('\n') || 'Нет выполненных';
+
+            const content = `
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:20px;font-weight:700;color:var(--text);">${task.title}</div>
+                    <div style="color:var(--text-secondary);margin-top:4px;">${task.desc || 'Без описания'}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
+                        <div style="font-size:12px;color:var(--text-secondary);">⏱️ Длительность</div>
+                        <div style="font-weight:600;">${task.duration} мин</div>
+                    </div>
+                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
+                        <div style="font-size:12px;color:var(--text-secondary);">🕐 Время</div>
+                        <div style="font-weight:600;">${task.time}</div>
+                    </div>
+                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
+                        <div style="font-size:12px;color:var(--text-secondary);">📅 Начало</div>
+                        <div style="font-weight:600;">${task.start}</div>
+                    </div>
+                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
+                        <div style="font-size:12px;color:var(--text-secondary);">📅 Конец</div>
+                        <div style="font-weight:600;">${task.end}</div>
+                    </div>
+                </div>
+                <div style="background:var(--bg);padding:8px;border-radius:8px;margin-bottom:12px;">
+                    <div style="font-size:12px;color:var(--text-secondary);">📆 Расписание</div>
+                    <div style="font-weight:600;">${scheduleStr}</div>
+                </div>
+                <div style="background:var(--bg);padding:8px;border-radius:8px;margin-bottom:12px;">
+                    <div style="font-size:12px;color:var(--text-secondary);">✅ Выполнено (${task.done.length} раз)</div>
+                    <div style="font-weight:600;font-size:13px;white-space:pre-wrap;">${statuses}</div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="form-btn" onclick="completeTask(${task.id}, '${today}')" style="flex:1;">
+                        ✅ Выполнить сегодня
+                    </button>
+                    <button class="form-btn" onclick="deleteTask(${task.id}); closeTaskEditor();" style="flex:0;background:var(--danger);">
+                        🗑️
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('editorTitle').textContent = '📋 ' + task.title;
+            document.getElementById('editorContent').innerHTML = content;
+            document.getElementById('taskEditorModal').classList.add('modal-overlay--open');
+        }
+
+        function closeTaskEditor() {
+            document.getElementById('taskEditorModal').classList.remove('modal-overlay--open');
+        }
+
+        // ============================================
+        // 4. ГАЛЕРЕЯ
         // ============================================
         let gallery = [];
 
@@ -1002,7 +1118,7 @@
         }
 
         // ============================================
-        // 4. КАЛЕНДАРЬ И РЕЖИМЫ
+        // 5. КАЛЕНДАРЬ И РЕЖИМЫ
         // ============================================
         let currentDate = new Date();
         let currentMode = 'month';
@@ -1011,7 +1127,7 @@
         ];
 
         // ============================================
-        // РЕЖИМ МЕСЯЦ (ОСНОВНОЙ)
+        // РЕЖИМ МЕСЯЦ
         // ============================================
         function renderMonthView() {
             const grid = document.getElementById('calendarGrid');
@@ -1054,9 +1170,7 @@
                     day.classList.add('calendar__day--today');
                 }
 
-                // ============================================
-                // НОВАЯ ЛОГИКА МАРКЕРОВ
-                // ============================================
+                // Маркер статуса
                 const markerData = getMarkerForDate(dateStr);
                 if (markerData) {
                     const marker = document.createElement('span');
@@ -1066,22 +1180,37 @@
                     day.appendChild(marker);
                 }
 
-                day.addEventListener('click', function() {
-                    const tasks = getTasksForDate(dateStr);
-                    if (tasks.length === 0) {
-                        alert('📭 На этот день нет задач');
-                        return;
+                // Шилд с количеством задач
+                const dayTasks = getTasksForDate(dateStr);
+                if (dayTasks.length > 0) {
+                    const badge = document.createElement('span');
+                    badge.className = 'calendar__badge';
+                    badge.textContent = dayTasks.length;
+
+                    // Цвет шилда в зависимости от статуса
+                    if (markerData) {
+                        if (markerData.status === 'done') badge.classList.add('calendar__badge--done');
+                        else if (markerData.status === 'missed') badge.classList.add('calendar__badge--missed');
+                        else if (markerData.status === 'mixed' || markerData.status === 'planned') badge.classList.add(
+                            'calendar__badge--mixed');
                     }
-                    let msg = '📋 Задачи на ' + dateStr + ':\n\n';
-                    tasks.forEach(t => {
-                        const status = getTaskStatusForDate(t, dateStr);
-                        let icon = '⬜';
-                        if (status === 'done') icon = '✅';
-                        else if (status === 'missed') icon = '❌';
-                        else if (status === 'planned') icon = '⏳';
-                        msg += icon + ' ' + t.title + ' (' + t.duration + ' мин)\n';
+                    day.appendChild(badge);
+                }
+
+                // КЛИК ПО ДНЮ → ОТКРЫВАЕМ РЕЖИМ ДЕНЬ
+                day.addEventListener('click', function() {
+                    // Переключаемся на режим День
+                    currentMode = 'day';
+                    currentDate = new Date(dateStr + 'T00:00:00');
+
+                    // Обновляем активную кнопку
+                    document.querySelectorAll('.modes__btn').forEach(b => {
+                        b.classList.remove('modes__btn--active');
                     });
-                    alert(msg);
+                    document.querySelector('.modes__btn[data-mode="day"]').classList.add('modes__btn--active');
+
+                    document.getElementById('monthTitle').textContent = '📅 День';
+                    renderDayView(currentDate);
                 });
 
                 grid.appendChild(day);
@@ -1102,10 +1231,10 @@
         function renderDayView(date) {
             const grid = document.getElementById('calendarGrid');
             const dateStr = date.toISOString().split('T')[0];
-            
+
             grid.style.cssText = 'display:block;';
             grid.innerHTML = '';
-            
+
             const title = document.createElement('div');
             title.style.cssText = `
                 text-align:center;
@@ -1119,9 +1248,9 @@
             const weekdays = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
             title.textContent = '📅 ' + weekdays[date.getDay()] + ', ' + dateStr;
             grid.appendChild(title);
-            
+
             const dayTasks = getTasksForDate(dateStr);
-            
+
             if (dayTasks.length === 0) {
                 const empty = document.createElement('div');
                 empty.style.cssText = `
@@ -1134,15 +1263,15 @@
                 grid.appendChild(empty);
                 return;
             }
-            
+
             dayTasks.sort((a, b) => a.time.localeCompare(b.time));
-            
+
             const container = document.createElement('div');
             container.style.cssText = 'display:flex;flex-direction:column;gap:4px;';
-            
+
             for (let hour = 6; hour <= 23; hour++) {
                 const hourStr = String(hour).padStart(2, '0') + ':00';
-                
+
                 const row = document.createElement('div');
                 row.style.cssText = `
                     display:grid;
@@ -1150,7 +1279,7 @@
                     gap:8px;
                     align-items:start;
                 `;
-                
+
                 const timeLabel = document.createElement('div');
                 timeLabel.style.cssText = `
                     padding:8px 4px;
@@ -1163,7 +1292,7 @@
                     border-radius:6px 0 0 6px;
                 `;
                 timeLabel.textContent = hourStr;
-                
+
                 const content = document.createElement('div');
                 content.style.cssText = `
                     padding:6px 10px;
@@ -1172,21 +1301,25 @@
                     border-radius:0 6px 6px 0;
                     min-height:46px;
                 `;
-                
+
                 const hourTasks = dayTasks.filter(t => {
                     const taskHour = parseInt(t.time.split(':')[0]);
                     return taskHour === hour;
                 });
-                
+
                 if (hourTasks.length > 0) {
                     hourTasks.forEach(task => {
                         const status = getTaskStatusForDate(task, dateStr);
                         let bgColor = 'var(--accent)';
                         let icon = '';
-                        if (status === 'done') { bgColor = 'var(--success)'; icon = '✅'; }
-                        else if (status === 'missed') { bgColor = 'var(--danger)'; icon = '❌'; }
-                        else if (status === 'planned') { bgColor = 'var(--warning)'; icon = '⏳'; }
-                        
+                        let clickable = true;
+                        if (status === 'done') { bgColor = 'var(--success)';
+                            icon = '✅';
+                            clickable = false; } else if (status === 'missed') { bgColor = 'var(--danger)';
+                            icon = '❌';
+                            clickable = false; } else if (status === 'planned') { bgColor = 'var(--warning)';
+                            icon = '⏳'; }
+
                         const taskEl = document.createElement('div');
                         taskEl.style.cssText = `
                             padding:6px 10px;
@@ -1198,7 +1331,7 @@
                             display:flex;
                             justify-content:space-between;
                             align-items:center;
-                            cursor:${status === 'done' || status === 'missed' ? 'default' : 'pointer'};
+                            cursor:${clickable ? 'pointer' : 'default'};
                             transition:opacity 0.2s;
                             word-break:break-word;
                         `;
@@ -1208,7 +1341,7 @@
                                 ${task.duration}мин
                             </span>
                         `;
-                        if (status === 'planned') {
+                        if (clickable) {
                             taskEl.onclick = function() {
                                 completeTask(task.id, dateStr);
                             };
@@ -1230,12 +1363,12 @@
                     emptyText.textContent = '—';
                     content.appendChild(emptyText);
                 }
-                
+
                 row.appendChild(timeLabel);
                 row.appendChild(content);
                 container.appendChild(row);
             }
-            
+
             grid.appendChild(container);
         }
 
@@ -1244,10 +1377,10 @@
         // ============================================
         function renderWeekView(startDate) {
             const grid = document.getElementById('calendarGrid');
-            
+
             grid.style.cssText = 'display:block;';
             grid.innerHTML = '';
-            
+
             const headerRow = document.createElement('div');
             headerRow.style.cssText = `
                 display:grid;
@@ -1255,10 +1388,10 @@
                 gap:4px;
                 margin-bottom:8px;
             `;
-            
+
             const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
             const today = new Date().toISOString().split('T')[0];
-            
+
             for (let i = 0; i < 7; i++) {
                 const header = document.createElement('div');
                 header.style.cssText = `
@@ -1274,7 +1407,7 @@
                 const date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
                 const dateStr = date.toISOString().split('T')[0];
-                
+
                 header.innerHTML = `
                     <div>${weekdays[i]}</div>
                     <div style="font-weight:400;font-size:10px;color:var(--text-secondary);">
@@ -1289,7 +1422,7 @@
                 headerRow.appendChild(header);
             }
             grid.appendChild(headerRow);
-            
+
             const dayTasks = [];
             for (let i = 0; i < 7; i++) {
                 const date = new Date(startDate);
@@ -1298,7 +1431,7 @@
                 const tasks = getTasksForDate(dateStr);
                 dayTasks.push({ date: dateStr, tasks: tasks });
             }
-            
+
             const hasTasks = dayTasks.some(d => d.tasks.length > 0);
             if (!hasTasks) {
                 const empty = document.createElement('div');
@@ -1312,9 +1445,9 @@
                 grid.appendChild(empty);
                 return;
             }
-            
+
             const maxTasks = Math.max(...dayTasks.map(d => d.tasks.length), 1);
-            
+
             for (let row = 0; row < maxTasks; row++) {
                 const rowEl = document.createElement('div');
                 rowEl.style.cssText = `
@@ -1323,7 +1456,7 @@
                     gap:4px;
                     margin-bottom:4px;
                 `;
-                
+
                 for (let col = 0; col < 7; col++) {
                     const cell = document.createElement('div');
                     cell.style.cssText = `
@@ -1335,23 +1468,27 @@
                         overflow:hidden;
                         text-overflow:ellipsis;
                     `;
-                    
+
                     const dayData = dayTasks[col];
                     const task = dayData.tasks[row];
-                    
+
                     if (task) {
                         const status = getTaskStatusForDate(task, dayData.date);
                         let bgColor = 'var(--accent)';
                         let icon = '●';
-                        if (status === 'done') { bgColor = 'var(--success)'; icon = '✅'; }
-                        else if (status === 'missed') { bgColor = 'var(--danger)'; icon = '❌'; }
-                        else if (status === 'planned') { bgColor = 'var(--warning)'; icon = '⏳'; }
-                        
+                        let clickable = true;
+                        if (status === 'done') { bgColor = 'var(--success)';
+                            icon = '✅';
+                            clickable = false; } else if (status === 'missed') { bgColor = 'var(--danger)';
+                            icon = '❌';
+                            clickable = false; } else if (status === 'planned') { bgColor = 'var(--warning)';
+                            icon = '⏳'; }
+
                         cell.style.cssText += `
                             background:${bgColor};
                             color:${status === 'planned' ? 'var(--text)' : 'white'};
                             padding:4px 6px;
-                            cursor:${status === 'done' || status === 'missed' ? 'default' : 'pointer'};
+                            cursor:${clickable ? 'pointer' : 'default'};
                             transition:opacity 0.2s;
                             font-size:11px;
                         `;
@@ -1364,7 +1501,7 @@
                                 <span>${task.duration}мин</span>
                             </div>
                         `;
-                        if (status === 'planned') {
+                        if (clickable) {
                             cell.onclick = function() {
                                 completeTask(task.id, dayData.date);
                             };
@@ -1385,7 +1522,7 @@
                         `;
                         cell.textContent = '·';
                     }
-                    
+
                     rowEl.appendChild(cell);
                 }
                 grid.appendChild(rowEl);
@@ -1397,17 +1534,18 @@
         // ============================================
         function renderYearView(year) {
             const grid = document.getElementById('calendarGrid');
-            
+
             grid.style.cssText = `
                 display:grid;
                 grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
                 gap:8px;
             `;
             grid.innerHTML = '';
-            
+
             const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн',
-                               'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
-            
+                'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
+            ];
+
             for (let month = 0; month < 12; month++) {
                 const monthContainer = document.createElement('div');
                 monthContainer.style.cssText = `
@@ -1418,7 +1556,7 @@
                     border:2px solid transparent;
                     min-width:0;
                 `;
-                
+
                 const header = document.createElement('div');
                 header.style.cssText = `
                     font-weight:600;
@@ -1429,13 +1567,13 @@
                 `;
                 header.textContent = monthNames[month];
                 monthContainer.appendChild(header);
-                
+
                 const lastDay = new Date(year, month + 1, 0);
                 let totalTasks = 0;
                 let completedTasks = 0;
                 let missedTasks = 0;
                 let plannedTasks = 0;
-                
+
                 for (let d = 1; d <= lastDay.getDate(); d++) {
                     const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
                     const dayTasks = getTasksForDate(dateStr);
@@ -1447,10 +1585,9 @@
                         else if (status === 'planned') plannedTasks++;
                     });
                 }
-                
+
                 const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                
-                // Цвет бара зависит от соотношения выполненных/пропущенных
+
                 let barColor = 'var(--border)';
                 if (totalTasks > 0) {
                     if (missedTasks > 0 && completedTasks === 0) barColor = 'var(--danger)';
@@ -1458,7 +1595,7 @@
                     else if (completedTasks === totalTasks) barColor = 'var(--success)';
                     else barColor = 'var(--warning)';
                 }
-                
+
                 const barContainer = document.createElement('div');
                 barContainer.style.cssText = `
                     height:6px;
@@ -1467,7 +1604,7 @@
                     overflow:hidden;
                     margin-bottom:4px;
                 `;
-                
+
                 const bar = document.createElement('div');
                 bar.style.cssText = `
                     height:100%;
@@ -1478,7 +1615,7 @@
                 `;
                 barContainer.appendChild(bar);
                 monthContainer.appendChild(barContainer);
-                
+
                 const stats = document.createElement('div');
                 stats.style.cssText = `
                     display:flex;
@@ -1492,19 +1629,19 @@
                     <span>❌ ${missedTasks}</span>
                 `;
                 monthContainer.appendChild(stats);
-                
+
                 const today = new Date();
                 if (year === today.getFullYear() && month === today.getMonth()) {
                     monthContainer.style.borderColor = 'var(--accent)';
                     monthContainer.style.background = 'var(--bg)';
                 }
-                
+
                 grid.appendChild(monthContainer);
             }
         }
 
         // ============================================
-        // 5. ПРОДУКТИВНОСТЬ
+        // 6. ПРОДУКТИВНОСТЬ
         // ============================================
         function updateProductivity() {
             const today = new Date();
@@ -1532,47 +1669,45 @@
 
             const pct = total > 0 ? Math.round(done / total * 100) : 0;
             document.getElementById('productivityText').textContent =
-                '✅ ' + done + ' выполнено · ⏳ ' + planned + ' запланировано · ❌ ' + missed + ' пропущено (' + pct + '%)';
+                '✅ ' + done + ' выполнено · ⏳ ' + planned + ' запланировано · ❌ ' + missed + ' пропущено (' + pct +
+                '%)';
         }
 
         // ============================================
-        // 6. ОТРИСОВКА ЗАДАЧ И ГАЛЕРЕИ
+        // 7. ОТРИСОВКА ЗАДАЧ (УПРОЩЁННЫЙ СПИСОК)
         // ============================================
         function renderTasks() {
             const container = document.getElementById('tasksContainer');
             if (!container) return;
 
             if (tasks.length === 0) {
-                container.innerHTML =
-                    '<div style="text-align:center;padding:30px 0;color:var(--text-secondary);">📋 Нет задач</div>';
+                container.innerHTML = `
+                    <div class="task-empty">
+                        <div style="font-size:48px;margin-bottom:8px;">📋</div>
+                        <div>Нет задач</div>
+                        <div style="font-size:14px;">Добавь свою первую задачу!</div>
+                    </div>
+                `;
                 return;
             }
 
             const today = new Date().toISOString().split('T')[0];
-            const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
             let html = '';
 
             tasks.forEach(t => {
-                const doneToday = t.done.includes(today);
-                const schedule = t.schedule.map(d => days[d]).join(', ');
+                const status = getTaskStatusForDate(t, today);
+                let statusIcon = '●';
+                let statusClass = '';
+                if (status === 'done') { statusIcon = '✅';
+                    statusClass = 'task-list-item--done'; } else if (status === 'missed') { statusIcon = '❌';
+                    statusClass = 'task-list-item--missed'; } else if (status === 'planned') { statusIcon = '⏳'; }
 
                 html += `
-                    <div class="task-item ${doneToday ? 'task-item--done' : ''}">
-                        <div class="task-item__title">${t.title} ${doneToday ? '✅' : ''}</div>
-                        <div class="task-item__desc">${t.desc}</div>
-                        <div class="task-item__meta">
-                            ⏱️ ${t.duration} мин · 🕐 ${t.time} · 📅 ${t.start} → ${t.end}
-                        </div>
-                        <div class="task-item__meta">📆 ${schedule} · Выполнено: ${t.done.length} раз</div>
-                        <div class="task-item__actions">
-                            ${!doneToday ? `
-                                <button class="task-item__btn task-item__btn--complete" onclick="completeTask(${t.id}, '${today}')">
-                                    ✅ Выполнить
-                                </button>
-                            ` : `
-                                <span class="task-item__btn task-item__btn--done">✅ Готово</span>
-                            `}
-                            <button class="task-item__btn task-item__btn--delete" onclick="deleteTask(${t.id})">🗑️</button>
+                    <div class="task-list-item ${statusClass}" onclick="openTaskEditor(${t.id})">
+                        <span class="task-list-item__title">${t.title}</span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="task-list-item__status">${statusIcon}</span>
+                            <button class="task-list-item__delete" onclick="event.stopPropagation(); deleteTask(${t.id})">✕</button>
                         </div>
                     </div>
                 `;
@@ -1581,6 +1716,9 @@
             container.innerHTML = html;
         }
 
+        // ============================================
+        // 8. ГАЛЕРЕЯ
+        // ============================================
         function renderGallery() {
             const container = document.getElementById('galleryContainer');
             if (!container) return;
@@ -1641,7 +1779,7 @@
         }
 
         // ============================================
-        // 7. МОДАЛЬНЫЕ ОКНА
+        // 9. МОДАЛЬНЫЕ ОКНА
         // ============================================
         function openModal(title, content) {
             document.getElementById('modalTitle').textContent = title;
@@ -1654,7 +1792,7 @@
         }
 
         // ============================================
-        // 8. ДОБАВЛЕНИЕ ЗАДАЧИ
+        // 10. ДОБАВЛЕНИЕ ЗАДАЧИ
         // ============================================
         function openAddTask() {
             const today = new Date().toISOString().split('T')[0];
@@ -1705,7 +1843,7 @@
         }
 
         // ============================================
-        // 9. ДОБАВЛЕНИЕ ФОТО
+        // 11. ДОБАВЛЕНИЕ ФОТО
         // ============================================
         function openAddPhoto() {
             document.getElementById('addPhotoModal').classList.add('modal-overlay--open');
@@ -1755,7 +1893,7 @@
         }
 
         // ============================================
-        // 10. ПРОФИЛЬ
+        // 12. ПРОФИЛЬ
         // ============================================
         function calculateBMI(weight, height) {
             if (!weight || !height || height === 0) return null;
@@ -1917,7 +2055,7 @@
         }
 
         // ============================================
-        // 11. ПУНКТЫ МЕНЮ
+        // 13. ПУНКТЫ МЕНЮ
         // ============================================
         function openTasks() {
             openModal('📋 Задачи', getTasksHTML());
@@ -1961,7 +2099,7 @@
         }
 
         // ============================================
-        // 12. ТЕМА
+        // 14. ТЕМА И КНОПКА "СЕГОДНЯ"
         // ============================================
         function toggleTheme() {
             const html = document.documentElement;
@@ -1981,18 +2119,40 @@
             document.getElementById('themeBtn').textContent = theme === 'light' ? '🌙' : '☀️';
         }
 
+        function goToToday() {
+            const today = new Date();
+            currentDate = today;
+
+            // Если в режиме месяц — просто перерисовываем
+            if (currentMode === 'month') {
+                renderMonthView();
+            } else {
+                // Переключаемся на месяц
+                currentMode = 'month';
+                document.querySelectorAll('.modes__btn').forEach(b => {
+                    b.classList.remove('modes__btn--active');
+                });
+                document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
+                document.getElementById('monthTitle').textContent = months[today.getMonth()] + ' ' + today.getFullYear();
+                renderMonthView();
+            }
+        }
+
         // ============================================
-        // 13. ОБРАБОТЧИКИ
+        // 15. ОБРАБОТЧИКИ
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             loadUser();
             loadTasks();
             loadGallery();
-            
+
             currentMode = 'month';
             document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
             renderMonthView();
+
+            // Кнопка "Сегодня"
+            document.getElementById('todayBtn').addEventListener('click', goToToday);
 
             document.getElementById('prevMonth').addEventListener('click', function() {
                 switch (currentMode) {
@@ -2099,12 +2259,14 @@
                             titleEl.textContent = '📅 Неделя';
                             const today2 = new Date();
                             const weekStart = new Date(today2);
-                            weekStart.setDate(today2.getDate() - today2.getDay() + (today2.getDay() === 0 ? -6 : 1));
+                            weekStart.setDate(today2.getDate() - today2.getDay() + (today2.getDay() === 0 ? -6 :
+                            1));
                             currentDate = weekStart;
                             renderWeekView(weekStart);
                             break;
                         case 'month':
-                            titleEl.textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+                            titleEl.textContent = months[currentDate.getMonth()] + ' ' + currentDate
+                            .getFullYear();
                             renderMonthView();
                             break;
                         case 'year':
@@ -2141,6 +2303,9 @@
         window.closeModal = closeModal;
         window.updateProfileField = updateProfileField;
         window.handleAvatarUpload = handleAvatarUpload;
+        window.openTaskEditor = openTaskEditor;
+        window.closeTaskEditor = closeTaskEditor;
+        window.goToToday = goToToday;
     </script>
 
 </body>
