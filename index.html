@@ -313,13 +313,8 @@
             color: var(--text);
         }
 
-        .calendar__badge--override {
-            background: var(--accent);
-            border: 2px solid var(--warning);
-        }
-
         /* ============================================
-           РЕЖИМ ДЕНЬ
+           РЕЖИМ ДЕНЬ — ДОПОЛНИТЕЛЬНЫЕ СТИЛИ
            ============================================ */
         .day-view__add-btn {
             display: block;
@@ -371,15 +366,6 @@
             flex-direction: column;
             align-items: stretch;
             padding: 4px 6px;
-        }
-
-        .task-override-badge {
-            font-size: 10px;
-            background: var(--warning);
-            color: var(--text);
-            padding: 1px 6px;
-            border-radius: 10px;
-            margin-left: 4px;
         }
 
         /* ============================================
@@ -569,14 +555,6 @@
 
         .form-btn:hover {
             background: var(--accent-hover);
-        }
-
-        .form-btn--danger {
-            background: var(--danger);
-        }
-
-        .form-btn--danger:hover {
-            background: #c0392b;
         }
 
         .checkbox-group {
@@ -900,7 +878,7 @@
     </div>
 
     <!-- ==========================================
-    МОДАЛЬНОЕ ОКНО РЕДАКТОРА ЗАДАЧИ (ДЛЯ КОНКРЕТНОГО ДНЯ)
+    МОДАЛЬНОЕ ОКНО РЕДАКТОРА ЗАДАЧИ
     ========================================== -->
     <div class="modal-overlay" id="taskEditorModal">
         <div class="modal">
@@ -950,7 +928,7 @@
         }
 
         // ============================================
-        // 2. ЗАДАЧИ С ПЕРЕОПРЕДЕЛЕНИЯМИ
+        // 2. ЗАДАЧИ
         // ============================================
         let tasks = [];
 
@@ -972,8 +950,7 @@
                     time: '08:00',
                     start: today,
                     end: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-                    done: [],
-                    overrides: {}
+                    done: []
                 }];
                 saveTasks();
             }
@@ -983,30 +960,13 @@
             localStorage.setItem('tasks', JSON.stringify(tasks));
         }
 
-        function getTaskForDate(task, dateStr) {
-            const d = new Date(dateStr + 'T00:00:00');
+        function getTasksForDate(date) {
+            const d = new Date(date + 'T00:00:00');
             const day = d.getDay();
-            if (dateStr < task.start || dateStr > task.end) return null;
-            if (!task.schedule.includes(day)) return null;
-
-            const override = task.overrides && task.overrides[dateStr];
-            return {
-                ...task,
-                time: override ? override.time : task.time,
-                duration: override ? override.duration : task.duration,
-                isOverridden: !!override
-            };
-        }
-
-        function getTasksForDate(dateStr) {
-            const result = [];
-            tasks.forEach(task => {
-                const taskForDate = getTaskForDate(task, dateStr);
-                if (taskForDate) {
-                    result.push(taskForDate);
-                }
+            return tasks.filter(t => {
+                if (date < t.start || date > t.end) return false;
+                return t.schedule.includes(day);
             });
-            return result;
         }
 
         function getTaskStatusForDate(task, dateStr) {
@@ -1037,10 +997,8 @@
             let hasMissed = false;
             let hasPlanned = false;
 
-            dayTasks.forEach(taskWithOverride => {
-                const originalTask = tasks.find(t => t.id === taskWithOverride.id);
-                if (!originalTask) return;
-                const status = getTaskStatusForDate(originalTask, dateStr);
+            dayTasks.forEach(task => {
+                const status = getTaskStatusForDate(task, dateStr);
                 if (status === 'done') hasDone = true;
                 else if (status === 'missed') hasMissed = true;
                 else if (status === 'planned') hasPlanned = true;
@@ -1066,8 +1024,7 @@
                 time: time || '12:00',
                 start: start || new Date().toISOString().split('T')[0],
                 end: end || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-                done: [],
-                overrides: {}
+                done: []
             });
             saveTasks();
             renderAll();
@@ -1082,10 +1039,7 @@
             }
             task.done.push(date);
 
-            const override = task.overrides && task.overrides[date];
-            const duration = override ? override.duration : task.duration;
-
-            const exp = Math.round(duration * 0.01 * 100) / 100;
+            const exp = Math.round(task.duration * 0.01 * 100) / 100;
             user.exp += exp;
             while (user.exp >= user.level) {
                 user.exp -= user.level;
@@ -1106,35 +1060,65 @@
         }
 
         // ============================================
-        // 3. ПЕРЕОПРЕДЕЛЕНИЕ ЗАДАЧИ НА ДАТУ
+        // 3. РЕДАКТОР ЗАДАЧИ
         // ============================================
-        function updateTaskOverride(taskId, dateStr, time, duration) {
+        function openTaskEditor(taskId) {
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
 
-            if (!task.overrides) task.overrides = {};
+            const today = new Date().toISOString().split('T')[0];
+            const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+            const scheduleStr = task.schedule.map(d => days[d]).join(', ');
+            const statuses = task.done.map(d => '✅ ' + d).join('\n') || 'Нет выполненных';
 
-            if (time && duration) {
-                task.overrides[dateStr] = {
-                    time: time,
-                    duration: parseInt(duration)
-                };
-            } else {
-                delete task.overrides[dateStr];
-            }
+            const content = `
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:20px;font-weight:700;color:var(--text);">${task.title}</div>
+                    <div style="color:var(--text-secondary);margin-top:4px;">${task.desc || 'Без описания'}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
+                        <div style="font-size:12px;color:var(--text-secondary);">⏱️ Длительность</div>
+                        <div style="font-weight:600;">${task.duration} мин</div>
+                    </div>
+                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
+                        <div style="font-size:12px;color:var(--text-secondary);">🕐 Время</div>
+                        <div style="font-weight:600;">${task.time}</div>
+                    </div>
+                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
+                        <div style="font-size:12px;color:var(--text-secondary);">📅 Начало</div>
+                        <div style="font-weight:600;">${task.start}</div>
+                    </div>
+                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
+                        <div style="font-size:12px;color:var(--text-secondary);">📅 Конец</div>
+                        <div style="font-weight:600;">${task.end}</div>
+                    </div>
+                </div>
+                <div style="background:var(--bg);padding:8px;border-radius:8px;margin-bottom:12px;">
+                    <div style="font-size:12px;color:var(--text-secondary);">📆 Расписание</div>
+                    <div style="font-weight:600;">${scheduleStr}</div>
+                </div>
+                <div style="background:var(--bg);padding:8px;border-radius:8px;margin-bottom:12px;">
+                    <div style="font-size:12px;color:var(--text-secondary);">✅ Выполнено (${task.done.length} раз)</div>
+                    <div style="font-weight:600;font-size:13px;white-space:pre-wrap;">${statuses}</div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="form-btn" onclick="completeTask(${task.id}, '${today}')" style="flex:1;">
+                        ✅ Выполнить сегодня
+                    </button>
+                    <button class="form-btn" onclick="deleteTask(${task.id}); closeTaskEditor();" style="flex:0;background:var(--danger);">
+                        🗑️
+                    </button>
+                </div>
+            `;
 
-            saveTasks();
-            renderAll();
+            document.getElementById('editorTitle').textContent = '📋 ' + task.title;
+            document.getElementById('editorContent').innerHTML = content;
+            document.getElementById('taskEditorModal').classList.add('modal-overlay--open');
         }
 
-        function clearTaskOverride(taskId, dateStr) {
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) return;
-            if (task.overrides && task.overrides[dateStr]) {
-                delete task.overrides[dateStr];
-                saveTasks();
-                renderAll();
-            }
+        function closeTaskEditor() {
+            document.getElementById('taskEditorModal').classList.remove('modal-overlay--open');
         }
 
         // ============================================
@@ -1255,11 +1239,6 @@
                     badge.className = 'calendar__badge';
                     badge.textContent = dayTasks.length;
 
-                    const hasOverride = dayTasks.some(t => t.isOverridden);
-                    if (hasOverride) {
-                        badge.classList.add('calendar__badge--override');
-                    }
-
                     if (markerData) {
                         if (markerData.status === 'done') badge.classList.add('calendar__badge--done');
                         else if (markerData.status === 'missed') badge.classList.add('calendar__badge--missed');
@@ -1295,7 +1274,7 @@
         }
 
         // ============================================
-        // РЕЖИМ ДЕНЬ
+        // РЕЖИМ ДЕНЬ (ОБНОВЛЁННЫЙ)
         // ============================================
         function renderDayView(date) {
             const grid = document.getElementById('calendarGrid');
@@ -1341,6 +1320,7 @@
                 empty.textContent = '📭 Нет задач на этот день';
                 grid.appendChild(empty);
 
+                // Показываем пустые часы для добавления
                 for (let hour = 6; hour <= 23; hour++) {
                     const hourStr = String(hour).padStart(2, '0') + ':00';
                     const row = document.createElement('div');
@@ -1450,7 +1430,7 @@
                 if (hourTasks.length > 0) {
                     content.style.opacity = '1';
                     hourTasks.forEach(task => {
-                        const status = getTaskStatusForDate(tasks.find(t => t.id === task.id), dateStr);
+                        const status = getTaskStatusForDate(task, dateStr);
                         let bgColor = 'var(--accent)';
                         let icon = '';
                         let clickable = true;
@@ -1475,30 +1455,31 @@
                             transition:opacity 0.2s;
                             word-break:break-word;
                         `;
-
-                        const overrideBadge = task.isOverridden ?
-                            `<span class="task-override-badge">⚡изменено</span>` :
-                            '';
-
                         taskEl.innerHTML = `
-                            <span style="flex:1;display:flex;align-items:center;gap:4px;">
-                                ${icon} ${task.title}
-                                ${overrideBadge}
-                            </span>
-                            <span style="font-size:11px;opacity:0.8;margin-left:8px;flex-shrink:0;display:flex;align-items:center;gap:4px;">
+                            <span style="flex:1;">${icon} ${task.title}</span>
+                            <span style="font-size:11px;opacity:0.8;margin-left:8px;flex-shrink:0;">
                                 ${task.duration}мин
-                                ${task.isOverridden ? '✏️' : ''}
                             </span>
                         `;
-
-                        taskEl.onclick = function(e) {
-                            e.stopPropagation();
-                            openTaskEditorForDate(task.id, dateStr);
-                        };
-
+                        if (clickable) {
+                            taskEl.onclick = function(e) {
+                                e.stopPropagation();
+                                completeTask(task.id, dateStr);
+                            };
+                        } else if (status === 'missed') {
+                            taskEl.onclick = function(e) {
+                                e.stopPropagation();
+                                alert('❌ Задача пропущена! Нельзя выполнить задним числом.');
+                            };
+                        } else {
+                            taskEl.onclick = function(e) {
+                                e.stopPropagation();
+                            };
+                        }
                         content.appendChild(taskEl);
                     });
                 } else {
+                    // Пустой час — кликабельный для добавления
                     const emptyText = document.createElement('div');
                     emptyText.style.cssText = `
                         color:var(--text-secondary);
@@ -1517,7 +1498,9 @@
                     content.appendChild(emptyText);
                 }
 
+                // Клик по всему ряду для добавления задачи
                 row.onclick = function(e) {
+                    // Если кликнули не по кнопке внутри
                     if (!e.target.closest('button') && !e.target.closest('.task-item__btn')) {
                         openAddTaskForDate(dateStr, hourStr);
                     }
@@ -1632,8 +1615,7 @@
                     const task = dayData.tasks[row];
 
                     if (task) {
-                        const originalTask = tasks.find(t => t.id === task.id);
-                        const status = getTaskStatusForDate(originalTask, dayData.date);
+                        const status = getTaskStatusForDate(task, dayData.date);
                         let bgColor = 'var(--accent)';
                         let icon = '●';
                         let clickable = true;
@@ -1653,9 +1635,8 @@
                             font-size:11px;
                         `;
                         cell.innerHTML = `
-                            <div style="font-weight:500;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px;">
+                            <div style="font-weight:500;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                 ${icon} ${task.title}
-                                ${task.isOverridden ? '⚡' : ''}
                             </div>
                             <div style="font-size:9px;opacity:0.8;display:flex;justify-content:space-between;">
                                 <span>${task.time}</span>
@@ -1740,8 +1721,7 @@
                     const dayTasks = getTasksForDate(dateStr);
                     totalTasks += dayTasks.length;
                     dayTasks.forEach(task => {
-                        const originalTask = tasks.find(t => t.id === task.id);
-                        const status = getTaskStatusForDate(originalTask, dateStr);
+                        const status = getTaskStatusForDate(task, dateStr);
                         if (status === 'done') completedTasks++;
                         else if (status === 'missed') missedTasks++;
                         else if (status === 'planned') plannedTasks++;
@@ -1821,9 +1801,8 @@
                 const dateStr = date.toISOString().split('T')[0];
                 const dayTasks = getTasksForDate(dateStr);
                 total += dayTasks.length;
-                dayTasks.forEach(task => {
-                    const originalTask = tasks.find(t => t.id === task.id);
-                    const status = getTaskStatusForDate(originalTask, dateStr);
+                dayTasks.forEach(t => {
+                    const status = getTaskStatusForDate(t, dateStr);
                     if (status === 'done') done++;
                     else if (status === 'missed') missed++;
                     else if (status === 'planned') planned++;
@@ -1837,83 +1816,42 @@
         }
 
         // ============================================
-        // 7. РЕДАКТОР ЗАДАЧИ ДЛЯ КОНКРЕТНОГО ДНЯ
+        // 7. ДОБАВЛЕНИЕ ЗАДАЧИ С КОНКРЕТНОЙ ДАТЫ/ВРЕМЕНИ
         // ============================================
-        function openTaskEditorForDate(taskId, dateStr) {
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) return;
+        let pendingTaskDate = null;
+        let pendingTaskTime = null;
 
-            const override = task.overrides && task.overrides[dateStr];
-            const currentTime = override ? override.time : task.time;
-            const currentDuration = override ? override.duration : task.duration;
+        function openAddTaskForDate(dateStr, timeStr) {
+            pendingTaskDate = dateStr;
+            pendingTaskTime = timeStr || '08:00';
 
-            const content = `
-                <div style="margin-bottom:12px;">
-                    <div style="font-size:20px;font-weight:700;color:var(--text);">${task.title}</div>
-                    <div style="color:var(--text-secondary);margin-top:4px;">${task.desc || 'Без описания'}</div>
-                    <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
-                        📅 ${dateStr} ${override ? '⚡ изменено' : ''}
-                    </div>
-                </div>
+            // Устанавливаем даты
+            document.getElementById('taskStart').value = dateStr;
+            document.getElementById('taskEnd').value = new Date(new Date(dateStr).getTime() + 30 * 86400000)
+            .toISOString().split('T')[0];
+            document.getElementById('taskTime').value = pendingTaskTime;
 
-                <div class="form-group">
-                    <label class="form-label">🕐 Время на этот день</label>
-                    <input class="form-input" id="editorTime" type="time" value="${currentTime}">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">⏱️ Длительность на этот день (мин)</label>
-                    <input class="form-input" id="editorDuration" type="number" value="${currentDuration}" min="1">
-                </div>
-
-                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                    <button class="form-btn" style="flex:1;" onclick="saveTaskOverride(${task.id}, '${dateStr}')">
-                        💾 Сохранить для этого дня
-                    </button>
-                    ${override ? `
-                        <button class="form-btn form-btn--danger" style="flex:0;" onclick="clearTaskOverride(${task.id}, '${dateStr}'); closeTaskEditor();">
-                            ↩️ Сбросить
-                        </button>
-                    ` : ''}
-                </div>
-
-                <hr style="border-color:var(--border);margin:12px 0;">
-
-                <div style="display:flex;gap:8px;">
-                    <button class="form-btn" onclick="completeTask(${task.id}, '${dateStr}'); closeTaskEditor();" style="flex:1;background:var(--success);">
-                        ✅ Выполнить сегодня
-                    </button>
-                    <button class="form-btn form-btn--danger" onclick="deleteTask(${task.id}); closeTaskEditor();" style="flex:0;">
-                        🗑️
-                    </button>
-                </div>
-            `;
-
-            document.getElementById('editorTitle').textContent = '📋 ' + task.title + ' — ' + dateStr;
-            document.getElementById('editorContent').innerHTML = content;
-            document.getElementById('taskEditorModal').classList.add('modal-overlay--open');
-        }
-
-        function saveTaskOverride(taskId, dateStr) {
-            const time = document.getElementById('editorTime').value;
-            const duration = document.getElementById('editorDuration').value;
-
-            if (!time) {
-                alert('Пожалуйста, выберите время');
-                return;
-            }
-            if (!duration || duration < 1) {
-                alert('Длительность должна быть больше 0');
-                return;
+            // Устанавливаем заголовок
+            const titleEl = document.getElementById('addTaskModalTitle');
+            if (timeStr) {
+                titleEl.textContent = '📝 Новая задача на ' + dateStr + ' в ' + timeStr;
+            } else {
+                titleEl.textContent = '📝 Новая задача на ' + dateStr;
             }
 
-            updateTaskOverride(taskId, dateStr, time, parseInt(duration));
-            closeTaskEditor();
-            alert('✅ Переопределение сохранено!');
-        }
+            // Очищаем поля
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskDuration').value = '30';
 
-        function closeTaskEditor() {
-            document.getElementById('taskEditorModal').classList.remove('modal-overlay--open');
+            // Отмечаем день недели для задачи
+            const dayOfWeek = new Date(dateStr + 'T00:00:00').getDay();
+            const checkboxes = document.querySelectorAll('#taskSchedule input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = (parseInt(cb.value) === dayOfWeek);
+            });
+
+            document.getElementById('addTaskModal').classList.add('modal-overlay--open');
         }
 
         // ============================================
@@ -1946,7 +1884,7 @@
                     statusClass = 'task-list-item--missed'; } else if (status === 'planned') { statusIcon = '⏳'; }
 
                 html += `
-                    <div class="task-list-item ${statusClass}" onclick="openTaskEditorForDate(${t.id}, '${today}')">
+                    <div class="task-list-item ${statusClass}" onclick="openTaskEditor(${t.id})">
                         <span class="task-list-item__title">${t.title}</span>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span class="task-list-item__status">${statusIcon}</span>
@@ -2035,40 +1973,8 @@
         }
 
         // ============================================
-        // 11. ДОБАВЛЕНИЕ ЗАДАЧИ
+        // 11. ДОБАВЛЕНИЕ ЗАДАЧИ (ОБНОВЛЁННОЕ)
         // ============================================
-        let pendingTaskDate = null;
-        let pendingTaskTime = null;
-
-        function openAddTaskForDate(dateStr, timeStr) {
-            pendingTaskDate = dateStr;
-            pendingTaskTime = timeStr || '08:00';
-
-            document.getElementById('taskStart').value = dateStr;
-            document.getElementById('taskEnd').value = new Date(new Date(dateStr).getTime() + 30 * 86400000)
-            .toISOString().split('T')[0];
-            document.getElementById('taskTime').value = pendingTaskTime;
-
-            const titleEl = document.getElementById('addTaskModalTitle');
-            if (timeStr) {
-                titleEl.textContent = '📝 Новая задача на ' + dateStr + ' в ' + timeStr;
-            } else {
-                titleEl.textContent = '📝 Новая задача на ' + dateStr;
-            }
-
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDesc').value = '';
-            document.getElementById('taskDuration').value = '30';
-
-            const dayOfWeek = new Date(dateStr + 'T00:00:00').getDay();
-            const checkboxes = document.querySelectorAll('#taskSchedule input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                cb.checked = (parseInt(cb.value) === dayOfWeek);
-            });
-
-            document.getElementById('addTaskModal').classList.add('modal-overlay--open');
-        }
-
         function openAddTask() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('taskStart').value = today;
@@ -2358,7 +2264,7 @@
                     📦 Импорт/экспорт данных
                 </p>
                 <p style="color:var(--text-secondary);font-size:13px;margin-top:12px;">
-                    Сделано с ❤️ Саша и Дэн AI
+                    Сделано с ❤️ Дэн и AI
                 </p>
             `);
         }
@@ -2579,11 +2485,8 @@
         window.closeModal = closeModal;
         window.updateProfileField = updateProfileField;
         window.handleAvatarUpload = handleAvatarUpload;
-        window.openTaskEditorForDate = openTaskEditorForDate;
+        window.openTaskEditor = openTaskEditor;
         window.closeTaskEditor = closeTaskEditor;
-        window.saveTaskOverride = saveTaskOverride;
-        window.clearTaskOverride = clearTaskOverride;
-        window.updateTaskOverride = updateTaskOverride;
         window.goToToday = goToToday;
     </script>
 
