@@ -605,13 +605,11 @@
             .calendar__day { font-size: 14px; }
             .modes__btn { padding: 6px 14px; font-size: 12px; }
             
-            /* Режим День */
             .calendar__grid[style*="display:block"] [style*="grid-template-columns:60px 1fr"] {
                 grid-template-columns: 40px 1fr !important;
                 gap: 4px !important;
             }
             
-            /* Режим Неделя */
             .calendar__grid[style*="display:block"] [style*="grid-template-columns:repeat(7,1fr)"] {
                 gap: 2px !important;
             }
@@ -621,7 +619,6 @@
                 padding: 3px 2px !important;
             }
             
-            /* Режим Год */
             .calendar__grid[style*="grid-template-columns:repeat(auto-fill, minmax(150px, 1fr))"] {
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
                 gap: 4px !important;
@@ -956,15 +953,26 @@
             'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
         ];
 
-        function renderCalendar() {
+        // ============================================
+        // РЕЖИМ МЕСЯЦ (ОСНОВНОЙ)
+        // ============================================
+        function renderMonthView() {
             const grid = document.getElementById('calendarGrid');
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
 
-            // Сохраняем заголовки дней недели
-            const weekdays = grid.querySelectorAll('.calendar__weekday');
+            // СБРАСЫВАЕМ ВСЕ СТИЛИ И ОЧИЩАЕМ
+            grid.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;';
             grid.innerHTML = '';
-            weekdays.forEach(el => grid.appendChild(el));
+
+            // Добавляем заголовки дней недели
+            const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            weekdays.forEach(name => {
+                const el = document.createElement('div');
+                el.className = 'calendar__weekday';
+                el.textContent = name;
+                grid.appendChild(el);
+            });
 
             const firstDay = new Date(year, month, 1);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -1025,7 +1033,7 @@
 
         function changeMonth(delta) {
             currentDate.setMonth(currentDate.getMonth() + delta);
-            renderCalendar();
+            renderMonthView();
         }
 
         // ============================================
@@ -1035,8 +1043,9 @@
             const grid = document.getElementById('calendarGrid');
             const dateStr = date.toISOString().split('T')[0];
             
-            grid.innerHTML = '';
+            // СБРАСЫВАЕМ ВСЕ СТИЛИ И ОЧИЩАЕМ
             grid.style.cssText = 'display:block;';
+            grid.innerHTML = '';
             
             const title = document.createElement('div');
             title.style.cssText = `
@@ -1168,8 +1177,10 @@
         // ============================================
         function renderWeekView(startDate) {
             const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
+            
+            // СБРАСЫВАЕМ ВСЕ СТИЛИ И ОЧИЩАЕМ
             grid.style.cssText = 'display:block;';
+            grid.innerHTML = '';
             
             const headerRow = document.createElement('div');
             headerRow.style.cssText = `
@@ -1312,12 +1323,14 @@
         // ============================================
         function renderYearView(year) {
             const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
+            
+            // СБРАСЫВАЕМ ВСЕ СТИЛИ И ОЧИЩАЕМ
             grid.style.cssText = `
                 display:grid;
                 grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
                 gap:8px;
             `;
+            grid.innerHTML = '';
             
             const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн',
                                'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
@@ -1516,7 +1529,7 @@
                     renderWeekView(currentDate);
                     break;
                 case 'month':
-                    renderCalendar();
+                    renderMonthView();
                     break;
                 case 'year':
                     renderYearView(currentDate.getFullYear());
@@ -1884,7 +1897,11 @@
             loadUser();
             loadTasks();
             loadGallery();
-            renderCalendar();
+            
+            // Устанавливаем начальный режим
+            currentMode = 'month';
+            document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
+            renderMonthView();
 
             document.getElementById('prevMonth').addEventListener('click', function() {
                 switch (currentMode) {
@@ -1997,7 +2014,7 @@
                             break;
                         case 'month':
                             titleEl.textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
-                            renderCalendar();
+                            renderMonthView();
                             break;
                         case 'year':
                             titleEl.textContent = '📅 ' + currentDate.getFullYear();
