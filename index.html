@@ -596,35 +596,26 @@
         }
 
         /* ============================================
-           АДАПТИВ ДЛЯ РЕЖИМОВ
+           АДАПТИВ
            ============================================ */
         @media (max-width: 480px) {
             .header__name { font-size: 14px; }
             .header__level { font-size: 12px; }
             .modal { padding: 20px; }
+            .calendar__day { font-size: 14px; }
+            .modes__btn { padding: 6px 14px; font-size: 12px; }
             
             /* Режим День */
-            .calendar__grid {
-                display: block !important;
-            }
-            .calendar__grid [style*="grid-template-columns:60px 1fr"] {
+            .calendar__grid[style*="display:block"] [style*="grid-template-columns:60px 1fr"] {
                 grid-template-columns: 40px 1fr !important;
                 gap: 4px !important;
             }
-            .calendar__grid [style*="padding:8px 4px"] {
-                font-size: 11px !important;
-                padding: 6px 2px !important;
-            }
             
             /* Режим Неделя */
-            .calendar__grid [style*="grid-template-columns:repeat(7,1fr)"] {
+            .calendar__grid[style*="display:block"] [style*="grid-template-columns:repeat(7,1fr)"] {
                 gap: 2px !important;
             }
-            .calendar__grid [style*="padding:8px 4px"] {
-                font-size: 11px !important;
-                padding: 4px 2px !important;
-            }
-            .calendar__grid [style*="min-height:40px"] {
+            .calendar__grid[style*="display:block"] [style*="min-height:40px"] {
                 min-height: 30px !important;
                 font-size: 10px !important;
                 padding: 3px 2px !important;
@@ -634,15 +625,6 @@
             .calendar__grid[style*="grid-template-columns:repeat(auto-fill, minmax(150px, 1fr))"] {
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
                 gap: 4px !important;
-            }
-            .calendar__grid [style*="padding:10px"] {
-                padding: 6px !important;
-            }
-            .calendar__grid [style*="font-size:13px"] {
-                font-size: 11px !important;
-            }
-            .calendar__grid [style*="font-size:10px"] {
-                font-size: 8px !important;
             }
         }
     </style>
@@ -976,11 +958,10 @@
 
         function renderCalendar() {
             const grid = document.getElementById('calendarGrid');
-            grid.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;';
-            
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
 
+            // Сохраняем заголовки дней недели
             const weekdays = grid.querySelectorAll('.calendar__weekday');
             grid.innerHTML = '';
             weekdays.forEach(el => grid.appendChild(el));
@@ -990,6 +971,7 @@
             let offset = firstDay.getDay() - 1;
             if (offset < 0) offset = 6;
 
+            // Пустые ячейки
             for (let i = 0; i < offset; i++) {
                 const empty = document.createElement('div');
                 empty.className = 'calendar__day calendar__day--other';
@@ -1047,7 +1029,7 @@
         }
 
         // ============================================
-        // РЕЖИМ ДЕНЬ (ИСПРАВЛЕННЫЙ)
+        // РЕЖИМ ДЕНЬ
         // ============================================
         function renderDayView(date) {
             const grid = document.getElementById('calendarGrid');
@@ -1182,7 +1164,7 @@
         }
 
         // ============================================
-        // РЕЖИМ НЕДЕЛЯ (ИСПРАВЛЕННЫЙ)
+        // РЕЖИМ НЕДЕЛЯ
         // ============================================
         function renderWeekView(startDate) {
             const grid = document.getElementById('calendarGrid');
@@ -1326,7 +1308,7 @@
         }
 
         // ============================================
-        // РЕЖИМ ГОД (ИСПРАВЛЕННЫЙ)
+        // РЕЖИМ ГОД
         // ============================================
         function renderYearView(year) {
             const grid = document.getElementById('calendarGrid');
