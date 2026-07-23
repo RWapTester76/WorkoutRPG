@@ -973,7 +973,7 @@
                     start: today,
                     end: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
                     done: [],
-                    overrides: {} // { "2026-01-15": { time: "09:00", duration: 45 } }
+                    overrides: {}
                 }];
                 saveTasks();
             }
@@ -989,7 +989,6 @@
             if (dateStr < task.start || dateStr > task.end) return null;
             if (!task.schedule.includes(day)) return null;
 
-            // Возвращаем задачу с учётом переопределения на эту дату
             const override = task.overrides && task.overrides[dateStr];
             return {
                 ...task,
@@ -1038,7 +1037,6 @@
             let hasMissed = false;
             let hasPlanned = false;
 
-            // Ищем оригинальные задачи по ID
             dayTasks.forEach(taskWithOverride => {
                 const originalTask = tasks.find(t => t.id === taskWithOverride.id);
                 if (!originalTask) return;
@@ -1084,7 +1082,6 @@
             }
             task.done.push(date);
 
-            // Используем длительность из переопределения или базовую
             const override = task.overrides && task.overrides[date];
             const duration = override ? override.duration : task.duration;
 
@@ -1123,7 +1120,6 @@
                     duration: parseInt(duration)
                 };
             } else {
-                // Удаляем переопределение
                 delete task.overrides[dateStr];
             }
 
@@ -1259,7 +1255,6 @@
                     badge.className = 'calendar__badge';
                     badge.textContent = dayTasks.length;
 
-                    // Проверяем, есть ли переопределения
                     const hasOverride = dayTasks.some(t => t.isOverridden);
                     if (hasOverride) {
                         badge.classList.add('calendar__badge--override');
@@ -1346,7 +1341,6 @@
                 empty.textContent = '📭 Нет задач на этот день';
                 grid.appendChild(empty);
 
-                // Показываем пустые часы для добавления
                 for (let hour = 6; hour <= 23; hour++) {
                     const hourStr = String(hour).padStart(2, '0') + ':00';
                     const row = document.createElement('div');
@@ -1497,7 +1491,6 @@
                             </span>
                         `;
 
-                        // Клик для редактирования задачи на этот день
                         taskEl.onclick = function(e) {
                             e.stopPropagation();
                             openTaskEditorForDate(task.id, dateStr);
@@ -1506,7 +1499,6 @@
                         content.appendChild(taskEl);
                     });
                 } else {
-                    // Пустой час — кликабельный для добавления
                     const emptyText = document.createElement('div');
                     emptyText.style.cssText = `
                         color:var(--text-secondary);
@@ -1524,6 +1516,12 @@
                     };
                     content.appendChild(emptyText);
                 }
+
+                row.onclick = function(e) {
+                    if (!e.target.closest('button') && !e.target.closest('.task-item__btn')) {
+                        openAddTaskForDate(dateStr, hourStr);
+                    }
+                };
 
                 row.appendChild(timeLabel);
                 row.appendChild(content);
@@ -2360,7 +2358,7 @@
                     📦 Импорт/экспорт данных
                 </p>
                 <p style="color:var(--text-secondary);font-size:13px;margin-top:12px;">
-                    Сделано с ❤️ Саша и AI
+                    Сделано с ❤️ Саша и Дэн AI
                 </p>
             `);
         }
