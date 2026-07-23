@@ -19,6 +19,7 @@
             --accent: #6c5ce7;
             --accent-hover: #5a4bd1;
             --success: #00b894;
+            --warning: #fdcb6e;
             --danger: #e17055;
             --radius: 16px;
         }
@@ -33,6 +34,9 @@
             --shadow: 0 2px 12px rgba(0,0,0,0.4);
             --accent: #a29bfe;
             --accent-hover: #8c85e6;
+            --success: #55efc4;
+            --warning: #fdcb6e;
+            --danger: #ff7675;
         }
 
         /* ============================================
@@ -246,7 +250,9 @@
         .calendar__marker {
             position: absolute;
             bottom: 2px;
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1;
         }
 
         /* ============================================
@@ -849,6 +855,57 @@
             });
         }
 
+        // ============================================
+        // НОВАЯ ФУНКЦИЯ: СТАТУС ЗАДАЧИ НА ДАТУ
+        // ============================================
+        function getTaskStatusForDate(task, dateStr) {
+            const today = new Date().toISOString().split('T')[0];
+            const isScheduled = dateStr >= task.start && dateStr <= task.end && task.schedule.includes(new Date(dateStr + 'T00:00:00').getDay());
+            
+            if (!isScheduled) return null; // задача не запланирована на этот день
+            
+            const isDone = task.done.includes(dateStr);
+            
+            if (isDone) {
+                return 'done'; // ✅ выполнена
+            }
+            
+            // Если дата прошла, но задача не выполнена — пропущена
+            if (dateStr < today) {
+                return 'missed'; // ❌ пропущена
+            }
+            
+            // Если дата сегодня или в будущем — запланирована
+            return 'planned'; // ⏳ запланирована
+        }
+
+        function getMarkerForDate(dateStr) {
+            const dayTasks = getTasksForDate(dateStr);
+            if (dayTasks.length === 0) return null;
+            
+            let hasDone = false;
+            let hasMissed = false;
+            let hasPlanned = false;
+            
+            dayTasks.forEach(task => {
+                const status = getTaskStatusForDate(task, dateStr);
+                if (status === 'done') hasDone = true;
+                else if (status === 'missed') hasMissed = true;
+                else if (status === 'planned') hasPlanned = true;
+            });
+            
+            // Приоритет: если есть пропущенные — показываем красный
+            if (hasMissed) return { text: '❌', color: 'var(--danger)', status: 'missed' };
+            // Если все выполнены — зелёный
+            if (hasDone && !hasMissed && !hasPlanned) return { text: '✅', color: 'var(--success)', status: 'done' };
+            // Если есть и выполненные, и запланированные — жёлтый
+            if (hasDone && hasPlanned) return { text: '⏳', color: 'var(--warning)', status: 'mixed' };
+            // Если только запланированные — жёлтый
+            if (hasPlanned) return { text: '●', color: 'var(--warning)', status: 'planned' };
+            
+            return null;
+        }
+
         function addTask(title, desc, duration, schedule, time, start, end) {
             tasks.push({
                 id: Date.now(),
@@ -961,11 +1018,9 @@
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
 
-            // СБРАСЫВАЕМ ВСЕ СТИЛИ И ОЧИЩАЕМ
             grid.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;';
             grid.innerHTML = '';
 
-            // Добавляем заголовки дней недели
             const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
             weekdays.forEach(name => {
                 const el = document.createElement('div');
@@ -979,7 +1034,6 @@
             let offset = firstDay.getDay() - 1;
             if (offset < 0) offset = 6;
 
-            // Пустые ячейки
             for (let i = 0; i < offset; i++) {
                 const empty = document.createElement('div');
                 empty.className = 'calendar__day calendar__day--other';
@@ -1000,13 +1054,15 @@
                     day.classList.add('calendar__day--today');
                 }
 
-                const dayTasks = getTasksForDate(dateStr);
-                if (dayTasks.length > 0) {
-                    const allDone = dayTasks.every(t => t.done.includes(dateStr));
+                // ============================================
+                // НОВАЯ ЛОГИКА МАРКЕРОВ
+                // ============================================
+                const markerData = getMarkerForDate(dateStr);
+                if (markerData) {
                     const marker = document.createElement('span');
                     marker.className = 'calendar__marker';
-                    marker.textContent = allDone ? '✅' : '●';
-                    marker.style.color = allDone ? 'var(--success)' : 'var(--accent)';
+                    marker.textContent = markerData.text;
+                    marker.style.color = markerData.color;
                     day.appendChild(marker);
                 }
 
@@ -1018,8 +1074,12 @@
                     }
                     let msg = '📋 Задачи на ' + dateStr + ':\n\n';
                     tasks.forEach(t => {
-                        const done = t.done.includes(dateStr) ? '✅' : '⬜';
-                        msg += done + ' ' + t.title + ' (' + t.duration + ' мин)\n';
+                        const status = getTaskStatusForDate(t, dateStr);
+                        let icon = '⬜';
+                        if (status === 'done') icon = '✅';
+                        else if (status === 'missed') icon = '❌';
+                        else if (status === 'planned') icon = '⏳';
+                        msg += icon + ' ' + t.title + ' (' + t.duration + ' мин)\n';
                     });
                     alert(msg);
                 });
@@ -1043,7 +1103,6 @@
             const grid = document.getElementById('calendarGrid');
             const dateStr = date.toISOString().split('T')[0];
             
-            // СБРАСЫВАЕМ ВСЕ СТИЛИ И ОЧИЩАЕМ
             grid.style.cssText = 'display:block;';
             grid.innerHTML = '';
             
@@ -1121,35 +1180,43 @@
                 
                 if (hourTasks.length > 0) {
                     hourTasks.forEach(task => {
-                        const isDone = task.done.includes(dateStr);
+                        const status = getTaskStatusForDate(task, dateStr);
+                        let bgColor = 'var(--accent)';
+                        let icon = '';
+                        if (status === 'done') { bgColor = 'var(--success)'; icon = '✅'; }
+                        else if (status === 'missed') { bgColor = 'var(--danger)'; icon = '❌'; }
+                        else if (status === 'planned') { bgColor = 'var(--warning)'; icon = '⏳'; }
+                        
                         const taskEl = document.createElement('div');
                         taskEl.style.cssText = `
                             padding:6px 10px;
                             margin-bottom:4px;
                             border-radius:8px;
-                            background:${isDone ? 'var(--success)' : 'var(--accent)'};
-                            color:white;
+                            background:${bgColor};
+                            color:${status === 'planned' ? 'var(--text)' : 'white'};
                             font-size:14px;
                             display:flex;
                             justify-content:space-between;
                             align-items:center;
-                            cursor:pointer;
+                            cursor:${status === 'done' || status === 'missed' ? 'default' : 'pointer'};
                             transition:opacity 0.2s;
                             word-break:break-word;
                         `;
                         taskEl.innerHTML = `
-                            <span style="flex:1;">${task.title}</span>
+                            <span style="flex:1;">${icon} ${task.title}</span>
                             <span style="font-size:12px;opacity:0.8;margin-left:8px;flex-shrink:0;">
-                                ${task.duration}мин ${isDone ? '✅' : ''}
+                                ${task.duration}мин
                             </span>
                         `;
-                        taskEl.onclick = function() {
-                            if (!isDone) {
+                        if (status === 'planned') {
+                            taskEl.onclick = function() {
                                 completeTask(task.id, dateStr);
-                            } else {
-                                alert('✅ Задача уже выполнена');
-                            }
-                        };
+                            };
+                        } else if (status === 'missed') {
+                            taskEl.onclick = function() {
+                                alert('❌ Задача пропущена! Нельзя выполнить задним числом.');
+                            };
+                        }
                         content.appendChild(taskEl);
                     });
                 } else {
@@ -1178,7 +1245,6 @@
         function renderWeekView(startDate) {
             const grid = document.getElementById('calendarGrid');
             
-            // СБРАСЫВАЕМ ВСЕ СТИЛИ И ОЧИЩАЕМ
             grid.style.cssText = 'display:block;';
             grid.innerHTML = '';
             
@@ -1274,31 +1340,39 @@
                     const task = dayData.tasks[row];
                     
                     if (task) {
-                        const isDone = task.done.includes(dayData.date);
+                        const status = getTaskStatusForDate(task, dayData.date);
+                        let bgColor = 'var(--accent)';
+                        let icon = '●';
+                        if (status === 'done') { bgColor = 'var(--success)'; icon = '✅'; }
+                        else if (status === 'missed') { bgColor = 'var(--danger)'; icon = '❌'; }
+                        else if (status === 'planned') { bgColor = 'var(--warning)'; icon = '⏳'; }
+                        
                         cell.style.cssText += `
-                            background:${isDone ? 'var(--success)' : 'var(--accent)'};
-                            color:white;
+                            background:${bgColor};
+                            color:${status === 'planned' ? 'var(--text)' : 'white'};
                             padding:4px 6px;
-                            cursor:pointer;
+                            cursor:${status === 'done' || status === 'missed' ? 'default' : 'pointer'};
                             transition:opacity 0.2s;
                             font-size:11px;
                         `;
                         cell.innerHTML = `
                             <div style="font-weight:500;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                ${task.title}
+                                ${icon} ${task.title}
                             </div>
                             <div style="font-size:9px;opacity:0.8;display:flex;justify-content:space-between;">
                                 <span>${task.time}</span>
-                                <span>${isDone ? '✅' : task.duration + 'мин'}</span>
+                                <span>${task.duration}мин</span>
                             </div>
                         `;
-                        cell.onclick = function() {
-                            if (!isDone) {
+                        if (status === 'planned') {
+                            cell.onclick = function() {
                                 completeTask(task.id, dayData.date);
-                            } else {
-                                alert('✅ Задача уже выполнена');
-                            }
-                        };
+                            };
+                        } else if (status === 'missed') {
+                            cell.onclick = function() {
+                                alert('❌ Задача пропущена!');
+                            };
+                        }
                     } else {
                         cell.style.cssText += `
                             color:var(--text-secondary);
@@ -1324,7 +1398,6 @@
         function renderYearView(year) {
             const grid = document.getElementById('calendarGrid');
             
-            // СБРАСЫВАЕМ ВСЕ СТИЛИ И ОЧИЩАЕМ
             grid.style.cssText = `
                 display:grid;
                 grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
@@ -1360,17 +1433,31 @@
                 const lastDay = new Date(year, month + 1, 0);
                 let totalTasks = 0;
                 let completedTasks = 0;
+                let missedTasks = 0;
+                let plannedTasks = 0;
                 
                 for (let d = 1; d <= lastDay.getDate(); d++) {
                     const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
                     const dayTasks = getTasksForDate(dateStr);
                     totalTasks += dayTasks.length;
                     dayTasks.forEach(task => {
-                        if (task.done.includes(dateStr)) completedTasks++;
+                        const status = getTaskStatusForDate(task, dateStr);
+                        if (status === 'done') completedTasks++;
+                        else if (status === 'missed') missedTasks++;
+                        else if (status === 'planned') plannedTasks++;
                     });
                 }
                 
                 const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                
+                // Цвет бара зависит от соотношения выполненных/пропущенных
+                let barColor = 'var(--border)';
+                if (totalTasks > 0) {
+                    if (missedTasks > 0 && completedTasks === 0) barColor = 'var(--danger)';
+                    else if (missedTasks > 0 && completedTasks > 0) barColor = 'var(--warning)';
+                    else if (completedTasks === totalTasks) barColor = 'var(--success)';
+                    else barColor = 'var(--warning)';
+                }
                 
                 const barContainer = document.createElement('div');
                 barContainer.style.cssText = `
@@ -1385,7 +1472,7 @@
                 bar.style.cssText = `
                     height:100%;
                     width:${pct}%;
-                    background:${pct >= 70 ? 'var(--success)' : pct >= 40 ? '#fdcb6e' : 'var(--danger)'};
+                    background:${barColor};
                     transition:width 0.5s;
                     border-radius:3px;
                 `;
@@ -1402,7 +1489,7 @@
                 stats.innerHTML = `
                     <span>📋 ${totalTasks}</span>
                     <span>✅ ${completedTasks}</span>
-                    <span>${pct}%</span>
+                    <span>❌ ${missedTasks}</span>
                 `;
                 monthContainer.appendChild(stats);
                 
@@ -1425,7 +1512,9 @@
             weekStart.setDate(today.getDate() - today.getDay());
 
             let total = 0,
-                done = 0;
+                done = 0,
+                missed = 0,
+                planned = 0;
 
             for (let i = 0; i < 7; i++) {
                 const date = new Date(weekStart);
@@ -1434,13 +1523,16 @@
                 const dayTasks = getTasksForDate(dateStr);
                 total += dayTasks.length;
                 dayTasks.forEach(t => {
-                    if (t.done.includes(dateStr)) done++;
+                    const status = getTaskStatusForDate(t, dateStr);
+                    if (status === 'done') done++;
+                    else if (status === 'missed') missed++;
+                    else if (status === 'planned') planned++;
                 });
             }
 
             const pct = total > 0 ? Math.round(done / total * 100) : 0;
             document.getElementById('productivityText').textContent =
-                'Выполнено ' + done + ' из ' + total + ' задач (' + pct + '%)';
+                '✅ ' + done + ' выполнено · ⏳ ' + planned + ' запланировано · ❌ ' + missed + ' пропущено (' + pct + '%)';
         }
 
         // ============================================
@@ -1898,7 +1990,6 @@
             loadTasks();
             loadGallery();
             
-            // Устанавливаем начальный режим
             currentMode = 'month';
             document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
             renderMonthView();
