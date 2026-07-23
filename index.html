@@ -283,7 +283,6 @@
             line-height: 1;
         }
 
-        /* Шилд с количеством задач */
         .calendar__badge {
             position: absolute;
             top: -4px;
@@ -312,6 +311,61 @@
         .calendar__badge--mixed {
             background: var(--warning);
             color: var(--text);
+        }
+
+        /* ============================================
+           РЕЖИМ ДЕНЬ — ДОПОЛНИТЕЛЬНЫЕ СТИЛИ
+           ============================================ */
+        .day-view__add-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .day-view__add-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .day-view__hour {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .day-view__hour:hover .day-view__hour-content {
+            background: var(--border);
+            border-radius: 6px;
+        }
+
+        .day-view__hour-content {
+            padding: 6px 10px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-card);
+            border-radius: 0 6px 6px 0;
+            min-height: 46px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            opacity: 0.4;
+        }
+
+        .day-view__hour-content--has-tasks {
+            opacity: 1;
+            justify-content: flex-start;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 4px 6px;
         }
 
         /* ============================================
@@ -762,7 +816,7 @@
     <div class="modal-overlay" id="addTaskModal">
         <div class="modal">
             <button class="modal__close" onclick="closeAddTask()">✕</button>
-            <h2 class="modal__title">📝 Новая задача</h2>
+            <h2 class="modal__title" id="addTaskModalTitle">📝 Новая задача</h2>
             <div class="modal__content">
                 <div class="form-group">
                     <label class="form-label">Название *</label>
@@ -1170,7 +1224,6 @@
                     day.classList.add('calendar__day--today');
                 }
 
-                // Маркер статуса
                 const markerData = getMarkerForDate(dateStr);
                 if (markerData) {
                     const marker = document.createElement('span');
@@ -1180,14 +1233,12 @@
                     day.appendChild(marker);
                 }
 
-                // Шилд с количеством задач
                 const dayTasks = getTasksForDate(dateStr);
                 if (dayTasks.length > 0) {
                     const badge = document.createElement('span');
                     badge.className = 'calendar__badge';
                     badge.textContent = dayTasks.length;
 
-                    // Цвет шилда в зависимости от статуса
                     if (markerData) {
                         if (markerData.status === 'done') badge.classList.add('calendar__badge--done');
                         else if (markerData.status === 'missed') badge.classList.add('calendar__badge--missed');
@@ -1197,13 +1248,10 @@
                     day.appendChild(badge);
                 }
 
-                // КЛИК ПО ДНЮ → ОТКРЫВАЕМ РЕЖИМ ДЕНЬ
                 day.addEventListener('click', function() {
-                    // Переключаемся на режим День
                     currentMode = 'day';
                     currentDate = new Date(dateStr + 'T00:00:00');
 
-                    // Обновляем активную кнопку
                     document.querySelectorAll('.modes__btn').forEach(b => {
                         b.classList.remove('modes__btn--active');
                     });
@@ -1226,7 +1274,7 @@
         }
 
         // ============================================
-        // РЕЖИМ ДЕНЬ
+        // РЕЖИМ ДЕНЬ (ОБНОВЛЁННЫЙ)
         // ============================================
         function renderDayView(date) {
             const grid = document.getElementById('calendarGrid');
@@ -1235,10 +1283,11 @@
             grid.style.cssText = 'display:block;';
             grid.innerHTML = '';
 
+            // Заголовок
             const title = document.createElement('div');
             title.style.cssText = `
                 text-align:center;
-                padding:8px 0 16px;
+                padding:8px 0 12px;
                 font-weight:600;
                 font-size:16px;
                 color:var(--text);
@@ -1249,18 +1298,78 @@
             title.textContent = '📅 ' + weekdays[date.getDay()] + ', ' + dateStr;
             grid.appendChild(title);
 
+            // Кнопка "Добавить задачу"
+            const addBtn = document.createElement('button');
+            addBtn.className = 'day-view__add-btn';
+            addBtn.textContent = '➕ Добавить задачу на этот день';
+            addBtn.onclick = function() {
+                openAddTaskForDate(dateStr);
+            };
+            grid.appendChild(addBtn);
+
             const dayTasks = getTasksForDate(dateStr);
 
             if (dayTasks.length === 0) {
                 const empty = document.createElement('div');
                 empty.style.cssText = `
                     text-align:center;
-                    padding:40px 0;
+                    padding:30px 0;
                     color:var(--text-secondary);
                     font-size:16px;
                 `;
                 empty.textContent = '📭 Нет задач на этот день';
                 grid.appendChild(empty);
+
+                // Показываем пустые часы для добавления
+                for (let hour = 6; hour <= 23; hour++) {
+                    const hourStr = String(hour).padStart(2, '0') + ':00';
+                    const row = document.createElement('div');
+                    row.className = 'day-view__hour';
+                    row.style.cssText = `
+                        display:grid;
+                        grid-template-columns:60px 1fr;
+                        gap:8px;
+                        align-items:start;
+                    `;
+                    row.onclick = function() {
+                        openAddTaskForDate(dateStr, hourStr);
+                    };
+
+                    const timeLabel = document.createElement('div');
+                    timeLabel.style.cssText = `
+                        padding:8px 4px;
+                        font-size:13px;
+                        color:var(--text-secondary);
+                        font-weight:500;
+                        text-align:right;
+                        border-top:1px solid var(--border);
+                        background:var(--bg);
+                        border-radius:6px 0 0 6px;
+                    `;
+                    timeLabel.textContent = hourStr;
+
+                    const content = document.createElement('div');
+                    content.className = 'day-view__hour-content';
+                    content.textContent = '➕ Нажмите, чтобы добавить задачу';
+                    content.style.cssText = `
+                        padding:6px 10px;
+                        border-top:1px solid var(--border);
+                        background:var(--bg-card);
+                        border-radius:0 6px 6px 0;
+                        min-height:46px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        color:var(--text-secondary);
+                        font-size:13px;
+                        opacity:0.4;
+                        transition:all 0.2s;
+                    `;
+
+                    row.appendChild(timeLabel);
+                    row.appendChild(content);
+                    grid.appendChild(row);
+                }
                 return;
             }
 
@@ -1273,6 +1382,7 @@
                 const hourStr = String(hour).padStart(2, '0') + ':00';
 
                 const row = document.createElement('div');
+                row.className = 'day-view__hour';
                 row.style.cssText = `
                     display:grid;
                     grid-template-columns:60px 1fr;
@@ -1290,16 +1400,26 @@
                     border-top:1px solid var(--border);
                     background:var(--bg);
                     border-radius:6px 0 0 6px;
+                    cursor:pointer;
                 `;
                 timeLabel.textContent = hourStr;
+                timeLabel.onclick = function() {
+                    openAddTaskForDate(dateStr, hourStr);
+                };
 
                 const content = document.createElement('div');
+                content.className = 'day-view__hour-content';
                 content.style.cssText = `
                     padding:6px 10px;
                     border-top:1px solid var(--border);
                     background:var(--bg-card);
                     border-radius:0 6px 6px 0;
                     min-height:46px;
+                    transition:all 0.2s;
+                    display:flex;
+                    flex-direction:column;
+                    align-items:stretch;
+                    gap:4px;
                 `;
 
                 const hourTasks = dayTasks.filter(t => {
@@ -1308,6 +1428,7 @@
                 });
 
                 if (hourTasks.length > 0) {
+                    content.style.opacity = '1';
                     hourTasks.forEach(task => {
                         const status = getTaskStatusForDate(task, dateStr);
                         let bgColor = 'var(--accent)';
@@ -1322,12 +1443,11 @@
 
                         const taskEl = document.createElement('div');
                         taskEl.style.cssText = `
-                            padding:6px 10px;
-                            margin-bottom:4px;
-                            border-radius:8px;
+                            padding:4px 8px;
+                            border-radius:6px;
                             background:${bgColor};
                             color:${status === 'planned' ? 'var(--text)' : 'white'};
-                            font-size:14px;
+                            font-size:13px;
                             display:flex;
                             justify-content:space-between;
                             align-items:center;
@@ -1337,32 +1457,54 @@
                         `;
                         taskEl.innerHTML = `
                             <span style="flex:1;">${icon} ${task.title}</span>
-                            <span style="font-size:12px;opacity:0.8;margin-left:8px;flex-shrink:0;">
+                            <span style="font-size:11px;opacity:0.8;margin-left:8px;flex-shrink:0;">
                                 ${task.duration}мин
                             </span>
                         `;
                         if (clickable) {
-                            taskEl.onclick = function() {
+                            taskEl.onclick = function(e) {
+                                e.stopPropagation();
                                 completeTask(task.id, dateStr);
                             };
                         } else if (status === 'missed') {
-                            taskEl.onclick = function() {
+                            taskEl.onclick = function(e) {
+                                e.stopPropagation();
                                 alert('❌ Задача пропущена! Нельзя выполнить задним числом.');
+                            };
+                        } else {
+                            taskEl.onclick = function(e) {
+                                e.stopPropagation();
                             };
                         }
                         content.appendChild(taskEl);
                     });
                 } else {
+                    // Пустой час — кликабельный для добавления
                     const emptyText = document.createElement('div');
                     emptyText.style.cssText = `
                         color:var(--text-secondary);
                         font-size:13px;
                         opacity:0.3;
                         padding:4px 0;
+                        cursor:pointer;
+                        text-align:center;
+                        width:100%;
                     `;
-                    emptyText.textContent = '—';
+                    emptyText.textContent = '➕ Нажмите, чтобы добавить задачу';
+                    emptyText.onclick = function(e) {
+                        e.stopPropagation();
+                        openAddTaskForDate(dateStr, hourStr);
+                    };
                     content.appendChild(emptyText);
                 }
+
+                // Клик по всему ряду для добавления задачи
+                row.onclick = function(e) {
+                    // Если кликнули не по кнопке внутри
+                    if (!e.target.closest('button') && !e.target.closest('.task-item__btn')) {
+                        openAddTaskForDate(dateStr, hourStr);
+                    }
+                };
 
                 row.appendChild(timeLabel);
                 row.appendChild(content);
@@ -1674,7 +1816,46 @@
         }
 
         // ============================================
-        // 7. ОТРИСОВКА ЗАДАЧ (УПРОЩЁННЫЙ СПИСОК)
+        // 7. ДОБАВЛЕНИЕ ЗАДАЧИ С КОНКРЕТНОЙ ДАТЫ/ВРЕМЕНИ
+        // ============================================
+        let pendingTaskDate = null;
+        let pendingTaskTime = null;
+
+        function openAddTaskForDate(dateStr, timeStr) {
+            pendingTaskDate = dateStr;
+            pendingTaskTime = timeStr || '08:00';
+
+            // Устанавливаем даты
+            document.getElementById('taskStart').value = dateStr;
+            document.getElementById('taskEnd').value = new Date(new Date(dateStr).getTime() + 30 * 86400000)
+            .toISOString().split('T')[0];
+            document.getElementById('taskTime').value = pendingTaskTime;
+
+            // Устанавливаем заголовок
+            const titleEl = document.getElementById('addTaskModalTitle');
+            if (timeStr) {
+                titleEl.textContent = '📝 Новая задача на ' + dateStr + ' в ' + timeStr;
+            } else {
+                titleEl.textContent = '📝 Новая задача на ' + dateStr;
+            }
+
+            // Очищаем поля
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskDuration').value = '30';
+
+            // Отмечаем день недели для задачи
+            const dayOfWeek = new Date(dateStr + 'T00:00:00').getDay();
+            const checkboxes = document.querySelectorAll('#taskSchedule input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = (parseInt(cb.value) === dayOfWeek);
+            });
+
+            document.getElementById('addTaskModal').classList.add('modal-overlay--open');
+        }
+
+        // ============================================
+        // 8. ОТРИСОВКА ЗАДАЧ (УПРОЩЁННЫЙ СПИСОК)
         // ============================================
         function renderTasks() {
             const container = document.getElementById('tasksContainer');
@@ -1717,7 +1898,7 @@
         }
 
         // ============================================
-        // 8. ГАЛЕРЕЯ
+        // 9. ГАЛЕРЕЯ
         // ============================================
         function renderGallery() {
             const container = document.getElementById('galleryContainer');
@@ -1779,7 +1960,7 @@
         }
 
         // ============================================
-        // 9. МОДАЛЬНЫЕ ОКНА
+        // 10. МОДАЛЬНЫЕ ОКНА
         // ============================================
         function openModal(title, content) {
             document.getElementById('modalTitle').textContent = title;
@@ -1792,17 +1973,20 @@
         }
 
         // ============================================
-        // 10. ДОБАВЛЕНИЕ ЗАДАЧИ
+        // 11. ДОБАВЛЕНИЕ ЗАДАЧИ (ОБНОВЛЁННОЕ)
         // ============================================
         function openAddTask() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('taskStart').value = today;
             document.getElementById('taskEnd').value = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+            document.getElementById('addTaskModalTitle').textContent = '📝 Новая задача';
             document.getElementById('addTaskModal').classList.add('modal-overlay--open');
         }
 
         function closeAddTask() {
             document.getElementById('addTaskModal').classList.remove('modal-overlay--open');
+            pendingTaskDate = null;
+            pendingTaskTime = null;
         }
 
         function handleAddTask() {
@@ -1843,7 +2027,7 @@
         }
 
         // ============================================
-        // 11. ДОБАВЛЕНИЕ ФОТО
+        // 12. ДОБАВЛЕНИЕ ФОТО
         // ============================================
         function openAddPhoto() {
             document.getElementById('addPhotoModal').classList.add('modal-overlay--open');
@@ -1893,7 +2077,7 @@
         }
 
         // ============================================
-        // 12. ПРОФИЛЬ
+        // 13. ПРОФИЛЬ
         // ============================================
         function calculateBMI(weight, height) {
             if (!weight || !height || height === 0) return null;
@@ -2055,7 +2239,7 @@
         }
 
         // ============================================
-        // 13. ПУНКТЫ МЕНЮ
+        // 14. ПУНКТЫ МЕНЮ
         // ============================================
         function openTasks() {
             openModal('📋 Задачи', getTasksHTML());
@@ -2099,7 +2283,7 @@
         }
 
         // ============================================
-        // 14. ТЕМА И КНОПКА "СЕГОДНЯ"
+        // 15. ТЕМА И КНОПКА "СЕГОДНЯ"
         // ============================================
         function toggleTheme() {
             const html = document.documentElement;
@@ -2123,11 +2307,9 @@
             const today = new Date();
             currentDate = today;
 
-            // Если в режиме месяц — просто перерисовываем
             if (currentMode === 'month') {
                 renderMonthView();
             } else {
-                // Переключаемся на месяц
                 currentMode = 'month';
                 document.querySelectorAll('.modes__btn').forEach(b => {
                     b.classList.remove('modes__btn--active');
@@ -2139,7 +2321,7 @@
         }
 
         // ============================================
-        // 15. ОБРАБОТЧИКИ
+        // 16. ОБРАБОТЧИКИ
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
@@ -2151,7 +2333,6 @@
             document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
             renderMonthView();
 
-            // Кнопка "Сегодня"
             document.getElementById('todayBtn').addEventListener('click', goToToday);
 
             document.getElementById('prevMonth').addEventListener('click', function() {
@@ -2288,6 +2469,7 @@
         window.openAddTask = openAddTask;
         window.closeAddTask = closeAddTask;
         window.handleAddTask = handleAddTask;
+        window.openAddTaskForDate = openAddTaskForDate;
         window.completeTask = completeTask;
         window.deleteTask = deleteTask;
         window.openAddPhoto = openAddPhoto;
