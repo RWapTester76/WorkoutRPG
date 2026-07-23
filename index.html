@@ -22,6 +22,9 @@
             --warning: #fdcb6e;
             --danger: #e17055;
             --radius: 16px;
+            --category-physical: #00b894;
+            --category-creative: #fdcb6e;
+            --category-practical: #6c5ce7;
         }
 
         [data-theme="dark"] {
@@ -37,6 +40,9 @@
             --success: #55efc4;
             --warning: #fdcb6e;
             --danger: #ff7675;
+            --category-physical: #55efc4;
+            --category-creative: #fdcb6e;
+            --category-practical: #a29bfe;
         }
 
         /* ============================================
@@ -313,8 +319,13 @@
             color: var(--text);
         }
 
+        .calendar__badge--override {
+            background: var(--accent);
+            border: 2px solid var(--warning);
+        }
+
         /* ============================================
-           РЕЖИМ ДЕНЬ — ДОПОЛНИТЕЛЬНЫЕ СТИЛИ
+           РЕЖИМ ДЕНЬ
            ============================================ */
         .day-view__add-btn {
             display: block;
@@ -366,6 +377,36 @@
             flex-direction: column;
             align-items: stretch;
             padding: 4px 6px;
+        }
+
+        .task-override-badge {
+            font-size: 10px;
+            background: var(--warning);
+            color: var(--text);
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
+
+        .task-category-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+            flex-shrink: 0;
+        }
+
+        .task-category-dot--physical {
+            background: var(--category-physical);
+        }
+
+        .task-category-dot--creative {
+            background: var(--category-creative);
+        }
+
+        .task-category-dot--practical {
+            background: var(--category-practical);
         }
 
         /* ============================================
@@ -540,6 +581,24 @@
             border-color: var(--accent);
         }
 
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            transition: border-color 0.2s;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
         .form-btn {
             width: 100%;
             padding: 12px;
@@ -555,6 +614,14 @@
 
         .form-btn:hover {
             background: var(--accent-hover);
+        }
+
+        .form-btn--danger {
+            background: var(--danger);
+        }
+
+        .form-btn--danger:hover {
+            background: #c0392b;
         }
 
         .checkbox-group {
@@ -605,6 +672,9 @@
             font-weight: 500;
             font-size: 15px;
             color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .task-list-item__status {
@@ -827,6 +897,14 @@
                     <input class="form-input" id="taskDesc" placeholder="Краткое описание">
                 </div>
                 <div class="form-group">
+                    <label class="form-label">📂 Категория</label>
+                    <select class="form-select" id="taskCategory">
+                        <option value="physical">🏋️ Физические</option>
+                        <option value="creative">🎨 Творческие</option>
+                        <option value="practical">🛠️ Практические</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label class="form-label">⏱️ Длительность (мин) *</label>
                     <input class="form-input" id="taskDuration" type="number" value="30" min="1">
                 </div>
@@ -878,7 +956,7 @@
     </div>
 
     <!-- ==========================================
-    МОДАЛЬНОЕ ОКНО РЕДАКТОРА ЗАДАЧИ
+    МОДАЛЬНОЕ ОКНО РЕДАКТОРА ЗАДАЧИ (ДЛЯ КОНКРЕТНОГО ДНЯ)
     ========================================== -->
     <div class="modal-overlay" id="taskEditorModal">
         <div class="modal">
@@ -928,9 +1006,15 @@
         }
 
         // ============================================
-        // 2. ЗАДАЧИ
+        // 2. ЗАДАЧИ С КАТЕГОРИЯМИ И ПЕРЕОПРЕДЕЛЕНИЯМИ
         // ============================================
         let tasks = [];
+
+        const CATEGORIES = {
+            physical: { label: '🏋️ Физические', color: 'var(--category-physical)', emoji: '🏋️' },
+            creative: { label: '🎨 Творческие', color: 'var(--category-creative)', emoji: '🎨' },
+            practical: { label: '🛠️ Практические', color: 'var(--category-practical)', emoji: '🛠️' }
+        };
 
         function loadTasks() {
             const saved = localStorage.getItem('tasks');
@@ -945,12 +1029,14 @@
                     id: Date.now(),
                     title: '🏋️ Тренировка',
                     desc: '100 приседаний, 50 отжиманий',
+                    category: 'physical',
                     duration: 30,
                     schedule: [1, 3, 5],
                     time: '08:00',
                     start: today,
                     end: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-                    done: []
+                    done: [],
+                    overrides: {}
                 }];
                 saveTasks();
             }
@@ -960,13 +1046,30 @@
             localStorage.setItem('tasks', JSON.stringify(tasks));
         }
 
-        function getTasksForDate(date) {
-            const d = new Date(date + 'T00:00:00');
+        function getTaskForDate(task, dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
             const day = d.getDay();
-            return tasks.filter(t => {
-                if (date < t.start || date > t.end) return false;
-                return t.schedule.includes(day);
+            if (dateStr < task.start || dateStr > task.end) return null;
+            if (!task.schedule.includes(day)) return null;
+
+            const override = task.overrides && task.overrides[dateStr];
+            return {
+                ...task,
+                time: override ? override.time : task.time,
+                duration: override ? override.duration : task.duration,
+                isOverridden: !!override
+            };
+        }
+
+        function getTasksForDate(dateStr) {
+            const result = [];
+            tasks.forEach(task => {
+                const taskForDate = getTaskForDate(task, dateStr);
+                if (taskForDate) {
+                    result.push(taskForDate);
+                }
             });
+            return result;
         }
 
         function getTaskStatusForDate(task, dateStr) {
@@ -997,8 +1100,10 @@
             let hasMissed = false;
             let hasPlanned = false;
 
-            dayTasks.forEach(task => {
-                const status = getTaskStatusForDate(task, dateStr);
+            dayTasks.forEach(taskWithOverride => {
+                const originalTask = tasks.find(t => t.id === taskWithOverride.id);
+                if (!originalTask) return;
+                const status = getTaskStatusForDate(originalTask, dateStr);
                 if (status === 'done') hasDone = true;
                 else if (status === 'missed') hasMissed = true;
                 else if (status === 'planned') hasPlanned = true;
@@ -1014,17 +1119,19 @@
             return null;
         }
 
-        function addTask(title, desc, duration, schedule, time, start, end) {
+        function addTask(title, desc, category, duration, schedule, time, start, end) {
             tasks.push({
                 id: Date.now(),
                 title: title || 'Без названия',
                 desc: desc || '',
+                category: category || 'practical',
                 duration: parseInt(duration) || 30,
                 schedule: schedule || [],
                 time: time || '12:00',
                 start: start || new Date().toISOString().split('T')[0],
                 end: end || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-                done: []
+                done: [],
+                overrides: {}
             });
             saveTasks();
             renderAll();
@@ -1039,7 +1146,10 @@
             }
             task.done.push(date);
 
-            const exp = Math.round(task.duration * 0.01 * 100) / 100;
+            const override = task.overrides && task.overrides[date];
+            const duration = override ? override.duration : task.duration;
+
+            const exp = Math.round(duration * 0.01 * 100) / 100;
             user.exp += exp;
             while (user.exp >= user.level) {
                 user.exp -= user.level;
@@ -1060,65 +1170,35 @@
         }
 
         // ============================================
-        // 3. РЕДАКТОР ЗАДАЧИ
+        // 3. ПЕРЕОПРЕДЕЛЕНИЕ ЗАДАЧИ НА ДАТУ
         // ============================================
-        function openTaskEditor(taskId) {
+        function updateTaskOverride(taskId, dateStr, time, duration) {
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
 
-            const today = new Date().toISOString().split('T')[0];
-            const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-            const scheduleStr = task.schedule.map(d => days[d]).join(', ');
-            const statuses = task.done.map(d => '✅ ' + d).join('\n') || 'Нет выполненных';
+            if (!task.overrides) task.overrides = {};
 
-            const content = `
-                <div style="margin-bottom:12px;">
-                    <div style="font-size:20px;font-weight:700;color:var(--text);">${task.title}</div>
-                    <div style="color:var(--text-secondary);margin-top:4px;">${task.desc || 'Без описания'}</div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
-                        <div style="font-size:12px;color:var(--text-secondary);">⏱️ Длительность</div>
-                        <div style="font-weight:600;">${task.duration} мин</div>
-                    </div>
-                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
-                        <div style="font-size:12px;color:var(--text-secondary);">🕐 Время</div>
-                        <div style="font-weight:600;">${task.time}</div>
-                    </div>
-                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
-                        <div style="font-size:12px;color:var(--text-secondary);">📅 Начало</div>
-                        <div style="font-weight:600;">${task.start}</div>
-                    </div>
-                    <div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center;">
-                        <div style="font-size:12px;color:var(--text-secondary);">📅 Конец</div>
-                        <div style="font-weight:600;">${task.end}</div>
-                    </div>
-                </div>
-                <div style="background:var(--bg);padding:8px;border-radius:8px;margin-bottom:12px;">
-                    <div style="font-size:12px;color:var(--text-secondary);">📆 Расписание</div>
-                    <div style="font-weight:600;">${scheduleStr}</div>
-                </div>
-                <div style="background:var(--bg);padding:8px;border-radius:8px;margin-bottom:12px;">
-                    <div style="font-size:12px;color:var(--text-secondary);">✅ Выполнено (${task.done.length} раз)</div>
-                    <div style="font-weight:600;font-size:13px;white-space:pre-wrap;">${statuses}</div>
-                </div>
-                <div style="display:flex;gap:8px;">
-                    <button class="form-btn" onclick="completeTask(${task.id}, '${today}')" style="flex:1;">
-                        ✅ Выполнить сегодня
-                    </button>
-                    <button class="form-btn" onclick="deleteTask(${task.id}); closeTaskEditor();" style="flex:0;background:var(--danger);">
-                        🗑️
-                    </button>
-                </div>
-            `;
+            if (time && duration) {
+                task.overrides[dateStr] = {
+                    time: time,
+                    duration: parseInt(duration)
+                };
+            } else {
+                delete task.overrides[dateStr];
+            }
 
-            document.getElementById('editorTitle').textContent = '📋 ' + task.title;
-            document.getElementById('editorContent').innerHTML = content;
-            document.getElementById('taskEditorModal').classList.add('modal-overlay--open');
+            saveTasks();
+            renderAll();
         }
 
-        function closeTaskEditor() {
-            document.getElementById('taskEditorModal').classList.remove('modal-overlay--open');
+        function clearTaskOverride(taskId, dateStr) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            if (task.overrides && task.overrides[dateStr]) {
+                delete task.overrides[dateStr];
+                saveTasks();
+                renderAll();
+            }
         }
 
         // ============================================
@@ -1239,6 +1319,11 @@
                     badge.className = 'calendar__badge';
                     badge.textContent = dayTasks.length;
 
+                    const hasOverride = dayTasks.some(t => t.isOverridden);
+                    if (hasOverride) {
+                        badge.classList.add('calendar__badge--override');
+                    }
+
                     if (markerData) {
                         if (markerData.status === 'done') badge.classList.add('calendar__badge--done');
                         else if (markerData.status === 'missed') badge.classList.add('calendar__badge--missed');
@@ -1274,7 +1359,7 @@
         }
 
         // ============================================
-        // РЕЖИМ ДЕНЬ (ОБНОВЛЁННЫЙ)
+        // РЕЖИМ ДЕНЬ
         // ============================================
         function renderDayView(date) {
             const grid = document.getElementById('calendarGrid');
@@ -1283,7 +1368,6 @@
             grid.style.cssText = 'display:block;';
             grid.innerHTML = '';
 
-            // Заголовок
             const title = document.createElement('div');
             title.style.cssText = `
                 text-align:center;
@@ -1298,7 +1382,6 @@
             title.textContent = '📅 ' + weekdays[date.getDay()] + ', ' + dateStr;
             grid.appendChild(title);
 
-            // Кнопка "Добавить задачу"
             const addBtn = document.createElement('button');
             addBtn.className = 'day-view__add-btn';
             addBtn.textContent = '➕ Добавить задачу на этот день';
@@ -1320,7 +1403,6 @@
                 empty.textContent = '📭 Нет задач на этот день';
                 grid.appendChild(empty);
 
-                // Показываем пустые часы для добавления
                 for (let hour = 6; hour <= 23; hour++) {
                     const hourStr = String(hour).padStart(2, '0') + ':00';
                     const row = document.createElement('div');
@@ -1430,7 +1512,7 @@
                 if (hourTasks.length > 0) {
                     content.style.opacity = '1';
                     hourTasks.forEach(task => {
-                        const status = getTaskStatusForDate(task, dateStr);
+                        const status = getTaskStatusForDate(tasks.find(t => t.id === task.id), dateStr);
                         let bgColor = 'var(--accent)';
                         let icon = '';
                         let clickable = true;
@@ -1440,6 +1522,8 @@
                             icon = '❌';
                             clickable = false; } else if (status === 'planned') { bgColor = 'var(--warning)';
                             icon = '⏳'; }
+
+                        const categoryInfo = CATEGORIES[task.category] || CATEGORIES.practical;
 
                         const taskEl = document.createElement('div');
                         taskEl.style.cssText = `
@@ -1455,31 +1539,31 @@
                             transition:opacity 0.2s;
                             word-break:break-word;
                         `;
+
+                        const overrideBadge = task.isOverridden ?
+                            `<span class="task-override-badge">⚡изменено</span>` :
+                            '';
+
                         taskEl.innerHTML = `
-                            <span style="flex:1;">${icon} ${task.title}</span>
-                            <span style="font-size:11px;opacity:0.8;margin-left:8px;flex-shrink:0;">
+                            <span style="flex:1;display:flex;align-items:center;gap:4px;">
+                                <span class="task-category-dot task-category-dot--${task.category}"></span>
+                                ${icon} ${task.title}
+                                ${overrideBadge}
+                            </span>
+                            <span style="font-size:11px;opacity:0.8;margin-left:8px;flex-shrink:0;display:flex;align-items:center;gap:4px;">
                                 ${task.duration}мин
+                                ${task.isOverridden ? '✏️' : ''}
                             </span>
                         `;
-                        if (clickable) {
-                            taskEl.onclick = function(e) {
-                                e.stopPropagation();
-                                completeTask(task.id, dateStr);
-                            };
-                        } else if (status === 'missed') {
-                            taskEl.onclick = function(e) {
-                                e.stopPropagation();
-                                alert('❌ Задача пропущена! Нельзя выполнить задним числом.');
-                            };
-                        } else {
-                            taskEl.onclick = function(e) {
-                                e.stopPropagation();
-                            };
-                        }
+
+                        taskEl.onclick = function(e) {
+                            e.stopPropagation();
+                            openTaskEditorForDate(task.id, dateStr);
+                        };
+
                         content.appendChild(taskEl);
                     });
                 } else {
-                    // Пустой час — кликабельный для добавления
                     const emptyText = document.createElement('div');
                     emptyText.style.cssText = `
                         color:var(--text-secondary);
@@ -1498,9 +1582,7 @@
                     content.appendChild(emptyText);
                 }
 
-                // Клик по всему ряду для добавления задачи
                 row.onclick = function(e) {
-                    // Если кликнули не по кнопке внутри
                     if (!e.target.closest('button') && !e.target.closest('.task-item__btn')) {
                         openAddTaskForDate(dateStr, hourStr);
                     }
@@ -1615,7 +1697,8 @@
                     const task = dayData.tasks[row];
 
                     if (task) {
-                        const status = getTaskStatusForDate(task, dayData.date);
+                        const originalTask = tasks.find(t => t.id === task.id);
+                        const status = getTaskStatusForDate(originalTask, dayData.date);
                         let bgColor = 'var(--accent)';
                         let icon = '●';
                         let clickable = true;
@@ -1626,6 +1709,8 @@
                             clickable = false; } else if (status === 'planned') { bgColor = 'var(--warning)';
                             icon = '⏳'; }
 
+                        const categoryInfo = CATEGORIES[task.category] || CATEGORIES.practical;
+
                         cell.style.cssText += `
                             background:${bgColor};
                             color:${status === 'planned' ? 'var(--text)' : 'white'};
@@ -1635,8 +1720,9 @@
                             font-size:11px;
                         `;
                         cell.innerHTML = `
-                            <div style="font-weight:500;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            <div style="font-weight:500;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px;">
                                 ${icon} ${task.title}
+                                ${task.isOverridden ? '⚡' : ''}
                             </div>
                             <div style="font-size:9px;opacity:0.8;display:flex;justify-content:space-between;">
                                 <span>${task.time}</span>
@@ -1721,7 +1807,8 @@
                     const dayTasks = getTasksForDate(dateStr);
                     totalTasks += dayTasks.length;
                     dayTasks.forEach(task => {
-                        const status = getTaskStatusForDate(task, dateStr);
+                        const originalTask = tasks.find(t => t.id === task.id);
+                        const status = getTaskStatusForDate(originalTask, dateStr);
                         if (status === 'done') completedTasks++;
                         else if (status === 'missed') missedTasks++;
                         else if (status === 'planned') plannedTasks++;
@@ -1801,8 +1888,9 @@
                 const dateStr = date.toISOString().split('T')[0];
                 const dayTasks = getTasksForDate(dateStr);
                 total += dayTasks.length;
-                dayTasks.forEach(t => {
-                    const status = getTaskStatusForDate(t, dateStr);
+                dayTasks.forEach(task => {
+                    const originalTask = tasks.find(t => t.id === task.id);
+                    const status = getTaskStatusForDate(originalTask, dateStr);
                     if (status === 'done') done++;
                     else if (status === 'missed') missed++;
                     else if (status === 'planned') planned++;
@@ -1816,42 +1904,104 @@
         }
 
         // ============================================
-        // 7. ДОБАВЛЕНИЕ ЗАДАЧИ С КОНКРЕТНОЙ ДАТЫ/ВРЕМЕНИ
+        // 7. РЕДАКТОР ЗАДАЧИ ДЛЯ КОНКРЕТНОГО ДНЯ
         // ============================================
-        let pendingTaskDate = null;
-        let pendingTaskTime = null;
+        function openTaskEditorForDate(taskId, dateStr) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
 
-        function openAddTaskForDate(dateStr, timeStr) {
-            pendingTaskDate = dateStr;
-            pendingTaskTime = timeStr || '08:00';
+            const override = task.overrides && task.overrides[dateStr];
+            const currentTime = override ? override.time : task.time;
+            const currentDuration = override ? override.duration : task.duration;
+            const categoryInfo = CATEGORIES[task.category] || CATEGORIES.practical;
 
-            // Устанавливаем даты
-            document.getElementById('taskStart').value = dateStr;
-            document.getElementById('taskEnd').value = new Date(new Date(dateStr).getTime() + 30 * 86400000)
-            .toISOString().split('T')[0];
-            document.getElementById('taskTime').value = pendingTaskTime;
+            const content = `
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:20px;font-weight:700;color:var(--text);">
+                        <span class="task-category-dot task-category-dot--${task.category}"></span>
+                        ${task.title}
+                    </div>
+                    <div style="color:var(--text-secondary);margin-top:4px;">${task.desc || 'Без описания'}</div>
+                    <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
+                        ${categoryInfo.emoji} ${categoryInfo.label} · 📅 ${dateStr} ${override ? '⚡ изменено' : ''}
+                    </div>
+                </div>
 
-            // Устанавливаем заголовок
-            const titleEl = document.getElementById('addTaskModalTitle');
-            if (timeStr) {
-                titleEl.textContent = '📝 Новая задача на ' + dateStr + ' в ' + timeStr;
-            } else {
-                titleEl.textContent = '📝 Новая задача на ' + dateStr;
+                <div class="form-group">
+                    <label class="form-label">📂 Категория</label>
+                    <select class="form-select" id="editorCategory">
+                        <option value="physical" ${task.category === 'physical' ? 'selected' : ''}>🏋️ Физические</option>
+                        <option value="creative" ${task.category === 'creative' ? 'selected' : ''}>🎨 Творческие</option>
+                        <option value="practical" ${task.category === 'practical' ? 'selected' : ''}>🛠️ Практические</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🕐 Время на этот день</label>
+                    <input class="form-input" id="editorTime" type="time" value="${currentTime}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">⏱️ Длительность на этот день (мин)</label>
+                    <input class="form-input" id="editorDuration" type="number" value="${currentDuration}" min="1">
+                </div>
+
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                    <button class="form-btn" style="flex:1;" onclick="saveTaskEditor(${task.id}, '${dateStr}')">
+                        💾 Сохранить
+                    </button>
+                    ${override ? `
+                        <button class="form-btn form-btn--danger" style="flex:0;" onclick="clearTaskOverride(${task.id}, '${dateStr}'); closeTaskEditor();">
+                            ↩️ Сбросить
+                        </button>
+                    ` : ''}
+                </div>
+
+                <hr style="border-color:var(--border);margin:12px 0;">
+
+                <div style="display:flex;gap:8px;">
+                    <button class="form-btn" onclick="completeTask(${task.id}, '${dateStr}'); closeTaskEditor();" style="flex:1;background:var(--success);">
+                        ✅ Выполнить сегодня
+                    </button>
+                    <button class="form-btn form-btn--danger" onclick="deleteTask(${task.id}); closeTaskEditor();" style="flex:0;">
+                        🗑️
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('editorTitle').textContent = '📋 ' + task.title + ' — ' + dateStr;
+            document.getElementById('editorContent').innerHTML = content;
+            document.getElementById('taskEditorModal').classList.add('modal-overlay--open');
+        }
+
+        function saveTaskEditor(taskId, dateStr) {
+            const category = document.getElementById('editorCategory').value;
+            const time = document.getElementById('editorTime').value;
+            const duration = document.getElementById('editorDuration').value;
+
+            if (!time) {
+                alert('Пожалуйста, выберите время');
+                return;
+            }
+            if (!duration || duration < 1) {
+                alert('Длительность должна быть больше 0');
+                return;
             }
 
-            // Очищаем поля
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDesc').value = '';
-            document.getElementById('taskDuration').value = '30';
+            // Обновляем категорию задачи
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.category = category;
+                saveTasks();
+            }
 
-            // Отмечаем день недели для задачи
-            const dayOfWeek = new Date(dateStr + 'T00:00:00').getDay();
-            const checkboxes = document.querySelectorAll('#taskSchedule input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                cb.checked = (parseInt(cb.value) === dayOfWeek);
-            });
+            updateTaskOverride(taskId, dateStr, time, parseInt(duration));
+            closeTaskEditor();
+            alert('✅ Изменения сохранены!');
+        }
 
-            document.getElementById('addTaskModal').classList.add('modal-overlay--open');
+        function closeTaskEditor() {
+            document.getElementById('taskEditorModal').classList.remove('modal-overlay--open');
         }
 
         // ============================================
@@ -1883,9 +2033,14 @@
                     statusClass = 'task-list-item--done'; } else if (status === 'missed') { statusIcon = '❌';
                     statusClass = 'task-list-item--missed'; } else if (status === 'planned') { statusIcon = '⏳'; }
 
+                const categoryInfo = CATEGORIES[t.category] || CATEGORIES.practical;
+
                 html += `
-                    <div class="task-list-item ${statusClass}" onclick="openTaskEditor(${t.id})">
-                        <span class="task-list-item__title">${t.title}</span>
+                    <div class="task-list-item ${statusClass}" onclick="openTaskEditorForDate(${t.id}, '${today}')">
+                        <span class="task-list-item__title">
+                            <span class="task-category-dot task-category-dot--${t.category}"></span>
+                            ${t.title}
+                        </span>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span class="task-list-item__status">${statusIcon}</span>
                             <button class="task-list-item__delete" onclick="event.stopPropagation(); deleteTask(${t.id})">✕</button>
@@ -1973,8 +2128,41 @@
         }
 
         // ============================================
-        // 11. ДОБАВЛЕНИЕ ЗАДАЧИ (ОБНОВЛЁННОЕ)
+        // 11. ДОБАВЛЕНИЕ ЗАДАЧИ
         // ============================================
+        let pendingTaskDate = null;
+        let pendingTaskTime = null;
+
+        function openAddTaskForDate(dateStr, timeStr) {
+            pendingTaskDate = dateStr;
+            pendingTaskTime = timeStr || '08:00';
+
+            document.getElementById('taskStart').value = dateStr;
+            document.getElementById('taskEnd').value = new Date(new Date(dateStr).getTime() + 30 * 86400000)
+            .toISOString().split('T')[0];
+            document.getElementById('taskTime').value = pendingTaskTime;
+
+            const titleEl = document.getElementById('addTaskModalTitle');
+            if (timeStr) {
+                titleEl.textContent = '📝 Новая задача на ' + dateStr + ' в ' + timeStr;
+            } else {
+                titleEl.textContent = '📝 Новая задача на ' + dateStr;
+            }
+
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskDuration').value = '30';
+            document.getElementById('taskCategory').value = 'physical';
+
+            const dayOfWeek = new Date(dateStr + 'T00:00:00').getDay();
+            const checkboxes = document.querySelectorAll('#taskSchedule input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = (parseInt(cb.value) === dayOfWeek);
+            });
+
+            document.getElementById('addTaskModal').classList.add('modal-overlay--open');
+        }
+
         function openAddTask() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('taskStart').value = today;
@@ -1992,6 +2180,7 @@
         function handleAddTask() {
             const title = document.getElementById('taskTitle').value.trim();
             const desc = document.getElementById('taskDesc').value.trim();
+            const category = document.getElementById('taskCategory').value;
             const duration = document.getElementById('taskDuration').value;
             const time = document.getElementById('taskTime').value;
             const start = document.getElementById('taskStart').value;
@@ -2005,7 +2194,7 @@
             checks.forEach(cb => { if (cb.checked) schedule.push(parseInt(cb.value)); });
             if (schedule.length === 0) { alert('Выберите хотя бы один день'); return; }
 
-            addTask(title, desc, duration, schedule, time, start, end);
+            addTask(title, desc, category, duration, schedule, time, start, end);
             closeAddTask();
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskDesc').value = '';
@@ -2148,6 +2337,23 @@
             const bmiInfo = getBMICategory(bmi);
             const stats = getTaskStats();
 
+            // Статистика по категориям
+            const categoryStats = {
+                physical: { count: 0, done: 0 },
+                creative: { count: 0, done: 0 },
+                practical: { count: 0, done: 0 }
+            };
+
+            tasks.forEach(task => {
+                const cat = task.category || 'practical';
+                if (categoryStats[cat]) {
+                    categoryStats[cat].count++;
+                    if (task.done.length > 0) {
+                        categoryStats[cat].done++;
+                    }
+                }
+            });
+
             const content = `
                 <!-- АВАТАР -->
                 <div style="text-align:center;margin-bottom:20px;">
@@ -2172,7 +2378,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">⚧️ Пол</label>
-                        <select class="form-input" id="profileGender" onchange="updateProfileField('gender', this.value)">
+                        <select class="form-select" id="profileGender" onchange="updateProfileField('gender', this.value)">
                             <option value="male" ${user.gender === 'male' ? 'selected' : ''}>👨 Мужской</option>
                             <option value="female" ${user.gender === 'female' ? 'selected' : ''}>👩 Женский</option>
                         </select>
@@ -2199,6 +2405,28 @@
                     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-top:4px;">
                         <span>${bmiInfo.emoji} ${bmiInfo.label}</span>
                         <span>Норма: 18.5–24.9</span>
+                    </div>
+                </div>
+
+                <!-- СТАТИСТИКА ПО КАТЕГОРИЯМ -->
+                <div style="margin-top:16px;">
+                    <div style="font-weight:600;font-size:14px;margin-bottom:8px;">📂 Статистика по категориям</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                        <div style="background:var(--bg);padding:10px;border-radius:12px;text-align:center;border-left:3px solid var(--category-physical);">
+                            <div style="font-size:20px;">🏋️</div>
+                            <div style="font-size:20px;font-weight:700;color:var(--category-physical);">${categoryStats.physical.count}</div>
+                            <div style="font-size:11px;color:var(--text-secondary);">✅ ${categoryStats.physical.done} выполнено</div>
+                        </div>
+                        <div style="background:var(--bg);padding:10px;border-radius:12px;text-align:center;border-left:3px solid var(--category-creative);">
+                            <div style="font-size:20px;">🎨</div>
+                            <div style="font-size:20px;font-weight:700;color:var(--category-creative);">${categoryStats.creative.count}</div>
+                            <div style="font-size:11px;color:var(--text-secondary);">✅ ${categoryStats.creative.done} выполнено</div>
+                        </div>
+                        <div style="background:var(--bg);padding:10px;border-radius:12px;text-align:center;border-left:3px solid var(--category-practical);">
+                            <div style="font-size:20px;">🛠️</div>
+                            <div style="font-size:20px;font-weight:700;color:var(--category-practical);">${categoryStats.practical.count}</div>
+                            <div style="font-size:11px;color:var(--text-secondary);">✅ ${categoryStats.practical.done} выполнено</div>
+                        </div>
                     </div>
                 </div>
 
@@ -2264,7 +2492,7 @@
                     📦 Импорт/экспорт данных
                 </p>
                 <p style="color:var(--text-secondary);font-size:13px;margin-top:12px;">
-                    Сделано с ❤️ Дэн и AI
+                    Сделано с ❤️ Саша и Дэн AI
                 </p>
             `);
         }
@@ -2485,8 +2713,11 @@
         window.closeModal = closeModal;
         window.updateProfileField = updateProfileField;
         window.handleAvatarUpload = handleAvatarUpload;
-        window.openTaskEditor = openTaskEditor;
+        window.openTaskEditorForDate = openTaskEditorForDate;
         window.closeTaskEditor = closeTaskEditor;
+        window.saveTaskEditor = saveTaskEditor;
+        window.clearTaskOverride = clearTaskOverride;
+        window.updateTaskOverride = updateTaskOverride;
         window.goToToday = goToToday;
     </script>
 
