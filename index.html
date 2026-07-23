@@ -757,6 +757,10 @@
         // ============================================
         const user = {
             name: 'Игрок',
+            age: 25,
+            gender: 'male',
+            height: 175,
+            weight: 70,
             level: 1,
             exp: 0,
             avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%236c5ce7\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'20\' fill=\'%23fff\'/%3E%3Ccircle cx=\'35\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3Ccircle cx=\'65\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3C/svg%3E'
@@ -931,7 +935,6 @@
             const month = currentDate.getMonth();
             const grid = document.getElementById('calendarGrid');
 
-            // Сохраняем заголовки
             const weekdays = grid.querySelectorAll('.calendar__weekday');
             grid.innerHTML = '';
             weekdays.forEach(el => grid.appendChild(el));
@@ -941,7 +944,6 @@
             let offset = firstDay.getDay() - 1;
             if (offset < 0) offset = 6;
 
-            // Пустые ячейки
             for (let i = 0; i < offset; i++) {
                 const empty = document.createElement('div');
                 empty.className = 'calendar__day calendar__day--other';
@@ -958,12 +960,10 @@
 
                 const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
 
-                // Сегодня
                 if (dateStr === todayStr) {
                     day.classList.add('calendar__day--today');
                 }
 
-                // Маркеры задач
                 const dayTasks = getTasksForDate(dateStr);
                 if (dayTasks.length > 0) {
                     const allDone = dayTasks.every(t => t.done.includes(dateStr));
@@ -974,7 +974,6 @@
                     day.appendChild(marker);
                 }
 
-                // Клик по дню — показываем задачи
                 day.addEventListener('click', function() {
                     const tasks = getTasksForDate(dateStr);
                     if (tasks.length === 0) {
@@ -992,7 +991,6 @@
                 grid.appendChild(day);
             }
 
-            // Заголовок месяца
             const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
                 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
             ];
@@ -1119,6 +1117,9 @@
             if (title.includes('Галерея')) {
                 renderGallery();
             }
+            if (title.includes('Профиль')) {
+                openProfile();
+            }
         }
 
         // ============================================
@@ -1169,7 +1170,6 @@
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskDesc').value = '';
 
-            // Обновляем модальное окно задач, если открыто
             if (document.getElementById('modalTitle').textContent.includes('Задачи')) {
                 openModal('📋 Задачи', getTasksHTML());
                 renderTasks();
@@ -1237,31 +1237,170 @@
         }
 
         // ============================================
-        // 10. ПУНКТЫ МЕНЮ
+        // 10. ПРОФИЛЬ
         // ============================================
-        function openProfile() {
-            openModal('👤 Профиль', `
-                <p><strong>Имя:</strong> ${user.name}</p>
-                <p><strong>Уровень:</strong> ${user.level}</p>
-                <p><strong>Опыт:</strong> ${Math.round(user.exp * 100) / 100}</p>
-                <hr style="margin:16px 0;border-color:var(--border);">
-                <p style="color:var(--text-secondary);">Редактирование профиля в разработке</p>
-                <button class="form-btn" style="margin-top:12px;" onclick="addTestExp()">+10 опыта (тест)</button>
-            `);
+        function calculateBMI(weight, height) {
+            if (!weight || !height || height === 0) return null;
+            const heightM = height / 100;
+            return Math.round((weight / (heightM * heightM)) * 10) / 10;
         }
 
-        function addTestExp() {
-            user.exp += 10;
-            while (user.exp >= user.level) {
-                user.exp -= user.level;
-                user.level++;
-            }
+        function getBMICategory(bmi) {
+            if (!bmi) return { label: 'Нет данных', color: '#888', emoji: '❓' };
+            if (bmi < 16) return { label: 'Выраженный дефицит', color: '#e17055', emoji: '⚠️' };
+            if (bmi < 18.5) return { label: 'Недостаточный вес', color: '#fdcb6e', emoji: '📉' };
+            if (bmi < 25) return { label: 'Нормальный вес', color: '#00b894', emoji: '✅' };
+            if (bmi < 30) return { label: 'Избыточный вес', color: '#fdcb6e', emoji: '📈' };
+            if (bmi < 35) return { label: 'Ожирение I', color: '#e17055', emoji: '⚠️' };
+            return { label: 'Ожирение II+', color: '#d63031', emoji: '🚨' };
+        }
+
+        function getTaskStats() {
+            const today = new Date().toISOString().split('T')[0];
+            let total = tasks.length;
+            let completed = 0;
+            let inProgress = 0;
+            let failed = 0;
+
+            tasks.forEach(task => {
+                if (task.done.length > 0) completed++;
+                if (task.end >= today) inProgress++;
+            });
+            failed = total - completed;
+
+            return { total, completed, inProgress, failed };
+        }
+
+        function updateProfileField(field, value) {
+            user[field] = value;
             saveUser();
-            updateUserUI();
-            openProfile();
-            alert('✅ +10 опыта! Уровень: ' + user.level);
+            if (field === 'name') {
+                document.getElementById('userName').textContent = value;
+            }
+            if (document.getElementById('modalTitle').textContent.includes('Профиль')) {
+                openProfile();
+            }
         }
 
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                alert('Выберите изображение');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                user.avatar = e.target.result;
+                saveUser();
+                document.getElementById('avatar').src = user.avatar;
+                if (document.getElementById('modalTitle').textContent.includes('Профиль')) {
+                    openProfile();
+                }
+                alert('✅ Аватар обновлён!');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function openProfile() {
+            const bmi = calculateBMI(user.weight, user.height);
+            const bmiInfo = getBMICategory(bmi);
+            const stats = getTaskStats();
+
+            const content = `
+                <!-- АВАТАР -->
+                <div style="text-align:center;margin-bottom:20px;">
+                    <img src="${user.avatar}" style="width:100px;height:100px;border-radius:50%;border:3px solid var(--accent);object-fit:cover;">
+                    <div style="margin-top:8px;">
+                        <button class="form-btn" style="width:auto;padding:6px 16px;font-size:13px;" onclick="document.getElementById('avatarInput').click()">
+                            📷 Сменить аватар
+                        </button>
+                        <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+                    </div>
+                </div>
+
+                <!-- ФОРМА -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div class="form-group" style="grid-column:1/3;">
+                        <label class="form-label">👤 Имя</label>
+                        <input class="form-input" id="profileName" value="${user.name}" onchange="updateProfileField('name', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🎂 Возраст</label>
+                        <input class="form-input" id="profileAge" type="number" value="${user.age}" onchange="updateProfileField('age', parseInt(this.value) || 0)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">⚧️ Пол</label>
+                        <select class="form-input" id="profileGender" onchange="updateProfileField('gender', this.value)">
+                            <option value="male" ${user.gender === 'male' ? 'selected' : ''}>👨 Мужской</option>
+                            <option value="female" ${user.gender === 'female' ? 'selected' : ''}>👩 Женский</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📏 Рост (см)</label>
+                        <input class="form-input" id="profileHeight" type="number" value="${user.height}" onchange="updateProfileField('height', parseInt(this.value) || 0)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">⚖️ Вес (кг)</label>
+                        <input class="form-input" id="profileWeight" type="number" value="${user.weight}" onchange="updateProfileField('weight', parseInt(this.value) || 0)">
+                    </div>
+                </div>
+
+                <!-- ИМТ -->
+                <div style="margin-top:16px;padding:16px;background:var(--bg);border-radius:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-weight:600;font-size:16px;">📊 Индекс массы тела</span>
+                        <span style="font-size:20px;font-weight:700;color:${bmiInfo.color};">${bmi || '—'}</span>
+                    </div>
+                    <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;position:relative;">
+                        <div style="height:100%;width:${bmi ? Math.min((bmi / 40) * 100, 100) : 0}%;background:${bmiInfo.color};border-radius:4px;transition:width 0.5s;"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-top:4px;">
+                        <span>${bmiInfo.emoji} ${bmiInfo.label}</span>
+                        <span>Норма: 18.5–24.9</span>
+                    </div>
+                </div>
+
+                <!-- СТАТИСТИКА ЗАДАЧ -->
+                <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
+                        <div style="font-size:24px;font-weight:700;color:var(--accent);">${stats.total}</div>
+                        <div style="font-size:13px;color:var(--text-secondary);">Всего задач</div>
+                    </div>
+                    <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
+                        <div style="font-size:24px;font-weight:700;color:var(--success);">${stats.completed}</div>
+                        <div style="font-size:13px;color:var(--text-secondary);">✅ Выполнено</div>
+                    </div>
+                    <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
+                        <div style="font-size:24px;font-weight:700;color:#fdcb6e;">${stats.inProgress}</div>
+                        <div style="font-size:13px;color:var(--text-secondary);">🔄 В процессе</div>
+                    </div>
+                    <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
+                        <div style="font-size:24px;font-weight:700;color:var(--danger);">${stats.failed}</div>
+                        <div style="font-size:13px;color:var(--text-secondary);">❌ Невыполнено</div>
+                    </div>
+                </div>
+
+                <!-- УРОВЕНЬ И ОПЫТ -->
+                <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;text-align:center;">
+                    <div style="font-size:14px;color:var(--text-secondary);">🎮 Уровень <strong style="color:var(--accent);font-size:20px;">${user.level}</strong></div>
+                    <div style="font-size:14px;color:var(--text-secondary);">⭐ Опыт: ${Math.round(user.exp * 100) / 100} / ${user.level}</div>
+                    <div style="height:6px;background:var(--border);border-radius:3px;margin-top:6px;overflow:hidden;">
+                        <div style="height:100%;width:${Math.min((user.exp / user.level) * 100, 100)}%;background:var(--accent);border-radius:3px;transition:width 0.5s;"></div>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">
+                        До следующего уровня: ${Math.round((user.level - user.exp) * 100) / 100} опыта
+                    </div>
+                </div>
+            `;
+
+            openModal('👤 Профиль', content);
+        }
+
+        // ============================================
+        // 11. ПУНКТЫ МЕНЮ
+        // ============================================
         function openTasks() {
             openModal('📋 Задачи', getTasksHTML());
             renderTasks();
@@ -1304,7 +1443,7 @@
         }
 
         // ============================================
-        // 11. ТЕМА
+        // 12. ТЕМА
         // ============================================
         function toggleTheme() {
             const html = document.documentElement;
@@ -1313,7 +1452,6 @@
             html.setAttribute('data-theme', next);
             localStorage.setItem('theme', next);
             document.getElementById('themeBtn').textContent = next === 'light' ? '🌙' : '☀️';
-            // Обновляем модальное окно настроек, если открыто
             if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
                 openSettings();
             }
@@ -1326,19 +1464,15 @@
         }
 
         // ============================================
-        // 12. ОБРАБОТЧИКИ
+        // 13. ОБРАБОТЧИКИ
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Загрузка данных
             loadTheme();
             loadUser();
             loadTasks();
             loadGallery();
-
-            // Календарь
             renderCalendar();
 
-            // Навигация
             document.getElementById('prevMonth').addEventListener('click', function() {
                 changeMonth(-1);
             });
@@ -1346,7 +1480,6 @@
                 changeMonth(1);
             });
 
-            // Сайдбар
             document.getElementById('menuBtn').addEventListener('click', function() {
                 document.getElementById('sidebar').classList.add('sidebar--open');
             });
@@ -1354,7 +1487,6 @@
                 document.getElementById('sidebar').classList.remove('sidebar--open');
             });
 
-            // Пункты меню
             document.querySelectorAll('.sidebar__item').forEach(function(el) {
                 el.addEventListener('click', function() {
                     const page = this.dataset.page;
@@ -1380,13 +1512,11 @@
                 });
             });
 
-            // Закрытие модальных окон
             document.getElementById('modalClose').addEventListener('click', closeModal);
             document.getElementById('mainModal').addEventListener('click', function(e) {
                 if (e.target === this) closeModal();
             });
 
-            // Режимы календаря
             document.querySelectorAll('.modes__btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.modes__btn').forEach(b => {
@@ -1402,7 +1532,6 @@
                 });
             });
 
-            // Тема
             document.getElementById('themeBtn').addEventListener('click', toggleTheme);
 
             console.log('🚀 SkillQuest запущен!');
@@ -1410,7 +1539,7 @@
             console.log('📋 Задач: ' + tasks.length + ', 📸 Фото: ' + gallery.length);
         });
 
-        // Экспортируем функции в глобальный объект для onclick
+        // Экспортируем функции
         window.openAddTask = openAddTask;
         window.closeAddTask = closeAddTask;
         window.handleAddTask = handleAddTask;
@@ -1420,7 +1549,6 @@
         window.closeAddPhoto = closeAddPhoto;
         window.handleAddPhoto = handleAddPhoto;
         window.deleteGalleryItem = deleteGalleryItem;
-        window.addTestExp = addTestExp;
         window.toggleTheme = toggleTheme;
         window.openProfile = openProfile;
         window.openTasks = openTasks;
@@ -1428,6 +1556,8 @@
         window.openSettings = openSettings;
         window.openInfo = openInfo;
         window.closeModal = closeModal;
+        window.updateProfileField = updateProfileField;
+        window.handleAvatarUpload = handleAvatarUpload;
     </script>
 
 </body>
