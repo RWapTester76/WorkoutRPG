@@ -925,10 +925,13 @@
         }
 
         // ============================================
-        // 4. КАЛЕНДАРЬ
+        // 4. КАЛЕНДАРЬ И РЕЖИМЫ
         // ============================================
         let currentDate = new Date();
         let currentMode = 'month';
+        const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
 
         function renderCalendar() {
             const year = currentDate.getFullYear();
@@ -991,17 +994,222 @@
                 grid.appendChild(day);
             }
 
-            const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-            ];
             document.getElementById('monthTitle').textContent = months[month] + ' ' + year;
-
             updateProductivity();
         }
 
         function changeMonth(delta) {
             currentDate.setMonth(currentDate.getMonth() + delta);
             renderCalendar();
+        }
+
+        // ============================================
+        // РЕЖИМ ДЕНЬ
+        // ============================================
+        function renderDayView(date) {
+            const grid = document.getElementById('calendarGrid');
+            const dateStr = date.toISOString().split('T')[0];
+
+            grid.innerHTML = '';
+
+            const title = document.createElement('div');
+            title.style.cssText =
+                'grid-column:1/-1;text-align:center;padding:8px 0;font-weight:600;font-size:16px;color:var(--text);';
+            const weekdays = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+            title.textContent = '📅 ' + weekdays[date.getDay()] + ', ' + dateStr;
+            grid.appendChild(title);
+
+            const dayTasks = getTasksForDate(dateStr);
+
+            if (dayTasks.length === 0) {
+                const empty = document.createElement('div');
+                empty.style.cssText =
+                'grid-column:1/-1;text-align:center;padding:30px 0;color:var(--text-secondary);';
+                empty.innerHTML = '📭 Нет задач на этот день';
+                grid.appendChild(empty);
+                return;
+            }
+
+            dayTasks.sort((a, b) => a.time.localeCompare(b.time));
+
+            for (let hour = 6; hour <= 23; hour++) {
+                const hourStr = String(hour).padStart(2, '0') + ':00';
+
+                const timeLabel = document.createElement('div');
+                timeLabel.style.cssText =
+                    'padding:8px 12px;font-size:13px;color:var(--text-secondary);font-weight:500;border-top:1px solid var(--border);text-align:right;background:var(--bg);';
+                timeLabel.textContent = hourStr;
+
+                const content = document.createElement('div');
+                content.style.cssText =
+                    'padding:8px 12px;border-top:1px solid var(--border);background:var(--bg-card);min-height:50px;';
+
+                const hourTasks = dayTasks.filter(t => {
+                    const taskHour = parseInt(t.time.split(':')[0]);
+                    return taskHour === hour;
+                });
+
+                if (hourTasks.length > 0) {
+                    hourTasks.forEach(task => {
+                        const isDone = task.done.includes(dateStr);
+                        const taskEl = document.createElement('div');
+                        taskEl.style.cssText =
+                            `padding:6px 10px;margin-bottom:4px;border-radius:8px;background:${isDone ? 'var(--success)' : 'var(--accent)'};color:white;font-size:14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:opacity 0.2s;`;
+                        taskEl.innerHTML =
+                            `<span>${task.title}</span><span style="font-size:12px;opacity:0.8;">${task.duration} мин ${isDone ? '✅' : ''}</span>`;
+                        taskEl.onclick = function() {
+                            if (!isDone) {
+                                completeTask(task.id, dateStr);
+                            } else {
+                                alert('✅ Задача уже выполнена');
+                            }
+                        };
+                        content.appendChild(taskEl);
+                    });
+                } else {
+                    const emptyText = document.createElement('div');
+                    emptyText.style.cssText = 'color:var(--text-secondary);font-size:13px;opacity:0.4;padding:4px 0;';
+                    emptyText.textContent = '—';
+                    content.appendChild(emptyText);
+                }
+
+                grid.appendChild(timeLabel);
+                grid.appendChild(content);
+            }
+        }
+
+        // ============================================
+        // РЕЖИМ НЕДЕЛЯ
+        // ============================================
+        function renderWeekView(startDate) {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+            for (let i = 0; i < 7; i++) {
+                const header = document.createElement('div');
+                header.style.cssText =
+                    'padding:8px 4px;text-align:center;font-weight:600;font-size:14px;background:var(--bg);border-radius:8px 8px 0 0;color:var(--text);';
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const today = new Date().toISOString().split('T')[0];
+                header.innerHTML = `
+                            <div>${weekdays[i]}</div>
+                            <div style="font-weight:400;font-size:12px;color:var(--text-secondary);">
+                                ${dateStr}
+                                ${dateStr === today ? ' ⭐' : ''}
+                            </div>
+                        `;
+                if (dateStr === today) {
+                    header.style.background = 'var(--accent)';
+                    header.style.color = 'white';
+                }
+                grid.appendChild(header);
+            }
+
+            const dayTasks = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const tasks = getTasksForDate(dateStr);
+                dayTasks.push({ date: dateStr, tasks: tasks });
+            }
+
+            const maxTasks = Math.max(...dayTasks.map(d => d.tasks.length), 1);
+
+            for (let row = 0; row < maxTasks; row++) {
+                for (let col = 0; col < 7; col++) {
+                    const cell = document.createElement('div');
+                    cell.style.cssText =
+                        'padding:6px 4px;min-height:40px;border-bottom:1px solid var(--border);background:var(--bg-card);font-size:13px;';
+
+                    const dayData = dayTasks[col];
+                    const task = dayData.tasks[row];
+
+                    if (task) {
+                        const isDone = task.done.includes(dayData.date);
+                        cell.style.cssText +=
+                            `background:${isDone ? 'var(--success)' : 'var(--accent)'};color:white;border-radius:6px;margin:2px;padding:4px 8px;cursor:pointer;transition:opacity 0.2s;`;
+                        cell.innerHTML =
+                            `<div style="font-weight:500;font-size:12px;">${task.title}</div><div style="font-size:10px;opacity:0.8;">${task.time} · ${task.duration}мин ${isDone ? '✅' : ''}</div>`;
+                        cell.onclick = function() {
+                            if (!isDone) {
+                                completeTask(task.id, dayData.date);
+                            } else {
+                                alert('✅ Задача уже выполнена');
+                            }
+                        };
+                    } else {
+                        cell.style.cssText += 'color:var(--text-secondary);opacity:0.3;text-align:center;font-size:12px;';
+                        cell.textContent = '·';
+                    }
+
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        // ============================================
+        // РЕЖИМ ГОД
+        // ============================================
+        function renderYearView(year) {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн',
+                'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
+            ];
+
+            for (let month = 0; month < 12; month++) {
+                const monthContainer = document.createElement('div');
+                monthContainer.style.cssText =
+                    'grid-column: span 1;background:var(--bg-card);border-radius:12px;padding:12px;box-shadow:var(--shadow);margin:4px;';
+
+                const header = document.createElement('div');
+                header.style.cssText = 'font-weight:600;font-size:14px;text-align:center;margin-bottom:8px;color:var(--text);';
+                header.textContent = monthNames[month];
+                monthContainer.appendChild(header);
+
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                let totalTasks = 0;
+                let completedTasks = 0;
+
+                for (let d = 1; d <= lastDay.getDate(); d++) {
+                    const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+                    const dayTasks = getTasksForDate(dateStr);
+                    totalTasks += dayTasks.length;
+                    dayTasks.forEach(task => {
+                        if (task.done.includes(dateStr)) completedTasks++;
+                    });
+                }
+
+                const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+                const barContainer = document.createElement('div');
+                barContainer.style.cssText = 'height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:4px;';
+
+                const bar = document.createElement('div');
+                bar.style.cssText =
+                    `height:100%;width:${pct}%;background:${pct >= 70 ? 'var(--success)' : pct >= 40 ? '#fdcb6e' : 'var(--danger)'};transition:width 0.5s;border-radius:3px;`;
+                barContainer.appendChild(bar);
+                monthContainer.appendChild(barContainer);
+
+                const stats = document.createElement('div');
+                stats.style.cssText = 'display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);';
+                stats.innerHTML = `<span>📋 ${totalTasks}</span><span>✅ ${completedTasks}</span><span>${pct}%</span>`;
+                monthContainer.appendChild(stats);
+
+                const today = new Date();
+                if (year === today.getFullYear() && month === today.getMonth()) {
+                    monthContainer.style.border = '2px solid var(--accent)';
+                }
+
+                grid.appendChild(monthContainer);
+            }
         }
 
         // ============================================
@@ -1053,25 +1261,25 @@
                 const schedule = t.schedule.map(d => days[d]).join(', ');
 
                 html += `
-                    <div class="task-item ${doneToday ? 'task-item--done' : ''}">
-                        <div class="task-item__title">${t.title} ${doneToday ? '✅' : ''}</div>
-                        <div class="task-item__desc">${t.desc}</div>
-                        <div class="task-item__meta">
-                            ⏱️ ${t.duration} мин · 🕐 ${t.time} · 📅 ${t.start} → ${t.end}
-                        </div>
-                        <div class="task-item__meta">📆 ${schedule} · Выполнено: ${t.done.length} раз</div>
-                        <div class="task-item__actions">
-                            ${!doneToday ? `
-                                <button class="task-item__btn task-item__btn--complete" onclick="completeTask(${t.id}, '${today}')">
-                                    ✅ Выполнить
-                                </button>
-                            ` : `
-                                <span class="task-item__btn task-item__btn--done">✅ Готово</span>
-                            `}
-                            <button class="task-item__btn task-item__btn--delete" onclick="deleteTask(${t.id})">🗑️</button>
-                        </div>
-                    </div>
-                `;
+                            <div class="task-item ${doneToday ? 'task-item--done' : ''}">
+                                <div class="task-item__title">${t.title} ${doneToday ? '✅' : ''}</div>
+                                <div class="task-item__desc">${t.desc}</div>
+                                <div class="task-item__meta">
+                                    ⏱️ ${t.duration} мин · 🕐 ${t.time} · 📅 ${t.start} → ${t.end}
+                                </div>
+                                <div class="task-item__meta">📆 ${schedule} · Выполнено: ${t.done.length} раз</div>
+                                <div class="task-item__actions">
+                                    ${!doneToday ? `
+                                        <button class="task-item__btn task-item__btn--complete" onclick="completeTask(${t.id}, '${today}')">
+                                            ✅ Выполнить
+                                        </button>
+                                    ` : `
+                                        <span class="task-item__btn task-item__btn--done">✅ Готово</span>
+                                    `}
+                                    <button class="task-item__btn task-item__btn--delete" onclick="deleteTask(${t.id})">🗑️</button>
+                                </div>
+                            </div>
+                        `;
             });
 
             container.innerHTML = html;
@@ -1083,33 +1291,48 @@
 
             if (gallery.length === 0) {
                 container.innerHTML = `
-                    <div class="gallery-empty">
-                        <div style="font-size:48px;margin-bottom:8px;">🖼️</div>
-                        <div>Нет фотографий</div>
-                    </div>
-                `;
+                            <div class="gallery-empty">
+                                <div style="font-size:48px;margin-bottom:8px;">🖼️</div>
+                                <div>Нет фотографий</div>
+                            </div>
+                        `;
                 return;
             }
 
             let html = '';
             gallery.forEach(g => {
                 html += `
-                    <div class="gallery-item">
-                        <img class="gallery-item__img" src="${g.image}" alt="${g.comment}">
-                        <button class="gallery-item__delete" onclick="deleteGalleryItem(${g.id})">✕</button>
-                        <div class="gallery-item__info">
-                            <div class="gallery-item__date">📅 ${g.date}</div>
-                            <div class="gallery-item__comment">${g.comment}</div>
-                        </div>
-                    </div>
-                `;
+                            <div class="gallery-item">
+                                <img class="gallery-item__img" src="${g.image}" alt="${g.comment}">
+                                <button class="gallery-item__delete" onclick="deleteGalleryItem(${g.id})">✕</button>
+                                <div class="gallery-item__info">
+                                    <div class="gallery-item__date">📅 ${g.date}</div>
+                                    <div class="gallery-item__comment">${g.comment}</div>
+                                </div>
+                            </div>
+                        `;
             });
 
             container.innerHTML = html;
         }
 
         function renderAll() {
-            renderCalendar();
+            // Перерисовываем текущий режим
+            switch (currentMode) {
+                case 'day':
+                    renderDayView(currentDate);
+                    break;
+                case 'week':
+                    renderWeekView(currentDate);
+                    break;
+                case 'month':
+                    renderCalendar();
+                    break;
+                case 'year':
+                    renderYearView(currentDate.getFullYear());
+                    break;
+            }
+
             const title = document.getElementById('modalTitle').textContent;
             if (title.includes('Задачи')) {
                 renderTasks();
@@ -1179,11 +1402,11 @@
 
         function getTasksHTML() {
             return `
-                <div style="margin-bottom:16px;">
-                    <button class="form-btn" onclick="openAddTask()">➕ Добавить задачу</button>
-                </div>
-                <div id="tasksContainer"></div>
-            `;
+                        <div style="margin-bottom:16px;">
+                            <button class="form-btn" onclick="openAddTask()">➕ Добавить задачу</button>
+                        </div>
+                        <div id="tasksContainer"></div>
+                    `;
         }
 
         // ============================================
@@ -1229,11 +1452,11 @@
 
         function getGalleryHTML() {
             return `
-                <div style="margin-bottom:16px;">
-                    <button class="form-btn" onclick="openAddPhoto()">➕ Добавить фото</button>
-                </div>
-                <div id="galleryContainer" class="gallery-grid"></div>
-            `;
+                        <div style="margin-bottom:16px;">
+                            <button class="form-btn" onclick="openAddPhoto()">➕ Добавить фото</button>
+                        </div>
+                        <div id="galleryContainer" class="gallery-grid"></div>
+                    `;
         }
 
         // ============================================
@@ -1309,91 +1532,91 @@
             const stats = getTaskStats();
 
             const content = `
-                <!-- АВАТАР -->
-                <div style="text-align:center;margin-bottom:20px;">
-                    <img src="${user.avatar}" style="width:100px;height:100px;border-radius:50%;border:3px solid var(--accent);object-fit:cover;">
-                    <div style="margin-top:8px;">
-                        <button class="form-btn" style="width:auto;padding:6px 16px;font-size:13px;" onclick="document.getElementById('avatarInput').click()">
-                            📷 Сменить аватар
-                        </button>
-                        <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
-                    </div>
-                </div>
+                        <!-- АВАТАР -->
+                        <div style="text-align:center;margin-bottom:20px;">
+                            <img src="${user.avatar}" style="width:100px;height:100px;border-radius:50%;border:3px solid var(--accent);object-fit:cover;">
+                            <div style="margin-top:8px;">
+                                <button class="form-btn" style="width:auto;padding:6px 16px;font-size:13px;" onclick="document.getElementById('avatarInput').click()">
+                                    📷 Сменить аватар
+                                </button>
+                                <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+                            </div>
+                        </div>
 
-                <!-- ФОРМА -->
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                    <div class="form-group" style="grid-column:1/3;">
-                        <label class="form-label">👤 Имя</label>
-                        <input class="form-input" id="profileName" value="${user.name}" onchange="updateProfileField('name', this.value)">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">🎂 Возраст</label>
-                        <input class="form-input" id="profileAge" type="number" value="${user.age}" onchange="updateProfileField('age', parseInt(this.value) || 0)">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">⚧️ Пол</label>
-                        <select class="form-input" id="profileGender" onchange="updateProfileField('gender', this.value)">
-                            <option value="male" ${user.gender === 'male' ? 'selected' : ''}>👨 Мужской</option>
-                            <option value="female" ${user.gender === 'female' ? 'selected' : ''}>👩 Женский</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">📏 Рост (см)</label>
-                        <input class="form-input" id="profileHeight" type="number" value="${user.height}" onchange="updateProfileField('height', parseInt(this.value) || 0)">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">⚖️ Вес (кг)</label>
-                        <input class="form-input" id="profileWeight" type="number" value="${user.weight}" onchange="updateProfileField('weight', parseInt(this.value) || 0)">
-                    </div>
-                </div>
+                        <!-- ФОРМА -->
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <div class="form-group" style="grid-column:1/3;">
+                                <label class="form-label">👤 Имя</label>
+                                <input class="form-input" id="profileName" value="${user.name}" onchange="updateProfileField('name', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">🎂 Возраст</label>
+                                <input class="form-input" id="profileAge" type="number" value="${user.age}" onchange="updateProfileField('age', parseInt(this.value) || 0)">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">⚧️ Пол</label>
+                                <select class="form-input" id="profileGender" onchange="updateProfileField('gender', this.value)">
+                                    <option value="male" ${user.gender === 'male' ? 'selected' : ''}>👨 Мужской</option>
+                                    <option value="female" ${user.gender === 'female' ? 'selected' : ''}>👩 Женский</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">📏 Рост (см)</label>
+                                <input class="form-input" id="profileHeight" type="number" value="${user.height}" onchange="updateProfileField('height', parseInt(this.value) || 0)">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">⚖️ Вес (кг)</label>
+                                <input class="form-input" id="profileWeight" type="number" value="${user.weight}" onchange="updateProfileField('weight', parseInt(this.value) || 0)">
+                            </div>
+                        </div>
 
-                <!-- ИМТ -->
-                <div style="margin-top:16px;padding:16px;background:var(--bg);border-radius:12px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                        <span style="font-weight:600;font-size:16px;">📊 Индекс массы тела</span>
-                        <span style="font-size:20px;font-weight:700;color:${bmiInfo.color};">${bmi || '—'}</span>
-                    </div>
-                    <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;position:relative;">
-                        <div style="height:100%;width:${bmi ? Math.min((bmi / 40) * 100, 100) : 0}%;background:${bmiInfo.color};border-radius:4px;transition:width 0.5s;"></div>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-top:4px;">
-                        <span>${bmiInfo.emoji} ${bmiInfo.label}</span>
-                        <span>Норма: 18.5–24.9</span>
-                    </div>
-                </div>
+                        <!-- ИМТ -->
+                        <div style="margin-top:16px;padding:16px;background:var(--bg);border-radius:12px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                <span style="font-weight:600;font-size:16px;">📊 Индекс массы тела</span>
+                                <span style="font-size:20px;font-weight:700;color:${bmiInfo.color};">${bmi || '—'}</span>
+                            </div>
+                            <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;position:relative;">
+                                <div style="height:100%;width:${bmi ? Math.min((bmi / 40) * 100, 100) : 0}%;background:${bmiInfo.color};border-radius:4px;transition:width 0.5s;"></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-top:4px;">
+                                <span>${bmiInfo.emoji} ${bmiInfo.label}</span>
+                                <span>Норма: 18.5–24.9</span>
+                            </div>
+                        </div>
 
-                <!-- СТАТИСТИКА ЗАДАЧ -->
-                <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                    <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
-                        <div style="font-size:24px;font-weight:700;color:var(--accent);">${stats.total}</div>
-                        <div style="font-size:13px;color:var(--text-secondary);">Всего задач</div>
-                    </div>
-                    <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
-                        <div style="font-size:24px;font-weight:700;color:var(--success);">${stats.completed}</div>
-                        <div style="font-size:13px;color:var(--text-secondary);">✅ Выполнено</div>
-                    </div>
-                    <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
-                        <div style="font-size:24px;font-weight:700;color:#fdcb6e;">${stats.inProgress}</div>
-                        <div style="font-size:13px;color:var(--text-secondary);">🔄 В процессе</div>
-                    </div>
-                    <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
-                        <div style="font-size:24px;font-weight:700;color:var(--danger);">${stats.failed}</div>
-                        <div style="font-size:13px;color:var(--text-secondary);">❌ Невыполнено</div>
-                    </div>
-                </div>
+                        <!-- СТАТИСТИКА ЗАДАЧ -->
+                        <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
+                                <div style="font-size:24px;font-weight:700;color:var(--accent);">${stats.total}</div>
+                                <div style="font-size:13px;color:var(--text-secondary);">Всего задач</div>
+                            </div>
+                            <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
+                                <div style="font-size:24px;font-weight:700;color:var(--success);">${stats.completed}</div>
+                                <div style="font-size:13px;color:var(--text-secondary);">✅ Выполнено</div>
+                            </div>
+                            <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
+                                <div style="font-size:24px;font-weight:700;color:#fdcb6e;">${stats.inProgress}</div>
+                                <div style="font-size:13px;color:var(--text-secondary);">🔄 В процессе</div>
+                            </div>
+                            <div style="background:var(--bg);padding:12px;border-radius:12px;text-align:center;">
+                                <div style="font-size:24px;font-weight:700;color:var(--danger);">${stats.failed}</div>
+                                <div style="font-size:13px;color:var(--text-secondary);">❌ Невыполнено</div>
+                            </div>
+                        </div>
 
-                <!-- УРОВЕНЬ И ОПЫТ -->
-                <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;text-align:center;">
-                    <div style="font-size:14px;color:var(--text-secondary);">🎮 Уровень <strong style="color:var(--accent);font-size:20px;">${user.level}</strong></div>
-                    <div style="font-size:14px;color:var(--text-secondary);">⭐ Опыт: ${Math.round(user.exp * 100) / 100} / ${user.level}</div>
-                    <div style="height:6px;background:var(--border);border-radius:3px;margin-top:6px;overflow:hidden;">
-                        <div style="height:100%;width:${Math.min((user.exp / user.level) * 100, 100)}%;background:var(--accent);border-radius:3px;transition:width 0.5s;"></div>
-                    </div>
-                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">
-                        До следующего уровня: ${Math.round((user.level - user.exp) * 100) / 100} опыта
-                    </div>
-                </div>
-            `;
+                        <!-- УРОВЕНЬ И ОПЫТ -->
+                        <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;text-align:center;">
+                            <div style="font-size:14px;color:var(--text-secondary);">🎮 Уровень <strong style="color:var(--accent);font-size:20px;">${user.level}</strong></div>
+                            <div style="font-size:14px;color:var(--text-secondary);">⭐ Опыт: ${Math.round(user.exp * 100) / 100} / ${user.level}</div>
+                            <div style="height:6px;background:var(--border);border-radius:3px;margin-top:6px;overflow:hidden;">
+                                <div style="height:100%;width:${Math.min((user.exp / user.level) * 100, 100)}%;background:var(--accent);border-radius:3px;transition:width 0.5s;"></div>
+                            </div>
+                            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">
+                                До следующего уровня: ${Math.round((user.level - user.exp) * 100) / 100} опыта
+                            </div>
+                        </div>
+                    `;
 
             openModal('👤 Профиль', content);
         }
@@ -1414,32 +1637,32 @@
         function openSettings() {
             const theme = document.documentElement.getAttribute('data-theme') || 'light';
             openModal('⚙️ Настройки', `
-                <p><strong>Тема:</strong> ${theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная'}</p>
-                <button class="form-btn" style="margin-top:12px;" onclick="toggleTheme()">
-                    Сменить тему
-                </button>
-                <hr style="margin:16px 0;border-color:var(--border);">
-                <p style="color:var(--text-secondary);font-size:14px;">
-                    🔄 Синхронизация с трекерами (в планах)<br>
-                    📦 Импорт/экспорт данных
-                </p>
-                <p style="color:var(--text-secondary);font-size:13px;margin-top:12px;">
-                    Сделано с ❤️ Дэн и AI
-                </p>
-            `);
+                        <p><strong>Тема:</strong> ${theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная'}</p>
+                        <button class="form-btn" style="margin-top:12px;" onclick="toggleTheme()">
+                            Сменить тему
+                        </button>
+                        <hr style="margin:16px 0;border-color:var(--border);">
+                        <p style="color:var(--text-secondary);font-size:14px;">
+                            🔄 Синхронизация с трекерами (в планах)<br>
+                            📦 Импорт/экспорт данных
+                        </p>
+                        <p style="color:var(--text-secondary);font-size:13px;margin-top:12px;">
+                            Сделано с ❤️ Дэн и AI
+                        </p>
+                    `);
         }
 
         function openInfo() {
             openModal('ℹ️ Информация', `
-                <h3 style="margin-bottom:8px;color:var(--text);">🎮 RPG Система</h3>
-                <p style="color:var(--text-secondary);">
-                    <strong>Опыт:</strong> 1 минута = 0.01 опыта<br>
-                    <strong>Уровни:</strong> для N уровня нужно N опыта
-                </p>
-                <p style="margin-top:12px;color:var(--text-secondary);">
-                    Выполняй задачи, прокачивай навыки! 💪
-                </p>
-            `);
+                        <h3 style="margin-bottom:8px;color:var(--text);">🎮 RPG Система</h3>
+                        <p style="color:var(--text-secondary);">
+                            <strong>Опыт:</strong> 1 минута = 0.01 опыта<br>
+                            <strong>Уровни:</strong> для N уровня нужно N опыта
+                        </p>
+                        <p style="margin-top:12px;color:var(--text-secondary);">
+                            Выполняй задачи, прокачивай навыки! 💪
+                        </p>
+                    `);
         }
 
         // ============================================
@@ -1473,13 +1696,62 @@
             loadGallery();
             renderCalendar();
 
+            // Навигация
             document.getElementById('prevMonth').addEventListener('click', function() {
-                changeMonth(-1);
-            });
-            document.getElementById('nextMonth').addEventListener('click', function() {
-                changeMonth(1);
+                switch (currentMode) {
+                    case 'day':
+                        const dayDate = new Date(currentDate);
+                        dayDate.setDate(dayDate.getDate() - 1);
+                        currentDate = dayDate;
+                        document.getElementById('monthTitle').textContent = '📅 День';
+                        renderDayView(currentDate);
+                        break;
+                    case 'week':
+                        const weekDate = new Date(currentDate);
+                        weekDate.setDate(weekDate.getDate() - 7);
+                        currentDate = weekDate;
+                        document.getElementById('monthTitle').textContent = '📅 Неделя';
+                        renderWeekView(currentDate);
+                        break;
+                    case 'month':
+                        changeMonth(-1);
+                        break;
+                    case 'year':
+                        currentDate.setFullYear(currentDate.getFullYear() - 1);
+                        document.getElementById('monthTitle').textContent = '📅 ' + currentDate.getFullYear();
+                        renderYearView(currentDate.getFullYear());
+                        break;
+                }
             });
 
+            document.getElementById('nextMonth').addEventListener('click', function() {
+                switch (currentMode) {
+                    case 'day':
+                        const dayDate = new Date(currentDate);
+                        dayDate.setDate(dayDate.getDate() + 1);
+                        currentDate = dayDate;
+                        document.getElementById('monthTitle').textContent = '📅 День';
+                        renderDayView(currentDate);
+                        break;
+                    case 'week':
+                        const weekDate = new Date(currentDate);
+                        weekDate.setDate(weekDate.getDate() + 7);
+                        currentDate = weekDate;
+                        document.getElementById('monthTitle').textContent = '📅 Неделя';
+                        renderWeekView(currentDate);
+                        break;
+                    case 'month':
+                        changeMonth(1);
+                        break;
+                    case 'year':
+                        currentDate.setFullYear(currentDate.getFullYear() + 1);
+                        document.getElementById('monthTitle').textContent = '📅 ' + currentDate.getFullYear();
+                        renderYearView(currentDate.getFullYear());
+                        break;
+                }
+            });
+
+            // Сайдбар
             document.getElementById('menuBtn').addEventListener('click', function() {
                 document.getElementById('sidebar').classList.add('sidebar--open');
             });
@@ -1487,6 +1759,7 @@
                 document.getElementById('sidebar').classList.remove('sidebar--open');
             });
 
+            // Пункты меню
             document.querySelectorAll('.sidebar__item').forEach(function(el) {
                 el.addEventListener('click', function() {
                     const page = this.dataset.page;
@@ -1512,26 +1785,51 @@
                 });
             });
 
+            // Модальные окна
             document.getElementById('modalClose').addEventListener('click', closeModal);
             document.getElementById('mainModal').addEventListener('click', function(e) {
                 if (e.target === this) closeModal();
             });
 
+            // Режимы календаря
             document.querySelectorAll('.modes__btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.modes__btn').forEach(b => {
                         b.classList.remove('modes__btn--active');
                     });
                     this.classList.add('modes__btn--active');
+
                     const mode = this.dataset.mode;
-                    if (mode === 'month') {
-                        renderCalendar();
-                    } else {
-                        alert('Режим "' + mode + '" в разработке');
+                    currentMode = mode;
+                    const titleEl = document.getElementById('monthTitle');
+
+                    switch (mode) {
+                        case 'day':
+                            titleEl.textContent = '📅 День';
+                            renderDayView(new Date());
+                            break;
+                        case 'week':
+                            titleEl.textContent = '📅 Неделя';
+                            const today = new Date();
+                            const weekStart = new Date(today);
+                            weekStart.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 :
+                            1));
+                            renderWeekView(weekStart);
+                            break;
+                        case 'month':
+                            titleEl.textContent = months[currentDate.getMonth()] + ' ' + currentDate
+                            .getFullYear();
+                            renderCalendar();
+                            break;
+                        case 'year':
+                            titleEl.textContent = '📅 ' + currentDate.getFullYear();
+                            renderYearView(currentDate.getFullYear());
+                            break;
                     }
                 });
             });
 
+            // Тема
             document.getElementById('themeBtn').addEventListener('click', toggleTheme);
 
             console.log('🚀 SkillQuest запущен!');
