@@ -22,6 +22,8 @@
             --success: #00b894;
             --warning: #fdcb6e;
             --danger: #e17055;
+            --fire: #e17055;
+            --gold: #fdcb6e;
             --radius: 16px;
             --bottom-height: 68px;
 
@@ -46,6 +48,8 @@
             --success: #55efc4;
             --warning: #fdcb6e;
             --danger: #ff7675;
+            --fire: #ff7675;
+            --gold: #fdcb6e;
 
             --color-body: #55efc4;
             --color-soul: #fd79a8;
@@ -74,7 +78,7 @@
         }
 
         /* ============================================
-           ШАПКА
+           ШАПКА (СО СТРИКАМИ)
            ============================================ */
         .header {
             display: flex;
@@ -141,6 +145,23 @@
         .header__level span {
             color: var(--accent);
             font-weight: 700;
+        }
+
+        .header__streak {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--fire);
+            background: rgba(225, 112, 85, 0.15);
+            padding: 2px 10px 2px 6px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .header__streak-icon {
+            font-size: 14px;
         }
 
         .header__actions {
@@ -297,7 +318,7 @@
         }
 
         /* ============================================
-           РЕЖИМЫ КАЛЕНДАРЯ (МЕЖДУ КАЛЕНДАРЁМ И СТАТИСТИКОЙ)
+           РЕЖИМЫ КАЛЕНДАРЯ
            ============================================ */
         .modes {
             display: flex;
@@ -406,7 +427,7 @@
         }
 
         /* ============================================
-           СТАТИСТИКА (КЛИКАБЕЛЬНАЯ)
+           СТАТИСТИКА
            ============================================ */
         .stats {
             background: var(--bg-card);
@@ -1181,6 +1202,45 @@
         }
 
         /* ============================================
+           УВЕДОМЛЕНИЕ О СТРИКЕ
+           ============================================ */
+        .streak-notification {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            z-index: 300;
+            display: none;
+            animation: slideDown 0.3s ease;
+            border-left: 4px solid var(--fire);
+            max-width: 90%;
+        }
+
+        .streak-notification--show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        .streak-notification__text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .streak-notification__sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* ============================================
            АДАПТИВ
            ============================================ */
         @media (max-width: 480px) {
@@ -1192,6 +1252,8 @@
             .header__avatar { width: 28px; height: 28px; }
             .header__name { font-size: 12px; }
             .header__level { font-size: 10px; }
+            .header__streak { font-size: 10px; padding: 1px 8px 1px 4px; }
+            .header__streak-icon { font-size: 12px; }
             .header__menu-btn { font-size: 20px; }
             .header__btn { font-size: 16px; }
             .modes__btn { font-size: 11px; padding: 4px 10px; max-width: 65px; }
@@ -1227,6 +1289,7 @@
             .sidebar__item { font-size: 14px; padding: 10px 14px; }
             .tabs__btn { font-size: 12px; padding: 6px 12px; }
             .weight-chart { height: 100px; }
+            .streak-notification { top: 70px; padding: 10px 16px; }
         }
 
         @media (max-width: 380px) {
@@ -1253,7 +1316,7 @@
 <body>
 
     <!-- ==========================================
-    ШАПКА
+    ШАПКА (СО СТРИКАМИ)
     ========================================== -->
     <header class="header">
         <button class="header__menu-btn" id="menuBtn">☰</button>
@@ -1264,6 +1327,12 @@
                 <div class="header__name" id="userName">Игрок</div>
                 <div class="header__level">Ур. <span id="userLevel">1</span> · Опыт: <span id="userExp">0</span></div>
             </div>
+        </div>
+
+        <!-- СТРИК В ШАПКЕ -->
+        <div class="header__streak" id="headerStreak" title="Дней подряд с выполненными задачами">
+            <span class="header__streak-icon">🔥</span>
+            <span id="headerStreakCount">0</span>
         </div>
 
         <div class="header__actions">
@@ -1292,7 +1361,7 @@
     </section>
 
     <!-- ==========================================
-    РЕЖИМЫ КАЛЕНДАРЯ (МЕЖДУ КАЛЕНДАРЁМ И СТАТИСТИКОЙ)
+    РЕЖИМЫ КАЛЕНДАРЯ
     ========================================== -->
     <div class="modes" id="modesContainer">
         <button class="modes__btn" data-mode="day">День</button>
@@ -1314,7 +1383,7 @@
     </div>
 
     <!-- ==========================================
-    СТАТИСТИКА (КЛИКАБЕЛЬНАЯ)
+    СТАТИСТИКА
     ========================================== -->
     <section class="stats" id="statsSection" onclick="openStatsDetail()">
         <div class="stats__title">📊 Статистика за неделю</div>
@@ -1323,7 +1392,7 @@
     </section>
 
     <!-- ==========================================
-    ОСНОВНОЙ КОНТЕНТ (ДЛЯ ОСТАЛЬНЫХ ЭЛЕМЕНТОВ)
+    ОСНОВНОЙ КОНТЕНТ
     ========================================== -->
     <main id="mainContent"></main>
 
@@ -1356,6 +1425,14 @@
             <span class="bottom-bar__label">Профиль</span>
         </button>
     </nav>
+
+    <!-- ==========================================
+    УВЕДОМЛЕНИЕ О СТРИКЕ
+    ========================================== -->
+    <div class="streak-notification" id="streakNotification">
+        <div class="streak-notification__text" id="streakNotifText">🔥 Стрик: 5 дней!</div>
+        <div class="streak-notification__sub" id="streakNotifSub">Множитель опыта x1.05</div>
+    </div>
 
     <!-- ==========================================
     МОДАЛЬНЫЕ ОКНА
@@ -1490,7 +1567,7 @@
         let activeCategories = ['body', 'soul', 'craft', 'deeds', 'other'];
 
         // ============================================
-        // 2. ПОЛЬЗОВАТЕЛЬ
+        // 2. ПОЛЬЗОВАТЕЛЬ (РАСШИРЕННЫЙ)
         // ============================================
         const user = {
             name: 'Игрок',
@@ -1501,16 +1578,51 @@
             level: 1,
             exp: 0,
             avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%236c5ce7\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'20\' fill=\'%23fff\'/%3E%3Ccircle cx=\'35\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3Ccircle cx=\'65\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3C/svg%3E',
-            weightLog: [] // {date: "2026-01-15", weight: 72}
+            weightLog: [],
+            // ===== НОВЫЕ ПОЛЯ ДЛЯ СТРИКОВ =====
+            streak: {
+                current: 0,
+                max: 0,
+                lastDate: null,
+                categories: {
+                    body: { current: 0, max: 0, lastDate: null },
+                    soul: { current: 0, max: 0, lastDate: null },
+                    craft: { current: 0, max: 0, lastDate: null },
+                    deeds: { current: 0, max: 0, lastDate: null },
+                    other: { current: 0, max: 0, lastDate: null }
+                }
+            }
         };
 
         function loadUser() {
             const saved = localStorage.getItem('user');
             if (saved) {
-                try { Object.assign(user, JSON.parse(saved)); } catch (e) {}
+                try {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(user, parsed);
+                    // Гарантируем наличие полей стрика
+                    if (!user.streak) {
+                        user.streak = { current: 0, max: 0, lastDate: null, categories: {} };
+                    }
+                    if (!user.streak.categories) {
+                        user.streak.categories = {
+                            body: { current: 0, max: 0, lastDate: null },
+                            soul: { current: 0, max: 0, lastDate: null },
+                            craft: { current: 0, max: 0, lastDate: null },
+                            deeds: { current: 0, max: 0, lastDate: null },
+                            other: { current: 0, max: 0, lastDate: null }
+                        };
+                    }
+                    Object.keys(CATEGORIES).forEach(key => {
+                        if (!user.streak.categories[key]) {
+                            user.streak.categories[key] = { current: 0, max: 0, lastDate: null };
+                        }
+                    });
+                } catch (e) { console.warn('Ошибка загрузки пользователя', e); }
             }
             if (!user.weightLog) user.weightLog = [];
             updateUserUI();
+            updateStreakUI();
         }
 
         function saveUser() {
@@ -1522,13 +1634,153 @@
             document.getElementById('userLevel').textContent = user.level;
             document.getElementById('userExp').textContent = Math.round(user.exp * 100) / 100;
             document.getElementById('avatar').src = user.avatar;
+            updateStreakUI();
         }
 
         // ============================================
-        // 3. ЗАДАЧИ
+        // 3. СТРИКИ (НОВАЯ СИСТЕМА)
+        // ============================================
+
+        /**
+         * Обновляет стрики после выполнения задачи
+         * @param {string} category - категория выполненной задачи
+         */
+        function updateStreak(category) {
+            const today = new Date().toISOString().split('T')[0];
+
+            // --- ОБЩИЙ СТРИК ---
+            if (user.streak.lastDate === today) {
+                // Уже обновляли сегодня — ничего не меняем
+            } else if (user.streak.lastDate === getYesterday()) {
+                user.streak.current += 1;
+                if (user.streak.current > user.streak.max) {
+                    user.streak.max = user.streak.current;
+                }
+            } else {
+                // Стрик сброшен
+                user.streak.current = 1;
+            }
+            user.streak.lastDate = today;
+
+            // --- СТРИК ПО КАТЕГОРИИ ---
+            const catStreak = user.streak.categories[category];
+            if (!catStreak) return;
+
+            if (catStreak.lastDate === today) {
+                // Уже обновляли сегодня
+            } else if (catStreak.lastDate === getYesterday()) {
+                catStreak.current += 1;
+                if (catStreak.current > catStreak.max) {
+                    catStreak.max = catStreak.current;
+                }
+            } else {
+                catStreak.current = 1;
+            }
+            catStreak.lastDate = today;
+
+            saveUser();
+            updateStreakUI();
+
+            // Показываем уведомление
+            showStreakNotification(category);
+        }
+
+        /**
+         * Проверяет стрики при загрузке (сброс, если день пропущен)
+         */
+        function checkStreakOnLoad() {
+            const today = new Date().toISOString().split('T')[0];
+
+            // Общий стрик
+            if (user.streak.lastDate && user.streak.lastDate !== today && user.streak.lastDate !== getYesterday()) {
+                user.streak.current = 0;
+                user.streak.lastDate = null;
+            }
+
+            // Стрики по категориям
+            Object.keys(CATEGORIES).forEach(key => {
+                const cat = user.streak.categories[key];
+                if (cat && cat.lastDate && cat.lastDate !== today && cat.lastDate !== getYesterday()) {
+                    cat.current = 0;
+                    cat.lastDate = null;
+                }
+            });
+
+            saveUser();
+            updateStreakUI();
+        }
+
+        function getYesterday() {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            return d.toISOString().split('T')[0];
+        }
+
+        /**
+         * Получает множитель опыта на основе текущего стрика
+         * Максимум x2.0
+         */
+        function getStreakMultiplier() {
+            const streak = user.streak.current || 0;
+            return Math.min(1 + (streak * 0.01), 2.0);
+        }
+
+        /**
+         * Получает множитель для конкретной категории
+         */
+        function getCategoryStreakMultiplier(category) {
+            const cat = user.streak.categories[category];
+            if (!cat) return 1.0;
+            return Math.min(1 + (cat.current * 0.01), 2.0);
+        }
+
+        /**
+         * Обновляет UI стриков в шапке
+         */
+        function updateStreakUI() {
+            const countEl = document.getElementById('headerStreakCount');
+            if (countEl) {
+                countEl.textContent = user.streak.current || 0;
+            }
+        }
+
+        /**
+         * Показывает уведомление о стрике
+         */
+        let streakNotifTimeout = null;
+
+        function showStreakNotification(category) {
+            const notif = document.getElementById('streakNotification');
+            const textEl = document.getElementById('streakNotifText');
+            const subEl = document.getElementById('streakNotifSub');
+
+            const totalStreak = user.streak.current || 0;
+            const catStreak = user.streak.categories[category]?.current || 0;
+            const catLabel = CATEGORIES[category]?.label || category;
+            const multiplier = getStreakMultiplier();
+
+            if (totalStreak >= 2) {
+                textEl.textContent = `🔥 Стрик: ${totalStreak} дней!`;
+                subEl.textContent =
+                    `${catLabel}: ${catStreak} дней · Множитель опыта x${multiplier.toFixed(2)}`;
+            } else {
+                textEl.textContent = `🔥 Первый день стрика!`;
+                subEl.textContent = `Продолжай в том же духе!`;
+            }
+
+            notif.classList.add('streak-notification--show');
+
+            if (streakNotifTimeout) clearTimeout(streakNotifTimeout);
+            streakNotifTimeout = setTimeout(() => {
+                notif.classList.remove('streak-notification--show');
+            }, 3000);
+        }
+
+        // ============================================
+        // 4. ЗАДАЧИ (С ОБНОВЛЁННОЙ ЛОГИКОЙ ОПЫТА)
         // ============================================
         let tasks = [];
-        let taskViewMode = 'categories'; // 'categories' | 'recent'
+        let taskViewMode = 'categories';
 
         function loadTasks() {
             const saved = localStorage.getItem('tasks');
@@ -1647,19 +1899,45 @@
             }
             task.done.push(date);
             task.lastEdited = Date.now();
+
             const override = task.overrides && task.overrides[date];
             const duration = override ? override.duration : task.duration;
-            const exp = Math.round(duration * 0.01 * 100) / 100;
-            user.exp += exp;
+
+            // ===== НОВАЯ ЛОГИКА ОПЫТА СО СТРИКОМ =====
+            // Базовый опыт
+            const baseExp = Math.round(duration * 0.01 * 100) / 100;
+
+            // Множитель от общего стрика
+            const totalMultiplier = getStreakMultiplier();
+
+            // Дополнительный множитель от стрика по категории
+            const catMultiplier = getCategoryStreakMultiplier(task.category);
+
+            // Итоговый множитель (не больше x2.5)
+            const finalMultiplier = Math.min(totalMultiplier * catMultiplier, 2.5);
+
+            const expEarned = Math.round(baseExp * finalMultiplier * 100) / 100;
+
+            user.exp += expEarned;
             while (user.exp >= user.level) {
                 user.exp -= user.level;
                 user.level++;
             }
+
+            // === ОБНОВЛЯЕМ СТРИК ===
+            updateStreak(task.category);
+
             saveUser();
             saveTasks();
             updateUserUI();
             renderAll();
-            alert('🎉 +' + exp + ' опыта! Уровень: ' + user.level);
+
+            // Показываем уведомление о получении опыта
+            let msg = `🎉 +${expEarned} опыта! (${baseExp} × ${finalMultiplier.toFixed(2)})`;
+            if (user.level > 1) {
+                msg += `\n📈 Уровень: ${user.level}`;
+            }
+            alert(msg);
         }
 
         function deleteTask(id) {
@@ -1695,7 +1973,7 @@
         }
 
         // ============================================
-        // 4. ГАЛЕРЕЯ (ИСПРАВЛЕННАЯ)
+        // 5. ГАЛЕРЕЯ
         // ============================================
         let gallery = [];
         let isPhotoSaving = false;
@@ -1726,14 +2004,12 @@
         }
 
         function addGalleryItem(image, comment) {
-            // Проверяем, не сохраняется ли уже фото
             if (isPhotoSaving) {
                 alert('⏳ Фото уже сохраняется, подождите...');
                 return;
             }
             isPhotoSaving = true;
 
-            // Проверяем, не дублируется ли фото (по данным)
             const duplicate = gallery.some(item =>
                 item.image === image && item.comment === (comment || 'Без комментария')
             );
@@ -1763,7 +2039,7 @@
         }
 
         // ============================================
-        // 5. КАЛЕНДАРЬ
+        // 6. КАЛЕНДАРЬ
         // ============================================
         let currentDate = new Date();
         let currentMode = 'month';
@@ -2194,7 +2470,7 @@
         }
 
         // ============================================
-        // 6. СТАТИСТИКА
+        // 7. СТАТИСТИКА
         // ============================================
         function updateStats() {
             const grid = document.getElementById('statsGrid');
@@ -2265,14 +2541,14 @@
         }
 
         // ============================================
-        // 6.1 ДЕТАЛЬНАЯ СТАТИСТИКА (КЛИК)
+        // 8. ДЕТАЛЬНАЯ СТАТИСТИКА
         // ============================================
         let statsDetailCategory = 'all';
 
         function openStatsDetail() {
             const content = document.getElementById('statsDetailContent');
-            // Рендерим кнопки категорий для статистики
-            let filterBtns = `
+            let filterBtns =
+                `
                 <div class="category-filter" style="margin-bottom:12px;">
                     <button class="category-filter__btn category-filter__btn--all ${statsDetailCategory === 'all' ? 'category-filter__btn--active' : ''}" 
                             onclick="setStatsDetailCategory('all')">👁️</button>
@@ -2291,7 +2567,6 @@
         function setStatsDetailCategory(category) {
             statsDetailCategory = category;
             renderStatsDetail();
-            // Обновляем активные кнопки
             const btns = document.querySelectorAll('#statsDetailContent .category-filter__btn');
             btns.forEach(b => b.classList.remove('category-filter__btn--active'));
             const target = document.querySelector(`#statsDetailContent .category-filter__btn[onclick*="${category}"]`);
@@ -2307,7 +2582,6 @@
             let totals = { done: 0, planned: 0, missed: 0 };
             let maxCount = 1;
 
-            // Фильтруем задачи по выбранной категории
             const filteredTasks = tasks.filter(t => {
                 if (statsDetailCategory === 'all') return true;
                 return t.category === statsDetailCategory;
@@ -2387,7 +2661,7 @@
         }
 
         // ============================================
-        // 7. НИЖНИЙ БАР
+        // 9. НИЖНИЙ БАР
         // ============================================
         let currentPage = 'calendar';
 
@@ -2441,7 +2715,7 @@
         }
 
         // ============================================
-        // 8. ФИЛЬТР ПО КАТЕГОРИЯМ
+        // 10. ФИЛЬТР ПО КАТЕГОРИЯМ
         // ============================================
         function setupCategoryFilter() {
             const filterBtns = document.querySelectorAll('.category-filter__btn');
@@ -2478,7 +2752,7 @@
         }
 
         // ============================================
-        // 9. РЕДАКТОР ЗАДАЧИ
+        // 11. РЕДАКТОР ЗАДАЧИ
         // ============================================
         function openTaskEditorForDate(taskId, dateStr) {
             const task = tasks.find(t => t.id === taskId);
@@ -2574,7 +2848,7 @@
         }
 
         // ============================================
-        // 10. МОДАЛЬНЫЕ ОКНА
+        // 12. МОДАЛЬНЫЕ ОКНА
         // ============================================
         function openModal(title, content) {
             document.getElementById('modalTitle').textContent = title;
@@ -2587,7 +2861,7 @@
         }
 
         // ============================================
-        // 11. ЗАДАЧИ (С ДВУМЯ ВКЛАДКАМИ)
+        // 13. ЗАДАЧИ (С ДВУМЯ ВКЛАДКАМИ)
         // ============================================
         function renderTasksList() {
             const container = document.getElementById('tasksContainer');
@@ -2595,7 +2869,6 @@
 
             let filteredTasks = [];
             if (taskViewMode === 'categories') {
-                // По категориям: показываем все задачи, сгруппированные по категориям
                 const categoryGroups = {};
                 tasks.forEach(t => {
                     if (!activeCategories.includes(t.category)) return;
@@ -2639,7 +2912,6 @@
                 container.innerHTML = html ||
                     '<div class="task-empty">Нет задач в выбранных категориях</div>';
             } else {
-                // Последние редактируемые
                 const sorted = [...tasks].sort((a, b) => (b.lastEdited || 0) - (a.lastEdited || 0));
                 if (sorted.length === 0) {
                     container.innerHTML =
@@ -2691,7 +2963,6 @@
 
         function setTaskView(mode) {
             taskViewMode = mode;
-            // Обновляем активную вкладку
             const btns = document.querySelectorAll('.tabs__btn');
             btns.forEach(b => b.classList.remove('tabs__btn--active'));
             const target = document.querySelector(`.tabs__btn[onclick*="${mode}"]`);
@@ -2700,7 +2971,7 @@
         }
 
         // ============================================
-        // 12. ГАЛЕРЕЯ
+        // 14. ГАЛЕРЕЯ
         // ============================================
         function renderGallery() {
             const container = document.getElementById('galleryContainer');
@@ -2746,7 +3017,7 @@
         }
 
         // ============================================
-        // 13. ПРОФИЛЬ С ЖУРНАЛОМ ВЕСА
+        // 15. ПРОФИЛЬ С ЖУРНАЛОМ ВЕСА И СТРИКАМИ
         // ============================================
         function openProfile() {
             const bmi = user.weight && user.height ? Math.round((user.weight / ((user.height / 100) ** 2)) * 10) / 10 :
@@ -2754,7 +3025,6 @@
             const bmiInfo = bmi ? getBMICategory(bmi) : { label: 'Нет данных', color: '#888', emoji: '❓' };
             const stats = { total: tasks.length, completed: tasks.filter(t => t.done.length > 0).length };
 
-            // Статистика по категориям
             const categoryStats = { body: { count: 0, done: 0 }, soul: { count: 0, done: 0 }, craft: { count: 0,
                     done: 0 }, deeds: { count: 0, done: 0 }, other: { count: 0, done: 0 } };
             tasks.forEach(task => {
@@ -2765,12 +3035,22 @@
                 }
             });
 
-            // Журнал веса
             const weightLog = user.weightLog || [];
             const sortedWeightLog = [...weightLog].sort((a, b) => a.date.localeCompare(b.date));
-            const weightChartHtml = renderWeightChart(sortedWeightLog);
 
-            // Инфо-кнопка для ИМТ
+            // Статистика стриков
+            const totalStreak = user.streak.current || 0;
+            const maxStreak = user.streak.max || 0;
+            const catStreaks = Object.keys(CATEGORIES).map(key => {
+                const cat = user.streak.categories[key];
+                return {
+                    key: key,
+                    label: CATEGORIES[key].emoji,
+                    current: cat?.current || 0,
+                    max: cat?.max || 0
+                };
+            });
+
             const bmiInfoContent = bmiInfo.label !== 'Нет данных' ?
                 `<button onclick="showBMIInfo('${bmiInfo.label}', '${bmiInfo.emoji}', '${bmiInfo.color}')" 
                          style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--text-secondary);margin-left:4px;">ℹ️</button>` :
@@ -2817,6 +3097,7 @@
                     </div>
                 </div>
 
+                <!-- ИМТ -->
                 <div style="padding:8px;background:var(--bg);border-radius:6px;margin-top:8px;cursor:pointer;" onclick="openWeightJournal()">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
                         <span style="font-weight:600;font-size:12px;">📊 ИМТ</span>
@@ -2833,7 +3114,25 @@
                     </div>
                 </div>
 
-                <!-- Журнал веса (свернутый) -->
+                <!-- СТРИКИ -->
+                <div style="padding:8px;background:var(--bg);border-radius:6px;margin-top:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-weight:600;font-size:12px;">🔥 Стрики</span>
+                        <span style="font-size:14px;color:var(--fire);font-weight:700;">${totalStreak} дней</span>
+                    </div>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+                        ${catStreaks.map(cs => `
+                            <span style="font-size:11px;background:var(--bg-card);padding:2px 8px;border-radius:10px;border:1px solid var(--border);">
+                                ${cs.label} ${cs.current}д (макс ${cs.max})
+                            </span>
+                        `).join('')}
+                    </div>
+                    <div style="font-size:10px;color:var(--text-secondary);margin-top:4px;">
+                        🏆 Рекорд: ${maxStreak} дней
+                    </div>
+                </div>
+
+                <!-- Журнал веса -->
                 <div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:6px;cursor:pointer;" onclick="openWeightJournal()">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="font-weight:600;font-size:12px;">⚖️ Журнал веса</span>
@@ -2850,6 +3149,7 @@
                     `}
                 </div>
 
+                <!-- Статистика по категориям -->
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-top:8px;">
                     ${Object.keys(categoryStats).map(key => `
                         <div style="background:var(--bg);padding:4px;border-radius:6px;text-align:center;border-left:2px solid ${CATEGORIES[key]?.color || 'var(--border)'};">
@@ -2860,6 +3160,7 @@
                     `).join('')}
                 </div>
 
+                <!-- Общая статистика -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
                     <div style="background:var(--bg);padding:6px;border-radius:6px;text-align:center;">
                         <div style="font-size:16px;font-weight:700;color:var(--accent);">${stats.total}</div>
@@ -2871,6 +3172,7 @@
                     </div>
                 </div>
 
+                <!-- Уровень и опыт -->
                 <div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:6px;text-align:center;">
                     <div style="font-size:12px;color:var(--text-secondary);">🎮 Уровень <strong style="color:var(--accent);font-size:16px;">${user.level}</strong></div>
                     <div style="font-size:12px;color:var(--text-secondary);">⭐ Опыт: ${Math.round(user.exp * 100) / 100} / ${user.level}</div>
@@ -2900,8 +3202,40 @@
             alert(`${emoji} ${label}\n\n${desc}`);
         }
 
+        function getBMICategory(bmi) {
+            if (!bmi) return { label: 'Нет данных', color: '#888', emoji: '❓' };
+            if (bmi < 16) return { label: 'Выраженный дефицит', color: '#e17055', emoji: '⚠️' };
+            if (bmi < 18.5) return { label: 'Недостаточный вес', color: '#fdcb6e', emoji: '📉' };
+            if (bmi < 25) return { label: 'Нормальный вес', color: '#00b894', emoji: '✅' };
+            if (bmi < 30) return { label: 'Избыточный вес', color: '#fdcb6e', emoji: '📈' };
+            if (bmi < 35) return { label: 'Ожирение I', color: '#e17055', emoji: '⚠️' };
+            return { label: 'Ожирение II+', color: '#d63031', emoji: '🚨' };
+        }
+
+        function updateProfileField(field, value) {
+            user[field] = value;
+            saveUser();
+            if (field === 'name') document.getElementById('userName').textContent = value;
+            if (document.getElementById('modalTitle').textContent.includes('Профиль')) openProfile();
+        }
+
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { alert('Выберите изображение'); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                user.avatar = e.target.result;
+                saveUser();
+                document.getElementById('avatar').src = user.avatar;
+                if (document.getElementById('modalTitle').textContent.includes('Профиль')) openProfile();
+                alert('✅ Аватар обновлён!');
+            };
+            reader.readAsDataURL(file);
+        }
+
         // ============================================
-        // 14. ЖУРНАЛ ВЕСА
+        // 16. ЖУРНАЛ ВЕСА
         // ============================================
         function renderWeightChart(log) {
             if (log.length === 0) {
@@ -2948,7 +3282,6 @@
             const today = new Date().toISOString().split('T')[0];
             if (!user.weightLog) user.weightLog = [];
 
-            // Проверяем, есть ли запись за сегодня
             const existing = user.weightLog.find(w => w.date === today);
             if (existing) {
                 existing.weight = val;
@@ -2994,42 +3327,7 @@
         }
 
         // ============================================
-        // 15. BMI ИНФО
-        // ============================================
-        function getBMICategory(bmi) {
-            if (!bmi) return { label: 'Нет данных', color: '#888', emoji: '❓' };
-            if (bmi < 16) return { label: 'Выраженный дефицит', color: '#e17055', emoji: '⚠️' };
-            if (bmi < 18.5) return { label: 'Недостаточный вес', color: '#fdcb6e', emoji: '📉' };
-            if (bmi < 25) return { label: 'Нормальный вес', color: '#00b894', emoji: '✅' };
-            if (bmi < 30) return { label: 'Избыточный вес', color: '#fdcb6e', emoji: '📈' };
-            if (bmi < 35) return { label: 'Ожирение I', color: '#e17055', emoji: '⚠️' };
-            return { label: 'Ожирение II+', color: '#d63031', emoji: '🚨' };
-        }
-
-        function updateProfileField(field, value) {
-            user[field] = value;
-            saveUser();
-            if (field === 'name') document.getElementById('userName').textContent = value;
-            if (document.getElementById('modalTitle').textContent.includes('Профиль')) openProfile();
-        }
-
-        function handleAvatarUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            if (!file.type.startsWith('image/')) { alert('Выберите изображение'); return; }
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                user.avatar = e.target.result;
-                saveUser();
-                document.getElementById('avatar').src = user.avatar;
-                if (document.getElementById('modalTitle').textContent.includes('Профиль')) openProfile();
-                alert('✅ Аватар обновлён!');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // ============================================
-        // 16. ДОБАВЛЕНИЕ ЗАДАЧИ
+        // 17. ДОБАВЛЕНИЕ ЗАДАЧИ
         // ============================================
         function openAddTaskForDate(dateStr, timeStr) {
             document.getElementById('taskStart').value = dateStr;
@@ -3092,11 +3390,10 @@
         }
 
         // ============================================
-        // 17. ДОБАВЛЕНИЕ ФОТО (ИСПРАВЛЕННОЕ)
+        // 18. ДОБАВЛЕНИЕ ФОТО
         // ============================================
         function openAddPhoto() {
             document.getElementById('addPhotoModal').classList.add('modal-overlay--open');
-            // Очищаем поля
             document.getElementById('photoInput').value = '';
             document.getElementById('photoComment').value = '';
         }
@@ -3119,7 +3416,6 @@
                 return;
             }
 
-            // Блокируем повторное нажатие
             const btn = document.querySelector('#addPhotoModal .form-btn');
             if (btn) {
                 btn.disabled = true;
@@ -3132,14 +3428,12 @@
                     const imageData = e.target.result;
                     addGalleryItem(imageData, comment || 'Без комментария');
                     closeAddPhoto();
-                    // Обновляем галерею, если она открыта
                     if (document.getElementById('modalTitle').textContent.includes('Галерея')) {
                         openGallery();
                     }
                 } catch (err) {
                     alert('❌ Ошибка при сохранении фото: ' + err.message);
                 } finally {
-                    // Разблокируем кнопку
                     if (btn) {
                         btn.disabled = false;
                         btn.textContent = '✅ Сохранить';
@@ -3157,7 +3451,7 @@
         }
 
         // ============================================
-        // 18. НАСТРОЙКИ И ИНФОРМАЦИЯ
+        // 19. НАСТРОЙКИ И ИНФОРМАЦИЯ
         // ============================================
         function openSettings() {
             const theme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -3182,6 +3476,7 @@
                 <h3 style="margin-bottom:4px;color:var(--text);font-size:15px;">🎮 RPG Система</h3>
                 <p style="color:var(--text-secondary);font-size:13px;">
                     <strong>Опыт:</strong> 1 минута = 0.01 опыта<br>
+                    <strong>Стрики:</strong> ежедневные серии увеличивают множитель опыта<br>
                     <strong>Уровни:</strong> для N уровня нужно N опыта
                 </p>
                 <p style="margin-top:8px;color:var(--text-secondary);font-size:13px;">
@@ -3191,7 +3486,7 @@
         }
 
         // ============================================
-        // 19. ТЕМА
+        // 20. ТЕМА
         // ============================================
         function toggleTheme() {
             const html = document.documentElement;
@@ -3209,9 +3504,12 @@
         }
 
         // ============================================
-        // 20. РЕНДЕР ВСЕГО
+        // 21. РЕНДЕР ВСЕГО
         // ============================================
         function renderAll() {
+            // Проверяем стрики при каждом рендере
+            checkStreakOnLoad();
+
             switch (currentMode) {
                 case 'day':
                     renderDayView(currentDate);
@@ -3228,16 +3526,21 @@
             }
             updateStats();
             updateBottomBarLabel();
+            updateStreakUI();
         }
 
         // ============================================
-        // 21. ИНИЦИАЛИЗАЦИЯ
+        // 22. ИНИЦИАЛИЗАЦИЯ
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             loadUser();
             loadTasks();
             loadGallery();
+
+            // Проверяем стрики при загрузке
+            checkStreakOnLoad();
+
             setupCategoryFilter();
 
             currentMode = 'month';
@@ -3420,7 +3723,7 @@
             console.log('🚀 SkillQuest запущен!');
             console.log('👤 ' + user.name + ', Уровень: ' + user.level);
             console.log('📋 Задач: ' + tasks.length + ', 📸 Фото: ' + gallery.length);
-            console.log('⚖️ Записей веса: ' + (user.weightLog?.length || 0));
+            console.log('🔥 Стрик: ' + (user.streak.current || 0) + ' дней');
         });
 
         // Экспорт функций
