@@ -3471,19 +3471,294 @@
             `);
         }
 
-        function openInfo() {
-            openModal('ℹ️ Информация', `
-                <h3 style="margin-bottom:4px;color:var(--text);font-size:15px;">🎮 RPG Система</h3>
-                <p style="color:var(--text-secondary);font-size:13px;">
-                    <strong>Опыт:</strong> 1 минута = 0.01 опыта<br>
-                    <strong>Стрики:</strong> ежедневные серии увеличивают множитель опыта<br>
-                    <strong>Уровни:</strong> для N уровня нужно N опыта
+       function openInfo() {
+    const totalStreak = user.streak?.current || 0;
+    const maxStreak = user.streak?.max || 0;
+    const multiplier = getStreakMultiplier ? getStreakMultiplier() : 1.0;
+
+    // Собираем статистику по категориям для отображения
+    const catStats = Object.keys(CATEGORIES).map(key => {
+        const cat = user.streak?.categories?.[key];
+        return {
+            key: key,
+            label: CATEGORIES[key].label,
+            emoji: CATEGORIES[key].emoji,
+            streak: cat?.current || 0,
+            maxStreak: cat?.max || 0
+        };
+    });
+
+    const content = `
+        <style>
+            .rpg-info {
+                color: var(--text);
+            }
+            .rpg-info h3 {
+                font-size: 16px;
+                font-weight: 700;
+                margin: 16px 0 8px 0;
+                color: var(--text);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .rpg-info h3:first-child {
+                margin-top: 0;
+            }
+            .rpg-info p {
+                font-size: 14px;
+                line-height: 1.6;
+                color: var(--text-secondary);
+                margin-bottom: 6px;
+            }
+            .rpg-info .highlight {
+                background: var(--bg);
+                padding: 10px 14px;
+                border-radius: 10px;
+                margin: 8px 0;
+                border-left: 3px solid var(--accent);
+            }
+            .rpg-info .highlight--fire {
+                border-left-color: var(--fire);
+            }
+            .rpg-info .highlight--gold {
+                border-left-color: var(--gold);
+            }
+            .rpg-info .highlight--success {
+                border-left-color: var(--success);
+            }
+            .rpg-info .badge {
+                display: inline-block;
+                padding: 2px 10px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+                background: var(--accent);
+                color: #fff;
+                margin-right: 4px;
+            }
+            .rpg-info .badge--fire {
+                background: var(--fire);
+            }
+            .rpg-info .badge--gold {
+                background: var(--gold);
+                color: #1a1a2e;
+            }
+            .rpg-info .badge--success {
+                background: var(--success);
+            }
+            .rpg-info .badge--body {
+                background: var(--color-body);
+            }
+            .rpg-info .badge--soul {
+                background: var(--color-soul);
+            }
+            .rpg-info .badge--craft {
+                background: var(--color-craft);
+            }
+            .rpg-info .badge--deeds {
+                background: var(--color-deeds);
+                color: #1a1a2e;
+            }
+            .rpg-info .badge--other {
+                background: var(--color-other);
+            }
+            .rpg-info .stat-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 8px;
+                margin: 8px 0;
+            }
+            .rpg-info .stat-item {
+                background: var(--bg);
+                padding: 8px;
+                border-radius: 8px;
+                text-align: center;
+            }
+            .rpg-info .stat-item__value {
+                font-size: 20px;
+                font-weight: 700;
+                color: var(--accent);
+            }
+            .rpg-info .stat-item__label {
+                font-size: 11px;
+                color: var(--text-secondary);
+            }
+            .rpg-info .feature-list {
+                list-style: none;
+                padding: 0;
+                margin: 4px 0;
+            }
+            .rpg-info .feature-list li {
+                padding: 4px 0;
+                font-size: 14px;
+                color: var(--text-secondary);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border-bottom: 1px solid var(--border);
+            }
+            .rpg-info .feature-list li:last-child {
+                border-bottom: none;
+            }
+            .rpg-info .feature-list li::before {
+                content: "▸";
+                color: var(--accent);
+                font-weight: 700;
+            }
+            .rpg-info .multiplier-table {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 4px;
+                margin: 6px 0;
+                font-size: 13px;
+            }
+            .rpg-info .multiplier-table .header {
+                font-weight: 600;
+                color: var(--text);
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 4px;
+            }
+            .rpg-info .multiplier-table .cell {
+                color: var(--text-secondary);
+                padding: 3px 0;
+            }
+            .rpg-info .multiplier-table .cell--highlight {
+                color: var(--fire);
+                font-weight: 600;
+            }
+        </style>
+
+        <div class="rpg-info">
+
+            <!-- ЗАГОЛОВОК -->
+            <h3>🎮 RPG Система SkillQuest</h3>
+            <p>
+                SkillQuest превращает твои повседневные задачи в увлекательную RPG-игру.
+                Каждое выполненное дело приносит опыт и приближает к новым уровням.
+            </p>
+
+            <!-- СТАТИСТИКА -->
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-item__value">${user.level}</div>
+                    <div class="stat-item__label">🎯 Уровень</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-item__value">${Math.round(user.exp * 100) / 100}</div>
+                    <div class="stat-item__label">⭐ Опыт</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-item__value">${totalStreak}</div>
+                    <div class="stat-item__label">🔥 Стрик (дней)</div>
+                </div>
+            </div>
+
+            <!-- ОПЫТ И УРОВНИ -->
+            <h3>📈 Опыт и уровни</h3>
+            <div class="highlight">
+                <p><strong>Как начисляется опыт:</strong></p>
+                <p>📊 <strong>Базовый опыт</strong> = Длительность задачи (минуты) × 0.01</p>
+                <p>🔥 <strong>Бонус за стрик</strong> = +1% за каждый день стрика (максимум x2.0)</p>
+                <p>📂 <strong>Бонус за категорию</strong> = +1% за каждый день стрика в категории (максимум x2.0)</p>
+                <p style="margin-top:4px;font-size:13px;color:var(--text-secondary);">
+                    <strong>Итоговый опыт</strong> = Базовый опыт × Общий множитель × Множитель категории
                 </p>
-                <p style="margin-top:8px;color:var(--text-secondary);font-size:13px;">
-                    Выполняй задачи, прокачивай навыки! 💪
+                <p style="margin-top:4px;font-size:13px;color:var(--text-secondary);">
+                    <strong>Уровни:</strong> Для достижения N уровня нужно набрать N опыта.
+                    Например, для 5 уровня нужно 5 опыта.
                 </p>
-            `);
-        }
+            </div>
+
+            <!-- МНОЖИТЕЛИ -->
+            <h3>⚡ Множители опыта</h3>
+            <div class="multiplier-table">
+                <div class="header">Стрик</div>
+                <div class="header">Множитель</div>
+                <div class="header">Бонус</div>
+
+                <div class="cell">1–9 дней</div>
+                <div class="cell">×1.01 – ×1.09</div>
+                <div class="cell">+1–9%</div>
+
+                <div class="cell">10–19 дней</div>
+                <div class="cell">×1.10 – ×1.19</div>
+                <div class="cell">+10–19%</div>
+
+                <div class="cell">20–49 дней</div>
+                <div class="cell">×1.20 – ×1.49</div>
+                <div class="cell">+20–49%</div>
+
+                <div class="cell">50–99 дней</div>
+                <div class="cell">×1.50 – ×1.99</div>
+                <div class="cell">+50–99%</div>
+
+                <div class="cell cell--highlight">100+ дней</div>
+                <div class="cell cell--highlight">×2.00</div>
+                <div class="cell cell--highlight">+100% (максимум)</div>
+            </div>
+
+            <!-- КАТЕГОРИИ -->
+            <h3>📂 Категории навыков</h3>
+            <p>Каждая задача относится к одной из пяти категорий. Выполняя задачи, ты прокачиваешь соответствующий навык.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;">
+                <span class="badge badge--body">🏋️ Тело</span>
+                <span class="badge badge--soul">🎨 Душа</span>
+                <span class="badge badge--craft">🛠️ Ремесло</span>
+                <span class="badge badge--deeds">📋 Дела</span>
+                <span class="badge badge--other">➕ Другое</span>
+            </div>
+            <div class="highlight highlight--gold">
+                <p style="font-size:13px;">
+                    <strong>🔥 Стрики по категориям:</strong>
+                    ${catStats.map(cs => `${cs.emoji} ${cs.streak}д (рекорд: ${cs.maxStreak}д)`).join(' · ')}
+                </p>
+            </div>
+
+            <!-- СТРИКИ -->
+            <h3>🔥 Система стриков</h3>
+            <div class="highlight highlight--fire">
+                <p><strong>Что это?</strong> Ежедневная серия выполненных задач. Чем длиннее стрик, тем выше множитель опыта.</p>
+                <p><strong>Как работает:</strong></p>
+                <ul class="feature-list">
+                    <li>Каждый день с выполненной задачей продлевает стрик</li>
+                    <li>Если за день не выполнено ни одной задачи — стрик сбрасывается</li>
+                    <li>Рекордный стрик сохраняется навсегда</li>
+                    <li>🔥 Текущий стрик: <strong>${totalStreak} дней</strong> (рекорд: ${maxStreak})</li>
+                </ul>
+            </div>
+
+            <!-- ФИЛЬТРЫ -->
+            <h3>🎯 Фильтры и визуализация</h3>
+            <div class="highlight highlight--success">
+                <p><strong>Календарь:</strong></p>
+                <ul class="feature-list">
+                    <li><span style="color:var(--success);">✅</span> Выполненные задачи</li>
+                    <li><span style="color:var(--warning);">●</span> Запланированные задачи</li>
+                    <li><span style="color:var(--danger);">❌</span> Пропущенные задачи</li>
+                </ul>
+                <p style="margin-top:6px;"><strong>Фильтр по категориям:</strong> Показывай только нужные задачи.</p>
+                <p><strong>4 режима календаря:</strong> День, Неделя, Месяц, Год.</p>
+            </div>
+
+            <!-- СТАТИСТИКА -->
+            <h3>📊 Статистика</h3>
+            <div class="highlight">
+                <p><strong>Еженедельная статистика:</strong> Столбцы по дням с разбивкой по статусам.</p>
+                <p><strong>Детальная статистика:</strong> Клик по блоку открывает фильтр по категориям.</p>
+                <p><strong>Профиль:</strong> Полная картина твоего прогресса — уровень, опыт, стрики, ИМТ, журнал веса.</p>
+            </div>
+
+            <!-- ФУТЕР -->
+            <div style="margin-top:16px;padding:10px;background:var(--bg);border-radius:8px;text-align:center;font-size:12px;color:var(--text-secondary);">
+                🎮 Продолжай выполнять задачи, прокачивай навыки и становись лучше каждый день!<br>
+                🔥 Текущий стрик: <strong style="color:var(--fire);">${totalStreak}</strong> дней · Уровень: <strong style="color:var(--accent);">${user.level}</strong>
+            </div>
+        </div>
+    `;
+
+    openModal('ℹ️ Информация', content);
+}
 
         // ============================================
         // 20. ТЕМА
