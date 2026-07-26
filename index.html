@@ -4000,7 +4000,181 @@
             console.log('📋 Задач: ' + tasks.length + ', 📸 Фото: ' + gallery.length);
             console.log('🔥 Стрик: ' + (user.streak.current || 0) + ' дней');
         });
+// ============================================
+// 22. УПРАВЛЕНИЕ ДАННЫМИ (ЭКСПОРТ/ИМПОРТ/ОЧИСТКА)
+// ============================================
 
+/**
+ * Экспорт всех данных в JSON-файл
+ */
+function exportData() {
+    try {
+        const data = {
+            user: user,
+            tasks: tasks,
+            gallery: gallery,
+            exportedAt: new Date().toISOString(),
+            version: '1.2'
+        };
+
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `skillquest_backup_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert('✅ Данные успешно экспортированы!');
+    } catch (e) {
+        alert('❌ Ошибка при экспорте данных: ' + e.message);
+    }
+}
+
+/**
+ * Импорт данных из JSON-файла
+ */
+function importData() {
+    // Создаём скрытый input для выбора файла
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) {
+            document.body.removeChild(input);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const data = JSON.parse(event.target.result);
+
+                // Проверяем структуру
+                if (!data.user || !data.tasks || !data.gallery) {
+                    alert('❌ Неверный формат файла. Убедитесь, что это файл резервной копии SkillQuest.');
+                    document.body.removeChild(input);
+                    return;
+                }
+
+                // Подтверждение
+                if (!confirm('⚠️ Импорт данных заменит все текущие данные. Продолжить?')) {
+                    document.body.removeChild(input);
+                    return;
+                }
+
+                // Загружаем данные
+                Object.assign(user, data.user);
+                tasks = data.tasks;
+                gallery = data.gallery;
+
+                // Сохраняем
+                saveUser();
+                saveTasks();
+                saveGallery();
+
+                // Обновляем UI
+                updateUserUI();
+                renderAll();
+
+                alert('✅ Данные успешно импортированы!');
+                closeModal();
+                document.body.removeChild(input);
+            } catch (err) {
+                alert('❌ Ошибка при импорте данных: ' + err.message);
+                document.body.removeChild(input);
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    input.click();
+}
+
+/**
+ * Очистка всех пользовательских данных
+ */
+function clearAllData() {
+    // Двойное подтверждение
+    if (!confirm('⚠️ ВНИМАНИЕ! Это действие удалит ВСЕ ваши данные:\n\n' +
+            '• Профиль (имя, уровень, опыт, ИМТ, журнал веса)\n' +
+            '• Все задачи и их историю\n' +
+            '• Все фото в галерее\n' +
+            '• Статистику и стрики\n\n' +
+            'Это действие НЕОБРАТИМО!')) {
+        return;
+    }
+
+    if (!confirm('🔴 Вы уверены? Введите "ДА" в поле ниже для подтверждения.')) {
+        return;
+    }
+
+    const confirmText = prompt('Введите "ДА" для подтверждения очистки:');
+    if (confirmText !== 'ДА') {
+        alert('❌ Очистка отменена.');
+        return;
+    }
+
+    try {
+        // Очищаем localStorage
+        localStorage.removeItem('user');
+        localStorage.removeItem('tasks');
+        localStorage.removeItem('gallery');
+        localStorage.removeItem('theme');
+
+        // Сбрасываем данные в памяти
+        Object.assign(user, {
+            name: 'Игрок',
+            age: 25,
+            gender: 'male',
+            height: 175,
+            weight: 70,
+            level: 1,
+            exp: 0,
+            avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%236c5ce7\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'20\' fill=\'%23fff\'/%3E%3Ccircle cx=\'35\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3Ccircle cx=\'65\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3C/svg%3E',
+            weightLog: [],
+            streak: {
+                current: 0,
+                max: 0,
+                lastDate: null,
+                categories: {
+                    body: { current: 0, max: 0, lastDate: null },
+                    soul: { current: 0, max: 0, lastDate: null },
+                    craft: { current: 0, max: 0, lastDate: null },
+                    deeds: { current: 0, max: 0, lastDate: null },
+                    other: { current: 0, max: 0, lastDate: null }
+                }
+            }
+        });
+        tasks = [];
+        gallery = [];
+
+        // Сохраняем пустые данные
+        saveUser();
+        saveTasks();
+        saveGallery();
+
+        // Обновляем UI
+        updateUserUI();
+        updateStreakUI();
+        renderAll();
+
+        // Закрываем модальное окно
+        closeModal();
+
+        alert('✅ Все данные успешно очищены! Приложение перезагружено в исходное состояние.');
+    } catch (e) {
+        alert('❌ Ошибка при очистке данных: ' + e.message);
+    }
+}
         // Экспорт функций
         window.openAddTask = openAddTask;
         window.closeAddTask = closeAddTask;
