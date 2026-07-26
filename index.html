@@ -427,6 +427,37 @@
         }
 
         /* ============================================
+           ИНФО ОБ АКТИВНЫХ КАТЕГОРИЯХ
+           ============================================ */
+        .category-filter__info {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .category-filter__info span {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin: 0 2px;
+            font-size: 10px;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+
+        .category-filter__info .active-body { background: var(--color-body); color: #fff; }
+        .category-filter__info .active-soul { background: var(--color-soul); color: #fff; }
+        .category-filter__info .active-craft { background: var(--color-craft); color: #fff; }
+        .category-filter__info .active-deeds { background: var(--color-deeds); color: #1a1a2e; }
+        .category-filter__info .active-other { background: var(--color-other); color: #fff; }
+
+        .category-filter__info span.active {
+            opacity: 1;
+        }
+
+        /* ============================================
            СТАТИСТИКА
            ============================================ */
         .stats {
@@ -1373,27 +1404,26 @@
     <!-- ==========================================
     ФИЛЬТР ПО КАТЕГОРИЯМ
     ========================================== -->
+    <div class="category-filter" id="categoryFilter">
+        <button class="category-filter__btn category-filter__btn--all category-filter__btn--active" data-category="all">👁️</button>
+        <button class="category-filter__btn category-filter__btn--body" data-category="body">🏋️</button>
+        <button class="category-filter__btn category-filter__btn--soul" data-category="soul">🎨</button>
+        <button class="category-filter__btn category-filter__btn--craft" data-category="craft">🛠️</button>
+        <button class="category-filter__btn category-filter__btn--deeds" data-category="deeds">📋</button>
+        <button class="category-filter__btn category-filter__btn--other" data-category="other">➕</button>
+    </div>
+
     <!-- ==========================================
-ФИЛЬТР ПО КАТЕГОРИЯМ
-========================================== -->
-<div class="category-filter" id="categoryFilter">
-    <button class="category-filter__btn category-filter__btn--all category-filter__btn--active" data-category="all">👁️</button>
-    <button class="category-filter__btn category-filter__btn--body" data-category="body">🏋️</button>
-    <button class="category-filter__btn category-filter__btn--soul" data-category="soul">🎨</button>
-    <button class="category-filter__btn category-filter__btn--craft" data-category="craft">🛠️</button>
-    <button class="category-filter__btn category-filter__btn--deeds" data-category="deeds">📋</button>
-    <button class="category-filter__btn category-filter__btn--other" data-category="other">➕</button>
-</div>
-<!-- ==========================================
-ИНФО ОБ АКТИВНЫХ КАТЕГОРИЯХ
-========================================== -->
-<div class="category-filter__info" id="categoryFilterInfo">
-    <span class="active-body">🏋️ Тело</span>
-    <span class="active-soul">🎨 Душа</span>
-    <span class="active-craft">🛠️ Ремесло</span>
-    <span class="active-deeds">📋 Дела</span>
-    <span class="active-other">➕ Другое</span>
-</div>
+    ИНФО ОБ АКТИВНЫХ КАТЕГОРИЯХ
+    ========================================== -->
+    <div class="category-filter__info" id="categoryFilterInfo">
+        <span class="active-body">🏋️ Тело</span>
+        <span class="active-soul">🎨 Душа</span>
+        <span class="active-craft">🛠️ Ремесло</span>
+        <span class="active-deeds">📋 Дела</span>
+        <span class="active-other">➕ Другое</span>
+    </div>
+
     <!-- ==========================================
     СТАТИСТИКА
     ========================================== -->
@@ -1591,7 +1621,6 @@
             exp: 0,
             avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%236c5ce7\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'20\' fill=\'%23fff\'/%3E%3Ccircle cx=\'35\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3Ccircle cx=\'65\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3C/svg%3E',
             weightLog: [],
-            // ===== НОВЫЕ ПОЛЯ ДЛЯ СТРИКОВ =====
             streak: {
                 current: 0,
                 max: 0,
@@ -1612,7 +1641,6 @@
                 try {
                     const parsed = JSON.parse(saved);
                     Object.assign(user, parsed);
-                    // Гарантируем наличие полей стрика
                     if (!user.streak) {
                         user.streak = { current: 0, max: 0, lastDate: null, categories: {} };
                     }
@@ -1650,66 +1678,49 @@
         }
 
         // ============================================
-        // 3. СТРИКИ (НОВАЯ СИСТЕМА)
+        // 3. СТРИКИ
         // ============================================
-
-        /**
-         * Обновляет стрики после выполнения задачи
-         * @param {string} category - категория выполненной задачи
-         */
         function updateStreak(category) {
             const today = new Date().toISOString().split('T')[0];
 
-            // --- ОБЩИЙ СТРИК ---
             if (user.streak.lastDate === today) {
-                // Уже обновляли сегодня — ничего не меняем
+                // уже сегодня обновляли
             } else if (user.streak.lastDate === getYesterday()) {
                 user.streak.current += 1;
                 if (user.streak.current > user.streak.max) {
                     user.streak.max = user.streak.current;
                 }
             } else {
-                // Стрик сброшен
                 user.streak.current = 1;
             }
             user.streak.lastDate = today;
 
-            // --- СТРИК ПО КАТЕГОРИИ ---
             const catStreak = user.streak.categories[category];
-            if (!catStreak) return;
-
-            if (catStreak.lastDate === today) {
-                // Уже обновляли сегодня
-            } else if (catStreak.lastDate === getYesterday()) {
-                catStreak.current += 1;
-                if (catStreak.current > catStreak.max) {
-                    catStreak.max = catStreak.current;
+            if (catStreak) {
+                if (catStreak.lastDate === today) {
+                    // уже сегодня
+                } else if (catStreak.lastDate === getYesterday()) {
+                    catStreak.current += 1;
+                    if (catStreak.current > catStreak.max) {
+                        catStreak.max = catStreak.current;
+                    }
+                } else {
+                    catStreak.current = 1;
                 }
-            } else {
-                catStreak.current = 1;
+                catStreak.lastDate = today;
             }
-            catStreak.lastDate = today;
 
             saveUser();
             updateStreakUI();
-
-            // Показываем уведомление
             showStreakNotification(category);
         }
 
-        /**
-         * Проверяет стрики при загрузке (сброс, если день пропущен)
-         */
         function checkStreakOnLoad() {
             const today = new Date().toISOString().split('T')[0];
-
-            // Общий стрик
             if (user.streak.lastDate && user.streak.lastDate !== today && user.streak.lastDate !== getYesterday()) {
                 user.streak.current = 0;
                 user.streak.lastDate = null;
             }
-
-            // Стрики по категориям
             Object.keys(CATEGORIES).forEach(key => {
                 const cat = user.streak.categories[key];
                 if (cat && cat.lastDate && cat.lastDate !== today && cat.lastDate !== getYesterday()) {
@@ -1717,7 +1728,6 @@
                     cat.lastDate = null;
                 }
             });
-
             saveUser();
             updateStreakUI();
         }
@@ -1728,27 +1738,17 @@
             return d.toISOString().split('T')[0];
         }
 
-        /**
-         * Получает множитель опыта на основе текущего стрика
-         * Максимум x2.0
-         */
         function getStreakMultiplier() {
             const streak = user.streak.current || 0;
             return Math.min(1 + (streak * 0.01), 2.0);
         }
 
-        /**
-         * Получает множитель для конкретной категории
-         */
         function getCategoryStreakMultiplier(category) {
             const cat = user.streak.categories[category];
             if (!cat) return 1.0;
             return Math.min(1 + (cat.current * 0.01), 2.0);
         }
 
-        /**
-         * Обновляет UI стриков в шапке
-         */
         function updateStreakUI() {
             const countEl = document.getElementById('headerStreakCount');
             if (countEl) {
@@ -1756,9 +1756,6 @@
             }
         }
 
-        /**
-         * Показывает уведомление о стрике
-         */
         let streakNotifTimeout = null;
 
         function showStreakNotification(category) {
@@ -1781,7 +1778,6 @@
             }
 
             notif.classList.add('streak-notification--show');
-
             if (streakNotifTimeout) clearTimeout(streakNotifTimeout);
             streakNotifTimeout = setTimeout(() => {
                 notif.classList.remove('streak-notification--show');
@@ -1789,7 +1785,7 @@
         }
 
         // ============================================
-        // 4. ЗАДАЧИ (С ОБНОВЛЁННОЙ ЛОГИКОЙ ОПЫТА)
+        // 4. ЗАДАЧИ
         // ============================================
         let tasks = [];
         let taskViewMode = 'categories';
@@ -1838,17 +1834,16 @@
         }
 
         function getTasksForDate(dateStr) {
-    const result = [];
-    tasks.forEach(task => {
-        // Проверяем, активна ли категория
-        if (!activeCategories.includes(task.category)) return;
-        const taskForDate = getTaskForDate(task, dateStr);
-        if (taskForDate) {
-            result.push(taskForDate);
+            const result = [];
+            tasks.forEach(task => {
+                if (!activeCategories.includes(task.category)) return;
+                const taskForDate = getTaskForDate(task, dateStr);
+                if (taskForDate) {
+                    result.push(taskForDate);
+                }
+            });
+            return result;
         }
-    });
-    return result;
-}
 
         function getTaskStatusForDate(task, dateStr) {
             const today = new Date().toISOString().split('T')[0];
@@ -1916,19 +1911,10 @@
             const override = task.overrides && task.overrides[date];
             const duration = override ? override.duration : task.duration;
 
-            // ===== НОВАЯ ЛОГИКА ОПЫТА СО СТРИКОМ =====
-            // Базовый опыт
             const baseExp = Math.round(duration * 0.01 * 100) / 100;
-
-            // Множитель от общего стрика
             const totalMultiplier = getStreakMultiplier();
-
-            // Дополнительный множитель от стрика по категории
             const catMultiplier = getCategoryStreakMultiplier(task.category);
-
-            // Итоговый множитель (не больше x2.5)
             const finalMultiplier = Math.min(totalMultiplier * catMultiplier, 2.5);
-
             const expEarned = Math.round(baseExp * finalMultiplier * 100) / 100;
 
             user.exp += expEarned;
@@ -1937,7 +1923,6 @@
                 user.level++;
             }
 
-            // === ОБНОВЛЯЕМ СТРИК ===
             updateStreak(task.category);
 
             saveUser();
@@ -1945,7 +1930,6 @@
             updateUserUI();
             renderAll();
 
-            // Показываем уведомление о получении опыта
             let msg = `🎉 +${expEarned} опыта! (${baseExp} × ${finalMultiplier.toFixed(2)})`;
             if (user.level > 1) {
                 msg += `\n📈 Уровень: ${user.level}`;
@@ -2730,46 +2714,40 @@
         // ============================================
         // 10. ФИЛЬТР ПО КАТЕГОРИЯМ
         // ============================================
-       function setupCategoryFilter() {
-    const filterBtns = document.querySelectorAll('.category-filter__btn');
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const category = this.dataset.category;
+        function setupCategoryFilter() {
+            const filterBtns = document.querySelectorAll('.category-filter__btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const category = this.dataset.category;
 
-            if (category === 'all') {
-                activeCategories = ['body', 'soul', 'craft', 'deeds', 'other'];
-                filterBtns.forEach(b => b.classList.remove('category-filter__btn--active'));
-                this.classList.add('category-filter__btn--active');
-            } else {
-                // Убираем активный класс с "все"
-                document.querySelector('.category-filter__btn--all')?.classList.remove('category-filter__btn--active');
-                
-                const index = activeCategories.indexOf(category);
-                if (index === -1) {
-                    activeCategories.push(category);
-                    this.classList.add('category-filter__btn--active');
-                } else {
-                    activeCategories.splice(index, 1);
-                    this.classList.remove('category-filter__btn--active');
-                }
-                
-                // Если активных категорий нет — включаем все
-                if (activeCategories.length === 0) {
-                    activeCategories = ['body', 'soul', 'craft', 'deeds', 'other'];
-                    filterBtns.forEach(b => b.classList.remove('category-filter__btn--active'));
-                    document.querySelector('.category-filter__btn--all')?.classList.add('category-filter__btn--active');
-                }
-            }
+                    if (category === 'all') {
+                        activeCategories = ['body', 'soul', 'craft', 'deeds', 'other'];
+                        filterBtns.forEach(b => b.classList.remove('category-filter__btn--active'));
+                        this.classList.add('category-filter__btn--active');
+                    } else {
+                        document.querySelector('.category-filter__btn--all')?.classList.remove('category-filter__btn--active');
+                        const index = activeCategories.indexOf(category);
+                        if (index === -1) {
+                            activeCategories.push(category);
+                            this.classList.add('category-filter__btn--active');
+                        } else {
+                            activeCategories.splice(index, 1);
+                            this.classList.remove('category-filter__btn--active');
+                        }
+                        if (activeCategories.length === 0) {
+                            activeCategories = ['body', 'soul', 'craft', 'deeds', 'other'];
+                            filterBtns.forEach(b => b.classList.remove('category-filter__btn--active'));
+                            document.querySelector('.category-filter__btn--all')?.classList.add('category-filter__btn--active');
+                        }
+                    }
 
-            // ===== ГЛАВНОЕ: ПЕРЕРИСОВЫВАЕМ КАЛЕНДАРЬ И СТАТИСТИКУ =====
-            renderAll();
-        });
-    });
-    
-    // Изначально все категории активны
-    document.querySelector('.category-filter__btn--all')?.classList.add('category-filter__btn--active');
-}
-        
+                    renderAll();
+                    updateCategoryFilterInfo(); // <-- добавлено
+                });
+            });
+            document.querySelector('.category-filter__btn--all')?.classList.add('category-filter__btn--active');
+        }
+
         // ============================================
         // 11. РЕДАКТОР ЗАДАЧИ
         // ============================================
@@ -3036,7 +3014,7 @@
         }
 
         // ============================================
-        // 15. ПРОФИЛЬ С ЖУРНАЛОМ ВЕСА И СТРИКАМИ
+        // 15. ПРОФИЛЬ
         // ============================================
         function openProfile() {
             const bmi = user.weight && user.height ? Math.round((user.weight / ((user.height / 100) ** 2)) * 10) / 10 :
@@ -3057,7 +3035,6 @@
             const weightLog = user.weightLog || [];
             const sortedWeightLog = [...weightLog].sort((a, b) => a.date.localeCompare(b.date));
 
-            // Статистика стриков
             const totalStreak = user.streak.current || 0;
             const maxStreak = user.streak.max || 0;
             const catStreaks = Object.keys(CATEGORIES).map(key => {
@@ -3116,7 +3093,6 @@
                     </div>
                 </div>
 
-                <!-- ИМТ -->
                 <div style="padding:8px;background:var(--bg);border-radius:6px;margin-top:8px;cursor:pointer;" onclick="openWeightJournal()">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
                         <span style="font-weight:600;font-size:12px;">📊 ИМТ</span>
@@ -3133,7 +3109,6 @@
                     </div>
                 </div>
 
-                <!-- СТРИКИ -->
                 <div style="padding:8px;background:var(--bg);border-radius:6px;margin-top:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="font-weight:600;font-size:12px;">🔥 Стрики</span>
@@ -3151,7 +3126,6 @@
                     </div>
                 </div>
 
-                <!-- Журнал веса -->
                 <div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:6px;cursor:pointer;" onclick="openWeightJournal()">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="font-weight:600;font-size:12px;">⚖️ Журнал веса</span>
@@ -3168,7 +3142,6 @@
                     `}
                 </div>
 
-                <!-- Статистика по категориям -->
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-top:8px;">
                     ${Object.keys(categoryStats).map(key => `
                         <div style="background:var(--bg);padding:4px;border-radius:6px;text-align:center;border-left:2px solid ${CATEGORIES[key]?.color || 'var(--border)'};">
@@ -3179,7 +3152,6 @@
                     `).join('')}
                 </div>
 
-                <!-- Общая статистика -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
                     <div style="background:var(--bg);padding:6px;border-radius:6px;text-align:center;">
                         <div style="font-size:16px;font-weight:700;color:var(--accent);">${stats.total}</div>
@@ -3191,7 +3163,6 @@
                     </div>
                 </div>
 
-                <!-- Уровень и опыт -->
                 <div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:6px;text-align:center;">
                     <div style="font-size:12px;color:var(--text-secondary);">🎮 Уровень <strong style="color:var(--accent);font-size:16px;">${user.level}</strong></div>
                     <div style="font-size:12px;color:var(--text-secondary);">⭐ Опыт: ${Math.round(user.exp * 100) / 100} / ${user.level}</div>
@@ -3473,408 +3444,370 @@
         // 19. НАСТРОЙКИ И ИНФОРМАЦИЯ
         // ============================================
         function openSettings() {
-    const theme = document.documentElement.getAttribute('data-theme') || 'light';
-    
-    const content = `
-        <style>
-            .settings-section {
-                margin-bottom: 16px;
-            }
-            .settings-section__title {
-                font-size: 14px;
-                font-weight: 600;
-                color: var(--text);
-                margin-bottom: 6px;
-            }
-            .settings-section__desc {
-                font-size: 13px;
-                color: var(--text-secondary);
-                margin-bottom: 10px;
-            }
-            .settings-divider {
-                border: none;
-                border-top: 1px solid var(--border);
-                margin: 14px 0;
-            }
-            .btn-danger {
-                background: var(--danger) !important;
-            }
-            .btn-danger:hover {
-                background: #c0392b !important;
-            }
-            .btn-warning {
-                background: var(--warning) !important;
-                color: #1a1a2e !important;
-            }
-            .btn-warning:hover {
-                background: #f0b83a !important;
-            }
-        </style>
+            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+            
+            const content = `
+                <style>
+                    .settings-section {
+                        margin-bottom: 16px;
+                    }
+                    .settings-section__title {
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: var(--text);
+                        margin-bottom: 6px;
+                    }
+                    .settings-section__desc {
+                        font-size: 13px;
+                        color: var(--text-secondary);
+                        margin-bottom: 10px;
+                    }
+                    .settings-divider {
+                        border: none;
+                        border-top: 1px solid var(--border);
+                        margin: 14px 0;
+                    }
+                    .btn-danger {
+                        background: var(--danger) !important;
+                    }
+                    .btn-danger:hover {
+                        background: #c0392b !important;
+                    }
+                    .btn-warning {
+                        background: var(--warning) !important;
+                        color: #1a1a2e !important;
+                    }
+                    .btn-warning:hover {
+                        background: #f0b83a !important;
+                    }
+                </style>
 
-        <div class="settings-section">
-            <div class="settings-section__title">🎨 Внешний вид</div>
-            <div class="settings-section__desc">Текущая тема: <strong>${theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная'}</strong></div>
-            <button class="form-btn" onclick="toggleTheme(); closeModal(); openSettings();">
-                ${theme === 'light' ? '🌙 Переключить на тёмную' : '☀️ Переключить на светлую'}
-            </button>
-        </div>
-
-        <hr class="settings-divider">
-
-        <div class="settings-section">
-            <div class="settings-section__title">📦 Данные</div>
-            <div class="settings-section__desc">
-                Управление данными приложения. Все данные хранятся локально в вашем браузере.
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-                <button class="form-btn" onclick="exportData();" style="background:var(--success);">
-                    📤 Экспортировать данные
-                </button>
-                <button class="form-btn" onclick="importData();" style="background:var(--accent);">
-                    📥 Импортировать данные
-                </button>
-                <button class="form-btn btn-danger" onclick="clearAllData();" style="margin-top:4px;">
-                    🗑️ Очистить все данные
-                </button>
-            </div>
-            <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
-                ⚠️ Очистка данных необратима. Рекомендуется сделать экспорт перед очисткой.
-            </div>
-        </div>
-
-        <hr class="settings-divider">
-
-        <div class="settings-section">
-            <div class="settings-section__title">ℹ️ О приложении</div>
-            <div style="font-size:13px;color:var(--text-secondary);">
-                <p><strong>SkillQuest</strong> — RPG-планировщик личного развития.</p>
-                <p style="margin-top:4px;">Версия: <strong>1.2</strong> (с поддержкой стриков и динамической сложности)</p>
-                <p style="margin-top:4px;">Сделано с ❤️ <strong>Саша и Дэн AI</strong></p>
-                <p style="margin-top:4px;font-size:12px;color:var(--text-secondary);">
-                    Данные хранятся в localStorage браузера.
-                </p>
-            </div>
-        </div>
-    `;
-
-    openModal('⚙️ Настройки', content);
-}
-
-       function openInfo() {
-    const totalStreak = user.streak?.current || 0;
-    const maxStreak = user.streak?.max || 0;
-    const multiplier = getStreakMultiplier ? getStreakMultiplier() : 1.0;
-
-    // Собираем статистику по категориям для отображения
-    const catStats = Object.keys(CATEGORIES).map(key => {
-        const cat = user.streak?.categories?.[key];
-        return {
-            key: key,
-            label: CATEGORIES[key].label,
-            emoji: CATEGORIES[key].emoji,
-            streak: cat?.current || 0,
-            maxStreak: cat?.max || 0
-        };
-    });
-
-    const content = `
-        <style>
-            .rpg-info {
-                color: var(--text);
-            }
-            .rpg-info h3 {
-                font-size: 16px;
-                font-weight: 700;
-                margin: 16px 0 8px 0;
-                color: var(--text);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            .rpg-info h3:first-child {
-                margin-top: 0;
-            }
-            .rpg-info p {
-                font-size: 14px;
-                line-height: 1.6;
-                color: var(--text-secondary);
-                margin-bottom: 6px;
-            }
-            .rpg-info .highlight {
-                background: var(--bg);
-                padding: 10px 14px;
-                border-radius: 10px;
-                margin: 8px 0;
-                border-left: 3px solid var(--accent);
-            }
-            .rpg-info .highlight--fire {
-                border-left-color: var(--fire);
-            }
-            .rpg-info .highlight--gold {
-                border-left-color: var(--gold);
-            }
-            .rpg-info .highlight--success {
-                border-left-color: var(--success);
-            }
-            .rpg-info .badge {
-                display: inline-block;
-                padding: 2px 10px;
-                border-radius: 12px;
-                font-size: 12px;
-                font-weight: 600;
-                background: var(--accent);
-                color: #fff;
-                margin-right: 4px;
-            }
-            .rpg-info .badge--fire {
-                background: var(--fire);
-            }
-            .rpg-info .badge--gold {
-                background: var(--gold);
-                color: #1a1a2e;
-            }
-            .rpg-info .badge--success {
-                background: var(--success);
-            }
-            .rpg-info .badge--body {
-                background: var(--color-body);
-            }
-            .rpg-info .badge--soul {
-                background: var(--color-soul);
-            }
-            .rpg-info .badge--craft {
-                background: var(--color-craft);
-            }
-            .rpg-info .badge--deeds {
-                background: var(--color-deeds);
-                color: #1a1a2e;
-            }
-            .rpg-info .badge--other {
-                background: var(--color-other);
-            }
-            .rpg-info .stat-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 8px;
-                margin: 8px 0;
-            }
-            .rpg-info .stat-item {
-                background: var(--bg);
-                padding: 8px;
-                border-radius: 8px;
-                text-align: center;
-            }
-            .rpg-info .stat-item__value {
-                font-size: 20px;
-                font-weight: 700;
-                color: var(--accent);
-            }
-            .rpg-info .stat-item__label {
-                font-size: 11px;
-                color: var(--text-secondary);
-            }
-            .rpg-info .feature-list {
-                list-style: none;
-                padding: 0;
-                margin: 4px 0;
-            }
-            .rpg-info .feature-list li {
-                padding: 4px 0;
-                font-size: 14px;
-                color: var(--text-secondary);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                border-bottom: 1px solid var(--border);
-            }
-            .rpg-info .feature-list li:last-child {
-                border-bottom: none;
-            }
-            .rpg-info .feature-list li::before {
-                content: "▸";
-                color: var(--accent);
-                font-weight: 700;
-            }
-            .rpg-info .multiplier-table {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 4px;
-                margin: 6px 0;
-                font-size: 13px;
-            }
-            .rpg-info .multiplier-table .header {
-                font-weight: 600;
-                color: var(--text);
-                border-bottom: 1px solid var(--border);
-                padding-bottom: 4px;
-            }
-            .rpg-info .multiplier-table .cell {
-                color: var(--text-secondary);
-                padding: 3px 0;
-            }
-            .rpg-info .multiplier-table .cell--highlight {
-                color: var(--fire);
-                font-weight: 600;
-            }
-        </style>
-/* ============================================
-   АКТИВНЫЕ КАТЕГОРИИ (ИНФО)
-   ============================================ */
-.category-filter__info {
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-}
-
-.category-filter__info span {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 10px;
-    font-weight: 600;
-    margin: 0 2px;
-    font-size: 10px;
-    opacity: 0.4;
-    transition: opacity 0.2s;
-}
-
-.category-filter__info .active-body { background: var(--color-body); color: #fff; }
-.category-filter__info .active-soul { background: var(--color-soul); color: #fff; }
-.category-filter__info .active-craft { background: var(--color-craft); color: #fff; }
-.category-filter__info .active-deeds { background: var(--color-deeds); color: #1a1a2e; }
-.category-filter__info .active-other { background: var(--color-other); color: #fff; }
-
-.category-filter__info span.active {
-    opacity: 1;
-}
-            <!-- ЗАГОЛОВОК -->
-            <h3>🎮 RPG Система SkillQuest</h3>
-            <p>
-                SkillQuest превращает твои повседневные задачи в увлекательную RPG-игру.
-                Каждое выполненное дело приносит опыт и приближает к новым уровням.
-            </p>
-
-            <!-- СТАТИСТИКА -->
-            <div class="stat-grid">
-                <div class="stat-item">
-                    <div class="stat-item__value">${user.level}</div>
-                    <div class="stat-item__label">🎯 Уровень</div>
+                <div class="settings-section">
+                    <div class="settings-section__title">🎨 Внешний вид</div>
+                    <div class="settings-section__desc">Текущая тема: <strong>${theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная'}</strong></div>
+                    <button class="form-btn" onclick="toggleTheme(); closeModal(); openSettings();">
+                        ${theme === 'light' ? '🌙 Переключить на тёмную' : '☀️ Переключить на светлую'}
+                    </button>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-item__value">${Math.round(user.exp * 100) / 100}</div>
-                    <div class="stat-item__label">⭐ Опыт</div>
+
+                <hr class="settings-divider">
+
+                <div class="settings-section">
+                    <div class="settings-section__title">📦 Данные</div>
+                    <div class="settings-section__desc">
+                        Управление данными приложения. Все данные хранятся локально в вашем браузере.
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <button class="form-btn" onclick="exportData();" style="background:var(--success);">
+                            📤 Экспортировать данные
+                        </button>
+                        <button class="form-btn" onclick="importData();" style="background:var(--accent);">
+                            📥 Импортировать данные
+                        </button>
+                        <button class="form-btn btn-danger" onclick="clearAllData();" style="margin-top:4px;">
+                            🗑️ Очистить все данные
+                        </button>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                        ⚠️ Очистка данных необратима. Рекомендуется сделать экспорт перед очисткой.
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-item__value">${totalStreak}</div>
-                    <div class="stat-item__label">🔥 Стрик (дней)</div>
+
+                <hr class="settings-divider">
+
+                <div class="settings-section">
+                    <div class="settings-section__title">ℹ️ О приложении</div>
+                    <div style="font-size:13px;color:var(--text-secondary);">
+                        <p><strong>SkillQuest</strong> — RPG-планировщик личного развития.</p>
+                        <p style="margin-top:4px;">Версия: <strong>1.2</strong> (с поддержкой стриков и динамической сложности)</p>
+                        <p style="margin-top:4px;">Сделано с ❤️ <strong>Саша и Дэн AI</strong></p>
+                        <p style="margin-top:4px;font-size:12px;color:var(--text-secondary);">
+                            Данные хранятся в localStorage браузера.
+                        </p>
+                    </div>
                 </div>
-            </div>
+            `;
 
-            <!-- ОПЫТ И УРОВНИ -->
-            <h3>📈 Опыт и уровни</h3>
-            <div class="highlight">
-                <p><strong>Как начисляется опыт:</strong></p>
-                <p>📊 <strong>Базовый опыт</strong> = Длительность задачи (минуты) × 0.01</p>
-                <p>🔥 <strong>Бонус за стрик</strong> = +1% за каждый день стрика (максимум x2.0)</p>
-                <p>📂 <strong>Бонус за категорию</strong> = +1% за каждый день стрика в категории (максимум x2.0)</p>
-                <p style="margin-top:4px;font-size:13px;color:var(--text-secondary);">
-                    <strong>Итоговый опыт</strong> = Базовый опыт × Общий множитель × Множитель категории
-                </p>
-                <p style="margin-top:4px;font-size:13px;color:var(--text-secondary);">
-                    <strong>Уровни:</strong> Для достижения N уровня нужно набрать N опыта.
-                    Например, для 5 уровня нужно 5 опыта.
-                </p>
-            </div>
+            openModal('⚙️ Настройки', content);
+        }
 
-            <!-- МНОЖИТЕЛИ -->
-            <h3>⚡ Множители опыта</h3>
-            <div class="multiplier-table">
-                <div class="header">Стрик</div>
-                <div class="header">Множитель</div>
-                <div class="header">Бонус</div>
+        function openInfo() {
+            const totalStreak = user.streak?.current || 0;
+            const maxStreak = user.streak?.max || 0;
+            const multiplier = getStreakMultiplier ? getStreakMultiplier() : 1.0;
 
-                <div class="cell">1–9 дней</div>
-                <div class="cell">×1.01 – ×1.09</div>
-                <div class="cell">+1–9%</div>
+            const catStats = Object.keys(CATEGORIES).map(key => {
+                const cat = user.streak?.categories?.[key];
+                return {
+                    key: key,
+                    label: CATEGORIES[key].label,
+                    emoji: CATEGORIES[key].emoji,
+                    streak: cat?.current || 0,
+                    maxStreak: cat?.max || 0
+                };
+            });
 
-                <div class="cell">10–19 дней</div>
-                <div class="cell">×1.10 – ×1.19</div>
-                <div class="cell">+10–19%</div>
+            const content = `
+                <style>
+                    .rpg-info {
+                        color: var(--text);
+                    }
+                    .rpg-info h3 {
+                        font-size: 16px;
+                        font-weight: 700;
+                        margin: 16px 0 8px 0;
+                        color: var(--text);
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    .rpg-info h3:first-child {
+                        margin-top: 0;
+                    }
+                    .rpg-info p {
+                        font-size: 14px;
+                        line-height: 1.6;
+                        color: var(--text-secondary);
+                        margin-bottom: 6px;
+                    }
+                    .rpg-info .highlight {
+                        background: var(--bg);
+                        padding: 10px 14px;
+                        border-radius: 10px;
+                        margin: 8px 0;
+                        border-left: 3px solid var(--accent);
+                    }
+                    .rpg-info .highlight--fire {
+                        border-left-color: var(--fire);
+                    }
+                    .rpg-info .highlight--gold {
+                        border-left-color: var(--gold);
+                    }
+                    .rpg-info .highlight--success {
+                        border-left-color: var(--success);
+                    }
+                    .rpg-info .badge {
+                        display: inline-block;
+                        padding: 2px 10px;
+                        border-radius: 12px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        background: var(--accent);
+                        color: #fff;
+                        margin-right: 4px;
+                    }
+                    .rpg-info .badge--fire {
+                        background: var(--fire);
+                    }
+                    .rpg-info .badge--gold {
+                        background: var(--gold);
+                        color: #1a1a2e;
+                    }
+                    .rpg-info .badge--success {
+                        background: var(--success);
+                    }
+                    .rpg-info .badge--body {
+                        background: var(--color-body);
+                    }
+                    .rpg-info .badge--soul {
+                        background: var(--color-soul);
+                    }
+                    .rpg-info .badge--craft {
+                        background: var(--color-craft);
+                    }
+                    .rpg-info .badge--deeds {
+                        background: var(--color-deeds);
+                        color: #1a1a2e;
+                    }
+                    .rpg-info .badge--other {
+                        background: var(--color-other);
+                    }
+                    .rpg-info .stat-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr 1fr;
+                        gap: 8px;
+                        margin: 8px 0;
+                    }
+                    .rpg-info .stat-item {
+                        background: var(--bg);
+                        padding: 8px;
+                        border-radius: 8px;
+                        text-align: center;
+                    }
+                    .rpg-info .stat-item__value {
+                        font-size: 20px;
+                        font-weight: 700;
+                        color: var(--accent);
+                    }
+                    .rpg-info .stat-item__label {
+                        font-size: 11px;
+                        color: var(--text-secondary);
+                    }
+                    .rpg-info .feature-list {
+                        list-style: none;
+                        padding: 0;
+                        margin: 4px 0;
+                    }
+                    .rpg-info .feature-list li {
+                        padding: 4px 0;
+                        font-size: 14px;
+                        color: var(--text-secondary);
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        border-bottom: 1px solid var(--border);
+                    }
+                    .rpg-info .feature-list li:last-child {
+                        border-bottom: none;
+                    }
+                    .rpg-info .feature-list li::before {
+                        content: "▸";
+                        color: var(--accent);
+                        font-weight: 700;
+                    }
+                    .rpg-info .multiplier-table {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr 1fr;
+                        gap: 4px;
+                        margin: 6px 0;
+                        font-size: 13px;
+                    }
+                    .rpg-info .multiplier-table .header {
+                        font-weight: 600;
+                        color: var(--text);
+                        border-bottom: 1px solid var(--border);
+                        padding-bottom: 4px;
+                    }
+                    .rpg-info .multiplier-table .cell {
+                        color: var(--text-secondary);
+                        padding: 3px 0;
+                    }
+                    .rpg-info .multiplier-table .cell--highlight {
+                        color: var(--fire);
+                        font-weight: 600;
+                    }
+                </style>
 
-                <div class="cell">20–49 дней</div>
-                <div class="cell">×1.20 – ×1.49</div>
-                <div class="cell">+20–49%</div>
+                <div class="rpg-info">
+                    <h3>🎮 RPG Система SkillQuest</h3>
+                    <p>
+                        SkillQuest превращает твои повседневные задачи в увлекательную RPG-игру.
+                        Каждое выполненное дело приносит опыт и приближает к новым уровням.
+                    </p>
 
-                <div class="cell">50–99 дней</div>
-                <div class="cell">×1.50 – ×1.99</div>
-                <div class="cell">+50–99%</div>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-item__value">${user.level}</div>
+                            <div class="stat-item__label">🎯 Уровень</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item__value">${Math.round(user.exp * 100) / 100}</div>
+                            <div class="stat-item__label">⭐ Опыт</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item__value">${totalStreak}</div>
+                            <div class="stat-item__label">🔥 Стрик (дней)</div>
+                        </div>
+                    </div>
 
-                <div class="cell cell--highlight">100+ дней</div>
-                <div class="cell cell--highlight">×2.00</div>
-                <div class="cell cell--highlight">+100% (максимум)</div>
-            </div>
+                    <h3>📈 Опыт и уровни</h3>
+                    <div class="highlight">
+                        <p><strong>Как начисляется опыт:</strong></p>
+                        <p>📊 <strong>Базовый опыт</strong> = Длительность задачи (минуты) × 0.01</p>
+                        <p>🔥 <strong>Бонус за стрик</strong> = +1% за каждый день стрика (максимум x2.0)</p>
+                        <p>📂 <strong>Бонус за категорию</strong> = +1% за каждый день стрика в категории (максимум x2.0)</p>
+                        <p style="margin-top:4px;font-size:13px;color:var(--text-secondary);">
+                            <strong>Итоговый опыт</strong> = Базовый опыт × Общий множитель × Множитель категории
+                        </p>
+                        <p style="margin-top:4px;font-size:13px;color:var(--text-secondary);">
+                            <strong>Уровни:</strong> Для достижения N уровня нужно набрать N опыта.
+                            Например, для 5 уровня нужно 5 опыта.
+                        </p>
+                    </div>
 
-            <!-- КАТЕГОРИИ -->
-            <h3>📂 Категории навыков</h3>
-            <p>Каждая задача относится к одной из пяти категорий. Выполняя задачи, ты прокачиваешь соответствующий навык.</p>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;">
-                <span class="badge badge--body">🏋️ Тело</span>
-                <span class="badge badge--soul">🎨 Душа</span>
-                <span class="badge badge--craft">🛠️ Ремесло</span>
-                <span class="badge badge--deeds">📋 Дела</span>
-                <span class="badge badge--other">➕ Другое</span>
-            </div>
-            <div class="highlight highlight--gold">
-                <p style="font-size:13px;">
-                    <strong>🔥 Стрики по категориям:</strong>
-                    ${catStats.map(cs => `${cs.emoji} ${cs.streak}д (рекорд: ${cs.maxStreak}д)`).join(' · ')}
-                </p>
-            </div>
+                    <h3>⚡ Множители опыта</h3>
+                    <div class="multiplier-table">
+                        <div class="header">Стрик</div>
+                        <div class="header">Множитель</div>
+                        <div class="header">Бонус</div>
 
-            <!-- СТРИКИ -->
-            <h3>🔥 Система стриков</h3>
-            <div class="highlight highlight--fire">
-                <p><strong>Что это?</strong> Ежедневная серия выполненных задач. Чем длиннее стрик, тем выше множитель опыта.</p>
-                <p><strong>Как работает:</strong></p>
-                <ul class="feature-list">
-                    <li>Каждый день с выполненной задачей продлевает стрик</li>
-                    <li>Если за день не выполнено ни одной задачи — стрик сбрасывается</li>
-                    <li>Рекордный стрик сохраняется навсегда</li>
-                    <li>🔥 Текущий стрик: <strong>${totalStreak} дней</strong> (рекорд: ${maxStreak})</li>
-                </ul>
-            </div>
+                        <div class="cell">1–9 дней</div>
+                        <div class="cell">×1.01 – ×1.09</div>
+                        <div class="cell">+1–9%</div>
 
-            <!-- ФИЛЬТРЫ -->
-            <h3>🎯 Фильтры и визуализация</h3>
-            <div class="highlight highlight--success">
-                <p><strong>Календарь:</strong></p>
-                <ul class="feature-list">
-                    <li><span style="color:var(--success);">✅</span> Выполненные задачи</li>
-                    <li><span style="color:var(--warning);">●</span> Запланированные задачи</li>
-                    <li><span style="color:var(--danger);">❌</span> Пропущенные задачи</li>
-                </ul>
-                <p style="margin-top:6px;"><strong>Фильтр по категориям:</strong> Показывай только нужные задачи.</p>
-                <p><strong>4 режима календаря:</strong> День, Неделя, Месяц, Год.</p>
-            </div>
+                        <div class="cell">10–19 дней</div>
+                        <div class="cell">×1.10 – ×1.19</div>
+                        <div class="cell">+10–19%</div>
 
-            <!-- СТАТИСТИКА -->
-            <h3>📊 Статистика</h3>
-            <div class="highlight">
-                <p><strong>Еженедельная статистика:</strong> Столбцы по дням с разбивкой по статусам.</p>
-                <p><strong>Детальная статистика:</strong> Клик по блоку открывает фильтр по категориям.</p>
-                <p><strong>Профиль:</strong> Полная картина твоего прогресса — уровень, опыт, стрики, ИМТ, журнал веса.</p>
-            </div>
+                        <div class="cell">20–49 дней</div>
+                        <div class="cell">×1.20 – ×1.49</div>
+                        <div class="cell">+20–49%</div>
 
-            <!-- ФУТЕР -->
-            <div style="margin-top:16px;padding:10px;background:var(--bg);border-radius:8px;text-align:center;font-size:12px;color:var(--text-secondary);">
-                🎮 Продолжай выполнять задачи, прокачивай навыки и становись лучше каждый день!<br>
-                🔥 Текущий стрик: <strong style="color:var(--fire);">${totalStreak}</strong> дней · Уровень: <strong style="color:var(--accent);">${user.level}</strong>
-            </div>
-        </div>
-    `;
+                        <div class="cell">50–99 дней</div>
+                        <div class="cell">×1.50 – ×1.99</div>
+                        <div class="cell">+50–99%</div>
 
-    openModal('ℹ️ Информация', content);
-}
+                        <div class="cell cell--highlight">100+ дней</div>
+                        <div class="cell cell--highlight">×2.00</div>
+                        <div class="cell cell--highlight">+100% (максимум)</div>
+                    </div>
+
+                    <h3>📂 Категории навыков</h3>
+                    <p>Каждая задача относится к одной из пяти категорий. Выполняя задачи, ты прокачиваешь соответствующий навык.</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;">
+                        <span class="badge badge--body">🏋️ Тело</span>
+                        <span class="badge badge--soul">🎨 Душа</span>
+                        <span class="badge badge--craft">🛠️ Ремесло</span>
+                        <span class="badge badge--deeds">📋 Дела</span>
+                        <span class="badge badge--other">➕ Другое</span>
+                    </div>
+                    <div class="highlight highlight--gold">
+                        <p style="font-size:13px;">
+                            <strong>🔥 Стрики по категориям:</strong>
+                            ${catStats.map(cs => `${cs.emoji} ${cs.streak}д (рекорд: ${cs.maxStreak}д)`).join(' · ')}
+                        </p>
+                    </div>
+
+                    <h3>🔥 Система стриков</h3>
+                    <div class="highlight highlight--fire">
+                        <p><strong>Что это?</strong> Ежедневная серия выполненных задач. Чем длиннее стрик, тем выше множитель опыта.</p>
+                        <p><strong>Как работает:</strong></p>
+                        <ul class="feature-list">
+                            <li>Каждый день с выполненной задачей продлевает стрик</li>
+                            <li>Если за день не выполнено ни одной задачи — стрик сбрасывается</li>
+                            <li>Рекордный стрик сохраняется навсегда</li>
+                            <li>🔥 Текущий стрик: <strong>${totalStreak} дней</strong> (рекорд: ${maxStreak})</li>
+                        </ul>
+                    </div>
+
+                    <h3>🎯 Фильтры и визуализация</h3>
+                    <div class="highlight highlight--success">
+                        <p><strong>Календарь:</strong></p>
+                        <ul class="feature-list">
+                            <li><span style="color:var(--success);">✅</span> Выполненные задачи</li>
+                            <li><span style="color:var(--warning);">●</span> Запланированные задачи</li>
+                            <li><span style="color:var(--danger);">❌</span> Пропущенные задачи</li>
+                        </ul>
+                        <p style="margin-top:6px;"><strong>Фильтр по категориям:</strong> Показывай только нужные задачи.</p>
+                        <p><strong>4 режима календаря:</strong> День, Неделя, Месяц, Год.</p>
+                    </div>
+
+                    <h3>📊 Статистика</h3>
+                    <div class="highlight">
+                        <p><strong>Еженедельная статистика:</strong> Столбцы по дням с разбивкой по статусам.</p>
+                        <p><strong>Детальная статистика:</strong> Клик по блоку открывает фильтр по категориям.</p>
+                        <p><strong>Профиль:</strong> Полная картина твоего прогресса — уровень, опыт, стрики, ИМТ, журнал веса.</p>
+                    </div>
+
+                    <div style="margin-top:16px;padding:10px;background:var(--bg);border-radius:8px;text-align:center;font-size:12px;color:var(--text-secondary);">
+                        🎮 Продолжай выполнять задачи, прокачивай навыки и становись лучше каждый день!<br>
+                        🔥 Текущий стрик: <strong style="color:var(--fire);">${totalStreak}</strong> дней · Уровень: <strong style="color:var(--accent);">${user.level}</strong>
+                    </div>
+                </div>
+            `;
+
+            openModal('ℹ️ Информация', content);
+        }
 
         // ============================================
         // 20. ТЕМА
@@ -3895,10 +3828,9 @@
         }
 
         // ============================================
-        // 21. РЕНДЕР ВСЕГО
+        // 21. РЕНДЕР ВСЕГО (ЕДИНСТВЕННОЕ ОПРЕДЕЛЕНИЕ)
         // ============================================
         function renderAll() {
-            // Проверяем стрики при каждом рендере
             checkStreakOnLoad();
 
             switch (currentMode) {
@@ -3907,31 +3839,7 @@
                     break;
                 case 'week':
                     renderWeekView(currentDate);
-                    break;function renderAll() {
-    // Проверяем стрики при каждом рендере
-    checkStreakOnLoad();
-
-    // Перерисовываем текущий режим календаря
-    switch (currentMode) {
-        case 'day':
-            renderDayView(currentDate);
-            break;
-        case 'week':
-            renderWeekView(currentDate);
-            break;
-        case 'month':
-            renderMonthView();
-            break;
-        case 'year':
-            renderYearView(currentDate.getFullYear());
-            break;
-    }
-    
-    // Обновляем статистику
-    updateStats();
-    updateBottomBarLabel();
-    updateStreakUI();
-}
+                    break;
                 case 'month':
                     renderMonthView();
                     break;
@@ -3939,13 +3847,175 @@
                     renderYearView(currentDate.getFullYear());
                     break;
             }
+
             updateStats();
             updateBottomBarLabel();
             updateStreakUI();
+            updateCategoryFilterInfo(); // <-- добавлено
         }
 
         // ============================================
-        // 23. ИНИЦИАЛИЗАЦИЯ
+        // 22. УПРАВЛЕНИЕ ДАННЫМИ
+        // ============================================
+        function exportData() {
+            try {
+                const data = {
+                    user: user,
+                    tasks: tasks,
+                    gallery: gallery,
+                    exportedAt: new Date().toISOString(),
+                    version: '1.2'
+                };
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `skillquest_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert('✅ Данные успешно экспортированы!');
+            } catch (e) {
+                alert('❌ Ошибка при экспорте данных: ' + e.message);
+            }
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.style.display = 'none';
+            document.body.appendChild(input);
+
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) {
+                    document.body.removeChild(input);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (!data.user || !data.tasks || !data.gallery) {
+                            alert('❌ Неверный формат файла. Убедитесь, что это файл резервной копии SkillQuest.');
+                            document.body.removeChild(input);
+                            return;
+                        }
+                        if (!confirm('⚠️ Импорт данных заменит все текущие данные. Продолжить?')) {
+                            document.body.removeChild(input);
+                            return;
+                        }
+                        Object.assign(user, data.user);
+                        tasks = data.tasks;
+                        gallery = data.gallery;
+                        saveUser();
+                        saveTasks();
+                        saveGallery();
+                        updateUserUI();
+                        renderAll();
+                        alert('✅ Данные успешно импортированы!');
+                        closeModal();
+                        document.body.removeChild(input);
+                    } catch (err) {
+                        alert('❌ Ошибка при импорте данных: ' + err.message);
+                        document.body.removeChild(input);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function clearAllData() {
+            if (!confirm('⚠️ ВНИМАНИЕ! Это действие удалит ВСЕ ваши данные:\n\n' +
+                    '• Профиль (имя, уровень, опыт, ИМТ, журнал веса)\n' +
+                    '• Все задачи и их историю\n' +
+                    '• Все фото в галерее\n' +
+                    '• Статистику и стрики\n\n' +
+                    'Это действие НЕОБРАТИМО!')) {
+                return;
+            }
+            if (!confirm('🔴 Вы уверены? Введите "ДА" в поле ниже для подтверждения.')) {
+                return;
+            }
+            const confirmText = prompt('Введите "ДА" для подтверждения очистки:');
+            if (confirmText !== 'ДА') {
+                alert('❌ Очистка отменена.');
+                return;
+            }
+            try {
+                localStorage.removeItem('user');
+                localStorage.removeItem('tasks');
+                localStorage.removeItem('gallery');
+                localStorage.removeItem('theme');
+
+                Object.assign(user, {
+                    name: 'Игрок',
+                    age: 25,
+                    gender: 'male',
+                    height: 175,
+                    weight: 70,
+                    level: 1,
+                    exp: 0,
+                    avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%236c5ce7\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'20\' fill=\'%23fff\'/%3E%3Ccircle cx=\'35\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3Ccircle cx=\'65\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3C/svg%3E',
+                    weightLog: [],
+                    streak: {
+                        current: 0,
+                        max: 0,
+                        lastDate: null,
+                        categories: {
+                            body: { current: 0, max: 0, lastDate: null },
+                            soul: { current: 0, max: 0, lastDate: null },
+                            craft: { current: 0, max: 0, lastDate: null },
+                            deeds: { current: 0, max: 0, lastDate: null },
+                            other: { current: 0, max: 0, lastDate: null }
+                        }
+                    }
+                });
+                tasks = [];
+                gallery = [];
+                saveUser();
+                saveTasks();
+                saveGallery();
+                updateUserUI();
+                updateStreakUI();
+                renderAll();
+                closeModal();
+                alert('✅ Все данные успешно очищены! Приложение перезагружено в исходное состояние.');
+            } catch (e) {
+                alert('❌ Ошибка при очистке данных: ' + e.message);
+            }
+        }
+
+        // ============================================
+        // 23. ОБНОВЛЕНИЕ ИНФО О КАТЕГОРИЯХ
+        // ============================================
+        function updateCategoryFilterInfo() {
+            const container = document.getElementById('categoryFilterInfo');
+            if (!container) return;
+
+            const spans = container.querySelectorAll('span');
+            spans.forEach(span => {
+                const category = span.classList.contains('active-body') ? 'body' :
+                                 span.classList.contains('active-soul') ? 'soul' :
+                                 span.classList.contains('active-craft') ? 'craft' :
+                                 span.classList.contains('active-deeds') ? 'deeds' :
+                                 span.classList.contains('active-other') ? 'other' : null;
+                if (category) {
+                    if (activeCategories.includes(category)) {
+                        span.classList.add('active');
+                    } else {
+                        span.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // 24. ИНИЦИАЛИЗАЦИЯ
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
@@ -3953,16 +4023,14 @@
             loadTasks();
             loadGallery();
 
-            // Проверяем стрики при загрузке
             checkStreakOnLoad();
-
             setupCategoryFilter();
 
             currentMode = 'month';
             document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
             renderMonthView();
+            updateCategoryFilterInfo(); // начальное обновление
 
-            // === НАВИГАЦИЯ КАЛЕНДАРЯ ===
             document.getElementById('prevMonth').addEventListener('click', function() {
                 switch (currentMode) {
                     case 'day':
@@ -4011,7 +4079,6 @@
                 updateBottomBarLabel();
             });
 
-            // Клик по заголовку — переход на сегодня
             document.getElementById('monthTitle').addEventListener('click', function() {
                 const today = new Date();
                 currentDate = today;
@@ -4025,7 +4092,6 @@
                 renderMonthView();
             });
 
-            // === РЕЖИМЫ КАЛЕНДАРЯ ===
             document.querySelectorAll('.modes__btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.modes__btn').forEach(b => {
@@ -4057,10 +4123,10 @@
                             break;
                     }
                     updateBottomBarLabel();
+                    updateCategoryFilterInfo();
                 });
             });
 
-            // === НИЖНИЙ БАР ===
             document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     const page = this.dataset.page;
@@ -4080,6 +4146,7 @@
                                 .getMonth()] + ' ' + currentDate.getFullYear();
                             renderMonthView();
                             updateBottomBarLabel();
+                            updateCategoryFilterInfo();
                         }
                         document.querySelectorAll('.bottom-bar__btn').forEach(b => {
                             b.classList.remove('bottom-bar__btn--active');
@@ -4094,7 +4161,6 @@
                 });
             });
 
-            // === САЙДБАР ===
             document.getElementById('menuBtn').addEventListener('click', function() {
                 document.getElementById('sidebar').classList.add('sidebar--open');
             });
@@ -4126,13 +4192,11 @@
                 });
             });
 
-            // === МОДАЛЬНЫЕ ОКНА ===
             document.getElementById('modalClose').addEventListener('click', closeModal);
             document.getElementById('mainModal').addEventListener('click', function(e) {
                 if (e.target === this) closeModal();
             });
 
-            // === ТЕМА ===
             document.getElementById('themeBtn').addEventListener('click', toggleTheme);
 
             console.log('🚀 SkillQuest запущен!');
@@ -4140,182 +4204,10 @@
             console.log('📋 Задач: ' + tasks.length + ', 📸 Фото: ' + gallery.length);
             console.log('🔥 Стрик: ' + (user.streak.current || 0) + ' дней');
         });
-// ============================================
-// 22. УПРАВЛЕНИЕ ДАННЫМИ (ЭКСПОРТ/ИМПОРТ/ОЧИСТКА)
-// ============================================
 
-/**
- * Экспорт всех данных в JSON-файл
- */
-function exportData() {
-    try {
-        const data = {
-            user: user,
-            tasks: tasks,
-            gallery: gallery,
-            exportedAt: new Date().toISOString(),
-            version: '1.2'
-        };
-
-        const json = JSON.stringify(data, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `skillquest_backup_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        alert('✅ Данные успешно экспортированы!');
-    } catch (e) {
-        alert('❌ Ошибка при экспорте данных: ' + e.message);
-    }
-}
-
-/**
- * Импорт данных из JSON-файла
- */
-function importData() {
-    // Создаём скрытый input для выбора файла
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.style.display = 'none';
-    document.body.appendChild(input);
-
-    input.onchange = function(e) {
-        const file = e.target.files[0];
-        if (!file) {
-            document.body.removeChild(input);
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            try {
-                const data = JSON.parse(event.target.result);
-
-                // Проверяем структуру
-                if (!data.user || !data.tasks || !data.gallery) {
-                    alert('❌ Неверный формат файла. Убедитесь, что это файл резервной копии SkillQuest.');
-                    document.body.removeChild(input);
-                    return;
-                }
-
-                // Подтверждение
-                if (!confirm('⚠️ Импорт данных заменит все текущие данные. Продолжить?')) {
-                    document.body.removeChild(input);
-                    return;
-                }
-
-                // Загружаем данные
-                Object.assign(user, data.user);
-                tasks = data.tasks;
-                gallery = data.gallery;
-
-                // Сохраняем
-                saveUser();
-                saveTasks();
-                saveGallery();
-
-                // Обновляем UI
-                updateUserUI();
-                renderAll();
-
-                alert('✅ Данные успешно импортированы!');
-                closeModal();
-                document.body.removeChild(input);
-            } catch (err) {
-                alert('❌ Ошибка при импорте данных: ' + err.message);
-                document.body.removeChild(input);
-            }
-        };
-        reader.readAsText(file);
-    };
-
-    input.click();
-}
-
-/**
- * Очистка всех пользовательских данных
- */
-function clearAllData() {
-    // Двойное подтверждение
-    if (!confirm('⚠️ ВНИМАНИЕ! Это действие удалит ВСЕ ваши данные:\n\n' +
-            '• Профиль (имя, уровень, опыт, ИМТ, журнал веса)\n' +
-            '• Все задачи и их историю\n' +
-            '• Все фото в галерее\n' +
-            '• Статистику и стрики\n\n' +
-            'Это действие НЕОБРАТИМО!')) {
-        return;
-    }
-
-    if (!confirm('🔴 Вы уверены? Введите "ДА" в поле ниже для подтверждения.')) {
-        return;
-    }
-
-    const confirmText = prompt('Введите "ДА" для подтверждения очистки:');
-    if (confirmText !== 'ДА') {
-        alert('❌ Очистка отменена.');
-        return;
-    }
-
-    try {
-        // Очищаем localStorage
-        localStorage.removeItem('user');
-        localStorage.removeItem('tasks');
-        localStorage.removeItem('gallery');
-        localStorage.removeItem('theme');
-
-        // Сбрасываем данные в памяти
-        Object.assign(user, {
-            name: 'Игрок',
-            age: 25,
-            gender: 'male',
-            height: 175,
-            weight: 70,
-            level: 1,
-            exp: 0,
-            avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%236c5ce7\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'20\' fill=\'%23fff\'/%3E%3Ccircle cx=\'35\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3Ccircle cx=\'65\' cy=\'30\' r=\'4\' fill=\'%231a1a2e\'/%3E%3C/svg%3E',
-            weightLog: [],
-            streak: {
-                current: 0,
-                max: 0,
-                lastDate: null,
-                categories: {
-                    body: { current: 0, max: 0, lastDate: null },
-                    soul: { current: 0, max: 0, lastDate: null },
-                    craft: { current: 0, max: 0, lastDate: null },
-                    deeds: { current: 0, max: 0, lastDate: null },
-                    other: { current: 0, max: 0, lastDate: null }
-                }
-            }
-        });
-        tasks = [];
-        gallery = [];
-
-        // Сохраняем пустые данные
-        saveUser();
-        saveTasks();
-        saveGallery();
-
-        // Обновляем UI
-        updateUserUI();
-        updateStreakUI();
-        renderAll();
-
-        // Закрываем модальное окно
-        closeModal();
-
-        alert('✅ Все данные успешно очищены! Приложение перезагружено в исходное состояние.');
-    } catch (e) {
-        alert('❌ Ошибка при очистке данных: ' + e.message);
-    }
-}
-        // Экспорт функций
+        // ============================================
+        // ЭКСПОРТ ФУНКЦИЙ
+        // ============================================
         window.openAddTask = openAddTask;
         window.closeAddTask = closeAddTask;
         window.handleAddTask = handleAddTask;
@@ -4351,29 +4243,6 @@ function clearAllData() {
         window.exportData = exportData;
         window.importData = importData;
         window.clearAllData = clearAllData;
-        /**
- * Обновляет отображение активных категорий в блоке .category-filter__info
- */
-function updateCategoryFilterInfo() {
-    const container = document.getElementById('categoryFilterInfo');
-    if (!container) return;
-
-    const spans = container.querySelectorAll('span');
-    spans.forEach(span => {
-        const category = span.classList.contains('active-body') ? 'body' :
-                         span.classList.contains('active-soul') ? 'soul' :
-                         span.classList.contains('active-craft') ? 'craft' :
-                         span.classList.contains('active-deeds') ? 'deeds' :
-                         span.classList.contains('active-other') ? 'other' : null;
-        if (category) {
-            if (activeCategories.includes(category)) {
-                span.classList.add('active');
-            } else {
-                span.classList.remove('active');
-            }
-        }
-    });
-}
     </script>
 
 </body>
