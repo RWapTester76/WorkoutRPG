@@ -3454,22 +3454,92 @@
         // 19. НАСТРОЙКИ И ИНФОРМАЦИЯ
         // ============================================
         function openSettings() {
-            const theme = document.documentElement.getAttribute('data-theme') || 'light';
-            openModal('⚙️ Настройки', `
-                <p><strong>Тема:</strong> ${theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная'}</p>
-                <button class="form-btn" style="margin-top:8px;" onclick="toggleTheme(); closeModal(); openSettings();">
-                    Сменить тему
+    const theme = document.documentElement.getAttribute('data-theme') || 'light';
+    
+    const content = `
+        <style>
+            .settings-section {
+                margin-bottom: 16px;
+            }
+            .settings-section__title {
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--text);
+                margin-bottom: 6px;
+            }
+            .settings-section__desc {
+                font-size: 13px;
+                color: var(--text-secondary);
+                margin-bottom: 10px;
+            }
+            .settings-divider {
+                border: none;
+                border-top: 1px solid var(--border);
+                margin: 14px 0;
+            }
+            .btn-danger {
+                background: var(--danger) !important;
+            }
+            .btn-danger:hover {
+                background: #c0392b !important;
+            }
+            .btn-warning {
+                background: var(--warning) !important;
+                color: #1a1a2e !important;
+            }
+            .btn-warning:hover {
+                background: #f0b83a !important;
+            }
+        </style>
+
+        <div class="settings-section">
+            <div class="settings-section__title">🎨 Внешний вид</div>
+            <div class="settings-section__desc">Текущая тема: <strong>${theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная'}</strong></div>
+            <button class="form-btn" onclick="toggleTheme(); closeModal(); openSettings();">
+                ${theme === 'light' ? '🌙 Переключить на тёмную' : '☀️ Переключить на светлую'}
+            </button>
+        </div>
+
+        <hr class="settings-divider">
+
+        <div class="settings-section">
+            <div class="settings-section__title">📦 Данные</div>
+            <div class="settings-section__desc">
+                Управление данными приложения. Все данные хранятся локально в вашем браузере.
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <button class="form-btn" onclick="exportData();" style="background:var(--success);">
+                    📤 Экспортировать данные
                 </button>
-                <hr style="margin:10px 0;border-color:var(--border);">
-                <p style="color:var(--text-secondary);font-size:12px;">
-                    🔄 Синхронизация с трекерами (в планах)<br>
-                    📦 Импорт/экспорт данных
+                <button class="form-btn" onclick="importData();" style="background:var(--accent);">
+                    📥 Импортировать данные
+                </button>
+                <button class="form-btn btn-danger" onclick="clearAllData();" style="margin-top:4px;">
+                    🗑️ Очистить все данные
+                </button>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                ⚠️ Очистка данных необратима. Рекомендуется сделать экспорт перед очисткой.
+            </div>
+        </div>
+
+        <hr class="settings-divider">
+
+        <div class="settings-section">
+            <div class="settings-section__title">ℹ️ О приложении</div>
+            <div style="font-size:13px;color:var(--text-secondary);">
+                <p><strong>SkillQuest</strong> — RPG-планировщик личного развития.</p>
+                <p style="margin-top:4px;">Версия: <strong>1.2</strong> (с поддержкой стриков и динамической сложности)</p>
+                <p style="margin-top:4px;">Сделано с ❤️ <strong>Саша и Дэн AI</strong></p>
+                <p style="margin-top:4px;font-size:12px;color:var(--text-secondary);">
+                    Данные хранятся в localStorage браузера.
                 </p>
-                <p style="color:var(--text-secondary);font-size:11px;margin-top:8px;">
-                    Сделано с ❤️ Саша и Дэн AI
-                </p>
-            `);
-        }
+            </div>
+        </div>
+    `;
+
+    openModal('⚙️ Настройки', content);
+}
 
        function openInfo() {
     const totalStreak = user.streak?.current || 0;
