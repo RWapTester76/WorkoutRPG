@@ -3717,33 +3717,36 @@
                 font-weight: 600;
             }
         </style>
-            /* ============================================
-       АКТИВНЫЕ КАТЕГОРИИ (ИНФО)
-       ============================================ */
-    .category-filter__info {
-        text-align: center;
-        font-size: 11px;
-        color: var(--text-secondary);
-        margin-bottom: 6px;
-    }
+/* ============================================
+   АКТИВНЫЕ КАТЕГОРИИ (ИНФО)
+   ============================================ */
+.category-filter__info {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
 
-    .category-filter__info span {
-        display: inline-block;
-        padding: 1px 8px;
-        border-radius: 10px;
-        font-weight: 600;
-        margin: 0 2px;
-        font-size: 10px;
-    }
+.category-filter__info span {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin: 0 2px;
+    font-size: 10px;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+}
 
-    .category-filter__info .active-body { background: var(--color-body); color: #fff; }
-    .category-filter__info .active-soul { background: var(--color-soul); color: #fff; }
-    .category-filter__info .active-craft { background: var(--color-craft); color: #fff; }
-    .category-filter__info .active-deeds { background: var(--color-deeds); color: #1a1a2e; }
-    .category-filter__info .active-other { background: var(--color-other); color: #fff; }
+.category-filter__info .active-body { background: var(--color-body); color: #fff; }
+.category-filter__info .active-soul { background: var(--color-soul); color: #fff; }
+.category-filter__info .active-craft { background: var(--color-craft); color: #fff; }
+.category-filter__info .active-deeds { background: var(--color-deeds); color: #1a1a2e; }
+.category-filter__info .active-other { background: var(--color-other); color: #fff; }
 
-        <div class="rpg-info">
-
+.category-filter__info span.active {
+    opacity: 1;
+}
             <!-- ЗАГОЛОВОК -->
             <h3>🎮 RPG Система SkillQuest</h3>
             <p>
@@ -4348,6 +4351,29 @@ function clearAllData() {
         window.exportData = exportData;
         window.importData = importData;
         window.clearAllData = clearAllData;
+        /**
+ * Обновляет отображение активных категорий в блоке .category-filter__info
+ */
+function updateCategoryFilterInfo() {
+    const container = document.getElementById('categoryFilterInfo');
+    if (!container) return;
+
+    const spans = container.querySelectorAll('span');
+    spans.forEach(span => {
+        const category = span.classList.contains('active-body') ? 'body' :
+                         span.classList.contains('active-soul') ? 'soul' :
+                         span.classList.contains('active-craft') ? 'craft' :
+                         span.classList.contains('active-deeds') ? 'deeds' :
+                         span.classList.contains('active-other') ? 'other' : null;
+        if (category) {
+            if (activeCategories.includes(category)) {
+                span.classList.add('active');
+            } else {
+                span.classList.remove('active');
+            }
+        }
+    });
+}
     </script>
 
 </body>
