@@ -4016,93 +4016,81 @@
         // ============================================
         // 22. НАСТРОЙКИ И ИНФОРМАЦИЯ
         // ============================================
-        function openSettings() {
-            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+function openSettings() {
+    const theme = document.documentElement.getAttribute('data-theme') || 'light';
+    const colorScheme = document.documentElement.getAttribute('data-color') || 'default';
 
-            const content = `
-                <style>
-                    .settings-section {
-                        margin-bottom: 16px;
-                    }
-                    .settings-section__title {
-                        font-size: 14px;
-                        font-weight: 600;
-                        color: var(--text);
-                        margin-bottom: 6px;
-                    }
-                    .settings-section__desc {
-                        font-size: 13px;
-                        color: var(--text-secondary);
-                        margin-bottom: 10px;
-                    }
-                    .settings-divider {
-                        border: none;
-                        border-top: 1px solid var(--border);
-                        margin: 14px 0;
-                    }
-                    .btn-danger {
-                        background: var(--danger) !important;
-                    }
-                    .btn-danger:hover {
-                        background: #c0392b !important;
-                    }
-                    .btn-warning {
-                        background: var(--warning) !important;
-                        color: #1a1a2e !important;
-                    }
-                    .btn-warning:hover {
-                        background: #f0b83a !important;
-                    }
-                </style>
+    const colorSchemes = [
+        { id: 'default', label: 'Фиолетовый', emoji: '💜' },
+        { id: 'ocean', label: 'Океан', emoji: '🌊' },
+        { id: 'sunset', label: 'Закат', emoji: '🌅' },
+        { id: 'forest', label: 'Лес', emoji: '🌿' },
+        { id: 'night', label: 'Ночь', emoji: '🌙' }
+    ];
 
-                <div class="settings-section">
-                    <div class="settings-section__title">🎨 Внешний вид</div>
-                    <div class="settings-section__desc">Текущая тема: <strong>${theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная'}</strong></div>
-                    <button class="form-btn" onclick="toggleTheme(); closeModal(); openSettings();">
-                        ${theme === 'light' ? '🌙 Переключить на тёмную' : '☀️ Переключить на светлую'}
-                    </button>
-                </div>
+    let colorBtns = '';
+    colorSchemes.forEach(scheme => {
+        const active = colorScheme === scheme.id ? 'color-schemes__btn--active' : '';
+        colorBtns += `
+            <button class="color-schemes__btn color-schemes__btn--${scheme.id} ${active}" 
+                    onclick="setColorScheme('${scheme.id}')" title="${scheme.label}">
+                <span class="check">✓</span>
+            </button>
+        `;
+    });
 
-                <hr class="settings-divider">
+    const content = `
+        <div class="settings-section">
+            <div class="settings-section__title">🎨 Цветовая схема</div>
+            <div class="settings-section__desc">Выберите оформление приложения</div>
+            <div class="color-schemes">
+                ${colorBtns}
+            </div>
+        </div>
 
-                <div class="settings-section">
-                    <div class="settings-section__title">📦 Данные</div>
-                    <div class="settings-section__desc">
-                        Управление данными приложения. Все данные хранятся локально в вашем браузере.
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:8px;">
-                        <button class="form-btn" onclick="exportData();" style="background:var(--success);">
-                            📤 Экспортировать данные
-                        </button>
-                        <button class="form-btn" onclick="importData();" style="background:var(--accent);">
-                            📥 Импортировать данные
-                        </button>
-                        <button class="form-btn btn-danger" onclick="clearAllData();" style="margin-top:4px;">
-                            🗑️ Очистить все данные
-                        </button>
-                    </div>
-                    <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
-                        ⚠️ Очистка данных необратима. Рекомендуется сделать экспорт перед очисткой.
-                    </div>
-                </div>
+        <div class="settings-section">
+            <div class="settings-section__title">🌓 Тема</div>
+            <div class="settings-section__desc">Текущая тема: <strong>${theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная'}</strong></div>
+            <button class="form-btn" onclick="toggleTheme(); closeModal(); setTimeout(openSettings, 200);">
+                ${theme === 'light' ? '🌙 Переключить на тёмную' : '☀️ Переключить на светлую'}
+            </button>
+        </div>
 
-                <hr class="settings-divider">
+        <hr class="settings-divider">
 
-                <div class="settings-section">
-                    <div class="settings-section__title">ℹ️ О приложении</div>
-                    <div style="font-size:13px;color:var(--text-secondary);">
-                        <p><strong>SkillQuest</strong> — RPG-планировщик личного развития.</p>
-                        <p style="margin-top:4px;">Версия: <strong>1.4</strong> (заметки + график)</p>
-                        <p style="margin-top:4px;">Сделано с ❤️ <strong>Саша и Дэн AI</strong></p>
-                        <p style="margin-top:4px;font-size:12px;color:var(--text-secondary);">
-                            Данные хранятся в localStorage браузера.
-                        </p>
-                    </div>
-                </div>
-            `;
+        <div class="settings-section">
+            <div class="settings-section__title">📦 Данные</div>
+            <div class="settings-section__desc">Управление данными приложения.</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <button class="form-btn" onclick="exportData();" style="background:var(--success);">
+                    📤 Экспортировать
+                </button>
+                <button class="form-btn" onclick="importData();" style="background:var(--accent);">
+                    📥 Импортировать
+                </button>
+                <button class="form-btn btn-danger" onclick="clearAllData();" style="margin-top:4px;">
+                    🗑️ Очистить всё
+                </button>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                ⚠️ Очистка необратима. Рекомендуется экспорт.
+            </div>
+        </div>
 
-            openModal('⚙️ Настройки', content);
-        }
+        <hr class="settings-divider">
+
+        <div class="settings-section">
+            <div class="settings-section__title">ℹ️ О приложении</div>
+            <div style="font-size:13px;color:var(--text-secondary);">
+                <p><strong>SkillQuest</strong> — RPG-планировщик личного развития.</p>
+                <p style="margin-top:4px;">Версия: <strong>1.5</strong></p>
+                <p style="margin-top:4px;">Сделано с ❤️ <strong>Саша и Дэн AI</strong></p>
+            </div>
+        </div>
+    `;
+
+    openModal('⚙️ Настройки', content);
+}
 
         function openInfo() {
             const totalStreak = user.streak?.current || 0;
