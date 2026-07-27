@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru" data-theme="light" data-color="default">
 <head>
@@ -2478,7 +2477,7 @@
             document.getElementById('monthTitle').textContent = months[month] + ' ' + year;
             renderMonthView();
             updateBottomBarLabel();
-            updateCategoryFilterInfo();
+            // updateCategoryFilterInfo(); // <-- УДАЛЕНО: функция не существует
         });
 
         const header = document.createElement('div');
@@ -3376,6 +3375,9 @@ setTimeout(() => {
         // ============================================
         // 16. ЗАДАЧИ
         // ============================================
+        // ============================================
+        // 16. ЗАДАЧИ (исправлено)
+        // ============================================
         function renderTasksList() {
             const container = document.getElementById('tasksContainer');
             if (!container) return;
@@ -3399,82 +3401,83 @@ setTimeout(() => {
                                 ${cat.label}
                             </div>
                     `;
-           categoryGroups[catKey].forEach(t => {
-    const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
-    let statusIcon = '●';
-    let statusClass = '';
-    if (status === 'done') { statusIcon = '✅';
-        statusClass = 'task-list-item--done'; } else if (status === 'missed') { statusIcon = '❌';
-        statusClass = 'task-list-item--missed'; } else if (status === 'planned') { statusIcon = '⏳'; }
-    
-    const cat = CATEGORIES[t.category] || CATEGORIES.other;
-    const coverEmoji = t.cover || cat.cover || '📌';
-    const coverBg = cat.bg || 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)';
-    
-    html += `
-        <div class="task-card" onclick="openTaskEditorForDate(${t.id}, '${new Date().toISOString().split('T')[0]}')">
-            <div class="task-card__cover" style="background:${coverBg};">
-                ${coverEmoji}
-            </div>
-            <div class="task-card__body">
-                <div class="task-card__title">
-                    ${t.title}
-                    <span class="task-card__status">${statusIcon}</span>
-                </div>
-                <div class="task-card__meta">
-                    <span>⏱️ ${t.duration}мин · 🕐 ${t.time}</span>
-                    <span style="display:flex;gap:6px;">
-                        <span onclick="event.stopPropagation(); deleteTask(${t.id})" style="cursor:pointer;color:var(--danger);">🗑️</span>
-                    </span>
-                </div>
-            </div>
-        </div>
-    `;
-});
+                    categoryGroups[catKey].forEach(t => {
+                        const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
+                        let statusIcon = '●';
+                        if (status === 'done') statusIcon = '✅';
+                        else if (status === 'missed') statusIcon = '❌';
+                        else if (status === 'planned') statusIcon = '⏳';
 
-                container.innerHTML = html ||
-                    '<div class="task-empty">Нет задач в выбранных категориях</div>';
+                        const cat2 = CATEGORIES[t.category] || CATEGORIES.other;
+                        const coverEmoji = t.cover || cat2.cover || '📌';
+                        const coverBg = cat2.bg || 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)';
+
+                        html += `
+                            <div class="task-card" onclick="openTaskEditorForDate(${t.id}, '${new Date().toISOString().split('T')[0]}')">
+                                <div class="task-card__cover" style="background:${coverBg};">
+                                    ${coverEmoji}
+                                </div>
+                                <div class="task-card__body">
+                                    <div class="task-card__title">
+                                        ${t.title}
+                                        <span class="task-card__status">${statusIcon}</span>
+                                    </div>
+                                    <div class="task-card__meta">
+                                        <span>⏱️ ${t.duration}мин · 🕐 ${t.time}</span>
+                                        <span style="display:flex;gap:6px;">
+                                            <span onclick="event.stopPropagation(); deleteTask(${t.id})" style="cursor:pointer;color:var(--danger);">🗑️</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                });
+                container.innerHTML = html || '<div class="task-empty">Нет задач в выбранных категориях</div>';
             } else {
                 const sorted = [...tasks].sort((a, b) => (b.lastEdited || 0) - (a.lastEdited || 0));
                 if (sorted.length === 0) {
-                    container.innerHTML =
-                        `<div class="task-empty">Нет задач</div>`;
+                    container.innerHTML = `<div class="task-empty">Нет задач</div>`;
                     return;
                 }
                 let html = '';
                 sorted.forEach(t => {
-    const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
-    let statusIcon = '●';
-    let statusClass = '';
-    if (status === 'done') { statusIcon = '✅';
-        statusClass = 'task-list-item--done'; } else if (status === 'missed') { statusIcon = '❌';
-        statusClass = 'task-list-item--missed'; } else if (status === 'planned') { statusIcon = '⏳'; }
-    const date = new Date(t.lastEdited || t.id);
-    const dateStr = date.toLocaleDateString('ru-RU');
-    
-    const cat = CATEGORIES[t.category] || CATEGORIES.other;
-    const coverEmoji = t.cover || cat.cover || '📌';
-    const coverBg = cat.bg || 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)';
-    
-    html += `
-        <div class="task-card" onclick="openTaskEditorForDate(${t.id}, '${new Date().toISOString().split('T')[0]}')">
-            <div class="task-card__cover" style="background:${coverBg};">
-                ${coverEmoji}
-            </div>
-            <div class="task-card__body">
-                <div class="task-card__title">
-                    ${t.title}
-                    <span class="task-card__status">${statusIcon}</span>
-                    <span style="font-size:10px;color:var(--text-secondary);font-weight:400;margin-left:auto;">${dateStr}</span>
-                </div>
-                <div class="task-card__meta">
-                    <span>📂 ${CATEGORIES[t.category]?.label || 'Другое'}</span>
-                    <span onclick="event.stopPropagation(); deleteTask(${t.id})" style="cursor:pointer;color:var(--danger);">🗑️</span>
-                </div>
-            </div>
-        </div>
-    `;
-});
+                    const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
+                    let statusIcon = '●';
+                    if (status === 'done') statusIcon = '✅';
+                    else if (status === 'missed') statusIcon = '❌';
+                    else if (status === 'planned') statusIcon = '⏳';
+
+                    const date = new Date(t.lastEdited || t.id);
+                    const dateStr = date.toLocaleDateString('ru-RU');
+
+                    const cat = CATEGORIES[t.category] || CATEGORIES.other;
+                    const coverEmoji = t.cover || cat.cover || '📌';
+                    const coverBg = cat.bg || 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)';
+
+                    html += `
+                        <div class="task-card" onclick="openTaskEditorForDate(${t.id}, '${new Date().toISOString().split('T')[0]}')">
+                            <div class="task-card__cover" style="background:${coverBg};">
+                                ${coverEmoji}
+                            </div>
+                            <div class="task-card__body">
+                                <div class="task-card__title">
+                                    ${t.title}
+                                    <span class="task-card__status">${statusIcon}</span>
+                                    <span style="font-size:10px;color:var(--text-secondary);font-weight:400;margin-left:auto;">${dateStr}</span>
+                                </div>
+                                <div class="task-card__meta">
+                                    <span>📂 ${CATEGORIES[t.category]?.label || 'Другое'}</span>
+                                    <span onclick="event.stopPropagation(); deleteTask(${t.id})" style="cursor:pointer;color:var(--danger);">🗑️</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+        }
 
         function openTasks() {
             openModal('📋 Задачи', `
@@ -4424,7 +4427,7 @@ coverBtns.forEach(btn => {
 });
 // По умолчанию первая обложка активна
 const firstCover = document.querySelector('.cover-btn');
-if (firstCover) firstCover.classList.add('cover-btn--active');
+if (firstCover) firstCover.classList.add('cover-btn--active'); // <-- лишняя буква "a" удалена
             // Навигация
             document.getElementById('prevMonth').addEventListener('click', function() {
                 switch (currentMode) {
