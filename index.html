@@ -2881,7 +2881,18 @@
             const catOptions = Object.keys(CATEGORIES).map(key =>
                 `<option value="${key}" ${task.category === key ? 'selected' : ''}>${CATEGORIES[key].label}</option>`
             ).join('');
-
+// ===== ВЫБОР ОБЛОЖКИ В РЕДАКТОРЕ =====
+const currentCover = task.cover || CATEGORIES[task.category]?.cover || '💪';
+const coverOptions = ['💪', '🎵', '🔧', '📌', '🌟', '📚', '🏃', '🧘', '🎯', '💡'];
+let coverBtnsHtml = '';
+coverOptions.forEach(c => {
+    const active = c === currentCover ? 'cover-btn--active' : '';
+    coverBtnsHtml += `
+        <button class="cover-btn ${active}" data-cover="${c}" style="width:36px;height:36px;border-radius:50%;border:2px solid ${c === currentCover ? 'var(--accent)' : 'var(--border)'};cursor:pointer;font-size:18px;background:var(--bg-card);transition:all 0.2s;">
+            ${c}
+        </button>
+    `;
+});
             let noteBlock = '';
             if (task.noteIds && task.noteIds.length > 0) {
                 const attachedNotes = notes.filter(n => task.noteIds.includes(n.id));
@@ -2919,6 +2930,13 @@
                     <div style="color:var(--text-secondary);font-size:12px;margin-top:3px;">
                         ${CATEGORIES[task.category]?.emoji || ''} ${CATEGORIES[task.category]?.label || ''} · 📅 ${dateStr} ${override ? '⚡ изменено' : ''}
                     </div>
+                    <div class="form-group">
+    <label class="form-label">🎨 Обложка</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${coverBtnsHtml}
+    </div>
+    <input type="hidden" id="editorCover" value="${currentCover}">
+</div>
                 </div>
 
                 ${noteBlock}
@@ -2975,29 +2993,46 @@
             `;
 
             document.getElementById('editorTitle').textContent = '📋 ' + task.title + ' — ' + dateStr;
+            // ===== ОБРАБОТЧИКИ ДЛЯ ОБЛОЖЕК В РЕДАКТОРЕ =====
+// Их нужно добавить после того, как контент вставлен в DOM
+setTimeout(() => {
+    const editorCoverBtns = document.querySelectorAll('#editorContent .cover-btn');
+    editorCoverBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            editorCoverBtns.forEach(b => {
+                b.classList.remove('cover-btn--active');
+                b.style.borderColor = 'var(--border)';
+            });
+            this.classList.add('cover-btn--active');
+            this.style.borderColor = 'var(--accent)';
+            document.getElementById('editorCover').value = this.dataset.cover;
+        });
+    });
+}, 50);
             document.getElementById('editorContent').innerHTML = content;
             document.getElementById('taskEditorModal').classList.add('modal-overlay--open');
         }
 
-        function saveTaskEditor(taskId, dateStr) {
-            const category = document.getElementById('editorCategory').value;
-            const time = document.getElementById('editorTime').value;
-            const duration = document.getElementById('editorDuration').value;
+       function saveTaskEditor(taskId, dateStr) {
+    const category = document.getElementById('editorCategory').value;
+    const time = document.getElementById('editorTime').value;
+    const duration = document.getElementById('editorDuration').value;
+    const cover = document.getElementById('editorCover').value; // <-- новое
 
-            if (!time) { alert('Пожалуйста, выберите время'); return; }
-            if (!duration || duration < 1) { alert('Длительность должна быть больше 0'); return; }
+    if (!time) { alert('Пожалуйста, выберите время'); return; }
+    if (!duration || duration < 1) { alert('Длительность должна быть больше 0'); return; }
 
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.category = category;
-                saveTasks();
-            }
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+        task.category = category;
+        task.cover = cover; // <-- новое
+        saveTasks();
+    }
 
-            updateTaskOverride(taskId, dateStr, time, parseInt(duration));
-            closeTaskEditor();
-            alert('✅ Изменения сохранены!');
-        }
-
+    updateTaskOverride(taskId, dateStr, time, parseInt(duration));
+    closeTaskEditor();
+    alert('✅ Изменения сохранены!');
+}
         function closeTaskEditor() {
             document.getElementById('taskEditorModal').classList.remove('modal-overlay--open');
         }
@@ -3372,32 +3407,38 @@
                 }
                 let html = '';
                 sorted.forEach(t => {
-                    const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
-                    let statusIcon = '●';
-                    let statusClass = '';
-                    if (status === 'done') { statusIcon = '✅';
-                        statusClass = 'task-list-item--done'; } else if (status === 'missed') { statusIcon = '❌';
-                        statusClass = 'task-list-item--missed'; } else if (status === 'planned') { statusIcon =
-                        '⏳'; }
-                    const date = new Date(t.lastEdited || t.id);
-                    const dateStr = date.toLocaleDateString('ru-RU');
-                    html += `
-                        <div class="task-list-item ${statusClass}" onclick="openTaskEditorForDate(${t.id}, '${new Date().toISOString().split('T')[0]}')">
-                            <span class="task-list-item__title">
-                                <span class="task-category-dot task-category-dot--${t.category}"></span>
-                                ${t.title}
-                                <span style="font-size:10px;color:var(--text-secondary);font-weight:400;margin-left:4px;">${dateStr}</span>
-                            </span>
-                            <div style="display:flex;align-items:center;gap:6px;">
-                                <span class="task-list-item__status">${statusIcon}</span>
-                                <button class="task-list-item__delete" onclick="event.stopPropagation(); deleteTask(${t.id})">✕</button>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            }
-        }
+    const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
+    let statusIcon = '●';
+    let statusClass = '';
+    if (status === 'done') { statusIcon = '✅';
+        statusClass = 'task-list-item--done'; } else if (status === 'missed') { statusIcon = '❌';
+        statusClass = 'task-list-item--missed'; } else if (status === 'planned') { statusIcon = '⏳'; }
+    const date = new Date(t.lastEdited || t.id);
+    const dateStr = date.toLocaleDateString('ru-RU');
+    
+    const cat = CATEGORIES[t.category] || CATEGORIES.other;
+    const coverEmoji = t.cover || cat.cover || '📌';
+    const coverBg = cat.bg || 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)';
+    
+    html += `
+        <div class="task-card" onclick="openTaskEditorForDate(${t.id}, '${new Date().toISOString().split('T')[0]}')">
+            <div class="task-card__cover" style="background:${coverBg};">
+                ${coverEmoji}
+            </div>
+            <div class="task-card__body">
+                <div class="task-card__title">
+                    ${t.title}
+                    <span class="task-card__status">${statusIcon}</span>
+                    <span style="font-size:10px;color:var(--text-secondary);font-weight:400;margin-left:auto;">${dateStr}</span>
+                </div>
+                <div class="task-card__meta">
+                    <span>📂 ${CATEGORIES[t.category]?.label || 'Другое'}</span>
+                    <span onclick="event.stopPropagation(); deleteTask(${t.id})" style="cursor:pointer;color:var(--danger);">🗑️</span>
+                </div>
+            </div>
+        </div>
+    `;
+});
 
         function openTasks() {
             openModal('📋 Задачи', `
