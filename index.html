@@ -4965,6 +4965,44 @@ body {
         // ============================================
         // 26. ИНИЦИАЛИЗАЦИЯ
         // ============================================
+        // ============================================
+        // ЦВЕТОВЫЕ СХЕМЫ (ОПРЕДЕЛЕНЫ ДО DOMContentLoaded)
+        // ============================================
+        function setColorScheme(schemeId) {
+            document.documentElement.setAttribute('data-color', schemeId);
+            localStorage.setItem('colorScheme', schemeId);
+            renderAll();
+            updateAllColors();
+            if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
+                setTimeout(openSettings, 200);
+            }
+        }
+
+        function loadColorScheme() {
+            const saved = localStorage.getItem('colorScheme') || 'default';
+            document.documentElement.setAttribute('data-color', saved);
+        }
+
+        function updateAllColors() {
+            document.querySelectorAll('.modes__btn--active').forEach(el => {
+                el.style.background = 'var(--gradient)';
+            });
+            document.querySelectorAll('.calendar__day--today').forEach(el => {
+                el.style.background = 'var(--gradient)';
+            });
+            document.querySelectorAll('.bottom-bar__btn--add').forEach(el => {
+                el.style.background = 'var(--gradient)';
+            });
+            updateStats();
+        }
+
+        // Экспорт для использования в HTML-атрибутах
+        window.setColorScheme = setColorScheme;
+        window.loadColorScheme = loadColorScheme;
+        window.toggleTheme = toggleTheme;
+        window.loadTheme = loadTheme;
+
+        // Запуск после загрузки DOM
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             loadColorScheme(); // теперь функция определена
@@ -5205,46 +5243,6 @@ body {
         window.createNoteForTask = createNoteForTask;
         window.attachExistingNote = attachExistingNote;
         window.openNoteViewer = openNoteViewer;
-        
-        // ============================================
-        // ЦВЕТОВЫЕ СХЕМЫ (ИСПРАВЛЕННЫЙ ВАРИАНТ)
-        // ============================================
-
-        function setColorScheme(schemeId) {
-            document.documentElement.setAttribute('data-color', schemeId);
-            localStorage.setItem('colorScheme', schemeId);
-            renderAll();  // перерисовка всего
-            updateAllColors();  // обновление цветов динамических элементов
-            // Если открыты настройки — обновляем их
-            if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
-                setTimeout(openSettings, 200);
-            }
-        }
-
-        function loadColorScheme() {
-            const saved = localStorage.getItem('colorScheme') || 'default';
-            document.documentElement.setAttribute('data-color', saved);
-        }
-
-        function updateAllColors() {
-            // Принудительно обновляем элементы, которые используют градиенты
-            document.querySelectorAll('.modes__btn--active').forEach(el => {
-                el.style.background = 'var(--gradient)';
-            });
-            document.querySelectorAll('.calendar__day--today').forEach(el => {
-                el.style.background = 'var(--gradient)';
-            });
-            document.querySelectorAll('.bottom-bar__btn--add').forEach(el => {
-                el.style.background = 'var(--gradient)';
-            });
-            updateStats(); // перерисовка статистики
-        }
-
-        // Экспорт для использования в HTML-атрибутах
-        window.setColorScheme = setColorScheme;
-        window.loadColorScheme = loadColorScheme;
-        window.toggleTheme = toggleTheme;
-        window.loadTheme = loadTheme;
     </script>
 
 </body>
