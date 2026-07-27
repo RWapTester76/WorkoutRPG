@@ -2617,76 +2617,77 @@
         // 7. СТАТИСТИКА С КРИВОЙ
         // ============================================
         function updateStats() {
-            const grid = document.getElementById('statsGrid');
-            const totalEl = document.getElementById('statsTotal');
-            if (!grid) return;
+    const grid = document.getElementById('statsGrid');
+    const totalEl = document.getElementById('statsTotal');
+    if (!grid) return;
 
-            const weekDays = getWeekDays();
-            const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-            let totals = { done: 0, planned: 0, missed: 0 };
-            let maxCount = 1;
+    const weekDays = getWeekDays();
+    const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    let totals = { done: 0, planned: 0, missed: 0 };
+    let maxCount = 1;
 
-            const weekData = weekDays.map((date, i) => {
-                const dateStr = date.toISOString().split('T')[0];
-                const dayTasks = getTasksForDate(dateStr);
-                let done = 0,
-                    planned = 0,
-                    missed = 0;
-                dayTasks.forEach(task => {
-                    const originalTask = tasks.find(t => t.id === task.id);
-                    const status = getTaskStatusForDate(originalTask, dateStr);
-                    if (status === 'done') { done++;
-                        totals.done++; } else if (status === 'missed') { missed++;
-                        totals.missed++; } else if (status === 'planned') { planned++;
-                        totals.planned++; }
-                });
-                const total = done + planned + missed;
-                if (total > maxCount) maxCount = total;
-                return { label: dayLabels[i], date: dateStr, done, planned, missed, total };
-            });
+    const weekData = weekDays.map((date, i) => {
+        const dateStr = date.toISOString().split('T')[0];
+        const dayTasks = getTasksForDate(dateStr);
+        let done = 0,
+            planned = 0,
+            missed = 0;
+        dayTasks.forEach(task => {
+            const originalTask = tasks.find(t => t.id === task.id);
+            const status = getTaskStatusForDate(originalTask, dateStr);
+            if (status === 'done') { done++;
+                totals.done++; } else if (status === 'missed') { missed++;
+                totals.missed++; } else if (status === 'planned') { planned++;
+                totals.planned++; }
+        });
+        const total = done + planned + missed;
+        if (total > maxCount) maxCount = total;
+        return { label: dayLabels[i], date: dateStr, done, planned, missed, total };
+    });
 
-            if (maxCount === 0) maxCount = 1;
+    if (maxCount === 0) maxCount = 1;
 
-            let html = '';
-            weekData.forEach(d => {
-                const hDone = Math.max((d.done / maxCount) * 100, 2);
-                const hPlanned = Math.max((d.planned / maxCount) * 100, 2);
-                const hMissed = Math.max((d.missed / maxCount) * 100, 2);
-                html +=
-                    `
-                    <div class="stats__bar-wrap">
-                        <div class="stats__bars">
-                            ${d.done > 0 ? `<div class="stats__bar stats__bar--done" style="height:${hDone}%;"></div>` : ''}
-                            ${d.planned > 0 ? `<div class="stats__bar stats__bar--planned" style="height:${hPlanned}%;"></div>` : ''}
-                            ${d.missed > 0 ? `<div class="stats__bar stats__bar--missed" style="height:${hMissed}%;"></div>` : ''}
-                        </div>
-                        <div class="stats__bar-label">${d.label}</div>
-                        <div class="stats__bar-value">${d.total}</div>
-                    </div>
-                `;
-            });
-            grid.innerHTML = html;
+    // ОЧИЩАЕМ ГРИД, НО СОХРАНЯЕМ КОНТЕЙНЕР ДЛЯ КРИВОЙ
+    const curveContainer = document.getElementById('statsCurveContainer');
+    grid.innerHTML = '';
+    if (curveContainer) grid.appendChild(curveContainer);
 
-            totalEl.innerHTML =
-                `
-                <span class="stats__total-item">
-                    <span class="stats__total-dot stats__total-dot--done"></span>
-                    Выполнено: <span class="stats__total-number">${totals.done}</span>
-                </span>
-                <span class="stats__total-item">
-                    <span class="stats__total-dot stats__total-dot--planned"></span>
-                    Запланировано: <span class="stats__total-number">${totals.planned}</span>
-                </span>
-                <span class="stats__total-item">
-                    <span class="stats__total-dot stats__total-dot--missed"></span>
-                    Пропущено: <span class="stats__total-number">${totals.missed}</span>
-                </span>
-            `;
+    let html = '';
+    weekData.forEach(d => {
+        const hDone = Math.max((d.done / maxCount) * 100, 2);
+        const hPlanned = Math.max((d.planned / maxCount) * 100, 2);
+        const hMissed = Math.max((d.missed / maxCount) * 100, 2);
+        html += `
+            <div class="stats__bar-wrap">
+                <div class="stats__bars">
+                    ${d.done > 0 ? `<div class="stats__bar stats__bar--done" style="height:${hDone}%;"></div>` : ''}
+                    ${d.planned > 0 ? `<div class="stats__bar stats__bar--planned" style="height:${hPlanned}%;"></div>` : ''}
+                    ${d.missed > 0 ? `<div class="stats__bar stats__bar--missed" style="height:${hMissed}%;"></div>` : ''}
+                </div>
+                <div class="stats__bar-label">${d.label}</div>
+                <div class="stats__bar-value">${d.total}</div>
+            </div>
+        `;
+    });
+    grid.innerHTML += html;
 
-            // Отрисовка кривой
-            drawCurve(weekData, maxCount);
-        }
+    totalEl.innerHTML = `
+        <span class="stats__total-item">
+            <span class="stats__total-dot stats__total-dot--done"></span>
+            Выполнено: <span class="stats__total-number">${totals.done}</span>
+        </span>
+        <span class="stats__total-item">
+            <span class="stats__total-dot stats__total-dot--planned"></span>
+            Запланировано: <span class="stats__total-number">${totals.planned}</span>
+        </span>
+        <span class="stats__total-item">
+            <span class="stats__total-dot stats__total-dot--missed"></span>
+            Пропущено: <span class="stats__total-number">${totals.missed}</span>
+        </span>
+    `;
 
+    drawCurve(weekData, maxCount);
+}
         function drawCurve(weekData, maxCount) {
             const canvas = document.getElementById('statsCurveCanvas');
             if (!canvas) return;
