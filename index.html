@@ -4967,7 +4967,7 @@ body {
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
-            loadColorScheme();
+            loadColorScheme(); // теперь функция определена
             loadUser();
             loadTasks();
             loadGallery();
@@ -5205,95 +5205,46 @@ body {
         window.createNoteForTask = createNoteForTask;
         window.attachExistingNote = attachExistingNote;
         window.openNoteViewer = openNoteViewer;
-        window.setColorScheme = setColorScheme;
-window.loadColorScheme = loadColorScheme;
-window.toggleTheme = toggleTheme;
-window.loadTheme = loadTheme;
+        
         // ============================================
-// ЦВЕТОВЫЕ СХЕМЫ
-// ============================================
+        // ЦВЕТОВЫЕ СХЕМЫ (ИСПРАВЛЕННЫЙ ВАРИАНТ)
+        // ============================================
 
-/**
- * Устанавливает цветовую схему
- */
-function setColorScheme(schemeId) {
-    document.documentElement.setAttribute('data-color', schemeId);
-    localStorage.setItem('colorScheme', schemeId);
-    
-    // Обновляем открытые настройки, если они есть
-    if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
-        openSettings();
-    }
-    
-    // Перерисовываем всё
-    renderAll();
-}
+        function setColorScheme(schemeId) {
+            document.documentElement.setAttribute('data-color', schemeId);
+            localStorage.setItem('colorScheme', schemeId);
+            renderAll();  // перерисовка всего
+            updateAllColors();  // обновление цветов динамических элементов
+            // Если открыты настройки — обновляем их
+            if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
+                setTimeout(openSettings, 200);
+            }
+        }
 
-/**
- * Загружает сохранённую цветовую схему
- */
-function setColorScheme(schemeId) {
-    document.documentElement.setAttribute('data-color', schemeId);
-    localStorage.setItem('colorScheme', schemeId);
-    
-    // Перерисовываем всё
-    renderAll();
-    
-    // Обновляем открытые настройки
-    if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
-        setTimeout(openSettings, 200);
-    }
-    
-    // Обновляем все цвета в реальном времени
-    updateAllColors();
-}
+        function loadColorScheme() {
+            const saved = localStorage.getItem('colorScheme') || 'default';
+            document.documentElement.setAttribute('data-color', saved);
+        }
 
-function updateAllColors() {
-    // Принудительно перерисовываем компоненты
-    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-    
-    // Обновляем кнопки и элементы
-    document.querySelectorAll('.modes__btn--active').forEach(el => {
-        el.style.background = 'var(--gradient)';
-    });
-    
-    document.querySelectorAll('.calendar__day--today').forEach(el => {
-        el.style.background = 'var(--gradient)';
-    });
-    
-    document.querySelectorAll('.bottom-bar__btn--add').forEach(el => {
-        el.style.background = 'var(--gradient)';
-    });
-    
-    // Перерисовываем статистику
-    updateStats();
-}
+        function updateAllColors() {
+            // Принудительно обновляем элементы, которые используют градиенты
+            document.querySelectorAll('.modes__btn--active').forEach(el => {
+                el.style.background = 'var(--gradient)';
+            });
+            document.querySelectorAll('.calendar__day--today').forEach(el => {
+                el.style.background = 'var(--gradient)';
+            });
+            document.querySelectorAll('.bottom-bar__btn--add').forEach(el => {
+                el.style.background = 'var(--gradient)';
+            });
+            updateStats(); // перерисовка статистики
+        }
 
-/**
- * Переключает тему (светлая/тёмная)
- */
-function toggleTheme() {
-    const html = document.documentElement;
-    const current = html.getAttribute('data-theme') || 'light';
-    const next = current === 'light' ? 'dark' : 'light';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    document.getElementById('themeBtn').textContent = next === 'light' ? '🌙' : '☀️';
-    
-    // Обновляем настройки, если они открыты
-    if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
-        openSettings();
-    }
-}
-
-/**
- * Загружает сохранённую тему
- */
-function loadTheme() {
-    const theme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-    document.getElementById('themeBtn').textContent = theme === 'light' ? '🌙' : '☀️';
-}
+        // Экспорт для использования в HTML-атрибутах
+        window.setColorScheme = setColorScheme;
+        window.loadColorScheme = loadColorScheme;
+        window.toggleTheme = toggleTheme;
+        window.loadTheme = loadTheme;
     </script>
 
 </body>
