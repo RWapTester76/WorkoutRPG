@@ -1834,7 +1834,7 @@
         }
 
         // ============================================
-        // 4. ЗАДАЧИ
+        // 4. ЗАДАЧИ (noteIds — массив)
         // ============================================
         let tasks = [];
         let taskViewMode = 'categories';
@@ -1859,10 +1859,15 @@
                     done: [],
                     overrides: {},
                     lastEdited: Date.now(),
-                    noteId: null // поле для привязки заметки
+                    noteIds: []
                 }];
                 saveTasks();
             }
+            // Убеждаемся, что у всех задач есть noteIds
+            tasks.forEach(t => {
+                if (!t.noteIds) t.noteIds = [];
+            });
+            saveTasks();
         }
 
         function saveTasks() {
@@ -1943,7 +1948,7 @@
                 done: [],
                 overrides: {},
                 lastEdited: Date.now(),
-                noteId: null
+                noteIds: []
             });
             saveTasks();
             renderAll();
@@ -1991,13 +1996,15 @@
         function deleteTask(id) {
             if (!confirm('Удалить задачу?')) return;
             const task = tasks.find(t => t.id === id);
-            if (task && task.noteId) {
-                // При удалении задачи, заметка остаётся, но отвязывается
-                const note = notes.find(n => n.id === task.noteId);
-                if (note) {
-                    note.taskId = null;
-                    saveNotes();
-                }
+            if (task && task.noteIds) {
+                // Отвязываем задачу от всех заметок
+                task.noteIds.forEach(noteId => {
+                    const note = notes.find(n => n.id === noteId);
+                    if (note && note.taskIds) {
+                        note.taskIds = note.taskIds.filter(tid => tid !== id);
+                        saveNotes();
+                    }
+                });
             }
             tasks = tasks.filter(t => t.id !== id);
             saveTasks();
@@ -2825,7 +2832,109 @@
         }
 
         // ============================================
-        // 11. РЕДАКТОР ЗАДАЧИ (С ПОДДЕРЖКОЙ ЗАМЕТОК)
+        // 11. ЗАМЕТКИ (МНОГИЕ КО МНОГИМ)
+        // ============================================
+        let notes = [];
+
+        function loadNotes() {
+            const saved = localStorage.getItem('notes');
+            if (saved) {
+                try { notes = JSON.parse(saved); } catch (e) {}
+            }
+            if (notes.length === 0) {
+                notes = [{
+                    id: Date.now(),
+                    title: 'Пример заметки',
+                    content: 'Это текст заметки. Вы можете прикрепить её к нескольким задачам.',
+                    taskIds: []
+                }];
+                saveNotes();
+            }
+            notes.forEach(n => {
+                if (!n.taskIds) n.taskIds = [];
+            });
+            saveNotes();
+        }
+
+        function saveNotes() {
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        function createNote(title, content) {
+            const note = {
+                id: Date.now(),
+                title: title || 'Без названия',
+                content: content || '',
+                taskIds: []
+            };
+            notes.push(note);
+            saveNotes();
+            return note;
+        }
+
+        function updateNote(id, title, content) {
+            const note = notes.find(n => n.id === id);
+            if (note) {
+                note.title = title;
+                note.content = content;
+                saveNotes();
+            }
+        }
+
+        function deleteNote(id) {
+            notes = notes.filter(n => n.id !== id);
+            // Удаляем ID этой заметки из всех задач
+            tasks.forEach(task => {
+                if (task.noteIds && task.noteIds.includes(id)) {
+                    task.noteIds = task.noteIds.filter(nid => nid !== id);
+                }
+            });
+            saveTasks();
+            saveNotes();
+        }
+
+        function attachNoteToTask(noteId, taskId) {
+            const note = notes.find(n => n.id === noteId);
+            const task = tasks.find(t => t.id === taskId);
+            if (!note || !task) return;
+
+            if (!note.taskIds) note.taskIds = [];
+            if (!task.noteIds) task.noteIds = [];
+
+            if (!note.taskIds.includes(taskId)) {
+                note.taskIds.push(taskId);
+            }
+            if (!task.noteIds.includes(noteId)) {
+                task.noteIds.push(noteId);
+                task.lastEdited = Date.now();
+            }
+            saveNotes();
+            saveTasks();
+        }
+
+        function detachNoteFromTask(noteId, taskId) {
+            const note = notes.find(n => n.id === noteId);
+            const task = tasks.find(t => t.id === taskId);
+            if (note && note.taskIds) {
+                note.taskIds = note.taskIds.filter(id => id !== taskId);
+                saveNotes();
+            }
+            if (task && task.noteIds) {
+                task.noteIds = task.noteIds.filter(id => id !== noteId);
+                saveTasks();
+            }
+        }
+
+        function getNotesForTask(taskId) {
+            return notes.filter(n => n.taskIds && n.taskIds.includes(taskId));
+        }
+
+        function getTasksForNote(noteId) {
+            return tasks.filter(t => t.noteIds && t.noteIds.includes(noteId));
+        }
+
+        // ============================================
+        // 12. РЕДАКТОР ЗАДАЧИ
         // ============================================
         function openTaskEditorForDate(taskId, dateStr) {
             const task = tasks.find(t => t.id === taskId);
@@ -2839,35 +2948,29 @@
                 `<option value="${key}" ${task.category === key ? 'selected' : ''}>${CATEGORIES[key].label}</option>`
             ).join('');
 
-            // Проверяем, есть ли привязанная заметка
+            // === ПРИВЯЗАННЫЕ ЗАМЕТКИ ===
+            const attachedNotes = getNotesForTask(task.id);
             let noteSection = '';
-            if (task.noteId) {
-                const note = notes.find(n => n.id === task.noteId);
-                if (note) {
-                    noteSection = `
-                        <div style="margin-bottom:10px;padding:8px;background:var(--bg);border-radius:8px;border-left:3px solid var(--accent);">
-                            <div style="display:flex;justify-content:space-between;align-items:center;">
-                                <span style="font-weight:600;font-size:13px;color:var(--text);">📝 Привязанная заметка</span>
-                                <span style="font-size:11px;color:var(--text-secondary);">${note.title}</span>
-                            </div>
-                            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                ${note.content.substring(0, 60)}${note.content.length > 60 ? '...' : ''}
-                            </div>
-                            <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;">
-                                <button class="form-btn" style="flex:1;font-size:12px;padding:4px;" onclick="openNoteFromTask(${note.id}, ${task.id}, '${dateStr}')">
-                                    📖 Открыть
-                                </button>
-                                <button class="form-btn form-btn--danger" style="flex:0;font-size:12px;padding:4px 10px;" onclick="detachNoteFromTask(${task.id})">
-                                    ✂️ Открепить
-                                </button>
-                            </div>
+            if (attachedNotes.length > 0) {
+                let notesHtml = attachedNotes.map(note =>
+                    `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);">
+                        <span style="font-size:13px;color:var(--text);">📝 ${note.title}</span>
+                        <div style="display:flex;gap:4px;">
+                            <button class="form-btn" style="flex:0;font-size:11px;padding:2px 10px;" onclick="openNoteEditor(${note.id}, ${task.id})">✏️</button>
+                            <button class="form-btn form-btn--danger" style="flex:0;font-size:11px;padding:2px 10px;" onclick="detachNoteFromTask(${note.id}, ${task.id}); openTaskEditorForDate(${task.id}, '${dateStr}')">✕</button>
                         </div>
-                    `;
-                } else {
-                    // Заметка не найдена, сбрасываем ссылку
-                    task.noteId = null;
-                    saveTasks();
-                }
+                    </div>
+                `).join('');
+
+                noteSection = `
+                    <div style="margin-bottom:10px;padding:8px;background:var(--bg);border-radius:8px;border-left:3px solid var(--accent);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                            <span style="font-weight:600;font-size:13px;color:var(--text);">📝 Привязанные заметки (${attachedNotes.length})</span>
+                        </div>
+                        ${notesHtml}
+                    </div>
+                `;
             }
 
             const content =
@@ -2913,17 +3016,14 @@
                     ` : ''}
                 </div>
 
-                <!-- Кнопка для работы с заметками -->
-                <div style="margin-bottom:8px;">
-                    ${task.noteId ? `
-                        <button class="form-btn" style="background:var(--warning);color:var(--text);font-size:13px;padding:7px;" onclick="createOrEditNote(${task.id}, '${dateStr}')">
-                            📝 Редактировать заметку
-                        </button>
-                    ` : `
-                        <button class="form-btn" style="font-size:13px;padding:7px;" onclick="createOrEditNote(${task.id}, '${dateStr}')">
-                            📝 Добавить заметку
-                        </button>
-                    `}
+                <!-- КНОПКИ ДЛЯ ЗАМЕТОК -->
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                    <button class="form-btn" style="flex:1;font-size:13px;padding:7px;" onclick="createNoteFromTask(${task.id}, '${dateStr}')">
+                        ➕ Создать заметку
+                    </button>
+                    <button class="form-btn" style="flex:1;font-size:13px;padding:7px;background:var(--warning);color:var(--text);" onclick="showAttachNoteModal(${task.id}, '${dateStr}')">
+                        📂 Прикрепить заметку
+                    </button>
                 </div>
 
                 <hr style="border-color:var(--border);margin:8px 0;">
@@ -2967,108 +3067,76 @@
         }
 
         // ============================================
-        // 12. ЗАМЕТКИ (НОВАЯ СИСТЕМА)
+        // 13. МОДАЛЬНОЕ ОКНО ДЛЯ ПРИКРЕПЛЕНИЯ ЗАМЕТКИ
         // ============================================
-        let notes = [];
+        let attachNoteTaskId = null;
+        let attachNoteDateStr = null;
 
-        function loadNotes() {
-            const saved = localStorage.getItem('notes');
-            if (saved) {
-                try { notes = JSON.parse(saved); } catch (e) {}
+        function showAttachNoteModal(taskId, dateStr) {
+            attachNoteTaskId = taskId;
+            attachNoteDateStr = dateStr;
+
+            const task = tasks.find(t => t.id === taskId);
+            const attachedIds = task.noteIds || [];
+            const availableNotes = notes.filter(n => !attachedIds.includes(n.id));
+
+            let html = `
+                <div style="margin-bottom:10px;">
+                    <span style="font-size:13px;color:var(--text-secondary);">Выберите заметку для прикрепления к задаче:</span>
+                </div>
+            `;
+
+            if (availableNotes.length === 0) {
+                html += `<div class="task-empty">Нет доступных заметок. Создайте новую.</div>`;
+            } else {
+                availableNotes.forEach(note => {
+                    const taskNames = getTasksForNote(note.id).map(t => t.title).join(', ');
+                    html += `
+                        <div class="note-item" style="cursor:pointer;" onclick="attachNoteToTaskAndRefresh(${note.id}, ${taskId})">
+                            <div class="note-item__title">${note.title}</div>
+                            <div class="note-item__preview">${note.content.substring(0, 60)}${note.content.length > 60 ? '...' : ''}</div>
+                            <div class="note-item__meta">${note.taskIds.length > 0 ? `📌 Уже привязана к: ${taskNames}` : '📌 Свободная'}</div>
+                        </div>
+                    `;
+                });
             }
-            if (notes.length === 0) {
-                // Добавляем демо-заметку для примера
-                notes = [{
-                    id: Date.now(),
-                    title: 'Пример заметки',
-                    content: 'Это текст заметки. Вы можете прикрепить её к задаче.',
-                    taskId: null
-                }];
-                saveNotes();
-            }
+
+            html += `
+                <div style="margin-top:10px;">
+                    <button class="form-btn" style="background:var(--success);" onclick="createNoteFromTaskAndAttach(${taskId}, '${dateStr}')">
+                        ➕ Создать новую и прикрепить
+                    </button>
+                </div>
+            `;
+
+            openModal('📂 Прикрепить заметку', html);
         }
 
-        function saveNotes() {
-            localStorage.setItem('notes', JSON.stringify(notes));
-        }
-
-        function createNote(title, content, taskId) {
-            const note = {
-                id: Date.now(),
-                title: title || 'Без названия',
-                content: content || '',
-                taskId: taskId || null
-            };
-            notes.push(note);
-            saveNotes();
-            return note;
-        }
-
-        function updateNote(id, title, content) {
-            const note = notes.find(n => n.id === id);
-            if (note) {
-                note.title = title;
-                note.content = content;
-                saveNotes();
-            }
-        }
-
-        function deleteNote(id) {
-            notes = notes.filter(n => n.id !== id);
-            // Отвязываем заметку от задачи, если была привязана
-            tasks.forEach(task => {
-                if (task.noteId === id) {
-                    task.noteId = null;
-                }
-            });
-            saveTasks();
-            saveNotes();
-        }
-
-        function attachNoteToTask(noteId, taskId) {
-            const note = notes.find(n => n.id === noteId);
-            if (note) {
-                note.taskId = taskId;
+        function attachNoteToTaskAndRefresh(noteId, taskId) {
+            attachNoteToTask(noteId, taskId);
+            closeModal();
+            renderAll();
+            // Обновляем редактор задачи, если он открыт
+            if (document.getElementById('taskEditorModal').classList.contains('modal-overlay--open')) {
                 const task = tasks.find(t => t.id === taskId);
                 if (task) {
-                    task.noteId = noteId;
-                    task.lastEdited = Date.now();
-                    saveTasks();
-                }
-                saveNotes();
-            }
-        }
-
-        function detachNoteFromTask(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task && task.noteId) {
-                const note = notes.find(n => n.id === task.noteId);
-                if (note) {
-                    note.taskId = null;
-                    saveNotes();
-                }
-                task.noteId = null;
-                saveTasks();
-                renderAll();
-                // Обновляем редактор, если открыт
-                if (document.getElementById('taskEditorModal').classList.contains('modal-overlay--open')) {
-                    const title = document.getElementById('editorTitle').textContent;
-                    const match = title.match(/📋 (.+) — (\d{4}-\d{2}-\d{2})/);
+                    const titleEl = document.getElementById('editorTitle');
+                    const match = titleEl.textContent.match(/📋 (.+) — (\d{4}-\d{2}-\d{2})/);
                     if (match) {
-                        const taskTitle = match[1];
-                        const dateStr = match[2];
-                        const task = tasks.find(t => t.title === taskTitle);
-                        if (task) {
-                            openTaskEditorForDate(task.id, dateStr);
-                        }
+                        openTaskEditorForDate(taskId, match[2]);
                     }
                 }
-                alert('✅ Заметка откреплена от задачи.');
             }
+            alert('✅ Заметка прикреплена!');
+        }
+
+        function createNoteFromTaskAndAttach(taskId, dateStr) {
+            closeModal();
+            openNoteEditor(null, taskId, true);
         }
 
         // ============================================
-        // 13. МОДАЛЬНЫЕ ОКНА ДЛЯ ЗАМЕТОК
+        // 14. МОДАЛЬНЫЕ ОКНА ДЛЯ ЗАМЕТОК
         // ============================================
         function openNotes() {
             const content = document.getElementById('notesModalContent');
@@ -3083,15 +3151,12 @@
                 html += `<div class="task-empty">Нет заметок</div>`;
             } else {
                 notes.forEach(note => {
-                    const taskTitle = note.taskId ? tasks.find(t => t.id === note.taskId)?.title || 'без задачи' :
-                        'без задачи';
+                    const taskNames = getTasksForNote(note.id).map(t => t.title).join(', ') || 'не привязана';
                     html += `
                         <div class="note-item">
                             <div class="note-item__title">${note.title}</div>
                             <div class="note-item__preview">${note.content.substring(0, 80)}${note.content.length > 80 ? '...' : ''}</div>
-                            <div class="note-item__meta">
-                                ${note.taskId ? `📌 Привязана к задаче: "${taskTitle}"` : '📌 Свободная заметка'}
-                            </div>
+                            <div class="note-item__meta">📌 Привязана к: ${taskNames}</div>
                             <div class="note-item__actions">
                                 <button class="note-item__btn note-item__btn--edit" onclick="openNoteEditor(${note.id}, null)">✏️</button>
                                 <button class="note-item__btn note-item__btn--delete" onclick="deleteNoteConfirm(${note.id})">🗑️</button>
@@ -3114,11 +3179,11 @@
         function deleteNoteConfirm(id) {
             if (confirm('Удалить заметку?')) {
                 deleteNote(id);
-                openNotes(); // обновить список
+                openNotes();
             }
         }
 
-        function openNoteEditor(noteId, taskId) {
+        function openNoteEditor(noteId, taskId, autoAttach = false) {
             const isNew = !noteId;
             const note = noteId ? notes.find(n => n.id === noteId) : null;
             const title = note ? note.title : '';
@@ -3134,7 +3199,7 @@
                     <label class="form-label">Содержание</label>
                     <textarea class="form-input" id="noteContentInput" rows="6" placeholder="Текст заметки...">${content}</textarea>
                 </div>
-                <button class="form-btn" onclick="saveNoteFromEditor(${noteId || 'null'}, ${taskId || 'null'})">
+                <button class="form-btn" onclick="saveNoteFromEditor(${noteId || 'null'}, ${taskId || 'null'}, ${autoAttach})">
                     💾 Сохранить
                 </button>
             `;
@@ -3146,7 +3211,7 @@
             document.getElementById('noteEditorModal').classList.remove('modal-overlay--open');
         }
 
-        function saveNoteFromEditor(noteId, taskId) {
+        function saveNoteFromEditor(noteId, taskId, autoAttach = false) {
             const title = document.getElementById('noteTitleInput').value.trim() || 'Без названия';
             const content = document.getElementById('noteContentInput').value.trim();
 
@@ -3155,24 +3220,23 @@
                 return;
             }
 
+            let savedNoteId = noteId;
             if (noteId) {
-                // Редактируем существующую
                 updateNote(noteId, title, content);
-                // Если привязана к задаче, обновляем задачу
-                if (taskId) {
-                    attachNoteToTask(noteId, taskId);
-                }
             } else {
-                // Создаём новую
-                const newNote = createNote(title, content, taskId || null);
-                if (taskId) {
+                const newNote = createNote(title, content);
+                savedNoteId = newNote.id;
+                if (taskId && autoAttach) {
                     attachNoteToTask(newNote.id, taskId);
                 }
             }
 
             closeNoteEditor();
 
-            // Если открыт редактор задачи, обновляем его
+            if (taskId && autoAttach && noteId) {
+                attachNoteToTask(noteId, taskId);
+            }
+
             if (document.getElementById('taskEditorModal').classList.contains('modal-overlay--open')) {
                 const titleEl = document.getElementById('editorTitle');
                 const match = titleEl.textContent.match(/📋 (.+) — (\d{4}-\d{2}-\d{2})/);
@@ -3185,15 +3249,19 @@
                     }
                 }
             } else if (document.getElementById('notesModal').classList.contains('modal-overlay--open')) {
-                openNotes(); // обновить список заметок
+                openNotes();
             }
 
             renderAll();
             alert('✅ Заметка сохранена!');
         }
 
+        function createNoteFromTask(taskId, dateStr) {
+            openNoteEditor(null, taskId, true);
+        }
+
         // ============================================
-        // 14. МОДАЛЬНЫЕ ОКНА (ОСНОВНЫЕ)
+        // 15. МОДАЛЬНЫЕ ОКНА (ОСНОВНЫЕ)
         // ============================================
         function openModal(title, content) {
             document.getElementById('modalTitle').textContent = title;
@@ -3206,7 +3274,7 @@
         }
 
         // ============================================
-        // 15. ЗАДАЧИ (СПИСОК)
+        // 16. ЗАДАЧИ (СПИСОК)
         // ============================================
         function renderTasksList() {
             const container = document.getElementById('tasksContainer');
@@ -3315,7 +3383,7 @@
         }
 
         // ============================================
-        // 16. ГАЛЕРЕЯ
+        // 17. ГАЛЕРЕЯ
         // ============================================
         function renderGallery() {
             const container = document.getElementById('galleryContainer');
@@ -3361,7 +3429,7 @@
         }
 
         // ============================================
-        // 17. ПРОФИЛЬ
+        // 18. ПРОФИЛЬ
         // ============================================
         function openProfile() {
             const bmi = user.weight && user.height ? Math.round((user.weight / ((user.height / 100) ** 2)) * 10) / 10 :
@@ -3572,7 +3640,7 @@
         }
 
         // ============================================
-        // 18. ЖУРНАЛ ВЕСА
+        // 19. ЖУРНАЛ ВЕСА
         // ============================================
         function renderWeightChart(log) {
             if (log.length === 0) {
@@ -3664,7 +3732,7 @@
         }
 
         // ============================================
-        // 19. ДОБАВЛЕНИЕ ЗАДАЧИ
+        // 20. ДОБАВЛЕНИЕ ЗАДАЧИ
         // ============================================
         function openAddTaskForDate(dateStr, timeStr) {
             document.getElementById('taskStart').value = dateStr;
@@ -3727,7 +3795,7 @@
         }
 
         // ============================================
-        // 20. ДОБАВЛЕНИЕ ФОТО
+        // 21. ДОБАВЛЕНИЕ ФОТО
         // ============================================
         function openAddPhoto() {
             document.getElementById('addPhotoModal').classList.add('modal-overlay--open');
@@ -3788,7 +3856,7 @@
         }
 
         // ============================================
-        // 21. НАСТРОЙКИ И ИНФОРМАЦИЯ
+        // 22. НАСТРОЙКИ И ИНФОРМАЦИЯ
         // ============================================
         function openSettings() {
             const theme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -4157,7 +4225,7 @@
         }
 
         // ============================================
-        // 22. ТЕМА
+        // 23. ТЕМА
         // ============================================
         function toggleTheme() {
             const html = document.documentElement;
@@ -4175,7 +4243,7 @@
         }
 
         // ============================================
-        // 23. РЕНДЕР ВСЕГО
+        // 24. РЕНДЕР ВСЕГО
         // ============================================
         function renderAll() {
             checkStreakOnLoad();
@@ -4201,7 +4269,7 @@
         }
 
         // ============================================
-        // 24. УПРАВЛЕНИЕ ДАННЫМИ
+        // 25. УПРАВЛЕНИЕ ДАННЫМИ
         // ============================================
         function exportData() {
             try {
@@ -4344,7 +4412,7 @@
         }
 
         // ============================================
-        // 25. ИНИЦИАЛИЗАЦИЯ
+        // 26. ИНИЦИАЛИЗАЦИЯ
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
@@ -4582,27 +4650,12 @@
         window.deleteNoteConfirm = deleteNoteConfirm;
         window.attachNoteToTask = attachNoteToTask;
         window.detachNoteFromTask = detachNoteFromTask;
-        window.createOrEditNote = function(taskId, dateStr) {
-            // Проверяем, есть ли уже заметка у задачи
-            const task = tasks.find(t => t.id === taskId);
-            if (task && task.noteId) {
-                const note = notes.find(n => n.id === task.noteId);
-                if (note) {
-                    // Открываем редактор существующей заметки
-                    openNoteEditor(note.id, taskId);
-                    return;
-                }
-            }
-            // Создаём новую заметку и сразу привязываем
-            openNoteEditor(null, taskId);
-        };
-        window.openNoteFromTask = function(noteId, taskId, dateStr) {
-            // Открываем заметку в режиме просмотра, но даём возможность редактировать
-            const note = notes.find(n => n.id === noteId);
-            if (!note) return;
-            // Просто открываем редактор
-            openNoteEditor(noteId, taskId);
-        };
+        window.createNoteFromTask = createNoteFromTask;
+        window.showAttachNoteModal = showAttachNoteModal;
+        window.attachNoteToTaskAndRefresh = attachNoteToTaskAndRefresh;
+        window.createNoteFromTaskAndAttach = createNoteFromTaskAndAttach;
+        window.getNotesForTask = getNotesForTask;
+        window.getTasksForNote = getTasksForNote;
     </script>
 
 </body>
