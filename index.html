@@ -2281,115 +2281,132 @@
             updateBottomBarLabel();
         }
 
-        function renderWeekView(startDate) {
-            const grid = document.getElementById('calendarGrid');
-            grid.style.cssText = 'display:block;';
-            grid.innerHTML = '';
+function renderWeekView(startDate) {
+    const grid = document.getElementById('calendarGrid');
+    grid.style.cssText = 'display:block;';
+    grid.innerHTML = '';
 
-            currentDate = new Date(startDate);
+    currentDate = new Date(startDate);
 
-            const headerRow = document.createElement('div');
-            headerRow.style.cssText =
-                'display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;';
-            const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-            const today = new Date().toISOString().split('T')[0];
-            for (let i = 0; i < 7; i++) {
-                const header = document.createElement('div');
-                header.style.cssText =
-                    'padding:4px 2px;text-align:center;font-weight:600;font-size:11px;background:var(--bg);border-radius:4px;color:var(--text);word-break:break-word;';
-                const date = new Date(startDate);
-                date.setDate(startDate.getDate() + i);
-                const dateStr = date.toISOString().split('T')[0];
-                header.innerHTML =
-                    `
-                    <div>${weekdays[i]}</div>
-                    <div style="font-weight:400;font-size:8px;color:var(--text-secondary);">
-                        ${dateStr.slice(5)}
-                        ${dateStr === today ? ' ⭐' : ''}
+    const headerRow = document.createElement('div');
+    headerRow.style.cssText =
+        'display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;';
+    const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    const today = new Date().toISOString().split('T')[0];
+
+    for (let i = 0; i < 7; i++) {
+        const header = document.createElement('div');
+        header.style.cssText =
+            'padding:4px 2px;text-align:center;font-weight:600;font-size:11px;background:var(--bg);border-radius:4px;color:var(--text);word-break:break-word;cursor:pointer;';
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+        header.innerHTML = `
+            <div>${weekdays[i]}</div>
+            <div style="font-weight:400;font-size:8px;color:var(--text-secondary);">
+                ${dateStr.slice(5)}
+                ${dateStr === today ? ' ⭐' : ''}
+            </div>
+        `;
+        if (dateStr === today) {
+            header.style.background = 'var(--accent)';
+            header.style.color = 'white';
+        }
+
+        // === НОВЫЙ ОБРАБОТЧИК КЛИКА ПО ДНЮ ===
+        header.addEventListener('click', function() {
+            currentMode = 'day';
+            currentDate = new Date(dateStr + 'T00:00:00');
+
+            document.querySelectorAll('.modes__btn').forEach(b => {
+                b.classList.remove('modes__btn--active');
+            });
+            document.querySelector('.modes__btn[data-mode="day"]').classList.add('modes__btn--active');
+
+            document.getElementById('monthTitle').textContent = '📅 День';
+            renderDayView(currentDate);
+            updateBottomBarLabel();
+            updateCategoryFilterInfo();
+        });
+
+        headerRow.appendChild(header);
+    }
+    grid.appendChild(headerRow);
+
+    // ... остальной код без изменений ...
+    const dayTasks = [];
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+        const tasks = getTasksForDate(dateStr);
+        dayTasks.push({ date: dateStr, tasks: tasks });
+    }
+
+    const hasTasks = dayTasks.some(d => d.tasks.length > 0);
+    if (!hasTasks) {
+        const empty = document.createElement('div');
+        empty.style.cssText =
+            'text-align:center;padding:16px 0;color:var(--text-secondary);font-size:13px;';
+        empty.textContent = '📭 Нет задач на этой неделе';
+        grid.appendChild(empty);
+        return;
+    }
+
+    const maxTasks = Math.max(...dayTasks.map(d => d.tasks.length), 1);
+    for (let row = 0; row < maxTasks; row++) {
+        const rowEl = document.createElement('div');
+        rowEl.style.cssText =
+            'display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;';
+        for (let col = 0; col < 7; col++) {
+            const cell = document.createElement('div');
+            cell.style.cssText =
+                'padding:3px 2px;min-height:28px;background:var(--bg-card);border-radius:4px;font-size:10px;overflow:hidden;text-overflow:ellipsis;';
+            const dayData = dayTasks[col];
+            const task = dayData.tasks[row];
+            if (task) {
+                const originalTask = tasks.find(t => t.id === task.id);
+                const status = getTaskStatusForDate(originalTask, dayData.date);
+                let bgColor = 'var(--accent)';
+                let icon = '●';
+                let clickable = true;
+                if (status === 'done') { bgColor = 'var(--success)';
+                    icon = '✅';
+                    clickable = false; } else if (status === 'missed') { bgColor = 'var(--danger)';
+                    icon = '❌';
+                    clickable = false; } else if (status === 'planned') { bgColor = 'var(--warning)';
+                    icon = '⏳'; }
+                cell.style.cssText +=
+                    'background:' + bgColor + ';color:' + (status === 'planned' ? 'var(--text)' :
+                        'white') + ';padding:2px 4px;cursor:' + (clickable ? 'pointer' : 'default') +
+                    ';transition:opacity 0.2s;font-size:9px;';
+                cell.innerHTML = `
+                    <div style="font-weight:500;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px;">
+                        ${icon} ${task.title}
+                        ${task.isOverridden ? '⚡' : ''}
+                    </div>
+                    <div style="font-size:7px;opacity:0.8;display:flex;justify-content:space-between;">
+                        <span>${task.time}</span>
+                        <span>${task.duration}мин</span>
                     </div>
                 `;
-                if (dateStr === today) {
-                    header.style.background = 'var(--accent)';
-                    header.style.color = 'white';
+                if (clickable) {
+                    cell.onclick = function() { completeTask(task.id, dayData.date); };
+                } else if (status === 'missed') {
+                    cell.onclick = function() { alert('❌ Задача пропущена!'); };
                 }
-                headerRow.appendChild(header);
+            } else {
+                cell.style.cssText +=
+                    'color:var(--text-secondary);opacity:0.15;text-align:center;font-size:10px;display:flex;align-items:center;justify-content:center;';
+                cell.textContent = '·';
             }
-            grid.appendChild(headerRow);
-
-            const dayTasks = [];
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(startDate);
-                date.setDate(startDate.getDate() + i);
-                const dateStr = date.toISOString().split('T')[0];
-                const tasks = getTasksForDate(dateStr);
-                dayTasks.push({ date: dateStr, tasks: tasks });
-            }
-
-            const hasTasks = dayTasks.some(d => d.tasks.length > 0);
-            if (!hasTasks) {
-                const empty = document.createElement('div');
-                empty.style.cssText =
-                    'text-align:center;padding:16px 0;color:var(--text-secondary);font-size:13px;';
-                empty.textContent = '📭 Нет задач на этой неделе';
-                grid.appendChild(empty);
-                return;
-            }
-
-            const maxTasks = Math.max(...dayTasks.map(d => d.tasks.length), 1);
-            for (let row = 0; row < maxTasks; row++) {
-                const rowEl = document.createElement('div');
-                rowEl.style.cssText =
-                    'display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;';
-                for (let col = 0; col < 7; col++) {
-                    const cell = document.createElement('div');
-                    cell.style.cssText =
-                        'padding:3px 2px;min-height:28px;background:var(--bg-card);border-radius:4px;font-size:10px;overflow:hidden;text-overflow:ellipsis;';
-                    const dayData = dayTasks[col];
-                    const task = dayData.tasks[row];
-                    if (task) {
-                        const originalTask = tasks.find(t => t.id === task.id);
-                        const status = getTaskStatusForDate(originalTask, dayData.date);
-                        let bgColor = 'var(--accent)';
-                        let icon = '●';
-                        let clickable = true;
-                        if (status === 'done') { bgColor = 'var(--success)';
-                            icon = '✅';
-                            clickable = false; } else if (status === 'missed') { bgColor = 'var(--danger)';
-                            icon = '❌';
-                            clickable = false; } else if (status === 'planned') { bgColor = 'var(--warning)';
-                            icon = '⏳'; }
-                        cell.style.cssText +=
-                            'background:' + bgColor + ';color:' + (status === 'planned' ? 'var(--text)' :
-                                'white') + ';padding:2px 4px;cursor:' + (clickable ? 'pointer' : 'default') +
-                            ';transition:opacity 0.2s;font-size:9px;';
-                        cell.innerHTML =
-                            `
-                            <div style="font-weight:500;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px;">
-                                ${icon} ${task.title}
-                                ${task.isOverridden ? '⚡' : ''}
-                            </div>
-                            <div style="font-size:7px;opacity:0.8;display:flex;justify-content:space-between;">
-                                <span>${task.time}</span>
-                                <span>${task.duration}мин</span>
-                            </div>
-                        `;
-                        if (clickable) {
-                            cell.onclick = function() { completeTask(task.id, dayData.date); };
-                        } else if (status === 'missed') {
-                            cell.onclick = function() { alert('❌ Задача пропущена!'); };
-                        }
-                    } else {
-                        cell.style.cssText +=
-                            'color:var(--text-secondary);opacity:0.15;text-align:center;font-size:10px;display:flex;align-items:center;justify-content:center;';
-                        cell.textContent = '·';
-                    }
-                    rowEl.appendChild(cell);
-                }
-                grid.appendChild(rowEl);
-            }
-            updateStats();
-            updateBottomBarLabel();
+            rowEl.appendChild(cell);
         }
+        grid.appendChild(rowEl);
+    }
+    updateStats();
+    updateBottomBarLabel();
+}
 
         function renderYearView(year) {
             const grid = document.getElementById('calendarGrid');
