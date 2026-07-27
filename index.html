@@ -3328,27 +3328,38 @@
                                 ${cat.label}
                             </div>
                     `;
-                    categoryGroups[catKey].forEach(t => {
-                        const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
-                        let statusIcon = '●';
-                        let statusClass = '';
-                        if (status === 'done') { statusIcon = '✅';
-                            statusClass = 'task-list-item--done'; } else if (status === 'missed') { statusIcon =
-                                '❌';
-                            statusClass = 'task-list-item--missed'; } else if (status === 'planned') { statusIcon =
-                                '⏳'; }
-                        html += `
-                            <div class="task-list-item ${statusClass}" onclick="openTaskEditorForDate(${t.id}, '${new Date().toISOString().split('T')[0]}')">
-                                <span class="task-list-item__title">${t.title}</span>
-                                <div style="display:flex;align-items:center;gap:6px;">
-                                    <span class="task-list-item__status">${statusIcon}</span>
-                                    <button class="task-list-item__delete" onclick="event.stopPropagation(); deleteTask(${t.id})">✕</button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    html += `</div>`;
-                });
+           categoryGroups[catKey].forEach(t => {
+    const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
+    let statusIcon = '●';
+    let statusClass = '';
+    if (status === 'done') { statusIcon = '✅';
+        statusClass = 'task-list-item--done'; } else if (status === 'missed') { statusIcon = '❌';
+        statusClass = 'task-list-item--missed'; } else if (status === 'planned') { statusIcon = '⏳'; }
+    
+    const cat = CATEGORIES[t.category] || CATEGORIES.other;
+    const coverEmoji = t.cover || cat.cover || '📌';
+    const coverBg = cat.bg || 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)';
+    
+    html += `
+        <div class="task-card" onclick="openTaskEditorForDate(${t.id}, '${new Date().toISOString().split('T')[0]}')">
+            <div class="task-card__cover" style="background:${coverBg};">
+                ${coverEmoji}
+            </div>
+            <div class="task-card__body">
+                <div class="task-card__title">
+                    ${t.title}
+                    <span class="task-card__status">${statusIcon}</span>
+                </div>
+                <div class="task-card__meta">
+                    <span>⏱️ ${t.duration}мин · 🕐 ${t.time}</span>
+                    <span style="display:flex;gap:6px;">
+                        <span onclick="event.stopPropagation(); deleteTask(${t.id})" style="cursor:pointer;color:var(--danger);">🗑️</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    `;
+});
 
                 container.innerHTML = html ||
                     '<div class="task-empty">Нет задач в выбранных категориях</div>';
@@ -4325,7 +4336,18 @@ function handleAddTask() {
             currentMode = 'month';
             document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
             renderMonthView();
-
+// ===== ВЫБОР ОБЛОЖКИ ПРИ СОЗДАНИИ ЗАДАЧИ =====
+const coverBtns = document.querySelectorAll('.cover-btn');
+coverBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+        coverBtns.forEach(b => b.classList.remove('cover-btn--active'));
+        this.classList.add('cover-btn--active');
+        document.getElementById('taskCover').value = this.dataset.cover;
+    });
+});
+// По умолчанию первая обложка активна
+const firstCover = document.querySelector('.cover-btn');
+if (firstCover) firstCover.classList.add('cover-btn--active');a
             // Навигация
             document.getElementById('prevMonth').addEventListener('click', function() {
                 switch (currentMode) {
