@@ -1858,26 +1858,26 @@
             return null;
         }
 
-        function addTask(title, desc, category, duration, schedule, time, start, end) {
-            tasks.push({
-                id: Date.now(),
-                title: title || 'Без названия',
-                desc: desc || '',
-                category: category || 'other',
-                duration: parseInt(duration) || 30,
-                schedule: schedule || [],
-                time: time || '12:00',
-                start: start || new Date().toISOString().split('T')[0],
-                end: end || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-                done: [],
-                overrides: {},
-                lastEdited: Date.now(),
-                noteIds: []
-            });
-            saveTasks();
-            renderAll();
-        }
-
+        function addTask(title, desc, category, duration, schedule, time, start, end, cover) {
+    tasks.push({
+        id: Date.now(),
+        title: title || 'Без названия',
+        desc: desc || '',
+        category: category || 'other',
+        duration: parseInt(duration) || 30,
+        schedule: schedule || [],
+        time: time || '12:00',
+        start: start || new Date().toISOString().split('T')[0],
+        end: end || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+        done: [],
+        overrides: {},
+        lastEdited: Date.now(),
+        noteIds: [],
+        cover: cover || '💪'  // <-- новое поле
+    });
+    saveTasks();
+    renderAll();
+}
         function completeTask(id, date) {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
@@ -3794,33 +3794,35 @@
             document.getElementById('addTaskModal').classList.remove('modal-overlay--open');
         }
 
-        function handleAddTask() {
-            const title = document.getElementById('taskTitle').value.trim();
-            const desc = document.getElementById('taskDesc').value.trim();
-            const category = document.getElementById('taskCategory').value;
-            const duration = document.getElementById('taskDuration').value;
-            const time = document.getElementById('taskTime').value;
-            const start = document.getElementById('taskStart').value;
-            const end = document.getElementById('taskEnd').value;
+function handleAddTask() {
+    const title = document.getElementById('taskTitle').value.trim();
+    const desc = document.getElementById('taskDesc').value.trim();
+    const category = document.getElementById('taskCategory').value;
+    const duration = document.getElementById('taskDuration').value;
+    const time = document.getElementById('taskTime').value;
+    const start = document.getElementById('taskStart').value;
+    const end = document.getElementById('taskEnd').value;
+    const cover = document.getElementById('taskCover').value; // <-- новое
 
-            if (!title) { alert('Введите название'); return; }
-            if (!duration || duration < 1) { alert('Длительность должна быть > 0'); return; }
+    if (!title) { alert('Введите название'); return; }
+    if (!duration || duration < 1) { alert('Длительность должна быть > 0'); return; }
 
-            const checks = document.querySelectorAll('#taskSchedule input[type="checkbox"]');
-            const schedule = [];
-            checks.forEach(cb => { if (cb.checked) schedule.push(parseInt(cb.value)); });
-            if (schedule.length === 0) { alert('Выберите хотя бы один день'); return; }
+    const checks = document.querySelectorAll('#taskSchedule input[type="checkbox"]');
+    const schedule = [];
+    checks.forEach(cb => { if (cb.checked) schedule.push(parseInt(cb.value)); });
+    if (schedule.length === 0) { alert('Выберите хотя бы один день'); return; }
 
-            addTask(title, desc, category, duration, schedule, time, start, end);
-            closeAddTask();
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDesc').value = '';
+    addTask(title, desc, category, duration, schedule, time, start, end, cover);
+    closeAddTask();
+    document.getElementById('taskTitle').value = '';
+    document.getElementById('taskDesc').value = '';
+    document.getElementById('taskCover').value = '💪';
 
-            if (document.getElementById('modalTitle').textContent.includes('Задачи')) {
-                openTasks();
-            }
-            alert('✅ Задача создана!');
-        }
+    if (document.getElementById('modalTitle').textContent.includes('Задачи')) {
+        openTasks();
+    }
+    alert('✅ Задача создана!');
+}
 
         // ============================================
         // 21. ДОБАВЛЕНИЕ ФОТО
