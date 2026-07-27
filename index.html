@@ -2538,80 +2538,98 @@
             updateBottomBarLabel();
         }
 
-        function renderYearView(year) {
-            const grid = document.getElementById('calendarGrid');
-            grid.style.cssText =
-                'display:grid;grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));gap:4px;';
-            grid.innerHTML = '';
+       function renderYearView(year) {
+    const grid = document.getElementById('calendarGrid');
+    grid.style.cssText =
+        'display:grid;grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));gap:8px;';
+    grid.innerHTML = '';
 
-            const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн',
-                'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
-            ];
+    const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн',
+        'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
+    ];
 
-            for (let month = 0; month < 12; month++) {
-                const monthContainer = document.createElement('div');
-                monthContainer.style.cssText =
-                    'background:var(--bg-card);border-radius:8px;padding:6px;box-shadow:0 2px 6px rgba(0,0,0,0.04);border:2px solid transparent;min-width:0;';
-                const header = document.createElement('div');
-                header.style.cssText =
-                    'font-weight:600;font-size:11px;text-align:center;margin-bottom:3px;color:var(--text);';
-                header.textContent = monthNames[month];
-                monthContainer.appendChild(header);
+    for (let month = 0; month < 12; month++) {
+        const monthContainer = document.createElement('div');
+        monthContainer.style.cssText =
+            'background:var(--bg-card);border-radius:12px;padding:10px;box-shadow:var(--shadow);border:2px solid transparent;min-width:0;transition:all 0.2s;cursor:pointer;';
+        
+        // ===== КЛИК НА МЕСЯЦ =====
+        monthContainer.addEventListener('click', (function(y, m) {
+            return function() {
+                currentDate = new Date(y, m, 1);
+                currentMode = 'month';
+                
+                document.querySelectorAll('.modes__btn').forEach(b => {
+                    b.classList.remove('modes__btn--active');
+                });
+                document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
+                
+                document.getElementById('monthTitle').textContent = months[m] + ' ' + y;
+                renderMonthView();
+                updateBottomBarLabel();
+            };
+        })(year, month));
 
-                const lastDay = new Date(year, month + 1, 0);
-                let totalTasks = 0,
-                    completedTasks = 0,
-                    missedTasks = 0;
-                for (let d = 1; d <= lastDay.getDate(); d++) {
-                    const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-                    const dayTasks = getTasksForDate(dateStr);
-                    totalTasks += dayTasks.length;
-                    dayTasks.forEach(task => {
-                        const originalTask = tasks.find(t => t.id === task.id);
-                        const status = getTaskStatusForDate(originalTask, dateStr);
-                        if (status === 'done') completedTasks++;
-                        else if (status === 'missed') missedTasks++;
-                    });
-                }
-                const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                let barColor = 'var(--border)';
-                if (totalTasks > 0) {
-                    if (missedTasks > 0 && completedTasks === 0) barColor = 'var(--danger)';
-                    else if (missedTasks > 0 && completedTasks > 0) barColor = 'var(--warning)';
-                    else if (completedTasks === totalTasks) barColor = 'var(--success)';
-                    else barColor = 'var(--warning)';
-                }
-                const barContainer = document.createElement('div');
-                barContainer.style.cssText =
-                    'height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:2px;';
-                const bar = document.createElement('div');
-                bar.style.cssText =
-                    'height:100%;width:' + pct + '%;background:' + barColor +
-                    ';transition:width 0.5s;border-radius:2px;';
-                barContainer.appendChild(bar);
-                monthContainer.appendChild(barContainer);
+        const header = document.createElement('div');
+        header.style.cssText =
+            'font-weight:600;font-size:12px;text-align:center;margin-bottom:6px;color:var(--text);';
+        header.textContent = monthNames[month];
+        monthContainer.appendChild(header);
 
-                const stats = document.createElement('div');
-                stats.style.cssText =
-                    'display:flex;justify-content:space-between;font-size:8px;color:var(--text-secondary);';
-                stats.innerHTML =
-                    `
-                    <span>📋 ${totalTasks}</span>
-                    <span>✅ ${completedTasks}</span>
-                    <span>❌ ${missedTasks}</span>
-                `;
-                monthContainer.appendChild(stats);
-
-                const today = new Date();
-                if (year === today.getFullYear() && month === today.getMonth()) {
-                    monthContainer.style.borderColor = 'var(--accent)';
-                    monthContainer.style.background = 'var(--bg)';
-                }
-                grid.appendChild(monthContainer);
-            }
-            updateStats();
-            updateBottomBarLabel();
+        const lastDay = new Date(year, month + 1, 0);
+        let totalTasks = 0,
+            completedTasks = 0,
+            missedTasks = 0;
+        for (let d = 1; d <= lastDay.getDate(); d++) {
+            const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+            const dayTasks = getTasksForDate(dateStr);
+            totalTasks += dayTasks.length;
+            dayTasks.forEach(task => {
+                const originalTask = tasks.find(t => t.id === task.id);
+                const status = getTaskStatusForDate(originalTask, dateStr);
+                if (status === 'done') completedTasks++;
+                else if (status === 'missed') missedTasks++;
+            });
         }
+        const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        let barColor = 'var(--border)';
+        if (totalTasks > 0) {
+            if (missedTasks > 0 && completedTasks === 0) barColor = 'var(--danger)';
+            else if (missedTasks > 0 && completedTasks > 0) barColor = 'var(--warning)';
+            else if (completedTasks === totalTasks) barColor = 'var(--success)';
+            else barColor = 'var(--warning)';
+        }
+        const barContainer = document.createElement('div');
+        barContainer.style.cssText =
+            'height:5px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:4px;';
+        const bar = document.createElement('div');
+        bar.style.cssText =
+            'height:100%;width:' + pct + '%;background:' + barColor +
+            ';transition:width 0.5s;border-radius:4px;';
+        barContainer.appendChild(bar);
+        monthContainer.appendChild(barContainer);
+
+        const stats = document.createElement('div');
+        stats.style.cssText =
+            'display:flex;justify-content:space-between;font-size:9px;color:var(--text-secondary);';
+        stats.innerHTML =
+            `
+            <span>📋 ${totalTasks}</span>
+            <span>✅ ${completedTasks}</span>
+            <span>❌ ${missedTasks}</span>
+        `;
+        monthContainer.appendChild(stats);
+
+        const today = new Date();
+        if (year === today.getFullYear() && month === today.getMonth()) {
+            monthContainer.style.borderColor = 'var(--accent)';
+            monthContainer.style.background = 'var(--bg)';
+        }
+        grid.appendChild(monthContainer);
+    }
+    updateStats();
+    updateBottomBarLabel();
+}
 
         // ============================================
         // 7. СТАТИСТИКА С КРИВОЙ
