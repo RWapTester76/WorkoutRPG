@@ -1820,38 +1820,50 @@
         }
 
         function completeTask(id, date) {
-            const task = tasks.find(t => t.id === id);
-            if (!task) return;
-            if (task.done.includes(date)) { alert('✅ Уже выполнено!'); return; }
-            task.done.push(date);
-            task.lastEdited = Date.now();
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
 
-            const override = task.overrides && task.overrides[date];
-            const duration = override ? override.duration : task.duration;
+    // ===== НОВАЯ ПРОВЕРКА: НЕЛЬЗЯ ВЫПОЛНЯТЬ БУДУЩИЕ ЗАДАЧИ =====
+    const today = new Date().toISOString().split('T')[0];
+    if (date > today) {
+        alert('❌ Нельзя выполнять задачи, запланированные на будущие даты!');
+        return;
+    }
 
-            const baseExp = Math.round(duration * 0.01 * 100) / 100;
-            const totalMultiplier = getStreakMultiplier();
-            const catMultiplier = getCategoryStreakMultiplier(task.category);
-            const finalMultiplier = Math.min(totalMultiplier * catMultiplier, 2.5);
-            const expEarned = Math.round(baseExp * finalMultiplier * 100) / 100;
+    if (task.done.includes(date)) {
+        alert('✅ Уже выполнено!');
+        return;
+    }
 
-            user.exp += expEarned;
-            while (user.exp >= user.level) {
-                user.exp -= user.level;
-                user.level++;
-            }
+    task.done.push(date);
+    task.lastEdited = Date.now();
 
-            updateStreak(task.category);
+    const override = task.overrides && task.overrides[date];
+    const duration = override ? override.duration : task.duration;
 
-            saveUser();
-            saveTasks();
-            updateUserUI();
-            renderAll();
+    const baseExp = Math.round(duration * 0.01 * 100) / 100;
+    const totalMultiplier = getStreakMultiplier();
+    const catMultiplier = getCategoryStreakMultiplier(task.category);
+    const finalMultiplier = Math.min(totalMultiplier * catMultiplier, 2.5);
+    const expEarned = Math.round(baseExp * finalMultiplier * 100) / 100;
 
-            let msg = `🎉 +${expEarned} опыта! (${baseExp} × ${finalMultiplier.toFixed(2)})`;
-            if (user.level > 1) msg += `\n📈 Уровень: ${user.level}`;
-            alert(msg);
-        }
+    user.exp += expEarned;
+    while (user.exp >= user.level) {
+        user.exp -= user.level;
+        user.level++;
+    }
+
+    updateStreak(task.category);
+
+    saveUser();
+    saveTasks();
+    updateUserUI();
+    renderAll();
+
+    let msg = `🎉 +${expEarned} опыта! (${baseExp} × ${finalMultiplier.toFixed(2)})`;
+    if (user.level > 1) msg += `\n📈 Уровень: ${user.level}`;
+    alert(msg);
+}
 
         function deleteTask(id) {
             if (!confirm('Удалить задачу?')) return;
