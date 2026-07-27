@@ -78,7 +78,7 @@
         }
 
         /* ============================================
-           ШАПКА (СО СТРИКАМИ)
+           ШАПКА
            ============================================ */
         .header {
             display: flex;
@@ -425,29 +425,6 @@
             width: 28px;
             height: 28px;
         }
-
-        /* ============================================
-           ИНФО ОБ АКТИВНЫХ КАТЕГОРИЯХ
-           ============================================ */
-        .category-filter__info {
-            text-align: center;
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-        }
-
-        .category-filter__info span {
-            display: inline-block;
-            padding: 1px 8px;
-            border-radius: 10px;
-            font-weight: 600;
-            margin: 0 2px;
-            font-size: 10px;
-            opacity: 0.4;
-            transition: opacity 0.2s;
-        }
-
-        
 
         /* ============================================
            СТАТИСТИКА
@@ -1264,6 +1241,77 @@
         }
 
         /* ============================================
+           ЗАМЕТКИ
+           ============================================ */
+        .note-item {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            border-left: 3px solid var(--accent);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .note-item:hover {
+            background: var(--border);
+        }
+
+        .note-item__title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .note-item__preview {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-item__meta {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .note-item__actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .note-item__btn {
+            padding: 2px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .note-item__btn--edit {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .note-item__btn--edit:hover {
+            background: var(--accent-hover);
+        }
+
+        .note-item__btn--delete {
+            background: rgba(225, 112, 85, 0.15);
+            color: var(--danger);
+        }
+
+        .note-item__btn--delete:hover {
+            background: rgba(225, 112, 85, 0.25);
+        }
+
+        /* ============================================
            АДАПТИВ
            ============================================ */
         @media (max-width: 480px) {
@@ -1313,6 +1361,8 @@
             .tabs__btn { font-size: 12px; padding: 6px 12px; }
             .weight-chart { height: 100px; }
             .streak-notification { top: 70px; padding: 10px 16px; }
+            .note-item { padding: 8px 10px; }
+            .note-item__title { font-size: 13px; }
         }
 
         @media (max-width: 380px) {
@@ -1334,27 +1384,12 @@
             .stats__bar { max-width: 28px; }
             .modal { max-width: 500px; }
         }
-        /* ============================================
-   ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ КНОПОК КАТЕГОРИЙ
-   ============================================ */
-.category-filter__btn {
-    width: auto;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    gap: 4px;
-}
-
-.category-filter__btn span {
-    margin-left: 4px;
-    font-weight: 500;
-}
     </style>
 </head>
 <body>
 
     <!-- ==========================================
-    ШАПКА (СО СТРИКАМИ)
+    ШАПКА
     ========================================== -->
     <header class="header">
         <button class="header__menu-btn" id="menuBtn">☰</button>
@@ -1367,7 +1402,6 @@
             </div>
         </div>
 
-        <!-- СТРИК В ШАПКЕ -->
         <div class="header__streak" id="headerStreak" title="Дней подряд с выполненными задачами">
             <span class="header__streak-icon">🔥</span>
             <span id="headerStreakCount">0</span>
@@ -1419,8 +1453,6 @@
         <button class="category-filter__btn category-filter__btn--deeds" data-category="deeds">📋</button>
         <button class="category-filter__btn category-filter__btn--other" data-category="other">➕</button>
     </div>
-
-   
 
     <!-- ==========================================
     СТАТИСТИКА
@@ -1576,6 +1608,25 @@
     </div>
 
     <!-- ==========================================
+    МОДАЛЬНЫЕ ОКНА ДЛЯ ЗАМЕТОК
+    ========================================== -->
+    <div class="modal-overlay" id="notesModal">
+        <div class="modal">
+            <button class="modal__close" onclick="closeNotes()">✕</button>
+            <h2 class="modal__title" id="notesModalTitle">📝 Заметки</h2>
+            <div class="modal__content" id="notesModalContent"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="noteEditorModal">
+        <div class="modal">
+            <button class="modal__close" onclick="closeNoteEditor()">✕</button>
+            <h2 class="modal__title" id="noteEditorTitle">📝 Редактор заметки</h2>
+            <div class="modal__content" id="noteEditorContent"></div>
+        </div>
+    </div>
+
+    <!-- ==========================================
     САЙДБАР (МЕНЮ)
     ========================================== -->
     <aside class="sidebar" id="sidebar">
@@ -1584,6 +1635,7 @@
             <div class="sidebar__item" data-page="profile">👤 Профиль</div>
             <div class="sidebar__item" data-page="tasks">📋 Задачи</div>
             <div class="sidebar__item" data-page="gallery">🖼️ Галерея</div>
+            <div class="sidebar__item" data-page="notes">📝 Заметки</div>
             <div class="sidebar__item" data-page="settings">⚙️ Настройки</div>
             <div class="sidebar__item" data-page="info">ℹ️ Информация</div>
         </nav>
@@ -1607,7 +1659,7 @@
         let activeCategories = ['body', 'soul', 'craft', 'deeds', 'other'];
 
         // ============================================
-        // 2. ПОЛЬЗОВАТЕЛЬ (РАСШИРЕННЫЙ)
+        // 2. ПОЛЬЗОВАТЕЛЬ
         // ============================================
         const user = {
             name: 'Игрок',
@@ -1680,9 +1732,8 @@
         // ============================================
         function updateStreak(category) {
             const today = new Date().toISOString().split('T')[0];
-
             if (user.streak.lastDate === today) {
-                // уже сегодня обновляли
+                // already updated today
             } else if (user.streak.lastDate === getYesterday()) {
                 user.streak.current += 1;
                 if (user.streak.current > user.streak.max) {
@@ -1696,7 +1747,7 @@
             const catStreak = user.streak.categories[category];
             if (catStreak) {
                 if (catStreak.lastDate === today) {
-                    // уже сегодня
+                    // already updated
                 } else if (catStreak.lastDate === getYesterday()) {
                     catStreak.current += 1;
                     if (catStreak.current > catStreak.max) {
@@ -1807,7 +1858,8 @@
                     end: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
                     done: [],
                     overrides: {},
-                    lastEdited: Date.now()
+                    lastEdited: Date.now(),
+                    noteId: null // поле для привязки заметки
                 }];
                 saveTasks();
             }
@@ -1890,7 +1942,8 @@
                 end: end || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
                 done: [],
                 overrides: {},
-                lastEdited: Date.now()
+                lastEdited: Date.now(),
+                noteId: null
             });
             saveTasks();
             renderAll();
@@ -1937,6 +1990,15 @@
 
         function deleteTask(id) {
             if (!confirm('Удалить задачу?')) return;
+            const task = tasks.find(t => t.id === id);
+            if (task && task.noteId) {
+                // При удалении задачи, заметка остаётся, но отвязывается
+                const note = notes.find(n => n.id === task.noteId);
+                if (note) {
+                    note.taskId = null;
+                    saveNotes();
+                }
+            }
             tasks = tasks.filter(t => t.id !== id);
             saveTasks();
             renderAll();
@@ -2279,131 +2341,131 @@
             updateBottomBarLabel();
         }
 
-function renderWeekView(startDate) {
-    const grid = document.getElementById('calendarGrid');
-    grid.style.cssText = 'display:block;';
-    grid.innerHTML = '';
+        function renderWeekView(startDate) {
+            const grid = document.getElementById('calendarGrid');
+            grid.style.cssText = 'display:block;';
+            grid.innerHTML = '';
 
-    currentDate = new Date(startDate);
+            currentDate = new Date(startDate);
 
-    const headerRow = document.createElement('div');
-    headerRow.style.cssText =
-        'display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;';
-    const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-    const today = new Date().toISOString().split('T')[0];
+            const headerRow = document.createElement('div');
+            headerRow.style.cssText =
+                'display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;';
+            const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            const today = new Date().toISOString().split('T')[0];
 
-    for (let i = 0; i < 7; i++) {
-        const header = document.createElement('div');
-        header.style.cssText =
-            'padding:4px 2px;text-align:center;font-weight:600;font-size:11px;background:var(--bg);border-radius:4px;color:var(--text);word-break:break-word;cursor:pointer;';
-        const date = new Date(startDate);
-        date.setDate(startDate.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
-        header.innerHTML = `
-            <div>${weekdays[i]}</div>
-            <div style="font-weight:400;font-size:8px;color:var(--text-secondary);">
-                ${dateStr.slice(5)}
-                ${dateStr === today ? ' ⭐' : ''}
-            </div>
-        `;
-        if (dateStr === today) {
-            header.style.background = 'var(--accent)';
-            header.style.color = 'white';
-        }
-
-        // === НОВЫЙ ОБРАБОТЧИК КЛИКА ПО ДНЮ ===
-        header.addEventListener('click', function() {
-            currentMode = 'day';
-            currentDate = new Date(dateStr + 'T00:00:00');
-
-            document.querySelectorAll('.modes__btn').forEach(b => {
-                b.classList.remove('modes__btn--active');
-            });
-            document.querySelector('.modes__btn[data-mode="day"]').classList.add('modes__btn--active');
-
-            document.getElementById('monthTitle').textContent = '📅 День';
-            renderDayView(currentDate);
-            updateBottomBarLabel();
-    });
-
-        headerRow.appendChild(header);
-    }
-    grid.appendChild(headerRow);
-
-    // ... остальной код без изменений ...
-    const dayTasks = [];
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(startDate);
-        date.setDate(startDate.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
-        const tasks = getTasksForDate(dateStr);
-        dayTasks.push({ date: dateStr, tasks: tasks });
-    }
-
-    const hasTasks = dayTasks.some(d => d.tasks.length > 0);
-    if (!hasTasks) {
-        const empty = document.createElement('div');
-        empty.style.cssText =
-            'text-align:center;padding:16px 0;color:var(--text-secondary);font-size:13px;';
-        empty.textContent = '📭 Нет задач на этой неделе';
-        grid.appendChild(empty);
-        return;
-    }
-
-    const maxTasks = Math.max(...dayTasks.map(d => d.tasks.length), 1);
-    for (let row = 0; row < maxTasks; row++) {
-        const rowEl = document.createElement('div');
-        rowEl.style.cssText =
-            'display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;';
-        for (let col = 0; col < 7; col++) {
-            const cell = document.createElement('div');
-            cell.style.cssText =
-                'padding:3px 2px;min-height:28px;background:var(--bg-card);border-radius:4px;font-size:10px;overflow:hidden;text-overflow:ellipsis;';
-            const dayData = dayTasks[col];
-            const task = dayData.tasks[row];
-            if (task) {
-                const originalTask = tasks.find(t => t.id === task.id);
-                const status = getTaskStatusForDate(originalTask, dayData.date);
-                let bgColor = 'var(--accent)';
-                let icon = '●';
-                let clickable = true;
-                if (status === 'done') { bgColor = 'var(--success)';
-                    icon = '✅';
-                    clickable = false; } else if (status === 'missed') { bgColor = 'var(--danger)';
-                    icon = '❌';
-                    clickable = false; } else if (status === 'planned') { bgColor = 'var(--warning)';
-                    icon = '⏳'; }
-                cell.style.cssText +=
-                    'background:' + bgColor + ';color:' + (status === 'planned' ? 'var(--text)' :
-                        'white') + ';padding:2px 4px;cursor:' + (clickable ? 'pointer' : 'default') +
-                    ';transition:opacity 0.2s;font-size:9px;';
-                cell.innerHTML = `
-                    <div style="font-weight:500;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px;">
-                        ${icon} ${task.title}
-                        ${task.isOverridden ? '⚡' : ''}
-                    </div>
-                    <div style="font-size:7px;opacity:0.8;display:flex;justify-content:space-between;">
-                        <span>${task.time}</span>
-                        <span>${task.duration}мин</span>
+            for (let i = 0; i < 7; i++) {
+                const header = document.createElement('div');
+                header.style.cssText =
+                    'padding:4px 2px;text-align:center;font-weight:600;font-size:11px;background:var(--bg);border-radius:4px;color:var(--text);word-break:break-word;cursor:pointer;';
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                header.innerHTML =
+                    `
+                    <div>${weekdays[i]}</div>
+                    <div style="font-weight:400;font-size:8px;color:var(--text-secondary);">
+                        ${dateStr.slice(5)}
+                        ${dateStr === today ? ' ⭐' : ''}
                     </div>
                 `;
-                if (clickable) {
-                    cell.onclick = function() { completeTask(task.id, dayData.date); };
-                } else if (status === 'missed') {
-                    cell.onclick = function() { alert('❌ Задача пропущена!'); };
+                if (dateStr === today) {
+                    header.style.background = 'var(--accent)';
+                    header.style.color = 'white';
                 }
-            } else {
-                cell.style.cssText +=
-                    'color:var(--text-secondary);opacity:0.15;text-align:center;font-size:10px;display:flex;align-items:center;justify-content:center;';
-                cell.textContent = '·';
+
+                header.addEventListener('click', function() {
+                    currentMode = 'day';
+                    currentDate = new Date(dateStr + 'T00:00:00');
+
+                    document.querySelectorAll('.modes__btn').forEach(b => {
+                        b.classList.remove('modes__btn--active');
+                    });
+                    document.querySelector('.modes__btn[data-mode="day"]').classList.add('modes__btn--active');
+
+                    document.getElementById('monthTitle').textContent = '📅 День';
+                    renderDayView(currentDate);
+                    updateBottomBarLabel();
+                });
+
+                headerRow.appendChild(header);
             }
-            rowEl.appendChild(cell);
+            grid.appendChild(headerRow);
+
+            const dayTasks = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const tasks = getTasksForDate(dateStr);
+                dayTasks.push({ date: dateStr, tasks: tasks });
+            }
+
+            const hasTasks = dayTasks.some(d => d.tasks.length > 0);
+            if (!hasTasks) {
+                const empty = document.createElement('div');
+                empty.style.cssText =
+                    'text-align:center;padding:16px 0;color:var(--text-secondary);font-size:13px;';
+                empty.textContent = '📭 Нет задач на этой неделе';
+                grid.appendChild(empty);
+                return;
+            }
+
+            const maxTasks = Math.max(...dayTasks.map(d => d.tasks.length), 1);
+            for (let row = 0; row < maxTasks; row++) {
+                const rowEl = document.createElement('div');
+                rowEl.style.cssText =
+                    'display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;';
+                for (let col = 0; col < 7; col++) {
+                    const cell = document.createElement('div');
+                    cell.style.cssText =
+                        'padding:3px 2px;min-height:28px;background:var(--bg-card);border-radius:4px;font-size:10px;overflow:hidden;text-overflow:ellipsis;';
+                    const dayData = dayTasks[col];
+                    const task = dayData.tasks[row];
+                    if (task) {
+                        const originalTask = tasks.find(t => t.id === task.id);
+                        const status = getTaskStatusForDate(originalTask, dayData.date);
+                        let bgColor = 'var(--accent)';
+                        let icon = '●';
+                        let clickable = true;
+                        if (status === 'done') { bgColor = 'var(--success)';
+                            icon = '✅';
+                            clickable = false; } else if (status === 'missed') { bgColor = 'var(--danger)';
+                            icon = '❌';
+                            clickable = false; } else if (status === 'planned') { bgColor = 'var(--warning)';
+                            icon = '⏳'; }
+                        cell.style.cssText +=
+                            'background:' + bgColor + ';color:' + (status === 'planned' ? 'var(--text)' :
+                                'white') + ';padding:2px 4px;cursor:' + (clickable ? 'pointer' : 'default') +
+                            ';transition:opacity 0.2s;font-size:9px;';
+                        cell.innerHTML =
+                            `
+                            <div style="font-weight:500;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px;">
+                                ${icon} ${task.title}
+                                ${task.isOverridden ? '⚡' : ''}
+                            </div>
+                            <div style="font-size:7px;opacity:0.8;display:flex;justify-content:space-between;">
+                                <span>${task.time}</span>
+                                <span>${task.duration}мин</span>
+                            </div>
+                        `;
+                        if (clickable) {
+                            cell.onclick = function() { completeTask(task.id, dayData.date); };
+                        } else if (status === 'missed') {
+                            cell.onclick = function() { alert('❌ Задача пропущена!'); };
+                        }
+                    } else {
+                        cell.style.cssText +=
+                            'color:var(--text-secondary);opacity:0.15;text-align:center;font-size:10px;display:flex;align-items:center;justify-content:center;';
+                        cell.textContent = '·';
+                    }
+                    rowEl.appendChild(cell);
+                }
+                grid.appendChild(rowEl);
+            }
+            updateStats();
+            updateBottomBarLabel();
         }
-        grid.appendChild(rowEl);
-    }
-    updateStats();
-    updateBottomBarLabel();
-}
 
         function renderYearView(year) {
             const grid = document.getElementById('calendarGrid');
@@ -2739,7 +2801,8 @@ function renderWeekView(startDate) {
                         filterBtns.forEach(b => b.classList.remove('category-filter__btn--active'));
                         this.classList.add('category-filter__btn--active');
                     } else {
-                        document.querySelector('.category-filter__btn--all')?.classList.remove('category-filter__btn--active');
+                        document.querySelector('.category-filter__btn--all')?.classList.remove(
+                        'category-filter__btn--active');
                         const index = activeCategories.indexOf(category);
                         if (index === -1) {
                             activeCategories.push(category);
@@ -2751,19 +2814,18 @@ function renderWeekView(startDate) {
                         if (activeCategories.length === 0) {
                             activeCategories = ['body', 'soul', 'craft', 'deeds', 'other'];
                             filterBtns.forEach(b => b.classList.remove('category-filter__btn--active'));
-                            document.querySelector('.category-filter__btn--all')?.classList.add('category-filter__btn--active');
+                            document.querySelector('.category-filter__btn--all')?.classList.add(
+                            'category-filter__btn--active');
                         }
                     }
-
                     renderAll();
-                    
                 });
             });
             document.querySelector('.category-filter__btn--all')?.classList.add('category-filter__btn--active');
         }
 
         // ============================================
-        // 11. РЕДАКТОР ЗАДАЧИ
+        // 11. РЕДАКТОР ЗАДАЧИ (С ПОДДЕРЖКОЙ ЗАМЕТОК)
         // ============================================
         function openTaskEditorForDate(taskId, dateStr) {
             const task = tasks.find(t => t.id === taskId);
@@ -2777,6 +2839,37 @@ function renderWeekView(startDate) {
                 `<option value="${key}" ${task.category === key ? 'selected' : ''}>${CATEGORIES[key].label}</option>`
             ).join('');
 
+            // Проверяем, есть ли привязанная заметка
+            let noteSection = '';
+            if (task.noteId) {
+                const note = notes.find(n => n.id === task.noteId);
+                if (note) {
+                    noteSection = `
+                        <div style="margin-bottom:10px;padding:8px;background:var(--bg);border-radius:8px;border-left:3px solid var(--accent);">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-weight:600;font-size:13px;color:var(--text);">📝 Привязанная заметка</span>
+                                <span style="font-size:11px;color:var(--text-secondary);">${note.title}</span>
+                            </div>
+                            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                ${note.content.substring(0, 60)}${note.content.length > 60 ? '...' : ''}
+                            </div>
+                            <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;">
+                                <button class="form-btn" style="flex:1;font-size:12px;padding:4px;" onclick="openNoteFromTask(${note.id}, ${task.id}, '${dateStr}')">
+                                    📖 Открыть
+                                </button>
+                                <button class="form-btn form-btn--danger" style="flex:0;font-size:12px;padding:4px 10px;" onclick="detachNoteFromTask(${task.id})">
+                                    ✂️ Открепить
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Заметка не найдена, сбрасываем ссылку
+                    task.noteId = null;
+                    saveTasks();
+                }
+            }
+
             const content =
                 `
                 <div style="margin-bottom:8px;">
@@ -2789,6 +2882,8 @@ function renderWeekView(startDate) {
                         ${CATEGORIES[task.category]?.emoji || ''} ${CATEGORIES[task.category]?.label || ''} · 📅 ${dateStr} ${override ? '⚡ изменено' : ''}
                     </div>
                 </div>
+
+                ${noteSection}
 
                 <div class="form-group">
                     <label class="form-label">📂 Категория</label>
@@ -2816,6 +2911,19 @@ function renderWeekView(startDate) {
                             ↩️
                         </button>
                     ` : ''}
+                </div>
+
+                <!-- Кнопка для работы с заметками -->
+                <div style="margin-bottom:8px;">
+                    ${task.noteId ? `
+                        <button class="form-btn" style="background:var(--warning);color:var(--text);font-size:13px;padding:7px;" onclick="createOrEditNote(${task.id}, '${dateStr}')">
+                            📝 Редактировать заметку
+                        </button>
+                    ` : `
+                        <button class="form-btn" style="font-size:13px;padding:7px;" onclick="createOrEditNote(${task.id}, '${dateStr}')">
+                            📝 Добавить заметку
+                        </button>
+                    `}
                 </div>
 
                 <hr style="border-color:var(--border);margin:8px 0;">
@@ -2859,7 +2967,233 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 12. МОДАЛЬНЫЕ ОКНА
+        // 12. ЗАМЕТКИ (НОВАЯ СИСТЕМА)
+        // ============================================
+        let notes = [];
+
+        function loadNotes() {
+            const saved = localStorage.getItem('notes');
+            if (saved) {
+                try { notes = JSON.parse(saved); } catch (e) {}
+            }
+            if (notes.length === 0) {
+                // Добавляем демо-заметку для примера
+                notes = [{
+                    id: Date.now(),
+                    title: 'Пример заметки',
+                    content: 'Это текст заметки. Вы можете прикрепить её к задаче.',
+                    taskId: null
+                }];
+                saveNotes();
+            }
+        }
+
+        function saveNotes() {
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        function createNote(title, content, taskId) {
+            const note = {
+                id: Date.now(),
+                title: title || 'Без названия',
+                content: content || '',
+                taskId: taskId || null
+            };
+            notes.push(note);
+            saveNotes();
+            return note;
+        }
+
+        function updateNote(id, title, content) {
+            const note = notes.find(n => n.id === id);
+            if (note) {
+                note.title = title;
+                note.content = content;
+                saveNotes();
+            }
+        }
+
+        function deleteNote(id) {
+            notes = notes.filter(n => n.id !== id);
+            // Отвязываем заметку от задачи, если была привязана
+            tasks.forEach(task => {
+                if (task.noteId === id) {
+                    task.noteId = null;
+                }
+            });
+            saveTasks();
+            saveNotes();
+        }
+
+        function attachNoteToTask(noteId, taskId) {
+            const note = notes.find(n => n.id === noteId);
+            if (note) {
+                note.taskId = taskId;
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.noteId = noteId;
+                    task.lastEdited = Date.now();
+                    saveTasks();
+                }
+                saveNotes();
+            }
+        }
+
+        function detachNoteFromTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task && task.noteId) {
+                const note = notes.find(n => n.id === task.noteId);
+                if (note) {
+                    note.taskId = null;
+                    saveNotes();
+                }
+                task.noteId = null;
+                saveTasks();
+                renderAll();
+                // Обновляем редактор, если открыт
+                if (document.getElementById('taskEditorModal').classList.contains('modal-overlay--open')) {
+                    const title = document.getElementById('editorTitle').textContent;
+                    const match = title.match(/📋 (.+) — (\d{4}-\d{2}-\d{2})/);
+                    if (match) {
+                        const taskTitle = match[1];
+                        const dateStr = match[2];
+                        const task = tasks.find(t => t.title === taskTitle);
+                        if (task) {
+                            openTaskEditorForDate(task.id, dateStr);
+                        }
+                    }
+                }
+                alert('✅ Заметка откреплена от задачи.');
+            }
+        }
+
+        // ============================================
+        // 13. МОДАЛЬНЫЕ ОКНА ДЛЯ ЗАМЕТОК
+        // ============================================
+        function openNotes() {
+            const content = document.getElementById('notesModalContent');
+            let html = `
+                <div style="margin-bottom:10px;">
+                    <button class="form-btn" onclick="openNoteEditor(null, null)">➕ Создать заметку</button>
+                </div>
+                <div id="notesList">
+            `;
+
+            if (notes.length === 0) {
+                html += `<div class="task-empty">Нет заметок</div>`;
+            } else {
+                notes.forEach(note => {
+                    const taskTitle = note.taskId ? tasks.find(t => t.id === note.taskId)?.title || 'без задачи' :
+                        'без задачи';
+                    html += `
+                        <div class="note-item">
+                            <div class="note-item__title">${note.title}</div>
+                            <div class="note-item__preview">${note.content.substring(0, 80)}${note.content.length > 80 ? '...' : ''}</div>
+                            <div class="note-item__meta">
+                                ${note.taskId ? `📌 Привязана к задаче: "${taskTitle}"` : '📌 Свободная заметка'}
+                            </div>
+                            <div class="note-item__actions">
+                                <button class="note-item__btn note-item__btn--edit" onclick="openNoteEditor(${note.id}, null)">✏️</button>
+                                <button class="note-item__btn note-item__btn--delete" onclick="deleteNoteConfirm(${note.id})">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `</div>`;
+            content.innerHTML = html;
+            document.getElementById('notesModalTitle').textContent = '📝 Заметки';
+            document.getElementById('notesModal').classList.add('modal-overlay--open');
+        }
+
+        function closeNotes() {
+            document.getElementById('notesModal').classList.remove('modal-overlay--open');
+        }
+
+        function deleteNoteConfirm(id) {
+            if (confirm('Удалить заметку?')) {
+                deleteNote(id);
+                openNotes(); // обновить список
+            }
+        }
+
+        function openNoteEditor(noteId, taskId) {
+            const isNew = !noteId;
+            const note = noteId ? notes.find(n => n.id === noteId) : null;
+            const title = note ? note.title : '';
+            const content = note ? note.content : '';
+
+            const editorContent = document.getElementById('noteEditorContent');
+            editorContent.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Название</label>
+                    <input class="form-input" id="noteTitleInput" value="${title}" placeholder="Название заметки">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Содержание</label>
+                    <textarea class="form-input" id="noteContentInput" rows="6" placeholder="Текст заметки...">${content}</textarea>
+                </div>
+                <button class="form-btn" onclick="saveNoteFromEditor(${noteId || 'null'}, ${taskId || 'null'})">
+                    💾 Сохранить
+                </button>
+            `;
+            document.getElementById('noteEditorTitle').textContent = isNew ? '📝 Новая заметка' : '📝 Редактировать заметку';
+            document.getElementById('noteEditorModal').classList.add('modal-overlay--open');
+        }
+
+        function closeNoteEditor() {
+            document.getElementById('noteEditorModal').classList.remove('modal-overlay--open');
+        }
+
+        function saveNoteFromEditor(noteId, taskId) {
+            const title = document.getElementById('noteTitleInput').value.trim() || 'Без названия';
+            const content = document.getElementById('noteContentInput').value.trim();
+
+            if (!content) {
+                alert('Заметка не может быть пустой');
+                return;
+            }
+
+            if (noteId) {
+                // Редактируем существующую
+                updateNote(noteId, title, content);
+                // Если привязана к задаче, обновляем задачу
+                if (taskId) {
+                    attachNoteToTask(noteId, taskId);
+                }
+            } else {
+                // Создаём новую
+                const newNote = createNote(title, content, taskId || null);
+                if (taskId) {
+                    attachNoteToTask(newNote.id, taskId);
+                }
+            }
+
+            closeNoteEditor();
+
+            // Если открыт редактор задачи, обновляем его
+            if (document.getElementById('taskEditorModal').classList.contains('modal-overlay--open')) {
+                const titleEl = document.getElementById('editorTitle');
+                const match = titleEl.textContent.match(/📋 (.+) — (\d{4}-\d{2}-\d{2})/);
+                if (match) {
+                    const taskTitle = match[1];
+                    const dateStr = match[2];
+                    const task = tasks.find(t => t.title === taskTitle);
+                    if (task) {
+                        openTaskEditorForDate(task.id, dateStr);
+                    }
+                }
+            } else if (document.getElementById('notesModal').classList.contains('modal-overlay--open')) {
+                openNotes(); // обновить список заметок
+            }
+
+            renderAll();
+            alert('✅ Заметка сохранена!');
+        }
+
+        // ============================================
+        // 14. МОДАЛЬНЫЕ ОКНА (ОСНОВНЫЕ)
         // ============================================
         function openModal(title, content) {
             document.getElementById('modalTitle').textContent = title;
@@ -2872,13 +3206,12 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 13. ЗАДАЧИ (С ДВУМЯ ВКЛАДКАМИ)
+        // 15. ЗАДАЧИ (СПИСОК)
         // ============================================
         function renderTasksList() {
             const container = document.getElementById('tasksContainer');
             if (!container) return;
 
-            let filteredTasks = [];
             if (taskViewMode === 'categories') {
                 const categoryGroups = {};
                 tasks.forEach(t => {
@@ -2982,7 +3315,7 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 14. ГАЛЕРЕЯ
+        // 16. ГАЛЕРЕЯ
         // ============================================
         function renderGallery() {
             const container = document.getElementById('galleryContainer');
@@ -3028,7 +3361,7 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 15. ПРОФИЛЬ
+        // 17. ПРОФИЛЬ
         // ============================================
         function openProfile() {
             const bmi = user.weight && user.height ? Math.round((user.weight / ((user.height / 100) ** 2)) * 10) / 10 :
@@ -3239,7 +3572,7 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 16. ЖУРНАЛ ВЕСА
+        // 18. ЖУРНАЛ ВЕСА
         // ============================================
         function renderWeightChart(log) {
             if (log.length === 0) {
@@ -3331,7 +3664,7 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 17. ДОБАВЛЕНИЕ ЗАДАЧИ
+        // 19. ДОБАВЛЕНИЕ ЗАДАЧИ
         // ============================================
         function openAddTaskForDate(dateStr, timeStr) {
             document.getElementById('taskStart').value = dateStr;
@@ -3394,7 +3727,7 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 18. ДОБАВЛЕНИЕ ФОТО
+        // 20. ДОБАВЛЕНИЕ ФОТО
         // ============================================
         function openAddPhoto() {
             document.getElementById('addPhotoModal').classList.add('modal-overlay--open');
@@ -3455,11 +3788,11 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 19. НАСТРОЙКИ И ИНФОРМАЦИЯ
+        // 21. НАСТРОЙКИ И ИНФОРМАЦИЯ
         // ============================================
         function openSettings() {
             const theme = document.documentElement.getAttribute('data-theme') || 'light';
-            
+
             const content = `
                 <style>
                     .settings-section {
@@ -3533,7 +3866,7 @@ function renderWeekView(startDate) {
                     <div class="settings-section__title">ℹ️ О приложении</div>
                     <div style="font-size:13px;color:var(--text-secondary);">
                         <p><strong>SkillQuest</strong> — RPG-планировщик личного развития.</p>
-                        <p style="margin-top:4px;">Версия: <strong>1.2</strong> (с поддержкой стриков и динамической сложности)</p>
+                        <p style="margin-top:4px;">Версия: <strong>1.3</strong> (с заметками)</p>
                         <p style="margin-top:4px;">Сделано с ❤️ <strong>Саша и Дэн AI</strong></p>
                         <p style="margin-top:4px;font-size:12px;color:var(--text-secondary);">
                             Данные хранятся в localStorage браузера.
@@ -3824,7 +4157,7 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 20. ТЕМА
+        // 22. ТЕМА
         // ============================================
         function toggleTheme() {
             const html = document.documentElement;
@@ -3842,7 +4175,7 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 21. РЕНДЕР ВСЕГО (ЕДИНСТВЕННОЕ ОПРЕДЕЛЕНИЕ)
+        // 23. РЕНДЕР ВСЕГО
         // ============================================
         function renderAll() {
             checkStreakOnLoad();
@@ -3865,11 +4198,10 @@ function renderWeekView(startDate) {
             updateStats();
             updateBottomBarLabel();
             updateStreakUI();
-            
         }
 
         // ============================================
-        // 22. УПРАВЛЕНИЕ ДАННЫМИ
+        // 24. УПРАВЛЕНИЕ ДАННЫМИ
         // ============================================
         function exportData() {
             try {
@@ -3877,8 +4209,9 @@ function renderWeekView(startDate) {
                     user: user,
                     tasks: tasks,
                     gallery: gallery,
+                    notes: notes,
                     exportedAt: new Date().toISOString(),
-                    version: '1.2'
+                    version: '1.3'
                 };
                 const json = JSON.stringify(data, null, 2);
                 const blob = new Blob([json], { type: 'application/json' });
@@ -3925,9 +4258,11 @@ function renderWeekView(startDate) {
                         Object.assign(user, data.user);
                         tasks = data.tasks;
                         gallery = data.gallery;
+                        if (data.notes) notes = data.notes;
                         saveUser();
                         saveTasks();
                         saveGallery();
+                        saveNotes();
                         updateUserUI();
                         renderAll();
                         alert('✅ Данные успешно импортированы!');
@@ -3948,6 +4283,7 @@ function renderWeekView(startDate) {
                     '• Профиль (имя, уровень, опыт, ИМТ, журнал веса)\n' +
                     '• Все задачи и их историю\n' +
                     '• Все фото в галерее\n' +
+                    '• Все заметки\n' +
                     '• Статистику и стрики\n\n' +
                     'Это действие НЕОБРАТИМО!')) {
                 return;
@@ -3964,6 +4300,7 @@ function renderWeekView(startDate) {
                 localStorage.removeItem('user');
                 localStorage.removeItem('tasks');
                 localStorage.removeItem('gallery');
+                localStorage.removeItem('notes');
                 localStorage.removeItem('theme');
 
                 Object.assign(user, {
@@ -3991,9 +4328,11 @@ function renderWeekView(startDate) {
                 });
                 tasks = [];
                 gallery = [];
+                notes = [];
                 saveUser();
                 saveTasks();
                 saveGallery();
+                saveNotes();
                 updateUserUI();
                 updateStreakUI();
                 renderAll();
@@ -4005,37 +4344,14 @@ function renderWeekView(startDate) {
         }
 
         // ============================================
-        // 23. ОБНОВЛЕНИЕ ИНФО О КАТЕГОРИЯХ
-        // ============================================
-        function updateCategoryFilterInfo() {
-            const container = document.getElementById('categoryFilterInfo');
-            if (!container) return;
-
-            const spans = container.querySelectorAll('span');
-            spans.forEach(span => {
-                const category = span.classList.contains('active-body') ? 'body' :
-                                 span.classList.contains('active-soul') ? 'soul' :
-                                 span.classList.contains('active-craft') ? 'craft' :
-                                 span.classList.contains('active-deeds') ? 'deeds' :
-                                 span.classList.contains('active-other') ? 'other' : null;
-                if (category) {
-                    if (activeCategories.includes(category)) {
-                        span.classList.add('active');
-                    } else {
-                        span.classList.remove('active');
-                    }
-                }
-            });
-        }
-
-        // ============================================
-        // 24. ИНИЦИАЛИЗАЦИЯ
+        // 25. ИНИЦИАЛИЗАЦИЯ
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             loadUser();
             loadTasks();
             loadGallery();
+            loadNotes();
 
             checkStreakOnLoad();
             setupCategoryFilter();
@@ -4043,7 +4359,6 @@ function renderWeekView(startDate) {
             currentMode = 'month';
             document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
             renderMonthView();
-            
 
             document.getElementById('prevMonth').addEventListener('click', function() {
                 switch (currentMode) {
@@ -4137,7 +4452,6 @@ function renderWeekView(startDate) {
                             break;
                     }
                     updateBottomBarLabel();
-                   
                 });
             });
 
@@ -4160,7 +4474,6 @@ function renderWeekView(startDate) {
                                 .getMonth()] + ' ' + currentDate.getFullYear();
                             renderMonthView();
                             updateBottomBarLabel();
-                           
                         }
                         document.querySelectorAll('.bottom-bar__btn').forEach(b => {
                             b.classList.remove('bottom-bar__btn--active');
@@ -4196,6 +4509,9 @@ function renderWeekView(startDate) {
                         case 'gallery':
                             openGallery();
                             break;
+                        case 'notes':
+                            openNotes();
+                            break;
                         case 'settings':
                             openSettings();
                             break;
@@ -4216,6 +4532,7 @@ function renderWeekView(startDate) {
             console.log('🚀 SkillQuest запущен!');
             console.log('👤 ' + user.name + ', Уровень: ' + user.level);
             console.log('📋 Задач: ' + tasks.length + ', 📸 Фото: ' + gallery.length);
+            console.log('📝 Заметок: ' + notes.length);
             console.log('🔥 Стрик: ' + (user.streak.current || 0) + ' дней');
         });
 
@@ -4257,6 +4574,35 @@ function renderWeekView(startDate) {
         window.exportData = exportData;
         window.importData = importData;
         window.clearAllData = clearAllData;
+        window.openNotes = openNotes;
+        window.closeNotes = closeNotes;
+        window.openNoteEditor = openNoteEditor;
+        window.closeNoteEditor = closeNoteEditor;
+        window.saveNoteFromEditor = saveNoteFromEditor;
+        window.deleteNoteConfirm = deleteNoteConfirm;
+        window.attachNoteToTask = attachNoteToTask;
+        window.detachNoteFromTask = detachNoteFromTask;
+        window.createOrEditNote = function(taskId, dateStr) {
+            // Проверяем, есть ли уже заметка у задачи
+            const task = tasks.find(t => t.id === taskId);
+            if (task && task.noteId) {
+                const note = notes.find(n => n.id === task.noteId);
+                if (note) {
+                    // Открываем редактор существующей заметки
+                    openNoteEditor(note.id, taskId);
+                    return;
+                }
+            }
+            // Создаём новую заметку и сразу привязываем
+            openNoteEditor(null, taskId);
+        };
+        window.openNoteFromTask = function(noteId, taskId, dateStr) {
+            // Открываем заметку в режиме просмотра, но даём возможность редактировать
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+            // Просто открываем редактор
+            openNoteEditor(noteId, taskId);
+        };
     </script>
 
 </body>
