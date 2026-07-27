@@ -4937,6 +4937,59 @@ body {
         window.createNoteForTask = createNoteForTask;
         window.attachExistingNote = attachExistingNote;
         window.openNoteViewer = openNoteViewer;
+        // ============================================
+// ЦВЕТОВЫЕ СХЕМЫ
+// ============================================
+
+/**
+ * Устанавливает цветовую схему
+ */
+function setColorScheme(schemeId) {
+    document.documentElement.setAttribute('data-color', schemeId);
+    localStorage.setItem('colorScheme', schemeId);
+    
+    // Обновляем открытые настройки, если они есть
+    if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
+        openSettings();
+    }
+    
+    // Перерисовываем всё
+    renderAll();
+}
+
+/**
+ * Загружает сохранённую цветовую схему
+ */
+function loadColorScheme() {
+    const saved = localStorage.getItem('colorScheme') || 'default';
+    document.documentElement.setAttribute('data-color', saved);
+}
+
+/**
+ * Переключает тему (светлая/тёмная)
+ */
+function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme') || 'light';
+    const next = current === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    document.getElementById('themeBtn').textContent = next === 'light' ? '🌙' : '☀️';
+    
+    // Обновляем настройки, если они открыты
+    if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
+        openSettings();
+    }
+}
+
+/**
+ * Загружает сохранённую тему
+ */
+function loadTheme() {
+    const theme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('themeBtn').textContent = theme === 'light' ? '🌙' : '☀️';
+}
     </script>
 
 </body>
