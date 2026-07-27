@@ -4961,9 +4961,41 @@ function setColorScheme(schemeId) {
 /**
  * Загружает сохранённую цветовую схему
  */
-function loadColorScheme() {
-    const saved = localStorage.getItem('colorScheme') || 'default';
-    document.documentElement.setAttribute('data-color', saved);
+function setColorScheme(schemeId) {
+    document.documentElement.setAttribute('data-color', schemeId);
+    localStorage.setItem('colorScheme', schemeId);
+    
+    // Перерисовываем всё
+    renderAll();
+    
+    // Обновляем открытые настройки
+    if (document.getElementById('modalTitle').textContent.includes('Настройки')) {
+        setTimeout(openSettings, 200);
+    }
+    
+    // Обновляем все цвета в реальном времени
+    updateAllColors();
+}
+
+function updateAllColors() {
+    // Принудительно перерисовываем компоненты
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    
+    // Обновляем кнопки и элементы
+    document.querySelectorAll('.modes__btn--active').forEach(el => {
+        el.style.background = 'var(--gradient)';
+    });
+    
+    document.querySelectorAll('.calendar__day--today').forEach(el => {
+        el.style.background = 'var(--gradient)';
+    });
+    
+    document.querySelectorAll('.bottom-bar__btn--add').forEach(el => {
+        el.style.background = 'var(--gradient)';
+    });
+    
+    // Перерисовываем статистику
+    updateStats();
 }
 
 /**
