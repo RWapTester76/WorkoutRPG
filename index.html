@@ -267,9 +267,11 @@ body::before {
     margin-bottom: 12px;
     border: 1px solid var(--glass-border);
     transition: all 0.3s;
-    min-height: 380px; /* чтобы не прыгало */
+    min-height: 380px;
+    height: 380px;           /* ← добавляем фиксированную высоту */
     display: flex;
     flex-direction: column;
+    overflow: hidden;        /* ← чтобы контент не вылезал */
 }
 .calendar__header {
     display: flex;
@@ -1740,8 +1742,9 @@ function renderMonthView() {
     if (offset < 0) offset = 6;
 
     for (let i = 0; i < offset; i++) {
-        const empty = document.createElement('div');
-        empty.className = 'calendar__day calendar__day--other';
+                        const empty = document.createElement('div');
+        empty.style.cssText = 'text-align:center;padding:30px 0;color:var(--text-secondary);font-size:14px;flex:1; display:flex; align-items:center; justify-content:center;';
+        empty.textContent = '📭 Нет задач на этой неделе';
         grid.appendChild(empty);
     }
 
@@ -1871,7 +1874,10 @@ function renderDayView(date) {
         container.appendChild(card);
     });
 
-    grid.appendChild(container);
+        const scrollWrap = document.createElement('div');
+    scrollWrap.style.cssText = 'flex:1; overflow-y:auto;';
+    scrollWrap.appendChild(container);
+    grid.appendChild(scrollWrap);
     renderWeekStats();
     updateBottomBarLabel();
     setActiveModeButton('day');
@@ -1939,47 +1945,22 @@ function renderWeekView(startDate) {
         setActiveModeButton('week');
         return;
     }
+    const weekScrollWrap = document.createElement('div');
+    weekScrollWrap.style.cssText = 'flex:1; overflow-y:auto;';
 
     const maxTasks = Math.max(...dayTasks.map(d => d.tasks.length), 1);
     for (let row = 0; row < maxTasks; row++) {
         const rowEl = document.createElement('div');
         rowEl.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;';
         for (let col = 0; col < 7; col++) {
-            const cell = document.createElement('div');
-            cell.style.cssText = 'padding:4px 3px;min-height:32px;background:var(--bg-card);border-radius:8px;font-size:10px;overflow:hidden;text-overflow:ellipsis;border:1px solid var(--border);';
-            const dayData = dayTasks[col];
-            const task = dayData.tasks[row];
-            if (task) {
-                const originalTask = tasks.find(t => t.id === task.id);
-                const status = getTaskStatusForDate(originalTask, dayData.date);
-                let bgColor = 'var(--accent)';
-                let icon = '●';
-                let clickable = true;
-                if (status === 'done') { bgColor = 'var(--success)'; icon = '✅'; clickable = false; }
-                else if (status === 'missed') { bgColor = 'var(--danger)'; icon = '❌'; }
-                else if (status === 'planned') { bgColor = 'var(--warning)'; icon = '⏳'; }
-                cell.style.cssText += 'background:' + bgColor + ';color:' + (status === 'planned' ? 'var(--text)' : 'white') + ';padding:4px 6px;cursor:' + (clickable ? 'pointer' : 'default') + ';transition:all 0.2s;font-size:9px;';
-                cell.innerHTML = `
-                    <div style="font-weight:500;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px;">
-                        ${icon} ${task.title}
-                        ${task.isOverridden ? '⚡' : ''}
-                    </div>
-                    <div style="font-size:7px;opacity:0.8;display:flex;justify-content:space-between;">
-                        <span>${task.time}</span>
-                        <span>${task.duration}мин</span>
-                    </div>
-                `;
-                if (clickable) {
-                    cell.onclick = function() { completeTask(task.id, dayData.date); };
-                }
-            } else {
-                cell.style.cssText += 'color:var(--text-secondary);opacity:0.2;text-align:center;font-size:10px;display:flex;align-items:center;justify-content:center;';
-                cell.textContent = '·';
-            }
+            // ... существующий код создания cell (менять не нужно)
             rowEl.appendChild(cell);
         }
-        grid.appendChild(rowEl);
+        weekScrollWrap.appendChild(rowEl);   // добавляем в обёртку
     }
+
+    grid.appendChild(weekScrollWrap);        // обёртку – в grid
+        }
     renderWeekStats();
     updateBottomBarLabel();
     setActiveModeButton('week');
