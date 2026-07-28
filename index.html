@@ -553,90 +553,49 @@ body::before {
    ============================================ */
 .week-stats {
     padding: 4px 0;
-}
-.week-stats__title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    overflow: hidden;
 }
 .week-stats__grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 4px;
     margin-bottom: 10px;
+    max-height: 140px; /* ограничиваем высоту */
+    overflow: hidden;
 }
 .week-stats__day {
     text-align: center;
-    padding: 8px 2px;
+    padding: 6px 2px;
     background: var(--bg);
     border-radius: 10px;
     border: 1px solid var(--border);
     transition: all 0.2s;
-}
-.week-stats__day:hover { transform: scale(1.03); box-shadow: var(--shadow); }
-.week-stats__day-name {
-    font-size: 9px;
-    color: var(--text-secondary);
-    font-weight: 600;
-}
-.week-stats__day-date {
-    font-size: 10px;
-    color: var(--text);
-    font-weight: 500;
-    margin-top: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+    max-height: 100px;
+    overflow: hidden;
 }
 .week-stats__day-bars {
     display: flex;
     justify-content: center;
     gap: 2px;
     margin-top: 4px;
-    height: 20px;
+    height: 24px;
     align-items: end;
+    width: 100%;
 }
 .week-stats__day-bar {
-    width: 6px;
+    flex: 0 0 6px;
+    max-width: 8px;
     border-radius: 3px 3px 0 0;
     min-height: 2px;
     transition: height 0.5s ease;
 }
-.week-stats__day-bar--done { background: var(--success); }
-.week-stats__day-bar--planned { background: var(--warning); }
-.week-stats__day-bar--missed { background: var(--danger); }
-.week-stats__day-total {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--text);
-    margin-top: 3px;
-}
-.week-stats__summary {
-    display: flex;
-    justify-content: space-around;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-.week-stats__summary-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-.week-stats__summary-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-}
-.week-stats__summary-dot--done { background: var(--success); }
-.week-stats__summary-dot--planned { background: var(--warning); }
-.week-stats__summary-dot--missed { background: var(--danger); }
-.week-stats__summary-number { font-weight: 700; }
-
-/* ============================================
+        
+    /* ============================================
    ЗАДАЧИ (КАРТОЧКИ)
    ============================================ */
 .task-card {
@@ -4316,39 +4275,43 @@ document.addEventListener('DOMContentLoaded', function() {
         renderMonthView();
     });
 
-    document.querySelectorAll('.modes__btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
+    document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const page = this.dataset.page;
+        if (page === 'add') {
+            openAddTask();
+            return;
+        }
+        if (page === 'calendar') {
+            // Всегда переключаемся на режим "Месяц" с сегодняшней датой
+            const today = new Date();
+            currentDate = today;
+            currentMode = 'month';
+            
+            // Обновляем активные кнопки режимов
             document.querySelectorAll('.modes__btn').forEach(b => {
                 b.classList.remove('modes__btn--active');
             });
-            this.classList.add('modes__btn--active');
-
-            const mode = this.dataset.mode;
-            currentMode = mode;
-            const titleEl = document.getElementById('monthTitle');
-
-            switch (mode) {
-                case 'day':
-                    titleEl.textContent = '📅 День';
-                    renderDayView(currentDate);
-                    break;
-                case 'week':
-                    titleEl.textContent = '📅 Неделя';
-                    renderWeekView(currentDate);
-                    break;
-                case 'month':
-                    titleEl.textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
-                    renderMonthView();
-                    break;
-                case 'year':
-                    titleEl.textContent = '📅 ' + currentDate.getFullYear();
-                    renderYearView(currentDate.getFullYear());
-                    break;
-            }
+            document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
+            
+            // Обновляем заголовок и перерисовываем
+            document.getElementById('monthTitle').textContent = months[today.getMonth()] + ' ' + today.getFullYear();
+            renderMonthView();
             updateBottomBarLabel();
-        });
+            
+            // Активируем кнопку в нижнем баре
+            document.querySelectorAll('.bottom-bar__btn').forEach(b => {
+                b.classList.remove('bottom-bar__btn--active');
+            });
+            this.classList.add('bottom-bar__btn--active');
+            currentPage = 'calendar';
+            closeModal();
+            closeTaskEditor();
+            return;
+        }
+        switchPage(page);
     });
-
+});
     document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             const page = this.dataset.page;
