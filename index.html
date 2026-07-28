@@ -1791,7 +1791,7 @@ function getTaskStatusForDate(task, dateStr) {
     if (!isScheduled) return null;
     const isDone = task.done.includes(dateStr);
     if (isDone) return 'done';
-    // Убираем проверку на просрочку - можно выполнить в любой день, если есть в расписании
+    if (dateStr < today) return 'missed';   // <-- просрочено
     return 'planned';
 }
 
@@ -1799,16 +1799,19 @@ function getMarkerForDate(dateStr) {
     const dayTasks = getTasksForDate(dateStr);
     if (dayTasks.length === 0) return null;
     let hasDone = false,
-        hasPlanned = false;
+        hasPlanned = false,
+        hasMissed = false;
     dayTasks.forEach(taskWithOverride => {
         const originalTask = tasks.find(t => t.id === taskWithOverride.id);
         if (!originalTask) return;
         const status = getTaskStatusForDate(originalTask, dateStr);
         if (status === 'done') hasDone = true;
+        else if (status === 'missed') hasMissed = true;
         else if (status === 'planned') hasPlanned = true;
     });
-    if (hasDone && !hasPlanned) return { text: '✅', color: 'var(--success)', status: 'done', count: dayTasks.length };
-    if (hasDone && hasPlanned) return { text: '⏳', color: 'var(--warning)', status: 'mixed', count: dayTasks.length };
+    if (hasDone && !hasPlanned && !hasMissed) return { text: '✅', color: 'var(--success)', status: 'done', count: dayTasks.length };
+    if (hasMissed && !hasDone && !hasPlanned) return { text: '❌', color: 'var(--danger)', status: 'missed', count: dayTasks.length };
+    if (hasDone && hasMissed || hasDone && hasPlanned || hasPlanned && hasMissed) return { text: '⏳', color: 'var(--warning)', status: 'mixed', count: dayTasks.length };
     if (hasPlanned) return { text: '●', color: 'var(--warning)', status: 'planned', count: dayTasks.length };
     return null;
 }
@@ -2172,6 +2175,7 @@ function renderMonthView() {
             badge.textContent = dayTasks.length;
             if (markerData) {
                 if (markerData.status === 'done') badge.classList.add('calendar__badge--done');
+                else if (markerData.status === 'missed') badge.classList.add('calendar__badge--missed');
                 else if (markerData.status === 'mixed' || markerData.status === 'planned') badge.classList.add('calendar__badge--mixed');
             }
             day.appendChild(badge);
@@ -2230,7 +2234,6 @@ function renderDayView(date) {
         empty.style.cssText = 'text-align:center;padding:30px 0;color:var(--text-secondary);font-size:14px;';
         empty.textContent = '📭 Нет задач на этот день';
         grid.appendChild(empty);
-        // Показываем недельную статистику и так
         renderWeekStats();
         return;
     }
@@ -2240,13 +2243,14 @@ function renderDayView(date) {
     container.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
 
     dayTasks.forEach(task => {
-        const status = getTaskStatusForDate(tasks.find(t => t.id === task.id), dateStr);
+        const originalTask = tasks.find(t => t.id === task.id);
+        const status = getTaskStatusForDate(originalTask, dateStr);
         let statusIcon = '●';
         let statusClass = '';
         let clickable = true;
-        if (status === 'done') { statusIcon = '✅';
-            statusClass = 'task-card--done';
-            clickable = false; } else if (status === 'planned') { statusIcon = '⏳'; }
+        if (status === 'done') { statusIcon = '✅'; statusClass = 'task-card--done'; clickable = false; }
+        else if (status === 'missed') { statusIcon = '❌'; statusClass = 'task-card--missed'; clickable = true; }
+        else if (status === 'planned') { statusIcon = '⏳'; }
 
         const card = document.createElement('div');
         card.className = `task-card ${statusClass}`;
@@ -2354,10 +2358,9 @@ function renderWeekView(startDate) {
                 let bgColor = 'var(--accent)';
                 let icon = '●';
                 let clickable = true;
-                if (status === 'done') { bgColor = 'var(--success)';
-                    icon = '✅';
-                    clickable = false; } else if (status === 'planned') { bgColor = 'var(--warning)';
-                    icon = '⏳'; }
+                if (status === 'done') { bgColor = 'var(--success)'; icon = '✅'; clickable = false; }
+                else if (status === 'missed') { bgColor = 'var(--danger)'; icon = '❌'; }
+                else if (status === 'planned') { bgColor = 'var(--warning)'; icon = '⏳'; }
                 cell.style.cssText += 'background:' + bgColor + ';color:' + (status === 'planned' ? 'var(--text)' : 'white') + ';padding:4px 6px;cursor:' + (clickable ? 'pointer' : 'default') + ';transition:all 0.2s;font-size:9px;';
                 cell.innerHTML = `
                     <div style="font-weight:500;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px;">
@@ -2470,13 +2473,12 @@ function renderYearView(year) {
     updateBottomBarLabel();
 }
 // ============================================
-// 7. СТАТИСТИКА
+// 7. СТАТИСТИКА (не используется, но оставлена)
 // ============================================
 function updateStats() {
-    // Защита: проверяем существование элементов, чтобы избежать ошибок в консоли
     const grid = document.getElementById('statsGrid');
     const totalEl = document.getElementById('statsTotal');
-    if (!grid || !totalEl) return; // блок не на странице — не выполняем
+    if (!grid || !totalEl) return;
 
     const weekDays = getWeekDays();
     const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -2504,14 +2506,12 @@ function updateStats() {
 
     if (maxCount === 0) maxCount = 1;
 
-    // Сохраняем контейнер для кривой
     const curveContainer = document.getElementById('statsCurveContainer');
     grid.innerHTML = '';
     if (curveContainer) {
         grid.appendChild(curveContainer);
     }
 
-    // Строим столбцы
     let html = '';
     weekData.forEach(d => {
         const hDone = Math.max((d.done / maxCount) * 100, 2);
@@ -2586,7 +2586,6 @@ function drawCurve(weekData, maxCount) {
 
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#7c3aed';
 
-    // Тень под кривой
     ctx.beginPath();
     ctx.moveTo(points[0].x, height);
     for (let i = 0; i < points.length; i++) {
@@ -2604,7 +2603,6 @@ function drawCurve(weekData, maxCount) {
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // Линия
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
     for (let i = 1; i < points.length; i++) {
@@ -2619,7 +2617,6 @@ function drawCurve(weekData, maxCount) {
 
     ctx.shadowBlur = 0;
 
-    // Точки
     points.forEach(p => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
@@ -2630,7 +2627,6 @@ function drawCurve(weekData, maxCount) {
         ctx.shadowBlur = 0;
     });
 }
-
 // ============================================
 // 8. СТАТИСТИКА ЗА МЕСЯЦ (РАЗВОРАЧИВАЮЩАЯСЯ)
 // ============================================
@@ -2659,22 +2655,25 @@ function updateMonthStats() {
     const todayStr = today.toISOString().split('T')[0];
 
     let totalDone = 0,
-        totalPlanned = 0;
+        totalPlanned = 0,
+        totalMissed = 0;
 
     let html = '';
     for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
         const dayTasks = getTasksForDate(dateStr);
         let done = 0,
-            planned = 0;
+            planned = 0,
+            missed = 0;
         dayTasks.forEach(task => {
             const originalTask = tasks.find(t => t.id === task.id);
             const status = getTaskStatusForDate(originalTask, dateStr);
             if (status === 'done') { done++;
-                totalDone++; } else if (status === 'planned') { planned++;
+                totalDone++; } else if (status === 'missed') { missed++;
+                totalMissed++; } else if (status === 'planned') { planned++;
                 totalPlanned++; }
         });
-        const total = done + planned;
+        const total = done + planned + missed;
         const pct = total > 0 ? Math.round((done / total) * 100) : 0;
         let barClass = 'month-stats__day-bar-fill--none';
         if (total > 0) {
@@ -2705,7 +2704,8 @@ function updateMonthStats() {
             Запланировано: <span class="month-stats__summary-number">${totalPlanned}</span>
         </span>
         <span class="month-stats__summary-item">
-            📊 Всего: <span class="month-stats__summary-number">${totalDone + totalPlanned}</span>
+            <span class="month-stats__summary-dot month-stats__summary-dot--missed"></span>
+            Пропущено: <span class="month-stats__summary-number">${totalMissed}</span>
         </span>
     `;
 }
@@ -2719,31 +2719,32 @@ function renderWeekStats() {
 
     const weekDays = getWeekDays();
     const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-    let totals = { done: 0, planned: 0 };
+    let totals = { done: 0, planned: 0, missed: 0 };
     let maxCount = 1;
 
     const weekData = weekDays.map((date, i) => {
         const dateStr = date.toISOString().split('T')[0];
         const dayTasks = getTasksForDate(dateStr);
         let done = 0,
-            planned = 0;
+            planned = 0,
+            missed = 0;
         dayTasks.forEach(task => {
             const originalTask = tasks.find(t => t.id === task.id);
             const status = getTaskStatusForDate(originalTask, dateStr);
             if (status === 'done') { done++;
-                totals.done++; } else if (status === 'planned') { planned++;
+                totals.done++; } else if (status === 'missed') { missed++;
+                totals.missed++; } else if (status === 'planned') { planned++;
                 totals.planned++; }
         });
-        const total = done + planned;
+        const total = done + planned + missed;
         if (total > maxCount) maxCount = total;
-        return { label: dayLabels[i], date: dateStr, done, planned, total };
+        return { label: dayLabels[i], date: dateStr, done, planned, missed, total };
     });
 
     if (maxCount === 0) maxCount = 1;
     const today = new Date().toISOString().split('T')[0];
 
-    // Ограничиваем высоту баров, чтобы они не вылезали
-    const maxBarHeight = 40; // максимальная высота столбца в пикселях
+    const maxBarHeight = 40;
 
     let html = `
         <div class="week-stats" style="overflow:hidden;padding:4px 0;">
@@ -2755,9 +2756,9 @@ function renderWeekStats() {
     `;
 
     weekData.forEach((d, index) => {
-        // Вычисляем высоту столбцов в пикселях (максимум maxBarHeight)
         const hDone = Math.min((d.done / maxCount) * maxBarHeight, maxBarHeight);
         const hPlanned = Math.min((d.planned / maxCount) * maxBarHeight, maxBarHeight);
+        const hMissed = Math.min((d.missed / maxCount) * maxBarHeight, maxBarHeight);
         const isToday = d.date === today;
         html += `
             <div class="week-stats__day" style="text-align:center;padding:6px 2px;background:var(--bg);border-radius:8px;border:1px solid ${isToday ? 'var(--accent)' : 'var(--border)'};${isToday ? 'background:var(--bg-soft);' : ''}cursor:pointer;" onclick="currentDate=new Date('${d.date}T00:00:00');currentMode='day';renderDayView(currentDate);document.getElementById('monthTitle').textContent='📅 День';updateBottomBarLabel();">
@@ -2766,6 +2767,7 @@ function renderWeekStats() {
                 <div class="week-stats__day-bars" style="display:flex;justify-content:center;gap:3px;margin-top:4px;height:${maxBarHeight}px;align-items:end;">
                     ${d.done > 0 ? `<div class="week-stats__day-bar week-stats__day-bar--done" style="width:8px;border-radius:3px 3px 0 0;background:var(--success);height:${Math.max(hDone, 2)}px;transition:height 0.3s;"></div>` : ''}
                     ${d.planned > 0 ? `<div class="week-stats__day-bar week-stats__day-bar--planned" style="width:8px;border-radius:3px 3px 0 0;background:var(--warning);height:${Math.max(hPlanned, 2)}px;transition:height 0.3s;"></div>` : ''}
+                    ${d.missed > 0 ? `<div class="week-stats__day-bar week-stats__day-bar--missed" style="width:8px;border-radius:3px 3px 0 0;background:var(--danger);height:${Math.max(hMissed, 2)}px;transition:height 0.3s;"></div>` : ''}
                 </div>
                 <div class="week-stats__day-total" style="font-size:9px;font-weight:600;color:var(--text);margin-top:3px;">${d.total}</div>
             </div>
@@ -2784,7 +2786,11 @@ function renderWeekStats() {
                     Запланировано: <span class="week-stats__summary-number" style="font-weight:700;">${totals.planned}</span>
                 </span>
                 <span class="week-stats__summary-item" style="display:flex;align-items:center;gap:4px;">
-                    📊 Всего: <span class="week-stats__summary-number" style="font-weight:700;">${totals.done + totals.planned}</span>
+                    <span class="week-stats__summary-dot week-stats__summary-dot--missed" style="width:7px;height:7px;border-radius:50%;background:var(--danger);"></span>
+                    Пропущено: <span class="week-stats__summary-number" style="font-weight:700;">${totals.missed}</span>
+                </span>
+                <span class="week-stats__summary-item" style="display:flex;align-items:center;gap:4px;">
+                    📊 Всего: <span class="week-stats__summary-number" style="font-weight:700;">${totals.done + totals.planned + totals.missed}</span>
                 </span>
             </div>
         </div>
@@ -2817,7 +2823,6 @@ function goToToday() {
     document.getElementById('monthTitle').textContent = months[today.getMonth()] + ' ' + today.getFullYear();
     renderMonthView();
     updateBottomBarLabel();
-    // Обновляем активную кнопку нижнего бара
     document.querySelectorAll('.bottom-bar__btn').forEach(b => {
         b.classList.remove('bottom-bar__btn--active');
     });
@@ -2896,8 +2901,37 @@ function setupCategoryFilter() {
     document.querySelector('.category-filter__btn--all')?.classList.add('category-filter__btn--active');
 }
 
- // ============================================
-// 12. МОДАЛЬНЫЕ ОКНА
+// ============================================
+// 12. РЕЖИМЫ КАЛЕНДАРЯ
+// ============================================
+function setupModeButtons() {
+    const modeBtns = document.querySelectorAll('.modes__btn');
+    modeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const mode = this.dataset.mode;
+            currentMode = mode;
+            modeBtns.forEach(b => b.classList.remove('modes__btn--active'));
+            this.classList.add('modes__btn--active');
+            if (mode === 'day') {
+                document.getElementById('monthTitle').textContent = '📅 День';
+                renderDayView(currentDate);
+            } else if (mode === 'week') {
+                document.getElementById('monthTitle').textContent = '📅 Неделя';
+                renderWeekView(currentDate);
+            } else if (mode === 'month') {
+                document.getElementById('monthTitle').textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+                renderMonthView();
+            } else if (mode === 'year') {
+                document.getElementById('monthTitle').textContent = '📅 ' + currentDate.getFullYear();
+                renderYearView(currentDate.getFullYear());
+            }
+            updateBottomBarLabel();
+        });
+    });
+}
+
+// ============================================
+// 13. МОДАЛЬНЫЕ ОКНА
 // ============================================
 function openModal(title, content) {
     document.getElementById('modalTitle').textContent = title;
@@ -2910,7 +2944,7 @@ function closeModal() {
 }
 
 // ============================================
-// 13. ЗАДАЧИ (СПИСОК)
+// 14. ЗАДАЧИ (СПИСОК)
 // ============================================
 function renderTasksList() {
     const container = document.getElementById('tasksContainer');
@@ -2939,8 +2973,9 @@ function renderTasksList() {
                 const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
                 let statusIcon = '●';
                 let statusClass = '';
-                if (status === 'done') { statusIcon = '✅';
-                    statusClass = 'task-card--done'; } else if (status === 'planned') { statusIcon = '⏳'; }
+                if (status === 'done') { statusIcon = '✅'; statusClass = 'task-card--done'; }
+                else if (status === 'missed') { statusIcon = '❌'; statusClass = 'task-card--missed'; }
+                else if (status === 'planned') { statusIcon = '⏳'; }
                 html += `
                     <div class="task-card ${statusClass}" onclick="openTaskEditorForDate(${t.id}, '${new Date().toISOString().split('T')[0]}')" style="border-left-color:${cat.color};">
                         <div class="task-card__left">
@@ -2969,8 +3004,9 @@ function renderTasksList() {
             const status = getTaskStatusForDate(t, new Date().toISOString().split('T')[0]);
             let statusIcon = '●';
             let statusClass = '';
-            if (status === 'done') { statusIcon = '✅';
-                statusClass = 'task-card--done'; } else if (status === 'planned') { statusIcon = '⏳'; }
+            if (status === 'done') { statusIcon = '✅'; statusClass = 'task-card--done'; }
+            else if (status === 'missed') { statusIcon = '❌'; statusClass = 'task-card--missed'; }
+            else if (status === 'planned') { statusIcon = '⏳'; }
             const date = new Date(t.lastEdited || t.id);
             const dateStr = date.toLocaleDateString('ru-RU');
             html += `
@@ -3020,7 +3056,7 @@ function setTaskView(mode) {
 }
 
 // ============================================
-// 14. ГАЛЕРЕЯ
+// 15. ГАЛЕРЕЯ
 // ============================================
 function renderGallery() {
     const container = document.getElementById('galleryContainer');
@@ -3064,7 +3100,7 @@ function openGallery() {
 }
 
 // ============================================
-// 15. ПРОФИЛЬ
+// 16. ПРОФИЛЬ
 // ============================================
 function getBMICategory(bmi) {
     if (!bmi) return { label: 'Нет данных', color: '#888', emoji: '❓' };
@@ -3263,7 +3299,7 @@ function handleAvatarUpload(event) {
 }
 
 // ============================================
-// 16. ЖУРНАЛ ВЕСА
+// 17. ЖУРНАЛ ВЕСА
 // ============================================
 function renderWeightChart(log) {
     if (log.length === 0) {
@@ -3347,7 +3383,7 @@ function openWeightJournal() {
 }
 
 // ============================================
-// 17. РЕДАКТОР ЗАДАЧИ
+// 18. РЕДАКТОР ЗАДАЧИ
 // ============================================
 function openTaskEditorForDate(taskId, dateStr) {
     const task = tasks.find(t => t.id === taskId);
@@ -3467,7 +3503,7 @@ function closeTaskEditor() {
 }
 
 // ============================================
-// 18. МОДАЛЬНЫЕ ОКНА ДЛЯ ЗАМЕТОК
+// 19. ЗАМЕТКИ (МОДАЛЬНЫЕ ОКНА)
 // ============================================
 function openNotes() {
     const content = document.getElementById('notesModalContent');
@@ -3633,7 +3669,7 @@ function openNoteViewer(noteId) {
 }
 
 // ============================================
-// 19. ДОБАВЛЕНИЕ ЗАДАЧИ (С ЗАМЕТКАМИ)
+// 20. ДОБАВЛЕНИЕ ЗАДАЧИ (С ЗАМЕТКАМИ)
 // ============================================
 function openAddTaskForDate(dateStr, timeStr) {
     document.getElementById('taskStart').value = dateStr;
@@ -3648,7 +3684,6 @@ function openAddTaskForDate(dateStr, timeStr) {
     document.getElementById('taskCategory').value = 'body';
     selectedDateForAdd = dateStr;
 
-    // Обновляем список заметок
     updateNoteSelect();
 
     const dayOfWeek = new Date(dateStr + 'T00:00:00').getDay();
@@ -3669,7 +3704,6 @@ function openAddTask() {
     document.getElementById('taskCategory').value = 'body';
     selectedDateForAdd = today;
     
-    // Обновляем список заметок
     updateNoteSelect();
 
     const dayOfWeek = new Date(today + 'T00:00:00').getDay();
@@ -3736,7 +3770,7 @@ function handleAddTask() {
 }
 
 // ============================================
-// 20. ДОБАВЛЕНИЕ ФОТО
+// 21. ФОТО
 // ============================================
 function openAddPhoto() {
     document.getElementById('addPhotoModal').classList.add('modal-overlay--open');
@@ -3797,7 +3831,7 @@ function handleAddPhoto() {
 }
 
 // ============================================
-// 21. НАСТРОЙКИ И ИНФОРМАЦИЯ
+// 22. НАСТРОЙКИ И ИНФОРМАЦИЯ
 // ============================================
 function openSettings() {
     const theme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -3941,7 +3975,7 @@ function openInfo() {
 }
 
 // ============================================
-// 22. ТЕМА И ЦВЕТ
+// 23. ТЕМА И ЦВЕТ
 // ============================================
 function toggleTheme() {
     const html = document.documentElement;
@@ -3995,7 +4029,7 @@ function updateAllColors() {
 }
 
 // ============================================
-// 23. РЕНДЕР ВСЕГО
+// 24. РЕНДЕР ВСЕГО
 // ============================================
 function renderAll() {
     checkStreakOnLoad();
@@ -4020,7 +4054,7 @@ function renderAll() {
 }
 
 // ============================================
-// 24. УПРАВЛЕНИЕ ДАННЫМИ
+// 25. УПРАВЛЕНИЕ ДАННЫМИ
 // ============================================
 function exportData() {
     try {
@@ -4164,7 +4198,7 @@ function clearAllData() {
 }
 
 // ============================================
-// 25. ЭКСПОРТ ФУНКЦИЙ
+// 26. ЭКСПОРТ В WINDOW
 // ============================================
 window.openAddTask = openAddTask;
 window.closeAddTask = closeAddTask;
@@ -4218,8 +4252,21 @@ window.createNoteFromAddTask = createNoteFromAddTask;
 window.goToToday = goToToday;
 
 // ============================================
-// 26. ЗАПУСК
+// 27. ИНИЦИАЛИЗАЦИЯ
 // ============================================
+// загружаем данные
+loadUser();
+loadTasks();
+loadNotes();
+loadGallery();
+loadTheme();
+loadColorScheme();
+
+// настройка фильтра категорий и режимов
+setupCategoryFilter();
+setupModeButtons();
+
+// нижний бар
 document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
         const page = this.dataset.page;
@@ -4228,129 +4275,131 @@ document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
             return;
         }
         if (page === 'calendar') {
-            goToToday(); // всегда переключаем на сегодня в режиме месяц
+            goToToday();
             return;
         }
         switchPage(page);
     });
 });
 
-    // Открываем статистику по умолчанию
-    monthStatsOpen = true;
-    document.getElementById('monthStatsBody').classList.add('month-stats__body--open');
-    document.getElementById('monthStatsArrow').classList.add('month-stats__arrow--open');
+// открываем статистику по умолчанию
+monthStatsOpen = true;
+document.getElementById('monthStatsBody').classList.add('month-stats__body--open');
+document.getElementById('monthStatsArrow').classList.add('month-stats__arrow--open');
 
+currentMode = 'month';
+document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
+renderMonthView();
+
+// кнопки навигации
+document.getElementById('prevMonth').addEventListener('click', function() {
+    switch (currentMode) {
+        case 'day':
+            currentDate.setDate(currentDate.getDate() - 1);
+            document.getElementById('monthTitle').textContent = '📅 День';
+            renderDayView(currentDate);
+            break;
+        case 'week':
+            currentDate.setDate(currentDate.getDate() - 7);
+            document.getElementById('monthTitle').textContent = '📅 Неделя';
+            renderWeekView(currentDate);
+            break;
+        case 'month':
+            changeMonth(-1);
+            break;
+        case 'year':
+            currentDate.setFullYear(currentDate.getFullYear() - 1);
+            document.getElementById('monthTitle').textContent = '📅 ' + currentDate.getFullYear();
+            renderYearView(currentDate.getFullYear());
+            break;
+    }
+    updateBottomBarLabel();
+});
+
+document.getElementById('nextMonth').addEventListener('click', function() {
+    switch (currentMode) {
+        case 'day':
+            currentDate.setDate(currentDate.getDate() + 1);
+            document.getElementById('monthTitle').textContent = '📅 День';
+            renderDayView(currentDate);
+            break;
+        case 'week':
+            currentDate.setDate(currentDate.getDate() + 7);
+            document.getElementById('monthTitle').textContent = '📅 Неделя';
+            renderWeekView(currentDate);
+            break;
+        case 'month':
+            changeMonth(1);
+            break;
+        case 'year':
+            currentDate.setFullYear(currentDate.getFullYear() + 1);
+            document.getElementById('monthTitle').textContent = '📅 ' + currentDate.getFullYear();
+            renderYearView(currentDate.getFullYear());
+            break;
+    }
+    updateBottomBarLabel();
+});
+
+document.getElementById('monthTitle').addEventListener('click', function() {
+    const today = new Date();
+    currentDate = today;
     currentMode = 'month';
+    document.querySelectorAll('.modes__btn').forEach(b => {
+        b.classList.remove('modes__btn--active');
+    });
     document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
+    document.getElementById('monthTitle').textContent = months[today.getMonth()] + ' ' + today.getFullYear();
     renderMonthView();
+});
 
-    // Обработчики
-    document.getElementById('prevMonth').addEventListener('click', function() {
-        switch (currentMode) {
-            case 'day':
-                currentDate.setDate(currentDate.getDate() - 1);
-                document.getElementById('monthTitle').textContent = '📅 День';
-                renderDayView(currentDate);
-                break;
-            case 'week':
-                currentDate.setDate(currentDate.getDate() - 7);
-                document.getElementById('monthTitle').textContent = '📅 Неделя';
-                renderWeekView(currentDate);
-                break;
-            case 'month':
-                changeMonth(-1);
-                break;
-            case 'year':
-                currentDate.setFullYear(currentDate.getFullYear() - 1);
-                document.getElementById('monthTitle').textContent = '📅 ' + currentDate.getFullYear();
-                renderYearView(currentDate.getFullYear());
-                break;
-        }
-        updateBottomBarLabel();
-    });
+// меню
+document.getElementById('menuBtn').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.add('sidebar--open');
+});
+document.getElementById('sidebarOverlay').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.remove('sidebar--open');
+});
 
-    document.getElementById('nextMonth').addEventListener('click', function() {
-        switch (currentMode) {
-            case 'day':
-                currentDate.setDate(currentDate.getDate() + 1);
-                document.getElementById('monthTitle').textContent = '📅 День';
-                renderDayView(currentDate);
-                break;
-            case 'week':
-                currentDate.setDate(currentDate.getDate() + 7);
-                document.getElementById('monthTitle').textContent = '📅 Неделя';
-                renderWeekView(currentDate);
-                break;
-            case 'month':
-                changeMonth(1);
-                break;
-            case 'year':
-                currentDate.setFullYear(currentDate.getFullYear() + 1);
-                document.getElementById('monthTitle').textContent = '📅 ' + currentDate.getFullYear();
-                renderYearView(currentDate.getFullYear());
-                break;
-        }
-        updateBottomBarLabel();
-    });
-
-    document.getElementById('monthTitle').addEventListener('click', function() {
-        const today = new Date();
-        currentDate = today;
-        currentMode = 'month';
-        document.querySelectorAll('.modes__btn').forEach(b => {
-            b.classList.remove('modes__btn--active');
-        });
-        document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
-        document.getElementById('monthTitle').textContent = months[today.getMonth()] + ' ' + today.getFullYear();
-        renderMonthView();
-    });
-
-    document.getElementById('menuBtn').addEventListener('click', function() {
-        document.getElementById('sidebar').classList.add('sidebar--open');
-    });
-    document.getElementById('sidebarOverlay').addEventListener('click', function() {
+document.querySelectorAll('.sidebar__item').forEach(function(el) {
+    el.addEventListener('click', function() {
+        const page = this.dataset.page;
         document.getElementById('sidebar').classList.remove('sidebar--open');
+        switch (page) {
+            case 'profile':
+                openProfile();
+                break;
+            case 'tasks':
+                openTasks();
+                break;
+            case 'gallery':
+                openGallery();
+                break;
+            case 'notes':
+                openNotes();
+                break;
+            case 'settings':
+                openSettings();
+                break;
+            case 'info':
+                openInfo();
+                break;
+        }
     });
+});
 
-    document.querySelectorAll('.sidebar__item').forEach(function(el) {
-        el.addEventListener('click', function() {
-            const page = this.dataset.page;
-            document.getElementById('sidebar').classList.remove('sidebar--open');
-            switch (page) {
-                case 'profile':
-                    openProfile();
-                    break;
-                case 'tasks':
-                    openTasks();
-                    break;
-                case 'gallery':
-                    openGallery();
-                    break;
-                case 'notes':
-                    openNotes();
-                    break;
-                case 'settings':
-                    openSettings();
-                    break;
-                case 'info':
-                    openInfo();
-                    break;
-            }
-        });
-    });
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('mainModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
 
-    document.getElementById('modalClose').addEventListener('click', closeModal);
-    document.getElementById('mainModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
+document.getElementById('themeBtn').addEventListener('click', toggleTheme);
 
-    document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+console.log('🚀 SkillQuest 2.0 запущен!');
+console.log('👤 ' + user.name + ', Уровень: ' + user.level);
+console.log('📋 Задач: ' + tasks.length + ', 📸 Фото: ' + gallery.length);
+console.log('📝 Заметок: ' + notes.length);
+console.log('🔥 Стрик: ' + (user.streak.current || 0) + ' дней');
 
-    console.log('🚀 SkillQuest 2.0 запущен!');
-    console.log('👤 ' + user.name + ', Уровень: ' + user.level);
-    console.log('📋 Задач: ' + tasks.length + ', 📸 Фото: ' + gallery.length);
-    console.log('📝 Заметок: ' + notes.length);
-    console.log('🔥 Стрик: ' + (user.streak.current || 0) + ' дней');
 });
 </script>
 </body>
