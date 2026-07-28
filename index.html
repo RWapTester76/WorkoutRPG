@@ -552,7 +552,7 @@ body::before {
 .month-stats__summary-number { font-weight: 700; }
 
 /* ============================================
-   НЕДЕЛЬНАЯ СТАТИСТИКА
+   НЕДЕЛЬНАЯ СТАТИСТИКА (ОСНОВНОЙ КОНТЕНТ)
    ============================================ */
 .week-stats { padding: 6px 0; overflow: hidden; }
 .week-stats__grid {
@@ -999,7 +999,6 @@ body::before {
     <div class="streak-notification__text" id="streakNotifText">🔥 Стрик: 5 дней!</div>
     <div class="streak-notification__sub" id="streakNotifSub">Множитель опыта x1.05</div>
 </div>
-
 <!-- ==========================================
 МОДАЛЬНЫЕ ОКНА
 ========================================== -->
@@ -1067,11 +1066,55 @@ body::before {
         </div>
     </div>
 </div>
-<div class="modal-overlay" id="addPhotoModal"><div class="modal"><button class="modal__close" onclick="closeAddPhoto()">✕</button><h2 class="modal__title">📸 Добавить фото</h2><div class="modal__content"><!-- содержимое --></div></div></div>
-<div class="modal-overlay" id="taskEditorModal"><div class="modal"><button class="modal__close" onclick="closeTaskEditor()">✕</button><h2 class="modal__title" id="editorTitle">📋 Редактор задачи</h2><div class="modal__content" id="editorContent"></div></div></div>
-<div class="modal-overlay" id="notesModal"><div class="modal"><button class="modal__close" onclick="closeNotes()">✕</button><h2 class="modal__title" id="notesModalTitle">📝 Заметки</h2><div class="modal__content" id="notesModalContent"></div></div></div>
-<div class="modal-overlay" id="noteEditorModal"><div class="modal"><button class="modal__close" onclick="closeNoteEditor()">✕</button><h2 class="modal__title" id="noteEditorTitle">📝 Редактор заметки</h2><div class="modal__content" id="noteEditorContent"></div></div></div>
-<aside class="sidebar" id="sidebar"><div class="sidebar__overlay" id="sidebarOverlay"></div><nav class="sidebar__menu"><div class="sidebar__item" data-page="profile"><span class="icon">👤</span> Профиль</div><div class="sidebar__item" data-page="tasks"><span class="icon">📋</span> Задачи</div><div class="sidebar__item" data-page="gallery"><span class="icon">🖼️</span> Галерея</div><div class="sidebar__item" data-page="notes"><span class="icon">📝</span> Заметки</div><div class="sidebar__item" data-page="settings"><span class="icon">⚙️</span> Настройки</div><div class="sidebar__item" data-page="info"><span class="icon">ℹ️</span> Информация</div></nav></aside>
+<div class="modal-overlay" id="addPhotoModal">
+    <div class="modal">
+        <button class="modal__close" onclick="closeAddPhoto()">✕</button>
+        <h2 class="modal__title">📸 Добавить фото</h2>
+        <div class="modal__content">
+            <div class="form-group">
+                <label class="form-label">Выберите фото</label>
+                <input class="form-input" id="photoInput" type="file" accept="image/*" style="padding:5px;">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Комментарий</label>
+                <input class="form-input" id="photoComment" placeholder="Научился садиться на шпагат!">
+            </div>
+            <button class="btn btn--primary btn--full" onclick="handleAddPhoto()">✅ Сохранить</button>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="taskEditorModal">
+    <div class="modal">
+        <button class="modal__close" onclick="closeTaskEditor()">✕</button>
+        <h2 class="modal__title" id="editorTitle">📋 Редактор задачи</h2>
+        <div class="modal__content" id="editorContent"></div>
+    </div>
+</div>
+<div class="modal-overlay" id="notesModal">
+    <div class="modal">
+        <button class="modal__close" onclick="closeNotes()">✕</button>
+        <h2 class="modal__title" id="notesModalTitle">📝 Заметки</h2>
+        <div class="modal__content" id="notesModalContent"></div>
+    </div>
+</div>
+<div class="modal-overlay" id="noteEditorModal">
+    <div class="modal">
+        <button class="modal__close" onclick="closeNoteEditor()">✕</button>
+        <h2 class="modal__title" id="noteEditorTitle">📝 Редактор заметки</h2>
+        <div class="modal__content" id="noteEditorContent"></div>
+    </div>
+</div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar__overlay" id="sidebarOverlay"></div>
+    <nav class="sidebar__menu">
+        <div class="sidebar__item" data-page="profile"><span class="icon">👤</span> Профиль</div>
+        <div class="sidebar__item" data-page="tasks"><span class="icon">📋</span> Задачи</div>
+        <div class="sidebar__item" data-page="gallery"><span class="icon">🖼️</span> Галерея</div>
+        <div class="sidebar__item" data-page="notes"><span class="icon">📝</span> Заметки</div>
+        <div class="sidebar__item" data-page="settings"><span class="icon">⚙️</span> Настройки</div>
+        <div class="sidebar__item" data-page="info"><span class="icon">ℹ️</span> Информация</div>
+    </nav>
+</aside>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1085,7 +1128,8 @@ const CATEGORIES = {
     deeds: { label: '📋 Дела', color: 'var(--color-deeds)', emoji: '📋', short: 'deeds' },
     other: { label: '➕ Другое', color: 'var(--color-other)', emoji: '➕', short: 'other' }
 };
-    let activeCategories = ['body', 'soul', 'craft', 'deeds', 'other'];
+
+let activeCategories = ['body', 'soul', 'craft', 'deeds', 'other'];
 let tasks = [];
 let notes = [];
 let gallery = [];
@@ -1388,7 +1432,6 @@ function addTask(title, desc, category, duration, schedule, time, start, end, no
     tasks.push(newTask);
     saveTasks();
     
-    // Если указан ID заметки, привязываем
     if (noteId) {
         attachNoteToTask(noteId, newTask.id);
     }
@@ -1401,7 +1444,6 @@ function completeTask(id, date) {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
     
-    // Проверяем, есть ли задача в расписании на эту дату
     const taskForDate = getTaskForDate(task, date);
     if (!taskForDate) {
         alert('❌ Эта задача не запланирована на выбранную дату');
@@ -1485,7 +1527,6 @@ function clearTaskOverride(taskId, dateStr) {
         renderAll();
     }
 }
-
 // ============================================
 // 5. ЗАМЕТКИ
 // ============================================
@@ -1671,15 +1712,10 @@ function getWeekDays() {
     return days;
 }
 
-    function setActiveModeButton(mode) {
+function setActiveModeButton(mode) {
     document.querySelectorAll('.modes__btn').forEach(b => b.classList.remove('modes__btn--active'));
     const activeBtn = document.querySelector(`.modes__btn[data-mode="${mode}"]`);
     if (activeBtn) activeBtn.classList.add('modes__btn--active');
-}
-function setActiveModeButton(mode) {
-    document.querySelectorAll('.modes__btn').forEach(b => b.classList.remove('modes__btn--active'));
-    const btn = document.querySelector(`.modes__btn[data-mode="${mode}"]`);
-    if (btn) btn.classList.add('modes__btn--active');
 }
 
 function renderMonthView() {
@@ -1767,7 +1803,7 @@ function renderMonthView() {
 function changeMonth(delta) {
     currentDate.setMonth(currentDate.getMonth() + delta);
     renderMonthView();
-}
+}    
 function renderDayView(date) {
     const grid = document.getElementById('calendarGrid');
     const dateStr = date.toISOString().split('T')[0];
@@ -1796,6 +1832,7 @@ function renderDayView(date) {
         empty.textContent = '📭 Нет задач на этот день';
         grid.appendChild(empty);
         renderWeekStats();
+        setActiveModeButton('day');
         return;
     }
 
@@ -1899,6 +1936,7 @@ function renderWeekView(startDate) {
         empty.textContent = '📭 Нет задач на этой неделе';
         grid.appendChild(empty);
         renderWeekStats();
+        setActiveModeButton('week');
         return;
     }
 
@@ -2357,7 +2395,8 @@ function renderWeekStats() {
     `;
 
     container.innerHTML = html;
-}
+}       
+
 // ============================================
 // 11. НИЖНИЙ БАР
 // ============================================
@@ -2377,7 +2416,7 @@ function goToToday() {
     const today = new Date();
     currentDate = today;
     currentMode = 'month';
-    setActiveModeButton('month');   // ← оставляем как есть
+    setActiveModeButton('month');
     document.getElementById('monthTitle').textContent = months[today.getMonth()] + ' ' + today.getFullYear();
     renderMonthView();
     updateBottomBarLabel();
@@ -2404,12 +2443,12 @@ function switchPage(page) {
         case 'tasks':
             openTasks();
             break;
-           case 'calendar':
-        currentMode = 'month';
-        setActiveModeButton('month');
-        document.getElementById('monthTitle').textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
-        renderMonthView();
-        break;
+        case 'calendar':
+            currentMode = 'month';
+            setActiveModeButton('month');
+            document.getElementById('monthTitle').textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+            renderMonthView();
+            break;
         case 'add':
             openAddTask();
             break;
@@ -2466,7 +2505,7 @@ function setupModeButtons() {
         btn.addEventListener('click', function() {
             const mode = this.dataset.mode;
             currentMode = mode;
-            setActiveModeButton(mode);   // ← вызываем нашу новую функцию
+            setActiveModeButton(mode);
             if (mode === 'day') {
                 document.getElementById('monthTitle').textContent = '📅 День';
                 renderDayView(currentDate);
@@ -2667,6 +2706,9 @@ function getBMICategory(bmi) {
     return { label: 'Ожирение II+', color: '#d63031', emoji: '🚨' };
 }
 
+// ============================================
+// 17. ПРОФИЛЬ (продолжение)
+// ============================================
 function openProfile() {
     const bmi = user.weight && user.height ? Math.round((user.weight / ((user.height / 100) ** 2)) * 10) / 10 : null;
     const bmiInfo = bmi ? getBMICategory(bmi) : { label: 'Нет данных', color: '#888', emoji: '❓' };
@@ -3939,4 +3981,4 @@ init();
 });
 </script>
 </body>
-</html>    
+</html>
