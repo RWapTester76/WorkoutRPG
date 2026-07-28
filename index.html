@@ -1520,6 +1520,7 @@ body::before {
 </aside>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 // 1. КАТЕГОРИИ
 // ============================================
@@ -2472,9 +2473,10 @@ function renderYearView(year) {
 // 7. СТАТИСТИКА
 // ============================================
 function updateStats() {
+    // Защита: проверяем существование элементов, чтобы избежать ошибок в консоли
     const grid = document.getElementById('statsGrid');
     const totalEl = document.getElementById('statsTotal');
-    if (!grid) return;
+    if (!grid || !totalEl) return; // блок не на странице — не выполняем
 
     const weekDays = getWeekDays();
     const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -2528,7 +2530,6 @@ function updateStats() {
         `;
     });
 
-    // Вставляем столбцы
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
     while (tempDiv.firstChild) {
@@ -2552,7 +2553,8 @@ function updateStats() {
 
     drawCurve(weekData, maxCount);
 }
-    function drawCurve(weekData, maxCount) {
+
+function drawCurve(weekData, maxCount) {
     const canvas = document.getElementById('statsCurveCanvas');
     if (!canvas) return;
     const container = document.getElementById('statsCurveContainer');
@@ -2628,6 +2630,7 @@ function updateStats() {
         ctx.shadowBlur = 0;
     });
 }
+
 // ============================================
 // 8. СТАТИСТИКА ЗА МЕСЯЦ (РАЗВОРАЧИВАЮЩАЯСЯ)
 // ============================================
@@ -3063,6 +3066,16 @@ function openGallery() {
 // ============================================
 // 15. ПРОФИЛЬ
 // ============================================
+function getBMICategory(bmi) {
+    if (!bmi) return { label: 'Нет данных', color: '#888', emoji: '❓' };
+    if (bmi < 16) return { label: 'Выраженный дефицит', color: '#e17055', emoji: '⚠️' };
+    if (bmi < 18.5) return { label: 'Недостаточный вес', color: '#fdcb6e', emoji: '📉' };
+    if (bmi < 25) return { label: 'Нормальный вес', color: '#00b894', emoji: '✅' };
+    if (bmi < 30) return { label: 'Избыточный вес', color: '#fdcb6e', emoji: '📈' };
+    if (bmi < 35) return { label: 'Ожирение I', color: '#e17055', emoji: '⚠️' };
+    return { label: 'Ожирение II+', color: '#d63031', emoji: '🚨' };
+}
+
 function openProfile() {
     const bmi = user.weight && user.height ? Math.round((user.weight / ((user.height / 100) ** 2)) * 10) / 10 : null;
     const bmiInfo = bmi ? getBMICategory(bmi) : { label: 'Нет данных', color: '#888', emoji: '❓' };
@@ -3225,16 +3238,6 @@ function showBMIInfo(label, emoji, color) {
     };
     const desc = descriptions[label] || 'Индекс массы тела — ориентировочный показатель, требующий индивидуальной оценки.';
     alert(`${emoji} ${label}\n\n${desc}`);
-}
-
-function getBMICategory(bmi) {
-    if (!bmi) return { label: 'Нет данных', color: '#888', emoji: '❓' };
-    if (bmi < 16) return { label: 'Выраженный дефицит', color: '#e17055', emoji: '⚠️' };
-    if (bmi < 18.5) return { label: 'Недостаточный вес', color: '#fdcb6e', emoji: '📉' };
-    if (bmi < 25) return { label: 'Нормальный вес', color: '#00b894', emoji: '✅' };
-    if (bmi < 30) return { label: 'Избыточный вес', color: '#fdcb6e', emoji: '📈' };
-    if (bmi < 35) return { label: 'Ожирение I', color: '#e17055', emoji: '⚠️' };
-    return { label: 'Ожирение II+', color: '#d63031', emoji: '🚨' };
 }
 
 function updateProfileField(field, value) {
@@ -4302,74 +4305,6 @@ document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
         renderMonthView();
     });
 
-    document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        const page = this.dataset.page;
-        if (page === 'add') {
-            openAddTask();
-            return;
-        }
-        if (page === 'calendar') {
-            // Всегда переключаемся на режим "Месяц" с сегодняшней датой
-            const today = new Date();
-            currentDate = today;
-            currentMode = 'month';
-            
-            // Обновляем активные кнопки режимов
-            document.querySelectorAll('.modes__btn').forEach(b => {
-                b.classList.remove('modes__btn--active');
-            });
-            document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
-            
-            // Обновляем заголовок и перерисовываем
-            document.getElementById('monthTitle').textContent = months[today.getMonth()] + ' ' + today.getFullYear();
-            renderMonthView();
-            updateBottomBarLabel();
-            
-            // Активируем кнопку в нижнем баре
-            document.querySelectorAll('.bottom-bar__btn').forEach(b => {
-                b.classList.remove('bottom-bar__btn--active');
-            });
-            this.classList.add('bottom-bar__btn--active');
-            currentPage = 'calendar';
-            closeModal();
-            closeTaskEditor();
-            return;
-        }
-        switchPage(page);
-    });
-});
-    document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            const page = this.dataset.page;
-            if (page === 'add') {
-                openAddTask();
-                return;
-            }
-            if (page === 'calendar') {
-                if (currentPage !== 'calendar') {
-                    currentMode = 'month';
-                    document.querySelectorAll('.modes__btn').forEach(b => {
-                        b.classList.remove('modes__btn--active');
-                    });
-                    document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
-                    document.getElementById('monthTitle').textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
-                    renderMonthView();
-                    updateBottomBarLabel();
-                }
-                document.querySelectorAll('.bottom-bar__btn').forEach(b => {
-                    b.classList.remove('bottom-bar__btn--active');
-                });
-                this.classList.add('bottom-bar__btn--active');
-                currentPage = 'calendar';
-                closeModal();
-                closeTaskEditor();
-                return;
-            }
-            switchPage(page);
-        });
-    });
-
     document.getElementById('menuBtn').addEventListener('click', function() {
         document.getElementById('sidebar').classList.add('sidebar--open');
     });
@@ -4420,4 +4355,3 @@ document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
 </script>
 </body>
 </html>
- 
