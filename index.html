@@ -2739,45 +2739,49 @@ function renderWeekStats() {
     if (maxCount === 0) maxCount = 1;
     const today = new Date().toISOString().split('T')[0];
 
+    // Ограничиваем высоту баров, чтобы они не вылезали
+    const maxBarHeight = 40; // максимальная высота столбца в пикселях
+
     let html = `
-        <div class="week-stats">
-            <div class="week-stats__title">
+        <div class="week-stats" style="overflow:hidden;padding:4px 0;">
+            <div class="week-stats__title" style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
                 <span>📊</span>
                 <span>Недельная статистика</span>
             </div>
-            <div class="week-stats__grid">
+            <div class="week-stats__grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;overflow:hidden;">
     `;
 
     weekData.forEach((d, index) => {
-        const hDone = Math.max((d.done / maxCount) * 100, 2);
-        const hPlanned = Math.max((d.planned / maxCount) * 100, 2);
+        // Вычисляем высоту столбцов в пикселях (максимум maxBarHeight)
+        const hDone = Math.min((d.done / maxCount) * maxBarHeight, maxBarHeight);
+        const hPlanned = Math.min((d.planned / maxCount) * maxBarHeight, maxBarHeight);
         const isToday = d.date === today;
         html += `
-            <div class="week-stats__day" style="${isToday ? 'border-color:var(--accent);background:var(--bg-soft);' : ''}" onclick="currentDate=new Date('${d.date}T00:00:00');currentMode='day';renderDayView(currentDate);document.getElementById('monthTitle').textContent='📅 День';updateBottomBarLabel();">
-                <div class="week-stats__day-name">${d.label}</div>
-                <div class="week-stats__day-date">${d.date.slice(5)}</div>
-                <div class="week-stats__day-bars">
-                    ${d.done > 0 ? `<div class="week-stats__day-bar week-stats__day-bar--done" style="height:${Math.max(hDone, 2)}px;"></div>` : ''}
-                    ${d.planned > 0 ? `<div class="week-stats__day-bar week-stats__day-bar--planned" style="height:${Math.max(hPlanned, 2)}px;"></div>` : ''}
+            <div class="week-stats__day" style="text-align:center;padding:6px 2px;background:var(--bg);border-radius:8px;border:1px solid ${isToday ? 'var(--accent)' : 'var(--border)'};${isToday ? 'background:var(--bg-soft);' : ''}cursor:pointer;" onclick="currentDate=new Date('${d.date}T00:00:00');currentMode='day';renderDayView(currentDate);document.getElementById('monthTitle').textContent='📅 День';updateBottomBarLabel();">
+                <div class="week-stats__day-name" style="font-size:9px;color:var(--text-secondary);font-weight:600;">${d.label}</div>
+                <div class="week-stats__day-date" style="font-size:9px;color:var(--text);font-weight:500;margin-top:2px;">${d.date.slice(5)}</div>
+                <div class="week-stats__day-bars" style="display:flex;justify-content:center;gap:3px;margin-top:4px;height:${maxBarHeight}px;align-items:end;">
+                    ${d.done > 0 ? `<div class="week-stats__day-bar week-stats__day-bar--done" style="width:8px;border-radius:3px 3px 0 0;background:var(--success);height:${Math.max(hDone, 2)}px;transition:height 0.3s;"></div>` : ''}
+                    ${d.planned > 0 ? `<div class="week-stats__day-bar week-stats__day-bar--planned" style="width:8px;border-radius:3px 3px 0 0;background:var(--warning);height:${Math.max(hPlanned, 2)}px;transition:height 0.3s;"></div>` : ''}
                 </div>
-                <div class="week-stats__day-total">${d.total}</div>
+                <div class="week-stats__day-total" style="font-size:9px;font-weight:600;color:var(--text);margin-top:3px;">${d.total}</div>
             </div>
         `;
     });
 
     html += `
             </div>
-            <div class="week-stats__summary">
-                <span class="week-stats__summary-item">
-                    <span class="week-stats__summary-dot week-stats__summary-dot--done"></span>
-                    Выполнено: <span class="week-stats__summary-number">${totals.done}</span>
+            <div class="week-stats__summary" style="display:flex;justify-content:space-around;padding-top:8px;border-top:1px solid var(--border);font-size:11px;flex-wrap:wrap;gap:4px;">
+                <span class="week-stats__summary-item" style="display:flex;align-items:center;gap:4px;">
+                    <span class="week-stats__summary-dot week-stats__summary-dot--done" style="width:7px;height:7px;border-radius:50%;background:var(--success);"></span>
+                    Выполнено: <span class="week-stats__summary-number" style="font-weight:700;">${totals.done}</span>
                 </span>
-                <span class="week-stats__summary-item">
-                    <span class="week-stats__summary-dot week-stats__summary-dot--planned"></span>
-                    Запланировано: <span class="week-stats__summary-number">${totals.planned}</span>
+                <span class="week-stats__summary-item" style="display:flex;align-items:center;gap:4px;">
+                    <span class="week-stats__summary-dot week-stats__summary-dot--planned" style="width:7px;height:7px;border-radius:50%;background:var(--warning);"></span>
+                    Запланировано: <span class="week-stats__summary-number" style="font-weight:700;">${totals.planned}</span>
                 </span>
-                <span class="week-stats__summary-item">
-                    📊 Всего: <span class="week-stats__summary-number">${totals.done + totals.planned}</span>
+                <span class="week-stats__summary-item" style="display:flex;align-items:center;gap:4px;">
+                    📊 Всего: <span class="week-stats__summary-number" style="font-weight:700;">${totals.done + totals.planned}</span>
                 </span>
             </div>
         </div>
@@ -2785,7 +2789,6 @@ function renderWeekStats() {
 
     container.innerHTML = html;
 }
-
 // ============================================
 // 10. НИЖНИЙ БАР
 // ============================================
@@ -2800,7 +2803,26 @@ function updateBottomBarLabel() {
         label.textContent = 'Сегодня';
     }
 }
-
+function goToToday() {
+    const today = new Date();
+    currentDate = today;
+    currentMode = 'month';
+    document.querySelectorAll('.modes__btn').forEach(b => {
+        b.classList.remove('modes__btn--active');
+    });
+    document.querySelector('.modes__btn[data-mode="month"]').classList.add('modes__btn--active');
+    document.getElementById('monthTitle').textContent = months[today.getMonth()] + ' ' + today.getFullYear();
+    renderMonthView();
+    updateBottomBarLabel();
+    // Обновляем активную кнопку нижнего бара
+    document.querySelectorAll('.bottom-bar__btn').forEach(b => {
+        b.classList.remove('bottom-bar__btn--active');
+    });
+    document.getElementById('navCalendar').classList.add('bottom-bar__btn--active');
+    currentPage = 'calendar';
+    closeModal();
+    closeTaskEditor();
+}
 function switchPage(page) {
     currentPage = page;
     document.querySelectorAll('.bottom-bar__btn').forEach(b => {
@@ -4190,20 +4212,25 @@ window.loadTheme = loadTheme;
 window.toggleMonthStats = toggleMonthStats;
 window.renderAll = renderAll;
 window.createNoteFromAddTask = createNoteFromAddTask;
+window.goToToday = goToToday;
 
 // ============================================
 // 26. ЗАПУСК
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    loadTheme();
-    loadColorScheme();
-    loadUser();
-    loadTasks();
-    loadGallery();
-    loadNotes();
-
-    checkStreakOnLoad();
-    setupCategoryFilter();
+document.querySelectorAll('.bottom-bar__btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const page = this.dataset.page;
+        if (page === 'add') {
+            openAddTask();
+            return;
+        }
+        if (page === 'calendar') {
+            goToToday(); // всегда переключаем на сегодня в режиме месяц
+            return;
+        }
+        switchPage(page);
+    });
+});
 
     // Открываем статистику по умолчанию
     monthStatsOpen = true;
