@@ -279,8 +279,180 @@
   text-transform: uppercase;
   margin-right: 0.5rem;
 }
+  /* === Календарь === */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.calendar-header h2 {
+  font-size: 1.5rem;
+  color: #e94560;
+  margin: 0;
+}
+.calendar-nav {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.calendar-nav button {
+  background: #0f3460;
+  border: 1px solid #2a2a4a;
+  color: #e0e0e0;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.calendar-nav button:hover {
+  background: #e94560;
+  border-color: #e94560;
+}
+
+/* Переключение режимов */
+.view-switcher {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+.view-switcher button {
+  background: #16213e;
+  border: 1px solid #2a2a4a;
+  color: #e0e0e0;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: 0.3s;
+}
+.view-switcher button.active {
+  background: #e94560;
+  border-color: #e94560;
+  color: white;
+  font-weight: bold;
+}
+
+/* Сетка месяца */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.weekday-header {
+  color: #a0a0b0;
+  font-size: 0.8rem;
+  padding: 0.5rem 0;
+  font-weight: bold;
+}
+.day-cell {
+  background: #0f3460;
+  border-radius: 8px;
+  padding: 0.5rem;
+  min-height: 50px;
+  cursor: pointer;
+  position: relative;
+  transition: 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.day-cell:hover {
+  background: #1a1a3e;
+  box-shadow: 0 0 10px rgba(233,69,96,0.3);
+}
+.day-cell.today {
+  border: 2px solid #e94560;
+}
+.day-cell.other-month {
+  opacity: 0.4;
+}
+.day-number {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+.markers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 4px;
+  justify-content: center;
+}
+.marker {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e94560;
+}
+.marker.completed {
+  background: #4ecca3;
+}
+.marker.planned {
+  background: #f5a623;
+}
+.marker.overdue {
+  background: #e94560;
+  box-shadow: 0 0 5px red;
+}
+
+/* Неделя и день */
+.week-list, .day-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.week-day-block, .day-hour-block {
+  background: #0f3460;
+  border-radius: 10px;
+  padding: 0.8rem;
+}
+.week-day-block h3 {
+  margin: 0 0 0.5rem 0;
+  color: #e94560;
+}
+.quest-item.mini {
+  background: #16213e;
+  border-radius: 8px;
+  padding: 0.6rem;
+  margin: 0.3rem 0;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.quest-item.mini .guild-badge {
+  transform: scale(0.8);
+}
+
+/* Фильтры гильдий */
+.guild-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+.guild-filter-btn {
+  background: #16213e;
+  border: 1px solid #2a2a4a;
+  color: #e0e0e0;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: 0.2s;
+}
+.guild-filter-btn.active {
+  background: #e94560;
+  border-color: #e94560;
+  color: white;
+  font-weight: bold;
+}
   }
-</style>
+  </style>
 </head>
 <body>
   <div id="app">
@@ -313,6 +485,13 @@
   </div>
 
 <script>
+  // Состояние календаря
+const CalendarState = {
+  currentDate: new Date(), // дата, которую мы просматриваем
+  view: 'month', // 'month', 'week', 'day'
+  selectedDay: null, // дата для просмотра дня
+  guildFilter: null // id гильдии или null (все)
+};
   // === Гильдии ===
   const GUILDS = [
     { id: 'body', name: 'Тело', icon: '💪', color: '#e94560' },
@@ -610,5 +789,6 @@
     GameState.player = { ...GameState.player, ...savedPlayer };
   }
   renderScreen('profile');
-</script></body>
+</script>
+</body>
 </html>
