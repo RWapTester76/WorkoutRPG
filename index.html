@@ -8,14 +8,14 @@
   <style>
     /* === БАЗОВЫЕ ПЕРЕМЕННЫЕ (светлая тема по умолчанию) === */
     :root {
-      --bg: #f5f5f7;
+      --bg: #f8f9fa;
       --surface: #ffffff;
       --primary: #007aff;
       --secondary: #5856d6;
       --text: #1d1d1f;
-      --text-secondary: #8e8e93;
-      --border: #e5e5ea;
-      --shadow: rgba(0,0,0,0.05);
+      --text-secondary: #6c757d;
+      --border: #dee2e6;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05);
       --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --button-bg: #007aff;
       --button-text: #ffffff;
@@ -31,7 +31,7 @@
       --text: #e5e5ea;
       --text-secondary: #98989d;
       --border: #48484a;
-      --shadow: rgba(0,0,0,0.3);
+      --shadow: 0 4px 12px rgba(0,0,0,0.3);
       --button-bg: #0a84ff;
       --button-text: #ffffff;
     }
@@ -44,7 +44,7 @@
       --text: #e0f0ff;
       --text-secondary: #aaa;
       --border: #00ffff44;
-      --shadow: #00ffff33;
+      --shadow: 0 0 15px #00ffff33;
       --font: 'Orbitron', sans-serif;
       --button-bg: transparent;
       --button-text: #00ffff;
@@ -57,7 +57,7 @@
       padding: 0;
       box-sizing: border-box;
       font-family: var(--font);
-      transition: background 0.25s, color 0.25s, border-color 0.25s, box-shadow 0.25s;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
     }
 
     body {
@@ -75,7 +75,7 @@
       max-width: 540px;
       min-height: 100vh;
       background: var(--surface);
-      box-shadow: 0 0 20px var(--shadow);
+      box-shadow: var(--shadow);
       border-radius: var(--radius);
       display: flex;
       flex-direction: column;
@@ -83,6 +83,7 @@
       border: 1px solid var(--border);
     }
 
+    /* === ШАПКА === */
     .app-header {
       display: flex;
       justify-content: space-between;
@@ -97,56 +98,89 @@
       font-size: 1.8rem;
       font-weight: 700;
       color: var(--text);
+      letter-spacing: -0.5px;
     }
 
-    .btn-icon {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 1.6rem;
+    /* Новая кнопка меню */
+    .menu-btn {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 28px;
+      height: 24px;
+      background: transparent;
+      border: none;
       cursor: pointer;
-      border-radius: var(--small-radius);
-      padding: 0.3rem 0.7rem;
+      padding: 0;
+      z-index: 10;
     }
 
+    .menu-btn span {
+      display: block;
+      width: 100%;
+      height: 3px;
+      background: var(--text);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    .menu-btn.open span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+
+    .menu-btn.open span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .menu-btn.open span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+
+    /* === НАВИГАЦИЯ === */
     .main-nav {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 0.6rem;
+      padding: 0.8rem;
+      display: none;
     }
 
-    .main-nav.hidden { display: none; }
+    .main-nav.visible {
+      display: block;
+    }
 
     .main-nav ul {
       list-style: none;
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
+      gap: 0.5rem;
       justify-content: center;
     }
 
     .main-nav li {
       background: var(--surface);
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 1.1rem;
       border-radius: 20px;
       cursor: pointer;
       border: 1px solid var(--border);
       color: var(--text);
       font-size: 0.85rem;
+      font-weight: 500;
     }
 
     .main-nav li:hover {
       background: var(--primary);
-      color: #fff;
+      color: #ffffff;
       border-color: var(--primary);
     }
 
+    /* === КОНТЕНТ === */
     #screenContainer {
       flex: 1;
-      padding: 1rem;
+      padding: 1.2rem;
       overflow-y: auto;
     }
 
+    /* === НИЖНИЙ БАР === */
     .bottom-bar {
       position: fixed;
       bottom: 0;
@@ -159,8 +193,8 @@
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding: 0.5rem;
-      box-shadow: 0 -2px 10px var(--shadow);
+      padding: 0.6rem;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
       z-index: 100;
       border-radius: 0 0 var(--radius) var(--radius);
     }
@@ -169,8 +203,11 @@
       background: none;
       border: none;
       color: var(--text-secondary);
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .bottom-bar button.active {
@@ -179,7 +216,7 @@
 
     .bottom-bar .add-btn {
       background: var(--primary);
-      color: #fff;
+      color: #ffffff;
       width: 48px;
       height: 48px;
       border-radius: 50%;
@@ -188,40 +225,44 @@
       justify-content: center;
       font-size: 2rem;
       margin-top: -20px;
-      box-shadow: 0 0 12px var(--primary);
+      box-shadow: 0 4px 12px rgba(0,122,255,0.4);
     }
 
+    /* === КАРТОЧКИ === */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1.5rem;
       margin-bottom: 1rem;
+      box-shadow: var(--shadow);
     }
 
     .avatar {
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      background: var(--primary);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       margin: 0 auto 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 2.5rem;
+      color: white;
     }
 
     .xp-bar {
       background: var(--border);
-      height: 8px;
-      border-radius: 4px;
-      margin: 0.8rem 0;
+      height: 10px;
+      border-radius: 5px;
+      margin: 1rem 0;
+      overflow: hidden;
     }
 
     .xp-fill {
       height: 100%;
-      background: var(--primary);
-      border-radius: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 5px;
       width: 0%;
     }
 
@@ -229,7 +270,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.8rem;
-      margin: 1rem 0;
+      margin: 1.2rem 0;
     }
 
     .stat-item {
@@ -241,8 +282,8 @@
     }
 
     .stat-value {
-      font-size: 1.8rem;
-      font-weight: 600;
+      font-size: 2rem;
+      font-weight: 700;
       color: var(--primary);
     }
 
@@ -250,33 +291,48 @@
       background: var(--button-bg);
       border: 2px solid var(--primary);
       color: var(--button-text);
-      padding: 0.6rem 1.5rem;
+      padding: 0.7rem 1.6rem;
       border-radius: 24px;
       font-weight: 600;
+      font-size: 0.95rem;
       cursor: pointer;
       display: inline-block;
-      margin: 0.2rem;
+      margin: 0.3rem;
+      text-align: center;
     }
 
     .btn:hover {
-      opacity: 0.85;
-      box-shadow: 0 0 10px var(--primary);
+      filter: brightness(1.1);
+      box-shadow: 0 0 12px var(--primary);
     }
 
-    .quest-form { display: none; }
-    .quest-form.active { display: block; }
+    .btn.danger {
+      background: #ff3b30;
+      border-color: #ff3b30;
+      color: white;
+    }
+
+    /* === ФОРМЫ === */
+    .quest-form {
+      display: none;
+    }
+
+    .quest-form.active {
+      display: block;
+    }
 
     .quest-form input,
     .quest-form select,
     .quest-form textarea {
       width: 100%;
       margin-bottom: 0.8rem;
-      padding: 0.7rem;
+      padding: 0.8rem;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--small-radius);
       color: var(--text);
       font-family: var(--font);
+      font-size: 0.95rem;
     }
 
     .quest-item {
@@ -284,21 +340,24 @@
       align-items: center;
       justify-content: space-between;
       background: var(--surface);
-      border-left: 4px solid var(--primary);
-      padding: 0.8rem;
-      margin-bottom: 0.5rem;
+      border-left: 5px solid var(--primary);
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.6rem;
       border-radius: var(--small-radius);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
     .guild-badge {
       background: var(--primary);
       color: #fff;
-      padding: 0.2rem 0.5rem;
-      border-radius: 8px;
-      font-size: 0.7rem;
-      margin-right: 0.5rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-right: 0.6rem;
+      font-weight: 600;
     }
 
+    /* === КАЛЕНДАРЬ === */
     .calendar-header {
       display: flex;
       justify-content: space-between;
@@ -307,8 +366,13 @@
     }
 
     .calendar-header h2 {
-      color: var(--text);
       font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 0.4rem;
     }
 
     .calendar-nav button {
@@ -318,6 +382,7 @@
       padding: 0.4rem 0.8rem;
       border-radius: var(--small-radius);
       cursor: pointer;
+      font-weight: 500;
     }
 
     .view-switcher {
@@ -334,12 +399,13 @@
       padding: 0.4rem 1rem;
       border-radius: 20px;
       cursor: pointer;
+      font-weight: 500;
     }
 
     .view-switcher button.active {
       background: var(--primary);
       border-color: var(--primary);
-      color: #fff;
+      color: #ffffff;
     }
 
     .guild-filter {
@@ -378,13 +444,14 @@
       gap: 4px;
       color: var(--text-secondary);
       font-weight: 600;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
     }
 
     .day-cell {
       background: var(--surface);
       border: 1px solid var(--border);
-      padding: 0.5rem;
+      padding: 0.6rem 0.2rem;
       cursor: pointer;
       border-radius: var(--small-radius);
       min-height: 50px;
@@ -392,7 +459,7 @@
 
     .day-cell.today {
       border-color: var(--primary);
-      box-shadow: 0 0 0 1px var(--primary);
+      box-shadow: 0 0 0 2px var(--primary);
     }
 
     .day-cell.other-month {
@@ -400,8 +467,8 @@
     }
 
     .marker {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       display: inline-block;
       margin: 1px;
@@ -418,19 +485,28 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--small-radius);
-      padding: 0.8rem;
+      padding: 1rem;
       text-align: center;
       cursor: pointer;
     }
 
-    .hour-list { list-style: none; padding: 0; }
+    .hour-list {
+      list-style: none;
+      padding: 0;
+    }
+
     .hour-item {
       display: flex;
       gap: 1rem;
-      padding: 0.4rem 0;
+      padding: 0.5rem 0;
       border-bottom: 1px solid var(--border);
     }
-    .hour-label { width: 50px; font-weight: 600; color: var(--primary); }
+
+    .hour-label {
+      width: 55px;
+      font-weight: 600;
+      color: var(--primary);
+    }
 
     .note-card {
       background: var(--surface);
@@ -448,10 +524,15 @@
       margin-bottom: 1rem;
     }
 
-    .glossary-term { font-weight: 600; color: var(--primary); }
+    .glossary-term {
+      font-weight: 700;
+      color: var(--primary);
+    }
 
     @media (max-width: 480px) {
-      .bottom-bar button { font-size: 1.2rem; }
+      .bottom-bar button {
+        font-size: 1.3rem;
+      }
     }
   </style>
 </head>
@@ -459,10 +540,14 @@
   <div id="app">
     <header class="app-header">
       <h1 class="logo">LVL UP</h1>
-      <button id="menuToggle" class="btn-icon" aria-label="Меню">☰</button>
+      <button id="menuToggle" class="menu-btn" aria-label="Меню">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </header>
 
-    <nav id="mainNav" class="main-nav hidden">
+    <nav id="mainNav" class="main-nav">
       <ul>
         <li data-screen="profile">🧙 Профиль</li>
         <li data-screen="calendar">📅 Календарь</li>
@@ -554,12 +639,16 @@
     const mainNav = document.getElementById('mainNav');
     const screenContainer = document.getElementById('screenContainer');
 
-    menuToggle.addEventListener('click', () => mainNav.classList.toggle('hidden'));
+    menuToggle.addEventListener('click', () => {
+      mainNav.classList.toggle('visible');
+      menuToggle.classList.toggle('open');
+    });
 
     document.querySelectorAll('.main-nav li').forEach(item => {
       item.addEventListener('click', (e) => {
         renderScreen(e.target.dataset.screen);
-        mainNav.classList.add('hidden');
+        mainNav.classList.remove('visible');
+        menuToggle.classList.remove('open');
       });
     });
 
@@ -591,10 +680,10 @@
           <h2 style="text-align:center;">${p.name}</h2>
           <p style="text-align:center;">Ур. ${p.lvl} · ${p.xp.toFixed(1)} XP</p>
           <div class="xp-bar"><div class="xp-fill" style="width:${p.progress}%"></div></div>
-          <p style="text-align:center; font-size:0.8rem;">До след. уровня: ${p.progress}%</p>
+          <p style="text-align:center; font-size:0.85rem;">До следующего уровня: ${p.progress}%</p>
           <div class="stats-grid">
-            <div class="stat-item"><span class="stat-value">${GameState.tasks.filter(t=>t.completed).length}</span><br>✅</div>
-            <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥</div>
+            <div class="stat-item"><span class="stat-value">${GameState.tasks.filter(t=>t.completed).length}</span><br>Выполнено</div>
+            <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥 Комбо</div>
           </div>
         </div>`;
     }
@@ -609,24 +698,30 @@
         const future = task.date > today;
         return `<div class="quest-item" style="border-left-color:${g.color}">
           <div><span class="guild-badge" style="background:${g.color}">${g.icon}</span> ${task.title}<br><small>${task.date} ${task.time} · ${task.minutes} мин</small></div>
-          <button ${future?'disabled':''} onclick="completeQuest('${task.id}')">✔</button>
+          <button class="btn" ${future?'disabled':''} onclick="completeQuest('${task.id}')">✔</button>
         </div>`;
-      }).join('') : '<p>Нет активных квестов</p>';
+      }).join('') : '<p style="text-align:center; opacity:0.7;">Нет активных квестов</p>';
 
       screenContainer.innerHTML = `
-        <button class="btn" onclick="toggleQuestForm()" style="width:100%;">➕ Новый квест</button>
+        <button class="btn" onclick="toggleQuestForm()" style="width:100%; margin-bottom:1rem;">➕ Новый квест</button>
         <div id="questForm" class="quest-form card">
           <form onsubmit="addQuest(event)">
+            <label>Гильдия</label>
             <select id="questCategory">${opts}</select>
-            <input id="questTitle" placeholder="Название" required>
+            <label>Название</label>
+            <input id="questTitle" placeholder="Что сделать?" required>
+            <label>Продолжительность (мин)</label>
             <input type="number" id="questMinutes" value="30" min="1">
+            <label>Дата</label>
             <input type="date" id="questDate">
+            <label>Время</label>
             <input type="time" id="questTime">
-            <textarea id="questNote" rows="2" placeholder="Заметка"></textarea>
-            <button type="submit" class="btn">Создать</button>
+            <label>Заметка</label>
+            <textarea id="questNote" rows="2" placeholder="Детали..."></textarea>
+            <button type="submit" class="btn" style="width:100%;">Создать квест</button>
           </form>
         </div>
-        <button class="btn" onclick="completeAllToday()">⚡ Выполнить все сегодня</button>
+        <button class="btn" onclick="completeAllToday()" style="width:100%; margin-bottom:1rem;">⚡ Выполнить все сегодня</button>
         <div style="margin-top:1rem;">${tasksHtml}</div>`;
       document.getElementById('questDate').value = new Date().toISOString().slice(0,10);
       document.getElementById('questTime').value = new Date().toTimeString().slice(0,5);
@@ -653,7 +748,7 @@
       const t = GameState.tasks.find(t=>t.id===id);
       if(!t || t.completed) return;
       const today = new Date().toISOString().slice(0,10);
-      if(t.date > today) { alert('Будущее!'); return; }
+      if(t.date > today) { alert('Нельзя завершить будущий квест!'); return; }
       t.completed = true; t.dateCompleted = today;
       GameState.player.xp += t.minutes * 0.01;
       checkLevelUp(); updateStreak(today);
@@ -818,7 +913,7 @@
       for(let h=0; h<24; h++) {
         const hour = String(h).padStart(2,'0');
         const hourTasks = tasks.filter(t=>t.time?.startsWith(hour+':'));
-        html += `<li class="hour-item"><span class="hour-label">${hour}:00</span><span>${hourTasks.length?hourTasks.map(t=>t.title+' '+ (t.completed?'✅':'')).join(', '):'—'}</span></li>`;
+        html += `<li class="hour-item"><span class="hour-label">${hour}:00</span><span>${hourTasks.length?hourTasks.map(t=>t.title+' '+(t.completed?'✅':'')).join(', '):'—'}</span></li>`;
       }
       return html + '</ul>';
     }
@@ -829,17 +924,17 @@
       const list = notes.length ? notes.map(n=>`
         <div class="note-card">
           <strong>${n.title}</strong>
-          <p>${n.content.replace(/\n/g,'<br>')}</p>
+          <p style="margin:0.5rem 0;">${n.content.replace(/\n/g,'<br>')}</p>
           <button class="btn" onclick="editNote('${n.id}')">✏️</button>
-          <button class="btn" onclick="deleteNote('${n.id}')" style="background:#ff3b30;">🗑️</button>
-        </div>`).join('') : '<p>Нет заметок</p>';
+          <button class="btn danger" onclick="deleteNote('${n.id}')">🗑️</button>
+        </div>`).join('') : '<p style="text-align:center; opacity:0.7;">Нет заметок</p>';
       screenContainer.innerHTML = `
-        <button class="btn" onclick="showNoteForm()">➕ Новая заметка</button>
+        <button class="btn" onclick="showNoteForm()" style="width:100%; margin-bottom:1rem;">➕ Новая заметка</button>
         <div id="noteForm" class="quest-form card" style="display:none;">
-          <input id="noteTitle" placeholder="Заголовок">
+          <input id="noteTitle" placeholder="Заголовок" required>
           <textarea id="noteContent" rows="4" placeholder="Текст..."></textarea>
           <input type="hidden" id="editNoteId">
-          <button class="btn" onclick="saveNote()">Сохранить</button>
+          <button class="btn" style="width:100%;" onclick="saveNote()">Сохранить</button>
         </div>
         <div>${list}</div>`;
     }
@@ -879,18 +974,22 @@
     // === НАСТРОЙКИ ===
     function renderSettings() {
       const themes = [
-        {id:'light',name:'Светлая'},{id:'dark',name:'Тёмная'},{id:'tron',name:'ТРОН'}
+        {id:'light',name:'Светлая'},
+        {id:'dark',name:'Тёмная'},
+        {id:'tron',name:'ТРОН'}
       ];
       screenContainer.innerHTML = `
         <div class="settings-section">
           <h3>🎨 Тема</h3>
-          ${themes.map(t=>`<button class="btn ${GameState.settings.theme===t.id?'active':''}" onclick="setTheme('${t.id}')">${t.name}</button>`).join('')}
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            ${themes.map(t=>`<button class="btn ${GameState.settings.theme===t.id?'active':''}" onclick="setTheme('${t.id}')">${t.name}</button>`).join('')}
+          </div>
         </div>
         <div class="settings-section">
           <h3>💾 Данные</h3>
-          <button class="btn" onclick="exportData()">📤 Экспорт</button>
-          <button class="btn" onclick="importDataPrompt()">📥 Импорт</button>
-          <button class="btn" style="background:#ff3b30;" onclick="clearAllData()">🗑️ Очистить</button>
+          <button class="btn" onclick="exportData()" style="width:100%; margin-bottom:0.8rem;">📤 Экспорт</button>
+          <button class="btn" onclick="importDataPrompt()" style="width:100%; margin-bottom:0.8rem;">📥 Импорт</button>
+          <button class="btn danger" onclick="clearAllData()" style="width:100%;">🗑️ Очистить всё</button>
         </div>`;
     }
 
@@ -915,7 +1014,7 @@
             if(data.notes) GameState.notes = data.notes;
             if(data.settings) GameState.settings = data.settings;
             savePlayer(); saveTasks(); saveNotes(); saveSettings();
-            applyTheme(); alert('Импорт выполнен'); renderScreen('profile');
+            applyTheme(); alert('Импорт успешен'); renderScreen('profile');
           } catch(ex) { alert('Ошибка файла'); }
         };
         reader.readAsText(f);
@@ -923,23 +1022,23 @@
       inp.click();
     };
     window.clearAllData = () => {
-      if(confirm('Удалить все данные?')) { localStorage.clear(); location.reload(); }
+      if(confirm('Точно удалить все данные?')) { localStorage.clear(); location.reload(); }
     };
 
     // === ИНФО ===
     function renderInfo() {
       screenContainer.innerHTML = `
         <div class="card">
-          <h2>📖 Глоссарий</h2>
-          <p><span class="glossary-term">Гильдия</span> — категория задач (Тело, Бизнес, Творчество…). Имеет цвет и иконку.</p>
-          <p><span class="glossary-term">Квест</span> — задача с датой, временем и длительностью. Выполнение приносит опыт (XP).</p>
-          <p><span class="glossary-term">XP (опыт)</span> — начисляется по формуле <em>минуты × 0.01</em>. Уровень (LVL) растёт по накоплению XP: для достижения уровня N нужно суммарно N×(N+1)/2 очков.</p>
-          <p><span class="glossary-term">Комбо (стрик)</span> — количество дней подряд с выполненными задачами. Сбрасывается, если день пропущен.</p>
-          <p><span class="glossary-term">Эпик-квест (цель)</span> — долгосрочная цель. После завершения даёт +1 XP и возможность загрузить фото в Галерею.</p>
-          <p><span class="glossary-term">Галерея</span> — хранилище фото успехов, привязанных к завершённым целям.</p>
-          <p><span class="glossary-term">Статистика</span> — раздел с графиками активности (в разработке).</p>
-          <p><span class="glossary-term">Календарь</span> — четыре уровня (год, месяц, неделя, день). Маркеры показывают статус задач, фильтр позволяет смотреть задачи отдельных гильдий.</p>
-          <p><span class="glossary-term">Нижний бар</span> — быстрый доступ к профилю, календарю, созданию квеста, списку квестов и статистике.</p>
+          <h2 style="margin-bottom:1rem;">📖 Как это работает</h2>
+          <p><span class="glossary-term">Гильдия</span> — категория задач (Тело, Бизнес, Творчество…). Имеет свой цвет и иконку для быстрой идентификации.</p>
+          <p><span class="glossary-term">Квест</span> — ваша задача с датой, временем и продолжительностью в минутах. Выполнение квеста приносит опыт.</p>
+          <p><span class="glossary-term">XP (опыт)</span> — рассчитывается просто: <em>минуты × 0.01</em>. Например, задача на 60 минут даст 0.6 XP. Уровень растёт по накоплению опыта: для достижения уровня N нужно суммарно N×(N+1)/2 очков.</p>
+          <p><span class="glossary-term">LVL (уровень)</span> — ваш текущий уровень. Чем выше, тем больше опыта нужно для следующего.</p>
+          <p><span class="glossary-term">Комбо (стрик)</span> — количество дней подряд, в которые вы выполняли хотя бы один квест. Пропуск дня сбрасывает стрик.</p>
+          <p><span class="glossary-term">Эпик-квест (цель)</span> — большая цель, которую вы ставите сами. За выполнение даётся +1 XP и возможность загрузить фото в Галерею.</p>
+          <p><span class="glossary-term">Галерея</span> — место для хранения ваших успехов, привязанных к завершённым целям.</p>
+          <p><span class="glossary-term">Статистика</span> — раздел с графиками активности (скоро появится).</p>
+          <p><span class="glossary-term">Календарь</span> — четыре уровня: год, месяц, неделя, день. Маркеры показывают статус задач, а фильтр помогает смотреть задачи конкретных гильдий.</p>
         </div>`;
     }
 
