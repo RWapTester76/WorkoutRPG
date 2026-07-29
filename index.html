@@ -4,1034 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>LVL UP · RPG Planner</title>
-<style>
-  /* === Сброс и базовые стили === */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-  }
-
-  body {
-    background: #1a1a2e;
-    color: #e0e0e0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-  }
-
-  #app {
-    width: 100%;
-    max-width: 500px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #16213e;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    position: relative;
-  }
-
-  .app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background: #0f3460;
-    border-bottom: 2px solid #e94560;
-  }
-
-  .logo {
-    font-size: 1.8rem;
-    color: #e94560;
-    letter-spacing: 2px;
-    text-shadow: 0 0 8px rgba(233,69,96,0.6);
-  }
-
-  .btn-icon {
-    background: none;
-    border: none;
-    color: #e0e0e0;
-    font-size: 1.8rem;
-    cursor: pointer;
-  }
-
-  /* Навигация */
-  .main-nav {
-    background: #0f3460;
-    border-bottom: 2px solid #e94560;
-    padding: 0.5rem;
-  }
-
-  .main-nav.hidden {
-    display: none;
-  }
-
-  .main-nav ul {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-  }
-
-  .main-nav li {
-    background: #16213e;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: 0.3s;
-    border: 1px solid transparent;
-    font-size: 0.9rem;
-  }
-
-  .main-nav li:hover {
-    border-color: #e94560;
-    color: #e94560;
-    box-shadow: 0 0 10px rgba(233,69,96,0.4);
-  }
-
-  /* Контент */
-  #screenContainer {
-    flex: 1;
-    padding: 1rem;
-    overflow-y: auto;
-  }
-
-  /* Экран профиля (пример) */
-  .profile-card {
-    background: #0f3460;
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-
-  .avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: #e94560;
-    margin: 0 auto 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-  }
-
-  .xp-bar {
-    background: #1a1a2e;
-    height: 10px;
-    border-radius: 5px;
-    margin: 0.5rem 0;
-    overflow: hidden;
-  }
-
-  .xp-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #e94560, #ff6b6b);
-    border-radius: 5px;
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    margin: 1rem 0;
-  }
-
-  .stat-item {
-    background: #16213e;
-    padding: 0.8rem;
-    border-radius: 10px;
-    text-align: center;
-  }
-
-  .stat-value {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #e94560;
-  }
-
-  .btn {
-    background: #e94560;
-    border: none;
-    color: white;
-    padding: 0.8rem 1.5rem;
-    border-radius: 25px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-
-  .btn:hover {
-    background: #c23152;
-    box-shadow: 0 0 15px rgba(233,69,96,0.5);
-  }
-
-  .hidden {
-    display: none;
-  }
-
-  /* Адаптив для телефона */
-  @media (max-width: 480px) {
-    .main-nav li {
-      font-size: 0.75rem;
-      padding: 0.4rem 0.8rem;
-    }
-/* Экран квестов */
-.quest-form-toggle {
-  background: #e94560;
-  border: none;
-  color: white;
-  padding: 0.7rem 1.2rem;
-  border-radius: 25px;
-  font-size: 1rem;
-  cursor: pointer;
-  width: 100%;
-  margin-bottom: 1rem;
-  transition: 0.3s;
-}
-.quest-form-toggle:hover {
-  background: #c23152;
-  box-shadow: 0 0 12px rgba(233,69,96,0.5);
-}
-.quest-form {
-  background: #0f3460;
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  display: none;
-}
-.quest-form.active {
-  display: block;
-}
-.quest-form input,
-.quest-form select,
-.quest-form textarea {
-  width: 100%;
-  margin-bottom: 0.8rem;
-  padding: 0.7rem;
-  border-radius: 10px;
-  border: 1px solid #2a2a4a;
-  background: #16213e;
-  color: #e0e0e0;
-  font-size: 1rem;
-}
-.quest-form label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-weight: bold;
-  color: #e94560;
-}
-.quest-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.quest-item {
-  background: #0f3460;
-  border-radius: 12px;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  border-left: 6px solid #e94560;
-  transition: 0.3s;
-}
-.quest-item.completed {
-  opacity: 0.5;
-  border-left-color: #4ecca3;
-  text-decoration: line-through;
-}
-.quest-info {
-  flex: 1;
-}
-.quest-title {
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-.quest-meta {
-  font-size: 0.8rem;
-  color: #a0a0b0;
-}
-.quest-actions button {
-  background: #e94560;
-  border: none;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.quest-actions button:disabled {
-  background: #555;
-  cursor: not-allowed;
-}
-.guild-badge {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  font-size: 0.7rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-right: 0.5rem;
-}
-  /* === Календарь === */
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-.calendar-header h2 {
-  font-size: 1.5rem;
-  color: #e94560;
-  margin: 0;
-}
-.calendar-nav {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-.calendar-nav button {
-  background: #0f3460;
-  border: 1px solid #2a2a4a;
-  color: #e0e0e0;
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-.calendar-nav button:hover {
-  background: #e94560;
-  border-color: #e94560;
-}
-
-/* Переключение режимов */
-.view-switcher {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  justify-content: center;
-}
-.view-switcher button {
-  background: #16213e;
-  border: 1px solid #2a2a4a;
-  color: #e0e0e0;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: 0.3s;
-}
-.view-switcher button.active {
-  background: #e94560;
-  border-color: #e94560;
-  color: white;
-  font-weight: bold;
-}
-
-/* Сетка месяца */
-.month-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-.weekday-header {
-  color: #a0a0b0;
-  font-size: 0.8rem;
-  padding: 0.5rem 0;
-  font-weight: bold;
-}
-.day-cell {
-  background: #0f3460;
-  border-radius: 8px;
-  padding: 0.5rem;
-  min-height: 50px;
-  cursor: pointer;
-  position: relative;
-  transition: 0.2s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.day-cell:hover {
-  background: #1a1a3e;
-  box-shadow: 0 0 10px rgba(233,69,96,0.3);
-}
-.day-cell.today {
-  border: 2px solid #e94560;
-}
-.day-cell.other-month {
-  opacity: 0.4;
-}
-.day-number {
-  font-size: 0.9rem;
-  font-weight: bold;
-}
-.markers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  margin-top: 4px;
-  justify-content: center;
-}
-.marker {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #e94560;
-}
-.marker.completed {
-  background: #4ecca3;
-}
-.marker.planned {
-  background: #f5a623;
-}
-.marker.overdue {
-  background: #e94560;
-  box-shadow: 0 0 5px red;
-}
-
-/* Неделя и день */
-.week-list, .day-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.week-day-block, .day-hour-block {
-  background: #0f3460;
-  border-radius: 10px;
-  padding: 0.8rem;
-}
-.week-day-block h3 {
-  margin: 0 0 0.5rem 0;
-  color: #e94560;
-}
-.quest-item.mini {
-  background: #16213e;
-  border-radius: 8px;
-  padding: 0.6rem;
-  margin: 0.3rem 0;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.quest-item.mini .guild-badge {
-  transform: scale(0.8);
-}
-
-/* Фильтры гильдий */
-.guild-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
-  justify-content: center;
-}
-.guild-filter-btn {
-  background: #16213e;
-  border: 1px solid #2a2a4a;
-  color: #e0e0e0;
-  padding: 0.3rem 0.8rem;
-  border-radius: 15px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: 0.2s;
-}
-.guild-filter-btn.active {
-  background: #e94560;
-  border-color: #e94560;
-  color: white;
-  font-weight: bold;
-}
-  }
-  </style>
-</head>
-<body>
-  <div id="app">
-    <!-- Шапка -->
-    <header class="app-header">
-      <h1 class="logo">⚔️ LVL UP</h1>
-      <button id="menuToggle" class="btn-icon" aria-label="Меню">☰</button>
-    </header>
-
-    <!-- Навигация (боковая панель, скрыта по умолчанию) -->
-    <nav id="mainNav" class="main-nav hidden">
-      <ul>
-        <li data-screen="profile">🧙 Профиль</li>
-        <li data-screen="calendar">📅 Календарь</li>
-        <li data-screen="tasks">📋 Квесты</li>
-        <li data-screen="guilds">🛡️ Гильдии</li>
-        <li data-screen="goals">🎯 Эпик-квесты</li>
-        <li data-screen="notes">📝 Заметки</li>
-        <li data-screen="gallery">🖼️ Галерея</li>
-        <li data-screen="stats">📊 Статистика</li>
-        <li data-screen="settings">⚙️ Настройки</li>
-        <li data-screen="info">ℹ️ Инфо</li>
-      </ul>
-    </nav>
-
-    <!-- Основной контент -->
-    <main id="screenContainer">
-      <!-- Контент экранов будет рендериться динамически -->
-    </main>
-  </div>
-
-<script>
-  // Состояние календаря
-const CalendarState = {
-  currentDate: new Date(), // дата, которую мы просматриваем
-  view: 'month', // 'month', 'week', 'day'
-  selectedDay: null, // дата для просмотра дня
-  guildFilter: null // id гильдии или null (все)
-};
-  // === Гильдии ===
-  const GUILDS = [
-    { id: 'body', name: 'Тело', icon: '💪', color: '#e94560' },
-    { id: 'creativity', name: 'Творчество', icon: '🎨', color: '#f5a623' },
-    { id: 'business', name: 'Бизнес', icon: '💼', color: '#4a90e2' },
-    { id: 'habits', name: 'Привычки', icon: '🔄', color: '#7ed321' },
-    { id: 'oneoff', name: 'Одноразки', icon: '🗑️', color: '#b8b8b8' },
-    { id: 'travel', name: 'Путешествия', icon: '✈️', color: '#50e3c2' },
-    { id: 'debts', name: 'Долги', icon: '💰', color: '#f8e71c' },
-    { id: 'other', name: 'Другое', icon: '📦', color: '#9b9b9b' },
-    { id: 'nutrition', name: 'Питание', icon: '🍎', color: '#f06292' }
-  ];
-
-  // === Хранилище ===
-  const Storage = {
-    get(key, defaultValue = null) {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : defaultValue;
-    },
-    set(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
-  };
-
-  // === Игровое состояние ===
-  const GameState = {
-    player: {
-      name: 'Александр',
-      lvl: 1,
-      xp: 0.5,
-      streak: 0,
-      lastCompletedDate: null, // 'YYYY-MM-DD'
-      get xpToNext() {
-        return this.lvl * (this.lvl + 1) / 2;
-      },
-      get progress() {
-        const currentLvlTotal = (this.lvl - 1) * this.lvl / 2;
-        const needed = this.xpToNext - currentLvlTotal;
-        const currentXp = this.xp - currentLvlTotal;
-        return Math.min((currentXp / needed) * 100, 100).toFixed(0);
-      }
-    },
-    tasks: Storage.get('tasks', [])
-  };
-
-  // Сохраняем игрока и задачи
-  function savePlayer() {
-    Storage.set('player', GameState.player);
-  }
-  function saveTasks() {
-    Storage.set('tasks', GameState.tasks);
-  }
-
-  // === Навигация ===
-  const menuToggle = document.getElementById('menuToggle');
-  const mainNav = document.getElementById('mainNav');
-  const screenContainer = document.getElementById('screenContainer');
-
-  menuToggle.addEventListener('click', () => {
-    mainNav.classList.toggle('hidden');
-  });
-
-  document.querySelectorAll('.main-nav li').forEach(item => {
-    item.addEventListener('click', (e) => {
-      const screen = e.target.dataset.screen;
-      renderScreen(screen);
-      mainNav.classList.add('hidden');
-    });
-  });
-
-  function renderScreen(screen) {
-    switch (screen) {
-      case 'profile': renderProfile(); break;
-      case 'calendar': renderCalendar(); break;
-      case 'tasks': renderTasks(); break;
-      case 'guilds': renderGuilds(); break;
-      case 'goals': renderGoals(); break;
-      case 'notes': renderNotes(); break;
-      case 'gallery': renderGallery(); break;
-      case 'stats': renderStats(); break;
-      case 'settings': renderSettings(); break;
-      case 'info': renderInfo(); break;
-      default: renderProfile();
-    }
-  }
-
-  // === Профиль ===
-  function renderProfile() {
-    const p = GameState.player;
-    const html = `
-      <div class="profile-card">
-        <div class="avatar">🧙</div>
-        <h2>${p.name}</h2>
-        <p>Уровень ${p.lvl} · ${p.xp.toFixed(1)} XP</p>
-        <div class="xp-bar">
-          <div class="xp-fill" style="width: ${p.progress}%;"></div>
-        </div>
-        <p style="font-size:0.8rem;">До следующего уровня: ${p.progress}%</p>
-        <div class="stats-grid">
-          <div class="stat-item"><span class="stat-value">${GameState.tasks.filter(t => t.completed).length}</span><br>Выполнено</div>
-          <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥 Комбо</div>
-        </div>
-      </div>
-    `;
-    screenContainer.innerHTML = html;
-  }
-
-  // === Квесты ===
-  function renderTasks() {
-    const activeTasks = GameState.tasks.filter(t => !t.completed).sort((a, b) => {
-      if (a.date < b.date) return -1;
-      if (a.date > b.date) return 1;
-      return a.time.localeCompare(b.time);
-    });
-
-    const guildOptions = GUILDS.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('');
-
-    let tasksHtml = activeTasks.length === 0 
-      ? '<p style="text-align:center; margin-top:2rem;">Нет активных квестов. Создай первый!</p>'
-      : activeTasks.map(task => {
-          const guild = GUILDS.find(g => g.id === task.category) || GUILDS[7];
-          const today = new Date().toISOString().slice(0, 10);
-          const isFuture = task.date > today;
-          const disableComplete = isFuture || task.completed;
-          return `
-            <div class="quest-item ${task.completed ? 'completed' : ''}" style="border-left-color: ${guild.color};">
-              <div class="quest-info">
-                <div class="quest-title">
-                  <span class="guild-badge" style="background:${guild.color}; color:white;">${guild.icon} ${guild.name}</span>
-                  ${task.title}
-                </div>
-                <div class="quest-meta">
-                  📅 ${task.date} 🕒 ${task.time} · ⏱️ ${task.minutes} мин
-                  ${task.note ? `<br>📝 ${task.note}` : ''}
-                </div>
-              </div>
-              <div class="quest-actions">
-                <button ${disableComplete ? 'disabled' : ''} 
-                        onclick="completeQuest('${task.id}')">
-                  ✔ Выполнить
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-    const html = `
-      <button class="quest-form-toggle" onclick="toggleQuestForm()">➕ Новый квест</button>
-      <div id="questForm" class="quest-form">
-        <form onsubmit="addQuest(event)">
-          <label>Гильдия</label>
-          <select id="questCategory" required>${guildOptions}</select>
-          <label>Название</label>
-          <input type="text" id="questTitle" required placeholder="Что нужно сделать?">
-          <label>Продолжительность (мин)</label>
-          <input type="number" id="questMinutes" required min="1" value="30" placeholder="Минуты">
-          <label>Дата</label>
-          <input type="date" id="questDate" required>
-          <label>Время</label>
-          <input type="time" id="questTime" required>
-          <label>Заметка (опционально)</label>
-          <textarea id="questNote" rows="2" placeholder="Детали..."></textarea>
-          <button type="submit" class="btn" style="width:100%;">Создать квест</button>
-        </form>
-      </div>
-      <div class="quest-list">${tasksHtml}</div>
-    `;
-    screenContainer.innerHTML = html;
-
-    // Установим дату по умолчанию = сегодня
-    const dateInput = document.getElementById('questDate');
-    if (dateInput) {
-      dateInput.value = new Date().toISOString().slice(0, 10);
-    }
-    const timeInput = document.getElementById('questTime');
-    if (timeInput) {
-      timeInput.value = new Date().toTimeString().slice(0, 5);
-    }
-  }
-
-  function toggleQuestForm() {
-    const form = document.getElementById('questForm');
-    if (form) form.classList.toggle('active');
-  }
-
-  function addQuest(event) {
-    event.preventDefault();
-    const category = document.getElementById('questCategory').value;
-    const title = document.getElementById('questTitle').value.trim();
-    const minutes = parseInt(document.getElementById('questMinutes').value, 10);
-    const date = document.getElementById('questDate').value;
-    const time = document.getElementById('questTime').value;
-    const note = document.getElementById('questNote').value.trim();
-
-    if (!title || !date || !time || isNaN(minutes) || minutes <= 0) return;
-
-    const newQuest = {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-      category,
-      title,
-      minutes,
-      date,
-      time,
-      note,
-      completed: false,
-      dateCompleted: null,
-      createdAt: new Date().toISOString()
-    };
-
-    GameState.tasks.push(newQuest);
-    saveTasks();
-    renderTasks(); // обновим список
-  }
-
-  function completeQuest(id) {
-    const task = GameState.tasks.find(t => t.id === id);
-    if (!task || task.completed) return;
-
-    const today = new Date().toISOString().slice(0, 10);
-    if (task.date > today) {
-      alert('Этот квест запланирован на будущее, выполнить нельзя!');
-      return;
-    }
-
-    task.completed = true;
-    task.dateCompleted = today;
-
-    // Начисляем XP = минуты * 0.01
-    const gainedXp = task.minutes * 0.01;
-    GameState.player.xp += gainedXp;
-    checkLevelUp();
-
-    // Обновляем стрик
-    updateStreak(today);
-
-    saveTasks();
-    savePlayer();
-    renderTasks();
-  }
-
-  function updateStreak(today) {
-    const p = GameState.player;
-    const lastDate = p.lastCompletedDate;
-
-    if (lastDate === today) {
-      // Уже была выполнена задача сегодня, стрик не меняем
-      return;
-    }
-
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().slice(0, 10);
-
-    if (lastDate === yesterdayStr) {
-      p.streak += 1;
-    } else if (lastDate !== today) {
-      p.streak = 1; // сброс или начало нового
-    }
-
-    p.lastCompletedDate = today;
-    savePlayer();
-  }
-
-  function checkLevelUp() {
-    const p = GameState.player;
-    let neededForNext = (p.lvl + 1) * (p.lvl + 2) / 2;
-    while (p.xp >= neededForNext) {
-      p.lvl++;
-      neededForNext = (p.lvl + 1) * (p.lvl + 2) / 2;
-    }
-    savePlayer();
-  }
-
-  function getGuildColor(categoryId) {
-    const guild = GUILDS.find(g => g.id === categoryId);
-    return guild ? guild.color : '#9b9b9b';
-  }
-
-  // === Остальные экраны-заглушки ===
-  // === Календарь ===
-
-function renderCalendar() {
-  const { currentDate, view, selectedDay, guildFilter } = CalendarState;
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-
-  // Заголовок с навигацией
-  let headerHtml = '';
-  if (view === 'month') {
-    headerHtml = `<h2>${currentDate.toLocaleString('ru', { month: 'long' })} ${year}</h2>`;
-  } else if (view === 'week') {
-    const startOfWeek = getStartOfWeek(currentDate);
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(endOfWeek.getDate() + 6);
-    headerHtml = `<h2>Неделя ${startOfWeek.getDate()} – ${endOfWeek.getDate()} ${endOfWeek.toLocaleString('ru', { month: 'long' })} ${endOfWeek.getFullYear()}</h2>`;
-  } else if (view === 'day') {
-    const displayDate = selectedDay || currentDate;
-    headerHtml = `<h2>${displayDate.toLocaleDateString('ru', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</h2>`;
-  }
-
-  // Кнопки переключения вида
-  const viewSwitcher = `
-    <div class="view-switcher">
-      <button class="${view === 'month' ? 'active' : ''}" onclick="setCalendarView('month')">Месяц</button>
-      <button class="${view === 'week' ? 'active' : ''}" onclick="setCalendarView('week')">Неделя</button>
-      <button class="${view === 'day' ? 'active' : ''}" onclick="setCalendarView('day')">День</button>
-    </div>
-  `;
-
-  // Фильтр по гильдиям
-  const filterHtml = `
-    <div class="guild-filter">
-      <button class="guild-filter-btn ${guildFilter === null ? 'active' : ''}" onclick="setGuildFilter(null)">Все</button>
-      ${GUILDS.map(g => `
-        <button class="guild-filter-btn ${guildFilter === g.id ? 'active' : ''}" onclick="setGuildFilter('${g.id}')" style="border-color: ${g.color}; color: ${g.color};">
-          ${g.icon} ${g.name}
-        </button>
-      `).join('')}
-    </div>
-  `;
-
-  // Основное содержимое в зависимости от вида
-  let contentHtml = '';
-  if (view === 'month') {
-    contentHtml = renderMonthView(year, month, guildFilter);
-  } else if (view === 'week') {
-    contentHtml = renderWeekView(currentDate, guildFilter);
-  } else if (view === 'day') {
-    contentHtml = renderDayView(selectedDay || currentDate, guildFilter);
-  }
-
-  const html = `
-    <div class="calendar-header">
-      ${headerHtml}
-      <div class="calendar-nav">
-        <button onclick="navigateCalendar(-1)">◀</button>
-        <button onclick="navigateCalendar(1)">▶</button>
-        <button onclick="resetCalendarToday()">Сегодня</button>
-      </div>
-    </div>
-    ${viewSwitcher}
-    ${filterHtml}
-    ${contentHtml}
-  `;
-  screenContainer.innerHTML = html;
-}
-
-function setCalendarView(view) {
-  CalendarState.view = view;
-  if (view === 'day' && !CalendarState.selectedDay) {
-    CalendarState.selectedDay = new Date();
-  }
-  renderCalendar();
-}
-
-function setGuildFilter(guildId) {
-  CalendarState.guildFilter = guildId;
-  renderCalendar();
-}
-
-function navigateCalendar(delta) {
-  const { view, currentDate } = CalendarState;
-  if (view === 'month') {
-    currentDate.setMonth(currentDate.getMonth() + delta);
-  } else if (view === 'week') {
-    currentDate.setDate(currentDate.getDate() + delta * 7);
-  } else if (view === 'day') {
-    const d = CalendarState.selectedDay || currentDate;
-    d.setDate(d.getDate() + delta);
-    CalendarState.selectedDay = new Date(d);
-    CalendarState.currentDate = new Date(d); // синхронизируем
-    renderCalendar();
-    return;
-  }
-  CalendarState.currentDate = new Date(currentDate);
-  renderCalendar();
-}
-
-function resetCalendarToday() {
-  CalendarState.currentDate = new Date();
-  CalendarState.selectedDay = new Date();
-  renderCalendar();
-}
-
-function getStartOfWeek(date) {
-  const d = new Date(date);
-  const day = d.getDay(); // 0 - вс, 1 - пн ... 6 - сб
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // понедельник
-  return new Date(d.setDate(diff));
-}
-
-// Получить задачи, отфильтрованные по гильдии
-function getFilteredTasks(guildFilter) {
-  let tasks = GameState.tasks;
-  if (guildFilter) {
-    tasks = tasks.filter(t => t.category === guildFilter);
-  }
-  return tasks;
-}
-
-// Отрисовка месяца
-function renderMonthView(year, month, guildFilter) {
-  const tasks = getFilteredTasks(guildFilter);
-  const firstDay = new Date(year, month, 1).getDay(); // 0 вс
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const startDay = firstDay === 0 ? 6 : firstDay - 1; // переводим на пн=0
-
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
-
-  // Дни недели
-  const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-  let grid = '<div class="weekday-header">' + weekdays.map(d => `<div>${d}</div>`).join('') + '</div>';
-  grid += '<div class="month-grid">';
-
-  // Пустые ячейки до начала месяца
-  for (let i = 0; i < startDay; i++) {
-    grid += '<div class="day-cell other-month"></div>';
-  }
-
-  // Дни месяца
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day);
-    const dateStr = date.toISOString().slice(0,10);
-    const isToday = date.getTime() === today.getTime() && month === currentMonth && year === currentYear;
-    const cellClass = `day-cell ${isToday ? 'today' : ''}`;
-
-    // Собираем маркеры для этого дня
-    const dayTasks = tasks.filter(t => t.date === dateStr);
-    const markers = dayTasks.map(task => {
-      let cls = 'marker planned';
-      if (task.completed) cls = 'marker completed';
-      else if (task.date < today.toISOString().slice(0,10) && !task.completed) cls = 'marker overdue';
-      const color = getGuildColor(task.category);
-      return `<span class="${cls}" style="background: ${color};"></span>`;
-    }).join('');
-
-    grid += `
-      <div class="${cellClass}" onclick="goToDay('${dateStr}')">
-        <div class="day-number">${day}</div>
-        <div class="markers">${markers}</div>
-      </div>
-    `;
-  }
-
-  grid += '</div>';
-  return grid;
-}
-
-// Отрисовка недели
-function renderWeekView(date, guildFilter) {
-  const tasks = getFilteredTasks(guildFilter);
-  const startOfWeek = getStartOfWeek(date);
-  const weekDays = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startOfWeek);
-    d.setDate(d.getDate() + i);
-    weekDays.push(d);
-  }
-
-  let html = '<div class="week-list">';
-  weekDays.forEach(day => {
-    const dateStr = day.toISOString().slice(0,10);
-    const dayTasks = tasks.filter(t => t.date === dateStr);
-    const dayName = day.toLocaleDateString('ru', { weekday: 'short', day: 'numeric', month: 'short' });
-    html += `<div class="week-day-block">
-      <h3>${dayName}</h3>
-      ${dayTasks.length === 0 ? '<p style="color:#a0a0b0; font-size:0.8rem;">Нет задач</p>' : dayTasks.map(task => {
-        const guild = GUILDS.find(g => g.id === task.category) || GUILDS[7];
-        return `<div class="quest-item mini" style="border-left: 4px solid ${guild.color};">
-          <span class="guild-badge" style="background:${guild.color}; color:white;">${guild.icon}</span>
-          ${task.title} ${task.completed ? '✅' : ''}
-        </div>`;
-      }).join('')}
-    </div>`;
-  });
-  html += '</div>';
-  return html;
-}
-
-// Отрисовка дня (по часам, упрощённо)
-function renderDayView(date, guildFilter) {
-  const tasks = getFilteredTasks(guildFilter);
-  const dateStr = date.toISOString().slice(0,10);
-  const dayTasks = tasks.filter(t => t.date === dateStr);
-  dayTasks.sort((a, b) => a.time.localeCompare(b.time));
-
-  let html = '<div class="day-list">';
-  if (dayTasks.length === 0) {
-    html += '<p style="text-align:center; margin-top:2rem;">Нет задач на этот день.</p>';
-  } else {
-    dayTasks.forEach(task => {
-      const guild = GUILDS.find(g => g.id === task.category) || GUILDS[7];
-      html += `<div class="quest-item mini" style="border-left: 4px solid ${guild.color};">
-        <span class="guild-badge" style="background:${guild.color}; color:white;">${guild.icon}</span>
-        <div style="flex:1;">
-          <strong>${task.time}</strong> — ${task.title} ${task.completed ? '✅' : ''}
-          <div style="font-size:0.7rem; color:#a0a0b0;">${task.minutes} мин</div>
-        </div>
-      </div>`;
-    });
-  }
-  html += '</div>';
-  return html;
-}
-
-// Переход в день из месяца
-function goToDay(dateStr) {
-  CalendarState.selectedDay = new Date(dateStr);
-  CalendarState.view = 'day';
-  renderCalendar();
-}<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <title>LVL UP · RPG Planner</title>
   <style>
-    /* === Сброс и базовые стили === */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Segoe UI', system-ui, sans-serif;
     }
 
     body {
-      background: #0a0f1e;
-      color: #e0e0f0;
+      background: #0f0f1a;
+      color: #e0e0e0;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      transition: background 0.3s;
     }
 
     body.light {
-      background: #f0f2f5;
+      background: #f5f6fa;
       color: #1a1a2e;
     }
 
@@ -1041,35 +32,28 @@ function goToDay(dateStr) {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background: #0d1326;
-      box-shadow: 0 0 30px rgba(0,0,0,0.7);
+      background: #1a1a2e;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
       position: relative;
-      border-radius: 0;
-      overflow: hidden;
-      transition: background 0.3s, box-shadow 0.3s;
     }
 
     body.light #app {
       background: #ffffff;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
 
-    /* Шапка */
     .app-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 1rem 1.2rem;
-      background: linear-gradient(135deg, #1a1f3a 0%, #0f1433 100%);
+      background: #16213e;
       border-bottom: 2px solid #e94560;
-      box-shadow: 0 2px 10px rgba(233,69,96,0.3);
-      transition: background 0.3s, border-color 0.3s;
     }
 
     body.light .app-header {
-      background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+      background: #ffffff;
       border-bottom: 2px solid #e94560;
-      box-shadow: 0 2px 10px rgba(233,69,96,0.2);
     }
 
     .logo {
@@ -1077,41 +61,28 @@ function goToDay(dateStr) {
       font-weight: 800;
       color: #e94560;
       letter-spacing: 2px;
-      text-shadow: 0 0 12px rgba(233,69,96,0.7);
-      background: linear-gradient(45deg, #e94560, #ff6b6b);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
     }
 
     .btn-icon {
       background: none;
       border: none;
-      color: #e0e0f0;
+      color: #e0e0e0;
       font-size: 1.8rem;
       cursor: pointer;
-      transition: 0.3s;
     }
 
     body.light .btn-icon {
       color: #1a1a2e;
     }
 
-    .btn-icon:hover {
-      color: #e94560;
-      transform: scale(1.1);
-    }
-
-    /* Навигация */
     .main-nav {
-      background: #111832;
+      background: #16213e;
       border-bottom: 1px solid #2a2a4a;
-      padding: 0.8rem;
-      transition: background 0.3s;
+      padding: 0.6rem;
     }
 
     body.light .main-nav {
-      background: #f8f9fa;
+      background: #f0f0f5;
       border-bottom: 1px solid #ddd;
     }
 
@@ -1123,42 +94,38 @@ function goToDay(dateStr) {
       list-style: none;
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
+      gap: 0.4rem;
       justify-content: center;
     }
 
     .main-nav li {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(5px);
-      padding: 0.6rem 1.2rem;
-      border-radius: 25px;
+      background: rgba(255,255,255,0.08);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
       cursor: pointer;
-      transition: 0.3s;
-      border: 1px solid rgba(233,69,96,0.3);
-      font-size: 0.9rem;
+      transition: 0.2s;
+      border: 1px solid transparent;
+      font-size: 0.85rem;
       color: #c0c0d0;
     }
 
     body.light .main-nav li {
-      background: rgba(0,0,0,0.03);
-      border: 1px solid rgba(233,69,96,0.2);
+      background: #ffffff;
+      border-color: #ddd;
       color: #333;
     }
 
     .main-nav li:hover {
       border-color: #e94560;
       color: #e94560;
-      box-shadow: 0 0 15px rgba(233,69,96,0.6);
-      transform: translateY(-1px);
+      box-shadow: 0 0 8px rgba(233,69,96,0.5);
     }
 
-    /* Контент */
     #screenContainer {
       flex: 1;
       padding: 1.2rem;
       overflow-y: auto;
-      background: #0d1326;
-      transition: background 0.3s;
+      background: #1a1a2e;
     }
 
     body.light #screenContainer {
@@ -1167,42 +134,37 @@ function goToDay(dateStr) {
 
     /* Профиль */
     .profile-card {
-      background: linear-gradient(145deg, #151c34, #0d1326);
-      border-radius: 24px;
-      padding: 2rem 1.5rem;
+      background: #16213e;
+      border-radius: 20px;
+      padding: 1.8rem;
       text-align: center;
       margin-bottom: 1rem;
-      border: 1px solid rgba(233,69,96,0.2);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-      transition: background 0.3s, border-color 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     body.light .profile-card {
-      background: linear-gradient(145deg, #ffffff, #f3f4f6);
-      border: 1px solid rgba(233,69,96,0.2);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      background: #f9f9fb;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
     .avatar {
-      width: 90px;
-      height: 90px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #e94560, #b0304a);
+      background: #e94560;
       margin: 0 auto 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.8rem;
-      box-shadow: 0 0 20px rgba(233,69,96,0.5);
+      font-size: 2.5rem;
     }
 
     .xp-bar {
-      background: rgba(0,0,0,0.4);
-      height: 12px;
+      background: #0f0f1a;
+      height: 10px;
       border-radius: 10px;
-      margin: 0.8rem 0;
+      margin: 0.6rem 0;
       overflow: hidden;
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
     }
 
     body.light .xp-bar {
@@ -1212,101 +174,77 @@ function goToDay(dateStr) {
     .xp-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #e94560, #ff8c42);
+      background: #e94560;
       border-radius: 10px;
-      box-shadow: 0 0 10px #e94560;
-      transition: width 0.4s ease;
     }
 
     .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.8rem;
-      margin: 1.2rem 0;
+      gap: 0.6rem;
+      margin: 1rem 0;
     }
 
     .stat-item {
-      background: rgba(255,255,255,0.03);
-      padding: 1rem;
-      border-radius: 16px;
+      background: #0f0f1a;
+      padding: 0.8rem;
+      border-radius: 12px;
       text-align: center;
-      backdrop-filter: blur(5px);
-      border: 1px solid rgba(255,255,255,0.05);
     }
 
     body.light .stat-item {
-      background: rgba(0,0,0,0.02);
-      border: 1px solid rgba(0,0,0,0.05);
+      background: #e9ecef;
     }
 
     .stat-value {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: bold;
       color: #e94560;
-      text-shadow: 0 0 8px rgba(233,69,96,0.5);
     }
 
     .btn {
-      background: linear-gradient(135deg, #e94560, #c23152);
+      background: #e94560;
       border: none;
       color: white;
-      padding: 0.8rem 1.8rem;
-      border-radius: 30px;
-      font-size: 1rem;
+      padding: 0.7rem 1.5rem;
+      border-radius: 25px;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(233,69,96,0.4);
-      letter-spacing: 0.5px;
+      transition: 0.2s;
     }
 
     .btn:hover {
-      background: linear-gradient(135deg, #ff5a75, #e94560);
-      box-shadow: 0 6px 20px rgba(233,69,96,0.7);
-      transform: translateY(-2px);
+      background: #c23152;
     }
 
-    .btn:active {
-      transform: translateY(0);
+    .hidden {
+      display: none;
     }
 
-    /* Формы и элементы */
+    /* Квесты */
     .quest-form-toggle {
-      background: linear-gradient(135deg, #e94560, #c23152);
+      background: #e94560;
       border: none;
       color: white;
-      padding: 0.8rem 1.5rem;
-      border-radius: 30px;
+      padding: 0.7rem 1.2rem;
+      border-radius: 25px;
       font-size: 1rem;
-      font-weight: 600;
       cursor: pointer;
       width: 100%;
-      margin-bottom: 1.2rem;
-      transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(233,69,96,0.4);
-    }
-
-    .quest-form-toggle:hover {
-      box-shadow: 0 6px 20px rgba(233,69,96,0.7);
-      transform: translateY(-1px);
+      margin-bottom: 1rem;
     }
 
     .quest-form {
-      background: rgba(255,255,255,0.03);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 1.8rem;
-      margin-bottom: 2rem;
+      background: #16213e;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
       display: none;
-      border: 1px solid rgba(233,69,96,0.2);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-      transition: background 0.3s;
     }
 
     body.light .quest-form {
-      background: rgba(0,0,0,0.02);
-      border: 1px solid rgba(0,0,0,0.1);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      background: #f0f2f5;
     }
 
     .quest-form.active {
@@ -1317,64 +255,49 @@ function goToDay(dateStr) {
     .quest-form select,
     .quest-form textarea {
       width: 100%;
-      margin-bottom: 1rem;
-      padding: 0.8rem 1rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(0,0,0,0.3);
-      color: #e0e0f0;
+      margin-bottom: 0.8rem;
+      padding: 0.7rem;
+      border-radius: 10px;
+      border: 1px solid #2a2a4a;
+      background: #0f0f1a;
+      color: #e0e0e0;
       font-size: 1rem;
-      transition: 0.3s;
     }
 
     body.light .quest-form input,
     body.light .quest-form select,
     body.light .quest-form textarea {
-      background: rgba(0,0,0,0.05);
-      border: 1px solid #ddd;
-      color: #1a1a2e;
-    }
-
-    .quest-form input:focus,
-    .quest-form select:focus,
-    .quest-form textarea:focus {
-      border-color: #e94560;
-      box-shadow: 0 0 10px rgba(233,69,96,0.3);
-      outline: none;
+      background: #ffffff;
+      border: 1px solid #ccc;
+      color: #333;
     }
 
     .quest-form label {
       display: block;
       margin-bottom: 0.3rem;
-      font-weight: 600;
+      font-weight: bold;
       color: #e94560;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .quest-list {
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
+      gap: 0.6rem;
     }
 
     .quest-item {
-      background: rgba(255,255,255,0.03);
-      border-radius: 16px;
-      padding: 1rem 1.2rem;
+      background: #16213e;
+      border-radius: 12px;
+      padding: 1rem;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.8rem;
       border-left: 6px solid #e94560;
-      transition: 0.3s;
-      backdrop-filter: blur(5px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
     body.light .quest-item {
       background: #ffffff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
     .quest-item.completed {
@@ -1388,49 +311,39 @@ function goToDay(dateStr) {
     }
 
     .quest-title {
-      font-weight: 700;
+      font-weight: bold;
       font-size: 1.05rem;
-      margin-bottom: 0.3rem;
     }
 
     .quest-meta {
       font-size: 0.8rem;
-      color: #a0a0c0;
-    }
-
-    body.light .quest-meta {
-      color: #666;
+      color: #a0a0b0;
     }
 
     .quest-actions button {
       background: #e94560;
       border: none;
       color: white;
-      padding: 0.6rem 1.2rem;
-      border-radius: 25px;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
       cursor: pointer;
-      font-weight: 600;
-      transition: 0.3s;
-      box-shadow: 0 2px 8px rgba(233,69,96,0.4);
     }
 
     .quest-actions button:disabled {
       background: #555;
-      box-shadow: none;
       cursor: not-allowed;
     }
 
     .guild-badge {
       display: inline-block;
-      padding: 0.2rem 0.8rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
       font-weight: bold;
       text-transform: uppercase;
       margin-right: 0.5rem;
       background: #e94560;
       color: white;
-      letter-spacing: 0.5px;
     }
 
     /* Календарь */
@@ -1438,74 +351,79 @@ function goToDay(dateStr) {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
     }
 
     .calendar-header h2 {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       color: #e94560;
-      font-weight: 700;
     }
 
     .calendar-nav {
       display: flex;
-      gap: 0.5rem;
-      align-items: center;
+      gap: 0.4rem;
     }
 
     .calendar-nav button {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #e0e0f0;
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      color: #e0e0e0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 0.9rem;
-      transition: 0.3s;
     }
 
     body.light .calendar-nav button {
       background: #f0f0f0;
-      border: 1px solid #ddd;
-      color: #1a1a2e;
-    }
-
-    .calendar-nav button:hover {
-      background: #e94560;
-      border-color: #e94560;
-      color: white;
+      border-color: #ccc;
+      color: #333;
     }
 
     .view-switcher {
       display: flex;
       gap: 0.5rem;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
       justify-content: center;
     }
 
     .view-switcher button {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: #16213e;
+      border: 1px solid #2a2a4a;
       color: #c0c0d0;
-      padding: 0.6rem 1.2rem;
-      border-radius: 25px;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
       cursor: pointer;
-      font-size: 0.9rem;
-      transition: 0.3s;
-      font-weight: 600;
-    }
-
-    body.light .view-switcher button {
-      background: #f0f0f0;
-      border: 1px solid #ddd;
-      color: #333;
     }
 
     .view-switcher button.active {
       background: #e94560;
       border-color: #e94560;
       color: white;
-      box-shadow: 0 4px 12px rgba(233,69,96,0.5);
+    }
+
+    .guild-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+
+    .guild-filter-btn {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      color: #c0c0d0;
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .guild-filter-btn.active {
+      background: #e94560;
+      border-color: #e94560;
+      color: white;
     }
 
     .month-grid {
@@ -1517,60 +435,45 @@ function goToDay(dateStr) {
     }
 
     .weekday-header {
-      color: #a0a0c0;
-      font-size: 0.8rem;
-      padding: 0.5rem 0;
-      font-weight: 700;
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 4px;
       text-align: center;
+      color: #a0a0b0;
+      font-size: 0.8rem;
+      font-weight: bold;
       margin-bottom: 0.3rem;
     }
 
     .day-cell {
-      background: rgba(255,255,255,0.03);
-      border-radius: 12px;
+      background: #16213e;
+      border-radius: 8px;
       padding: 0.6rem 0.2rem;
-      min-height: 55px;
+      min-height: 50px;
       cursor: pointer;
-      position: relative;
       transition: 0.2s;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      border: 1px solid transparent;
     }
 
     body.light .day-cell {
       background: #f9f9fb;
     }
 
-    .day-cell:hover {
-      background: rgba(233,69,96,0.1);
-      border-color: #e94560;
-    }
-
     .day-cell.today {
       border: 2px solid #e94560;
-      box-shadow: 0 0 15px rgba(233,69,96,0.3);
     }
 
     .day-cell.other-month {
-      opacity: 0.3;
-    }
-
-    .day-number {
-      font-size: 0.9rem;
-      font-weight: bold;
-      margin-bottom: 4px;
+      opacity: 0.4;
     }
 
     .markers {
       display: flex;
       flex-wrap: wrap;
-      gap: 3px;
+      gap: 2px;
+      margin-top: 4px;
       justify-content: center;
     }
 
@@ -1578,161 +481,62 @@ function goToDay(dateStr) {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #e94560;
-    }
-
-    .marker.completed {
-      background: #4ecca3;
-      box-shadow: 0 0 6px #4ecca3;
-    }
-
-    .marker.planned {
-      background: #f5a623;
-    }
-
-    .marker.overdue {
-      background: #e94560;
-      box-shadow: 0 0 8px red;
-    }
-
-    .week-list, .day-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .week-day-block, .day-hour-block {
-      background: rgba(255,255,255,0.03);
-      border-radius: 16px;
-      padding: 1rem;
-      backdrop-filter: blur(5px);
-    }
-
-    body.light .week-day-block,
-    body.light .day-hour-block {
-      background: #f9f9fb;
-    }
-
-    .week-day-block h3 {
-      margin: 0 0 0.5rem 0;
-      color: #e94560;
-    }
-
-    .quest-item.mini {
-      background: rgba(0,0,0,0.2);
-      border-radius: 12px;
-      padding: 0.7rem;
-      margin: 0.4rem 0;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    body.light .quest-item.mini {
-      background: #ffffff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .guild-filter {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-bottom: 1.2rem;
-      justify-content: center;
-    }
-
-    .guild-filter-btn {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #c0c0d0;
-      padding: 0.4rem 1rem;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: 0.2s;
-      font-weight: 600;
-    }
-
-    body.light .guild-filter-btn {
-      background: #f0f0f0;
-      border: 1px solid #ddd;
-      color: #333;
-    }
-
-    .guild-filter-btn.active {
-      background: #e94560;
-      border-color: #e94560;
-      color: white;
-      box-shadow: 0 0 12px rgba(233,69,96,0.5);
     }
 
     /* Заметки */
     .notes-list {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.8rem;
     }
 
     .note-card {
-      background: rgba(255,255,255,0.03);
-      border-radius: 16px;
-      padding: 1.2rem;
+      background: #16213e;
+      border-radius: 12px;
+      padding: 1rem;
       border-left: 4px solid #e94560;
-      transition: 0.3s;
-      backdrop-filter: blur(5px);
     }
 
     body.light .note-card {
       background: #ffffff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
     .note-title {
-      font-weight: 700;
-      margin-bottom: 0.5rem;
+      font-weight: bold;
       color: #e94560;
-    }
-
-    .note-content {
-      color: #b0b0c0;
-      font-size: 0.9rem;
-    }
-
-    body.light .note-content {
-      color: #555;
+      margin-bottom: 0.4rem;
     }
 
     /* Настройки */
     .settings-section {
-      background: rgba(255,255,255,0.03);
-      border-radius: 20px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      backdrop-filter: blur(5px);
+      background: #16213e;
+      border-radius: 16px;
+      padding: 1.2rem;
+      margin-bottom: 1.2rem;
     }
 
     body.light .settings-section {
-      background: #f9f9fb;
+      background: #f0f2f5;
     }
 
     .settings-section h3 {
       color: #e94560;
-      margin-bottom: 1rem;
+      margin-bottom: 0.8rem;
     }
 
     .toggle-label {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 0.8rem 0;
+      margin: 0.5rem 0;
     }
 
     .switch {
       position: relative;
       display: inline-block;
-      width: 50px;
-      height: 28px;
+      width: 48px;
+      height: 26px;
     }
 
     .switch input {
@@ -1749,19 +553,19 @@ function goToDay(dateStr) {
       right: 0;
       bottom: 0;
       background-color: #2a2a4a;
-      transition: 0.4s;
+      transition: 0.3s;
       border-radius: 34px;
     }
 
     .slider:before {
       position: absolute;
       content: "";
-      height: 22px;
-      width: 22px;
+      height: 20px;
+      width: 20px;
       left: 3px;
       bottom: 3px;
       background-color: white;
-      transition: 0.4s;
+      transition: 0.3s;
       border-radius: 50%;
     }
 
@@ -1774,36 +578,23 @@ function goToDay(dateStr) {
     }
 
     .danger-btn {
-      background: #ff4444;
-      color: white;
+      background: #e94560;
     }
 
-    /* Адаптивность */
     @media (max-width: 480px) {
       .main-nav li {
         font-size: 0.75rem;
-        padding: 0.5rem 1rem;
-      }
-      .profile-card {
-        padding: 1.5rem 1rem;
-      }
-      .quest-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .quest-actions {
-        align-self: flex-end;
+        padding: 0.4rem 0.8rem;
       }
     }
   </style>
 </head>
-<body class="dark">
+<body>
   <div id="app">
     <header class="app-header">
       <h1 class="logo">⚔️ LVL UP</h1>
       <button id="menuToggle" class="btn-icon" aria-label="Меню">☰</button>
     </header>
-
     <nav id="mainNav" class="main-nav hidden">
       <ul>
         <li data-screen="profile">🧙 Профиль</li>
@@ -1818,12 +609,11 @@ function goToDay(dateStr) {
         <li data-screen="info">ℹ️ Инфо</li>
       </ul>
     </nav>
-
     <main id="screenContainer"></main>
   </div>
 
   <script>
-    // === Состояние календаря ===
+    // Состояния
     const CalendarState = {
       currentDate: new Date(),
       view: 'month',
@@ -1831,7 +621,6 @@ function goToDay(dateStr) {
       guildFilter: null
     };
 
-    // === Гильдии ===
     const GUILDS = [
       { id: 'body', name: 'Тело', icon: '💪', color: '#e94560' },
       { id: 'creativity', name: 'Творчество', icon: '🎨', color: '#f5a623' },
@@ -1844,18 +633,16 @@ function goToDay(dateStr) {
       { id: 'nutrition', name: 'Питание', icon: '🍎', color: '#f06292' }
     ];
 
-    // === Хранилище ===
     const Storage = {
-      get(key, defaultValue = null) {
+      get(key, def) {
         const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : defaultValue;
+        return raw ? JSON.parse(raw) : def;
       },
-      set(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
+      set(key, val) {
+        localStorage.setItem(key, JSON.stringify(val));
       }
     };
 
-    // === Игровое состояние ===
     const GameState = {
       player: {
         name: 'Александр',
@@ -1883,15 +670,11 @@ function goToDay(dateStr) {
 
     // Тема
     function applyTheme() {
-      if (GameState.settings.theme === 'light') {
-        document.body.classList.add('light');
-      } else {
-        document.body.classList.remove('light');
-      }
+      document.body.classList.toggle('light', GameState.settings.theme === 'light');
     }
     applyTheme();
 
-    // === Навигация ===
+    // Навигация
     const menuToggle = document.getElementById('menuToggle');
     const mainNav = document.getElementById('mainNav');
     const screenContainer = document.getElementById('screenContainer');
@@ -1921,30 +704,29 @@ function goToDay(dateStr) {
       }
     }
 
-    // === Профиль ===
+    // Профиль
     function renderProfile() {
       const p = GameState.player;
-      const html = `
+      screenContainer.innerHTML = `
         <div class="profile-card">
           <div class="avatar">🧙</div>
           <h2>${p.name}</h2>
-          <p style="font-size:1.1rem;">Ур. ${p.lvl} · ${p.xp.toFixed(1)} XP</p>
+          <p>Ур. ${p.lvl} · ${p.xp.toFixed(1)} XP</p>
           <div class="xp-bar"><div class="xp-fill" style="width:${p.progress}%"></div></div>
-          <p style="font-size:0.8rem; opacity:0.8;">До след. уровня: ${p.progress}%</p>
+          <p style="font-size:0.8rem;">До след. уровня: ${p.progress}%</p>
           <div class="stats-grid">
             <div class="stat-item"><span class="stat-value">${GameState.tasks.filter(t=>t.completed).length}</span><br>✅ Выполнено</div>
             <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥 Комбо</div>
           </div>
         </div>`;
-      screenContainer.innerHTML = html;
     }
 
-    // === Квесты ===
+    // Квесты
     function renderTasks() {
       const activeTasks = GameState.tasks.filter(t => !t.completed).sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
       const guildOptions = GUILDS.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('');
       const tasksHtml = activeTasks.length === 0
-        ? '<p style="text-align:center; margin-top:2rem; opacity:0.7;">Нет активных квестов</p>'
+        ? '<p style="text-align:center; opacity:0.7;">Нет активных квестов</p>'
         : activeTasks.map(task => {
             const guild = GUILDS.find(g => g.id === task.category) || GUILDS[7];
             const today = new Date().toISOString().slice(0,10);
@@ -1972,15 +754,16 @@ function goToDay(dateStr) {
           </form>
         </div>
         <div class="quest-list">${tasksHtml}</div>`;
-      const dateInput = document.getElementById('questDate');
-      if(dateInput) dateInput.value = new Date().toISOString().slice(0,10);
-      const timeInput = document.getElementById('questTime');
-      if(timeInput) timeInput.value = new Date().toTimeString().slice(0,5);
+      document.getElementById('questDate').value = new Date().toISOString().slice(0,10);
+      document.getElementById('questTime').value = new Date().toTimeString().slice(0,5);
     }
 
-    function toggleQuestForm(){ document.getElementById('questForm')?.classList.toggle('active'); }
+    // Глобальные функции для onclick
+    window.toggleQuestForm = function() {
+      document.getElementById('questForm')?.classList.toggle('active');
+    };
 
-    function addQuest(event){
+    window.addQuest = function(event) {
       event.preventDefault();
       const q = {
         id: Date.now().toString(36)+Math.random().toString(36).substring(2),
@@ -1998,9 +781,9 @@ function goToDay(dateStr) {
       GameState.tasks.push(q);
       saveTasks();
       renderTasks();
-    }
+    };
 
-    function completeQuest(id){
+    window.completeQuest = function(id) {
       const task = GameState.tasks.find(t=>t.id===id);
       if(!task || task.completed) return;
       const today = new Date().toISOString().slice(0,10);
@@ -2012,9 +795,9 @@ function goToDay(dateStr) {
       updateStreak(today);
       saveTasks(); savePlayer();
       renderTasks();
-    }
+    };
 
-    function updateStreak(today){
+    function updateStreak(today) {
       const p = GameState.player;
       if(p.lastCompletedDate === today) return;
       const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
@@ -2024,43 +807,100 @@ function goToDay(dateStr) {
       savePlayer();
     }
 
-    function checkLevelUp(){
+    function checkLevelUp() {
       const p = GameState.player;
       let needed = (p.lvl+1)*(p.lvl+2)/2;
       while(p.xp >= needed){ p.lvl++; needed = (p.lvl+1)*(p.lvl+2)/2; }
       savePlayer();
     }
 
-    function getGuildColor(id){ return (GUILDS.find(g=>g.id===id)||{}).color || '#9b9b9b'; }
+    function getGuildColor(id) { return (GUILDS.find(g=>g.id===id)||{}).color || '#9b9b9b'; }
 
-    // === Календарь (без изменений в логике, только косметика) ===
+    // Календарь
+    window.setCalendarView = function(view) {
+      CalendarState.view = view;
+      if(view==='day' && !CalendarState.selectedDay) CalendarState.selectedDay = new Date();
+      renderCalendar();
+    };
+
+    window.setGuildFilter = function(id) {
+      CalendarState.guildFilter = id;
+      renderCalendar();
+    };
+
+    window.navigateCalendar = function(delta) {
+      const {view, currentDate} = CalendarState;
+      if(view==='month') currentDate.setMonth(currentDate.getMonth()+delta);
+      else if(view==='week') currentDate.setDate(currentDate.getDate()+delta*7);
+      else {
+        const d = CalendarState.selectedDay || currentDate;
+        d.setDate(d.getDate()+delta);
+        CalendarState.selectedDay = new Date(d);
+        CalendarState.currentDate = new Date(d);
+        renderCalendar();
+        return;
+      }
+      CalendarState.currentDate = new Date(currentDate);
+      renderCalendar();
+    };
+
+    window.resetCalendarToday = function() {
+      CalendarState.currentDate = new Date();
+      CalendarState.selectedDay = new Date();
+      renderCalendar();
+    };
+
+    window.goToDay = function(dateStr) {
+      CalendarState.selectedDay = new Date(dateStr);
+      CalendarState.view = 'day';
+      renderCalendar();
+    };
+
+    function getStartOfWeek(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      d.setDate(d.getDate() - (day===0?6:day-1));
+      return d;
+    }
+
+    function getFilteredTasks(filter) {
+      let tasks = GameState.tasks;
+      if(filter) tasks = tasks.filter(t=>t.category===filter);
+      return tasks;
+    }
+
     function renderCalendar() {
       const { currentDate, view, selectedDay, guildFilter } = CalendarState;
       const year = currentDate.getFullYear(), month = currentDate.getMonth();
       let headerHtml = '';
       if (view === 'month') headerHtml = `<h2>${currentDate.toLocaleString('ru',{month:'long'})} ${year}</h2>`;
       else if (view === 'week') {
-        const s = getStartOfWeek(currentDate), e = new Date(s); e.setDate(e.getDate()+6);
-        headerHtml = `<h2>${s.getDate()}–${e.getDate()} ${e.toLocaleString('ru',{month:'long'})} ${e.getFullYear()}</h2>`;
+        const start = getStartOfWeek(currentDate);
+        const end = new Date(start); end.setDate(end.getDate()+6);
+        headerHtml = `<h2>${start.getDate()}–${end.getDate()} ${end.toLocaleString('ru',{month:'long'})} ${end.getFullYear()}</h2>`;
       } else {
         const d = selectedDay || currentDate;
         headerHtml = `<h2>${d.toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</h2>`;
       }
+
       const viewSwitcher = `
         <div class="view-switcher">
           <button class="${view==='month'?'active':''}" onclick="setCalendarView('month')">Месяц</button>
           <button class="${view==='week'?'active':''}" onclick="setCalendarView('week')">Неделя</button>
           <button class="${view==='day'?'active':''}" onclick="setCalendarView('day')">День</button>
         </div>`;
+
       const filterHtml = `
         <div class="guild-filter">
           <button class="guild-filter-btn ${guildFilter===null?'active':''}" onclick="setGuildFilter(null)">Все</button>
-          ${GUILDS.map(g=>`<button class="guild-filter-btn ${guildFilter===g.id?'active':''}" onclick="setGuildFilter('${g.id}')" style="border-color:${g.color}; color:${guildFilter===g.id?'white':g.color}">${g.icon} ${g.name}</button>`).join('')}
+          ${GUILDS.map(g => `<button class="guild-filter-btn ${guildFilter===g.id?'active':''}" onclick="setGuildFilter('${g.id}')">${g.icon} ${g.name}</button>`).join('')}
         </div>`;
+
       let content = '';
       if (view === 'month') content = renderMonthView(year, month, guildFilter);
       else if (view === 'week') content = renderWeekView(currentDate, guildFilter);
       else content = renderDayView(selectedDay || currentDate, guildFilter);
+
       screenContainer.innerHTML = `
         <div class="calendar-header">${headerHtml}
           <div class="calendar-nav">
@@ -2068,97 +908,92 @@ function goToDay(dateStr) {
             <button onclick="navigateCalendar(1)">▶</button>
             <button onclick="resetCalendarToday()">Сегодня</button>
           </div>
-        </div>${viewSwitcher}${filterHtml}${content}`;
+        </div>
+        ${viewSwitcher}${filterHtml}${content}`;
     }
 
-    function setCalendarView(v){ CalendarState.view=v; if(v==='day'&&!CalendarState.selectedDay) CalendarState.selectedDay=new Date(); renderCalendar(); }
-    function setGuildFilter(id){ CalendarState.guildFilter=id; renderCalendar(); }
-    function navigateCalendar(d){
-      const {view, currentDate} = CalendarState;
-      if(view==='month') currentDate.setMonth(currentDate.getMonth()+d);
-      else if(view==='week') currentDate.setDate(currentDate.getDate()+d*7);
-      else {
-        const date = CalendarState.selectedDay || currentDate;
-        date.setDate(date.getDate()+d);
-        CalendarState.selectedDay = new Date(date);
-        CalendarState.currentDate = new Date(date);
-        renderCalendar(); return;
-      }
-      CalendarState.currentDate = new Date(currentDate);
-      renderCalendar();
-    }
-    function resetCalendarToday(){ CalendarState.currentDate=new Date(); CalendarState.selectedDay=new Date(); renderCalendar(); }
-    function getStartOfWeek(d){ const date=new Date(d); const day=date.getDay(); date.setDate(date.getDate()-(day===0?6:day-1)); return date; }
-    function getFilteredTasks(filter){ let tasks=GameState.tasks; if(filter) tasks=tasks.filter(t=>t.category===filter); return tasks; }
-    function renderMonthView(y,m,filter){
-      const tasks=getFilteredTasks(filter);
-      const firstDay=new Date(y,m,1).getDay(), daysInMonth=new Date(y,m+1,0).getDate();
-      const startDay=firstDay===0?6:firstDay-1;
-      const today=new Date(); today.setHours(0,0,0,0);
-      const weekdays=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-      let grid='<div class="weekday-header">'+weekdays.map(d=>`<div>${d}</div>`).join('')+'</div><div class="month-grid">';
-      for(let i=0;i<startDay;i++) grid+='<div class="day-cell other-month"></div>';
-      for(let day=1;day<=daysInMonth;day++){
-        const date=new Date(y,m,day), dateStr=date.toISOString().slice(0,10);
-        const isToday=date.getTime()===today.getTime() && m===today.getMonth() && y===today.getFullYear();
-        const dayTasks=tasks.filter(t=>t.date===dateStr);
-        const markers=dayTasks.map(task=>{
-          let cls='marker planned';
-          if(task.completed) cls='marker completed';
-          else if(task.date < today.toISOString().slice(0,10)) cls='marker overdue';
+    function renderMonthView(year, month, filter) {
+      const tasks = getFilteredTasks(filter);
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month+1, 0).getDate();
+      const startDay = firstDay === 0 ? 6 : firstDay-1;
+      const today = new Date(); today.setHours(0,0,0,0);
+      const weekdays = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+      let grid = `<div class="weekday-header">${weekdays.map(d=>`<div>${d}</div>`).join('')}</div><div class="month-grid">`;
+      for (let i=0; i<startDay; i++) grid += '<div class="day-cell other-month"></div>';
+      for (let day=1; day<=daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dateStr = date.toISOString().slice(0,10);
+        const isToday = date.getTime()===today.getTime() && month===today.getMonth() && year===today.getFullYear();
+        const dayTasks = tasks.filter(t=>t.date===dateStr);
+        const markers = dayTasks.map(task=>{
+          let cls = 'marker';
+          if(task.completed) cls += ' completed';
+          else if(task.date < today.toISOString().slice(0,10)) cls += ' overdue';
+          else cls += ' planned';
           return `<span class="${cls}" style="background:${getGuildColor(task.category)}"></span>`;
         }).join('');
-        grid+=`<div class="day-cell ${isToday?'today':''}" onclick="goToDay('${dateStr}')"><div class="day-number">${day}</div><div class="markers">${markers}</div></div>`;
+        grid += `<div class="day-cell ${isToday?'today':''}" onclick="goToDay('${dateStr}')"><div class="day-number">${day}</div><div class="markers">${markers}</div></div>`;
       }
-      return grid+'</div>';
+      return grid + '</div>';
     }
-    function renderWeekView(date,filter){
-      const tasks=getFilteredTasks(filter), start=getStartOfWeek(date);
-      let html='<div class="week-list">';
-      for(let i=0;i<7;i++){
-        const d=new Date(start); d.setDate(d.getDate()+i);
-        const dateStr=d.toISOString().slice(0,10), dayTasks=tasks.filter(t=>t.date===dateStr);
-        html+=`<div class="week-day-block"><h3>${d.toLocaleDateString('ru',{weekday:'short',day:'numeric',month:'short'})}</h3>`;
-        html+=dayTasks.length? dayTasks.map(task=>`<div class="quest-item mini" style="border-left:4px solid ${getGuildColor(task.category)}"><span class="guild-badge" style="background:${getGuildColor(task.category)}">${(GUILDS.find(g=>g.id===task.category)||{}).icon}</span>${task.title} ${task.completed?'✅':''}</div>`).join('') : '<p style="opacity:0.6;">Нет задач</p>';
-        html+='</div>';
-      }
-      return html+'</div>';
-    }
-    function renderDayView(date,filter){
-      const tasks=getFilteredTasks(filter).filter(t=>t.date===date.toISOString().slice(0,10)).sort((a,b)=>a.time.localeCompare(b.time));
-      let html='<div class="day-list">';
-      if(!tasks.length) html+='<p style="text-align:center; opacity:0.6;">Нет задач</p>';
-      else tasks.forEach(task=>{
-        html+=`<div class="quest-item mini" style="border-left:4px solid ${getGuildColor(task.category)}"><span class="guild-badge" style="background:${getGuildColor(task.category)}">${(GUILDS.find(g=>g.id===task.category)||{}).icon}</span><div style="flex:1"><strong>${task.time}</strong> — ${task.title} ${task.completed?'✅':''}<div style="font-size:0.7rem; opacity:0.7;">${task.minutes} мин</div></div></div>`;
-      });
-      return html+'</div>';
-    }
-    function goToDay(dateStr){ CalendarState.selectedDay=new Date(dateStr); CalendarState.view='day'; renderCalendar(); }
 
-    // === Заметки ===
+    function renderWeekView(date, filter) {
+      const tasks = getFilteredTasks(filter);
+      const start = getStartOfWeek(date);
+      let html = '<div class="week-list">';
+      for (let i=0; i<7; i++) {
+        const d = new Date(start); d.setDate(d.getDate()+i);
+        const dateStr = d.toISOString().slice(0,10);
+        const dayTasks = tasks.filter(t=>t.date===dateStr);
+        html += `<div class="week-day-block"><h3>${d.toLocaleDateString('ru',{weekday:'short',day:'numeric',month:'short'})}</h3>`;
+        html += dayTasks.length ? dayTasks.map(task => `
+          <div class="quest-item mini" style="border-left:4px solid ${getGuildColor(task.category)}">
+            <span class="guild-badge" style="background:${getGuildColor(task.category)}">${(GUILDS.find(g=>g.id===task.category)||{}).icon}</span>
+            ${task.title} ${task.completed?'✅':''}
+          </div>`).join('') : '<p style="opacity:0.6;">Нет задач</p>';
+        html += '</div>';
+      }
+      return html + '</div>';
+    }
+
+    function renderDayView(date, filter) {
+      const tasks = getFilteredTasks(filter).filter(t=>t.date===date.toISOString().slice(0,10)).sort((a,b)=>a.time.localeCompare(b.time));
+      let html = '<div class="day-list">';
+      if(!tasks.length) html += '<p style="text-align:center; opacity:0.6;">Нет задач</p>';
+      else tasks.forEach(task => {
+        html += `<div class="quest-item mini" style="border-left:4px solid ${getGuildColor(task.category)}">
+          <span class="guild-badge" style="background:${getGuildColor(task.category)}">${(GUILDS.find(g=>g.id===task.category)||{}).icon}</span>
+          <div style="flex:1"><strong>${task.time}</strong> — ${task.title} ${task.completed?'✅':''}<div style="font-size:0.7rem; opacity:0.7;">${task.minutes} мин</div></div>
+        </div>`;
+      });
+      return html + '</div>';
+    }
+
+    // Заметки
     function renderNotes() {
       const notes = GameState.notes.sort((a,b)=> new Date(b.updatedAt||b.createdAt) - new Date(a.updatedAt||a.createdAt));
-      const list = notes.length ? notes.map(note=>`
+      const list = notes.length ? notes.map(note => `
         <div class="note-card">
           <div class="note-title">${note.title}</div>
           <div class="note-content">${note.content.replace(/\n/g,'<br>')}</div>
-          <div style="display:flex; gap:0.5rem; margin-top:0.8rem;">
-            <button class="btn" style="padding:0.3rem 1rem; font-size:0.8rem;" onclick="editNote('${note.id}')">✏️</button>
-            <button class="btn danger-btn" style="padding:0.3rem 1rem; font-size:0.8rem;" onclick="deleteNote('${note.id}')">🗑️</button>
+          <div style="margin-top:0.8rem; display:flex; gap:0.5rem;">
+            <button class="btn" onclick="editNote('${note.id}')">✏️</button>
+            <button class="btn danger-btn" onclick="deleteNote('${note.id}')">🗑️</button>
           </div>
         </div>`).join('') : '<p style="text-align:center; opacity:0.7;">Нет заметок</p>';
       screenContainer.innerHTML = `
         <button class="quest-form-toggle" onclick="showNoteForm()">➕ Новая заметка</button>
         <div id="noteForm" class="quest-form" style="display:none;">
-          <input type="text" id="noteTitle" placeholder="Заголовок заметки" required>
-          <textarea id="noteContent" rows="4" placeholder="Текст заметки..."></textarea>
+          <input type="text" id="noteTitle" placeholder="Заголовок" required>
+          <textarea id="noteContent" rows="4" placeholder="Текст..."></textarea>
           <input type="hidden" id="editNoteId">
           <button class="btn" style="width:100%;" onclick="saveNote()">Сохранить</button>
         </div>
         <div class="notes-list">${list}</div>`;
     }
 
-    window.showNoteForm = function(id=null) {
+    window.showNoteForm = function(id) {
       const form = document.getElementById('noteForm');
       form.style.display = 'block';
       if (id) {
@@ -2182,7 +1017,12 @@ function goToDay(dateStr) {
         const note = GameState.notes.find(n=>n.id===editId);
         note.title = title; note.content = content; note.updatedAt = new Date().toISOString();
       } else {
-        GameState.notes.push({ id: Date.now().toString(36)+Math.random().toString(36).substring(2), title, content, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+        GameState.notes.push({
+          id: Date.now().toString(36)+Math.random().toString(36).substring(2),
+          title, content,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
       }
       saveNotes();
       renderNotes();
@@ -2195,7 +1035,7 @@ function goToDay(dateStr) {
       renderNotes();
     };
 
-    // === Настройки ===
+    // Настройки
     function renderSettings() {
       const isLight = GameState.settings.theme === 'light';
       screenContainer.innerHTML = `
@@ -2203,18 +1043,21 @@ function goToDay(dateStr) {
           <h3>🎨 Оформление</h3>
           <label class="toggle-label">
             <span>Тёмная тема</span>
-            <label class="switch"><input type="checkbox" id="themeToggle" ${isLight?'':'checked'} onchange="toggleTheme()"><span class="slider"></span></label>
+            <label class="switch">
+              <input type="checkbox" id="themeToggle" ${isLight?'':'checked'} onchange="toggleTheme()">
+              <span class="slider"></span>
+            </label>
           </label>
         </div>
         <div class="settings-section">
           <h3>💾 Данные</h3>
-          <button class="btn" style="width:100%; margin-bottom:0.8rem;" onclick="exportData()">📤 Экспорт данных</button>
-          <button class="btn" style="width:100%; margin-bottom:0.8rem;" onclick="importDataPrompt()">📥 Импорт данных</button>
+          <button class="btn" style="width:100%; margin-bottom:0.6rem;" onclick="exportData()">📤 Экспорт</button>
+          <button class="btn" style="width:100%; margin-bottom:0.6rem;" onclick="importDataPrompt()">📥 Импорт</button>
           <button class="btn danger-btn" style="width:100%;" onclick="clearAllData()">🗑️ Очистить всё</button>
         </div>
         <div class="settings-section">
           <h3>ℹ️ О приложении</h3>
-          <p style="opacity:0.8;">LVL UP v0.5 · RPG-планировщик<br>Санька и Дэн AI</p>
+          <p>LVL UP v0.5<br>Саша и Дэн AI</p>
         </div>`;
     }
 
@@ -2226,28 +1069,32 @@ function goToDay(dateStr) {
 
     window.exportData = function() {
       const data = { player: GameState.player, tasks: GameState.tasks, notes: GameState.notes, settings: GameState.settings };
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'lvlup_backup.json'; a.click();
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'lvlup_backup.json';
+      a.click();
     };
 
     window.importDataPrompt = function() {
-      const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
       input.onchange = e => {
         const file = e.target.files[0];
         const reader = new FileReader();
-        reader.onload = event => {
+        reader.onload = ev => {
           try {
-            const data = JSON.parse(event.target.result);
-            if (data.player) GameState.player = data.player;
-            if (data.tasks) GameState.tasks = data.tasks;
-            if (data.notes) GameState.notes = data.notes;
-            if (data.settings) GameState.settings = data.settings;
+            const data = JSON.parse(ev.target.result);
+            if(data.player) GameState.player = data.player;
+            if(data.tasks) GameState.tasks = data.tasks;
+            if(data.notes) GameState.notes = data.notes;
+            if(data.settings) GameState.settings = data.settings;
             savePlayer(); saveTasks(); saveNotes(); saveSettings();
             applyTheme();
             alert('Данные импортированы!');
             renderScreen('profile');
-          } catch(e) { alert('Ошибка импорта'); }
+          } catch(ex) { alert('Ошибка импорта'); }
         };
         reader.readAsText(file);
       };
@@ -2255,43 +1102,25 @@ function goToDay(dateStr) {
     };
 
     window.clearAllData = function() {
-      if (confirm('Точно удалить все данные? Это необратимо!')) {
+      if(confirm('Удалить ВСЕ данные?')) {
         localStorage.clear();
         location.reload();
       }
     };
 
-    // Остальные заглушки
-    function renderGuilds() { screenContainer.innerHTML = `<h2>🛡️ Гильдии</h2>${GUILDS.map(g=>`<p style="color:${g.color}">${g.icon} ${g.name}</p>`).join('')}<p style="opacity:0.7;">Кастомизация позже</p>`; }
-    function renderGoals() { screenContainer.innerHTML = '<h2>🎯 Эпик-квесты</h2><p style="opacity:0.7;">Цели с наградой +1 XP</p>'; }
-    function renderGallery() { screenContainer.innerHTML = '<h2>🖼️ Галерея</h2><p style="opacity:0.7;">Фото успехов</p>'; }
-    function renderStats() { screenContainer.innerHTML = '<h2>📊 Статистика</h2><p style="opacity:0.7;">Графики позже</p>'; }
-    function renderInfo() { screenContainer.innerHTML = '<h2>ℹ️ Инфо</h2><p style="opacity:0.7;">РПГ-система: LVL = N*(N+1)/2 XP, стрики, комбо. Гильдии — категории задач.</p>'; }
+    // Заглушки
+    function renderGuilds() {
+      screenContainer.innerHTML = `<h2>🛡️ Гильдии</h2>${GUILDS.map(g=>`<p style="color:${g.color}">${g.icon} ${g.name}</p>`).join('')}<p style="opacity:0.7;">Кастомизация позже</p>`;
+    }
+    function renderGoals() { screenContainer.innerHTML = '<h2>🎯 Эпик-квесты</h2><p>Цели с наградой +1 XP</p>'; }
+    function renderGallery() { screenContainer.innerHTML = '<h2>🖼️ Галерея</h2><p>Фото успехов</p>'; }
+    function renderStats() { screenContainer.innerHTML = '<h2>📊 Статистика</h2><p>Графики позже</p>'; }
+    function renderInfo() { screenContainer.innerHTML = '<h2>ℹ️ Инфо</h2><p>РПГ-система, стрики, комбо.</p>'; }
 
     // Инициализация
     const savedPlayer = Storage.get('player');
     if (savedPlayer) GameState.player = { ...GameState.player, ...savedPlayer };
     renderScreen('profile');
   </script>
-</body>
-</html>
-  function renderGuilds() { 
-    const guildList = GUILDS.map(g => `<p style="color:${g.color}">${g.icon} ${g.name}</p>`).join('');
-    screenContainer.innerHTML = `<h2>🛡️ Гильдии</h2>${guildList}<p>Кастомизация позже.</p>`; 
-  }
-  function renderGoals() { screenContainer.innerHTML = '<h2>🎯 Эпик-квесты</h2><p>Цели с наградой +1 XP.</p>'; }
-  function renderNotes() { screenContainer.innerHTML = '<h2>📝 Заметки</h2><p>Заметки (в разработке).</p>'; }
-  function renderGallery() { screenContainer.innerHTML = '<h2>🖼️ Галерея</h2><p>Фото успехов.</p>'; }
-  function renderStats() { screenContainer.innerHTML = '<h2>📊 Статистика</h2><p>Графики позже.</p>'; }
-  function renderSettings() { screenContainer.innerHTML = '<h2>⚙️ Настройки</h2><p>Темы, экспорт/импорт.</p>'; }
-  function renderInfo() { screenContainer.innerHTML = '<h2>ℹ️ Инфо</h2><p>Описание РПГ-системы.</p>'; }
-
-  // === Инициализация ===
-  const savedPlayer = Storage.get('player');
-  if (savedPlayer) {
-    GameState.player = { ...GameState.player, ...savedPlayer };
-  }
-  renderScreen('profile');
-</script>
 </body>
 </html>
