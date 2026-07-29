@@ -3,1055 +3,423 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>LVL UP · RPG Planner</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+  <title>LVL UP • RPG Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=Philosopher&family=Playfair+Display&display=swap" rel="stylesheet">
   <style>
-    /* === БАЗОВЫЕ ПЕРЕМЕННЫЕ (светлая тема по умолчанию) === */
     :root {
-      --bg: #f8f9fa;
-      --surface: #ffffff;
-      --primary: #007aff;
-      --secondary: #5856d6;
-      --text: #1d1d1f;
-      --text-secondary: #6c757d;
-      --border: #dee2e6;
-      --shadow: 0 4px 12px rgba(0,0,0,0.05);
-      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --button-bg: #007aff;
-      --button-text: #ffffff;
-      --radius: 16px;
-      --small-radius: 10px;
+      --bg: #F5FBF8;
+      --surface: #FFFFFF;
+      --primary: #7EC8A0;
+      --secondary: #B8E6CF;
+      --text: #2C3E35;
+      --text-light: #6B7D74;
+      --border: #d0e0d8;
+      --shadow: 0 4px 16px rgba(126, 200, 160, 0.08);
+      --radius: 18px;
+      --font: 'Inter', system-ui, sans-serif;
     }
 
-    body.theme-dark {
-      --bg: #1c1c1e;
-      --surface: #2c2c2e;
-      --primary: #0a84ff;
-      --secondary: #5e5ce6;
-      --text: #e5e5ea;
-      --text-secondary: #98989d;
-      --border: #48484a;
-      --shadow: 0 4px 12px rgba(0,0,0,0.3);
-      --button-bg: #0a84ff;
-      --button-text: #ffffff;
+    body.theme-mint {
+      --bg: #F5FBF8; --surface: #FFFFFF; --primary: #7EC8A0; --secondary: #B8E6CF;
+      --text: #2C3E35; --text-light: #6B7D74; --border: #d0e0d8;
+    }
+    body.theme-pearl {
+      --bg: #FBF9F6; --surface: #FFFFFF; --primary: #C8B8A8; --secondary: #E8DFD5;
+      --text: #3D3530; --text-light: #8E857E; --border: #e2dcd5;
+    }
+    body.theme-steel {
+      --bg: #F2F4F7; --surface: #FFFFFF; --primary: #5C6F8C; --secondary: #8FA3BF;
+      --text: #1E2633; --text-light: #6B7B8D; --border: #d6dce2;
+    }
+    body.theme-nettle {
+      --bg: #F4F3EE; --surface: #FFFFFF; --primary: #5C7A4A; --secondary: #9BB080;
+      --text: #2B3027; --text-light: #7B8073; --border: #d8ddd2;
+    }
+    body.theme-first_snow {
+      --bg: #F8FAFC; --surface: #FFFFFF; --primary: #B0C4DE; --secondary: #D4DFEB;
+      --text: #2D3748; --text-light: #7B8794; --border: #e2e8f0;
+    }
+    body.theme-instinct {
+      --bg: #FCF9F5; --surface: #FFFFFF; --primary: #D4845A; --secondary: #E8C4A8;
+      --text: #3A2E28; --text-light: #8E7B72; --border: #e7dbcf;
     }
 
-    body.theme-tron {
-      --bg: #03050a;
-      --surface: #0d111c;
-      --primary: #00ffff;
-      --secondary: #ff00ff;
-      --text: #e0f0ff;
-      --text-secondary: #aaa;
-      --border: #00ffff44;
-      --shadow: 0 0 15px #00ffff33;
-      --font: 'Orbitron', sans-serif;
-      --button-bg: transparent;
-      --button-text: #00ffff;
-      --radius: 8px;
-      --small-radius: 4px;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: var(--font);
-      transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding-bottom: 80px;
+      background: var(--bg); color: var(--text); font-family: var(--font);
+      min-height: 100vh; display: flex; justify-content: center; align-items: flex-start;
+      padding-bottom: 90px; transition: background 0.4s, color 0.4s;
     }
-
     #app {
-      width: 100%;
-      max-width: 540px;
-      min-height: 100vh;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-      border-radius: var(--radius);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      border: 1px solid var(--border);
+      width: 100%; max-width: 520px; min-height: 100vh;
+      background: var(--surface); box-shadow: var(--shadow);
+      border-radius: var(--radius); display: flex; flex-direction: column; position: relative;
     }
-
-    /* === ШАПКА === */
     .app-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.2rem;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      border-radius: var(--radius) var(--radius) 0 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
+      background: var(--surface); border-radius: var(--radius) var(--radius) 0 0;
     }
-
-    .logo {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.5px;
-    }
-
-    /* Новая кнопка меню */
-    .menu-btn {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
-      width: 28px;
-      height: 24px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      z-index: 10;
-    }
-
-    .menu-btn span {
-      display: block;
-      width: 100%;
-      height: 3px;
-      background: var(--text);
-      border-radius: 3px;
-      transition: all 0.3s ease;
-    }
-
-    .menu-btn.open span:nth-child(1) {
-      transform: translateY(8px) rotate(45deg);
-    }
-
-    .menu-btn.open span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .menu-btn.open span:nth-child(3) {
-      transform: translateY(-8px) rotate(-45deg);
-    }
-
-    /* === НАВИГАЦИЯ === */
+    .logo { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; color: var(--primary); letter-spacing: 2px; }
+    .btn-icon { background: none; border: none; font-size: 1.8rem; color: var(--primary); cursor: pointer; }
     .main-nav {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0.8rem;
-      display: none;
+      background: var(--surface); padding: 0.8rem 1rem;
+      border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
     }
-
-    .main-nav.visible {
-      display: block;
-    }
-
-    .main-nav ul {
-      list-style: none;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      justify-content: center;
-    }
-
+    .main-nav.hidden { display: none; }
     .main-nav li {
-      background: var(--surface);
-      padding: 0.5rem 1.1rem;
-      border-radius: 20px;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 0.85rem;
-      font-weight: 500;
+      list-style: none; padding: 0.5rem 1.2rem; border-radius: 30px;
+      cursor: pointer; font-weight: 500; background: var(--secondary); color: var(--text);
+      transition: all 0.2s; font-size: 0.9rem;
     }
-
-    .main-nav li:hover {
-      background: var(--primary);
-      color: #ffffff;
-      border-color: var(--primary);
-    }
-
-    /* === КОНТЕНТ === */
-    #screenContainer {
-      flex: 1;
-      padding: 1.2rem;
-      overflow-y: auto;
-    }
-
-    /* === НИЖНИЙ БАР === */
+    .main-nav li:hover { background: var(--primary); color: white; }
+    #screenContainer { flex: 1; padding: 1.5rem; overflow-y: auto; }
     .bottom-bar {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 540px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0.6rem;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-      z-index: 100;
-      border-radius: 0 0 var(--radius) var(--radius);
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 520px; background: var(--surface);
+      border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+      padding: 0.6rem 0; border-radius: 0 0 var(--radius) var(--radius); z-index: 100;
     }
-
     .bottom-bar button {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 1.6rem;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: none; border: none; font-size: 1.5rem; cursor: pointer;
+      color: var(--text-light); display: flex; flex-direction: column; align-items: center;
     }
-
-    .bottom-bar button.active {
-      color: var(--primary);
+    .bottom-bar button.active { color: var(--primary); }
+    .add-btn {
+      background: var(--primary); color: white; width: 52px; height: 52px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin-top: -26px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-
-    .bottom-bar .add-btn {
-      background: var(--primary);
-      color: #ffffff;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      margin-top: -20px;
-      box-shadow: 0 4px 12px rgba(0,122,255,0.4);
-    }
-
-    /* === КАРТОЧКИ === */
     .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 1rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.2rem;
       box-shadow: var(--shadow);
     }
-
     .avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+      width: 80px; height: 80px; border-radius: 50%;
       background: linear-gradient(135deg, var(--primary), var(--secondary));
-      margin: 0 auto 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      color: white;
+      margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
     }
-
-    .xp-bar {
-      background: var(--border);
-      height: 10px;
-      border-radius: 5px;
-      margin: 1rem 0;
-      overflow: hidden;
-    }
-
-    .xp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      border-radius: 5px;
-      width: 0%;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.8rem;
-      margin: 1.2rem 0;
-    }
-
-    .stat-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 0.8rem;
-      border-radius: var(--small-radius);
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
+    .xp-bar { background: #eee; height: 8px; border-radius: 8px; margin: 1rem 0; }
+    .xp-fill { height: 100%; background: var(--primary); border-radius: 8px; width: 0%; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 1rem 0; }
+    .stat-item { background: var(--bg); padding: 0.8rem; border-radius: 12px; text-align: center; }
+    .stat-value { font-size: 1.8rem; font-weight: 600; color: var(--primary); }
     .btn {
-      background: var(--button-bg);
-      border: 2px solid var(--primary);
-      color: var(--button-text);
-      padding: 0.7rem 1.6rem;
-      border-radius: 24px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: inline-block;
-      margin: 0.3rem;
-      text-align: center;
+      background: var(--primary); border: none; color: white; padding: 0.7rem 1.5rem;
+      border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-block; margin: 0.2rem;
     }
-
-    .btn:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 0 12px var(--primary);
-    }
-
-    .btn.danger {
-      background: #ff3b30;
-      border-color: #ff3b30;
-      color: white;
-    }
-
-    /* === ФОРМЫ === */
-    .quest-form {
-      display: none;
-    }
-
-    .quest-form.active {
-      display: block;
-    }
-
-    .quest-form input,
-    .quest-form select,
-    .quest-form textarea {
-      width: 100%;
-      margin-bottom: 0.8rem;
-      padding: 0.8rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--small-radius);
-      color: var(--text);
-      font-family: var(--font);
-      font-size: 0.95rem;
-    }
-
+    .btn.secondary { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+    .btn:hover { opacity: 0.85; }
     .quest-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--surface);
-      border-left: 5px solid var(--primary);
-      padding: 0.8rem 1rem;
-      margin-bottom: 0.6rem;
-      border-radius: var(--small-radius);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border-left: 6px solid var(--primary); padding: 0.8rem;
+      margin-bottom: 0.5rem; border-radius: 12px;
     }
-
-    .guild-badge {
-      background: var(--primary);
-      color: #fff;
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      margin-right: 0.6rem;
-      font-weight: 600;
-    }
-
-    /* === КАЛЕНДАРЬ === */
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    .calendar-header h2 {
-      font-size: 1.4rem;
-      font-weight: 600;
-    }
-
-    .calendar-nav {
-      display: flex;
-      gap: 0.4rem;
-    }
-
-    .calendar-nav button {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.4rem 0.8rem;
-      border-radius: var(--small-radius);
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .view-switcher {
-      display: flex;
-      gap: 0.4rem;
-      margin-bottom: 1rem;
-      justify-content: center;
-    }
-
-    .view-switcher button {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 0.4rem 1rem;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .view-switcher button.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #ffffff;
-    }
-
-    .guild-filter {
-      margin-top: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      justify-content: center;
-    }
-
-    .guild-filter button {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 0.3rem 0.8rem;
-      border-radius: 15px;
-      cursor: pointer;
-    }
-
-    .guild-filter button.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #fff;
-    }
-
-    .month-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      text-align: center;
-    }
-
-    .weekday-header {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      font-size: 0.85rem;
-    }
-
-    .day-cell {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 0.6rem 0.2rem;
-      cursor: pointer;
-      border-radius: var(--small-radius);
-      min-height: 50px;
-    }
-
-    .day-cell.today {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px var(--primary);
-    }
-
-    .day-cell.other-month {
-      opacity: 0.4;
-    }
-
-    .marker {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      display: inline-block;
-      margin: 1px;
-    }
-
-    .year-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.8rem;
-      margin-top: 1rem;
-    }
-
-    .month-stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--small-radius);
-      padding: 1rem;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .hour-list {
-      list-style: none;
-      padding: 0;
-    }
-
-    .hour-item {
-      display: flex;
-      gap: 1rem;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .hour-label {
-      width: 55px;
-      font-weight: 600;
-      color: var(--primary);
-    }
-
-    .note-card {
-      background: var(--surface);
-      border-left: 4px solid var(--primary);
-      padding: 1rem;
-      margin-bottom: 0.8rem;
-      border-radius: var(--small-radius);
-    }
-
-    .settings-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .glossary-term {
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    @media (max-width: 480px) {
-      .bottom-bar button {
-        font-size: 1.3rem;
-      }
-    }
+    .guild-badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; margin-right: 0.5rem; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .calendar-header h2 { color: var(--primary); }
+    .calendar-nav button { background: none; border: 1px solid var(--primary); color: var(--primary); padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; }
+    .view-switcher { display: flex; gap: 0.5rem; margin-bottom: 1rem; justify-content: center; }
+    .view-switcher button { background: none; border: 1px solid var(--border); color: var(--text-light); padding: 0.4rem 1rem; border-radius: 20px; cursor: pointer; }
+    .view-switcher button.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .guild-filter { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
+    .guild-filter button { background: none; border: 1px solid var(--border); color: var(--text-light); padding: 0.3rem 0.8rem; border-radius: 15px; cursor: pointer; }
+    .guild-filter button.active { border-color: var(--primary); color: var(--primary); }
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 1rem; }
+    .weekday-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; color: var(--text-light); font-weight: 500; margin-bottom: 0.5rem; }
+    .day-cell { background: var(--surface); border: 1px solid var(--border); padding: 0.5rem; cursor: pointer; border-radius: 8px; min-height: 50px; }
+    .day-cell.today { border-color: var(--primary); box-shadow: 0 0 10px var(--secondary); }
+    .marker { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin: 1px; }
+    .year-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-top: 1rem; }
+    .month-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.8rem; text-align: center; cursor: pointer; }
+    .note-card { background: var(--surface); border-left: 4px solid var(--primary); padding: 1rem; margin-bottom: 0.8rem; border-radius: 8px; }
+    .glossary-term { color: var(--primary); font-weight: 600; }
   </style>
 </head>
-<body>
+<body class="theme-mint">
   <div id="app">
     <header class="app-header">
       <h1 class="logo">LVL UP</h1>
-      <button id="menuToggle" class="menu-btn" aria-label="Меню">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <button id="menuToggle" class="btn-icon" aria-label="Меню">☰</button>
     </header>
-
-    <nav id="mainNav" class="main-nav">
-      <ul>
-        <li data-screen="profile">🧙 Профиль</li>
-        <li data-screen="calendar">📅 Календарь</li>
-        <li data-screen="tasks">📋 Квесты</li>
-        <li data-screen="guilds">🛡️ Гильдии</li>
-        <li data-screen="goals">🎯 Эпик-квесты</li>
-        <li data-screen="notes">📝 Заметки</li>
-        <li data-screen="gallery">🖼️ Галерея</li>
-        <li data-screen="stats">📊 Статистика</li>
-        <li data-screen="settings">⚙️ Настройки</li>
-        <li data-screen="info">ℹ️ Инфо</li>
-      </ul>
+    <nav id="mainNav" class="main-nav hidden">
+      <li data-screen="today">🏠 Сегодня</li>
+      <li data-screen="calendar">📅 Календарь</li>
+      <li data-screen="guilds">📚 Журналы</li>
+      <li data-screen="goals">🎯 Цели</li>
+      <li data-screen="gallery">🖼️ Галерея</li>
+      <li data-screen="profile">👤 Профиль</li>
     </nav>
-
     <main id="screenContainer"></main>
-
     <div class="bottom-bar">
-      <button onclick="renderScreen('profile')">👤</button>
+      <button onclick="renderScreen('today')">🏠</button>
       <button onclick="renderScreen('calendar')">📅</button>
       <button class="add-btn" onclick="quickAddTask()">+</button>
-      <button onclick="renderScreen('tasks')">📋</button>
-      <button onclick="renderScreen('stats')">📊</button>
+      <button onclick="renderScreen('guilds')">📚</button>
+      <button onclick="renderScreen('profile')">👤</button>
     </div>
   </div>
-
   <script>
-    // === ГЛОБАЛЬНЫЕ СОСТОЯНИЯ ===
-    const CalendarState = {
-      currentDate: new Date(),
-      view: 'month',
-      selectedDay: null,
-      guildFilter: null
-    };
-
     const GUILDS = [
-      { id: 'body', name: 'Тело', icon: '💪', color: '#007aff' },
-      { id: 'creativity', name: 'Творчество', icon: '🎨', color: '#ff9f0a' },
-      { id: 'business', name: 'Бизнес', icon: '💼', color: '#30d158' },
-      { id: 'habits', name: 'Привычки', icon: '🔄', color: '#5e5ce6' },
-      { id: 'oneoff', name: 'Одноразки', icon: '🗑️', color: '#8e8e93' },
-      { id: 'travel', name: 'Путешествия', icon: '✈️', color: '#64d2ff' },
-      { id: 'debts', name: 'Долги', icon: '💰', color: '#ff375f' },
-      { id: 'other', name: 'Другое', icon: '📦', color: '#aeaeb2' },
-      { id: 'nutrition', name: 'Питание', icon: '🍎', color: '#ff6b35' }
+      { id: 'body', name: 'Тело', icon: '💪', color: '#E57373' },
+      { id: 'creativity', name: 'Творчество', icon: '🎨', color: '#BA68C8' },
+      { id: 'business', name: 'Бизнес', icon: '💼', color: '#4FC3F7' },
+      { id: 'habits', name: 'Привычки', icon: '🔄', color: '#FFB74D' },
+      { id: 'oneoff', name: 'Одноразки', icon: '🗑️', color: '#90A4AE' },
+      { id: 'travel', name: 'Путешествия', icon: '✈️', color: '#4DB6AC' },
+      { id: 'debts', name: 'Долги', icon: '💰', color: '#EF5350' },
+      { id: 'other', name: 'Другое', icon: '📦', color: '#78909C' },
+      { id: 'nutrition', name: 'Питание', icon: '🍎', color: '#81C784' }
     ];
 
     const Storage = {
-      get(key, def) {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : def;
-      },
-      set(key, val) {
-        localStorage.setItem(key, JSON.stringify(val));
-      }
+      get(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; } },
+      set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
     };
 
     const GameState = {
       player: {
-        name: 'Александр',
-        lvl: 1,
-        xp: 0.5,
-        streak: 0,
-        lastCompletedDate: null,
+        name: 'Александр', lvl: 1, xp: 0.5, streak: 0, bestStreak: 0, lastCompletedDate: null,
         get xpToNext() { return this.lvl * (this.lvl + 1) / 2; },
-        get progress() {
-          const base = (this.lvl - 1) * this.lvl / 2;
-          const needed = this.xpToNext - base;
-          const current = this.xp - base;
-          return Math.min((current / needed) * 100, 100).toFixed(0);
-        }
+        get progress() { const done = (this.lvl - 1) * this.lvl / 2; return Math.min(((this.xp - done) / this.lvl) * 100, 100).toFixed(0); }
       },
       tasks: Storage.get('tasks', []),
       notes: Storage.get('notes', []),
-      settings: Storage.get('settings', { theme: 'light' })
+      goals: Storage.get('goals', []),
+      gallery: Storage.get('gallery', []),
+      settings: Storage.get('settings', { theme: 'mint' })
     };
 
-    function savePlayer() { Storage.set('player', GameState.player); }
-    function saveTasks() { Storage.set('tasks', GameState.tasks); }
-    function saveNotes() { Storage.set('notes', GameState.notes); }
-    function saveSettings() { Storage.set('settings', GameState.settings); }
-
-    function applyTheme() {
-      document.body.className = 'theme-' + GameState.settings.theme;
+    function persist() {
+      Storage.set('tasks', GameState.tasks);
+      Storage.set('notes', GameState.notes);
+      Storage.set('goals', GameState.goals);
+      Storage.set('gallery', GameState.gallery);
+      Storage.set('settings', GameState.settings);
+      Storage.set('player', GameState.player);
     }
+    function applyTheme() { document.body.className = 'theme-' + GameState.settings.theme; }
     applyTheme();
 
-    // === НАВИГАЦИЯ ===
     const menuToggle = document.getElementById('menuToggle');
     const mainNav = document.getElementById('mainNav');
-    const screenContainer = document.getElementById('screenContainer');
-
-    menuToggle.addEventListener('click', () => {
-      mainNav.classList.toggle('visible');
-      menuToggle.classList.toggle('open');
-    });
-
-    document.querySelectorAll('.main-nav li').forEach(item => {
-      item.addEventListener('click', (e) => {
-        renderScreen(e.target.dataset.screen);
-        mainNav.classList.remove('visible');
-        menuToggle.classList.remove('open');
-      });
+    menuToggle.addEventListener('click', () => mainNav.classList.toggle('hidden'));
+    document.querySelectorAll('.main-nav li').forEach(li => {
+      li.addEventListener('click', (e) => { renderScreen(e.target.dataset.screen); mainNav.classList.add('hidden'); });
     });
 
     function renderScreen(screen) {
-      switch (screen) {
-        case 'profile': renderProfile(); break;
+      switch(screen) {
+        case 'today': renderToday(); break;
         case 'calendar': renderCalendar(); break;
-        case 'tasks': renderTasks(); break;
         case 'guilds': renderGuilds(); break;
         case 'goals': renderGoals(); break;
         case 'notes': renderNotes(); break;
         case 'gallery': renderGallery(); break;
-        case 'stats': renderStats(); break;
+        case 'profile': renderProfile(); break;
         case 'settings': renderSettings(); break;
         case 'info': renderInfo(); break;
-        default: renderProfile();
+        default: renderToday();
       }
-      document.querySelectorAll('.bottom-bar button').forEach(b => b.classList.remove('active'));
-      const btn = document.querySelector(`.bottom-bar button[onclick*="${screen}"]`);
-      if (btn) btn.classList.add('active');
     }
 
-    // === ПРОФИЛЬ ===
-    function renderProfile() {
-      const p = GameState.player;
-      screenContainer.innerHTML = `
+    // ==================== СЕГОДНЯ ====================
+    function renderToday() {
+      const today = new Date().toISOString().slice(0,10);
+      const tasks = GameState.tasks.filter(t => t.date === today && !t.completed);
+      const html = `
         <div class="card">
-          <div class="avatar">🧙</div>
-          <h2 style="text-align:center;">${p.name}</h2>
-          <p style="text-align:center;">Ур. ${p.lvl} · ${p.xp.toFixed(1)} XP</p>
-          <div class="xp-bar"><div class="xp-fill" style="width:${p.progress}%"></div></div>
-          <p style="text-align:center; font-size:0.85rem;">До следующего уровня: ${p.progress}%</p>
-          <div class="stats-grid">
-            <div class="stat-item"><span class="stat-value">${GameState.tasks.filter(t=>t.completed).length}</span><br>Выполнено</div>
-            <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥 Комбо</div>
-          </div>
-        </div>`;
-    }
-
-    // === КВЕСТЫ ===
-    function renderTasks() {
-      const active = GameState.tasks.filter(t => !t.completed).sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
-      const opts = GUILDS.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('');
-      const tasksHtml = active.length ? active.map(task => {
-        const g = GUILDS.find(g => g.id === task.category) || GUILDS[7];
-        const today = new Date().toISOString().slice(0,10);
-        const future = task.date > today;
-        return `<div class="quest-item" style="border-left-color:${g.color}">
-          <div><span class="guild-badge" style="background:${g.color}">${g.icon}</span> ${task.title}<br><small>${task.date} ${task.time} · ${task.minutes} мин</small></div>
-          <button class="btn" ${future?'disabled':''} onclick="completeQuest('${task.id}')">✔</button>
-        </div>`;
-      }).join('') : '<p style="text-align:center; opacity:0.7;">Нет активных квестов</p>';
-
-      screenContainer.innerHTML = `
-        <button class="btn" onclick="toggleQuestForm()" style="width:100%; margin-bottom:1rem;">➕ Новый квест</button>
-        <div id="questForm" class="quest-form card">
-          <form onsubmit="addQuest(event)">
-            <label>Гильдия</label>
-            <select id="questCategory">${opts}</select>
-            <label>Название</label>
-            <input id="questTitle" placeholder="Что сделать?" required>
-            <label>Продолжительность (мин)</label>
-            <input type="number" id="questMinutes" value="30" min="1">
-            <label>Дата</label>
-            <input type="date" id="questDate">
-            <label>Время</label>
-            <input type="time" id="questTime">
-            <label>Заметка</label>
-            <textarea id="questNote" rows="2" placeholder="Детали..."></textarea>
-            <button type="submit" class="btn" style="width:100%;">Создать квест</button>
-          </form>
+          <h2>Доброе утро, ${GameState.player.name}!</h2>
+          <p>Уровень ${GameState.player.lvl} • XP ${GameState.player.xp.toFixed(1)}</p>
+          <div class="xp-bar"><div class="xp-fill" style="width:${GameState.player.progress}%"></div></div>
+          <p>🔥 Комбо дней: ${GameState.player.streak}</p>
         </div>
-        <button class="btn" onclick="completeAllToday()" style="width:100%; margin-bottom:1rem;">⚡ Выполнить все сегодня</button>
-        <div style="margin-top:1rem;">${tasksHtml}</div>`;
-      document.getElementById('questDate').value = new Date().toISOString().slice(0,10);
-      document.getElementById('questTime').value = new Date().toTimeString().slice(0,5);
+        <h3>Квесты на сегодня</h3>
+        ${tasks.length === 0 ? '<p>На сегодня ничего нет</p>' : tasks.map(t => `
+          <div class="quest-item">
+            <div><span class="guild-badge" style="background:${getGuildColor(t.category)}">${getGuildIcon(t.category)}</span>${t.title} (${t.minutes} мин)</div>
+            <button class="btn secondary" onclick="completeQuest('${t.id}')">✔</button>
+          </div>`).join('')}
+      `;
+      document.getElementById('screenContainer').innerHTML = html;
     }
 
-    window.toggleQuestForm = () => document.getElementById('questForm').classList.toggle('active');
-    window.addQuest = (e) => {
-      e.preventDefault();
-      const q = {
-        id: Date.now().toString(36)+Math.random().toString(36).substr(2),
-        category: document.getElementById('questCategory').value,
-        title: document.getElementById('questTitle').value.trim(),
-        minutes: +document.getElementById('questMinutes').value,
-        date: document.getElementById('questDate').value,
-        time: document.getElementById('questTime').value,
-        note: document.getElementById('questNote').value.trim(),
-        completed: false, dateCompleted: null, createdAt: new Date().toISOString()
-      };
-      if(!q.title || !q.date || !q.time) return;
-      GameState.tasks.push(q); saveTasks(); renderTasks();
-    };
-
-    window.completeQuest = (id) => {
-      const t = GameState.tasks.find(t=>t.id===id);
-      if(!t || t.completed) return;
-      const today = new Date().toISOString().slice(0,10);
-      if(t.date > today) { alert('Нельзя завершить будущий квест!'); return; }
-      t.completed = true; t.dateCompleted = today;
-      GameState.player.xp += t.minutes * 0.01;
-      checkLevelUp(); updateStreak(today);
-      saveTasks(); savePlayer(); renderTasks();
-    };
-
-    window.completeAllToday = () => {
-      const today = new Date().toISOString().slice(0,10);
-      const tasks = GameState.tasks.filter(t => !t.completed && t.date === today);
-      if(!tasks.length) { alert('Нет задач на сегодня'); return; }
-      tasks.forEach(t => {
-        t.completed = true; t.dateCompleted = today;
-        GameState.player.xp += t.minutes * 0.01;
-      });
-      checkLevelUp(); updateStreak(today);
-      saveTasks(); savePlayer(); renderTasks();
-    };
-
-    window.quickAddTask = () => {
-      const title = prompt('Название квеста:');
-      if(!title) return;
-      const now = new Date();
-      GameState.tasks.push({
-        id: Date.now().toString(36)+Math.random().toString(36).substr(2),
-        category: 'other', title, minutes: 30,
-        date: now.toISOString().slice(0,10),
-        time: now.toTimeString().slice(0,5),
-        note: '', completed: false, dateCompleted: null, createdAt: new Date().toISOString()
-      });
-      saveTasks(); renderScreen('tasks');
-    };
-
-    function updateStreak(today) {
-      const p = GameState.player;
-      if(p.lastCompletedDate === today) return;
-      const y = new Date(); y.setDate(y.getDate()-1);
-      const yStr = y.toISOString().slice(0,10);
-      p.streak = (p.lastCompletedDate === yStr) ? p.streak+1 : 1;
-      p.lastCompletedDate = today; savePlayer();
-    }
-
-    function checkLevelUp() {
-      const p = GameState.player;
-      let need = (p.lvl+1)*(p.lvl+2)/2;
-      while(p.xp >= need) { p.lvl++; need = (p.lvl+1)*(p.lvl+2)/2; }
-      savePlayer();
-    }
-
-    // === КАЛЕНДАРЬ ===
-    window.setCalendarView = (v) => {
-      CalendarState.view = v;
-      if(v==='day' && !CalendarState.selectedDay) CalendarState.selectedDay = new Date();
-      if(v==='year') CalendarState.selectedDay = null;
+    // ==================== КАЛЕНДАРЬ ====================
+    const Cal = { currentDate: new Date(), view: 'month', selectedDay: null, filter: null };
+    window.setCalendarView = v => { Cal.view = v; if(v==='day' && !Cal.selectedDay) Cal.selectedDay = new Date(); renderCalendar(); };
+    window.setGuildFilter = id => { Cal.filter = id; renderCalendar(); };
+    window.navigateCalendar = delta => {
+      if(Cal.view === 'year') Cal.currentDate.setFullYear(Cal.currentDate.getFullYear()+delta);
+      else if(Cal.view === 'month') Cal.currentDate.setMonth(Cal.currentDate.getMonth()+delta);
+      else if(Cal.view === 'week') Cal.currentDate.setDate(Cal.currentDate.getDate()+delta*7);
+      else if(Cal.view === 'day') { Cal.selectedDay.setDate(Cal.selectedDay.getDate()+delta); Cal.currentDate = new Date(Cal.selectedDay); }
       renderCalendar();
     };
-    window.setGuildFilter = (id) => { CalendarState.guildFilter = id; renderCalendar(); };
-    window.navigateCalendar = (d) => {
-      const {view, currentDate} = CalendarState;
-      if(view==='year') currentDate.setFullYear(currentDate.getFullYear()+d);
-      else if(view==='month') currentDate.setMonth(currentDate.getMonth()+d);
-      else if(view==='week') currentDate.setDate(currentDate.getDate()+d*7);
-      else {
-        const day = CalendarState.selectedDay || currentDate;
-        day.setDate(day.getDate()+d);
-        CalendarState.selectedDay = new Date(day);
-        CalendarState.currentDate = new Date(day);
-        renderCalendar(); return;
-      }
-      CalendarState.currentDate = new Date(currentDate); renderCalendar();
-    };
-    window.resetCalendarToday = () => {
-      CalendarState.currentDate = new Date();
-      CalendarState.selectedDay = new Date();
-      renderCalendar();
-    };
-    window.goToDay = (ds) => { CalendarState.selectedDay = new Date(ds); CalendarState.view='day'; renderCalendar(); };
-    window.goToMonth = (m) => { CalendarState.currentDate.setMonth(m); CalendarState.view='month'; renderCalendar(); };
-
-    function getStartOfWeek(date) {
-      const d = new Date(date);
-      d.setDate(d.getDate() - (d.getDay()||7) + 1);
-      return d;
-    }
-
-    function getFilteredTasks(f) {
-      return f ? GameState.tasks.filter(t=>t.category===f) : GameState.tasks;
-    }
+    window.goToDay = d => { Cal.selectedDay = new Date(d); Cal.view='day'; renderCalendar(); };
+    window.goToMonth = m => { Cal.currentDate.setMonth(m); Cal.view='month'; renderCalendar(); };
 
     function renderCalendar() {
-      const {currentDate, view, selectedDay, guildFilter} = CalendarState;
-      const year = currentDate.getFullYear(), month = currentDate.getMonth();
-      let header = '';
-      if(view==='year') header = `<h2>${year}</h2>`;
-      else if(view==='month') header = `<h2>${currentDate.toLocaleString('ru',{month:'long'})} ${year}</h2>`;
-      else if(view==='week') {
-        const s = getStartOfWeek(currentDate), e = new Date(s); e.setDate(e.getDate()+6);
-        header = `<h2>${s.getDate()}–${e.getDate()} ${e.toLocaleString('ru',{month:'long'})}</h2>`;
-      } else {
-        const d = selectedDay || currentDate;
-        header = `<h2>${d.toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'long'})}</h2>`;
-      }
-      const views = ['year','month','week','day'].map(v => 
-        `<button class="${v===view?'active':''}" onclick="setCalendarView('${v}')">${v==='year'?'Год':v==='month'?'Месяц':v==='week'?'Неделя':'День'}</button>`
-      ).join('');
-      let content = '';
-      if(view==='year') content = renderYearView(year, guildFilter);
-      else if(view==='month') content = renderMonthView(year, month, guildFilter);
-      else if(view==='week') content = renderWeekView(currentDate, guildFilter);
-      else content = renderDayView(selectedDay||currentDate, guildFilter);
-
-      screenContainer.innerHTML = `
-        <div class="calendar-header">${header}<div class="calendar-nav"><button onclick="navigateCalendar(-1)">◀</button><button onclick="navigateCalendar(1)">▶</button><button onclick="resetCalendarToday()">Сегодня</button></div></div>
-        <div class="view-switcher">${views}</div>
+      const {currentDate, view, filter} = Cal;
+      const tasks = filter ? GameState.tasks.filter(t=>t.category===filter) : GameState.tasks;
+      let header = '', content = '';
+      if(view==='year') { header = `<h2>${currentDate.getFullYear()}</h2>`; content = yearView(currentDate.getFullYear(), tasks); }
+      else if(view==='month') { header = `<h2>${currentDate.toLocaleString('ru',{month:'long'})} ${currentDate.getFullYear()}</h2>`; content = monthView(currentDate.getFullYear(), currentDate.getMonth(), tasks); }
+      else if(view==='week') { header = `<h2>Неделя</h2>`; content = weekView(currentDate, tasks); }
+      else if(view==='day') { const d = Cal.selectedDay||currentDate; header = `<h2>${d.toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})}</h2>`; content = dayView(d, tasks); }
+      document.getElementById('screenContainer').innerHTML = `
+        <div class="calendar-header">${header}<div class="calendar-nav"><button onclick="navigateCalendar(-1)">◀</button><button onclick="navigateCalendar(1)">▶</button><button onclick="Cal.currentDate=new Date();Cal.selectedDay=new Date();renderCalendar();">Сегодня</button></div></div>
+        <div class="view-switcher">${['year','month','week','day'].map(v=>`<button class="${v===view?'active':''}" onclick="setCalendarView('${v}')">${v==='year'?'Год':v==='month'?'Месяц':v==='week'?'Неделя':'День'}</button>`).join('')}</div>
         ${content}
-        <div class="guild-filter"><button class="${guildFilter===null?'active':''}" onclick="setGuildFilter(null)">Все</button>${GUILDS.map(g=>`<button class="${guildFilter===g.id?'active':''}" onclick="setGuildFilter('${g.id}')">${g.icon}</button>`).join('')}</div>`;
+        <div class="guild-filter"><button class="${filter===null?'active':''}" onclick="setGuildFilter(null)">Все</button>${GUILDS.map(g=>`<button class="${filter===g.id?'active':''}" onclick="setGuildFilter('${g.id}')" style="border-color:${g.color}">${g.icon} ${g.name}</button>`).join('')}</div>
+      `;
     }
 
-    function renderYearView(year, filter) {
-      const tasks = getFilteredTasks(filter);
+    function yearView(year, tasks) {
       const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-      return '<div class="year-grid">' + months.map((m,i) => {
-        const prefix = `${year}-${String(i+1).padStart(2,'0')}`;
-        const mt = tasks.filter(t=>t.date?.startsWith(prefix));
-        return `<div class="month-stat-card" onclick="goToMonth(${i})"><strong>${m}</strong><br>${mt.filter(t=>t.completed).length}/${mt.length}</div>`;
-      }).join('') + '</div>';
+      let html = '<div class="year-grid">';
+      for(let m=0; m<12; m++) {
+        const monthStr = `${year}-${String(m+1).padStart(2,'0')}`;
+        const monthTasks = tasks.filter(t=>t.date?.startsWith(monthStr));
+        html += `<div class="month-stat-card" onclick="goToMonth(${m})"><strong>${months[m]}</strong><br>${monthTasks.filter(t=>t.completed).length}/${monthTasks.length}<br><small>задач</small></div>`;
+      }
+      return html + '</div>';
     }
 
-    function renderMonthView(year, month, filter) {
-      const tasks = getFilteredTasks(filter);
+    function monthView(year, month, tasks) {
       const firstDay = new Date(year, month, 1).getDay();
       const days = new Date(year, month+1, 0).getDate();
       const start = firstDay===0?6:firstDay-1;
       const today = new Date(); today.setHours(0,0,0,0);
-      let grid = '<div class="weekday-header">Пн|Вт|Ср|Чт|Пт|Сб|Вс</div><div class="month-grid">';
+      let grid = '<div class="weekday-header">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<div>${d}</div>`).join('')+'</div><div class="month-grid">';
       for(let i=0; i<start; i++) grid += '<div class="day-cell other-month"></div>';
       for(let d=1; d<=days; d++) {
-        const date = new Date(year, month, d), ds = date.toISOString().slice(0,10);
-        const isToday = date.getTime()===today.getTime() && month===today.getMonth() && year===today.getFullYear();
-        const cellTasks = tasks.filter(t=>t.date===ds);
-        const markers = cellTasks.map(t=>`<span class="marker" style="background:${t.completed?'var(--secondary)':'var(--primary)'}"></span>`).join('');
-        grid += `<div class="day-cell ${isToday?'today':''}" onclick="goToDay('${ds}')">${d}<div>${markers}</div></div>`;
+        const date = new Date(year, month, d); const dateStr = date.toISOString().slice(0,10);
+        const isToday = date.getTime()===today.getTime();
+        const dayTasks = tasks.filter(t=>t.date===dateStr);
+        const markers = dayTasks.map(t=>`<span class="marker" style="background:${t.completed?'var(--secondary)':t.date<today.toISOString().slice(0,10)?'#EF5350':'var(--primary)'}"></span>`).join('');
+        grid += `<div class="day-cell${isToday?' today':''}" onclick="goToDay('${dateStr}')"><div>${d}</div><div>${markers}</div></div>`;
       }
       return grid + '</div>';
     }
 
-    function renderWeekView(date, filter) {
-      const tasks = getFilteredTasks(filter);
-      const start = getStartOfWeek(date);
-      let html = '';
+    function weekView(date, tasks) {
+      const start = new Date(date); start.setDate(start.getDate()-start.getDay()+1);
+      let html = '<div>';
       for(let i=0; i<7; i++) {
         const d = new Date(start); d.setDate(d.getDate()+i);
-        const ds = d.toISOString().slice(0,10);
-        const dayTasks = tasks.filter(t=>t.date===ds);
-        html += `<div class="card"><h3>${d.toLocaleDateString('ru',{weekday:'short',day:'numeric',month:'short'})}</h3>${dayTasks.length?dayTasks.map(t=>`<div>${t.title} ${t.completed?'✅':''}</div>`).join(''):'<p>—</p>'}</div>`;
+        const dateStr = d.toISOString().slice(0,10);
+        const dayTasks = tasks.filter(t=>t.date===dateStr);
+        html += `<div class="card"><h3>${d.toLocaleDateString('ru',{weekday:'short',day:'numeric'})}</h3>${dayTasks.map(t=>`<div>${t.title} ${t.completed?'✅':''}</div>`).join('')||'<p>—</p>'}</div>`;
       }
-      return html;
+      return html + '</div>';
     }
 
-    function renderDayView(date, filter) {
-      const tasks = getFilteredTasks(filter).filter(t=>t.date===date.toISOString().slice(0,10)).sort((a,b)=>a.time.localeCompare(b.time));
+    function dayView(date, tasks) {
+      const dateStr = date.toISOString().slice(0,10);
+      const dayTasks = tasks.filter(t=>t.date===dateStr).sort((a,b)=>a.time?.localeCompare(b.time));
       let html = '<ul class="hour-list">';
       for(let h=0; h<24; h++) {
-        const hour = String(h).padStart(2,'0');
-        const hourTasks = tasks.filter(t=>t.time?.startsWith(hour+':'));
-        html += `<li class="hour-item"><span class="hour-label">${hour}:00</span><span>${hourTasks.length?hourTasks.map(t=>t.title+' '+(t.completed?'✅':'')).join(', '):'—'}</span></li>`;
+        const hourStr = String(h).padStart(2,'0');
+        const hourTasks = dayTasks.filter(t=>t.time?.startsWith(hourStr+':'));
+        html += `<li class="hour-item"><span class="hour-label">${hourStr}:00</span> ${hourTasks.map(t=>`<span>${t.title} ${t.completed?'✅':''}</span>`).join(', ')||'—'}</li>`;
       }
       return html + '</ul>';
     }
 
-    // === ЗАМЕТКИ ===
-    function renderNotes() {
-      const notes = GameState.notes.sort((a,b)=> new Date(b.updatedAt||b.createdAt) - new Date(a.updatedAt||a.createdAt));
-      const list = notes.length ? notes.map(n=>`
-        <div class="note-card">
-          <strong>${n.title}</strong>
-          <p style="margin:0.5rem 0;">${n.content.replace(/\n/g,'<br>')}</p>
-          <button class="btn" onclick="editNote('${n.id}')">✏️</button>
-          <button class="btn danger" onclick="deleteNote('${n.id}')">🗑️</button>
-        </div>`).join('') : '<p style="text-align:center; opacity:0.7;">Нет заметок</p>';
-      screenContainer.innerHTML = `
-        <button class="btn" onclick="showNoteForm()" style="width:100%; margin-bottom:1rem;">➕ Новая заметка</button>
-        <div id="noteForm" class="quest-form card" style="display:none;">
-          <input id="noteTitle" placeholder="Заголовок" required>
-          <textarea id="noteContent" rows="4" placeholder="Текст..."></textarea>
-          <input type="hidden" id="editNoteId">
-          <button class="btn" style="width:100%;" onclick="saveNote()">Сохранить</button>
-        </div>
-        <div>${list}</div>`;
-    }
-
-    window.showNoteForm = (id) => {
-      document.getElementById('noteForm').style.display='block';
-      if(id) {
-        const n = GameState.notes.find(n=>n.id===id);
-        document.getElementById('noteTitle').value = n.title;
-        document.getElementById('noteContent').value = n.content;
-        document.getElementById('editNoteId').value = id;
-      } else {
-        document.getElementById('noteTitle').value = '';
-        document.getElementById('noteContent').value = '';
-        document.getElementById('editNoteId').value = '';
-      }
+    // ==================== ЗАДАЧИ И RPG ====================
+    window.completeQuest = function(id) {
+      const t = GameState.tasks.find(t=>t.id===id);
+      if(!t || t.completed) return;
+      if(t.date > new Date().toISOString().slice(0,10)) return alert('Этот квест ещё не наступил!');
+      t.completed = true; t.dateCompleted = new Date().toISOString().slice(0,10);
+      GameState.player.xp += t.minutes * 0.01;
+      checkLevelUp(); updateStreak();
+      persist(); renderScreen('today');
     };
-    window.saveNote = () => {
-      const title = document.getElementById('noteTitle').value.trim();
-      const content = document.getElementById('noteContent').value.trim();
-      const editId = document.getElementById('editNoteId').value;
+
+    window.quickAddTask = function() {
+      const title = prompt('Название квеста:');
       if(!title) return;
-      if(editId) {
-        const n = GameState.notes.find(n=>n.id===editId);
-        n.title=title; n.content=content; n.updatedAt=new Date().toISOString();
-      } else {
-        GameState.notes.push({id:Date.now().toString(36)+Math.random().toString(36).substr(2), title, content, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()});
-      }
-      saveNotes(); renderNotes();
-    };
-    window.editNote = (id) => showNoteForm(id);
-    window.deleteNote = (id) => {
-      GameState.notes = GameState.notes.filter(n=>n.id!==id);
-      saveNotes(); renderNotes();
+      const now = new Date();
+      GameState.tasks.push({
+        id: Date.now().toString(36)+Math.random().toString(36).substring(2),
+        category: 'other', title, minutes: 30,
+        date: now.toISOString().slice(0,10), time: now.toTimeString().slice(0,5), completed: false
+      });
+      persist(); renderScreen('today');
     };
 
-    // === НАСТРОЙКИ ===
-    function renderSettings() {
-      const themes = [
-        {id:'light',name:'Светлая'},
-        {id:'dark',name:'Тёмная'},
-        {id:'tron',name:'ТРОН'}
-      ];
-      screenContainer.innerHTML = `
-        <div class="settings-section">
-          <h3>🎨 Тема</h3>
-          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-            ${themes.map(t=>`<button class="btn ${GameState.settings.theme===t.id?'active':''}" onclick="setTheme('${t.id}')">${t.name}</button>`).join('')}
-          </div>
-        </div>
-        <div class="settings-section">
-          <h3>💾 Данные</h3>
-          <button class="btn" onclick="exportData()" style="width:100%; margin-bottom:0.8rem;">📤 Экспорт</button>
-          <button class="btn" onclick="importDataPrompt()" style="width:100%; margin-bottom:0.8rem;">📥 Импорт</button>
-          <button class="btn danger" onclick="clearAllData()" style="width:100%;">🗑️ Очистить всё</button>
-        </div>`;
+    function updateStreak() {
+      const today = new Date().toISOString().slice(0,10);
+      const p = GameState.player;
+      if(p.lastCompletedDate === today) return;
+      const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+      if(p.lastCompletedDate === yesterday) p.streak++; else p.streak = 1;
+      if(p.streak > p.bestStreak) p.bestStreak = p.streak;
+      p.lastCompletedDate = today;
     }
 
-    window.setTheme = (id) => {
-      GameState.settings.theme = id;
-      saveSettings(); applyTheme(); renderSettings();
-    };
-    window.exportData = () => {
-      const blob = new Blob([JSON.stringify({player:GameState.player,tasks:GameState.tasks,notes:GameState.notes,settings:GameState.settings},null,2)],{type:'application/json'});
-      const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='lvlup_backup.json'; a.click();
-    };
-    window.importDataPrompt = () => {
-      const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
-      inp.onchange = e => {
-        const f = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = ev => {
-          try {
-            const data = JSON.parse(ev.target.result);
-            if(data.player) GameState.player = data.player;
-            if(data.tasks) GameState.tasks = data.tasks;
-            if(data.notes) GameState.notes = data.notes;
-            if(data.settings) GameState.settings = data.settings;
-            savePlayer(); saveTasks(); saveNotes(); saveSettings();
-            applyTheme(); alert('Импорт успешен'); renderScreen('profile');
-          } catch(ex) { alert('Ошибка файла'); }
-        };
-        reader.readAsText(f);
-      };
-      inp.click();
-    };
-    window.clearAllData = () => {
-      if(confirm('Точно удалить все данные?')) { localStorage.clear(); location.reload(); }
-    };
+    function checkLevelUp() {
+      const p = GameState.player;
+      while(p.xp >= (p.lvl+1)*(p.lvl+2)/2) p.lvl++;
+      persist();
+    }
 
-    // === ИНФО ===
-    function renderInfo() {
-      screenContainer.innerHTML = `
+    function getGuildColor(id) { return GUILDS.find(g=>g.id===id)?.color || '#78909C'; }
+    function getGuildIcon(id) { return GUILDS.find(g=>g.id===id)?.icon || '📦'; }
+
+    // ==================== ЖУРНАЛЫ, ЦЕЛИ, ЗАМЕТКИ, ГАЛЕРЕЯ, ПРОФИЛЬ ====================
+    function renderGuilds() {
+      document.getElementById('screenContainer').innerHTML = '<h2>Журналы</h2>'+GUILDS.map(g=>`<div class="card" style="border-left:6px solid ${g.color}"><h3>${g.icon} ${g.name}</h3><p>Задач: ${GameState.tasks.filter(t=>t.category===g.id).length}</p></div>`).join('');
+    }
+    function renderGoals() {
+      document.getElementById('screenContainer').innerHTML = `<h2>🎯 Цели</h2><p>Скоро здесь будут твои эпик-квесты.</p>`;
+    }
+    function renderGallery() {
+      document.getElementById('screenContainer').innerHTML = `<h2>🖼️ Галерея</h2><p>Загружай фото своих побед.</p>`;
+    }
+    function renderNotes() {
+      const notes = GameState.notes;
+      document.getElementById('screenContainer').innerHTML = `
+        <button class="btn" onclick="alert('Функция скоро')">+ Новая заметка</button>
+        ${notes.map(n=>`<div class="note-card"><strong>${n.title}</strong><p>${n.content}</p></div>`).join('') || '<p>Нет заметок</p>'}
+      `;
+    }
+    function renderProfile() {
+      const p = GameState.player;
+      document.getElementById('screenContainer').innerHTML = `
         <div class="card">
-          <h2 style="margin-bottom:1rem;">📖 Как это работает</h2>
-          <p><span class="glossary-term">Гильдия</span> — категория задач (Тело, Бизнес, Творчество…). Имеет свой цвет и иконку для быстрой идентификации.</p>
-          <p><span class="glossary-term">Квест</span> — ваша задача с датой, временем и продолжительностью в минутах. Выполнение квеста приносит опыт.</p>
-          <p><span class="glossary-term">XP (опыт)</span> — рассчитывается просто: <em>минуты × 0.01</em>. Например, задача на 60 минут даст 0.6 XP. Уровень растёт по накоплению опыта: для достижения уровня N нужно суммарно N×(N+1)/2 очков.</p>
-          <p><span class="glossary-term">LVL (уровень)</span> — ваш текущий уровень. Чем выше, тем больше опыта нужно для следующего.</p>
-          <p><span class="glossary-term">Комбо (стрик)</span> — количество дней подряд, в которые вы выполняли хотя бы один квест. Пропуск дня сбрасывает стрик.</p>
-          <p><span class="glossary-term">Эпик-квест (цель)</span> — большая цель, которую вы ставите сами. За выполнение даётся +1 XP и возможность загрузить фото в Галерею.</p>
-          <p><span class="glossary-term">Галерея</span> — место для хранения ваших успехов, привязанных к завершённым целям.</p>
-          <p><span class="glossary-term">Статистика</span> — раздел с графиками активности (скоро появится).</p>
-          <p><span class="glossary-term">Календарь</span> — четыре уровня: год, месяц, неделя, день. Маркеры показывают статус задач, а фильтр помогает смотреть задачи конкретных гильдий.</p>
-        </div>`;
+          <div class="avatar">🧙</div>
+          <h2>${p.name}</h2><p>Ур. ${p.lvl} • ${p.xp.toFixed(1)} XP</p>
+          <div class="xp-bar"><div class="xp-fill" style="width:${p.progress}%"></div></div>
+          <div class="stats-grid">
+            <div class="stat-item"><span class="stat-value">${GameState.tasks.filter(t=>t.completed).length}</span><br>✅ Выполнено</div>
+            <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥 Комбо</div>
+          </div>
+          <button class="btn secondary" onclick="renderSettings()">⚙️ Настройки</button>
+        </div>
+      `;
     }
+    function renderSettings() {
+      const themes = ['mint','pearl','steel','nettle','first_snow','instinct'];
+      document.getElementById('screenContainer').innerHTML = `
+        <h2>Тема</h2>
+        ${themes.map(t=>`<button class="btn ${GameState.settings.theme===t?'active':''}" onclick="setTheme('${t}')">${t}</button>`).join('')}
+        <hr><button class="btn" onclick="exportData()">📤 Экспорт</button>
+        <button class="btn" onclick="importData()">📥 Импорт</button>
+        <button class="btn" onclick="if(confirm('Удалить всё?')){localStorage.clear();location.reload();}">🗑️ Сброс</button>
+      `;
+    }
+    window.setTheme = t => { GameState.settings.theme = t; persist(); applyTheme(); renderSettings(); };
+    window.exportData = () => { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({player:GameState.player,tasks:GameState.tasks,notes:GameState.notes,settings:GameState.settings})],{type:'application/json'})); a.download='lvlup.json'; a.click(); };
+    window.importData = () => { const i=document.createElement('input'); i.type='file'; i.onchange=e=>{ const r=new FileReader(); r.onload=ev=>{ try{ const d=JSON.parse(ev.target.result); Object.assign(GameState,d); persist(); applyTheme(); location.reload(); }catch{ alert('Ошибка'); } }; r.readAsText(e.target.files[0]); }; i.click(); };
 
-    // === ЗАГЛУШКИ ===
-    function renderGuilds() { screenContainer.innerHTML = '<h2>🛡️ Гильдии</h2>'+GUILDS.map(g=>`<p>${g.icon} ${g.name}</p>`).join(''); }
-    function renderGoals() { screenContainer.innerHTML = '<h2>🎯 Эпик-квесты</h2><p>Скоро</p>'; }
-    function renderGallery() { screenContainer.innerHTML = '<h2>🖼️ Галерея</h2><p>Скоро</p>'; }
-    function renderStats() { screenContainer.innerHTML = '<h2>📊 Статистика</h2><p>Скоро</p>'; }
-
-    // === СТАРТ ===
-    const saved = Storage.get('player');
-    if(saved) Object.assign(GameState.player, saved);
-    renderScreen('profile');
+    const savedPlayer = Storage.get('player');
+    if(savedPlayer) Object.assign(GameState.player, savedPlayer);
+    renderScreen('today');
   </script>
 </body>
 </html>
