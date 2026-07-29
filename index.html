@@ -771,7 +771,241 @@ const CalendarState = {
   }
 
   // === Остальные экраны-заглушки ===
-  function renderCalendar() { screenContainer.innerHTML = '<h2>📅 Календарь</h2><p>В разработке.</p>'; }
+  // === Календарь ===
+
+function renderCalendar() {
+  const { currentDate, view, selectedDay, guildFilter } = CalendarState;
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  // Заголовок с навигацией
+  let headerHtml = '';
+  if (view === 'month') {
+    headerHtml = `<h2>${currentDate.toLocaleString('ru', { month: 'long' })} ${year}</h2>`;
+  } else if (view === 'week') {
+    const startOfWeek = getStartOfWeek(currentDate);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 6);
+    headerHtml = `<h2>Неделя ${startOfWeek.getDate()} – ${endOfWeek.getDate()} ${endOfWeek.toLocaleString('ru', { month: 'long' })} ${endOfWeek.getFullYear()}</h2>`;
+  } else if (view === 'day') {
+    const displayDate = selectedDay || currentDate;
+    headerHtml = `<h2>${displayDate.toLocaleDateString('ru', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</h2>`;
+  }
+
+  // Кнопки переключения вида
+  const viewSwitcher = `
+    <div class="view-switcher">
+      <button class="${view === 'month' ? 'active' : ''}" onclick="setCalendarView('month')">Месяц</button>
+      <button class="${view === 'week' ? 'active' : ''}" onclick="setCalendarView('week')">Неделя</button>
+      <button class="${view === 'day' ? 'active' : ''}" onclick="setCalendarView('day')">День</button>
+    </div>
+  `;
+
+  // Фильтр по гильдиям
+  const filterHtml = `
+    <div class="guild-filter">
+      <button class="guild-filter-btn ${guildFilter === null ? 'active' : ''}" onclick="setGuildFilter(null)">Все</button>
+      ${GUILDS.map(g => `
+        <button class="guild-filter-btn ${guildFilter === g.id ? 'active' : ''}" onclick="setGuildFilter('${g.id}')" style="border-color: ${g.color}; color: ${g.color};">
+          ${g.icon} ${g.name}
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  // Основное содержимое в зависимости от вида
+  let contentHtml = '';
+  if (view === 'month') {
+    contentHtml = renderMonthView(year, month, guildFilter);
+  } else if (view === 'week') {
+    contentHtml = renderWeekView(currentDate, guildFilter);
+  } else if (view === 'day') {
+    contentHtml = renderDayView(selectedDay || currentDate, guildFilter);
+  }
+
+  const html = `
+    <div class="calendar-header">
+      ${headerHtml}
+      <div class="calendar-nav">
+        <button onclick="navigateCalendar(-1)">◀</button>
+        <button onclick="navigateCalendar(1)">▶</button>
+        <button onclick="resetCalendarToday()">Сегодня</button>
+      </div>
+    </div>
+    ${viewSwitcher}
+    ${filterHtml}
+    ${contentHtml}
+  `;
+  screenContainer.innerHTML = html;
+}
+
+function setCalendarView(view) {
+  CalendarState.view = view;
+  if (view === 'day' && !CalendarState.selectedDay) {
+    CalendarState.selectedDay = new Date();
+  }
+  renderCalendar();
+}
+
+function setGuildFilter(guildId) {
+  CalendarState.guildFilter = guildId;
+  renderCalendar();
+}
+
+function navigateCalendar(delta) {
+  const { view, currentDate } = CalendarState;
+  if (view === 'month') {
+    currentDate.setMonth(currentDate.getMonth() + delta);
+  } else if (view === 'week') {
+    currentDate.setDate(currentDate.getDate() + delta * 7);
+  } else if (view === 'day') {
+    const d = CalendarState.selectedDay || currentDate;
+    d.setDate(d.getDate() + delta);
+    CalendarState.selectedDay = new Date(d);
+    CalendarState.currentDate = new Date(d); // синхронизируем
+    renderCalendar();
+    return;
+  }
+  CalendarState.currentDate = new Date(currentDate);
+  renderCalendar();
+}
+
+function resetCalendarToday() {
+  CalendarState.currentDate = new Date();
+  CalendarState.selectedDay = new Date();
+  renderCalendar();
+}
+
+function getStartOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 - вс, 1 - пн ... 6 - сб
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // понедельник
+  return new Date(d.setDate(diff));
+}
+
+// Получить задачи, отфильтрованные по гильдии
+function getFilteredTasks(guildFilter) {
+  let tasks = GameState.tasks;
+  if (guildFilter) {
+    tasks = tasks.filter(t => t.category === guildFilter);
+  }
+  return tasks;
+}
+
+// Отрисовка месяца
+function renderMonthView(year, month, guildFilter) {
+  const tasks = getFilteredTasks(guildFilter);
+  const firstDay = new Date(year, month, 1).getDay(); // 0 вс
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startDay = firstDay === 0 ? 6 : firstDay - 1; // переводим на пн=0
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // Дни недели
+  const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  let grid = '<div class="weekday-header">' + weekdays.map(d => `<div>${d}</div>`).join('') + '</div>';
+  grid += '<div class="month-grid">';
+
+  // Пустые ячейки до начала месяца
+  for (let i = 0; i < startDay; i++) {
+    grid += '<div class="day-cell other-month"></div>';
+  }
+
+  // Дни месяца
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const dateStr = date.toISOString().slice(0,10);
+    const isToday = date.getTime() === today.getTime() && month === currentMonth && year === currentYear;
+    const cellClass = `day-cell ${isToday ? 'today' : ''}`;
+
+    // Собираем маркеры для этого дня
+    const dayTasks = tasks.filter(t => t.date === dateStr);
+    const markers = dayTasks.map(task => {
+      let cls = 'marker planned';
+      if (task.completed) cls = 'marker completed';
+      else if (task.date < today.toISOString().slice(0,10) && !task.completed) cls = 'marker overdue';
+      const color = getGuildColor(task.category);
+      return `<span class="${cls}" style="background: ${color};"></span>`;
+    }).join('');
+
+    grid += `
+      <div class="${cellClass}" onclick="goToDay('${dateStr}')">
+        <div class="day-number">${day}</div>
+        <div class="markers">${markers}</div>
+      </div>
+    `;
+  }
+
+  grid += '</div>';
+  return grid;
+}
+
+// Отрисовка недели
+function renderWeekView(date, guildFilter) {
+  const tasks = getFilteredTasks(guildFilter);
+  const startOfWeek = getStartOfWeek(date);
+  const weekDays = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(d.getDate() + i);
+    weekDays.push(d);
+  }
+
+  let html = '<div class="week-list">';
+  weekDays.forEach(day => {
+    const dateStr = day.toISOString().slice(0,10);
+    const dayTasks = tasks.filter(t => t.date === dateStr);
+    const dayName = day.toLocaleDateString('ru', { weekday: 'short', day: 'numeric', month: 'short' });
+    html += `<div class="week-day-block">
+      <h3>${dayName}</h3>
+      ${dayTasks.length === 0 ? '<p style="color:#a0a0b0; font-size:0.8rem;">Нет задач</p>' : dayTasks.map(task => {
+        const guild = GUILDS.find(g => g.id === task.category) || GUILDS[7];
+        return `<div class="quest-item mini" style="border-left: 4px solid ${guild.color};">
+          <span class="guild-badge" style="background:${guild.color}; color:white;">${guild.icon}</span>
+          ${task.title} ${task.completed ? '✅' : ''}
+        </div>`;
+      }).join('')}
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+// Отрисовка дня (по часам, упрощённо)
+function renderDayView(date, guildFilter) {
+  const tasks = getFilteredTasks(guildFilter);
+  const dateStr = date.toISOString().slice(0,10);
+  const dayTasks = tasks.filter(t => t.date === dateStr);
+  dayTasks.sort((a, b) => a.time.localeCompare(b.time));
+
+  let html = '<div class="day-list">';
+  if (dayTasks.length === 0) {
+    html += '<p style="text-align:center; margin-top:2rem;">Нет задач на этот день.</p>';
+  } else {
+    dayTasks.forEach(task => {
+      const guild = GUILDS.find(g => g.id === task.category) || GUILDS[7];
+      html += `<div class="quest-item mini" style="border-left: 4px solid ${guild.color};">
+        <span class="guild-badge" style="background:${guild.color}; color:white;">${guild.icon}</span>
+        <div style="flex:1;">
+          <strong>${task.time}</strong> — ${task.title} ${task.completed ? '✅' : ''}
+          <div style="font-size:0.7rem; color:#a0a0b0;">${task.minutes} мин</div>
+        </div>
+      </div>`;
+    });
+  }
+  html += '</div>';
+  return html;
+}
+
+// Переход в день из месяца
+function goToDay(dateStr) {
+  CalendarState.selectedDay = new Date(dateStr);
+  CalendarState.view = 'day';
+  renderCalendar();
+}
   function renderGuilds() { 
     const guildList = GUILDS.map(g => `<p style="color:${g.color}">${g.icon} ${g.name}</p>`).join('');
     screenContainer.innerHTML = `<h2>🛡️ Гильдии</h2>${guildList}<p>Кастомизация позже.</p>`; 
