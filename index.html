@@ -2,155 +2,209 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Планировщик — выбор темы</title>
-    <!-- Font Awesome для иконок -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        /* —————— БАЗОВЫЙ СБРОС И ПЕРЕМЕННЫЕ —————— */
+        /* —————— БАЗОВЫЙ СБРОС —————— */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #f3f4f6;
-            transition: background 0.4s ease, color 0.3s ease;
-            padding: 20px;
+            transition: background 0.4s ease;
+            padding: 12px;
         }
 
-        /* —————— КОНТЕЙНЕР ПРИЛОЖЕНИЯ —————— */
+        /* —————— КОНТЕЙНЕР —————— */
         .app-container {
             width: 100%;
-            max-width: 1280px;
-            border-radius: 32px;
-            padding: 28px 32px 32px 32px;
-            transition: background 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            max-width: 1200px;
+            border-radius: 28px;
+            padding: 20px;
+            transition: background 0.4s ease, box-shadow 0.4s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
             background: #ffffff;
         }
 
-        /* —————— ХЕДЕР С ПЕРЕКЛЮЧАТЕЛЕМ ТЕМ —————— */
+        /* —————— ХЕДЕР —————— */
         .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 16px 24px;
-            margin-bottom: 32px;
+            gap: 12px 16px;
+            margin-bottom: 24px;
         }
 
         .app-header h1 {
-            font-size: 26px;
-            font-weight: 600;
-            letter-spacing: -0.3px;
+            font-size: clamp(20px, 4vw, 28px);
+            font-weight: 700;
+            letter-spacing: -0.4px;
             color: inherit;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-header h1 i {
+            font-size: clamp(18px, 3vw, 24px);
         }
 
         .theme-picker {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
 
         .theme-btn {
-            width: 44px;
-            height: 44px;
+            width: clamp(38px, 7vw, 48px);
+            height: clamp(38px, 7vw, 48px);
             border-radius: 14px;
             border: 2.5px solid transparent;
             cursor: pointer;
-            transition: all 0.25s ease;
-            position: relative;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 600;
             color: #1e1e2a;
             background: #f0f0f5;
             box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            padding: 0 4px;
+            gap: 4px;
+            flex-shrink: 0;
         }
 
-        .theme-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+        .theme-btn:active {
+            transform: scale(0.92);
         }
 
         .theme-btn.active {
             border-color: currentColor;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.10);
         }
 
         .theme-btn .color-dots {
             display: flex;
-            gap: 4px;
+            gap: 3px;
         }
 
         .theme-btn .color-dots span {
             display: block;
-            width: 10px;
-            height: 10px;
+            width: clamp(8px, 1.5vw, 12px);
+            height: clamp(8px, 1.5vw, 12px);
             border-radius: 4px;
         }
 
-        /* —————— СЕТКА ДАШБОРДА —————— */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2.2fr 1fr;
-            gap: 28px;
-            margin-bottom: 30px;
+        .theme-btn .theme-label {
+            display: none;
         }
 
-        /* КАРТОЧКИ */
+        @media (min-width: 600px) {
+            .theme-btn .theme-label {
+                display: inline;
+                font-size: 10px;
+                margin-left: 2px;
+            }
+        }
+
+        /* —————— ОСНОВНАЯ СЕТКА —————— */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1.8fr 1fr;
+                gap: 24px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 2fr 1.1fr;
+                gap: 28px;
+            }
+        }
+
+        /* —————— КАРТОЧКИ —————— */
         .card {
             background: rgba(255,255,255,0.5);
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
-            border-radius: 24px;
-            padding: 22px 24px;
-            transition: background 0.35s ease, box-shadow 0.35s ease, border-color 0.3s ease;
+            border-radius: 20px;
+            padding: 18px 16px;
+            transition: background 0.35s ease, box-shadow 0.35s ease;
             border: 1px solid rgba(0,0,0,0.03);
             box-shadow: 0 4px 16px rgba(0,0,0,0.02);
         }
 
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            text-transform: uppercase;
-            opacity: 0.5;
-            margin-bottom: 18px;
+        @media (min-width: 480px) {
+            .card {
+                padding: 22px 24px;
+                border-radius: 24px;
+            }
         }
 
-        /* ——— Список задач ——— */
+        .card-title {
+            font-size: clamp(12px, 1.8vw, 15px);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            opacity: 0.5;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ——— ЗАДАЧИ ——— */
         .task-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .task-item {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 12px 14px;
-            border-radius: 16px;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
             background: rgba(255,255,255,0.5);
             backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
             transition: background 0.25s ease;
             border: 1px solid rgba(0,0,0,0.02);
+            touch-action: manipulation;
+        }
+
+        @media (min-width: 480px) {
+            .task-item {
+                padding: 12px 16px;
+                gap: 14px;
+            }
         }
 
         .task-check {
-            width: 22px;
-            height: 22px;
+            width: clamp(20px, 4vw, 26px);
+            height: clamp(20px, 4vw, 26px);
             border-radius: 8px;
             border: 2px solid rgba(0,0,0,0.15);
             background: transparent;
@@ -160,6 +214,13 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .task-check:active {
+            transform: scale(0.85);
         }
 
         .task-check.done {
@@ -169,7 +230,7 @@
         }
 
         .task-check.done i {
-            font-size: 12px;
+            font-size: clamp(10px, 1.8vw, 14px);
         }
 
         .task-content {
@@ -177,46 +238,50 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            min-width: 0;
         }
 
         .task-name {
             font-weight: 500;
-            font-size: 15px;
+            font-size: clamp(14px, 2.2vw, 16px);
+            word-break: break-word;
         }
 
         .task-meta {
-            font-size: 12px;
+            font-size: clamp(11px, 1.6vw, 13px);
             opacity: 0.5;
             display: flex;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 6px 12px;
             align-items: center;
         }
 
         .task-tag {
-            padding: 2px 12px;
+            padding: 2px 10px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: clamp(10px, 1.4vw, 12px);
             font-weight: 500;
             background: rgba(0,0,0,0.05);
             color: inherit;
+            white-space: nowrap;
         }
 
-        /* ——— Прогресс-бар ——— */
+        /* ——— ПРОГРЕСС ——— */
         .progress-block {
-            margin-top: 8px;
+            margin-top: 4px;
         }
 
         .progress-label {
             display: flex;
             justify-content: space-between;
-            font-size: 14px;
+            font-size: clamp(13px, 2vw, 15px);
             font-weight: 500;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .progress-track {
             width: 100%;
-            height: 8px;
+            height: clamp(6px, 1vw, 10px);
             border-radius: 20px;
             background: rgba(0,0,0,0.06);
             overflow: hidden;
@@ -226,43 +291,62 @@
             height: 100%;
             border-radius: 20px;
             background: currentColor;
-            width: 64%;
             transition: width 0.6s ease;
         }
 
-        /* ——— Статистика ——— */
+        /* ——— СТАТИСТИКА ——— */
         .stats-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
             margin-top: 10px;
+        }
+
+        @media (min-width: 480px) {
+            .stats-row {
+                gap: 12px;
+            }
         }
 
         .stat-item {
             text-align: center;
-            padding: 10px 0;
-            border-radius: 16px;
+            padding: 8px 4px;
+            border-radius: 14px;
             background: rgba(255,255,255,0.3);
         }
 
+        @media (min-width: 480px) {
+            .stat-item {
+                padding: 12px 8px;
+                border-radius: 16px;
+            }
+        }
+
         .stat-number {
-            font-size: 26px;
+            font-size: clamp(22px, 4.5vw, 30px);
             font-weight: 700;
             letter-spacing: -0.3px;
+            line-height: 1.2;
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: clamp(10px, 1.4vw, 13px);
             opacity: 0.5;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
-        /* ——— Календарь-мини ——— */
+        /* ——— КАЛЕНДАРЬ ——— */
         .mini-calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            margin: 12px 0 6px;
+            gap: 4px;
+            margin: 8px 0 4px;
+        }
+
+        @media (min-width: 480px) {
+            .mini-calendar {
+                gap: 6px;
+            }
         }
 
         .mini-calendar .day {
@@ -270,12 +354,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            font-size: 14px;
+            border-radius: clamp(8px, 1.5vw, 14px);
+            font-size: clamp(12px, 2vw, 16px);
             font-weight: 500;
             background: rgba(255,255,255,0.2);
             transition: background 0.2s ease;
             cursor: default;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .mini-calendar .day.has-task {
@@ -290,13 +376,18 @@
             color: inherit;
         }
 
-        /* ——— Цели (эпические) ——— */
+        .mini-calendar .day.weekend {
+            opacity: 0.4;
+        }
+
+        /* ——— ЦЕЛИ ——— */
         .goal-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 0;
+            padding: 12px 0;
             border-bottom: 1px solid rgba(0,0,0,0.04);
+            gap: 12px;
         }
 
         .goal-item:last-child {
@@ -307,54 +398,160 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            min-width: 0;
         }
 
         .goal-name {
             font-weight: 500;
-            font-size: 15px;
+            font-size: clamp(14px, 2.2vw, 16px);
+            word-break: break-word;
         }
 
         .goal-sub {
-            font-size: 13px;
+            font-size: clamp(12px, 1.6vw, 14px);
             opacity: 0.5;
         }
 
         .goal-badge {
-            font-size: 12px;
+            font-size: clamp(11px, 1.5vw, 13px);
             font-weight: 600;
-            padding: 4px 14px;
+            padding: 4px 12px;
             border-radius: 30px;
             background: rgba(0,0,0,0.04);
+            white-space: nowrap;
         }
 
-        /* ——— Нижняя панель ——— */
+        /* ——— НИЖНЯЯ ПАНЕЛЬ ——— */
         .bottom-bar {
             display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 18px;
-            padding-top: 18px;
+            flex-direction: column;
+            gap: 14px;
+            padding-top: 16px;
             border-top: 1px solid rgba(0,0,0,0.04);
-            margin-top: 4px;
         }
 
-        .bottom-bar .tag-group {
+        @media (min-width: 600px) {
+            .bottom-bar {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .tag-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag-group .tag {
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: clamp(12px, 1.6vw, 14px);
+            font-weight: 500;
+            background: rgba(0,0,0,0.03);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+            border: none;
+            color: inherit;
+        }
+
+        .tag-group .tag:active {
+            transform: scale(0.92);
+        }
+
+        .tag-group .tag.active-tag {
+            background: var(--accent, #4a6fa5);
+            color: #fff;
+        }
+
+        .bottom-stats {
+            display: flex;
+            gap: 16px;
+            font-size: clamp(13px, 1.8vw, 15px);
+            opacity: 0.5;
+            flex-wrap: wrap;
+        }
+
+        .bottom-stats span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ——— ДОПОЛНИТЕЛЬНЫЕ КНОПКИ ——— */
+        .action-buttons {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            margin-top: 14px;
         }
 
-        .bottom-bar .tag {
-            padding: 6px 18px;
-            border-radius: 30px;
-            font-size: 13px;
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 600;
+            font-size: clamp(13px, 1.8vw, 15px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            flex: 1;
+            justify-content: center;
+            min-width: 100px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.94);
+        }
+
+        .action-btn.primary {
+            background: var(--accent, #4a6fa5);
+        }
+
+        .action-btn.success {
+            background: #2ecc71;
+        }
+
+        .action-btn.danger {
+            background: #e74c3c;
+        }
+
+        .action-btn.warning {
+            background: #f39c12;
+        }
+
+        /* ——— TOAST-УВЕДОМЛЕНИЕ ——— */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e1e2a;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 16px;
             font-weight: 500;
-            background: rgba(0,0,0,0.03);
-            cursor: default;
+            font-size: 15px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 999;
+            max-width: 90%;
+            text-align: center;
         }
 
-        /* —————— ТЕМЫ (переопределение через data-theme) —————— */
-        /* 1. Нордик */
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* —————— ТЕМЫ —————— */
         [data-theme="nordic"] {
             --bg: #eef2f5;
             --surface: #ffffff;
@@ -373,7 +570,6 @@
             border-color: var(--border);
         }
 
-        /* 2. Янтарный */
         [data-theme="amber"] {
             --bg: #fbf3e8;
             --surface: #fff9f0;
@@ -390,7 +586,6 @@
             background: rgba(255,248,235,0.7);
         }
 
-        /* 3. Лесной */
         [data-theme="forest"] {
             --bg: #eaf0e6;
             --surface: #f4f9f0;
@@ -407,7 +602,6 @@
             background: rgba(255,255,255,0.65);
         }
 
-        /* 4. Индиго (тёмная) */
         [data-theme="indigo"] {
             --bg: #131b2b;
             --surface: #1a2538;
@@ -441,7 +635,6 @@
             border-color: var(--border);
         }
 
-        /* 5. Розовый кварц */
         [data-theme="rose"] {
             --bg: #f9f0f2;
             --surface: #fff7f9;
@@ -458,7 +651,6 @@
             background: rgba(255,245,247,0.7);
         }
 
-        /* 6. Техно-нуар (тёмный неон) */
         [data-theme="technoir"] {
             --bg: #0b0d14;
             --surface: #131721;
@@ -496,7 +688,6 @@
             border-color: var(--border);
         }
 
-        /* 7. Бумага и чернила */
         [data-theme="paper"] {
             --bg: #f6f4ef;
             --surface: #ffffff;
@@ -519,50 +710,7 @@
             background: rgba(255,252,248,0.5);
         }
 
-        /* ——— Адаптив ——— */
-        @media (max-width: 820px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            .app-container {
-                padding: 20px;
-            }
-            .stats-row {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .app-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .theme-picker {
-                justify-content: center;
-            }
-            .stats-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ——— вспомогательные утилиты ——— */
-        .flex {
-            display: flex;
-        }
-        .flex-between {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .gap-2 { gap: 8px; }
-        .mt-2 { margin-top: 12px; }
-        .mb-2 { margin-bottom: 12px; }
-        .op-5 { opacity: 0.5; }
-        .fw-600 { font-weight: 600; }
-        .text-sm { font-size: 13px; }
-
-        /* чтобы кнопки темы наследовали цвет акцента */
+        /* ——— Общие стили для всех тем ——— */
         .theme-btn {
             color: var(--text, #1e1e2a);
             background: var(--surface, #f0f0f5);
@@ -571,6 +719,52 @@
             border-color: var(--accent, #4a6fa5);
             color: var(--accent, #4a6fa5);
         }
+
+        body {
+            background: var(--bg, #f3f4f6);
+        }
+
+        /* ——— iPhone Safe Area ——— */
+        @supports (padding: max(0px)) {
+            .app-container {
+                padding-left: max(20px, env(safe-area-inset-left));
+                padding-right: max(20px, env(safe-area-inset-right));
+            }
+        }
+
+        /* ——— Отладка для очень маленьких экранов ——— */
+        @media (max-width: 380px) {
+            .app-container {
+                padding: 12px 10px;
+                border-radius: 20px;
+            }
+            .card {
+                padding: 14px 12px;
+                border-radius: 16px;
+            }
+            .task-item {
+                padding: 8px 10px;
+                gap: 10px;
+            }
+            .theme-btn {
+                width: 34px;
+                height: 34px;
+                border-radius: 10px;
+            }
+            .theme-btn .color-dots span {
+                width: 6px;
+                height: 6px;
+            }
+            .stats-row {
+                gap: 4px;
+            }
+            .stat-item {
+                padding: 6px 2px;
+            }
+            .stat-number {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -578,142 +772,119 @@
 <div class="app-container" id="app" data-theme="nordic">
     <!-- ХЕДЕР -->
     <header class="app-header">
-        <h1><i class="far fa-calendar-alt" style="margin-right: 10px;"></i>Планировщик</h1>
-        <div class="theme-picker" id="themePicker">
-            <!-- кнопки тем заполняются из JS -->
-        </div>
+        <h1><i class="far fa-calendar-alt"></i>Планировщик</h1>
+        <div class="theme-picker" id="themePicker"></div>
     </header>
 
     <!-- ОСНОВНАЯ СЕТКА -->
     <div class="dashboard-grid">
-        <!-- ЛЕВАЯ КОЛОНКА: задачи + прогресс -->
+        <!-- ЛЕВАЯ КОЛОНКА -->
         <div>
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-title"><i class="far fa-check-circle" style="margin-right: 8px;"></i>Сегодня</div>
-                <div class="task-list">
-                    <div class="task-item">
-                        <div class="task-check done"><i class="fas fa-check"></i></div>
-                        <div class="task-content">
-                            <span class="task-name">Создать макет дашборда</span>
-                            <span class="task-meta"><span class="task-tag">Дизайн</span> 10:30 – 12:00</span>
-                        </div>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-check"></div>
-                        <div class="task-content">
-                            <span class="task-name">Написать документацию</span>
-                            <span class="task-meta"><span class="task-tag">Разработка</span> 14:00 – 15:30</span>
-                        </div>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-check"></div>
-                        <div class="task-content">
-                            <span class="task-name">Обзор кода команды</span>
-                            <span class="task-meta"><span class="task-tag">Ревью</span> 16:00 – 17:00</span>
-                        </div>
-                    </div>
+            <div class="card" style="margin-bottom: 18px;">
+                <div class="card-title"><i class="far fa-check-circle"></i>Сегодня</div>
+                <div class="task-list" id="taskList">
+                    <!-- Задачи рендерятся из JS -->
                 </div>
             </div>
 
-            <!-- Прогресс -->
             <div class="card">
-                <div class="card-title"><i class="fas fa-chart-line" style="margin-right: 8px;"></i>Прогресс недели</div>
+                <div class="card-title"><i class="fas fa-chart-line"></i>Прогресс недели</div>
                 <div class="progress-block">
                     <div class="progress-label">
                         <span>Выполнено задач</span>
-                        <span>9 / 14</span>
+                        <span id="progressText">9 / 14</span>
                     </div>
                     <div class="progress-track">
-                        <div class="progress-fill" style="width: 64%;"></div>
+                        <div class="progress-fill" id="progressFill" style="width: 64%;"></div>
                     </div>
                 </div>
                 <div class="stats-row">
                     <div class="stat-item">
-                        <div class="stat-number">12</div>
+                        <div class="stat-number" id="statPlanned">12</div>
                         <div class="stat-label">Запланировано</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">9</div>
+                        <div class="stat-number" id="statDone">9</div>
                         <div class="stat-label">Выполнено</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">3</div>
+                        <div class="stat-number" id="statRemaining">3</div>
                         <div class="stat-label">Осталось</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ПРАВАЯ КОЛОНКА: календарь + цели -->
+        <!-- ПРАВАЯ КОЛОНКА -->
         <div>
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="flex-between">
-                    <span class="card-title"><i class="far fa-calendar" style="margin-right: 8px;"></i>Июль 2026</span>
-                    <span class="text-sm op-5">неделя 30</span>
+            <div class="card" style="margin-bottom: 18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                    <span class="card-title" style="margin-bottom:0;"><i class="far fa-calendar"></i><span id="monthLabel">Июль 2026</span></span>
+                    <span class="text-sm" style="opacity:0.5; font-size:clamp(11px,1.6vw,14px);">неделя 30</span>
                 </div>
-                <div class="mini-calendar">
-                    <span class="day">Пн</span>
-                    <span class="day">Вт</span>
-                    <span class="day">Ср</span>
-                    <span class="day">Чт</span>
-                    <span class="day">Пт</span>
-                    <span class="day">Сб</span>
-                    <span class="day">Вс</span>
-                    <!-- заполним дни через JS -->
-                </div>
-                <div style="margin-top: 10px; display: flex; gap: 18px; font-size: 12px; opacity: 0.5;">
+                <div class="mini-calendar" id="miniCalendar"></div>
+                <div style="margin-top: 10px; display: flex; gap: 14px; font-size: clamp(11px,1.6vw,13px); opacity: 0.5; flex-wrap:wrap;">
                     <span><span style="display:inline-block; width:10px; height:10px; border-radius:4px; background:currentColor; margin-right:6px;"></span> с задачами</span>
                     <span><span style="display:inline-block; width:10px; height:10px; border-radius:4px; border:2px solid currentColor; margin-right:6px;"></span> сегодня</span>
                 </div>
             </div>
 
-            <!-- Цели -->
             <div class="card">
-                <div class="card-title"><i class="fas fa-bullseye" style="margin-right: 8px;"></i>Цели</div>
-                <div class="goal-item">
-                    <div class="goal-info">
-                        <span class="goal-name">Запустить MVP</span>
-                        <span class="goal-sub">3 из 5 задач выполнено</span>
-                    </div>
-                    <span class="goal-badge" style="color: var(--accent);">60%</span>
-                </div>
-                <div class="goal-item">
-                    <div class="goal-info">
-                        <span class="goal-name">Изучить Vue 3</span>
-                        <span class="goal-sub">2 из 4 задач выполнено</span>
-                    </div>
-                    <span class="goal-badge" style="color: var(--accent);">50%</span>
-                </div>
-                <div class="goal-item">
-                    <div class="goal-info">
-                        <span class="goal-name">Дизайн-система</span>
-                        <span class="goal-sub">1 из 3 задач выполнено</span>
-                    </div>
-                    <span class="goal-badge" style="color: var(--accent);">33%</span>
+                <div class="card-title"><i class="fas fa-bullseye"></i>Цели</div>
+                <div id="goalList">
+                    <!-- Цели рендерятся из JS -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- НИЖНЯЯ ПАНЕЛЬ (категории / фильтры) -->
+    <!-- НИЖНЯЯ ПАНЕЛЬ -->
     <div class="bottom-bar">
-        <div class="tag-group">
-            <span class="tag" style="background: var(--accent-light); color: var(--accent);">Все</span>
-            <span class="tag">Работа</span>
-            <span class="tag">Личное</span>
-            <span class="tag">Здоровье</span>
-            <span class="tag">Обучение</span>
+        <div class="tag-group" id="tagGroup">
+            <button class="tag active-tag" data-tag="all">Все</button>
+            <button class="tag" data-tag="work">Работа</button>
+            <button class="tag" data-tag="personal">Личное</button>
+            <button class="tag" data-tag="health">Здоровье</button>
+            <button class="tag" data-tag="learning">Обучение</button>
         </div>
-        <div style="display: flex; gap: 14px; font-size: 14px; opacity: 0.5;">
-            <span><i class="far fa-star"></i> 18 XP</span>
-            <span><i class="fas fa-fire"></i> 5 дн.</span>
+        <div class="bottom-stats">
+            <span><i class="far fa-star"></i> <span id="xpDisplay">18</span> XP</span>
+            <span><i class="fas fa-fire"></i> <span id="streakDisplay">5</span> дн.</span>
         </div>
+    </div>
+
+    <!-- КНОПКИ ДЕЙСТВИЙ -->
+    <div class="action-buttons">
+        <button class="action-btn primary" id="btnAddTask"><i class="fas fa-plus"></i> Новая задача</button>
+        <button class="action-btn success" id="btnCompleteAll"><i class="fas fa-check-double"></i> Все готово</button>
+        <button class="action-btn warning" id="btnResetStats"><i class="fas fa-undo"></i> Сброс</button>
     </div>
 </div>
 
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
     (function() {
-        // ———— 1. Определение тем ————
+        // ———— ДАННЫЕ ————
+        const tasks = [
+            { id: 1, name: 'Создать макет дашборда', tag: 'Работа', time: '10:30 – 12:00', done: true },
+            { id: 2, name: 'Написать документацию', tag: 'Разработка', time: '14:00 – 15:30', done: false },
+            { id: 3, name: 'Обзор кода команды', tag: 'Ревью', time: '16:00 – 17:00', done: false },
+            { id: 4, name: 'Планерка с дизайнерами', tag: 'Работа', time: '09:00 – 10:00', done: false }
+        ];
+
+        const goals = [
+            { name: 'Запустить MVP', done: 3, total: 5 },
+            { name: 'Изучить Vue 3', done: 2, total: 4 },
+            { name: 'Дизайн-система', done: 1, total: 3 }
+        ];
+
+        let currentTheme = 'nordic';
+        let taskData = [...tasks];
+        let doneCount = taskData.filter(t => t.done).length;
+
+        // ———— ТЕМЫ ————
         const themes = [
             { id: 'nordic',   label: 'Нордик',   colors: ['#4a6fa5', '#d4e0f0', '#eef2f5'] },
             { id: 'amber',    label: 'Янтарь',   colors: ['#d48c4b', '#f0dec8', '#fbf3e8'] },
@@ -724,19 +895,32 @@
             { id: 'paper',    label: 'Бумага',   colors: ['#b8a99a', '#e8e1d8', '#f6f4ef'] }
         ];
 
+        // ———— DOM ————
         const app = document.getElementById('app');
         const picker = document.getElementById('themePicker');
+        const taskList = document.getElementById('taskList');
+        const goalList = document.getElementById('goalList');
+        const miniCalendar = document.getElementById('miniCalendar');
+        const toast = document.getElementById('toast');
+        let toastTimer = null;
 
-        // ———— 2. Рендерим кнопки тем ————
+        // ———— TOAST ————
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        // ———— РЕНДЕР ТЕМ ————
         function renderThemeButtons() {
             picker.innerHTML = '';
             themes.forEach(t => {
                 const btn = document.createElement('button');
-                btn.className = 'theme-btn' + (t.id === 'nordic' ? ' active' : '');
+                btn.className = 'theme-btn' + (t.id === currentTheme ? ' active' : '');
                 btn.dataset.theme = t.id;
                 btn.title = t.label;
 
-                // цветные точки
                 const dots = document.createElement('span');
                 dots.className = 'color-dots';
                 t.colors.forEach(c => {
@@ -746,108 +930,215 @@
                 });
                 btn.appendChild(dots);
 
-                // подпись (короткая)
                 const label = document.createElement('span');
-                label.style.marginLeft = '6px';
-                label.style.fontSize = '11px';
-                label.style.fontWeight = '500';
+                label.className = 'theme-label';
                 label.textContent = t.label;
                 btn.appendChild(label);
 
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    setTheme(t.id);
-                });
-
+                btn.addEventListener('click', () => setTheme(t.id));
                 picker.appendChild(btn);
             });
         }
 
-        // ———— 3. Установка темы ————
         function setTheme(themeId) {
+            currentTheme = themeId;
             app.dataset.theme = themeId;
-            // обновляем активный класс
             document.querySelectorAll('.theme-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.theme === themeId);
             });
-            // сохраняем в localStorage (опционально)
-            try {
-                localStorage.setItem('planner-theme', themeId);
-            } catch (_) {}
+            try { localStorage.setItem('planner-theme', themeId); } catch(_) {}
+            showToast('Тема: ' + themes.find(t => t.id === themeId)?.label);
         }
 
-        // ———— 4. Восстановление темы ————
-        function loadSavedTheme() {
-            let saved = null;
+        function loadTheme() {
             try {
-                saved = localStorage.getItem('planner-theme');
-            } catch (_) {}
-            if (saved && themes.some(t => t.id === saved)) {
-                setTheme(saved);
-            } else {
-                setTheme('nordic');
-            }
+                const saved = localStorage.getItem('planner-theme');
+                if (saved && themes.some(t => t.id === saved)) {
+                    currentTheme = saved;
+                }
+            } catch(_) {}
+            app.dataset.theme = currentTheme;
         }
 
-        // ———— 5. Календарь (мини) ————
-        function renderMiniCalendar() {
-            const container = document.querySelector('.mini-calendar');
-            if (!container) return;
-            // очищаем, но оставляем заголовки дней недели (первые 7 элементов)
+        // ———— РЕНДЕР ЗАДАЧ ————
+        function renderTasks(filter = 'all') {
+            const filtered = filter === 'all' ? taskData : taskData.filter(t => t.tag.toLowerCase() === filter);
+            taskList.innerHTML = '';
+            filtered.forEach(task => {
+                const item = document.createElement('div');
+                item.className = 'task-item';
+
+                const check = document.createElement('div');
+                check.className = 'task-check' + (task.done ? ' done' : '');
+                check.innerHTML = task.done ? '<i class="fas fa-check"></i>' : '';
+                check.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    task.done = !task.done;
+                    updateStats();
+                    renderTasks(document.querySelector('.tag.active-tag')?.dataset?.tag || 'all');
+                    showToast(task.done ? '✅ Задача выполнена!' : '↩️ Задача возвращена');
+                });
+
+                const content = document.createElement('div');
+                content.className = 'task-content';
+                content.innerHTML = `
+                    <span class="task-name">${task.name}</span>
+                    <span class="task-meta">
+                        <span class="task-tag">${task.tag}</span>
+                        ${task.time || ''}
+                    </span>
+                `;
+
+                item.appendChild(check);
+                item.appendChild(content);
+                taskList.appendChild(item);
+            });
+            updateStats();
+        }
+
+        // ———— РЕНДЕР ЦЕЛЕЙ ————
+        function renderGoals() {
+            goalList.innerHTML = '';
+            goals.forEach(g => {
+                const pct = Math.round((g.done / g.total) * 100);
+                const item = document.createElement('div');
+                item.className = 'goal-item';
+                item.innerHTML = `
+                    <div class="goal-info">
+                        <span class="goal-name">${g.name}</span>
+                        <span class="goal-sub">${g.done} из ${g.total} задач выполнено</span>
+                    </div>
+                    <span class="goal-badge" style="color:var(--accent);">${pct}%</span>
+                `;
+                goalList.appendChild(item);
+            });
+        }
+
+        // ———— РЕНДЕР КАЛЕНДАРЯ ————
+        function renderCalendar() {
             const daysOfWeek = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-            // пересоздаём
-            container.innerHTML = '';
+            miniCalendar.innerHTML = '';
             daysOfWeek.forEach(d => {
                 const el = document.createElement('span');
                 el.className = 'day';
                 el.textContent = d;
-                container.appendChild(el);
+                miniCalendar.appendChild(el);
             });
 
-            // имитация июля 2026: 1 июля — среда
-            const startDay = 3; // 0=пн, 1=вт, 2=ср, 3=чт, 4=пт, 5=сб, 6=вс
+            const startDay = 3;
             const daysInMonth = 31;
-            const today = 30; // 30 июля
+            const today = 30;
 
             for (let i = 1; i <= daysInMonth; i++) {
                 const dayEl = document.createElement('span');
                 dayEl.className = 'day';
                 dayEl.textContent = i;
 
-                // есть ли задача (случайно 30% дней)
+                const dayOfWeek = (startDay + i - 1) % 7;
+                if (dayOfWeek === 5 || dayOfWeek === 6) {
+                    dayEl.classList.add('weekend');
+                }
+
                 if (i % 3 === 0 || i === 15 || i === 22 || i === 30) {
                     dayEl.classList.add('has-task');
                 }
-                // сегодня
                 if (i === today) {
                     dayEl.classList.add('today');
                 }
-                // выходные (суббота/воскресенье) — визуально не выделяем, но можно
-                container.appendChild(dayEl);
+                miniCalendar.appendChild(dayEl);
             }
         }
 
-        // ———— 6. Инициализация ————
-        function init() {
-            renderThemeButtons();
-            loadSavedTheme();
-            renderMiniCalendar();
+        // ———— ОБНОВЛЕНИЕ СТАТИСТИКИ ————
+        function updateStats() {
+            doneCount = taskData.filter(t => t.done).length;
+            const total = taskData.length;
+            const remaining = total - doneCount;
+            const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
 
-            // клик по чекбоксам задач (демо)
-            document.querySelectorAll('.task-check').forEach(chk => {
-                chk.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    this.classList.toggle('done');
-                    if (this.classList.contains('done')) {
-                        this.innerHTML = '<i class="fas fa-check"></i>';
-                    } else {
-                        this.innerHTML = '';
-                    }
+            document.getElementById('progressText').textContent = `${doneCount} / ${total}`;
+            document.getElementById('progressFill').style.width = `${pct}%`;
+            document.getElementById('statPlanned').textContent = total;
+            document.getElementById('statDone').textContent = doneCount;
+            document.getElementById('statRemaining').textContent = remaining;
+
+            // XP и стрик (демо)
+            document.getElementById('xpDisplay').textContent = 18 + doneCount * 2;
+            document.getElementById('streakDisplay').textContent = 5 + (doneCount > 2 ? 1 : 0);
+        }
+
+        // ———— ФИЛЬТРЫ ————
+        function setupFilters() {
+            document.querySelectorAll('.tag-group .tag').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tag-group .tag').forEach(b => b.classList.remove('active-tag'));
+                    this.classList.add('active-tag');
+                    const filter = this.dataset.tag;
+                    renderTasks(filter);
+                    showToast('Фильтр: ' + (filter === 'all' ? 'Все' : this.textContent));
                 });
             });
         }
 
-        // запуск после загрузки DOM
+        // ———— КНОПКИ ДЕЙСТВИЙ ————
+        function setupActions() {
+            // Новая задача
+            document.getElementById('btnAddTask').addEventListener('click', () => {
+                const name = prompt('Название задачи:');
+                if (name && name.trim()) {
+                    const tag = prompt('Категория (Работа/Личное/Здоровье/Обучение):') || 'Другое';
+                    taskData.push({
+                        id: Date.now(),
+                        name: name.trim(),
+                        tag: tag,
+                        time: new Date().toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'}),
+                        done: false
+                    });
+                    renderTasks(document.querySelector('.tag.active-tag')?.dataset?.tag || 'all');
+                    showToast('➕ Задача добавлена!');
+                }
+            });
+
+            // Все готово
+            document.getElementById('btnCompleteAll').addEventListener('click', () => {
+                if (taskData.every(t => t.done)) {
+                    showToast('🎉 Все уже выполнено!');
+                    return;
+                }
+                if (confirm('Отметить все задачи как выполненные?')) {
+                    taskData.forEach(t => t.done = true);
+                    renderTasks(document.querySelector('.tag.active-tag')?.dataset?.tag || 'all');
+                    showToast('✅ Все задачи выполнены!');
+                }
+            });
+
+            // Сброс
+            document.getElementById('btnResetStats').addEventListener('click', () => {
+                if (confirm('Сбросить все задачи и статистику?')) {
+                    taskData = tasks.map(t => ({ ...t, done: false }));
+                    renderTasks('all');
+                    // сбросить активный фильтр
+                    document.querySelectorAll('.tag-group .tag').forEach(b => b.classList.remove('active-tag'));
+                    document.querySelector('[data-tag="all"]').classList.add('active-tag');
+                    showToast('🔄 Статистика сброшена');
+                }
+            });
+        }
+
+        // ———— ИНИЦИАЛИЗАЦИЯ ————
+        function init() {
+            loadTheme();
+            renderThemeButtons();
+            renderTasks('all');
+            renderGoals();
+            renderCalendar();
+            setupFilters();
+            setupActions();
+
+            // обновить активный фильтр
+            document.querySelector('[data-tag="all"]').classList.add('active-tag');
+        }
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
