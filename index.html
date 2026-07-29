@@ -3,24 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>LVL UP • RPG Planner</title>
+  <title>LVL UP · RPG Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=Philosopher&family=Playfair+Display&display=swap" rel="stylesheet">
   <style>
+    /* ---------- ОСНОВНЫЕ ПЕРЕМЕННЫЕ (ТЕМЫ) ---------- */
     :root {
-      --bg: #F5FBF8;
-      --surface: #FFFFFF;
-      --primary: #7EC8A0;
-      --secondary: #B8E6CF;
-      --text: #2C3E35;
-      --text-light: #6B7D74;
-      --border: #d0e0d8;
-      --shadow: 0 4px 16px rgba(126, 200, 160, 0.08);
-      --radius: 18px;
-      --font: 'Inter', system-ui, sans-serif;
+      --bg: #F5FBF8; --surface: #FFFFFF; --primary: #7EC8A0; --secondary: #B8E6CF;
+      --text: #2C3E35; --text-light: #6B7D74; --border: #d0e0d8; --shadow: 0 4px 16px rgba(126,200,160,0.08);
+      --radius: 18px; --font: 'Inter', system-ui, sans-serif;
     }
-
     body.theme-mint {
       --bg: #F5FBF8; --surface: #FFFFFF; --primary: #7EC8A0; --secondary: #B8E6CF;
       --text: #2C3E35; --text-light: #6B7D74; --border: #d0e0d8;
@@ -46,6 +39,7 @@
       --text: #3A2E28; --text-light: #8E7B72; --border: #e7dbcf;
     }
 
+    /* ---------- БАЗОВЫЕ СТИЛИ ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: var(--bg); color: var(--text); font-family: var(--font);
@@ -92,6 +86,8 @@
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
       font-size: 2rem; margin-top: -26px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
+
+    /* ---------- КАРТОЧКИ И ЭЛЕМЕНТЫ ---------- */
     .card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.2rem;
@@ -137,6 +133,12 @@
     .month-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.8rem; text-align: center; cursor: pointer; }
     .note-card { background: var(--surface); border-left: 4px solid var(--primary); padding: 1rem; margin-bottom: 0.8rem; border-radius: 8px; }
     .glossary-term { color: var(--primary); font-weight: 600; }
+    input, select, textarea {
+      width: 100%; padding: 0.7rem; margin-bottom: 0.8rem;
+      border: 1px solid var(--border); border-radius: 12px;
+      font-family: var(--font); background: var(--bg); color: var(--text);
+    }
+    label { font-weight: 500; margin-bottom: 0.3rem; display: block; color: var(--primary); }
   </style>
 </head>
 <body class="theme-mint">
@@ -150,6 +152,7 @@
       <li data-screen="calendar">📅 Календарь</li>
       <li data-screen="guilds">📚 Журналы</li>
       <li data-screen="goals">🎯 Цели</li>
+      <li data-screen="notes">📝 Заметки</li>
       <li data-screen="gallery">🖼️ Галерея</li>
       <li data-screen="profile">👤 Профиль</li>
     </nav>
@@ -163,6 +166,7 @@
     </div>
   </div>
   <script>
+    // ==================== ГЛОБАЛЬНЫЕ ДАННЫЕ ====================
     const GUILDS = [
       { id: 'body', name: 'Тело', icon: '💪', color: '#E57373' },
       { id: 'creativity', name: 'Творчество', icon: '🎨', color: '#BA68C8' },
@@ -183,7 +187,7 @@
     const GameState = {
       player: {
         name: 'Александр', lvl: 1, xp: 0.5, streak: 0, bestStreak: 0, lastCompletedDate: null,
-        get xpToNext() { return this.lvl * (this.lvl + 1) / 2; },
+        get xpToNext() { return (this.lvl + 1) * (this.lvl + 2) / 2; },
         get progress() { const done = (this.lvl - 1) * this.lvl / 2; return Math.min(((this.xp - done) / this.lvl) * 100, 100).toFixed(0); }
       },
       tasks: Storage.get('tasks', []),
@@ -201,9 +205,11 @@
       Storage.set('settings', GameState.settings);
       Storage.set('player', GameState.player);
     }
+
     function applyTheme() { document.body.className = 'theme-' + GameState.settings.theme; }
     applyTheme();
 
+    // ==================== НАВИГАЦИЯ ====================
     const menuToggle = document.getElementById('menuToggle');
     const mainNav = document.getElementById('mainNav');
     menuToggle.addEventListener('click', () => mainNav.classList.toggle('hidden'));
@@ -226,7 +232,59 @@
       }
     }
 
-    // ==================== СЕГОДНЯ ====================
+    // ==================== RPG-ЛОГИКА (ОПЫТ, СТРИКИ) ====================
+    function completeQuest(id) {
+      const task = GameState.tasks.find(t => t.id === id);
+      if (!task || task.completed) return;
+      const today = new Date().toISOString().slice(0,10);
+      if (task.date > today) { alert('Этот квест ещё не наступил!'); return; }
+      task.completed = true;
+      task.dateCompleted = today;
+      GameState.player.xp += task.minutes * 0.01;
+      checkLevelUp();
+      updateStreak(today);
+      persist();
+      renderScreen('today');
+    }
+
+    function updateStreak(today) {
+      const p = GameState.player;
+      if (p.lastCompletedDate === today) return;
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+      if (p.lastCompletedDate === yesterday) p.streak++; else p.streak = 1;
+      if (p.streak > p.bestStreak) p.bestStreak = p.streak;
+      p.lastCompletedDate = today;
+    }
+
+    function checkLevelUp() {
+      const p = GameState.player;
+      let needed = p.xpToNext;
+      while (p.xp >= needed) {
+        p.lvl++;
+        needed = p.xpToNext;
+      }
+      persist();
+    }
+
+    function quickAddTask() {
+      const title = prompt('Название квеста:');
+      if (!title) return;
+      const now = new Date();
+      const newQuest = {
+        id: Date.now().toString(36) + Math.random().toString(36).substring(2),
+        category: 'other', title, minutes: 30,
+        date: now.toISOString().slice(0,10), time: now.toTimeString().slice(0,5),
+        completed: false, dateCompleted: null, createdAt: new Date().toISOString()
+      };
+      GameState.tasks.push(newQuest);
+      persist();
+      renderScreen('today');
+    }
+
+    function getGuildColor(id) { return GUILDS.find(g => g.id === id)?.color || '#78909C'; }
+    function getGuildIcon(id) { return GUILDS.find(g => g.id === id)?.icon || '📦'; }
+
+    // ==================== ЭКРАНЫ ====================
     function renderToday() {
       const today = new Date().toISOString().slice(0,10);
       const tasks = GameState.tasks.filter(t => t.date === today && !t.completed);
@@ -235,19 +293,93 @@
           <h2>Доброе утро, ${GameState.player.name}!</h2>
           <p>Уровень ${GameState.player.lvl} • XP ${GameState.player.xp.toFixed(1)}</p>
           <div class="xp-bar"><div class="xp-fill" style="width:${GameState.player.progress}%"></div></div>
-          <p>🔥 Комбо дней: ${GameState.player.streak}</p>
+          <p>🔥 Комбо дней: ${GameState.player.streak} (рекорд: ${GameState.player.bestStreak})</p>
         </div>
         <h3>Квесты на сегодня</h3>
         ${tasks.length === 0 ? '<p>На сегодня ничего нет</p>' : tasks.map(t => `
           <div class="quest-item">
-            <div><span class="guild-badge" style="background:${getGuildColor(t.category)}">${getGuildIcon(t.category)}</span>${t.title} (${t.minutes} мин)</div>
+            <div>
+              <span class="guild-badge" style="background:${getGuildColor(t.category)}">${getGuildIcon(t.category)}</span>
+              ${t.title} (${t.minutes} мин)
+            </div>
             <button class="btn secondary" onclick="completeQuest('${t.id}')">✔</button>
           </div>`).join('')}
+        <button class="btn" style="margin-top:1rem" onclick="renderScreen('tasks')">📋 Все квесты</button>
       `;
       document.getElementById('screenContainer').innerHTML = html;
     }
 
-    // ==================== КАЛЕНДАРЬ ====================
+    function renderTasks() {
+      const tasks = GameState.tasks.sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+      const guildOptions = GUILDS.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('');
+      const html = `
+        <button class="btn" onclick="toggleQuestForm()">➕ Новый квест</button>
+        <div id="questForm" class="card" style="display:none;">
+          <form onsubmit="addQuest(event)">
+            <label>Гильдия</label>
+            <select id="qCategory" required>${guildOptions}</select>
+            <label>Название</label>
+            <input type="text" id="qTitle" required>
+            <label>Продолжительность (мин)</label>
+            <input type="number" id="qMinutes" min="1" value="30" required>
+            <label>Дата</label>
+            <input type="date" id="qDate" required>
+            <label>Время</label>
+            <input type="time" id="qTime" required>
+            <label>Заметка</label>
+            <textarea id="qNote" rows="2"></textarea>
+            <button type="submit" class="btn" style="width:100%">Создать квест</button>
+          </form>
+        </div>
+        <hr>
+        <h3>Активные квесты</h3>
+        ${tasks.filter(t => !t.completed).map(t => `
+          <div class="quest-item">
+            <div>
+              <span class="guild-badge" style="background:${getGuildColor(t.category)}">${getGuildIcon(t.category)} ${GUILDS.find(g=>g.id===t.category)?.name}</span>
+              <strong>${t.title}</strong><br>
+              📅 ${t.date} 🕒 ${t.time} · ⏱ ${t.minutes} мин
+              ${t.note ? `<br>📝 ${t.note}` : ''}
+            </div>
+            <button class="btn secondary" onclick="completeQuest('${t.id}')">✔</button>
+          </div>`).join('') || '<p>Нет активных квестов</p>'}
+        <h3>Выполненные</h3>
+        ${tasks.filter(t => t.completed).slice(-10).reverse().map(t => `
+          <div class="quest-item" style="opacity:0.7;">
+            <div>${t.title} <span style="color:var(--primary)">✅ +${(t.minutes*0.01).toFixed(2)} XP</span></div>
+          </div>`).join('') || '<p>Пока ничего не выполнено</p>'}
+      `;
+      document.getElementById('screenContainer').innerHTML = html;
+      const dateInput = document.getElementById('qDate');
+      if (dateInput) dateInput.value = new Date().toISOString().slice(0,10);
+      const timeInput = document.getElementById('qTime');
+      if (timeInput) timeInput.value = new Date().toTimeString().slice(0,5);
+    }
+
+    window.toggleQuestForm = () => {
+      const form = document.getElementById('questForm');
+      if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    };
+
+    window.addQuest = (event) => {
+      event.preventDefault();
+      const category = document.getElementById('qCategory').value;
+      const title = document.getElementById('qTitle').value.trim();
+      const minutes = parseInt(document.getElementById('qMinutes').value, 10);
+      const date = document.getElementById('qDate').value;
+      const time = document.getElementById('qTime').value;
+      const note = document.getElementById('qNote').value.trim();
+      if (!title || !date || !time || isNaN(minutes) || minutes <= 0) return;
+      GameState.tasks.push({
+        id: Date.now().toString(36) + Math.random().toString(36).substring(2),
+        category, title, minutes, date, time, note,
+        completed: false, dateCompleted: null, createdAt: new Date().toISOString()
+      });
+      persist();
+      renderTasks();
+    };
+
+    // -------------------- КАЛЕНДАРЬ (ПОЛНОСТЬЮ) --------------------
     const Cal = { currentDate: new Date(), view: 'month', selectedDay: null, filter: null };
     window.setCalendarView = v => { Cal.view = v; if(v==='day' && !Cal.selectedDay) Cal.selectedDay = new Date(); renderCalendar(); };
     window.setGuildFilter = id => { Cal.filter = id; renderCalendar(); };
@@ -265,15 +397,37 @@
       const {currentDate, view, filter} = Cal;
       const tasks = filter ? GameState.tasks.filter(t=>t.category===filter) : GameState.tasks;
       let header = '', content = '';
-      if(view==='year') { header = `<h2>${currentDate.getFullYear()}</h2>`; content = yearView(currentDate.getFullYear(), tasks); }
-      else if(view==='month') { header = `<h2>${currentDate.toLocaleString('ru',{month:'long'})} ${currentDate.getFullYear()}</h2>`; content = monthView(currentDate.getFullYear(), currentDate.getMonth(), tasks); }
-      else if(view==='week') { header = `<h2>Неделя</h2>`; content = weekView(currentDate, tasks); }
-      else if(view==='day') { const d = Cal.selectedDay||currentDate; header = `<h2>${d.toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})}</h2>`; content = dayView(d, tasks); }
+      if(view==='year') {
+        header = `<h2>${currentDate.getFullYear()}</h2>`;
+        content = yearView(currentDate.getFullYear(), tasks);
+      } else if(view==='month') {
+        header = `<h2>${currentDate.toLocaleString('ru',{month:'long'})} ${currentDate.getFullYear()}</h2>`;
+        content = monthView(currentDate.getFullYear(), currentDate.getMonth(), tasks);
+      } else if(view==='week') {
+        header = `<h2>Неделя</h2>`;
+        content = weekView(currentDate, tasks);
+      } else if(view==='day') {
+        const d = Cal.selectedDay || currentDate;
+        header = `<h2>${d.toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})}</h2>`;
+        content = dayView(d, tasks);
+      }
       document.getElementById('screenContainer').innerHTML = `
-        <div class="calendar-header">${header}<div class="calendar-nav"><button onclick="navigateCalendar(-1)">◀</button><button onclick="navigateCalendar(1)">▶</button><button onclick="Cal.currentDate=new Date();Cal.selectedDay=new Date();renderCalendar();">Сегодня</button></div></div>
-        <div class="view-switcher">${['year','month','week','day'].map(v=>`<button class="${v===view?'active':''}" onclick="setCalendarView('${v}')">${v==='year'?'Год':v==='month'?'Месяц':v==='week'?'Неделя':'День'}</button>`).join('')}</div>
+        <div class="calendar-header">
+          ${header}
+          <div class="calendar-nav">
+            <button onclick="navigateCalendar(-1)">◀</button>
+            <button onclick="navigateCalendar(1)">▶</button>
+            <button onclick="Cal.currentDate=new Date();Cal.selectedDay=new Date();renderCalendar();">Сегодня</button>
+          </div>
+        </div>
+        <div class="view-switcher">
+          ${['year','month','week','day'].map(v=>`<button class="${v===view?'active':''}" onclick="setCalendarView('${v}')">${v==='year'?'Год':v==='month'?'Месяц':v==='week'?'Неделя':'День'}</button>`).join('')}
+        </div>
         ${content}
-        <div class="guild-filter"><button class="${filter===null?'active':''}" onclick="setGuildFilter(null)">Все</button>${GUILDS.map(g=>`<button class="${filter===g.id?'active':''}" onclick="setGuildFilter('${g.id}')" style="border-color:${g.color}">${g.icon} ${g.name}</button>`).join('')}</div>
+        <div class="guild-filter">
+          <button class="${filter===null?'active':''}" onclick="setGuildFilter(null)">Все</button>
+          ${GUILDS.map(g=>`<button class="${filter===g.id?'active':''}" onclick="setGuildFilter('${g.id}')" style="border-color:${g.color}">${g.icon} ${g.name}</button>`).join('')}
+        </div>
       `;
     }
 
@@ -283,7 +437,8 @@
       for(let m=0; m<12; m++) {
         const monthStr = `${year}-${String(m+1).padStart(2,'0')}`;
         const monthTasks = tasks.filter(t=>t.date?.startsWith(monthStr));
-        html += `<div class="month-stat-card" onclick="goToMonth(${m})"><strong>${months[m]}</strong><br>${monthTasks.filter(t=>t.completed).length}/${monthTasks.length}<br><small>задач</small></div>`;
+        const completed = monthTasks.filter(t=>t.completed).length;
+        html += `<div class="month-stat-card" onclick="goToMonth(${m})"><strong>${months[m]}</strong><br>${completed}/${monthTasks.length}<br><small>задач</small></div>`;
       }
       return html + '</div>';
     }
@@ -291,25 +446,33 @@
     function monthView(year, month, tasks) {
       const firstDay = new Date(year, month, 1).getDay();
       const days = new Date(year, month+1, 0).getDate();
-      const start = firstDay===0?6:firstDay-1;
+      const start = firstDay === 0 ? 6 : firstDay - 1;
       const today = new Date(); today.setHours(0,0,0,0);
       let grid = '<div class="weekday-header">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<div>${d}</div>`).join('')+'</div><div class="month-grid">';
       for(let i=0; i<start; i++) grid += '<div class="day-cell other-month"></div>';
       for(let d=1; d<=days; d++) {
-        const date = new Date(year, month, d); const dateStr = date.toISOString().slice(0,10);
-        const isToday = date.getTime()===today.getTime();
-        const dayTasks = tasks.filter(t=>t.date===dateStr);
-        const markers = dayTasks.map(t=>`<span class="marker" style="background:${t.completed?'var(--secondary)':t.date<today.toISOString().slice(0,10)?'#EF5350':'var(--primary)'}"></span>`).join('');
+        const date = new Date(year, month, d);
+        const dateStr = date.toISOString().slice(0,10);
+        const isToday = date.getTime() === today.getTime();
+        const dayTasks = tasks.filter(t=>t.date === dateStr);
+        const markers = dayTasks.map(t=>{
+          let color = getGuildColor(t.category);
+          if(t.completed) color = 'var(--secondary)';
+          else if(dateStr < today.toISOString().slice(0,10)) color = '#EF5350';
+          return `<span class="marker" style="background:${color}"></span>`;
+        }).join('');
         grid += `<div class="day-cell${isToday?' today':''}" onclick="goToDay('${dateStr}')"><div>${d}</div><div>${markers}</div></div>`;
       }
       return grid + '</div>';
     }
 
     function weekView(date, tasks) {
-      const start = new Date(date); start.setDate(start.getDate()-start.getDay()+1);
+      const start = new Date(date);
+      start.setDate(start.getDate() - start.getDay() + 1);
       let html = '<div>';
       for(let i=0; i<7; i++) {
-        const d = new Date(start); d.setDate(d.getDate()+i);
+        const d = new Date(start);
+        d.setDate(d.getDate()+i);
         const dateStr = d.toISOString().slice(0,10);
         const dayTasks = tasks.filter(t=>t.date===dateStr);
         html += `<div class="card"><h3>${d.toLocaleDateString('ru',{weekday:'short',day:'numeric'})}</h3>${dayTasks.map(t=>`<div>${t.title} ${t.completed?'✅':''}</div>`).join('')||'<p>—</p>'}</div>`;
@@ -329,96 +492,305 @@
       return html + '</ul>';
     }
 
-    // ==================== ЗАДАЧИ И RPG ====================
-    window.completeQuest = function(id) {
-      const t = GameState.tasks.find(t=>t.id===id);
-      if(!t || t.completed) return;
-      if(t.date > new Date().toISOString().slice(0,10)) return alert('Этот квест ещё не наступил!');
-      t.completed = true; t.dateCompleted = new Date().toISOString().slice(0,10);
-      GameState.player.xp += t.minutes * 0.01;
-      checkLevelUp(); updateStreak();
-      persist(); renderScreen('today');
-    };
-
-    window.quickAddTask = function() {
-      const title = prompt('Название квеста:');
-      if(!title) return;
-      const now = new Date();
-      GameState.tasks.push({
-        id: Date.now().toString(36)+Math.random().toString(36).substring(2),
-        category: 'other', title, minutes: 30,
-        date: now.toISOString().slice(0,10), time: now.toTimeString().slice(0,5), completed: false
-      });
-      persist(); renderScreen('today');
-    };
-
-    function updateStreak() {
-      const today = new Date().toISOString().slice(0,10);
-      const p = GameState.player;
-      if(p.lastCompletedDate === today) return;
-      const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-      if(p.lastCompletedDate === yesterday) p.streak++; else p.streak = 1;
-      if(p.streak > p.bestStreak) p.bestStreak = p.streak;
-      p.lastCompletedDate = today;
-    }
-
-    function checkLevelUp() {
-      const p = GameState.player;
-      while(p.xp >= (p.lvl+1)*(p.lvl+2)/2) p.lvl++;
-      persist();
-    }
-
-    function getGuildColor(id) { return GUILDS.find(g=>g.id===id)?.color || '#78909C'; }
-    function getGuildIcon(id) { return GUILDS.find(g=>g.id===id)?.icon || '📦'; }
-
-    // ==================== ЖУРНАЛЫ, ЦЕЛИ, ЗАМЕТКИ, ГАЛЕРЕЯ, ПРОФИЛЬ ====================
+    // -------------------- ЖУРНАЛЫ, ЦЕЛИ, ЗАМЕТКИ, ГАЛЕРЕЯ --------------------
     function renderGuilds() {
-      document.getElementById('screenContainer').innerHTML = '<h2>Журналы</h2>'+GUILDS.map(g=>`<div class="card" style="border-left:6px solid ${g.color}"><h3>${g.icon} ${g.name}</h3><p>Задач: ${GameState.tasks.filter(t=>t.category===g.id).length}</p></div>`).join('');
-    }
-    function renderGoals() {
-      document.getElementById('screenContainer').innerHTML = `<h2>🎯 Цели</h2><p>Скоро здесь будут твои эпик-квесты.</p>`;
-    }
-    function renderGallery() {
-      document.getElementById('screenContainer').innerHTML = `<h2>🖼️ Галерея</h2><p>Загружай фото своих побед.</p>`;
-    }
-    function renderNotes() {
-      const notes = GameState.notes;
-      document.getElementById('screenContainer').innerHTML = `
-        <button class="btn" onclick="alert('Функция скоро')">+ Новая заметка</button>
-        ${notes.map(n=>`<div class="note-card"><strong>${n.title}</strong><p>${n.content}</p></div>`).join('') || '<p>Нет заметок</p>'}
+      const html = `
+        <h2>📚 Журналы (Гильдии)</h2>
+        <p>Выбери гильдию, чтобы посмотреть задачи</p>
+        ${GUILDS.map(g => {
+          const tasksCount = GameState.tasks.filter(t=>t.category===g.id).length;
+          const completed = GameState.tasks.filter(t=>t.category===g.id && t.completed).length;
+          return `
+            <div class="card" style="border-left: 6px solid ${g.color}; cursor:pointer;" onclick="alert('Задач: ${tasksCount}, выполнено: ${completed}')">
+              <h3>${g.icon} ${g.name}</h3>
+              <p>${completed}/${tasksCount} выполнено</p>
+            </div>`;
+        }).join('')}
       `;
+      document.getElementById('screenContainer').innerHTML = html;
     }
-    function renderProfile() {
-      const p = GameState.player;
-      document.getElementById('screenContainer').innerHTML = `
-        <div class="card">
-          <div class="avatar">🧙</div>
-          <h2>${p.name}</h2><p>Ур. ${p.lvl} • ${p.xp.toFixed(1)} XP</p>
-          <div class="xp-bar"><div class="xp-fill" style="width:${p.progress}%"></div></div>
-          <div class="stats-grid">
-            <div class="stat-item"><span class="stat-value">${GameState.tasks.filter(t=>t.completed).length}</span><br>✅ Выполнено</div>
-            <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥 Комбо</div>
-          </div>
-          <button class="btn secondary" onclick="renderSettings()">⚙️ Настройки</button>
+
+    function renderGoals() {
+      const goals = GameState.goals;
+      const html = `
+        <h2>🎯 Эпик-квесты (Цели)</h2>
+        <button class="btn" onclick="addGoal()">➕ Новая цель</button>
+        <div id="goalList">
+          ${goals.length === 0 ? '<p>Целей пока нет</p>' : goals.map(g => {
+            const tasks = GameState.tasks.filter(t=>t.goalId === g.id);
+            const done = tasks.filter(t=>t.completed).length;
+            return `
+              <div class="card">
+                <strong>${g.title}</strong> (${g.status})
+                <p>Создана: ${g.createdAt.slice(0,10)}</p>
+                <p>Прогресс: ${done}/${tasks.length} задач</p>
+                ${g.status === 'active' ? `<button class="btn" onclick="achieveGoal('${g.id}')">Достиг!</button>` : `<p>Достигнута ${g.achievedAt?.slice(0,10)} (+${g.xpBonus} XP)</p>`}
+              </div>`;
+          }).join('')}
         </div>
       `;
+      document.getElementById('screenContainer').innerHTML = html;
     }
-    function renderSettings() {
-      const themes = ['mint','pearl','steel','nettle','first_snow','instinct'];
-      document.getElementById('screenContainer').innerHTML = `
-        <h2>Тема</h2>
-        ${themes.map(t=>`<button class="btn ${GameState.settings.theme===t?'active':''}" onclick="setTheme('${t}')">${t}</button>`).join('')}
-        <hr><button class="btn" onclick="exportData()">📤 Экспорт</button>
-        <button class="btn" onclick="importData()">📥 Импорт</button>
-        <button class="btn" onclick="if(confirm('Удалить всё?')){localStorage.clear();location.reload();}">🗑️ Сброс</button>
-      `;
-    }
-    window.setTheme = t => { GameState.settings.theme = t; persist(); applyTheme(); renderSettings(); };
-    window.exportData = () => { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({player:GameState.player,tasks:GameState.tasks,notes:GameState.notes,settings:GameState.settings})],{type:'application/json'})); a.download='lvlup.json'; a.click(); };
-    window.importData = () => { const i=document.createElement('input'); i.type='file'; i.onchange=e=>{ const r=new FileReader(); r.onload=ev=>{ try{ const d=JSON.parse(ev.target.result); Object.assign(GameState,d); persist(); applyTheme(); location.reload(); }catch{ alert('Ошибка'); } }; r.readAsText(e.target.files[0]); }; i.click(); };
 
+    window.addGoal = function() {
+      const title = prompt('Название цели:');
+      if (!title) return;
+      GameState.goals.push({
+        id: Date.now().toString(36)+Math.random().toString(36).substring(2),
+        title,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        achievedAt: null,
+        xpBonus: 10,
+        tasks: []
+      });
+      persist();
+      renderGoals();
+    };
+
+    window.achieveGoal = function(goalId) {
+      const goal = GameState.goals.find(g=>g.id===goalId);
+      if (!goal || goal.status !== 'active') return;
+      goal.status = 'achieved';
+      goal.achievedAt = new Date().toISOString();
+      // Начисляем бонусный опыт
+      GameState.player.xp += goal.xpBonus;
+      checkLevelUp();
+      // Можно привязать фото
+      const photoUrl = prompt('Ссылка на фото успеха (или отмена):');
+      if (photoUrl) {
+        GameState.gallery.push({
+          id: Date.now().toString(36),
+          imageUrl: photoUrl,
+          caption: goal.title,
+          date: new Date().toISOString()
+        });
+        Storage.set('gallery', GameState.gallery);
+      }
+      persist();
+      renderGoals();
+    };
+
+    function renderNotes() {
+      const notes = GameState.notes.sort((a,b)=> (b.updatedAt||b.createdAt).localeCompare(a.updatedAt||a.createdAt));
+      const html = `
+        <h2>📝 Заметки</h2>
+        <button class="btn" onclick="showNoteForm()">➕ Новая заметка</button>
+        <div id="noteForm" class="card" style="display:none;">
+          <input type="text" id="noteTitle" placeholder="Заголовок">
+          <textarea id="noteContent" rows="4" placeholder="Текст..."></textarea>
+          <input type="hidden" id="editNoteId">
+          <button class="btn" onclick="saveNote()">Сохранить</button>
+        </div>
+        <div id="notesList">
+          ${notes.length === 0 ? '<p>Нет заметок</p>' : notes.map(n => `
+            <div class="note-card">
+              <strong>${n.title}</strong>
+              <p>${n.content.replace(/\n/g,'<br>')}</p>
+              <button class="btn secondary" onclick="editNote('${n.id}')">✏️</button>
+              <button class="btn secondary" onclick="deleteNote('${n.id}')">🗑️</button>
+            </div>`).join('')}
+        </div>
+      `;
+      document.getElementById('screenContainer').innerHTML = html;
+    }
+
+    window.showNoteForm = function(id=null) {
+      const form = document.getElementById('noteForm');
+      form.style.display = 'block';
+      if (id) {
+        const note = GameState.notes.find(n=>n.id===id);
+        document.getElementById('noteTitle').value = note.title;
+        document.getElementById('noteContent').value = note.content;
+        document.getElementById('editNoteId').value = id;
+      } else {
+        document.getElementById('noteTitle').value = '';
+        document.getElementById('noteContent').value = '';
+        document.getElementById('editNoteId').value = '';
+      }
+    };
+
+    window.saveNote = function() {
+      const title = document.getElementById('noteTitle').value.trim();
+      const content = document.getElementById('noteContent').value.trim();
+      const editId = document.getElementById('editNoteId').value;
+      if (!title) return;
+      if (editId) {
+        const note = GameState.notes.find(n=>n.id===editId);
+        note.title = title; note.content = content; note.updatedAt = new Date().toISOString();
+      } else {
+        GameState.notes.push({
+          id: Date.now().toString(36)+Math.random().toString(36).substring(2),
+          title, content, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+        });
+      }
+      persist();
+      renderNotes();
+    };
+
+    window.editNote = function(id) { showNoteForm(id); };
+    window.deleteNote = function(id) {
+      if (confirm('Удалить заметку?')) {
+        GameState.notes = GameState.notes.filter(n=>n.id!==id);
+        persist();
+        renderNotes();
+      }
+    };
+
+    function renderGallery() {
+      const items = GameState.gallery.sort((a,b)=>new Date(b.date)-new Date(a.date));
+      const html = `
+        <h2>🖼️ Галерея достижений</h2>
+        <button class="btn" onclick="addGalleryItem()">➕ Добавить фото</button>
+        <div style="margin-top:1rem;">
+          ${items.length === 0 ? '<p>Пока пусто</p>' : items.map(item => `
+            <div class="card" style="text-align:center">
+              <img src="${item.imageUrl}" style="max-width:100%; border-radius:12px;" alt="${item.caption}">
+              <p>${item.caption} (${new Date(item.date).toLocaleDateString()})</p>
+            </div>`).join('')}
+        </div>
+      `;
+      document.getElementById('screenContainer').innerHTML = html;
+    }
+
+    window.addGalleryItem = function() {
+      const url = prompt('Ссылка на изображение:');
+      if (!url) return;
+      const caption = prompt('Подпись:') || '';
+      GameState.gallery.push({
+        id: Date.now().toString(36),
+        imageUrl: url,
+        caption,
+        date: new Date().toISOString()
+      });
+      persist();
+      renderGallery();
+    };
+
+    // -------------------- ПРОФИЛЬ, НАСТРОЙКИ, ИНФО --------------------
+    function renderProfile() {
+      const p = GameState.player;
+      const totalTasks = GameState.tasks.length;
+      const completed = GameState.tasks.filter(t=>t.completed).length;
+      const html = `
+        <div class="card">
+          <div class="avatar">🧙</div>
+          <h2 style="text-align:center;">${p.name}</h2>
+          <p style="text-align:center;">Уровень ${p.lvl} · ${p.xp.toFixed(1)} XP</p>
+          <div class="xp-bar"><div class="xp-fill" style="width:${p.progress}%"></div></div>
+          <div class="stats-grid">
+            <div class="stat-item"><span class="stat-value">${completed}</span><br>✅ Выполнено</div>
+            <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥 Текущее комбо</div>
+            <div class="stat-item"><span class="stat-value">${p.bestStreak}</span><br>🏆 Рекорд</div>
+            <div class="stat-item"><span class="stat-value">${totalTasks}</span><br>📋 Всего квестов</div>
+          </div>
+          <button class="btn secondary" onclick="renderScreen('settings')">⚙️ Настройки</button>
+          <button class="btn secondary" onclick="renderScreen('info')">ℹ️ Инфо</button>
+        </div>
+      `;
+      document.getElementById('screenContainer').innerHTML = html;
+    }
+
+    function renderSettings() {
+      const themes = [
+        { id: 'mint', name: 'Мята' },
+        { id: 'pearl', name: 'Жемчуг' },
+        { id: 'steel', name: 'Сталь' },
+        { id: 'nettle', name: 'Крапива' },
+        { id: 'first_snow', name: 'Первый снег' },
+        { id: 'instinct', name: 'Инстинкт' }
+      ];
+      const html = `
+        <h2>Тема оформления</h2>
+        <div>${themes.map(t => `<button class="btn ${GameState.settings.theme===t.id?'active':''}" onclick="setTheme('${t.id}')">${t.name}</button>`).join('')}</div>
+        <hr style="margin:1.5rem 0">
+        <h3>Данные</h3>
+        <button class="btn" onclick="exportData()">📤 Экспорт</button>
+        <button class="btn" onclick="importDataPrompt()">📥 Импорт</button>
+        <button class="btn" onclick="clearData()" style="background:#EF5350; border-color:#EF5350;">🗑️ Сбросить всё</button>
+        <hr style="margin:1.5rem 0">
+        <p>LVL UP v2.0 · RPG Планировщик</p>
+        <p>Создано для Санька и Дэна AI</p>
+      `;
+      document.getElementById('screenContainer').innerHTML = html;
+    }
+
+    window.setTheme = function(themeId) {
+      GameState.settings.theme = themeId;
+      persist();
+      applyTheme();
+      renderSettings();
+    };
+
+    window.exportData = function() {
+      const data = {
+        player: GameState.player,
+        tasks: GameState.tasks,
+        notes: GameState.notes,
+        goals: GameState.goals,
+        gallery: GameState.gallery,
+        settings: GameState.settings
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'lvlup_backup.json';
+      a.click();
+    };
+
+    window.importDataPrompt = function() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            GameState.player = data.player || GameState.player;
+            GameState.tasks = data.tasks || [];
+            GameState.notes = data.notes || [];
+            GameState.goals = data.goals || [];
+            GameState.gallery = data.gallery || [];
+            GameState.settings = data.settings || {theme:'mint'};
+            persist();
+            applyTheme();
+            alert('Данные импортированы!');
+            renderScreen('profile');
+          } catch(ex) { alert('Ошибка файла'); }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    };
+
+    window.clearData = function() {
+      if (confirm('Удалить все данные безвозвратно?')) {
+        localStorage.clear();
+        location.reload();
+      }
+    };
+
+    function renderInfo() {
+      const html = `
+        <h2>ℹ️ Информация</h2>
+        <div class="card">
+          <p><span class="glossary-term">Гильдия</span> — категория задач (Тело, Творчество, Бизнес и др.) со своим цветом.</p>
+          <p><span class="glossary-term">Квест</span> — задача с датой, временем и продолжительностью. За выполнение даётся опыт.</p>
+          <p><span class="glossary-term">XP</span> — очки опыта: минуты × 0.01. Накопление повышает уровень.</p>
+          <p><span class="glossary-term">Уровень</span> — для уровня N нужно N×(N+1)/2 XP.</p>
+          <p><span class="glossary-term">Стрик (комбо)</span> — дни подряд с выполненными задачами. При пропуске сбрасывается.</p>
+          <p><span class="glossary-term">Эпик-квест (цель)</span> — долгосрочная цель. При достижении даёт +10 XP и фото в галерею.</p>
+          <p><span class="glossary-term">Календарь</span> — четыре уровня: год, месяц, неделя, день. Цвета маркеров = гильдии.</p>
+        </div>
+      `;
+      document.getElementById('screenContainer').innerHTML = html;
+    }
+
+    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
     const savedPlayer = Storage.get('player');
-    if(savedPlayer) Object.assign(GameState.player, savedPlayer);
+    if (savedPlayer) Object.assign(GameState.player, savedPlayer);
     renderScreen('today');
   </script>
 </body>
