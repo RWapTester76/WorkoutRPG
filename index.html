@@ -1,864 +1,887 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LVL UP · RPG Planner</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=Playfair+Display&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #F5FBF8; --surface: #FFFFFF; --primary: #7EC8A0; --secondary: #B8E6CF;
-            --text: #2C3E35; --text-light: #6B7D74; --border: #d0e0d8; --shadow: 0 4px 16px rgba(126,200,160,0.08);
-            --radius: 18px; --font: 'Inter', system-ui, sans-serif;
-        }
-        body.theme-mint { --bg: #F5FBF8; --surface: #FFFFFF; --primary: #7EC8A0; --secondary: #B8E6CF; --text: #2C3E35; --text-light: #6B7D74; --border: #d0e0d8; }
-        body.theme-pearl { --bg: #FBF9F6; --surface: #FFFFFF; --primary: #C8B8A8; --secondary: #E8DFD5; --text: #3D3530; --text-light: #8E857E; --border: #e2dcd5; }
-        body.theme-steel { --bg: #F2F4F7; --surface: #FFFFFF; --primary: #5C6F8C; --secondary: #8FA3BF; --text: #1E2633; --text-light: #6B7B8D; --border: #d6dce2; }
-        body.theme-nettle { --bg: #F4F3EE; --surface: #FFFFFF; --primary: #5C7A4A; --secondary: #9BB080; --text: #2B3027; --text-light: #7B8073; --border: #d8ddd2; }
-        body.theme-first_snow { --bg: #F8FAFC; --surface: #FFFFFF; --primary: #B0C4DE; --secondary: #D4DFEB; --text: #2D3748; --text-light: #7B8794; --border: #e2e8f0; }
-        body.theme-instinct { --bg: #FCF9F5; --surface: #FFFFFF; --primary: #D4845A; --secondary: #E8C4A8; --text: #3A2E28; --text-light: #8E7B72; --border: #e7dbcf; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>LVL UP · RPG Planner Ultimate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F5FBF8; --surface: #FFFFFF; --primary: #7EC8A0; --secondary: #B8E6CF;
+      --text: #2C3E35; --text-light: #6B7D74; --border: #d0e0d8;
+      --shadow: 0 8px 24px rgba(126,200,160,0.12); --glow: 0 0 12px rgba(126,200,160,0.3);
+      --radius: 20px; --font: 'Inter', sans-serif;
+      --card-bg: linear-gradient(145deg, #ffffff, #f0faf5);
+    }
+    body.theme-mint {
+      --bg: #F5FBF8; --surface: #FFFFFF; --primary: #7EC8A0; --secondary: #B8E6CF;
+      --text: #2C3E35; --text-light: #6B7D74; --border: #d0e0d8;
+      --card-bg: linear-gradient(145deg, #ffffff, #f0faf5);
+    }
+    body.theme-pearl {
+      --bg: #FBF9F6; --surface: #FFFFFF; --primary: #C8B8A8; --secondary: #E8DFD5;
+      --text: #3D3530; --text-light: #8E857E; --border: #e2dcd5;
+      --card-bg: linear-gradient(145deg, #ffffff, #f5f2ed);
+    }
+    body.theme-steel {
+      --bg: #F2F4F7; --surface: #FFFFFF; --primary: #5C6F8C; --secondary: #8FA3BF;
+      --text: #1E2633; --text-light: #6B7B8D; --border: #d6dce2;
+      --card-bg: linear-gradient(145deg, #ffffff, #edf0f4);
+    }
+    body.theme-nettle {
+      --bg: #F4F3EE; --surface: #FFFFFF; --primary: #5C7A4A; --secondary: #9BB080;
+      --text: #2B3027; --text-light: #7B8073; --border: #d8ddd2;
+      --card-bg: linear-gradient(145deg, #ffffff, #f0f2eb);
+    }
+    body.theme-first_snow {
+      --bg: #F8FAFC; --surface: #FFFFFF; --primary: #B0C4DE; --secondary: #D4DFEB;
+      --text: #2D3748; --text-light: #7B8794; --border: #e2e8f0;
+      --card-bg: linear-gradient(145deg, #ffffff, #f1f5f9);
+    }
+    body.theme-instinct {
+      --bg: #FCF9F5; --surface: #FFFFFF; --primary: #D4845A; --secondary: #E8C4A8;
+      --text: #3A2E28; --text-light: #8E7B72; --border: #e7dbcf;
+      --card-bg: linear-gradient(145deg, #ffffff, #faf4ed);
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: var(--bg); color: var(--text); font-family: var(--font);
-            min-height: 100vh; display: flex; justify-content: center; align-items: flex-start;
-            padding-bottom: 90px; transition: background 0.4s, color 0.4s;
-        }
-        #app {
-            width: 100%; max-width: 520px; min-height: 100vh;
-            background: var(--surface); box-shadow: var(--shadow);
-            border-radius: var(--radius); display: flex; flex-direction: column; position: relative;
-        }
-        .app-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
-            background: var(--surface); border-radius: var(--radius) var(--radius) 0 0;
-        }
-        .logo { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; color: var(--primary); letter-spacing: 2px; }
-        .btn-icon { background: none; border: none; font-size: 1.8rem; color: var(--primary); cursor: pointer; }
-        .main-nav {
-            background: var(--surface); padding: 0.8rem 1rem; border-bottom: 1px solid var(--border);
-            display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; transition: all 0.3s;
-        }
-        .main-nav.hidden { display: none; }
-        .main-nav li {
-            list-style: none; padding: 0.5rem 1.2rem; border-radius: 30px;
-            cursor: pointer; font-weight: 500; background: var(--secondary); color: var(--text);
-            transition: all 0.2s; font-size: 0.9rem;
-        }
-        .main-nav li:hover { background: var(--primary); color: white; }
-        #screenContainer { flex: 1; padding: 1.5rem; overflow-y: auto; }
-        .bottom-bar {
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 100%; max-width: 520px; background: var(--surface);
-            border-top: 1px solid var(--border); display: flex; justify-content: space-around;
-            padding: 0.6rem 0; border-radius: 0 0 var(--radius) var(--radius); z-index: 100;
-        }
-        .bottom-bar button {
-            background: none; border: none; font-size: 1.5rem; cursor: pointer;
-            color: var(--text-light); display: flex; flex-direction: column; align-items: center;
-        }
-        .bottom-bar button.active { color: var(--primary); }
-        .add-btn {
-            background: var(--primary); color: white; width: 52px; height: 52px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; margin-top: -26px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.2rem;
-            box-shadow: var(--shadow);
-        }
-        .avatar {
-            width: 80px; height: 80px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
-            overflow: hidden;
-        }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .xp-bar { background: #eee; height: 8px; border-radius: 8px; margin: 1rem 0; }
-        .xp-fill { height: 100%; background: var(--primary); border-radius: 8px; width: 0%; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 1rem 0; }
-        .stat-item { background: var(--bg); padding: 0.8rem; border-radius: 12px; text-align: center; }
-        .stat-value { font-size: 1.8rem; font-weight: 600; color: var(--primary); }
-        .btn {
-            background: var(--primary); border: none; color: white; padding: 0.7rem 1.5rem;
-            border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-block; margin: 0.2rem;
-        }
-        .btn.secondary { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-        .btn:hover { opacity: 0.85; }
-        .quest-item {
-            display: flex; align-items: center; justify-content: space-between;
-            background: var(--surface); border-left: 6px solid var(--primary); padding: 0.8rem;
-            margin-bottom: 0.5rem; border-radius: 12px;
-        }
-        .guild-badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; margin-right: 0.5rem; }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .calendar-header h2 { color: var(--primary); }
-        .calendar-nav button { background: none; border: 1px solid var(--primary); color: var(--primary); padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; }
-        .view-switcher { display: flex; gap: 0.5rem; margin-bottom: 1rem; justify-content: center; }
-        .view-switcher button { background: none; border: 1px solid var(--border); color: var(--text-light); padding: 0.4rem 1rem; border-radius: 20px; cursor: pointer; }
-        .view-switcher button.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .guild-filter { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
-        .guild-filter button { background: none; border: 1px solid var(--border); color: var(--text-light); padding: 0.3rem 0.8rem; border-radius: 15px; cursor: pointer; }
-        .guild-filter button.active { border-color: var(--primary); color: var(--primary); }
-        .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 1rem; }
-        .weekday-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; color: var(--text-light); font-weight: 500; margin-bottom: 0.5rem; }
-        .day-cell { background: var(--surface); border: 1px solid var(--border); padding: 0.5rem; cursor: pointer; border-radius: 8px; min-height: 50px; }
-        .day-cell.today { border-color: var(--primary); box-shadow: 0 0 10px var(--secondary); }
-        .marker { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin: 1px; }
-        .year-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-top: 1rem; }
-        .month-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.8rem; text-align: center; cursor: pointer; }
-        .note-card { background: var(--surface); border-left: 4px solid var(--primary); padding: 1rem; margin-bottom: 0.8rem; border-radius: 8px; }
-        .glossary-term { color: var(--primary); font-weight: 600; }
-        input, select, textarea {
-            width: 100%; padding: 0.7rem; margin-bottom: 0.8rem;
-            border: 1px solid var(--border); border-radius: 12px;
-            font-family: var(--font); background: var(--bg); color: var(--text);
-        }
-        label { font-weight: 500; margin-bottom: 0.3rem; display: block; color: var(--primary); }
-        canvas { max-width: 100%; margin: 1rem auto; display: block; }
-    </style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg); color: var(--text); font-family: var(--font);
+      min-height: 100vh; display: flex; justify-content: center; align-items: flex-start;
+      padding-bottom: 90px; transition: background 0.4s, color 0.4s;
+    }
+    #app {
+      width: 100%; max-width: 540px; min-height: 100vh;
+      background: var(--surface); box-shadow: var(--shadow), var(--glow);
+      border-radius: var(--radius); display: flex; flex-direction: column;
+      position: relative; overflow: hidden;
+    }
+    .app-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
+      background: var(--surface); backdrop-filter: blur(10px);
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 600;
+      color: var(--primary); text-shadow: 0 0 8px var(--primary); letter-spacing: 2px;
+    }
+    .btn-icon { background: none; border: none; font-size: 1.8rem; color: var(--primary); cursor: pointer; }
+    .main-nav {
+      background: var(--surface); padding: 0.8rem 1rem; border-bottom: 1px solid var(--border);
+      display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+    }
+    .main-nav.hidden { display: none; }
+    .main-nav li {
+      list-style: none; padding: 0.5rem 1.2rem; border-radius: 30px;
+      cursor: pointer; font-weight: 500; background: var(--secondary); color: var(--text);
+      transition: all 0.2s; font-size: 0.9rem;
+    }
+    .main-nav li:hover { background: var(--primary); color: white; transform: scale(1.05); }
+    #screenContainer { flex: 1; padding: 1.5rem; overflow-y: auto; }
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 540px; background: var(--surface);
+      border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+      padding: 0.6rem 0; border-radius: 0 0 var(--radius) var(--radius); z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    .bottom-bar button {
+      background: none; border: none; font-size: 1.5rem; cursor: pointer;
+      color: var(--text-light); display: flex; flex-direction: column; align-items: center;
+    }
+    .bottom-bar button.active { color: var(--primary); text-shadow: 0 0 6px var(--primary); }
+    .add-btn {
+      background: var(--primary); color: white; width: 56px; height: 56px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin-top: -28px; box-shadow: 0 8px 20px rgba(0,0,0,0.2), 0 0 20px var(--primary);
+    }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.2rem;
+      box-shadow: var(--shadow); transition: all 0.3s;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.1), 0 0 16px var(--primary); }
+    .avatar {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; overflow: hidden; box-shadow: 0 0 20px var(--primary);
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .xp-bar { background: #eee; height: 10px; border-radius: 10px; margin: 1rem 0; }
+    .xp-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 10px; width: 0%; box-shadow: 0 0 10px var(--primary); }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 1rem 0; }
+    .stat-item { background: var(--bg); padding: 0.8rem; border-radius: 14px; text-align: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+    .stat-value { font-size: 1.8rem; font-weight: 600; color: var(--primary); text-shadow: 0 0 6px var(--primary); }
+    .btn {
+      background: var(--primary); border: none; color: white; padding: 0.7rem 1.5rem;
+      border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-block; margin: 0.2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .btn.secondary { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .quest-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border-left: 6px solid var(--primary); padding: 0.8rem;
+      margin-bottom: 0.5rem; border-radius: 14px; box-shadow: var(--shadow);
+    }
+    .guild-badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; margin-right: 0.5rem; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .calendar-header h2 { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+    .calendar-nav button { background: none; border: 1px solid var(--primary); color: var(--primary); padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; }
+    .view-switcher { display: flex; gap: 0.5rem; margin-bottom: 1rem; justify-content: center; }
+    .view-switcher button { background: none; border: 1px solid var(--border); color: var(--text-light); padding: 0.4rem 1rem; border-radius: 20px; cursor: pointer; }
+    .view-switcher button.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
+    .guild-filter { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
+    .guild-filter button { background: none; border: 1px solid var(--border); color: var(--text-light); padding: 0.3rem 0.8rem; border-radius: 15px; cursor: pointer; }
+    .guild-filter button.active { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 8px var(--primary); }
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 1rem; }
+    .weekday-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; color: var(--text-light); font-weight: 500; margin-bottom: 0.5rem; }
+    .day-cell { background: var(--surface); border: 1px solid var(--border); padding: 0.5rem; cursor: pointer; border-radius: 10px; min-height: 50px; transition: 0.2s; position: relative; }
+    .day-cell:hover { background: var(--secondary); }
+    .day-cell.today { border-color: var(--primary); box-shadow: 0 0 16px var(--primary); }
+    .marker { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin: 1px; }
+    .year-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-top: 1rem; }
+    .month-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0.8rem; text-align: center; cursor: pointer; transition: 0.2s; }
+    .month-stat-card:hover { border-color: var(--primary); box-shadow: 0 0 12px var(--primary); }
+    .note-card { background: var(--surface); border-left: 4px solid var(--primary); padding: 1rem; margin-bottom: 0.8rem; border-radius: 10px; }
+    .glossary-term { color: var(--primary); font-weight: 600; }
+    input, select, textarea {
+      width: 100%; padding: 0.8rem; margin-bottom: 0.8rem;
+      border: 1px solid var(--border); border-radius: 14px;
+      font-family: var(--font); background: var(--bg); color: var(--text);
+    }
+    label { font-weight: 500; margin-bottom: 0.3rem; display: block; color: var(--primary); }
+    canvas { max-width: 100%; margin: 1rem auto; display: block; filter: drop-shadow(0 0 6px var(--primary)); }
+    .reminder-badge { background: #ffaa00; color: #000; padding: 0.2rem 0.5rem; border-radius: 8px; font-size: 0.7rem; margin-left: 0.5rem; }
+  </style>
 </head>
 <body class="theme-mint">
 <div id="app">
-    <header class="app-header">
-        <h1 class="logo">LVL UP</h1>
-        <button id="menuToggle" class="btn-icon" aria-label="Меню">☰</button>
-    </header>
-    <nav id="mainNav" class="main-nav hidden">
-        <li data-screen="today">🏠 Сегодня</li>
-        <li data-screen="calendar">📅 Календарь</li>
-        <li data-screen="guilds">📚 Журналы</li>
-        <li data-screen="goals">🎯 Цели</li>
-        <li data-screen="notes">📝 Заметки</li>
-        <li data-screen="gallery">🖼️ Галерея</li>
-        <li data-screen="stats">📊 Статистика</li>
-        <li data-screen="profile">👤 Профиль</li>
-    </nav>
-    <main id="screenContainer"></main>
-    <div class="bottom-bar">
-        <button onclick="renderScreen('today')">🏠</button>
-        <button onclick="renderScreen('calendar')">📅</button>
-        <button class="add-btn" onclick="quickAddTask()">+</button>
-        <button onclick="renderScreen('guilds')">📚</button>
-        <button onclick="renderScreen('profile')">👤</button>
-    </div>
+  <header class="app-header">
+    <h1 class="logo">LVL UP</h1>
+    <button id="menuToggle" class="btn-icon" aria-label="Меню">☰</button>
+  </header>
+  <nav id="mainNav" class="main-nav hidden">
+    <li data-screen="today">🏠 Сегодня</li>
+    <li data-screen="calendar">📅 Календарь</li>
+    <li data-screen="guilds">📚 Журналы</li>
+    <li data-screen="goals">🎯 Цели</li>
+    <li data-screen="notes">📝 Заметки</li>
+    <li data-screen="gallery">🖼️ Галерея</li>
+    <li data-screen="stats">📊 Статистика</li>
+    <li data-screen="profile">👤 Профиль</li>
+  </nav>
+  <main id="screenContainer"></main>
+  <div class="bottom-bar">
+    <button onclick="renderScreen('today')">🏠</button>
+    <button onclick="renderScreen('calendar')">📅</button>
+    <button class="add-btn" onclick="quickAddTask()">+</button>
+    <button onclick="renderScreen('guilds')">📚</button>
+    <button onclick="renderScreen('profile')">👤</button>
+  </div>
 </div>
 <script>
-    // ==================== ГЛОБАЛЬНЫЕ ДАННЫЕ ====================
-    const GUILDS = [
-        { id: 'body', name: 'Тело', icon: '💪', color: '#E57373' },
-        { id: 'creativity', name: 'Творчество', icon: '🎨', color: '#BA68C8' },
-        { id: 'business', name: 'Бизнес', icon: '💼', color: '#4FC3F7' },
-        { id: 'habits', name: 'Привычки', icon: '🔄', color: '#FFB74D' },
-        { id: 'oneoff', name: 'Одноразки', icon: '🗑️', color: '#90A4AE' },
-        { id: 'travel', name: 'Путешествия', icon: '✈️', color: '#4DB6AC' },
-        { id: 'debts', name: 'Долги', icon: '💰', color: '#EF5350' },
-        { id: 'other', name: 'Другое', icon: '📦', color: '#78909C' },
-        { id: 'nutrition', name: 'Питание', icon: '🍎', color: '#81C784' }
-    ];
+  // ==================== ГЛОБАЛЬНЫЕ ДАННЫЕ ====================
+  const GUILDS = [
+    { id: 'body', name: 'Тело', icon: '💪', color: '#E57373' },
+    { id: 'creativity', name: 'Творчество', icon: '🎨', color: '#BA68C8' },
+    { id: 'business', name: 'Бизнес', icon: '💼', color: '#4FC3F7' },
+    { id: 'habits', name: 'Привычки', icon: '🔄', color: '#FFB74D' },
+    { id: 'oneoff', name: 'Одноразки', icon: '🗑️', color: '#90A4AE' },
+    { id: 'travel', name: 'Путешествия', icon: '✈️', color: '#4DB6AC' },
+    { id: 'debts', name: 'Долги', icon: '💰', color: '#EF5350' },
+    { id: 'other', name: 'Другое', icon: '📦', color: '#78909C' },
+    { id: 'nutrition', name: 'Питание', icon: '🍎', color: '#81C784' }
+  ];
 
-    const Storage = {
-        get(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; } },
-        set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
-    };
+  const Storage = {
+    get(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; } },
+    set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  };
 
-    const GameState = {
-        player: {
-            name: 'Александр', lvl: 1, xp: 0.5, streak: 0, bestStreak: 0, lastCompletedDate: null,
-            age: 25, height: 175, weight: 70, weightHistory: [], avatarUrl: '',
-            get xpToNext() { return (this.lvl + 1) * (this.lvl + 2) / 2; },
-            get progress() { const done = (this.lvl - 1) * this.lvl / 2; return Math.min(((this.xp - done) / this.lvl) * 100, 100).toFixed(0); }
-        },
-        tasks: Storage.get('tasks', []),
-        notes: Storage.get('notes', []),
-        goals: Storage.get('goals', []),
-        gallery: Storage.get('gallery', []),
-        settings: Storage.get('settings', { theme: 'mint' })
-    };
+  const GameState = {
+    player: {
+      name: 'Александр', lvl: 1, xp: 0.5, streak: 0, bestStreak: 0, lastCompletedDate: null,
+      age: 25, height: 175, weight: 70, weightHistory: [], avatarUrl: '',
+      get xpToNext() { return (this.lvl + 1) * (this.lvl + 2) / 2; },
+      get progress() { const done = (this.lvl - 1) * this.lvl / 2; return Math.min(((this.xp - done) / this.lvl) * 100, 100).toFixed(0); }
+    },
+    tasks: Storage.get('tasks', []),
+    notes: Storage.get('notes', []),
+    goals: Storage.get('goals', []),
+    gallery: Storage.get('gallery', []),
+    settings: Storage.get('settings', { theme: 'mint' })
+  };
 
-    function persist() {
-        Storage.set('tasks', GameState.tasks);
-        Storage.set('notes', GameState.notes);
-        Storage.set('goals', GameState.goals);
-        Storage.set('gallery', GameState.gallery);
-        Storage.set('settings', GameState.settings);
-        Storage.set('player', GameState.player);
+  function persist() {
+    Storage.set('tasks', GameState.tasks);
+    Storage.set('notes', GameState.notes);
+    Storage.set('goals', GameState.goals);
+    Storage.set('gallery', GameState.gallery);
+    Storage.set('settings', GameState.settings);
+    Storage.set('player', GameState.player);
+  }
+  function applyTheme() { document.body.className = 'theme-' + GameState.settings.theme; }
+  applyTheme();
+
+  // ==================== НАВИГАЦИЯ ====================
+  const menuToggle = document.getElementById('menuToggle');
+  const mainNav = document.getElementById('mainNav');
+  menuToggle.addEventListener('click', () => mainNav.classList.toggle('hidden'));
+  document.querySelectorAll('.main-nav li').forEach(li => {
+    li.addEventListener('click', (e) => { renderScreen(e.target.dataset.screen); mainNav.classList.add('hidden'); });
+  });
+  function renderScreen(screen) {
+    switch(screen) {
+      case 'today': renderToday(); break;
+      case 'calendar': renderCalendar(); break;
+      case 'guilds': renderGuilds(); break;
+      case 'goals': renderGoals(); break;
+      case 'notes': renderNotes(); break;
+      case 'gallery': renderGallery(); break;
+      case 'stats': renderStats(); break;
+      case 'profile': renderProfile(); break;
+      case 'settings': renderSettings(); break;
+      case 'info': renderInfo(); break;
+      default: renderToday();
     }
-    function applyTheme() { document.body.className = 'theme-' + GameState.settings.theme; }
-    applyTheme();
+  }
 
-    // ==================== НАВИГАЦИЯ ====================
-    const menuToggle = document.getElementById('menuToggle');
-    const mainNav = document.getElementById('mainNav');
-    menuToggle.addEventListener('click', () => mainNav.classList.toggle('hidden'));
-    document.querySelectorAll('.main-nav li').forEach(li => {
-        li.addEventListener('click', (e) => { renderScreen(e.target.dataset.screen); mainNav.classList.add('hidden'); });
+  // ==================== RPG-ЛОГИКА И УВЕДОМЛЕНИЯ ====================
+  function completeQuest(id) {
+    const task = GameState.tasks.find(t => t.id === id);
+    if (!task || task.completed) return;
+    const today = new Date().toISOString().slice(0,10);
+    if (task.date > today) { alert('Этот квест ещё не наступил!'); return; }
+    task.completed = true;
+    task.dateCompleted = today;
+    GameState.player.xp += task.minutes * 0.01;
+    checkLevelUp();
+    updateStreak(today);
+    persist();
+    renderScreen('today');
+  }
+  function updateStreak(today) {
+    const p = GameState.player;
+    if (p.lastCompletedDate === today) return;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+    if (p.lastCompletedDate === yesterday) p.streak++; else p.streak = 1;
+    if (p.streak > p.bestStreak) p.bestStreak = p.streak;
+    p.lastCompletedDate = today;
+  }
+  function checkLevelUp() {
+    const p = GameState.player;
+    let needed = p.xpToNext;
+    while (p.xp >= needed) {
+      p.lvl++;
+      needed = p.xpToNext;
+      alert(`🎉 Поздравляем! Вы достигли уровня ${p.lvl}!`);
+    }
+    persist();
+  }
+  function quickAddTask() {
+    const title = prompt('Название квеста:');
+    if (!title) return;
+    const now = new Date();
+    GameState.tasks.push({
+      id: Date.now().toString(36) + Math.random().toString(36).substring(2),
+      category: 'other', title, minutes: 30,
+      date: now.toISOString().slice(0,10), time: now.toTimeString().slice(0,5),
+      completed: false, dateCompleted: null, createdAt: new Date().toISOString(),
+      goalId: null, reminder: false, reminderTime: null
     });
-    function renderScreen(screen) {
-        switch(screen) {
-            case 'today': renderToday(); break;
-            case 'calendar': renderCalendar(); break;
-            case 'guilds': renderGuilds(); break;
-            case 'goals': renderGoals(); break;
-            case 'notes': renderNotes(); break;
-            case 'gallery': renderGallery(); break;
-            case 'stats': renderStats(); break;
-            case 'profile': renderProfile(); break;
-            case 'settings': renderSettings(); break;
-            case 'info': renderInfo(); break;
-            default: renderToday();
-        }
-    }
+    persist();
+    renderScreen('today');
+  }
+  function getGuildColor(id) { return GUILDS.find(g => g.id === id)?.color || '#78909C'; }
+  function getGuildIcon(id) { return GUILDS.find(g => g.id === id)?.icon || '📦'; }
 
-    // ==================== RPG-ЛОГИКА ====================
-    function completeQuest(id) {
-        const task = GameState.tasks.find(t => t.id === id);
-        if (!task || task.completed) return;
-        const today = new Date().toISOString().slice(0,10);
-        if (task.date > today) { alert('Этот квест ещё не наступил!'); return; }
-        task.completed = true;
-        task.dateCompleted = today;
-        GameState.player.xp += task.minutes * 0.01;
-        checkLevelUp();
-        updateStreak(today);
-        persist();
-        renderScreen('today');
-    }
-    function updateStreak(today) {
-        const p = GameState.player;
-        if (p.lastCompletedDate === today) return;
-        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
-        if (p.lastCompletedDate === yesterday) p.streak++; else p.streak = 1;
-        if (p.streak > p.bestStreak) p.bestStreak = p.streak;
-        p.lastCompletedDate = today;
-    }
-    function checkLevelUp() {
-        const p = GameState.player;
-        let needed = p.xpToNext;
-        while (p.xp >= needed) {
-            p.lvl++;
-            needed = p.xpToNext;
-        }
-        persist();
-    }
-    function quickAddTask() {
-        const title = prompt('Название квеста:');
-        if (!title) return;
-        const now = new Date();
-        GameState.tasks.push({
-            id: Date.now().toString(36) + Math.random().toString(36).substring(2),
-            category: 'other', title, minutes: 30,
-            date: now.toISOString().slice(0,10), time: now.toTimeString().slice(0,5),
-            completed: false, dateCompleted: null, createdAt: new Date().toISOString(), goalId: null
-        });
-        persist();
-        renderScreen('today');
-    }
-    function getGuildColor(id) { return GUILDS.find(g => g.id === id)?.color || '#78909C'; }
-    function getGuildIcon(id) { return GUILDS.find(g => g.id === id)?.icon || '📦'; }
-
-    // ==================== ЭКРАНЫ ====================
-    function renderToday() {
-        const today = new Date().toISOString().slice(0,10);
-        const tasks = GameState.tasks.filter(t => t.date === today && !t.completed);
-        document.getElementById('screenContainer').innerHTML = `
-            <div class="card">
-                <h2>Доброе утро, ${GameState.player.name}!</h2>
-                <p>Уровень ${GameState.player.lvl} · XP ${GameState.player.xp.toFixed(1)}</p>
-                <div class="xp-bar"><div class="xp-fill" style="width:${GameState.player.progress}%"></div></div>
-                <p>🔥 Комбо дней: ${GameState.player.streak} (рекорд: ${GameState.player.bestStreak})</p>
-            </div>
-            <h3>Квесты на сегодня</h3>
-            ${tasks.length === 0 ? '<p>На сегодня ничего нет</p>' : tasks.map(t => `
-                <div class="quest-item">
-                    <div>
-                        <span class="guild-badge" style="background:${getGuildColor(t.category)}">${getGuildIcon(t.category)}</span>
-                        ${t.title} (${t.minutes} мин)
-                    </div>
-                    <button class="btn secondary" onclick="completeQuest('${t.id}')">✔</button>
-                </div>`).join('')}
-            <button class="btn" style="margin-top:1rem" onclick="renderScreen('tasks')">📋 Все квесты</button>
-        `;
-    }
-
-    // -------------------- ЗАДАЧИ --------------------
-    function renderTasks() {
-        const tasks = GameState.tasks.sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
-        const guildOptions = GUILDS.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('');
-        document.getElementById('screenContainer').innerHTML = `
-            <button class="btn" onclick="toggleQuestForm()">➕ Новый квест</button>
-            <div id="questForm" class="card" style="display:none;">
-                <form onsubmit="addQuest(event)">
-                    <label>Гильдия</label>
-                    <select id="qCategory" required>${guildOptions}</select>
-                    <label>Название</label>
-                    <input type="text" id="qTitle" required>
-                    <label>Продолжительность (мин)</label>
-                    <input type="number" id="qMinutes" min="1" value="30" required>
-                    <label>Дата</label>
-                    <input type="date" id="qDate" required>
-                    <label>Время</label>
-                    <input type="time" id="qTime" required>
-                    <label>Заметка</label>
-                    <textarea id="qNote" rows="2"></textarea>
-                    <label>Цель</label>
-                    <select id="qGoal"><option value="">Без цели</option>${GameState.goals.filter(g=>g.status==='active').map(g=>`<option value="${g.id}">${g.title}</option>`).join('')}</select>
-                    <button type="submit" class="btn" style="width:100%">Создать квест</button>
-                </form>
-            </div>
-            <hr>
-            <h3>Активные квесты</h3>
-            ${tasks.filter(t => !t.completed).map(t => `
-                <div class="quest-item">
-                    <div>
-                        <span class="guild-badge" style="background:${getGuildColor(t.category)}">${getGuildIcon(t.category)} ${GUILDS.find(g=>g.id===t.category)?.name}</span>
-                        <strong>${t.title}</strong><br>
-                        📅 ${t.date} 🕒 ${t.time} · ⏱ ${t.minutes} мин
-                        ${t.note ? `<br>📝 ${t.note}` : ''}
-                    </div>
-                    <div>
-                        <button class="btn secondary" onclick="completeQuest('${t.id}')">✔</button>
-                        <button class="btn secondary" style="color:#EF5350; border-color:#EF5350;" onclick="deleteTask('${t.id}')">🗑️</button>
-                    </div>
-                </div>`).join('') || '<p>Нет активных квестов</p>'}
-            <h3>Выполненные</h3>
-            ${tasks.filter(t => t.completed).slice(-10).reverse().map(t => `
-                <div class="quest-item" style="opacity:0.7;">
-                    <div>${t.title} <span style="color:var(--primary)">✅ +${(t.minutes*0.01).toFixed(2)} XP</span></div>
-                    <button class="btn secondary" style="color:#EF5350; border-color:#EF5350;" onclick="deleteTask('${t.id}')">🗑️</button>
-                </div>`).join('') || '<p>Пока ничего не выполнено</p>'}
-        `;
-        const dateInput = document.getElementById('qDate');
-        if (dateInput) dateInput.value = new Date().toISOString().slice(0,10);
-        const timeInput = document.getElementById('qTime');
-        if (timeInput) timeInput.value = new Date().toTimeString().slice(0,5);
-    }
-    window.toggleQuestForm = () => {
-        const form = document.getElementById('questForm');
-        if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    };
-    window.addQuest = (event) => {
-        event.preventDefault();
-        const category = document.getElementById('qCategory').value;
-        const title = document.getElementById('qTitle').value.trim();
-        const minutes = parseInt(document.getElementById('qMinutes').value, 10);
-        const date = document.getElementById('qDate').value;
-        const time = document.getElementById('qTime').value;
-        const note = document.getElementById('qNote').value.trim();
-        const goalId = document.getElementById('qGoal').value || null;
-        if (!title || !date || !time || isNaN(minutes) || minutes <= 0) return;
-        GameState.tasks.push({
-            id: Date.now().toString(36) + Math.random().toString(36).substring(2),
-            category, title, minutes, date, time, note, goalId,
-            completed: false, dateCompleted: null, createdAt: new Date().toISOString()
-        });
-        persist();
-        renderTasks();
-    };
-    window.deleteTask = (id) => {
-        if (confirm('Удалить задачу?')) {
-            GameState.tasks = GameState.tasks.filter(t => t.id !== id);
-            persist();
-            renderTasks();
-        }
-    };
-
-    // -------------------- КАЛЕНДАРЬ --------------------
-    const Cal = { currentDate: new Date(), view: 'month', selectedDay: null, filter: null };
-    window.setCalendarView = v => { Cal.view = v; if(v==='day' && !Cal.selectedDay) Cal.selectedDay = new Date(); renderCalendar(); };
-    window.setGuildFilter = id => { Cal.filter = id; renderCalendar(); };
-    window.navigateCalendar = delta => {
-        if(Cal.view === 'year') Cal.currentDate.setFullYear(Cal.currentDate.getFullYear()+delta);
-        else if(Cal.view === 'month') Cal.currentDate.setMonth(Cal.currentDate.getMonth()+delta);
-        else if(Cal.view === 'week') Cal.currentDate.setDate(Cal.currentDate.getDate()+delta*7);
-        else if(Cal.view === 'day') { Cal.selectedDay.setDate(Cal.selectedDay.getDate()+delta); Cal.currentDate = new Date(Cal.selectedDay); }
-        renderCalendar();
-    };
-    window.goToDay = d => { Cal.selectedDay = new Date(d); Cal.view='day'; renderCalendar(); };
-    window.goToMonth = m => { Cal.currentDate.setMonth(m); Cal.view='month'; renderCalendar(); };
-    function renderCalendar() {
-        const {currentDate, view, filter} = Cal;
-        const tasks = filter ? GameState.tasks.filter(t=>t.category===filter) : GameState.tasks;
-        let header = '', content = '';
-        if(view==='year') { header = `<h2>${currentDate.getFullYear()}</h2>`; content = yearView(currentDate.getFullYear(), tasks); }
-        else if(view==='month') { header = `<h2>${currentDate.toLocaleString('ru',{month:'long'})} ${currentDate.getFullYear()}</h2>`; content = monthView(currentDate.getFullYear(), currentDate.getMonth(), tasks); }
-        else if(view==='week') { header = `<h2>Неделя</h2>`; content = weekView(currentDate, tasks); }
-        else if(view==='day') { const d = Cal.selectedDay || currentDate; header = `<h2>${d.toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})}</h2>`; content = dayView(d, tasks); }
-        document.getElementById('screenContainer').innerHTML = `
-            <div class="calendar-header">
-                ${header}
-                <div class="calendar-nav">
-                    <button onclick="navigateCalendar(-1)">◀</button>
-                    <button onclick="navigateCalendar(1)">▶</button>
-                    <button onclick="Cal.currentDate=new Date();Cal.selectedDay=new Date();renderCalendar();">Сегодня</button>
-                </div>
-            </div>
-            <div class="view-switcher">
-                ${['year','month','week','day'].map(v=>`<button class="${v===view?'active':''}" onclick="setCalendarView('${v}')">${v==='year'?'Год':v==='month'?'Месяц':v==='week'?'Неделя':'День'}</button>`).join('')}
-            </div>
-            ${content}
-            <div class="guild-filter">
-                <button class="${filter===null?'active':''}" onclick="setGuildFilter(null)">Все</button>
-                ${GUILDS.map(g=>`<button class="${filter===g.id?'active':''}" onclick="setGuildFilter('${g.id}')" style="border-color:${g.color}">${g.icon} ${g.name}</button>`).join('')}
-            </div>
-        `;
-    }
-    function yearView(year, tasks) {
-        const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-        let html = '<div class="year-grid">';
-        for(let m=0; m<12; m++) {
-            const monthStr = `${year}-${String(m+1).padStart(2,'0')}`;
-            const monthTasks = tasks.filter(t=>t.date?.startsWith(monthStr));
-            const completed = monthTasks.filter(t=>t.completed).length;
-            html += `<div class="month-stat-card" onclick="goToMonth(${m})"><strong>${months[m]}</strong><br>${completed}/${monthTasks.length}<br><small>задач</small></div>`;
-        }
-        return html + '</div>';
-    }
-    function monthView(year, month, tasks) {
-        const firstDay = new Date(year, month, 1).getDay();
-        const days = new Date(year, month+1, 0).getDate();
-        const start = firstDay === 0 ? 6 : firstDay - 1;
-        const today = new Date(); today.setHours(0,0,0,0);
-        let grid = '<div class="weekday-header">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<div>${d}</div>`).join('')+'</div><div class="month-grid">';
-        for(let i=0; i<start; i++) grid += '<div class="day-cell other-month"></div>';
-        for(let d=1; d<=days; d++) {
-            const date = new Date(year, month, d); const dateStr = date.toISOString().slice(0,10);
-            const isToday = date.getTime() === today.getTime();
-            const dayTasks = tasks.filter(t=>t.date === dateStr);
-            const markers = dayTasks.map(t=>{
-                let color = getGuildColor(t.category);
-                if(t.completed) color = 'var(--secondary)';
-                else if(dateStr < today.toISOString().slice(0,10)) color = '#EF5350';
-                return `<span class="marker" style="background:${color}"></span>`;
-            }).join('');
-            grid += `<div class="day-cell${isToday?' today':''}" onclick="goToDay('${dateStr}')"><div>${d}</div><div>${markers}</div></div>`;
-        }
-        return grid + '</div>';
-    }
-    function weekView(date, tasks) {
-        const start = new Date(date); start.setDate(start.getDate() - start.getDay() + 1);
-        let html = '<div>';
-        for(let i=0; i<7; i++) {
-            const d = new Date(start); d.setDate(d.getDate()+i);
-            const dateStr = d.toISOString().slice(0,10);
-            const dayTasks = tasks.filter(t=>t.date===dateStr);
-            html += `<div class="card"><h3>${d.toLocaleDateString('ru',{weekday:'short',day:'numeric'})}</h3>${dayTasks.map(t=>`<div>${t.title} ${t.completed?'✅':''}</div>`).join('')||'<p>—</p>'}</div>`;
-        }
-        return html + '</div>';
-    }
-    function dayView(date, tasks) {
-        const dateStr = date.toISOString().slice(0,10);
-        const dayTasks = tasks.filter(t=>t.date===dateStr).sort((a,b)=>a.time?.localeCompare(b.time));
-        let html = '<ul class="hour-list">';
-        for(let h=0; h<24; h++) {
-            const hourStr = String(h).padStart(2,'0');
-            const hourTasks = dayTasks.filter(t=>t.time?.startsWith(hourStr+':'));
-            html += `<li class="hour-item"><span class="hour-label">${hourStr}:00</span> ${hourTasks.map(t=>`<span>${t.title} ${t.completed?'✅':''}</span>`).join(', ')||'—'}</li>`;
-        }
-        return html + '</ul>';
-    }
-
-    // -------------------- ЖУРНАЛЫ, ЦЕЛИ, ЗАМЕТКИ, ГАЛЕРЕЯ --------------------
-    function renderGuilds() {
-        document.getElementById('screenContainer').innerHTML = `
-            <h2>📚 Журналы</h2>
-            <p>Нажми на гильдию, чтобы фильтровать календарь</p>
-            ${GUILDS.map(g => {
-                const tasksCount = GameState.tasks.filter(t=>t.category===g.id).length;
-                const completed = GameState.tasks.filter(t=>t.category===g.id && t.completed).length;
-                return `<div class="card" style="border-left:6px solid ${g.color}; cursor:pointer;" onclick="Cal.filter='${g.id}'; renderCalendar();"><h3>${g.icon} ${g.name}</h3><p>${completed}/${tasksCount} выполнено</p></div>`;
-            }).join('')}
-        `;
-    }
-    function renderGoals() {
-        const goals = GameState.goals;
-        document.getElementById('screenContainer').innerHTML = `
-            <h2>🎯 Цели</h2>
-            <button class="btn" onclick="addGoal()">➕ Новая цель</button>
-            <div id="goalList">
-                ${goals.length === 0 ? '<p>Целей пока нет</p>' : goals.map(g => {
-                    const tasks = GameState.tasks.filter(t=>t.goalId === g.id);
-                    const done = tasks.filter(t=>t.completed).length;
-                    return `<div class="card">
-                        <strong>${g.title}</strong> (${g.status === 'active' ? 'Активна' : 'Достигнута'})
-                        <p>Создана: ${g.createdAt.slice(0,10)}</p>
-                        <p>Прогресс: ${done}/${tasks.length} задач</p>
-                        ${g.status === 'active' ? `<button class="btn" onclick="achieveGoal('${g.id}')">Достиг!</button>` : `<p>Достигнута ${g.achievedAt?.slice(0,10)} (+${g.xpBonus} XP)</p>`}
-                    </div>`;
-                }).join('')}
-            </div>
-        `;
-    }
-    window.addGoal = () => {
-        const title = prompt('Название цели:');
-        if (!title) return;
-        GameState.goals.push({
-            id: Date.now().toString(36)+Math.random().toString(36).substring(2),
-            title, status: 'active', createdAt: new Date().toISOString(),
-            achievedAt: null, xpBonus: 10
-        });
-        persist();
-        renderGoals();
-    };
-    window.achieveGoal = (goalId) => {
-        const goal = GameState.goals.find(g=>g.id===goalId);
-        if (!goal || goal.status !== 'active') return;
-        const linkedTasks = GameState.tasks.filter(t=>t.goalId === goalId && t.completed);
-        goal.xpBonus = 10 + linkedTasks.length * 2;
-        goal.status = 'achieved';
-        goal.achievedAt = new Date().toISOString();
-        GameState.player.xp += goal.xpBonus;
-        checkLevelUp();
-        const photoUrl = prompt('Ссылка на фото успеха (или отмена):');
-        if (photoUrl) {
-            GameState.gallery.push({
-                id: Date.now().toString(36), imageUrl: photoUrl,
-                caption: goal.title, date: new Date().toISOString()
-            });
-            Storage.set('gallery', GameState.gallery);
-        }
-        persist();
-        renderGoals();
-    };
-    function renderNotes() {
-        const notes = GameState.notes.sort((a,b)=>(b.updatedAt||b.createdAt).localeCompare(a.updatedAt||a.createdAt));
-        document.getElementById('screenContainer').innerHTML = `
-            <h2>📝 Заметки</h2>
-            <button class="btn" onclick="showNoteForm()">➕ Новая заметка</button>
-            <div id="noteForm" class="card" style="display:none;">
-                <input type="text" id="noteTitle" placeholder="Заголовок">
-                <textarea id="noteContent" rows="4" placeholder="Текст..."></textarea>
-                <input type="hidden" id="editNoteId">
-                <button class="btn" onclick="saveNote()">Сохранить</button>
-            </div>
-            <div id="notesList">
-                ${notes.length === 0 ? '<p>Нет заметок</p>' : notes.map(n => `
-                    <div class="note-card">
-                        <strong>${n.title}</strong>
-                        <p>${n.content.replace(/\n/g,'<br>')}</p>
-                        <button class="btn secondary" onclick="editNote('${n.id}')">✏️</button>
-                        <button class="btn secondary" onclick="deleteNote('${n.id}')">🗑️</button>
-                    </div>`).join('')}
-            </div>
-        `;
-    }
-    window.showNoteForm = (id=null) => {
-        const form = document.getElementById('noteForm');
-        form.style.display = 'block';
-        if (id) {
-            const note = GameState.notes.find(n=>n.id===id);
-            document.getElementById('noteTitle').value = note.title;
-            document.getElementById('noteContent').value = note.content;
-            document.getElementById('editNoteId').value = id;
+  // Запрос разрешения на уведомления
+  if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+    Notification.requestPermission();
+  }
+  function scheduleReminder(task) {
+    if (!task.reminder || !task.reminderTime) return;
+    const [hours, minutes] = task.reminderTime.split(':').map(Number);
+    const taskDate = new Date(task.date);
+    taskDate.setHours(hours, minutes, 0, 0);
+    const now = new Date();
+    const delay = taskDate.getTime() - now.getTime();
+    if (delay > 0) {
+      setTimeout(() => {
+        if (Notification.permission === "granted") {
+          new Notification("LVL UP Напоминание", { body: task.title, icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔔</text></svg>" });
         } else {
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
-            document.getElementById('editNoteId').value = '';
+          alert(`Напоминание: ${task.title}`);
         }
-    };
-    window.saveNote = () => {
-        const title = document.getElementById('noteTitle').value.trim();
-        const content = document.getElementById('noteContent').value.trim();
-        const editId = document.getElementById('editNoteId').value;
-        if (!title) return;
-        if (editId) {
-            const note = GameState.notes.find(n=>n.id===editId);
-            note.title = title; note.content = content; note.updatedAt = new Date().toISOString();
-        } else {
-            GameState.notes.push({
-                id: Date.now().toString(36)+Math.random().toString(36).substring(2),
-                title, content, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-            });
-        }
-        persist();
-        renderNotes();
-    };
-    window.editNote = (id) => showNoteForm(id);
-    window.deleteNote = (id) => {
-        if (confirm('Удалить заметку?')) {
-            GameState.notes = GameState.notes.filter(n=>n.id!==id);
-            persist();
-            renderNotes();
-        }
-    };
-    function renderGallery() {
-        const items = GameState.gallery.sort((a,b)=>new Date(b.date)-new Date(a.date));
-        document.getElementById('screenContainer').innerHTML = `
-            <h2>🖼️ Галерея</h2>
-            <button class="btn" onclick="addGalleryItem()">➕ Добавить фото</button>
-            <button class="btn secondary" onclick="uploadGalleryFile()">📁 Загрузить с устройства</button>
-            <div style="margin-top:1rem;">
-                ${items.length === 0 ? '<p>Пока пусто</p>' : items.map(item => `
-                    <div class="card" style="text-align:center">
-                        <img src="${item.imageUrl}" style="max-width:100%; border-radius:12px;" alt="${item.caption}">
-                        <p>${item.caption} (${new Date(item.date).toLocaleDateString()})</p>
-                    </div>`).join('')}
-            </div>
-        `;
+      }, delay);
     }
-    window.addGalleryItem = () => {
-        const url = prompt('Ссылка на изображение:');
-        if (!url) return;
+  }
+  // Перезапуск напоминаний при загрузке
+  GameState.tasks.forEach(t => { if (!t.completed && t.reminder) scheduleReminder(t); });
+
+  // ==================== ЭКРАНЫ ====================
+  function renderToday() {
+    const today = new Date().toISOString().slice(0,10);
+    const tasks = GameState.tasks.filter(t => t.date === today && !t.completed);
+    document.getElementById('screenContainer').innerHTML = `
+      <div class="card">
+        <h2>Доброе утро, ${GameState.player.name}!</h2>
+        <p>Уровень ${GameState.player.lvl} · XP ${GameState.player.xp.toFixed(1)}</p>
+        <div class="xp-bar"><div class="xp-fill" style="width:${GameState.player.progress}%"></div></div>
+        <p>🔥 Комбо дней: ${GameState.player.streak} (рекорд: ${GameState.player.bestStreak})</p>
+      </div>
+      <h3>Квесты на сегодня</h3>
+      ${tasks.length === 0 ? '<p>На сегодня ничего нет</p>' : tasks.map(t => `
+        <div class="quest-item">
+          <div>
+            <span class="guild-badge" style="background:${getGuildColor(t.category)}">${getGuildIcon(t.category)}</span>
+            ${t.title} (${t.minutes} мин) ${t.reminder ? '<span class="reminder-badge">🔔</span>' : ''}
+          </div>
+          <button class="btn secondary" onclick="completeQuest('${t.id}')">✔</button>
+        </div>`).join('')}
+      <button class="btn" style="margin-top:1rem" onclick="renderScreen('tasks')">📋 Все квесты</button>
+    `;
+  }
+
+  function renderTasks() {
+    const tasks = GameState.tasks.sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+    const guildOptions = GUILDS.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('');
+    document.getElementById('screenContainer').innerHTML = `
+      <button class="btn" onclick="toggleQuestForm()">➕ Новый квест</button>
+      <div id="questForm" class="card" style="display:none;">
+        <form onsubmit="addQuest(event)">
+          <label>Гильдия</label>
+          <select id="qCategory" required>${guildOptions}</select>
+          <label>Название</label>
+          <input type="text" id="qTitle" required>
+          <label>Продолжительность (мин)</label>
+          <input type="number" id="qMinutes" min="1" value="30" required>
+          <label>Дата</label>
+          <input type="date" id="qDate" required>
+          <label>Время</label>
+          <input type="time" id="qTime" required>
+          <label>Заметка</label>
+          <textarea id="qNote" rows="2"></textarea>
+          <label>Цель</label>
+          <select id="qGoal"><option value="">Без цели</option>${GameState.goals.filter(g=>g.status==='active').map(g=>`<option value="${g.id}">${g.title}</option>`).join('')}</select>
+          <label>
+            <input type="checkbox" id="qReminder"> 🔔 Напоминание
+          </label>
+          <div id="reminderTimeBlock" style="display:none;">
+            <label>Время напоминания</label>
+            <input type="time" id="qReminderTime">
+          </div>
+          <button type="submit" class="btn" style="width:100%">Создать квест</button>
+        </form>
+      </div>
+      <hr>
+      <h3>Активные квесты</h3>
+      ${tasks.filter(t => !t.completed).map(t => `
+        <div class="quest-item">
+          <div>
+            <span class="guild-badge" style="background:${getGuildColor(t.category)}">${getGuildIcon(t.category)} ${GUILDS.find(g=>g.id===t.category)?.name}</span>
+            <strong>${t.title}</strong><br>
+            📅 ${t.date} 🕒 ${t.time} · ⏱ ${t.minutes} мин
+            ${t.reminder ? '<span class="reminder-badge">🔔</span>' : ''}
+          </div>
+          <div>
+            <button class="btn secondary" onclick="completeQuest('${t.id}')">✔</button>
+            <button class="btn secondary" style="color:#EF5350; border-color:#EF5350;" onclick="deleteTask('${t.id}')">🗑️</button>
+          </div>
+        </div>`).join('') || '<p>Нет активных квестов</p>'}
+      <h3>Выполненные</h3>
+      ${tasks.filter(t => t.completed).slice(-10).reverse().map(t => `
+        <div class="quest-item" style="opacity:0.7;">
+          <div>${t.title} <span style="color:var(--primary)">✅ +${(t.minutes*0.01).toFixed(2)} XP</span></div>
+          <button class="btn secondary" style="color:#EF5350; border-color:#EF5350;" onclick="deleteTask('${t.id}')">🗑️</button>
+        </div>`).join('') || '<p>Пока ничего не выполнено</p>'}
+    `;
+    const dateInput = document.getElementById('qDate');
+    if (dateInput) dateInput.value = new Date().toISOString().slice(0,10);
+    const timeInput = document.getElementById('qTime');
+    if (timeInput) timeInput.value = new Date().toTimeString().slice(0,5);
+    const reminderCheck = document.getElementById('qReminder');
+    const reminderTimeBlock = document.getElementById('reminderTimeBlock');
+    if (reminderCheck) {
+      reminderCheck.addEventListener('change', (e) => {
+        reminderTimeBlock.style.display = e.target.checked ? 'block' : 'none';
+      });
+    }
+  }
+  window.toggleQuestForm = () => {
+    const form = document.getElementById('questForm');
+    if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  };
+  window.addQuest = (event) => {
+    event.preventDefault();
+    const category = document.getElementById('qCategory').value;
+    const title = document.getElementById('qTitle').value.trim();
+    const minutes = parseInt(document.getElementById('qMinutes').value, 10);
+    const date = document.getElementById('qDate').value;
+    const time = document.getElementById('qTime').value;
+    const note = document.getElementById('qNote').value.trim();
+    const goalId = document.getElementById('qGoal').value || null;
+    const reminder = document.getElementById('qReminder').checked;
+    const reminderTime = reminder ? document.getElementById('qReminderTime').value : null;
+    if (!title || !date || !time || isNaN(minutes) || minutes <= 0) return;
+    const newTask = {
+      id: Date.now().toString(36) + Math.random().toString(36).substring(2),
+      category, title, minutes, date, time, note, goalId,
+      completed: false, dateCompleted: null, createdAt: new Date().toISOString(),
+      reminder, reminderTime
+    };
+    GameState.tasks.push(newTask);
+    persist();
+    if (reminder) scheduleReminder(newTask);
+    renderTasks();
+  };
+  window.deleteTask = (id) => {
+    if (confirm('Удалить задачу?')) {
+      GameState.tasks = GameState.tasks.filter(t => t.id !== id);
+      persist();
+      renderTasks();
+    }
+  };
+
+  // -------------------- КАЛЕНДАРЬ (УЛУЧШЕННЫЙ) --------------------
+  const Cal = { currentDate: new Date(), view: 'month', selectedDay: null, filter: null };
+  window.setCalendarView = v => { Cal.view = v; if(v==='day' && !Cal.selectedDay) Cal.selectedDay = new Date(); renderCalendar(); };
+  window.setGuildFilter = id => { Cal.filter = id; renderCalendar(); };
+  window.navigateCalendar = delta => {
+    if(Cal.view === 'year') Cal.currentDate.setFullYear(Cal.currentDate.getFullYear()+delta);
+    else if(Cal.view === 'month') Cal.currentDate.setMonth(Cal.currentDate.getMonth()+delta);
+    else if(Cal.view === 'week') Cal.currentDate.setDate(Cal.currentDate.getDate()+delta*7);
+    else if(Cal.view === 'day') { Cal.selectedDay.setDate(Cal.selectedDay.getDate()+delta); Cal.currentDate = new Date(Cal.selectedDay); }
+    renderCalendar();
+  };
+  window.goToDay = d => { Cal.selectedDay = new Date(d); Cal.view='day'; renderCalendar(); };
+  window.goToMonth = m => { Cal.currentDate.setMonth(m); Cal.view='month'; renderCalendar(); };
+  function renderCalendar() {
+    const {currentDate, view, filter} = Cal;
+    const tasks = filter ? GameState.tasks.filter(t=>t.category===filter) : GameState.tasks;
+    let header = '', content = '';
+    if(view==='year') { header = `<h2>${currentDate.getFullYear()}</h2>`; content = yearView(currentDate.getFullYear(), tasks); }
+    else if(view==='month') { header = `<h2>${currentDate.toLocaleString('ru',{month:'long'})} ${currentDate.getFullYear()}</h2>`; content = monthView(currentDate.getFullYear(), currentDate.getMonth(), tasks); }
+    else if(view==='week') { header = `<h2>Неделя</h2>`; content = weekView(currentDate, tasks); }
+    else if(view==='day') { const d = Cal.selectedDay || currentDate; header = `<h2>${d.toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})}</h2>`; content = dayView(d, tasks); }
+    document.getElementById('screenContainer').innerHTML = `
+      <div class="calendar-header">
+        ${header}
+        <div class="calendar-nav">
+          <button onclick="navigateCalendar(-1)">◀</button>
+          <button onclick="navigateCalendar(1)">▶</button>
+          <button onclick="Cal.currentDate=new Date();Cal.selectedDay=new Date();renderCalendar();">Сегодня</button>
+        </div>
+      </div>
+      <div class="view-switcher">
+        ${['year','month','week','day'].map(v=>`<button class="${v===view?'active':''}" onclick="setCalendarView('${v}')">${v==='year'?'Год':v==='month'?'Месяц':v==='week'?'Неделя':'День'}</button>`).join('')}
+      </div>
+      ${content}
+      <div class="guild-filter">
+        <button class="${filter===null?'active':''}" onclick="setGuildFilter(null)">Все</button>
+        ${GUILDS.map(g=>`<button class="${filter===g.id?'active':''}" onclick="setGuildFilter('${g.id}')" style="border-color:${g.color}">${g.icon} ${g.name}</button>`).join('')}
+      </div>
+    `;
+  }
+  function yearView(year, tasks) {
+    const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+    let html = '<div class="year-grid">';
+    for(let m=0; m<12; m++) {
+      const monthStr = `${year}-${String(m+1).padStart(2,'0')}`;
+      const monthTasks = tasks.filter(t=>t.date?.startsWith(monthStr));
+      const completed = monthTasks.filter(t=>t.completed).length;
+      const overdue = monthTasks.filter(t=>!t.completed && t.date < new Date().toISOString().slice(0,10)).length;
+      const planned = monthTasks.filter(t=>!t.completed && t.date >= new Date().toISOString().slice(0,10)).length;
+      const total = monthTasks.length;
+      const hue = total ? Math.round((completed/total)*120) : 0; // 0=красный, 120=зелёный
+      html += `<div class="month-stat-card" onclick="goToMonth(${m})" style="background: hsl(${hue}, 70%, 85%);">
+        <strong>${months[m]}</strong><br>
+        <span style="font-size:0.9rem;">✅${completed} ❌${overdue} 📅${planned}</span>
+      </div>`;
+    }
+    return html + '</div>';
+  }
+  function monthView(year, month, tasks) {
+    const firstDay = new Date(year, month, 1).getDay();
+    const days = new Date(year, month+1, 0).getDate();
+    const start = firstDay === 0 ? 6 : firstDay - 1;
+    const today = new Date(); today.setHours(0,0,0,0);
+    let grid = '<div class="weekday-header">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<div>${d}</div>`).join('')+'</div><div class="month-grid">';
+    for(let i=0; i<start; i++) grid += '<div class="day-cell other-month"></div>';
+    for(let d=1; d<=days; d++) {
+      const date = new Date(year, month, d); const dateStr = date.toISOString().slice(0,10);
+      const isToday = date.getTime() === today.getTime();
+      const dayTasks = tasks.filter(t=>t.date === dateStr);
+      const completed = dayTasks.filter(t=>t.completed).length;
+      const overdue = dayTasks.filter(t=>!t.completed && t.date < today.toISOString().slice(0,10)).length;
+      const planned = dayTasks.filter(t=>!t.completed && t.date >= today.toISOString().slice(0,10)).length;
+      const markers = [];
+      if (completed) markers.push(`<span class="marker" style="background:#4caf50;" title="Выполнено: ${completed}"></span>`);
+      if (overdue) markers.push(`<span class="marker" style="background:#f44336;" title="Просрочено: ${overdue}"></span>`);
+      if (planned) markers.push(`<span class="marker" style="background:${getGuildColor(dayTasks[0]?.category) || 'var(--primary)'};" title="Запланировано: ${planned}"></span>`);
+      grid += `<div class="day-cell${isToday?' today':''}" onclick="goToDay('${dateStr}')">
+        <div>${d}</div><div>${markers.join('')}</div>
+      </div>`;
+    }
+    return grid + '</div>';
+  }
+  function weekView(date, tasks) {
+    const start = new Date(date); start.setDate(start.getDate() - start.getDay() + 1);
+    const today = new Date().toISOString().slice(0,10);
+    let html = '<div>';
+    for(let i=0; i<7; i++) {
+      const d = new Date(start); d.setDate(d.getDate()+i);
+      const dateStr = d.toISOString().slice(0,10);
+      const dayTasks = tasks.filter(t=>t.date===dateStr);
+      const completed = dayTasks.filter(t=>t.completed).length;
+      const overdue = dayTasks.filter(t=>!t.completed && dateStr < today).length;
+      const planned = dayTasks.filter(t=>!t.completed && dateStr >= today).length;
+      html += `<div class="card" style="padding:0.8rem;">
+        <h3>${d.toLocaleDateString('ru',{weekday:'short',day:'numeric'})}</h3>
+        <div style="display:flex; gap:0.5rem; margin:0.3rem 0;">
+          ${completed ? `<span style="color:#4caf50;">✅${completed}</span>` : ''}
+          ${overdue ? `<span style="color:#f44336;">❌${overdue}</span>` : ''}
+          ${planned ? `<span style="color:var(--primary);">📅${planned}</span>` : ''}
+        </div>
+        ${dayTasks.slice(0,3).map(t=>`<div style="font-size:0.8rem;">${t.title} ${t.completed?'✅':''}</div>`).join('')}
+      </div>`;
+    }
+    return html + '</div>';
+  }
+  function dayView(date, tasks) {
+    const dateStr = date.toISOString().slice(0,10);
+    const dayTasks = tasks.filter(t=>t.date===dateStr).sort((a,b)=>a.time?.localeCompare(b.time));
+    const today = new Date().toISOString().slice(0,10);
+    let html = '<ul class="hour-list">';
+    for(let h=0; h<24; h++) {
+      const hourStr = String(h).padStart(2,'0');
+      const hourTasks = dayTasks.filter(t=>t.time?.startsWith(hourStr+':'));
+      const tasksHtml = hourTasks.map(t => {
+        let statusColor = 'var(--primary)';
+        if (t.completed) statusColor = '#4caf50';
+        else if (dateStr < today) statusColor = '#f44336';
+        return `<span style="color:${statusColor}; margin-right:0.5rem;">${t.title} ${t.completed?'✅':(dateStr<today?'❌':'📅')}</span>`;
+      }).join(', ');
+      html += `<li class="hour-item"><span class="hour-label">${hourStr}:00</span> ${tasksHtml || '—'}</li>`;
+    }
+    return html + '</ul>';
+  }
+
+  // -------------------- ЖУРНАЛЫ, ЦЕЛИ, ЗАМЕТКИ, ГАЛЕРЕЯ --------------------
+  function renderGuilds() {
+    document.getElementById('screenContainer').innerHTML = `
+      <h2>📚 Журналы</h2>
+      ${GUILDS.map(g => {
+        const tasks = GameState.tasks.filter(t=>t.category===g.id);
+        const completed = tasks.filter(t=>t.completed).length;
+        const total = tasks.length;
+        return `<div class="card" style="border-left:6px solid ${g.color}; cursor:pointer;" onclick="Cal.filter='${g.id}'; renderCalendar();">
+          <h3>${g.icon} ${g.name}</h3>
+          <p>${completed}/${total} выполнено</p>
+        </div>`;
+      }).join('')}
+    `;
+  }
+  function renderGoals() {
+    const goals = GameState.goals;
+    document.getElementById('screenContainer').innerHTML = `
+      <h2>🎯 Цели</h2>
+      <button class="btn" onclick="addGoal()">➕ Новая цель</button>
+      ${goals.length === 0 ? '<p>Целей пока нет</p>' : goals.map(g => {
+        const linkedTasks = GameState.tasks.filter(t=>t.goalId === g.id);
+        const done = linkedTasks.filter(t=>t.completed).length;
+        const total = linkedTasks.length;
+        return `<div class="card">
+          <strong>${g.title}</strong> (${g.status === 'active' ? 'Активна' : 'Достигнута'})
+          <p>Создана: ${g.createdAt.slice(0,10)}</p>
+          <p>Прогресс: ${done}/${total} задач</p>
+          ${g.status === 'active' ? `<button class="btn" onclick="achieveGoal('${g.id}')">Достиг!</button>` : `<p>Достигнута ${g.achievedAt?.slice(0,10)} (+${g.xpBonus} XP)</p>`}
+        </div>`;
+      }).join('')}
+    `;
+  }
+  window.addGoal = () => {
+    const title = prompt('Название цели:');
+    if (!title) return;
+    GameState.goals.push({
+      id: Date.now().toString(36)+Math.random().toString(36).substring(2),
+      title, status: 'active', createdAt: new Date().toISOString(),
+      achievedAt: null, xpBonus: 10
+    });
+    persist();
+    renderGoals();
+  };
+  window.achieveGoal = (goalId) => {
+    const goal = GameState.goals.find(g=>g.id===goalId);
+    if (!goal || goal.status !== 'active') return;
+    const linkedCompleted = GameState.tasks.filter(t=>t.goalId === goalId && t.completed).length;
+    goal.xpBonus = 10 + linkedCompleted * 2;
+    goal.status = 'achieved';
+    goal.achievedAt = new Date().toISOString();
+    GameState.player.xp += goal.xpBonus;
+    checkLevelUp();
+    const photoUrl = prompt('Ссылка на фото успеха (или отмена):');
+    if (photoUrl) {
+      GameState.gallery.push({ id: Date.now().toString(36), imageUrl: photoUrl, caption: goal.title, date: new Date().toISOString() });
+      Storage.set('gallery', GameState.gallery);
+    }
+    persist();
+    renderGoals();
+  };
+  function renderNotes() {
+    const notes = GameState.notes.sort((a,b)=>(b.updatedAt||b.createdAt).localeCompare(a.updatedAt||a.createdAt));
+    document.getElementById('screenContainer').innerHTML = `
+      <h2>📝 Заметки</h2>
+      <button class="btn" onclick="showNoteForm()">➕ Новая заметка</button>
+      <div id="noteForm" class="card" style="display:none;">
+        <input type="text" id="noteTitle" placeholder="Заголовок">
+        <textarea id="noteContent" rows="4" placeholder="Текст..."></textarea>
+        <input type="hidden" id="editNoteId">
+        <button class="btn" onclick="saveNote()">Сохранить</button>
+      </div>
+      ${notes.length === 0 ? '<p>Нет заметок</p>' : notes.map(n => `
+        <div class="note-card">
+          <strong>${n.title}</strong>
+          <p>${n.content.replace(/\n/g,'<br>')}</p>
+          <button class="btn secondary" onclick="editNote('${n.id}')">✏️</button>
+          <button class="btn secondary" onclick="deleteNote('${n.id}')">🗑️</button>
+        </div>`).join('')}
+    `;
+  }
+  window.showNoteForm = (id=null) => {
+    const form = document.getElementById('noteForm');
+    form.style.display = 'block';
+    if (id) {
+      const note = GameState.notes.find(n=>n.id===id);
+      document.getElementById('noteTitle').value = note.title;
+      document.getElementById('noteContent').value = note.content;
+      document.getElementById('editNoteId').value = id;
+    } else {
+      document.getElementById('noteTitle').value = '';
+      document.getElementById('noteContent').value = '';
+      document.getElementById('editNoteId').value = '';
+    }
+  };
+  window.saveNote = () => {
+    const title = document.getElementById('noteTitle').value.trim();
+    const content = document.getElementById('noteContent').value.trim();
+    const editId = document.getElementById('editNoteId').value;
+    if (!title) return;
+    if (editId) {
+      const note = GameState.notes.find(n=>n.id===editId);
+      note.title = title; note.content = content; note.updatedAt = new Date().toISOString();
+    } else {
+      GameState.notes.push({
+        id: Date.now().toString(36)+Math.random().toString(36).substring(2),
+        title, content, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+      });
+    }
+    persist();
+    renderNotes();
+  };
+  window.editNote = (id) => showNoteForm(id);
+  window.deleteNote = (id) => {
+    if (confirm('Удалить заметку?')) {
+      GameState.notes = GameState.notes.filter(n=>n.id!==id);
+      persist();
+      renderNotes();
+    }
+  };
+  function renderGallery() {
+    const items = GameState.gallery.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    document.getElementById('screenContainer').innerHTML = `
+      <h2>🖼️ Галерея</h2>
+      <button class="btn" onclick="addGalleryItem()">➕ Добавить фото</button>
+      <button class="btn secondary" onclick="uploadGalleryFile()">📁 Загрузить с устройства</button>
+      ${items.length === 0 ? '<p>Пока пусто</p>' : items.map(item => `
+        <div class="card" style="text-align:center">
+          <img src="${item.imageUrl}" style="max-width:100%; border-radius:12px;" alt="${item.caption}">
+          <p>${item.caption} (${new Date(item.date).toLocaleDateString()})</p>
+        </div>`).join('')}
+    `;
+  }
+  window.addGalleryItem = () => {
+    const url = prompt('Ссылка на изображение:');
+    if (!url) return;
+    const caption = prompt('Подпись:') || '';
+    GameState.gallery.push({ id: Date.now().toString(36), imageUrl: url, caption, date: new Date().toISOString() });
+    persist();
+    renderGallery();
+  };
+  window.uploadGalleryFile = () => {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
         const caption = prompt('Подпись:') || '';
-        GameState.gallery.push({
-            id: Date.now().toString(36), imageUrl: url, caption,
-            date: new Date().toISOString()
-        });
+        GameState.gallery.push({ id: Date.now().toString(36), imageUrl: ev.target.result, caption, date: new Date().toISOString() });
         persist();
         renderGallery();
+      };
+      reader.readAsDataURL(file);
     };
-    window.uploadGalleryFile = () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const caption = prompt('Подпись:') || '';
-                GameState.gallery.push({
-                    id: Date.now().toString(36),
-                    imageUrl: ev.target.result,
-                    caption,
-                    date: new Date().toISOString()
-                });
-                persist();
-                renderGallery();
-            };
-            reader.readAsDataURL(file);
-        };
-        input.click();
-    };
+    input.click();
+  };
 
-    // -------------------- СТАТИСТИКА --------------------
-    function renderStats() {
-        const total = GameState.tasks.length;
-        const completed = GameState.tasks.filter(t=>t.completed).length;
-        const overdue = GameState.tasks.filter(t=>!t.completed && t.date < new Date().toISOString().slice(0,10)).length;
-        const byGuild = GUILDS.map(g => {
-            const tasks = GameState.tasks.filter(t=>t.category===g.id);
-            return { ...g, total: tasks.length, completed: tasks.filter(t=>t.completed).length };
-        }).sort((a,b) => b.total - a.total);
-        const maxGuildTasks = Math.max(...byGuild.map(g=>g.total), 1);
-        const weightHistory = GameState.player.weightHistory || [];
-        document.getElementById('screenContainer').innerHTML = `
-            <h2>📊 Статистика</h2>
-            <div class="stats-grid">
-                <div class="stat-item"><span class="stat-value">${total}</span><br>Всего квестов</div>
-                <div class="stat-item"><span class="stat-value">${completed}</span><br>Выполнено</div>
-                <div class="stat-item"><span class="stat-value">${overdue}</span><br>Просрочено</div>
-                <div class="stat-item"><span class="stat-value">${GameState.player.streak}</span><br>Текущий стрик</div>
-            </div>
-            <h3>По гильдиям</h3>
-            ${byGuild.map(g => `
-                <div style="margin-bottom:0.8rem;">
-                    <span>${g.icon} ${g.name}: ${g.completed}/${g.total}</span>
-                    <div class="xp-bar" style="height:6px; margin:0.3rem 0;">
-                        <div style="width:${(g.total/maxGuildTasks)*100}%; height:100%; background:${g.color}; border-radius:8px;"></div>
-                    </div>
-                </div>
-            `).join('')}
-            <h3>Прогресс по дням (последние 7)</h3>
-            <div id="weekChart" style="margin-top:1rem;">
-                ${(() => {
-                    let html = '';
-                    for (let i = 6; i >= 0; i--) {
-                        const d = new Date(Date.now() - i*86400000);
-                        const dateStr = d.toISOString().slice(0,10);
-                        const dayTasks = GameState.tasks.filter(t=>t.date === dateStr);
-                        const dayCompleted = dayTasks.filter(t=>t.completed).length;
-                        const maxDay = Math.max(dayTasks.length, 1);
-                        const pct = (dayCompleted / maxDay) * 100;
-                        html += `<div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
-                            <span style="width:40px; font-size:0.8rem;">${d.toLocaleDateString('ru',{weekday:'short',day:'numeric'})}</span>
-                            <div class="xp-bar" style="flex:1; margin:0;"><div class="xp-fill" style="width:${pct}%; background:var(--primary);"></div></div>
-                            <span>${dayCompleted}/${dayTasks.length}</span>
-                        </div>`;
-                    }
-                    return html;
-                })()}
-            </div>
-            <h3>Распределение по категориям</h3>
-            <canvas id="guildChart" width="200" height="200"></canvas>
-            ${weightHistory.length > 0 ? `
-                <h3>Динамика веса</h3>
-                <canvas id="weightChart" width="300" height="150"></canvas>
-            ` : ''}
-            <button class="btn secondary" onclick="renderScreen('info')">ℹ️ RPG-система</button>
-        `;
-        setTimeout(() => {
-            const canvas = document.getElementById('guildChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const totalTasks = byGuild.reduce((sum, g) => sum + g.total, 0);
-            if (totalTasks === 0) return;
-            let startAngle = -Math.PI/2;
-            byGuild.forEach(g => {
-                if (g.total === 0) return;
-                const sliceAngle = (g.total / totalTasks) * 2 * Math.PI;
-                ctx.fillStyle = g.color;
-                ctx.beginPath();
-                ctx.moveTo(100, 100);
-                ctx.arc(100, 100, 80, startAngle, startAngle + sliceAngle);
-                ctx.closePath();
-                ctx.fill();
-                startAngle += sliceAngle;
-            });
-            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--surface').trim() || '#fff';
-            ctx.beginPath();
-            ctx.arc(100, 100, 40, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#000';
-            ctx.font = 'bold 16px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText(totalTasks, 100, 105);
-        }, 10);
-        if (weightHistory.length > 0) {
-            setTimeout(() => {
-                const wCanvas = document.getElementById('weightChart');
-                if (!wCanvas) return;
-                const wCtx = wCanvas.getContext('2d');
-                const data = weightHistory.slice(-30);
-                const maxWeight = Math.max(...data.map(d=>d.weight)) + 2;
-                const minWeight = Math.min(...data.map(d=>d.weight)) - 2;
-                const range = maxWeight - minWeight || 1;
-                const stepX = wCanvas.width / (data.length - 1 || 1);
-                wCtx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--primary').trim() || '#7EC8A0';
-                wCtx.lineWidth = 2;
-                wCtx.beginPath();
-                data.forEach((point, i) => {
-                    const x = i * stepX;
-                    const y = wCanvas.height - ((point.weight - minWeight) / range) * wCanvas.height;
-                    if (i === 0) wCtx.moveTo(x, y);
-                    else wCtx.lineTo(x, y);
-                });
-                wCtx.stroke();
-            }, 10);
-        }
-    }
+  // -------------------- СТАТИСТИКА --------------------
+  function renderStats() {
+    const total = GameState.tasks.length;
+    const completed = GameState.tasks.filter(t=>t.completed).length;
+    const overdue = GameState.tasks.filter(t=>!t.completed && t.date < new Date().toISOString().slice(0,10)).length;
+    const byGuild = GUILDS.map(g => {
+      const tasks = GameState.tasks.filter(t=>t.category===g.id);
+      return { ...g, total: tasks.length, completed: tasks.filter(t=>t.completed).length };
+    }).sort((a,b) => b.total - a.total);
+    const maxGuildTasks = Math.max(...byGuild.map(g=>g.total), 1);
+    const weightHistory = GameState.player.weightHistory || [];
+    document.getElementById('screenContainer').innerHTML = `
+      <h2>📊 Статистика</h2>
+      <div class="stats-grid">
+        <div class="stat-item"><span class="stat-value">${total}</span><br>Всего</div>
+        <div class="stat-item"><span class="stat-value">${completed}</span><br>✅ Выполнено</div>
+        <div class="stat-item"><span class="stat-value">${overdue}</span><br>❌ Просрочено</div>
+        <div class="stat-item"><span class="stat-value">${GameState.player.streak}</span><br>🔥 Стрик</div>
+      </div>
+      <h3>Гильдии</h3>
+      ${byGuild.map(g => `
+        <div style="margin-bottom:0.8rem;">
+          <span>${g.icon} ${g.name}: ${g.completed}/${g.total}</span>
+          <div class="xp-bar" style="height:6px; margin:0.3rem 0;">
+            <div style="width:${(g.total/maxGuildTasks)*100}%; height:100%; background:${g.color}; border-radius:8px;"></div>
+          </div>
+        </div>
+      `).join('')}
+      <canvas id="guildChart" width="200" height="200"></canvas>
+      ${weightHistory.length > 1 ? `<canvas id="weightChart" width="300" height="150"></canvas>` : ''}
+    `;
+    setTimeout(() => {
+      const canvas = document.getElementById('guildChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const totalTasks = byGuild.reduce((sum, g) => sum + g.total, 0);
+      if (totalTasks === 0) return;
+      let startAngle = -Math.PI/2;
+      byGuild.forEach(g => {
+        if (g.total === 0) return;
+        const slice = (g.total / totalTasks) * 2 * Math.PI;
+        ctx.fillStyle = g.color;
+        ctx.beginPath(); ctx.moveTo(100,100); ctx.arc(100,100,80,startAngle,startAngle+slice); ctx.fill();
+        startAngle += slice;
+      });
+    }, 50);
+  }
 
-    // -------------------- ПРОФИЛЬ, НАСТРОЙКИ, ИНФО --------------------
-    function renderProfile() {
-        const p = GameState.player;
-        const totalTasks = GameState.tasks.length;
-        const completed = GameState.tasks.filter(t=>t.completed).length;
-        const avatarContent = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="avatar">` : '🧙';
-        document.getElementById('screenContainer').innerHTML = `
-            <div class="card">
-                <div class="avatar">${avatarContent}</div>
-                <h2 style="text-align:center;">${p.name}</h2>
-                <p style="text-align:center;">Уровень ${p.lvl} · ${p.xp.toFixed(1)} XP</p>
-                <div class="xp-bar"><div class="xp-fill" style="width:${p.progress}%"></div></div>
-                <div class="stats-grid">
-                    <div class="stat-item"><span class="stat-value">${completed}</span><br>✅ Выполнено</div>
-                    <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥 Текущее комбо</div>
-                    <div class="stat-item"><span class="stat-value">${p.bestStreak}</span><br>🏆 Рекорд</div>
-                    <div class="stat-item"><span class="stat-value">${totalTasks}</span><br>📋 Всего квестов</div>
-                </div>
-                <p>Возраст: ${p.age} · Рост: ${p.height} см · Вес: ${p.weight} кг</p>
-                <button class="btn secondary" onclick="editProfile()">✏️ Редактировать профиль</button>
-                <button class="btn secondary" onclick="renderScreen('settings')">⚙️ Настройки</button>
-                <button class="btn secondary" onclick="renderScreen('info')">ℹ️ Инфо</button>
-            </div>
-        `;
+  // -------------------- ПРОФИЛЬ, НАСТРОЙКИ, ИНФО --------------------
+  function renderProfile() {
+    const p = GameState.player;
+    const avatarContent = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="аватар">` : '🧙';
+    document.getElementById('screenContainer').innerHTML = `
+      <div class="card">
+        <div class="avatar">${avatarContent}</div>
+        <h2 style="text-align:center;">${p.name}</h2>
+        <p style="text-align:center;">Ур. ${p.lvl} · ${p.xp.toFixed(1)} XP</p>
+        <div class="xp-bar"><div class="xp-fill" style="width:${p.progress}%"></div></div>
+        <p>🔥 Стрик: ${p.streak} (рекорд ${p.bestStreak})</p>
+        <p>👤 ${p.age} лет, ${p.height} см, ${p.weight} кг</p>
+        <button class="btn secondary" onclick="editProfile()">✏️ Редактировать</button>
+        <button class="btn secondary" onclick="renderScreen('settings')">⚙️ Настройки</button>
+        <button class="btn secondary" onclick="renderScreen('info')">ℹ️ RPG-система</button>
+      </div>
+    `;
+  }
+  window.editProfile = () => {
+    const p = GameState.player;
+    const newName = prompt('Имя', p.name); if (newName !== null) p.name = newName;
+    const newAge = prompt('Возраст', p.age); if (newAge !== null) p.age = parseInt(newAge,10)||p.age;
+    const newHeight = prompt('Рост (см)', p.height); if (newHeight !== null) p.height = parseInt(newHeight,10)||p.height;
+    const newWeight = prompt('Вес (кг)', p.weight);
+    if (newWeight !== null) {
+      const w = parseFloat(newWeight);
+      if (!isNaN(w)) {
+        p.weight = w;
+        if (!p.weightHistory) p.weightHistory = [];
+        p.weightHistory.push({ date: new Date().toISOString().slice(0,10), weight: w });
+      }
     }
-    window.editProfile = () => {
-        const p = GameState.player;
-        const newName = prompt('Имя', p.name);
-        if (newName !== null) p.name = newName;
-        const newAge = prompt('Возраст', p.age);
-        if (newAge !== null) p.age = parseInt(newAge, 10) || p.age;
-        const newHeight = prompt('Рост (см)', p.height);
-        if (newHeight !== null) p.height = parseInt(newHeight, 10) || p.height;
-        const newWeight = prompt('Вес (кг)', p.weight);
-        if (newWeight !== null) {
-            const w = parseFloat(newWeight);
-            if (!isNaN(w)) {
-                p.weight = w;
-                p.weightHistory.push({ date: new Date().toISOString().slice(0,10), weight: w });
-            }
-        }
-        const avatarChoice = prompt('Аватар (эмодзи или ссылка на изображение)', p.avatarUrl);
-        if (avatarChoice !== null) p.avatarUrl = avatarChoice;
-        persist();
-        renderProfile();
-    };
-    function renderSettings() {
-        const themes = [
-            { id: 'mint', name: 'Мята' }, { id: 'pearl', name: 'Жемчуг' },
-            { id: 'steel', name: 'Сталь' }, { id: 'nettle', name: 'Крапива' },
-            { id: 'first_snow', name: 'Первый снег' }, { id: 'instinct', name: 'Инстинкт' }
-        ];
-        document.getElementById('screenContainer').innerHTML = `
-            <h2>Тема оформления</h2>
-            <div>${themes.map(t => `<button class="btn ${GameState.settings.theme===t.id?'active':''}" onclick="setTheme('${t.id}')">${t.name}</button>`).join('')}</div>
-            <hr style="margin:1.5rem 0">
-            <h3>Данные</h3>
-            <button class="btn" onclick="exportData()">📤 Экспорт</button>
-            <button class="btn" onclick="importDataPrompt()">📥 Импорт</button>
-            <button class="btn" onclick="clearData()" style="background:#EF5350; border-color:#EF5350;">🗑️ Сбросить всё</button>
-            <hr style="margin:1.5rem 0">
-            <p>LVL UP v2.0 · RPG Планировщик</p>
-            <p>Создано для Санька и Дэна AI</p>
-        `;
+    const avatarChoice = prompt('Аватар (ссылка или загрузить? "file" для выбора файла)', p.avatarUrl);
+    if (avatarChoice === 'file') {
+      const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => { p.avatarUrl = ev.target.result; persist(); renderProfile(); };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    } else if (avatarChoice !== null) {
+      p.avatarUrl = avatarChoice;
     }
-    window.setTheme = (themeId) => {
-        GameState.settings.theme = themeId; persist(); applyTheme(); renderSettings();
+    persist();
+    renderProfile();
+  };
+  function renderSettings() {
+    const themes = ['mint','pearl','steel','nettle','first_snow','instinct'];
+    document.getElementById('screenContainer').innerHTML = `
+      <h2>Тема</h2>
+      ${themes.map(t=>`<button class="btn ${GameState.settings.theme===t?'active':''}" onclick="setTheme('${t}')">${t}</button>`).join('')}
+      <hr style="margin:1.5rem 0">
+      <button class="btn" onclick="exportData()">📤 Экспорт</button>
+      <button class="btn" onclick="importDataPrompt()">📥 Импорт</button>
+      <button class="btn" onclick="clearData()" style="background:#EF5350;">🗑️ Сброс</button>
+      <p style="margin-top:1rem;">LVL UP Ultimate · Санька и Дэн AI</p>
+    `;
+  }
+  window.setTheme = t => { GameState.settings.theme = t; persist(); applyTheme(); renderSettings(); };
+  window.exportData = () => {
+    const data = { player: GameState.player, tasks: GameState.tasks, notes: GameState.notes, goals: GameState.goals, gallery: GameState.gallery, settings: GameState.settings };
+    const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lvlup.json'; a.click();
+  };
+  window.importDataPrompt = () => {
+    const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+    input.onchange = e => {
+      const file = e.target.files[0]; const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          GameState.player = data.player || GameState.player;
+          GameState.tasks = data.tasks || [];
+          GameState.notes = data.notes || [];
+          GameState.goals = data.goals || [];
+          GameState.gallery = data.gallery || [];
+          GameState.settings = data.settings || {theme:'mint'};
+          persist(); applyTheme();
+          alert('Импортировано!'); renderScreen('profile');
+        } catch(ex) { alert('Ошибка файла'); }
+      };
+      reader.readAsText(file);
     };
-    window.exportData = () => {
-        const data = { player: GameState.player, tasks: GameState.tasks, notes: GameState.notes, goals: GameState.goals, gallery: GameState.gallery, settings: GameState.settings };
-        const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lvlup_backup.json'; a.click();
-    };
-    window.importDataPrompt = () => {
-        const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-        input.onchange = e => {
-            const file = e.target.files[0]; const reader = new FileReader();
-            reader.onload = ev => {
-                try {
-                    const data = JSON.parse(ev.target.result);
-                    GameState.player = data.player || GameState.player;
-                    GameState.tasks = data.tasks || [];
-                    GameState.notes = data.notes || [];
-                    GameState.goals = data.goals || [];
-                    GameState.gallery = data.gallery || [];
-                    GameState.settings = data.settings || {theme:'mint'};
-                    persist(); applyTheme();
-                    alert('Данные импортированы!'); renderScreen('profile');
-                } catch(ex) { alert('Ошибка файла'); }
-            };
-            reader.readAsText(file);
-        };
-        input.click();
-    };
-    window.clearData = () => {
-        if (confirm('Удалить все данные безвозвратно?')) { localStorage.clear(); location.reload(); }
-    };
-    function renderInfo() {
-        document.getElementById('screenContainer').innerHTML = `
-            <h2>ℹ️ Информация</h2>
-            <div class="card">
-                <p><span class="glossary-term">Гильдия</span> — категория задач со своим цветом.</p>
-                <p><span class="glossary-term">Квест</span> — задача с датой, временем и продолжительностью. Опыт = минуты × 0.01.</p>
-                <p><span class="glossary-term">XP</span> — очки опыта. Накопление повышает уровень по формуле N×(N+1)/2.</p>
-                <p><span class="glossary-term">Стрик</span> — дни подряд с выполненными задачами. При пропуске сбрасывается.</p>
-                <p><span class="glossary-term">Цель</span> — долгосрочная задача. При достижении даёт бонус XP = 10 + 2 за каждую выполненную задачу, привязанную к цели.</p>
-                <p><span class="glossary-term">Календарь</span> — четыре уровня: год, месяц, неделя, день. Цвета маркеров = гильдии.</p>
-                <p><span class="glossary-term">Журналы</span> — просмотр задач по гильдиям.</p>
-                <p><span class="glossary-term">Галерея</span> — фото достижений, можно загружать с устройства или по ссылке.</p>
-            </div>
-        `;
-    }
+    input.click();
+  };
+  window.clearData = () => { if(confirm('Удалить всё?')) { localStorage.clear(); location.reload(); } };
+  function renderInfo() {
+    document.getElementById('screenContainer').innerHTML = `
+      <h2>ℹ️ RPG-система</h2>
+      <div class="card">
+        <p><span class="glossary-term">XP</span> = минуты × 0.01</p>
+        <p><span class="glossary-term">Уровень</span>: для N нужно N(N+1)/2 опыта</p>
+        <p><span class="glossary-term">Стрик</span> сбрасывается при пропуске дня</p>
+        <p><span class="glossary-term">Цели</span>: бонус XP = 10 + 2 за выполненную задачу цели</p>
+        <p>Календарь: 🟢 выполнено, 🔴 просрочено, 🔵 запланировано</p>
+      </div>
+    `;
+  }
 
-    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-    const savedPlayer = Storage.get('player');
-    if (savedPlayer) Object.assign(GameState.player, savedPlayer);
-    // Гарантируем наличие weightHistory
-    if (!GameState.player.weightHistory) GameState.player.weightHistory = [];
-    renderScreen('today');
+  // Инициализация
+  const savedPlayer = Storage.get('player');
+  if (savedPlayer) Object.assign(GameState.player, savedPlayer);
+  if (!GameState.player.weightHistory) GameState.player.weightHistory = [];
+  renderScreen('today');
 </script>
 </body>
 </html>
