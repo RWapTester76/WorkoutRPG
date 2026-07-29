@@ -181,6 +181,104 @@
       font-size: 0.75rem;
       padding: 0.4rem 0.8rem;
     }
+/* Экран квестов */
+.quest-form-toggle {
+  background: #e94560;
+  border: none;
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 1rem;
+  transition: 0.3s;
+}
+.quest-form-toggle:hover {
+  background: #c23152;
+  box-shadow: 0 0 12px rgba(233,69,96,0.5);
+}
+.quest-form {
+  background: #0f3460;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: none;
+}
+.quest-form.active {
+  display: block;
+}
+.quest-form input,
+.quest-form select,
+.quest-form textarea {
+  width: 100%;
+  margin-bottom: 0.8rem;
+  padding: 0.7rem;
+  border-radius: 10px;
+  border: 1px solid #2a2a4a;
+  background: #16213e;
+  color: #e0e0e0;
+  font-size: 1rem;
+}
+.quest-form label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+  color: #e94560;
+}
+.quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.quest-item {
+  background: #0f3460;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-left: 6px solid #e94560;
+  transition: 0.3s;
+}
+.quest-item.completed {
+  opacity: 0.5;
+  border-left-color: #4ecca3;
+  text-decoration: line-through;
+}
+.quest-info {
+  flex: 1;
+}
+.quest-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.quest-meta {
+  font-size: 0.8rem;
+  color: #a0a0b0;
+}
+.quest-actions button {
+  background: #e94560;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.quest-actions button:disabled {
+  background: #555;
+  cursor: not-allowed;
+}
+.guild-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-right: 0.5rem;
+}
   }
 </style>
 </head>
@@ -215,7 +313,20 @@
   </div>
 
 <script>
-  // === Хранилище (localStorage) ===
+  // === Гильдии ===
+  const GUILDS = [
+    { id: 'body', name: 'Тело', icon: '💪', color: '#e94560' },
+    { id: 'creativity', name: 'Творчество', icon: '🎨', color: '#f5a623' },
+    { id: 'business', name: 'Бизнес', icon: '💼', color: '#4a90e2' },
+    { id: 'habits', name: 'Привычки', icon: '🔄', color: '#7ed321' },
+    { id: 'oneoff', name: 'Одноразки', icon: '🗑️', color: '#b8b8b8' },
+    { id: 'travel', name: 'Путешествия', icon: '✈️', color: '#50e3c2' },
+    { id: 'debts', name: 'Долги', icon: '💰', color: '#f8e71c' },
+    { id: 'other', name: 'Другое', icon: '📦', color: '#9b9b9b' },
+    { id: 'nutrition', name: 'Питание', icon: '🍎', color: '#f06292' }
+  ];
+
+  // === Хранилище ===
   const Storage = {
     get(key, defaultValue = null) {
       const raw = localStorage.getItem(key);
@@ -226,27 +337,34 @@
     }
   };
 
-  // === Игровые данные ===
+  // === Игровое состояние ===
   const GameState = {
     player: {
       name: 'Александр',
       lvl: 1,
-      xp: 0.5,  // текущий XP
-      // Суммарный XP для текущего уровня: lvl*(lvl+1)/2
+      xp: 0.5,
+      streak: 0,
+      lastCompletedDate: null, // 'YYYY-MM-DD'
       get xpToNext() {
-        const currentTotal = this.lvl * (this.lvl + 1) / 2;
-        return currentTotal;
+        return this.lvl * (this.lvl + 1) / 2;
       },
       get progress() {
-        const current = this.xp; // уже накоплено на этом уровне
-        const needed = this.xpToNext - (this.lvl - 1) * this.lvl / 2; // сколько нужно для этого уровня
-        return Math.min((current / needed) * 100, 100).toFixed(0);
+        const currentLvlTotal = (this.lvl - 1) * this.lvl / 2;
+        const needed = this.xpToNext - currentLvlTotal;
+        const currentXp = this.xp - currentLvlTotal;
+        return Math.min((currentXp / needed) * 100, 100).toFixed(0);
       }
     },
-    tasks: Storage.get('tasks', []),
-    notes: Storage.get('notes', []),
-    gallery: Storage.get('gallery', [])
+    tasks: Storage.get('tasks', [])
   };
+
+  // Сохраняем игрока и задачи
+  function savePlayer() {
+    Storage.set('player', GameState.player);
+  }
+  function saveTasks() {
+    Storage.set('tasks', GameState.tasks);
+  }
 
   // === Навигация ===
   const menuToggle = document.getElementById('menuToggle');
@@ -257,16 +375,14 @@
     mainNav.classList.toggle('hidden');
   });
 
-  // Обработчики для пунктов меню
   document.querySelectorAll('.main-nav li').forEach(item => {
     item.addEventListener('click', (e) => {
       const screen = e.target.dataset.screen;
       renderScreen(screen);
-      mainNav.classList.add('hidden'); // сворачиваем меню на мобильных
+      mainNav.classList.add('hidden');
     });
   });
 
-  // === Рендер экранов ===
   function renderScreen(screen) {
     switch (screen) {
       case 'profile': renderProfile(); break;
@@ -283,7 +399,7 @@
     }
   }
 
-  // Профиль
+  // === Профиль ===
   function renderProfile() {
     const p = GameState.player;
     const html = `
@@ -296,54 +412,203 @@
         </div>
         <p style="font-size:0.8rem;">До следующего уровня: ${p.progress}%</p>
         <div class="stats-grid">
-          <div class="stat-item"><span class="stat-value">${GameState.tasks.length}</span><br>Квестов</div>
-          <div class="stat-item"><span class="stat-value">0</span><br>Комбо (дней)</div>
+          <div class="stat-item"><span class="stat-value">${GameState.tasks.filter(t => t.completed).length}</span><br>Выполнено</div>
+          <div class="stat-item"><span class="stat-value">${p.streak}</span><br>🔥 Комбо</div>
         </div>
-        <button class="btn" onclick="completeDemoQuest()">Выполнить тестовый квест</button>
       </div>
     `;
     screenContainer.innerHTML = html;
   }
 
-  // Заглушки для остальных экранов
-  function renderCalendar() { screenContainer.innerHTML = '<h2>📅 Календарь</h2><p>Год/Месяц/Неделя/День (в разработке)</p>'; }
-  function renderTasks() { screenContainer.innerHTML = '<h2>📋 Квесты</h2><p>Список задач по гильдиям и дате.</p>'; }
-  function renderGuilds() { screenContainer.innerHTML = '<h2>🛡️ Гильдии</h2><p>Тело, Творчество, Бизнес и др.</p>'; }
-  function renderGoals() { screenContainer.innerHTML = '<h2>🎯 Эпик-квесты</h2><p>Цели с наградой +1 XP</p>'; }
-  function renderNotes() { screenContainer.innerHTML = '<h2>📝 Заметки</h2><p>Заметки, можно прикрепить к квесту.</p>'; }
-  function renderGallery() { screenContainer.innerHTML = '<h2>🖼️ Галерея</h2><p>Фото успехов после завершения целей.</p>'; }
-  function renderStats() { screenContainer.innerHTML = '<h2>📊 Статистика</h2><p>Графики и дашборды (в разработке).</p>'; }
-  function renderSettings() { screenContainer.innerHTML = '<h2>⚙️ Настройки</h2><p>Темы, экспорт/импорт, о приложении.</p>'; }
-  function renderInfo() { screenContainer.innerHTML = '<h2>ℹ️ Инфо</h2><p>Описание РПГ-системы, стриков, меню.</p>'; }
+  // === Квесты ===
+  function renderTasks() {
+    const activeTasks = GameState.tasks.filter(t => !t.completed).sort((a, b) => {
+      if (a.date < b.date) return -1;
+      if (a.date > b.date) return 1;
+      return a.time.localeCompare(b.time);
+    });
 
-  // Демо-функция: добавление XP и проверка левелапа
-  window.completeDemoQuest = function() {
-    const p = GameState.player;
-    p.xp += 0.3; // предположим, задача на 30 минут
-    Storage.set('player', p);
+    const guildOptions = GUILDS.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('');
+
+    let tasksHtml = activeTasks.length === 0 
+      ? '<p style="text-align:center; margin-top:2rem;">Нет активных квестов. Создай первый!</p>'
+      : activeTasks.map(task => {
+          const guild = GUILDS.find(g => g.id === task.category) || GUILDS[7];
+          const today = new Date().toISOString().slice(0, 10);
+          const isFuture = task.date > today;
+          const disableComplete = isFuture || task.completed;
+          return `
+            <div class="quest-item ${task.completed ? 'completed' : ''}" style="border-left-color: ${guild.color};">
+              <div class="quest-info">
+                <div class="quest-title">
+                  <span class="guild-badge" style="background:${guild.color}; color:white;">${guild.icon} ${guild.name}</span>
+                  ${task.title}
+                </div>
+                <div class="quest-meta">
+                  📅 ${task.date} 🕒 ${task.time} · ⏱️ ${task.minutes} мин
+                  ${task.note ? `<br>📝 ${task.note}` : ''}
+                </div>
+              </div>
+              <div class="quest-actions">
+                <button ${disableComplete ? 'disabled' : ''} 
+                        onclick="completeQuest('${task.id}')">
+                  ✔ Выполнить
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+    const html = `
+      <button class="quest-form-toggle" onclick="toggleQuestForm()">➕ Новый квест</button>
+      <div id="questForm" class="quest-form">
+        <form onsubmit="addQuest(event)">
+          <label>Гильдия</label>
+          <select id="questCategory" required>${guildOptions}</select>
+          <label>Название</label>
+          <input type="text" id="questTitle" required placeholder="Что нужно сделать?">
+          <label>Продолжительность (мин)</label>
+          <input type="number" id="questMinutes" required min="1" value="30" placeholder="Минуты">
+          <label>Дата</label>
+          <input type="date" id="questDate" required>
+          <label>Время</label>
+          <input type="time" id="questTime" required>
+          <label>Заметка (опционально)</label>
+          <textarea id="questNote" rows="2" placeholder="Детали..."></textarea>
+          <button type="submit" class="btn" style="width:100%;">Создать квест</button>
+        </form>
+      </div>
+      <div class="quest-list">${tasksHtml}</div>
+    `;
+    screenContainer.innerHTML = html;
+
+    // Установим дату по умолчанию = сегодня
+    const dateInput = document.getElementById('questDate');
+    if (dateInput) {
+      dateInput.value = new Date().toISOString().slice(0, 10);
+    }
+    const timeInput = document.getElementById('questTime');
+    if (timeInput) {
+      timeInput.value = new Date().toTimeString().slice(0, 5);
+    }
+  }
+
+  function toggleQuestForm() {
+    const form = document.getElementById('questForm');
+    if (form) form.classList.toggle('active');
+  }
+
+  function addQuest(event) {
+    event.preventDefault();
+    const category = document.getElementById('questCategory').value;
+    const title = document.getElementById('questTitle').value.trim();
+    const minutes = parseInt(document.getElementById('questMinutes').value, 10);
+    const date = document.getElementById('questDate').value;
+    const time = document.getElementById('questTime').value;
+    const note = document.getElementById('questNote').value.trim();
+
+    if (!title || !date || !time || isNaN(minutes) || minutes <= 0) return;
+
+    const newQuest = {
+      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+      category,
+      title,
+      minutes,
+      date,
+      time,
+      note,
+      completed: false,
+      dateCompleted: null,
+      createdAt: new Date().toISOString()
+    };
+
+    GameState.tasks.push(newQuest);
+    saveTasks();
+    renderTasks(); // обновим список
+  }
+
+  function completeQuest(id) {
+    const task = GameState.tasks.find(t => t.id === id);
+    if (!task || task.completed) return;
+
+    const today = new Date().toISOString().slice(0, 10);
+    if (task.date > today) {
+      alert('Этот квест запланирован на будущее, выполнить нельзя!');
+      return;
+    }
+
+    task.completed = true;
+    task.dateCompleted = today;
+
+    // Начисляем XP = минуты * 0.01
+    const gainedXp = task.minutes * 0.01;
+    GameState.player.xp += gainedXp;
     checkLevelUp();
-    renderScreen('profile');
-  };
+
+    // Обновляем стрик
+    updateStreak(today);
+
+    saveTasks();
+    savePlayer();
+    renderTasks();
+  }
+
+  function updateStreak(today) {
+    const p = GameState.player;
+    const lastDate = p.lastCompletedDate;
+
+    if (lastDate === today) {
+      // Уже была выполнена задача сегодня, стрик не меняем
+      return;
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+    if (lastDate === yesterdayStr) {
+      p.streak += 1;
+    } else if (lastDate !== today) {
+      p.streak = 1; // сброс или начало нового
+    }
+
+    p.lastCompletedDate = today;
+    savePlayer();
+  }
 
   function checkLevelUp() {
     const p = GameState.player;
-    let neededForCurrent = p.lvl * (p.lvl + 1) / 2; // сумма XP до текущего уровня
-    let neededForNext = (p.lvl + 1) * (p.lvl + 2) / 2; // сумма XP до следующего уровня
-    // пока суммарный XP >= neededForNext -> левел up
+    let neededForNext = (p.lvl + 1) * (p.lvl + 2) / 2;
     while (p.xp >= neededForNext) {
       p.lvl++;
       neededForNext = (p.lvl + 1) * (p.lvl + 2) / 2;
     }
-    Storage.set('player', p);
+    savePlayer();
   }
 
+  function getGuildColor(categoryId) {
+    const guild = GUILDS.find(g => g.id === categoryId);
+    return guild ? guild.color : '#9b9b9b';
+  }
+
+  // === Остальные экраны-заглушки ===
+  function renderCalendar() { screenContainer.innerHTML = '<h2>📅 Календарь</h2><p>В разработке.</p>'; }
+  function renderGuilds() { 
+    const guildList = GUILDS.map(g => `<p style="color:${g.color}">${g.icon} ${g.name}</p>`).join('');
+    screenContainer.innerHTML = `<h2>🛡️ Гильдии</h2>${guildList}<p>Кастомизация позже.</p>`; 
+  }
+  function renderGoals() { screenContainer.innerHTML = '<h2>🎯 Эпик-квесты</h2><p>Цели с наградой +1 XP.</p>'; }
+  function renderNotes() { screenContainer.innerHTML = '<h2>📝 Заметки</h2><p>Заметки (в разработке).</p>'; }
+  function renderGallery() { screenContainer.innerHTML = '<h2>🖼️ Галерея</h2><p>Фото успехов.</p>'; }
+  function renderStats() { screenContainer.innerHTML = '<h2>📊 Статистика</h2><p>Графики позже.</p>'; }
+  function renderSettings() { screenContainer.innerHTML = '<h2>⚙️ Настройки</h2><p>Темы, экспорт/импорт.</p>'; }
+  function renderInfo() { screenContainer.innerHTML = '<h2>ℹ️ Инфо</h2><p>Описание РПГ-системы.</p>'; }
+
   // === Инициализация ===
-  // Загружаем сохранённого игрока, если есть
   const savedPlayer = Storage.get('player');
   if (savedPlayer) {
     GameState.player = { ...GameState.player, ...savedPlayer };
   }
   renderScreen('profile');
-</script>
-</body>
+</script></body>
 </html>
