@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Планировщик — выбор темы</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <title>Планировщик задач</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        /* —————— БАЗОВЫЙ СБРОС —————— */
+        /* ========================================
+           БАЗОВЫЙ СБРОС И ПЕРЕМЕННЫЕ
+           ======================================== */
         * {
             margin: 0;
             padding: 0;
@@ -26,7 +28,9 @@
             padding: 12px;
         }
 
-        /* —————— КОНТЕЙНЕР —————— */
+        /* ========================================
+           КОНТЕЙНЕР
+           ======================================== */
         .app-container {
             width: 100%;
             max-width: 1200px;
@@ -37,7 +41,9 @@
             background: #ffffff;
         }
 
-        /* —————— ХЕДЕР —————— */
+        /* ========================================
+           ХЕДЕР
+           ======================================== */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -121,7 +127,9 @@
             }
         }
 
-        /* —————— ОСНОВНАЯ СЕТКА —————— */
+        /* ========================================
+           ОСНОВНАЯ СЕТКА
+           ======================================== */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -143,7 +151,9 @@
             }
         }
 
-        /* —————— КАРТОЧКИ —————— */
+        /* ========================================
+           КАРТОЧКИ
+           ======================================== */
         .card {
             background: rgba(255,255,255,0.5);
             backdrop-filter: blur(4px);
@@ -174,7 +184,9 @@
             gap: 8px;
         }
 
-        /* ——— ЗАДАЧИ ——— */
+        /* ========================================
+           ЗАДАЧИ
+           ======================================== */
         .task-list {
             display: flex;
             flex-direction: column;
@@ -193,6 +205,14 @@
             transition: background 0.25s ease;
             border: 1px solid rgba(0,0,0,0.02);
             touch-action: manipulation;
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+        }
+
+        .task-item.completed .task-name {
+            text-decoration: line-through;
         }
 
         @media (min-width: 480px) {
@@ -266,7 +286,51 @@
             white-space: nowrap;
         }
 
-        /* ——— ПРОГРЕСС ——— */
+        .habit-badge {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .task-delete {
+            background: none;
+            border: none;
+            color: inherit;
+            opacity: 0.2;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .task-delete:hover {
+            opacity: 0.8;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .task-delete:active {
+            transform: scale(0.9);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            opacity: 0.4;
+        }
+
+        .empty-state i {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* ========================================
+           ПРОГРЕСС
+           ======================================== */
         .progress-block {
             margin-top: 4px;
         }
@@ -294,7 +358,9 @@
             transition: width 0.6s ease;
         }
 
-        /* ——— СТАТИСТИКА ——— */
+        /* ========================================
+           СТАТИСТИКА
+           ======================================== */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -335,7 +401,9 @@
             margin-top: 2px;
         }
 
-        /* ——— КАЛЕНДАРЬ ——— */
+        /* ========================================
+           КАЛЕНДАРЬ
+           ======================================== */
         .mini-calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -380,7 +448,15 @@
             opacity: 0.4;
         }
 
-        /* ——— ЦЕЛИ ——— */
+        .mini-calendar .day-header {
+            font-size: clamp(10px, 1.4vw, 12px);
+            font-weight: 600;
+            opacity: 0.4;
+        }
+
+        /* ========================================
+           ЦЕЛИ
+           ======================================== */
         .goal-item {
             display: flex;
             justify-content: space-between;
@@ -421,7 +497,9 @@
             white-space: nowrap;
         }
 
-        /* ——— НИЖНЯЯ ПАНЕЛЬ ——— */
+        /* ========================================
+           НИЖНЯЯ ПАНЕЛЬ
+           ======================================== */
         .bottom-bar {
             display: flex;
             flex-direction: column;
@@ -480,7 +558,9 @@
             gap: 6px;
         }
 
-        /* ——— ДОПОЛНИТЕЛЬНЫЕ КНОПКИ ——— */
+        /* ========================================
+           КНОПКИ ДЕЙСТВИЙ
+           ======================================== */
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -526,7 +606,244 @@
             background: #f39c12;
         }
 
-        /* ——— TOAST-УВЕДОМЛЕНИЕ ——— */
+        /* ========================================
+           МОДАЛКА
+           ======================================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface, #fff);
+            border-radius: 24px;
+            max-width: 560px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: all 0.2s ease;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        /* ========================================
+           ФОРМА
+           ======================================== */
+        .task-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .form-group label.checkbox-label {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-input {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 2px solid rgba(0,0,0,0.06);
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.5);
+            color: inherit;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(74, 111, 165, 0.1);
+        }
+
+        .form-input.error {
+            border-color: #e74c3c;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .error-text {
+            color: #e74c3c;
+            font-size: 12px;
+        }
+
+        .habit-days {
+            margin-top: 8px;
+        }
+
+        .habit-presets {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .preset-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 2px solid rgba(0,0,0,0.06);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .preset-btn:active {
+            transform: scale(0.92);
+        }
+
+        .preset-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 2px solid rgba(0,0,0,0.06);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .toggle-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .toggle-btn:active {
+            transform: scale(0.92);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.94);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: rgba(0,0,0,0.04);
+            color: inherit;
+        }
+
+        small {
+            display: block;
+            margin-top: 4px;
+            opacity: 0.6;
+            font-size: 12px;
+        }
+
+        /* ========================================
+           TOAST
+           ======================================== */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -544,6 +861,7 @@
             z-index: 999;
             max-width: 90%;
             text-align: center;
+            pointer-events: none;
         }
 
         .toast.show {
@@ -551,7 +869,9 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* —————— ТЕМЫ —————— */
+        /* ========================================
+           ТЕМЫ
+           ======================================== */
         [data-theme="nordic"] {
             --bg: #eef2f5;
             --surface: #ffffff;
@@ -710,7 +1030,9 @@
             background: rgba(255,252,248,0.5);
         }
 
-        /* ——— Общие стили для всех тем ——— */
+        /* ========================================
+           ОБЩИЕ СТИЛИ ДЛЯ ВСЕХ ТЕМ
+           ======================================== */
         .theme-btn {
             color: var(--text, #1e1e2a);
             background: var(--surface, #f0f0f5);
@@ -724,7 +1046,9 @@
             background: var(--bg, #f3f4f6);
         }
 
-        /* ——— iPhone Safe Area ——— */
+        /* ========================================
+           IPHONE SAFE AREA
+           ======================================== */
         @supports (padding: max(0px)) {
             .app-container {
                 padding-left: max(20px, env(safe-area-inset-left));
@@ -732,7 +1056,9 @@
             }
         }
 
-        /* ——— Отладка для очень маленьких экранов ——— */
+        /* ========================================
+           АДАПТИВ ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ
+           ======================================== */
         @media (max-width: 380px) {
             .app-container {
                 padding: 12px 10px;
@@ -764,51 +1090,71 @@
             .stat-number {
                 font-size: 18px;
             }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 20px;
+                border-radius: 20px;
+                max-height: 95vh;
+            }
+        }
+
+        /* ========================================
+           АНИМАЦИИ
+           ======================================== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
 <body>
 
 <div class="app-container" id="app" data-theme="nordic">
-    <!-- ХЕДЕР -->
+    <!-- ===== ХЕДЕР ===== -->
     <header class="app-header">
-        <h1><i class="far fa-calendar-alt"></i>Планировщик</h1>
+        <h1><i class="far fa-calendar-alt"></i> Планировщик</h1>
         <div class="theme-picker" id="themePicker"></div>
     </header>
 
-    <!-- ОСНОВНАЯ СЕТКА -->
+    <!-- ===== ОСНОВНАЯ СЕТКА ===== -->
     <div class="dashboard-grid">
         <!-- ЛЕВАЯ КОЛОНКА -->
         <div>
             <div class="card" style="margin-bottom: 18px;">
-                <div class="card-title"><i class="far fa-check-circle"></i>Сегодня</div>
-                <div class="task-list" id="taskList">
-                    <!-- Задачи рендерятся из JS -->
+                <div class="card-title">
+                    <i class="far fa-check-circle"></i> Сегодня
+                    <span class="task-count" id="taskCount" style="margin-left:auto;background:rgba(0,0,0,0.05);padding:2px 10px;border-radius:20px;font-size:12px;">0</span>
                 </div>
+                <div class="task-list" id="taskList"></div>
             </div>
 
             <div class="card">
-                <div class="card-title"><i class="fas fa-chart-line"></i>Прогресс недели</div>
+                <div class="card-title"><i class="fas fa-chart-line"></i> Прогресс недели</div>
                 <div class="progress-block">
                     <div class="progress-label">
                         <span>Выполнено задач</span>
-                        <span id="progressText">9 / 14</span>
+                        <span id="progressText">0 / 0</span>
                     </div>
                     <div class="progress-track">
-                        <div class="progress-fill" id="progressFill" style="width: 64%;"></div>
+                        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
                     </div>
                 </div>
                 <div class="stats-row">
                     <div class="stat-item">
-                        <div class="stat-number" id="statPlanned">12</div>
+                        <div class="stat-number" id="statPlanned">0</div>
                         <div class="stat-label">Запланировано</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number" id="statDone">9</div>
+                        <div class="stat-number" id="statDone">0</div>
                         <div class="stat-label">Выполнено</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number" id="statRemaining">3</div>
+                        <div class="stat-number" id="statRemaining">0</div>
                         <div class="stat-label">Осталось</div>
                     </div>
                 </div>
@@ -819,8 +1165,11 @@
         <div>
             <div class="card" style="margin-bottom: 18px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-                    <span class="card-title" style="margin-bottom:0;"><i class="far fa-calendar"></i><span id="monthLabel">Июль 2026</span></span>
-                    <span class="text-sm" style="opacity:0.5; font-size:clamp(11px,1.6vw,14px);">неделя 30</span>
+                    <span class="card-title" style="margin-bottom:0;">
+                        <i class="far fa-calendar"></i>
+                        <span id="monthLabel">Июль 2026</span>
+                    </span>
+                    <span style="opacity:0.5; font-size:clamp(11px,1.6vw,14px);">неделя 30</span>
                 </div>
                 <div class="mini-calendar" id="miniCalendar"></div>
                 <div style="margin-top: 10px; display: flex; gap: 14px; font-size: clamp(11px,1.6vw,13px); opacity: 0.5; flex-wrap:wrap;">
@@ -830,30 +1179,32 @@
             </div>
 
             <div class="card">
-                <div class="card-title"><i class="fas fa-bullseye"></i>Цели</div>
-                <div id="goalList">
-                    <!-- Цели рендерятся из JS -->
-                </div>
+                <div class="card-title"><i class="fas fa-bullseye"></i> Цели</div>
+                <div id="goalList"></div>
             </div>
         </div>
     </div>
 
-    <!-- НИЖНЯЯ ПАНЕЛЬ -->
+    <!-- ===== НИЖНЯЯ ПАНЕЛЬ ===== -->
     <div class="bottom-bar">
         <div class="tag-group" id="tagGroup">
             <button class="tag active-tag" data-tag="all">Все</button>
-            <button class="tag" data-tag="work">Работа</button>
-            <button class="tag" data-tag="personal">Личное</button>
-            <button class="tag" data-tag="health">Здоровье</button>
-            <button class="tag" data-tag="learning">Обучение</button>
+            <button class="tag" data-tag="Тело">Тело</button>
+            <button class="tag" data-tag="Творчество">Творчество</button>
+            <button class="tag" data-tag="Бизнес">Бизнес</button>
+            <button class="tag" data-tag="Привычки">Привычки</button>
+            <button class="tag" data-tag="Путешествия">Путешествия</button>
+            <button class="tag" data-tag="Долги">Долги</button>
+            <button class="tag" data-tag="Питание">Питание</button>
+            <button class="tag" data-tag="Другое">Другое</button>
         </div>
         <div class="bottom-stats">
-            <span><i class="far fa-star"></i> <span id="xpDisplay">18</span> XP</span>
-            <span><i class="fas fa-fire"></i> <span id="streakDisplay">5</span> дн.</span>
+            <span><i class="far fa-star"></i> <span id="xpDisplay">0</span> XP</span>
+            <span><i class="fas fa-fire"></i> <span id="streakDisplay">0</span> дн.</span>
         </div>
     </div>
 
-    <!-- КНОПКИ ДЕЙСТВИЙ -->
+    <!-- ===== КНОПКИ ДЕЙСТВИЙ ===== -->
     <div class="action-buttons">
         <button class="action-btn primary" id="btnAddTask"><i class="fas fa-plus"></i> Новая задача</button>
         <button class="action-btn success" id="btnCompleteAll"><i class="fas fa-check-double"></i> Все готово</button>
@@ -861,60 +1212,280 @@
     </div>
 </div>
 
-<!-- TOAST -->
+<!-- ===== МОДАЛКА ===== -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Новая задача</h2>
+            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="taskForm" class="task-form">
+                <div class="form-group">
+                    <label>Название задачи *</label>
+                    <input type="text" id="taskName" class="form-input" placeholder="Что нужно сделать?" required />
+                    <span class="error-text" id="taskNameError" style="display:none;">Название обязательно</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Категория</label>
+                    <select id="taskCategory" class="form-input">
+                        <option value="Тело">Тело</option>
+                        <option value="Творчество">Творчество</option>
+                        <option value="Бизнес">Бизнес</option>
+                        <option value="Привычки">Привычки</option>
+                        <option value="Одноразки">Одноразки</option>
+                        <option value="Путешествия">Путешествия</option>
+                        <option value="Долги">Долги</option>
+                        <option value="Питание">Питание</option>
+                        <option value="Другое" selected>Другое</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Дата *</label>
+                        <input type="date" id="taskDate" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Время</label>
+                        <input type="time" id="taskTime" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Длительность (минуты)</label>
+                        <input type="number" id="taskDuration" class="form-input" min="1" max="1440" value="30" />
+                    </div>
+                    <div class="form-group">
+                        <label>Напоминание</label>
+                        <button type="button" id="taskReminder" class="toggle-btn">Выкл</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="taskIsHabit" />
+                        Это привычка (повторяется каждый день)
+                    </label>
+                    <div id="habitDaysContainer" style="display:none;">
+                        <div class="habit-days">
+                            <label>Длительность привычки (дней)</label>
+                            <div class="habit-presets">
+                                <button type="button" class="preset-btn" data-days="7">7</button>
+                                <button type="button" class="preset-btn active" data-days="21">21</button>
+                                <button type="button" class="preset-btn" data-days="30">30</button>
+                                <button type="button" class="preset-btn" data-days="60">60</button>
+                            </div>
+                            <small>💡 Учёные говорят, привычка формируется за 21 день</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Заметка</label>
+                    <textarea id="taskNotes" class="form-input" rows="3" placeholder="Дополнительная информация..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="modalCancel">Отмена</button>
+                    <button type="submit" class="btn btn-primary" id="modalSubmit">Создать задачу</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
+<!-- ============================================================
+     JAVASCRIPT — ВЕСЬ КОД В ОДНОМ МЕСТЕ
+     ============================================================ -->
 <script>
     (function() {
-        // ———— ДАННЫЕ ————
-        const tasks = [
-            { id: 1, name: 'Создать макет дашборда', tag: 'Работа', time: '10:30 – 12:00', done: true },
-            { id: 2, name: 'Написать документацию', tag: 'Разработка', time: '14:00 – 15:30', done: false },
-            { id: 3, name: 'Обзор кода команды', tag: 'Ревью', time: '16:00 – 17:00', done: false },
-            { id: 4, name: 'Планерка с дизайнерами', tag: 'Работа', time: '09:00 – 10:00', done: false }
-        ];
+        'use strict';
 
-        const goals = [
-            { name: 'Запустить MVP', done: 3, total: 5 },
-            { name: 'Изучить Vue 3', done: 2, total: 4 },
-            { name: 'Дизайн-система', done: 1, total: 3 }
-        ];
-
+        // ========================================
+        // 1. ДАННЫЕ
+        // ========================================
+        let taskData = [];
+        let goalsData = [];
+        let currentFilter = 'all';
         let currentTheme = 'nordic';
-        let taskData = [...tasks];
-        let doneCount = taskData.filter(t => t.done).length;
+        let nextId = 1;
 
-        // ———— ТЕМЫ ————
-        const themes = [
-            { id: 'nordic',   label: 'Нордик',   colors: ['#4a6fa5', '#d4e0f0', '#eef2f5'] },
-            { id: 'amber',    label: 'Янтарь',   colors: ['#d48c4b', '#f0dec8', '#fbf3e8'] },
-            { id: 'forest',   label: 'Лесной',   colors: ['#4a7c59', '#cde0d4', '#eaf0e6'] },
-            { id: 'indigo',   label: 'Индиго',   colors: ['#7a9bcb', '#2a3a55', '#131b2b'] },
-            { id: 'rose',     label: 'Розовый',  colors: ['#d4899e', '#f2d9e0', '#f9f0f2'] },
-            { id: 'technoir', label: 'Техно',    colors: ['#00d4b6', '#1a2a2f', '#0b0d14'] },
-            { id: 'paper',    label: 'Бумага',   colors: ['#b8a99a', '#e8e1d8', '#f6f4ef'] }
-        ];
-
-        // ———— DOM ————
+        // ========================================
+        // 2. DOM-ЭЛЕМЕНТЫ
+        // ========================================
         const app = document.getElementById('app');
-        const picker = document.getElementById('themePicker');
+        const themePicker = document.getElementById('themePicker');
         const taskList = document.getElementById('taskList');
         const goalList = document.getElementById('goalList');
         const miniCalendar = document.getElementById('miniCalendar');
         const toast = document.getElementById('toast');
-        let toastTimer = null;
+        const modalOverlay = document.getElementById('modalOverlay');
+        const taskForm = document.getElementById('taskForm');
+        const modalClose = document.getElementById('modalClose');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalSubmit = document.getElementById('modalSubmit');
+        const modalTitle = document.getElementById('modalTitle');
 
-        // ———— TOAST ————
-        function showToast(msg) {
-            toast.textContent = msg;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+        // Поля формы
+        const taskName = document.getElementById('taskName');
+        const taskCategory = document.getElementById('taskCategory');
+        const taskDate = document.getElementById('taskDate');
+        const taskTime = document.getElementById('taskTime');
+        const taskDuration = document.getElementById('taskDuration');
+        const taskReminder = document.getElementById('taskReminder');
+        const taskIsHabit = document.getElementById('taskIsHabit');
+        const habitDaysContainer = document.getElementById('habitDaysContainer');
+        const taskNotes = document.getElementById('taskNotes');
+        const taskNameError = document.getElementById('taskNameError');
+
+        let toastTimer = null;
+        let reminderOn = false;
+        let habitDays = 21;
+        let editingTaskId = null;
+
+        // ========================================
+        // 3. ЦВЕТА КАТЕГОРИЙ
+        // ========================================
+        const categoryColors = {
+            'Тело': '#4a7c59',
+            'Творчество': '#d4899e',
+            'Бизнес': '#4a6fa5',
+            'Привычки': '#f39c12',
+            'Одноразки': '#8e44ad',
+            'Путешествия': '#00d4b6',
+            'Долги': '#e74c3c',
+            'Питание': '#27ae60',
+            'Другое': '#95a5a6'
+        };
+
+        // ========================================
+        // 4. ТЕМЫ
+        // ========================================
+        const themes = [
+            { id: 'nordic', label: 'Нордик', colors: ['#4a6fa5', '#d4e0f0', '#eef2f5'] },
+            { id: 'amber', label: 'Янтарь', colors: ['#d48c4b', '#f0dec8', '#fbf3e8'] },
+            { id: 'forest', label: 'Лесной', colors: ['#4a7c59', '#cde0d4', '#eaf0e6'] },
+            { id: 'indigo', label: 'Индиго', colors: ['#7a9bcb', '#2a3a55', '#131b2b'] },
+            { id: 'rose', label: 'Розовый', colors: ['#d4899e', '#f2d9e0', '#f9f0f2'] },
+            { id: 'technoir', label: 'Техно', colors: ['#00d4b6', '#1a2a2f', '#0b0d14'] },
+            { id: 'paper', label: 'Бумага', colors: ['#b8a99a', '#e8e1d8', '#f6f4ef'] }
+        ];
+
+        // ========================================
+        // 5. ФУНКЦИИ XP И УРОВНЕЙ
+        // ========================================
+        function calculateLevel(totalXP) {
+            if (totalXP < 1) return 1;
+            let level = 1;
+            while (true) {
+                const xpForLevel = (level * (level + 1)) / 2;
+                if (totalXP < xpForLevel) {
+                    return level - 1 || 1;
+                }
+                level++;
+            }
         }
 
-        // ———— РЕНДЕР ТЕМ ————
+        function calculateTaskXP(minutes) {
+            return Math.round(minutes * 0.01);
+        }
+
+        // ========================================
+        // 6. ИНИЦИАЛИЗАЦИЯ ДАННЫХ
+        // ========================================
+        function initData() {
+            // Начальные задачи
+            taskData = [
+                { id: nextId++, name: 'Создать макет дашборда', category: 'Творчество', date: getToday(), time: '10:30', duration: 90, done: false, isHabit: false, notes: '', reminder: false },
+                { id: nextId++, name: 'Написать документацию', category: 'Бизнес', date: getToday(), time: '14:00', duration: 60, done: false, isHabit: false, notes: '', reminder: false },
+                { id: nextId++, name: 'Обзор кода команды', category: 'Бизнес', date: getToday(), time: '16:00', duration: 45, done: false, isHabit: false, notes: '', reminder: false },
+                { id: nextId++, name: 'Утренняя зарядка', category: 'Тело', date: getToday(), time: '07:00', duration: 15, done: false, isHabit: true, habitDays: 21, habitCurrentDay: 1, notes: '', reminder: true },
+            ];
+
+            // Начальные цели
+            goalsData = [
+                { id: 1, name: 'Запустить MVP', done: 3, total: 5 },
+                { id: 2, name: 'Изучить Vue 3', done: 2, total: 4 },
+                { id: 3, name: 'Дизайн-система', done: 1, total: 3 }
+            ];
+
+            saveToLocalStorage();
+        }
+
+        // ========================================
+        // 7. LOCAL STORAGE
+        // ========================================
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('planner_tasks', JSON.stringify(taskData));
+                localStorage.setItem('planner_goals', JSON.stringify(goalsData));
+                localStorage.setItem('planner_nextId', String(nextId));
+                localStorage.setItem('planner_theme', currentTheme);
+            } catch(e) { /* ignore */ }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const tasks = localStorage.getItem('planner_tasks');
+                const goals = localStorage.getItem('planner_goals');
+                const savedId = localStorage.getItem('planner_nextId');
+                const theme = localStorage.getItem('planner_theme');
+
+                if (tasks) taskData = JSON.parse(tasks);
+                if (goals) goalsData = JSON.parse(goals);
+                if (savedId) nextId = parseInt(savedId);
+                if (theme && themes.some(t => t.id === theme)) {
+                    currentTheme = theme;
+                }
+                return true;
+            } catch(e) {
+                return false;
+            }
+        }
+
+        // ========================================
+        // 8. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ========================================
+        function getToday() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('ru', { day: 'numeric', month: 'long' });
+        }
+
+        function getCategoryColor(category) {
+            return categoryColors[category] || '#95a5a6';
+        }
+
+        function generateId() {
+            return nextId++;
+        }
+
+        // ========================================
+        // 9. TOAST
+        // ========================================
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // ========================================
+        // 10. РЕНДЕР ТЕМ
+        // ========================================
         function renderThemeButtons() {
-            picker.innerHTML = '';
+            themePicker.innerHTML = '';
             themes.forEach(t => {
                 const btn = document.createElement('button');
                 btn.className = 'theme-btn' + (t.id === currentTheme ? ' active' : '');
@@ -935,8 +1506,10 @@
                 label.textContent = t.label;
                 btn.appendChild(label);
 
-                btn.addEventListener('click', () => setTheme(t.id));
-                picker.appendChild(btn);
+                btn.addEventListener('click', () => {
+                    setTheme(t.id);
+                });
+                themePicker.appendChild(btn);
             });
         }
 
@@ -946,60 +1519,210 @@
             document.querySelectorAll('.theme-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.theme === themeId);
             });
-            try { localStorage.setItem('planner-theme', themeId); } catch(_) {}
+            saveToLocalStorage();
             showToast('Тема: ' + themes.find(t => t.id === themeId)?.label);
         }
 
-        function loadTheme() {
-            try {
-                const saved = localStorage.getItem('planner-theme');
-                if (saved && themes.some(t => t.id === saved)) {
-                    currentTheme = saved;
-                }
-            } catch(_) {}
-            app.dataset.theme = currentTheme;
-        }
+        // ========================================
+        // 11. РЕНДЕР ЗАДАЧ
+        // ========================================
+        function renderTasks(filter) {
+            const f = filter || currentFilter;
+            const filtered = f === 'all' 
+                ? taskData 
+                : taskData.filter(t => t.category === f);
 
-        // ———— РЕНДЕР ЗАДАЧ ————
-        function renderTasks(filter = 'all') {
-            const filtered = filter === 'all' ? taskData : taskData.filter(t => t.tag.toLowerCase() === filter);
+            // Сортируем по времени
+            filtered.sort((a, b) => {
+                if (a.time && b.time) return a.time.localeCompare(b.time);
+                if (a.time) return -1;
+                if (b.time) return 1;
+                return 0;
+            });
+
             taskList.innerHTML = '';
+
+            if (filtered.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>Нет задач</p>
+                    </div>
+                `;
+                document.getElementById('taskCount').textContent = '0';
+                updateStats();
+                return;
+            }
+
+            document.getElementById('taskCount').textContent = filtered.length;
+
             filtered.forEach(task => {
                 const item = document.createElement('div');
-                item.className = 'task-item';
+                item.className = 'task-item' + (task.done ? ' completed' : '');
 
                 const check = document.createElement('div');
                 check.className = 'task-check' + (task.done ? ' done' : '');
                 check.innerHTML = task.done ? '<i class="fas fa-check"></i>' : '';
                 check.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    task.done = !task.done;
-                    updateStats();
-                    renderTasks(document.querySelector('.tag.active-tag')?.dataset?.tag || 'all');
-                    showToast(task.done ? '✅ Задача выполнена!' : '↩️ Задача возвращена');
+                    toggleTask(task.id);
                 });
 
                 const content = document.createElement('div');
                 content.className = 'task-content';
-                content.innerHTML = `
-                    <span class="task-name">${task.name}</span>
-                    <span class="task-meta">
-                        <span class="task-tag">${task.tag}</span>
-                        ${task.time || ''}
-                    </span>
-                `;
+
+                const name = document.createElement('span');
+                name.className = 'task-name';
+                name.textContent = task.name;
+
+                const meta = document.createElement('div');
+                meta.className = 'task-meta';
+
+                const tag = document.createElement('span');
+                tag.className = 'task-tag';
+                tag.style.background = getCategoryColor(task.category) + '22';
+                tag.style.color = getCategoryColor(task.category);
+                tag.textContent = task.category;
+
+                meta.appendChild(tag);
+
+                if (task.time) {
+                    const timeSpan = document.createElement('span');
+                    timeSpan.textContent = task.time;
+                    meta.appendChild(timeSpan);
+                }
+
+                if (task.duration) {
+                    const durSpan = document.createElement('span');
+                    durSpan.textContent = '⏱ ' + task.duration + ' мин';
+                    meta.appendChild(durSpan);
+                }
+
+                if (task.isHabit) {
+                    const habitSpan = document.createElement('span');
+                    habitSpan.className = 'habit-badge';
+                    habitSpan.textContent = '🔄 ' + (task.habitCurrentDay || '?') + '/' + task.habitDays;
+                    meta.appendChild(habitSpan);
+                }
+
+                if (task.reminder) {
+                    const remSpan = document.createElement('span');
+                    remSpan.textContent = '🔔';
+                    remSpan.style.fontSize = '12px';
+                    meta.appendChild(remSpan);
+                }
+
+                content.appendChild(name);
+                content.appendChild(meta);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'task-delete';
+                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm('Удалить задачу "' + task.name + '"?')) {
+                        deleteTask(task.id);
+                    }
+                });
 
                 item.appendChild(check);
                 item.appendChild(content);
+                item.appendChild(deleteBtn);
                 taskList.appendChild(item);
             });
+
             updateStats();
         }
 
-        // ———— РЕНДЕР ЦЕЛЕЙ ————
+        // ========================================
+        // 12. УПРАВЛЕНИЕ ЗАДАЧАМИ
+        // ========================================
+        function toggleTask(id) {
+            const task = taskData.find(t => t.id === id);
+            if (!task) return;
+
+            const today = getToday();
+            if (task.date > today && !task.done) {
+                showToast('❌ Нельзя выполнить задачу раньше срока');
+                return;
+            }
+
+            task.done = !task.done;
+            if (task.done) {
+                const xp = calculateTaskXP(task.duration || 0);
+                showToast('✅ Выполнено! +' + xp + ' XP');
+            } else {
+                showToast('↩️ Задача возвращена');
+            }
+
+            saveToLocalStorage();
+            renderTasks(currentFilter);
+        }
+
+        function deleteTask(id) {
+            taskData = taskData.filter(t => t.id !== id);
+            saveToLocalStorage();
+            renderTasks(currentFilter);
+            showToast('🗑️ Задача удалена');
+        }
+
+        function addTask(task) {
+            taskData.push(task);
+            saveToLocalStorage();
+            renderTasks(currentFilter);
+        }
+
+        // ========================================
+        // 13. ГЕНЕРАЦИЯ ПРИВЫЧЕК
+        // ========================================
+        function generateHabitTasks(baseTask) {
+            const tasks = [];
+            const today = new Date();
+            const days = baseTask.habitDays || 21;
+
+            for (let i = 0; i < days; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+
+                tasks.push({
+                    id: generateId(),
+                    name: baseTask.name,
+                    category: baseTask.category,
+                    date: dateStr,
+                    time: baseTask.time || '',
+                    duration: baseTask.duration || 0,
+                    done: false,
+                    isHabit: true,
+                    habitDays: days,
+                    habitCurrentDay: i + 1,
+                    notes: baseTask.notes || '',
+                    reminder: baseTask.reminder || false,
+                });
+            }
+
+            taskData.push(...tasks);
+            saveToLocalStorage();
+            renderTasks(currentFilter);
+            showToast('🔄 Создано ' + days + ' привычек!');
+        }
+
+        // ========================================
+        // 14. РЕНДЕР ЦЕЛЕЙ
+        // ========================================
         function renderGoals() {
             goalList.innerHTML = '';
-            goals.forEach(g => {
+            if (goalsData.length === 0) {
+                goalList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-bullseye"></i>
+                        <p>Нет целей</p>
+                    </div>
+                `;
+                return;
+            }
+
+            goalsData.forEach(g => {
                 const pct = Math.round((g.done / g.total) * 100);
                 const item = document.createElement('div');
                 item.className = 'goal-item';
@@ -1014,136 +1737,310 @@
             });
         }
 
-        // ———— РЕНДЕР КАЛЕНДАРЯ ————
+        // ========================================
+        // 15. РЕНДЕР КАЛЕНДАРЯ
+        // ========================================
         function renderCalendar() {
-            const daysOfWeek = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+            const daysOfWeek = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
             miniCalendar.innerHTML = '';
+
             daysOfWeek.forEach(d => {
                 const el = document.createElement('span');
-                el.className = 'day';
+                el.className = 'day day-header';
                 el.textContent = d;
                 miniCalendar.appendChild(el);
             });
 
             const startDay = 3;
             const daysInMonth = 31;
-            const today = 30;
+            const today = new Date().getDate();
+
+            // Собираем даты с задачами
+            const taskDates = new Set();
+            taskData.forEach(t => {
+                if (t.date) taskDates.add(t.date);
+            });
 
             for (let i = 1; i <= daysInMonth; i++) {
                 const dayEl = document.createElement('span');
                 dayEl.className = 'day';
                 dayEl.textContent = i;
 
+                const dateStr = '2026-07-' + String(i).padStart(2, '0');
                 const dayOfWeek = (startDay + i - 1) % 7;
+
                 if (dayOfWeek === 5 || dayOfWeek === 6) {
                     dayEl.classList.add('weekend');
                 }
 
-                if (i % 3 === 0 || i === 15 || i === 22 || i === 30) {
+                if (taskDates.has(dateStr)) {
                     dayEl.classList.add('has-task');
                 }
+
                 if (i === today) {
                     dayEl.classList.add('today');
                 }
+
                 miniCalendar.appendChild(dayEl);
             }
+
+            document.getElementById('monthLabel').textContent = 'Июль 2026';
         }
 
-        // ———— ОБНОВЛЕНИЕ СТАТИСТИКИ ————
+        // ========================================
+        // 16. ОБНОВЛЕНИЕ СТАТИСТИКИ
+        // ========================================
         function updateStats() {
-            doneCount = taskData.filter(t => t.done).length;
             const total = taskData.length;
-            const remaining = total - doneCount;
-            const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+            const done = taskData.filter(t => t.done).length;
+            const remaining = total - done;
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
-            document.getElementById('progressText').textContent = `${doneCount} / ${total}`;
-            document.getElementById('progressFill').style.width = `${pct}%`;
+            document.getElementById('progressText').textContent = done + ' / ' + total;
+            document.getElementById('progressFill').style.width = pct + '%';
             document.getElementById('statPlanned').textContent = total;
-            document.getElementById('statDone').textContent = doneCount;
+            document.getElementById('statDone').textContent = done;
             document.getElementById('statRemaining').textContent = remaining;
 
-            // XP и стрик (демо)
-            document.getElementById('xpDisplay').textContent = 18 + doneCount * 2;
-            document.getElementById('streakDisplay').textContent = 5 + (doneCount > 2 ? 1 : 0);
+            // XP: база + 2 за каждую выполненную
+            const xp = 18 + done * 2;
+            document.getElementById('xpDisplay').textContent = xp;
+
+            // Стрик: база + бонус
+            const streak = 5 + (done > 2 ? 1 : 0);
+            document.getElementById('streakDisplay').textContent = streak;
         }
 
-        // ———— ФИЛЬТРЫ ————
-        function setupFilters() {
-            document.querySelectorAll('.tag-group .tag').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.tag-group .tag').forEach(b => b.classList.remove('active-tag'));
-                    this.classList.add('active-tag');
-                    const filter = this.dataset.tag;
-                    renderTasks(filter);
-                    showToast('Фильтр: ' + (filter === 'all' ? 'Все' : this.textContent));
-                });
-            });
+        // ========================================
+        // 17. МОДАЛКА
+        // ========================================
+        function openModal(title, taskData) {
+            modalTitle.textContent = title;
+            modalOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+
+            if (taskData) {
+                taskName.value = taskData.name || '';
+                taskCategory.value = taskData.category || 'Другое';
+                taskDate.value = taskData.date || getToday();
+                taskTime.value = taskData.time || '';
+                taskDuration.value = taskData.duration || 30;
+                taskNotes.value = taskData.notes || '';
+                reminderOn = taskData.reminder || false;
+                taskReminder.textContent = reminderOn ? 'Вкл' : 'Выкл';
+                taskReminder.classList.toggle('active', reminderOn);
+                taskIsHabit.checked = taskData.isHabit || false;
+                habitDaysContainer.style.display = taskIsHabit.checked ? 'block' : 'none';
+                editingTaskId = taskData.id || null;
+            } else {
+                taskName.value = '';
+                taskCategory.value = 'Другое';
+                taskDate.value = getToday();
+                taskTime.value = '';
+                taskDuration.value = 30;
+                taskNotes.value = '';
+                reminderOn = false;
+                taskReminder.textContent = 'Выкл';
+                taskReminder.classList.remove('active');
+                taskIsHabit.checked = false;
+                habitDaysContainer.style.display = 'none';
+                editingTaskId = null;
+            }
+
+            taskNameError.style.display = 'none';
+            taskName.focus();
+
+            // Обновляем кнопку
+            modalSubmit.textContent = editingTaskId ? 'Сохранить' : 'Создать задачу';
         }
 
-        // ———— КНОПКИ ДЕЙСТВИЙ ————
-        function setupActions() {
-            // Новая задача
-            document.getElementById('btnAddTask').addEventListener('click', () => {
-                const name = prompt('Название задачи:');
-                if (name && name.trim()) {
-                    const tag = prompt('Категория (Работа/Личное/Здоровье/Обучение):') || 'Другое';
-                    taskData.push({
-                        id: Date.now(),
-                        name: name.trim(),
-                        tag: tag,
-                        time: new Date().toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'}),
-                        done: false
-                    });
-                    renderTasks(document.querySelector('.tag.active-tag')?.dataset?.tag || 'all');
-                    showToast('➕ Задача добавлена!');
-                }
-            });
-
-            // Все готово
-            document.getElementById('btnCompleteAll').addEventListener('click', () => {
-                if (taskData.every(t => t.done)) {
-                    showToast('🎉 Все уже выполнено!');
-                    return;
-                }
-                if (confirm('Отметить все задачи как выполненные?')) {
-                    taskData.forEach(t => t.done = true);
-                    renderTasks(document.querySelector('.tag.active-tag')?.dataset?.tag || 'all');
-                    showToast('✅ Все задачи выполнены!');
-                }
-            });
-
-            // Сброс
-            document.getElementById('btnResetStats').addEventListener('click', () => {
-                if (confirm('Сбросить все задачи и статистику?')) {
-                    taskData = tasks.map(t => ({ ...t, done: false }));
-                    renderTasks('all');
-                    // сбросить активный фильтр
-                    document.querySelectorAll('.tag-group .tag').forEach(b => b.classList.remove('active-tag'));
-                    document.querySelector('[data-tag="all"]').classList.add('active-tag');
-                    showToast('🔄 Статистика сброшена');
-                }
-            });
+        function closeModal() {
+            modalOverlay.classList.remove('open');
+            document.body.style.overflow = '';
+            editingTaskId = null;
         }
 
-        // ———— ИНИЦИАЛИЗАЦИЯ ————
+        // ========================================
+        // 18. ОБРАБОТКА ФОРМЫ
+        // ========================================
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const name = taskName.value.trim();
+            if (!name) {
+                taskNameError.style.display = 'block';
+                taskName.focus();
+                return;
+            }
+            taskNameError.style.display = 'none';
+
+            const task = {
+                id: editingTaskId || generateId(),
+                name: name,
+                category: taskCategory.value,
+                date: taskDate.value,
+                time: taskTime.value || '',
+                duration: parseInt(taskDuration.value) || 0,
+                done: false,
+                isHabit: taskIsHabit.checked,
+                habitDays: taskIsHabit.checked ? habitDays : undefined,
+                habitCurrentDay: taskIsHabit.checked ? 1 : undefined,
+                notes: taskNotes.value.trim() || '',
+                reminder: reminderOn,
+            };
+
+            if (editingTaskId) {
+                // Редактирование
+                const index = taskData.findIndex(t => t.id === editingTaskId);
+                if (index !== -1) {
+                    taskData[index] = { ...taskData[index], ...task };
+                    showToast('✏️ Задача обновлена');
+                }
+            } else {
+                // Новая задача
+                if (task.isHabit) {
+                    generateHabitTasks(task);
+                } else {
+                    addTask(task);
+                    showToast('✅ Задача создана!');
+                }
+            }
+
+            saveToLocalStorage();
+            renderTasks(currentFilter);
+            closeModal();
+        }
+
+        // ========================================
+        // 19. ИНИЦИАЛИЗАЦИЯ
+        // ========================================
         function init() {
-            loadTheme();
+            // Загрузка данных
+            const hasData = loadFromLocalStorage();
+            if (!hasData || taskData.length === 0) {
+                initData();
+            }
+
+            // Применяем тему
+            app.dataset.theme = currentTheme;
+
+            // Рендер
             renderThemeButtons();
             renderTasks('all');
             renderGoals();
             renderCalendar();
-            setupFilters();
-            setupActions();
 
-            // обновить активный фильтр
-            document.querySelector('[data-tag="all"]').classList.add('active-tag');
+            // ===== СОБЫТИЯ =====
+
+            // Фильтры
+            document.querySelectorAll('.tag-group .tag').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tag-group .tag').forEach(b => b.classList.remove('active-tag'));
+                    this.classList.add('active-tag');
+                    currentFilter = this.dataset.tag;
+                    renderTasks(currentFilter);
+                    showToast('Фильтр: ' + (currentFilter === 'all' ? 'Все' : this.textContent));
+                });
+            });
+
+            // Кнопка "Новая задача"
+            document.getElementById('btnAddTask').addEventListener('click', () => {
+                openModal('Новая задача');
+            });
+
+            // Кнопка "Все готово"
+            document.getElementById('btnCompleteAll').addEventListener('click', () => {
+                const pending = taskData.filter(t => !t.done);
+                if (pending.length === 0) {
+                    showToast('🎉 Все уже выполнено!');
+                    return;
+                }
+                if (confirm('Отметить все задачи как выполненные?')) {
+                    const today = getToday();
+                    let xpGain = 0;
+                    pending.forEach(t => {
+                        if (t.date <= today) {
+                            t.done = true;
+                            xpGain += calculateTaskXP(t.duration || 0);
+                        }
+                    });
+                    saveToLocalStorage();
+                    renderTasks(currentFilter);
+                    showToast('✅ Все задачи выполнены! +' + xpGain + ' XP');
+                }
+            });
+
+            // Кнопка "Сброс"
+            document.getElementById('btnResetStats').addEventListener('click', () => {
+                if (confirm('Сбросить все задачи?')) {
+                    taskData = taskData.map(t => ({ ...t, done: false }));
+                    saveToLocalStorage();
+                    renderTasks('all');
+                    // Сброс фильтра
+                    document.querySelectorAll('.tag-group .tag').forEach(b => b.classList.remove('active-tag'));
+                    document.querySelector('[data-tag="all"]').classList.add('active-tag');
+                    currentFilter = 'all';
+                    showToast('🔄 Статистика сброшена');
+                }
+            });
+
+            // Модалка
+            modalClose.addEventListener('click', closeModal);
+            modalCancel.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+            // Форма
+            taskForm.addEventListener('submit', handleFormSubmit);
+
+            // Чекбокс привычки
+            taskIsHabit.addEventListener('change', function() {
+                habitDaysContainer.style.display = this.checked ? 'block' : 'none';
+            });
+
+            // Кнопки дней привычки
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    habitDays = parseInt(this.dataset.days);
+                });
+            });
+
+            // Кнопка напоминания
+            taskReminder.addEventListener('click', function() {
+                reminderOn = !reminderOn;
+                this.textContent = reminderOn ? 'Вкл' : 'Выкл';
+                this.classList.toggle('active', reminderOn);
+            });
+
+            // Закрытие по Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+
+            // Обновление при фокусе
+            taskName.addEventListener('input', () => {
+                if (taskName.value.trim()) {
+                    taskNameError.style.display = 'none';
+                }
+            });
+
+            console.log('🚀 Планировщик загружен!');
+            console.log('📊 Задач:', taskData.length);
+            console.log('🎯 Целей:', goalsData.length);
         }
 
+        // ========================================
+        // 20. ЗАПУСК
+        // ========================================
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
             init();
         }
+
     })();
 </script>
 
