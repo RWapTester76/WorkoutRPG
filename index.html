@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -40,7 +39,6 @@
       backdrop-filter: blur(8px);
     }
 
-    /* ===== ВЕРХНИЙ БАР ===== */
     .top-bar {
       display: flex;
       align-items: center;
@@ -60,7 +58,6 @@
       color: #4a4a5a;
     }
     .menu-btn:hover { transform: scale(1.1); background: rgba(0,0,0,0.04); }
-    .menu-btn:active { transform: scale(0.95); }
 
     .profile-card {
       display: flex;
@@ -309,10 +306,9 @@
     }
     .task-dot.done { opacity: 0.2; }
     .task-dot.important { box-shadow: 0 0 8px rgba(255,215,0,0.4); }
-    .task-dot.high { box-shadow: 0 0 6px rgba(255,100,100,0.3); }
     .task-dot.period { border-style: dashed; border-width: 1.5px; }
+    .task-dot.goal { border-color: #9b59b6; }
 
-    /* ===== ДНЕВНОЙ ПРОГРЕСС ===== */
     .daily-progress {
       display: flex;
       align-items: center;
@@ -361,7 +357,6 @@
       color: #4a4a5a;
     }
     .bottom-bar button:hover { transform: translateY(-2px); background: rgba(0,0,0,0.04); }
-    .bottom-bar button:active { transform: scale(0.95); }
     .bottom-bar .badge {
       position: absolute;
       top: -2px;
@@ -376,7 +371,7 @@
       text-align: center;
     }
 
-    /* ===== ЛЕГЕНДА (фильтры) ===== */
+    /* ===== ЛЕГЕНДА ===== */
     .category-legend {
       display: flex;
       flex-wrap: wrap;
@@ -451,7 +446,7 @@
       margin: 10px 0 4px;
       color: #4a4a5a;
     }
-    .modal input, .modal select {
+    .modal input, .modal select, .modal textarea {
       width: 100%;
       padding: 10px 14px;
       border-radius: 14px;
@@ -461,7 +456,8 @@
       transition: 0.2s;
       color: #2a2a3a;
     }
-    .modal input:focus { border-color: rgba(0,0,0,0.2); outline: none; }
+    .modal input:focus, .modal textarea:focus { border-color: rgba(0,0,0,0.2); outline: none; }
+    .modal textarea { resize: vertical; min-height: 60px; }
     .modal .category-selector {
       display: flex;
       flex-wrap: wrap;
@@ -508,6 +504,7 @@
     .modal .modal-actions button:hover { transform: scale(1.03); }
     .modal .btn-save { background: #2a2a3a; color: white; }
     .modal .btn-cancel { background: rgba(0,0,0,0.05); color: #4a4a5a; }
+    .modal .btn-danger { background: #e74c3c; color: white; }
 
     /* ===== СПИСОК ЗАДАЧ ===== */
     .day-tasks-modal .task-list-header {
@@ -578,15 +575,13 @@
       color: #7a7a8a;
       flex-wrap: wrap;
     }
-    .day-tasks-modal .task-item .task-priority {
+    .day-tasks-modal .task-item .task-goal-badge {
+      background: #9b59b6;
+      color: white;
       padding: 1px 8px;
       border-radius: 10px;
+      font-size: 0.5rem;
       font-weight: 600;
-      font-size: 0.55rem;
-    }
-    .day-tasks-modal .task-item .task-period {
-      font-size: 0.55rem;
-      opacity: 0.6;
     }
     .day-tasks-modal .task-item .task-actions {
       display: flex;
@@ -607,10 +602,7 @@
       opacity: 0.5;
       background: rgba(0,0,0,0.02);
     }
-    .day-tasks-modal .task-item.done .task-name {
-      text-decoration: line-through;
-    }
-    .day-tasks-modal .task-item.done .task-actions button { opacity: 0.5; }
+    .day-tasks-modal .task-item.done .task-name { text-decoration: line-through; }
     .day-tasks-modal .no-tasks {
       text-align: center;
       color: #8a8a9a;
@@ -632,6 +624,111 @@
       from { opacity: 0; transform: translateY(-4px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ===== ЦЕЛИ ===== */
+    .goal-item {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(0,0,0,0.04);
+      margin-bottom: 10px;
+      transition: 0.2s;
+    }
+    .goal-item:hover { background: rgba(255,255,255,0.8); }
+    .goal-item .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .goal-item .goal-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #2a2a3a;
+    }
+    .goal-item .goal-status {
+      font-size: 0.65rem;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .goal-item .goal-status.active { background: #d4edda; color: #155724; }
+    .goal-item .goal-status.done { background: #cce5ff; color: #004085; }
+    .goal-item .goal-desc {
+      font-size: 0.8rem;
+      color: #5a5a6a;
+      margin: 4px 0 8px;
+    }
+    .goal-item .goal-progress {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 6px 0;
+    }
+    .goal-item .goal-progress .bar {
+      flex: 1;
+      height: 4px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .goal-item .goal-progress .bar .fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s;
+      background: #9b59b6;
+    }
+    .goal-item .goal-progress .text {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #5a5a6a;
+    }
+    .goal-item .goal-tasks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 6px 0;
+    }
+    .goal-item .goal-tasks .tag {
+      font-size: 0.55rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.04);
+      color: #4a4a5a;
+    }
+    .goal-item .goal-tasks .tag.done { opacity: 0.4; text-decoration: line-through; }
+    .goal-item .goal-photo {
+      margin-top: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 100%;
+    }
+    .goal-item .goal-photo img {
+      width: 100%;
+      height: auto;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .goal-item .goal-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .goal-item .goal-actions button {
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: none;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+      background: rgba(0,0,0,0.04);
+      color: #4a4a5a;
+    }
+    .goal-item .goal-actions button:hover { transform: scale(1.05); background: rgba(0,0,0,0.08); }
 
     /* ===== ТАЙМЕР ===== */
     .timer-display {
@@ -701,7 +798,6 @@
     .scheme-mono .avatar { background: linear-gradient(145deg, #aaaaaa, #888888); }
     .scheme-mono .xp-bar-fill { background: linear-gradient(90deg, #888888, #555555); }
 
-    /* ===== ТЁМНАЯ ТЕМА ===== */
     body.dark-mode .app { background: rgba(38,38,51,0.92); border-color: rgba(63,63,85,0.3); }
     body.dark-mode .profile-card { background: rgba(255,255,255,0.04); }
     body.dark-mode .day-cell { background: rgba(255,255,255,0.04); color: #d0d0e0; border-color: rgba(255,255,255,0.04); }
@@ -713,7 +809,7 @@
     body.dark-mode .menu-item:hover { background: rgba(255,255,255,0.04); }
     body.dark-mode .menu-dropdown h4 { color: #8a8aaa; }
     body.dark-mode .modal { background: rgba(38,38,51,0.96); color: #d0d0e0; }
-    body.dark-mode .modal input, body.dark-mode .modal select { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #d0d0e0; }
+    body.dark-mode .modal input, body.dark-mode .modal select, body.dark-mode .modal textarea { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #d0d0e0; }
     body.dark-mode .modal .btn-cancel { background: rgba(255,255,255,0.06); color: #aaaac0; }
     body.dark-mode .modal .btn-save { background: #5a5a7a; color: white; }
     body.dark-mode .day-tasks-modal .task-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.04); }
@@ -734,6 +830,12 @@
     body.dark-mode .modal label { color: #8a8aaa; }
     body.dark-mode .category-legend { color: #8a8aaa; }
     body.dark-mode .legend-item.active-filter { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+    body.dark-mode .goal-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.04); }
+    body.dark-mode .goal-item:hover { background: rgba(255,255,255,0.08); }
+    body.dark-mode .goal-item .goal-title { color: #d0d0e0; }
+    body.dark-mode .goal-item .goal-desc { color: #8a8aaa; }
+    body.dark-mode .goal-item .goal-status.active { background: #1e3a2a; color: #7dcea0; }
+    body.dark-mode .goal-item .goal-status.done { background: #1a2a3a; color: #7db8d0; }
 
     @media (max-width: 420px) {
       .app { padding: 14px 12px 8px; }
@@ -747,6 +849,7 @@
       .day-tasks-modal .task-item .task-name { font-size: 0.8rem; }
       .modal .period-inputs { flex-direction: column; gap: 6px; }
       .modal .period-inputs span { display: none; }
+      .goal-item { padding: 12px; }
     }
   </style>
 </head>
@@ -775,6 +878,10 @@
 
       <h4>👤 Профиль</h4>
       <button class="menu-item" id="menuProfile"><i class="fas fa-user"></i> Сменить имя</button>
+
+      <h4>🎯 Цели</h4>
+      <button class="menu-item" id="menuGoals"><i class="fas fa-bullseye"></i> Мои цели (<span id="goalsCount">0</span>)</button>
+      <button class="menu-item" id="menuAddGoal"><i class="fas fa-plus-circle"></i> Новая цель</button>
 
       <h4>🎨 Цветовые схемы</h4>
       <div class="scheme-options" id="schemeOptions">
@@ -808,21 +915,18 @@
     <div class="weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
     <div class="days-grid" id="daysGrid"></div>
 
-    <!-- Дневной прогресс -->
     <div class="daily-progress" id="dailyProgress">
       <span>📅 Сегодня</span>
       <div class="progress-bar"><div class="fill" id="dailyProgressFill"></div></div>
       <span id="dailyProgressText">0/0</span>
     </div>
 
-    <!-- Легенда - фильтры категорий -->
     <div class="category-legend" id="legendContainer"></div>
 
-    <!-- Нижний бар -->
     <div class="bottom-bar">
       <button id="addTaskBtn"><i class="fas fa-calendar-plus"></i></button>
       <button id="tasksListBtn"><i class="fas fa-tasks"></i><span class="badge" id="tasksBadge">0</span></button>
-      <button id="statsBtn"><i class="fas fa-chart-simple"></i></button>
+      <button id="goalsBtn"><i class="fas fa-bullseye"></i></button>
       <button id="settingsBtn"><i class="fas fa-user-gear"></i></button>
     </div>
   </div>
@@ -845,16 +949,12 @@
       <label>Категория</label>
       <div class="category-selector" id="categorySelector"></div>
 
-      <label>Приоритет</label>
-      <select id="taskPriority">
-        <option value="low">Низкий</option>
-        <option value="medium" selected>Средний</option>
-        <option value="high">Высокий</option>
-      </select>
-
       <label style="display:flex; align-items:center; gap:8px; margin-top:4px;">
         <input type="checkbox" id="taskImportant"> <span>⭐ Важная задача (+5 XP)</span>
       </label>
+
+      <label>Привязать к цели (опционально)</label>
+      <select id="taskGoalSelect"><option value="">Без цели</option></select>
 
       <div class="modal-actions">
         <button class="btn-cancel" id="cancelTaskBtn">Отмена</button>
@@ -881,37 +981,61 @@
     </div>
   </div>
 
-  <!-- Модалка редактирования -->
-  <div class="modal-overlay" id="editTaskModal">
+  <!-- Модалка целей -->
+  <div class="modal-overlay" id="goalsModal">
     <div class="modal">
-      <h3><i class="fas fa-edit"></i> Редактировать</h3>
-      <label>Название</label>
-      <input type="text" id="editTaskTitle">
-
-      <label>Категория</label>
-      <div class="category-selector" id="editCategorySelector"></div>
-
-      <label>Приоритет</label>
-      <select id="editTaskPriority">
-        <option value="low">Низкий</option>
-        <option value="medium">Средний</option>
-        <option value="high">Высокий</option>
-      </select>
-
-      <label>Период</label>
-      <div class="period-inputs">
-        <input type="date" id="editTaskDateFrom" />
-        <span>→</span>
-        <input type="date" id="editTaskDateTo" />
+      <h3><i class="fas fa-bullseye"></i> Мои цели</h3>
+      <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;">
+        <button id="goalsFilterAll" class="btn-cancel" style="padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; cursor:pointer;">Все</button>
+        <button id="goalsFilterActive" class="btn-cancel" style="padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; cursor:pointer;">Активные</button>
+        <button id="goalsFilterDone" class="btn-cancel" style="padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; cursor:pointer;">Выполненные</button>
+        <button id="goalsAddBtn" class="btn-save" style="padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; cursor:pointer; margin-left:auto;">+ Новая</button>
       </div>
+      <div id="goalsList"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="closeGoalsBtn">Закрыть</button>
+      </div>
+    </div>
+  </div>
 
-      <label style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-        <input type="checkbox" id="editTaskImportant"> <span>⭐ Важная</span>
-      </label>
+  <!-- Модалка создания/редактирования цели -->
+  <div class="modal-overlay" id="goalFormModal">
+    <div class="modal">
+      <h3 id="goalFormTitle"><i class="fas fa-plus-circle"></i> Новая цель</h3>
+      <label>Название</label>
+      <input type="text" id="goalFormTitleInput" placeholder="Название цели">
+
+      <label>Описание</label>
+      <textarea id="goalFormDesc" placeholder="Что хотите достичь?"></textarea>
+
+      <label>Срок достижения</label>
+      <input type="date" id="goalFormDeadline">
+
+      <label>Прикрепить задачи</label>
+      <div id="goalFormTasks" style="display:flex; flex-wrap:wrap; gap:4px; margin:6px 0;"></div>
+
+      <label>Фото при достижении</label>
+      <input type="file" id="goalFormPhoto" accept="image/*">
 
       <div class="modal-actions">
-        <button class="btn-cancel" id="cancelEditBtn">Отмена</button>
-        <button class="btn-save" id="saveEditBtn">Сохранить</button>
+        <button class="btn-cancel" id="cancelGoalFormBtn">Отмена</button>
+        <button class="btn-save" id="saveGoalFormBtn">Сохранить</button>
+        <button class="btn-danger" id="deleteGoalBtn" style="display:none;">Удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка прикрепления задачи к цели -->
+  <div class="modal-overlay" id="attachGoalModal">
+    <div class="modal">
+      <h3><i class="fas fa-link"></i> Прикрепить к цели</h3>
+      <label>Выберите цель</label>
+      <select id="attachGoalSelect"><option value="">Новая цель</option></select>
+      <label>Название новой цели</label>
+      <input type="text" id="attachGoalNewName" placeholder="Название цели">
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cancelAttachBtn">Отмена</button>
+        <button class="btn-save" id="saveAttachBtn">Прикрепить</button>
       </div>
     </div>
   </div>
@@ -953,14 +1077,18 @@
       let filterCategory = null;
       let hideDone = false;
       let searchQuery = '';
+      let goalsFilter = 'all'; // all, active, done
 
       let tasks = [];
+      let goals = [];
       let nextTaskId = 1;
+      let nextGoalId = 1;
       let player = { name: 'Эльдар', level: 1, xp: 0, xpToNext: 100 };
       let achievements = [];
       let editTaskId = null;
+      let editGoalId = null;
+      let attachTaskId = null;
 
-      // Таймер
       let timerInterval = null;
       let timerSeconds = 25 * 60;
       let timerRunning = false;
@@ -969,41 +1097,50 @@
       // ===== ЗАГРУЗКА / СОХРАНЕНИЕ =====
       function loadData() {
         try {
-          const saved = localStorage.getItem('rpgCalendarData_v5');
+          const saved = localStorage.getItem('rpgCalendarData_v6');
           if (saved) {
             const data = JSON.parse(saved);
             tasks = data.tasks || [];
+            goals = data.goals || [];
             nextTaskId = data.nextTaskId || 1;
+            nextGoalId = data.nextGoalId || 1;
             if (data.player) player = data.player;
             if (data.achievements) achievements = data.achievements;
             tasks = tasks.map(t => ({
               ...t,
               done: t.done || false,
               important: t.important || false,
-              priority: t.priority || 'medium',
               dateFrom: t.dateFrom || t.date,
-              dateTo: t.dateTo || t.date
+              dateTo: t.dateTo || t.date,
+              goalId: t.goalId || null
+            }));
+            goals = goals.map(g => ({
+              ...g,
+              done: g.done || false,
+              photo: g.photo || null,
+              taskIds: g.taskIds || []
             }));
           } else {
             const today = getDateStr(0);
             tasks = [
-              { id: nextTaskId++, title: '🏃 Утренняя пробежка', date: today, dateFrom: today, dateTo: today, category: 'sport', done: false, important: true, priority: 'high' },
-              { id: nextTaskId++, title: '🥗 Здоровый завтрак', date: today, dateFrom: today, dateTo: today, category: 'food', done: false, important: false, priority: 'medium' },
-              { id: nextTaskId++, title: '📚 Почитать 30 мин', date: getDateStr(1), dateFrom: getDateStr(1), dateTo: getDateStr(1), category: 'hobby', done: false, important: false, priority: 'low' },
+              { id: nextTaskId++, title: '🏃 Утренняя пробежка', date: today, dateFrom: today, dateTo: today, category: 'sport', done: false, important: true, goalId: null },
+              { id: nextTaskId++, title: '🥗 Здоровый завтрак', date: today, dateFrom: today, dateTo: today, category: 'food', done: false, important: false, goalId: null },
             ];
+            goals = [];
           }
-        } catch(e) { tasks = []; }
+        } catch(e) { tasks = []; goals = []; }
         updateBadge();
         updateProfile();
         checkAchievements();
         checkDailyQuest();
         updateDailyProgress();
+        updateGoalsCount();
       }
 
       function saveData() {
         try {
-          localStorage.setItem('rpgCalendarData_v5', JSON.stringify({
-            tasks, nextTaskId, player, achievements
+          localStorage.setItem('rpgCalendarData_v6', JSON.stringify({
+            tasks, goals, nextTaskId, nextGoalId, player, achievements
           }));
         } catch(e) {}
       }
@@ -1047,6 +1184,7 @@
       function checkAchievements() {
         const done = tasks.filter(t => t.done).length;
         const total = tasks.length;
+        const doneGoals = goals.filter(g => g.done).length;
         const list = [];
         if (total >= 1 && !achievements.includes('first')) { achievements.push('first'); list.push('🎯 Первая задача!'); }
         if (done >= 5 && !achievements.includes('done5')) { achievements.push('done5'); list.push('🏅 5 задач выполнено!'); }
@@ -1054,6 +1192,7 @@
         if (done >= 25 && !achievements.includes('done25')) { achievements.push('done25'); list.push('👑 25 задач выполнено!'); }
         if (player.level >= 5 && !achievements.includes('lv5')) { achievements.push('lv5'); list.push('⭐ Уровень 5!'); }
         if (player.level >= 10 && !achievements.includes('lv10')) { achievements.push('lv10'); list.push('🌟 Уровень 10!'); }
+        if (doneGoals >= 1 && !achievements.includes('first_goal')) { achievements.push('first_goal'); list.push('🎯 Первая цель достигнута!'); }
         if (list.length) {
           saveData();
           document.getElementById('achCount').textContent = achievements.length;
@@ -1086,6 +1225,10 @@
         document.getElementById('dailyProgressFill').style.width = pct + '%';
       }
 
+      function updateGoalsCount() {
+        document.getElementById('goalsCount').textContent = goals.length;
+      }
+
       // ===== РАБОТА С ЗАДАЧАМИ =====
       function getTasksForDate(dateStr) {
         let filtered = tasks.filter(t => isDateInRange(dateStr, t.dateFrom, t.dateTo));
@@ -1093,7 +1236,11 @@
         return filtered;
       }
 
-      function addTask(title, dateFrom, dateTo, category, important = false, priority = 'medium') {
+      function getTasksForGoal(goalId) {
+        return tasks.filter(t => t.goalId === goalId);
+      }
+
+      function addTask(title, dateFrom, dateTo, category, important = false, goalId = null) {
         if (!title.trim()) return false;
         if (!dateFrom) return false;
         if (!dateTo) dateTo = dateFrom;
@@ -1106,9 +1253,15 @@
           category: category,
           done: false,
           important: important,
-          priority: priority
+          goalId: goalId
         };
         tasks.push(newTask);
+        if (goalId) {
+          const goal = goals.find(g => g.id === goalId);
+          if (goal && !goal.taskIds.includes(newTask.id)) {
+            goal.taskIds.push(newTask.id);
+          }
+        }
         saveData();
         updateBadge();
         renderCalendar();
@@ -1123,10 +1276,13 @@
           if (!task.done) {
             let bonus = 10;
             if (task.important) bonus += 5;
-            if (task.priority === 'high') bonus += 3;
             addXP(bonus);
           }
           task.done = !task.done;
+          // обновляем прогресс цели
+          if (task.goalId) {
+            updateGoalProgress(task.goalId);
+          }
           saveData();
           updateBadge();
           renderCalendar();
@@ -1137,10 +1293,32 @@
             const date = document.getElementById('dayTasksTitle').dataset.date;
             if (date) renderDayTasks(date);
           }
+          if (document.getElementById('goalsModal').classList.contains('active')) {
+            renderGoals();
+          }
+        }
+      }
+
+      function updateGoalProgress(goalId) {
+        const goal = goals.find(g => g.id === goalId);
+        if (!goal) return;
+        const goalTasks = tasks.filter(t => t.goalId === goalId);
+        const done = goalTasks.filter(t => t.done).length;
+        const total = goalTasks.length;
+        // если все задачи выполнены и цель ещё не отмечена
+        if (total > 0 && done === total && !goal.done) {
+          // не автоматически отмечаем, пусть пользователь сам
         }
       }
 
       function deleteTask(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (task && task.goalId) {
+          const goal = goals.find(g => g.id === task.goalId);
+          if (goal) {
+            goal.taskIds = goal.taskIds.filter(id => id !== taskId);
+          }
+        }
         tasks = tasks.filter(t => t.id !== taskId);
         saveData();
         updateBadge();
@@ -1150,68 +1328,95 @@
           const date = document.getElementById('dayTasksTitle').dataset.date;
           if (date) renderDayTasks(date);
         }
-      }
-
-      function editTask(taskId, title, category, priority, important, dateFrom, dateTo) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return false;
-        if (title.trim()) task.title = title.trim();
-        task.category = category;
-        task.priority = priority;
-        task.important = important;
-        task.dateFrom = dateFrom;
-        task.dateTo = dateTo || dateFrom;
-        task.date = dateFrom;
-        saveData();
-        renderCalendar();
-        updateDailyProgress();
-        return true;
-      }
-
-      function duplicateTask(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
-        const newTask = {
-          id: nextTaskId++,
-          title: task.title + ' (копия)',
-          date: task.dateFrom,
-          dateFrom: task.dateFrom,
-          dateTo: task.dateTo,
-          category: task.category,
-          done: false,
-          important: task.important,
-          priority: task.priority
-        };
-        tasks.push(newTask);
-        saveData();
-        updateBadge();
-        renderCalendar();
-        updateDailyProgress();
-      }
-
-      function completeAllTasks(dateStr) {
-        const dayTasks = tasks.filter(t => isDateInRange(dateStr, t.dateFrom, t.dateTo) && !t.done);
-        dayTasks.forEach(t => {
-          let bonus = 10;
-          if (t.important) bonus += 5;
-          if (t.priority === 'high') bonus += 3;
-          addXP(bonus);
-          t.done = true;
-        });
-        saveData();
-        updateBadge();
-        renderCalendar();
-        checkAchievements();
-        checkDailyQuest();
-        updateDailyProgress();
-        if (document.getElementById('dayTasksModal').classList.contains('active')) {
-          renderDayTasks(dateStr);
+        if (document.getElementById('goalsModal').classList.contains('active')) {
+          renderGoals();
         }
       }
 
       function updateBadge() {
         const undone = tasks.filter(t => !t.done).length;
         document.getElementById('tasksBadge').textContent = undone;
+      }
+
+      // ===== ЦЕЛИ =====
+      function addGoal(title, desc, deadline, photo = null) {
+        if (!title.trim()) return false;
+        const newGoal = {
+          id: nextGoalId++,
+          title: title.trim(),
+          description: desc || '',
+          deadline: deadline || '',
+          done: false,
+          photo: photo,
+          taskIds: []
+        };
+        goals.push(newGoal);
+        saveData();
+        updateGoalsCount();
+        return true;
+      }
+
+      function toggleGoalDone(goalId, photoData = null) {
+        const goal = goals.find(g => g.id === goalId);
+        if (!goal) return;
+        goal.done = !goal.done;
+        if (goal.done && photoData) {
+          goal.photo = photoData;
+        }
+        if (goal.done) {
+          const goalTasks = tasks.filter(t => t.goalId === goalId);
+          const undone = goalTasks.filter(t => !t.done);
+          if (undone.length === 0) {
+            addXP(25); // бонус за достижение цели
+          }
+        }
+        saveData();
+        updateGoalsCount();
+        checkAchievements();
+        if (document.getElementById('goalsModal').classList.contains('active')) {
+          renderGoals();
+        }
+      }
+
+      function deleteGoal(goalId) {
+        // открепляем задачи
+        tasks.forEach(t => {
+          if (t.goalId === goalId) t.goalId = null;
+        });
+        goals = goals.filter(g => g.id !== goalId);
+        saveData();
+        updateGoalsCount();
+        if (document.getElementById('goalsModal').classList.contains('active')) {
+          renderGoals();
+        }
+      }
+
+      function attachTaskToGoal(taskId, goalId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return false;
+        // если была в другой цели, убираем
+        if (task.goalId) {
+          const oldGoal = goals.find(g => g.id === task.goalId);
+          if (oldGoal) {
+            oldGoal.taskIds = oldGoal.taskIds.filter(id => id !== taskId);
+          }
+        }
+        task.goalId = goalId;
+        if (goalId) {
+          const goal = goals.find(g => g.id === goalId);
+          if (goal && !goal.taskIds.includes(taskId)) {
+            goal.taskIds.push(taskId);
+          }
+        }
+        saveData();
+        if (document.getElementById('dayTasksModal').classList.contains('active')) {
+          const date = document.getElementById('dayTasksTitle').dataset.date;
+          if (date) renderDayTasks(date);
+        }
+        if (document.getElementById('goalsModal').classList.contains('active')) {
+          renderGoals();
+        }
+        return true;
       }
 
       // ===== ТАЙМЕР =====
@@ -1324,9 +1529,9 @@
           const cat = categories.find(c => c.id === t.category);
           const doneClass = t.done ? 'done' : '';
           const importantClass = t.important ? 'important' : '';
-          const priorityClass = t.priority === 'high' ? 'high' : '';
           const periodClass = t.dateFrom !== t.dateTo ? 'period' : '';
-          dots += cat ? `<span class="task-dot ${doneClass} ${importantClass} ${priorityClass} ${periodClass}" style="background:${cat.color};"></span>` : '';
+          const goalClass = t.goalId ? 'goal' : '';
+          dots += cat ? `<span class="task-dot ${doneClass} ${importantClass} ${periodClass} ${goalClass}" style="background:${cat.color};"></span>` : '';
         });
         let extra = '';
         if (dayTasks.length > maxDots) extra = `<span style="font-size:0.5rem; opacity:0.5;">+${dayTasks.length - maxDots}</span>`;
@@ -1369,8 +1574,7 @@
         dayTasks.sort((a, b) => {
           if (a.important && !b.important) return -1;
           if (!a.important && b.important) return 1;
-          const order = { high: 0, medium: 1, low: 2 };
-          return order[a.priority] - order[b.priority];
+          return 0;
         });
 
         if (dayTasks.length === 0) {
@@ -1383,20 +1587,20 @@
           const doneClass = task.done ? 'done' : '';
           const doneIcon = task.done ? 'fa-circle-check' : 'fa-circle';
           const importantStar = task.important ? '⭐' : '';
-          const priorityColors = { low: '🟢', medium: '🟡', high: '🔴' };
-          const priorityLabel = priorityColors[task.priority] || '';
-          const priorityText = { low: 'Низкий', medium: 'Средний', high: 'Высокий' };
+          const goal = goals.find(g => g.id === task.goalId);
+          const goalBadge = goal ? `<span class="task-goal-badge">🎯 ${goal.title}</span>` : '';
           const periodText = task.dateFrom !== task.dateTo ? `📅 ${task.dateFrom} → ${task.dateTo}` : '';
 
           html += `
             <div class="task-item ${doneClass}">
               <span class="task-cat" style="background:${cat ? cat.color : '#999'};"></span>
-              <span class="task-name">${importantStar} ${priorityLabel} ${task.title}</span>
+              <span class="task-name">${importantStar} ${task.title}</span>
               <div class="task-meta">
-                <span class="task-priority" style="background:${task.priority === 'high' ? '#fee' : 'rgba(0,0,0,0.04)'}; color:${task.priority === 'high' ? '#c0392b' : '#5a5a6a'};">${priorityText[task.priority]}</span>
-                ${periodText ? `<span class="task-period">${periodText}</span>` : ''}
+                ${goalBadge}
+                ${periodText ? `<span style="font-size:0.55rem; opacity:0.6;">${periodText}</span>` : ''}
               </div>
               <div class="task-actions">
+                <button class="task-attach-btn" data-id="${task.id}" title="Прикрепить к цели"><i class="fas fa-link"></i></button>
                 <button class="task-edit-btn" data-id="${task.id}" title="Редактировать"><i class="fas fa-edit"></i></button>
                 <button class="task-duplicate-btn" data-id="${task.id}" title="Дублировать"><i class="fas fa-copy"></i></button>
                 <button class="task-timer-btn" data-id="${task.id}" title="Таймер"><i class="fas fa-clock"></i></button>
@@ -1445,6 +1649,39 @@
             startTimer(id);
           });
         });
+
+        container.querySelectorAll('.task-attach-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const id = parseInt(this.dataset.id);
+            openAttachGoal(id);
+          });
+        });
+      }
+
+      function duplicateTask(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+        const newTask = {
+          id: nextTaskId++,
+          title: task.title + ' (копия)',
+          date: task.dateFrom,
+          dateFrom: task.dateFrom,
+          dateTo: task.dateTo,
+          category: task.category,
+          done: false,
+          important: task.important,
+          goalId: task.goalId
+        };
+        tasks.push(newTask);
+        if (newTask.goalId) {
+          const goal = goals.find(g => g.id === newTask.goalId);
+          if (goal) goal.taskIds.push(newTask.id);
+        }
+        saveData();
+        updateBadge();
+        renderCalendar();
+        updateDailyProgress();
       }
 
       // ===== РЕДАКТИРОВАНИЕ =====
@@ -1456,7 +1693,6 @@
         document.getElementById('editTaskDateFrom').value = task.dateFrom;
         document.getElementById('editTaskDateTo').value = task.dateTo;
         document.getElementById('editTaskImportant').checked = task.important;
-        document.getElementById('editTaskPriority').value = task.priority;
 
         const container = document.getElementById('editCategorySelector');
         container.innerHTML = '';
@@ -1476,6 +1712,154 @@
         document.getElementById('editTaskModal').classList.add('active');
       }
 
+      // ===== ПРИКРЕПЛЕНИЕ К ЦЕЛИ =====
+      function openAttachGoal(taskId) {
+        attachTaskId = taskId;
+        const select = document.getElementById('attachGoalSelect');
+        select.innerHTML = '<option value="">Новая цель</option>';
+        goals.forEach(g => {
+          const opt = document.createElement('option');
+          opt.value = g.id;
+          opt.textContent = g.title + (g.done ? ' ✅' : '');
+          select.appendChild(opt);
+        });
+        document.getElementById('attachGoalNewName').value = '';
+        document.getElementById('attachGoalModal').classList.add('active');
+      }
+
+      // ===== ЦЕЛИ — ОТОБРАЖЕНИЕ =====
+      function renderGoals() {
+        const container = document.getElementById('goalsList');
+        let filtered = goals;
+        if (goalsFilter === 'active') filtered = goals.filter(g => !g.done);
+        if (goalsFilter === 'done') filtered = goals.filter(g => g.done);
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<div style="text-align:center; color:#8a8a9a; padding:20px 0;">🎯 Нет целей</div>`;
+          return;
+        }
+
+        let html = '';
+        filtered.forEach(goal => {
+          const goalTasks = tasks.filter(t => t.goalId === goal.id);
+          const doneTasks = goalTasks.filter(t => t.done).length;
+          const totalTasks = goalTasks.length;
+          const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+          const statusClass = goal.done ? 'done' : 'active';
+          const statusText = goal.done ? '✅ Выполнена' : '🔄 В процессе';
+          const deadlineText = goal.deadline ? `⏰ ${goal.deadline}` : '';
+
+          let tasksHtml = '';
+          goalTasks.forEach(t => {
+            const cat = categories.find(c => c.id === t.category);
+            tasksHtml += `<span class="tag ${t.done ? 'done' : ''}" style="${cat ? 'background:'+cat.color+'20;' : ''}">${t.title}</span>`;
+          });
+
+          let photoHtml = '';
+          if (goal.photo) {
+            photoHtml = `<div class="goal-photo"><img src="${goal.photo}" alt="Фото цели" /></div>`;
+          }
+
+          html += `
+            <div class="goal-item">
+              <div class="goal-header">
+                <span class="goal-title">${goal.title}</span>
+                <span class="goal-status ${statusClass}">${statusText}</span>
+              </div>
+              ${goal.description ? `<div class="goal-desc">${goal.description}</div>` : ''}
+              <div class="goal-progress">
+                <span style="font-size:0.65rem;">${doneTasks}/${totalTasks}</span>
+                <div class="bar"><div class="fill" style="width:${progress}%;"></div></div>
+                <span class="text">${progress}%</span>
+              </div>
+              ${deadlineText ? `<div style="font-size:0.7rem; opacity:0.6;">${deadlineText}</div>` : ''}
+              ${tasksHtml ? `<div class="goal-tasks">${tasksHtml}</div>` : '<div style="font-size:0.7rem; opacity:0.5;">Нет прикреплённых задач</div>'}
+              ${photoHtml}
+              <div class="goal-actions">
+                ${!goal.done ? `<button class="goal-done-btn" data-id="${goal.id}">✅ Отметить выполненной</button>` : ''}
+                <button class="goal-edit-btn" data-id="${goal.id}">✏️ Редактировать</button>
+                <button class="goal-delete-btn" data-id="${goal.id}" style="color:#e74c3c;">🗑️ Удалить</button>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+
+        container.querySelectorAll('.goal-done-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = parseInt(this.dataset.id);
+            // запрос фото
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                  toggleGoalDone(id, ev.target.result);
+                };
+                reader.readAsDataURL(file);
+              } else {
+                toggleGoalDone(id, null);
+              }
+            };
+            input.click();
+          });
+        });
+
+        container.querySelectorAll('.goal-edit-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = parseInt(this.dataset.id);
+            openGoalForm(id);
+          });
+        });
+
+        container.querySelectorAll('.goal-delete-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = parseInt(this.dataset.id);
+            if (confirm('Удалить цель?')) deleteGoal(id);
+          });
+        });
+      }
+
+      // ===== ФОРМА ЦЕЛИ =====
+      function openGoalForm(goalId = null) {
+        const modal = document.getElementById('goalFormModal');
+        const title = document.getElementById('goalFormTitle');
+        const deleteBtn = document.getElementById('deleteGoalBtn');
+
+        if (goalId) {
+          const goal = goals.find(g => g.id === goalId);
+          if (!goal) return;
+          editGoalId = goalId;
+          title.innerHTML = '<i class="fas fa-edit"></i> Редактировать цель';
+          document.getElementById('goalFormTitleInput').value = goal.title;
+          document.getElementById('goalFormDesc').value = goal.description || '';
+          document.getElementById('goalFormDeadline').value = goal.deadline || '';
+          deleteBtn.style.display = 'inline-block';
+          // показываем прикреплённые задачи
+          const container = document.getElementById('goalFormTasks');
+          container.innerHTML = '';
+          const goalTasks = tasks.filter(t => t.goalId === goalId);
+          goalTasks.forEach(t => {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.textContent = t.title;
+            container.appendChild(span);
+          });
+        } else {
+          editGoalId = null;
+          title.innerHTML = '<i class="fas fa-plus-circle"></i> Новая цель';
+          document.getElementById('goalFormTitleInput').value = '';
+          document.getElementById('goalFormDesc').value = '';
+          document.getElementById('goalFormDeadline').value = '';
+          document.getElementById('goalFormTasks').innerHTML = '';
+          deleteBtn.style.display = 'none';
+        }
+        modal.classList.add('active');
+      }
+
       // ===== МОДАЛКА ДОБАВЛЕНИЯ =====
       function openAddTaskModal() {
         const modal = document.getElementById('addTaskModal');
@@ -1485,7 +1869,16 @@
         document.getElementById('taskDateTo').value = today;
         document.getElementById('taskTitleInput').value = '';
         document.getElementById('taskImportant').checked = false;
-        document.getElementById('taskPriority').value = 'medium';
+
+        // обновляем список целей
+        const select = document.getElementById('taskGoalSelect');
+        select.innerHTML = '<option value="">Без цели</option>';
+        goals.forEach(g => {
+          const opt = document.createElement('option');
+          opt.value = g.id;
+          opt.textContent = g.title + (g.done ? ' ✅' : '');
+          select.appendChild(opt);
+        });
 
         const container = document.getElementById('categorySelector');
         container.innerHTML = '';
@@ -1511,15 +1904,18 @@
           const activeBtn = document.querySelector('#categorySelector .cat-btn.active');
           const category = activeBtn ? activeBtn.dataset.cat : categories[0].id;
           const important = document.getElementById('taskImportant').checked;
-          const priority = document.getElementById('taskPriority').value;
+          const goalId = document.getElementById('taskGoalSelect').value;
           if (!title) { alert('Введите название задачи'); return; }
           if (!dateFrom) { alert('Выберите дату начала'); return; }
-          if (addTask(title, dateFrom, dateTo, category, important, priority)) {
+          if (addTask(title, dateFrom, dateTo, category, important, goalId || null)) {
             modal.classList.remove('active');
             renderCalendar();
             updateBadge();
             checkDailyQuest();
             updateDailyProgress();
+            if (document.getElementById('goalsModal').classList.contains('active')) {
+              renderGoals();
+            }
           }
         };
         document.getElementById('cancelTaskBtn').onclick = () => modal.classList.remove('active');
@@ -1531,13 +1927,15 @@
         const done = tasks.filter(t => t.done).length;
         const undone = total - done;
         const important = tasks.filter(t => t.important).length;
-        const high = tasks.filter(t => t.priority === 'high').length;
-        const periodTasks = tasks.filter(t => t.dateFrom !== t.dateTo).length;
+        const withGoal = tasks.filter(t => t.goalId).length;
+        const totalGoals = goals.length;
+        const doneGoals = goals.filter(g => g.done).length;
         let byCat = {}; categories.forEach(c => byCat[c.id] = 0);
         tasks.forEach(t => { if (byCat[t.category] !== undefined) byCat[t.category]++; });
 
         let msg = `📊 СТАТИСТИКА\n━━━━━━━━━━━━━━\n`;
-        msg += `📌 Всего: ${total}\n✅ Выполнено: ${done}\n⏳ Осталось: ${undone}\n⭐ Важных: ${important}\n🔴 Высокий приоритет: ${high}\n📅 С периодом: ${periodTasks}\n`;
+        msg += `📌 Задач: ${total}\n✅ Выполнено: ${done}\n⏳ Осталось: ${undone}\n⭐ Важных: ${important}\n🎯 Привязано к целям: ${withGoal}\n`;
+        msg += `━━━━━━━━━━━━━━\n🎯 Целей: ${totalGoals}\n✅ Достигнуто: ${doneGoals}\n`;
         msg += `━━━━━━━━━━━━━━\n📂 По категориям:\n`;
         categories.forEach(c => {
           const count = byCat[c.id] || 0;
@@ -1558,7 +1956,7 @@
 
       // ===== ЭКСПОРТ =====
       function exportData() {
-        const data = { tasks, player, achievements, exported: new Date().toISOString() };
+        const data = { tasks, goals, player, achievements, exported: new Date().toISOString() };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -1570,10 +1968,12 @@
 
       // ===== СБРОС =====
       function resetAll() {
-        if (confirm('⚠️ Удалить все задачи, прогресс и достижения?')) {
+        if (confirm('⚠️ Удалить все задачи, цели, прогресс и достижения?')) {
           if (confirm('Точно? Это нельзя отменить!')) {
             tasks = [];
+            goals = [];
             nextTaskId = 1;
+            nextGoalId = 1;
             player = { name: 'Эльдар', level: 1, xp: 0, xpToNext: 100 };
             achievements = [];
             saveData();
@@ -1583,6 +1983,7 @@
             updateDailyProgress();
             checkDailyQuest();
             document.getElementById('achCount').textContent = '0';
+            updateGoalsCount();
             alert('✅ Данные сброшены');
           }
         }
@@ -1620,7 +2021,6 @@
         });
         renderCalendar();
         updateDailyProgress();
-        // обновить список задач если открыт
         const modal = document.getElementById('dayTasksModal');
         if (modal.classList.contains('active')) {
           const date = document.getElementById('dayTasksTitle').dataset.date;
@@ -1647,7 +2047,6 @@
         checkDailyQuest();
         updateDailyProgress();
 
-        // Навигация
         document.getElementById('prevMonth').addEventListener('click', () => {
           currentDate.setMonth(currentDate.getMonth()-1);
           renderCalendar();
@@ -1663,6 +2062,10 @@
         document.getElementById('addTaskBtn').addEventListener('click', openAddTaskModal);
         document.getElementById('tasksListBtn').addEventListener('click', () => openDayTasks(getDateStr(0)));
         document.getElementById('statsBtn').addEventListener('click', showStats);
+        document.getElementById('goalsBtn').addEventListener('click', () => {
+          document.getElementById('goalsModal').classList.add('active');
+          renderGoals();
+        });
         document.getElementById('settingsBtn').addEventListener('click', () => {
           const newName = prompt('👤 Введите новое имя:', player.name);
           if (newName && newName.trim()) {
@@ -1672,7 +2075,7 @@
           }
         });
 
-        // Меню — кнопка в левом верхнем углу
+        // Меню
         document.getElementById('menuBtn').addEventListener('click', toggleMenu);
         document.getElementById('menuClose').addEventListener('click', closeMenu);
         document.addEventListener('click', function(e) {
@@ -1693,6 +2096,17 @@
           }
         });
 
+        document.getElementById('menuGoals').addEventListener('click', () => {
+          closeMenu();
+          document.getElementById('goalsModal').classList.add('active');
+          renderGoals();
+        });
+
+        document.getElementById('menuAddGoal').addEventListener('click', () => {
+          closeMenu();
+          openGoalForm(null);
+        });
+
         document.getElementById('menuAchievements').addEventListener('click', () => {
           closeMenu();
           const list = achievements.length > 0 ? achievements.map((a, i) => `${i+1}. ${a}`).join('\n') : 'Пока нет достижений';
@@ -1703,7 +2117,7 @@
         document.getElementById('menuExport').addEventListener('click', () => { closeMenu(); exportData(); });
         document.getElementById('menuReset').addEventListener('click', () => { closeMenu(); resetAll(); });
 
-        // Схемы в меню
+        // Схемы
         document.querySelectorAll('.scheme-opt').forEach(opt => {
           opt.addEventListener('click', function() {
             applyScheme(this.dataset.scheme);
@@ -1718,8 +2132,13 @@
           });
         });
 
+        // Закрытие модалок
         document.getElementById('closeDayTasksBtn').addEventListener('click', () => {
           document.getElementById('dayTasksModal').classList.remove('active');
+        });
+
+        document.getElementById('closeGoalsBtn').addEventListener('click', () => {
+          document.getElementById('goalsModal').classList.remove('active');
         });
 
         document.getElementById('closeTimerBtn').addEventListener('click', () => {
@@ -1741,7 +2160,6 @@
           if (date) renderDayTasks(date);
         });
 
-        // Скрыть выполненные
         document.getElementById('toggleDoneBtn').addEventListener('click', function() {
           hideDone = !hideDone;
           this.innerHTML = hideDone ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
@@ -1749,19 +2167,34 @@
           if (date) renderDayTasks(date);
         });
 
-        // Выполнить все
         document.getElementById('completeAllBtn').addEventListener('click', function() {
           const date = document.getElementById('dayTasksTitle').dataset.date;
           if (date) {
             const undone = tasks.filter(t => isDateInRange(date, t.dateFrom, t.dateTo) && !t.done).length;
             if (undone === 0) { alert('Все задачи уже выполнены!'); return; }
             if (confirm(`Выполнить все ${undone} задач за этот день?`)) {
-              completeAllTasks(date);
+              const dayTasks = tasks.filter(t => isDateInRange(date, t.dateFrom, t.dateTo) && !t.done);
+              dayTasks.forEach(t => {
+                let bonus = 10;
+                if (t.important) bonus += 5;
+                addXP(bonus);
+                t.done = true;
+              });
+              saveData();
+              updateBadge();
+              renderCalendar();
+              checkAchievements();
+              checkDailyQuest();
+              updateDailyProgress();
+              renderDayTasks(date);
+              if (document.getElementById('goalsModal').classList.contains('active')) {
+                renderGoals();
+              }
             }
           }
         });
 
-        // Редактирование
+        // Редактирование задачи
         document.getElementById('cancelEditBtn').addEventListener('click', () => {
           document.getElementById('editTaskModal').classList.remove('active');
         });
@@ -1772,40 +2205,177 @@
           const dateTo = document.getElementById('editTaskDateTo').value || dateFrom;
           const activeBtn = document.querySelector('#editCategorySelector .cat-btn.active');
           const category = activeBtn ? activeBtn.dataset.cat : categories[0].id;
-          const priority = document.getElementById('editTaskPriority').value;
           const important = document.getElementById('editTaskImportant').checked;
           if (!title) { alert('Введите название'); return; }
           if (!dateFrom) { alert('Выберите дату начала'); return; }
-          if (editTask(editTaskId, title, category, priority, important, dateFrom, dateTo)) {
+          const task = tasks.find(t => t.id === editTaskId);
+          if (task) {
+            task.title = title;
+            task.category = category;
+            task.important = important;
+            task.dateFrom = dateFrom;
+            task.dateTo = dateTo;
+            task.date = dateFrom;
+            saveData();
+            renderCalendar();
+            updateDailyProgress();
             document.getElementById('editTaskModal').classList.remove('active');
             const dateStr = document.getElementById('dayTasksTitle').dataset.date;
             if (dateStr) renderDayTasks(dateStr);
           }
         });
 
-        // Кнопка "Настройки" в правом нижнем углу уже есть (settingsBtn)
-        // Добавляем дополнительную активность
-        document.getElementById('settingsBtn').addEventListener('click', function() {
-          const actions = [
-            '👤 Сменить имя',
-            '🎨 Сменить схему (в меню)',
-            '📊 Статистика',
-            '💾 Экспорт данных'
-          ];
-          const choice = prompt('⚙️ Настройки:\n' + actions.map((a, i) => `${i+1}. ${a}`).join('\n') + '\n\nВведите номер:');
-          if (choice === '1') {
-            const newName = prompt('Введите новое имя:', player.name);
-            if (newName && newName.trim()) {
-              player.name = newName.trim();
-              document.getElementById('profileName').textContent = player.name;
+        // Цели — фильтры
+        document.getElementById('goalsFilterAll').addEventListener('click', function() {
+          goalsFilter = 'all';
+          renderGoals();
+        });
+        document.getElementById('goalsFilterActive').addEventListener('click', function() {
+          goalsFilter = 'active';
+          renderGoals();
+        });
+        document.getElementById('goalsFilterDone').addEventListener('click', function() {
+          goalsFilter = 'done';
+          renderGoals();
+        });
+        document.getElementById('goalsAddBtn').addEventListener('click', function() {
+          openGoalForm(null);
+        });
+
+        // Форма цели
+        document.getElementById('cancelGoalFormBtn').addEventListener('click', () => {
+          document.getElementById('goalFormModal').classList.remove('active');
+        });
+
+        document.getElementById('saveGoalFormBtn').addEventListener('click', function() {
+          const title = document.getElementById('goalFormTitleInput').value.trim();
+          const desc = document.getElementById('goalFormDesc').value.trim();
+          const deadline = document.getElementById('goalFormDeadline').value;
+          if (!title) { alert('Введите название цели'); return; }
+          if (editGoalId) {
+            const goal = goals.find(g => g.id === editGoalId);
+            if (goal) {
+              goal.title = title;
+              goal.description = desc;
+              goal.deadline = deadline;
               saveData();
+              updateGoalsCount();
+              document.getElementById('goalFormModal').classList.remove('active');
+              renderGoals();
             }
-          } else if (choice === '3') {
-            showStats();
-          } else if (choice === '4') {
-            exportData();
+          } else {
+            if (addGoal(title, desc, deadline)) {
+              document.getElementById('goalFormModal').classList.remove('active');
+              renderGoals();
+              updateGoalsCount();
+            }
           }
         });
+
+        document.getElementById('deleteGoalBtn').addEventListener('click', function() {
+          if (editGoalId && confirm('Удалить цель?')) {
+            deleteGoal(editGoalId);
+            document.getElementById('goalFormModal').classList.remove('active');
+          }
+        });
+
+        // Прикрепление к цели
+        document.getElementById('cancelAttachBtn').addEventListener('click', () => {
+          document.getElementById('attachGoalModal').classList.remove('active');
+        });
+
+        document.getElementById('saveAttachBtn').addEventListener('click', function() {
+          const select = document.getElementById('attachGoalSelect');
+          const goalId = select.value;
+          const newName = document.getElementById('attachGoalNewName').value.trim();
+
+          if (goalId === '' && !newName) {
+            alert('Выберите цель или введите название новой');
+            return;
+          }
+
+          let targetGoalId = goalId;
+          if (goalId === '' && newName) {
+            const newGoal = {
+              id: nextGoalId++,
+              title: newName,
+              description: '',
+              deadline: '',
+              done: false,
+              photo: null,
+              taskIds: []
+            };
+            goals.push(newGoal);
+            targetGoalId = newGoal.id;
+            saveData();
+            updateGoalsCount();
+          }
+
+          if (attachTaskId && targetGoalId) {
+            attachTaskToGoal(attachTaskId, targetGoalId);
+            document.getElementById('attachGoalModal').classList.remove('active');
+            // обновляем список задач
+            const date = document.getElementById('dayTasksTitle').dataset.date;
+            if (date) renderDayTasks(date);
+            if (document.getElementById('goalsModal').classList.contains('active')) {
+              renderGoals();
+            }
+          }
+        });
+
+        // Фото для цели
+        document.getElementById('goalFormPhoto').addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+              // сохраняем фото в цель при сохранении
+              window._goalPhotoData = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        // переопределяем сохранение цели с фото
+        const origSaveGoal = document.getElementById('saveGoalFormBtn').onclick;
+        document.getElementById('saveGoalFormBtn').onclick = function() {
+          const title = document.getElementById('goalFormTitleInput').value.trim();
+          const desc = document.getElementById('goalFormDesc').value.trim();
+          const deadline = document.getElementById('goalFormDeadline').value;
+          if (!title) { alert('Введите название цели'); return; }
+          if (editGoalId) {
+            const goal = goals.find(g => g.id === editGoalId);
+            if (goal) {
+              goal.title = title;
+              goal.description = desc;
+              goal.deadline = deadline;
+              if (window._goalPhotoData) {
+                goal.photo = window._goalPhotoData;
+                window._goalPhotoData = null;
+              }
+              saveData();
+              updateGoalsCount();
+              document.getElementById('goalFormModal').classList.remove('active');
+              renderGoals();
+            }
+          } else {
+            const newGoal = {
+              id: nextGoalId++,
+              title: title,
+              description: desc,
+              deadline: deadline,
+              done: false,
+              photo: window._goalPhotoData || null,
+              taskIds: []
+            };
+            goals.push(newGoal);
+            window._goalPhotoData = null;
+            saveData();
+            updateGoalsCount();
+            document.getElementById('goalFormModal').classList.remove('active');
+            renderGoals();
+          }
+        };
       }
 
       function renderLegend() {
