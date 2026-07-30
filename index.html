@@ -6,1010 +6,256 @@
   <title>RPG Календарь · Журнал активности</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-      transition: background 0.3s, color 0.25s, border 0.25s, box-shadow 0.3s, transform 0.2s;
-    }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 12px;
-      background: #e8e4de;
-      transition: background 0.5s;
-    }
-
-    .app {
-      max-width: 480px;
-      width: 100%;
-      backdrop-filter: blur(2px);
-      border-radius: 36px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 6px 12px rgba(0,0,0,0.04);
-      overflow: hidden;
-      padding: 20px 18px 12px;
-      border: 1px solid rgba(255,255,255,0.3);
-      position: relative;
-      transition: background 0.5s, border 0.5s;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(8px);
-    }
-
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-      gap: 8px;
-    }
-
-    .menu-btn {
-      font-size: 1.8rem;
-      background: rgba(0,0,0,0.04);
-      border: none;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 20px;
-      transition: 0.15s;
-      color: #4a4a5a;
-      min-width: 48px;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .menu-btn:hover { transform: scale(1.1); background: rgba(0,0,0,0.08); }
-    .menu-btn:active { transform: scale(0.95); }
-
-    .profile-card {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 4px 14px 4px 6px;
-      border-radius: 60px;
-      background: rgba(0,0,0,0.04);
-      flex: 1;
-      max-width: 210px;
-      cursor: pointer;
-    }
-    .profile-card:hover { background: rgba(0,0,0,0.08); }
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      background: linear-gradient(145deg, #b8a48b, #8f7b66);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      flex-shrink: 0;
-      overflow: hidden;
-      object-fit: cover;
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-    .profile-info {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.2;
-      min-width: 0;
-      flex: 1;
-    }
-    .profile-name {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #2a2a3a;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .profile-level {
-      font-size: 0.6rem;
-      padding: 0 10px;
-      border-radius: 20px;
-      font-weight: 600;
-      display: inline-block;
-      width: fit-content;
-      background: rgba(0,0,0,0.06);
-      color: #4a4a5a;
-    }
-    .xp-bar-wrap {
-      width: 100%;
-      height: 4px;
-      border-radius: 10px;
-      margin-top: 3px;
-      overflow: hidden;
-      background: rgba(0,0,0,0.06);
-    }
-    .xp-bar-fill {
-      height: 100%;
-      border-radius: 10px;
-      transition: width 0.6s ease;
-      width: 0%;
-      background: linear-gradient(90deg, #8b9a7a, #6b8a5a);
-    }
-
-    .theme-toggle {
-      border: none;
-      font-size: 1.3rem;
-      width: 42px;
-      height: 42px;
-      border-radius: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      background: rgba(0,0,0,0.04);
-      color: #4a4a5a;
-      flex-shrink: 0;
-    }
-    .theme-toggle:hover { background: rgba(0,0,0,0.08); }
-
-    .menu-dropdown {
-      display: none;
-      position: absolute;
-      top: 75px;
-      left: 10px;
-      right: 10px;
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(12px);
-      border-radius: 28px;
-      padding: 20px 18px;
-      z-index: 100;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-      max-height: 70vh;
-      overflow-y: auto;
-      border: 1px solid rgba(255,255,255,0.3);
-    }
-    .menu-dropdown.open { display: block; animation: slideDown 0.25s ease; }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-15px) scale(0.97); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .menu-dropdown h4 {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      opacity: 0.5;
-      margin: 14px 0 8px;
-      font-weight: 700;
-      color: #4a4a5a;
-    }
-    .menu-dropdown h4:first-child { margin-top: 0; }
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border-radius: 14px;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 0.9rem;
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-      color: #2a2a3a;
-    }
-    .menu-item:hover { background: rgba(0,0,0,0.04); transform: translateX(4px); }
-    .menu-item i { width: 22px; font-size: 1rem; opacity: 0.7; }
-
-    .scheme-options {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      margin: 6px 0 2px;
-    }
-    .scheme-opt {
-      padding: 8px 4px;
-      border-radius: 14px;
-      border: 2px solid transparent;
-      text-align: center;
-      font-size: 0.55rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-      color: white;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.15);
-    }
-    .scheme-opt:hover { transform: scale(1.05); }
-    .scheme-opt.active { border-color: #2a2a3a; box-shadow: 0 0 20px rgba(0,0,0,0.08); }
-
-    .menu-close {
-      position: absolute;
-      top: 12px;
-      right: 16px;
-      background: none;
-      border: none;
-      font-size: 1.3rem;
-      cursor: pointer;
-      opacity: 0.4;
-      color: #2a2a3a;
-    }
-    .menu-close:hover { opacity: 0.8; }
-
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 4px 0 12px;
-      padding: 0 4px;
-    }
-    .calendar-header h2 {
-      font-weight: 700;
-      font-size: 1.2rem;
-      letter-spacing: -0.3px;
-      color: #2a2a3a;
-    }
-    .month-nav { display: flex; gap: 12px; }
-    .month-nav button {
-      background: none;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-      padding: 0 6px;
-      color: #5a5a6a;
-      transition: 0.15s;
-    }
-    .month-nav button:hover { transform: scale(1.2); }
-
-    .weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      font-weight: 600;
-      font-size: 0.6rem;
-      margin-bottom: 4px;
-      letter-spacing: 0.3px;
-      color: #7a7a8a;
-    }
-
-    .days-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-
-    .day-cell {
-      aspect-ratio: 1 / 1;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 500;
-      padding: 2px;
-      position: relative;
-      border: 1px solid rgba(0,0,0,0.04);
-      transition: 0.15s;
-      background: rgba(255,255,255,0.5);
-      cursor: pointer;
-      color: #2a2a3a;
-    }
-    .day-cell:hover { transform: scale(1.04); z-index: 2; background: rgba(255,255,255,0.8); }
-    .day-cell.other-month { opacity: 0.3; }
-    .day-cell.today { border-color: rgba(0,0,0,0.2); border-width: 2px; }
-    .day-cell .day-number { font-weight: 500; font-size: 0.85rem; }
-    .day-cell .task-indicators {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2px;
-      justify-content: center;
-      margin-top: 1px;
-    }
-    .task-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 20px;
-      display: inline-block;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    .task-dot.done { opacity: 0.2; }
-    .task-dot.important { box-shadow: 0 0 8px rgba(255,215,0,0.4); }
-    .task-dot.period { border-style: dashed; border-width: 1.5px; }
-    .task-dot.goal { border-color: #9b59b6; }
-
-    .daily-progress {
-      display: flex;
-      align-items: center;
-      margin: 10px 0 4px;
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 0.7rem;
-      font-weight: 500;
-      color: #4a4a5a;
-      background: rgba(0,0,0,0.03);
-    }
-    .daily-progress .progress-bar {
-      flex: 1;
-      height: 3px;
-      border-radius: 10px;
-      margin: 0 10px;
-      overflow: hidden;
-      background: rgba(0,0,0,0.06);
-    }
-    .daily-progress .progress-bar .fill {
-      height: 100%;
-      border-radius: 10px;
-      transition: width 0.5s;
-      width: 0%;
-      background: linear-gradient(90deg, #8b9a7a, #6b8a5a);
-    }
-
-    .bottom-bar {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      margin-top: 16px;
-      padding: 6px 0 4px;
-      border-top: 1px solid rgba(0,0,0,0.06);
-    }
-    .bottom-bar button {
-      background: none;
-      border: none;
-      font-size: 1.4rem;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 40px;
-      transition: 0.15s;
-      position: relative;
-      color: #4a4a5a;
-    }
-    .bottom-bar button:hover { transform: translateY(-2px); background: rgba(0,0,0,0.04); }
-    .bottom-bar .badge {
-      position: absolute;
-      top: -2px;
-      right: -2px;
-      background: #e74c3c;
-      color: white;
-      font-size: 0.5rem;
-      border-radius: 20px;
-      padding: 0 6px;
-      font-weight: 700;
-      min-width: 18px;
-      text-align: center;
-    }
-
-    .bottom-bar .stats-btn {
-      background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-      color: white;
-      border-radius: 40px;
-      padding: 8px 16px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
-    }
-    .bottom-bar .stats-btn:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 6px 25px rgba(108, 92, 231, 0.4);
-    }
-    .bottom-bar .stats-btn i { margin-right: 6px; }
-
-    .category-legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 10px;
-      justify-content: center;
-      margin: 8px 0 0;
-      font-size: 0.55rem;
-      font-weight: 600;
-      color: #5a5a6a;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      padding: 4px 10px;
-      border-radius: 20px;
-      transition: 0.2s;
-      opacity: 0.6;
-      border: 2px solid transparent;
-    }
-    .legend-item:hover { opacity: 1; transform: scale(1.05); }
-    .legend-item.active-filter {
-      opacity: 1;
-      background: rgba(0,0,0,0.04);
-      border-color: rgba(0,0,0,0.1);
-    }
-    .color-swatch {
-      width: 10px;
-      height: 10px;
-      border-radius: 30px;
-      display: inline-block;
-    }
-
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.35);
-      backdrop-filter: blur(6px);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      padding: 20px;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal {
-      border-radius: 28px;
-      padding: 24px 22px;
-      max-width: 400px;
-      width: 100%;
-      max-height: 85vh;
-      overflow-y: auto;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.12);
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(8px);
-    }
-    .modal h3 {
-      margin-bottom: 16px;
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: #2a2a3a;
-    }
-    .modal label {
-      font-weight: 500;
-      font-size: 0.8rem;
-      display: block;
-      margin: 10px 0 4px;
-      color: #4a4a5a;
-    }
-    .modal input, .modal select, .modal textarea {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(0,0,0,0.08);
-      background: rgba(0,0,0,0.03);
-      font-size: 0.9rem;
-      transition: 0.2s;
-      color: #2a2a3a;
-    }
-    .modal input:focus, .modal textarea:focus { border-color: rgba(0,0,0,0.2); outline: none; }
-    .modal textarea { resize: vertical; min-height: 60px; }
-    .modal .category-selector {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin: 6px 0 10px;
-    }
-    .modal .cat-btn {
-      padding: 5px 12px;
-      border-radius: 30px;
-      border: 2px solid transparent;
-      font-size: 0.7rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.15s;
-      color: white;
-    }
-    .modal .cat-btn.active {
-      border-color: #2a2a3a;
-      transform: scale(1.04);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .modal .period-inputs {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .modal .period-inputs input { flex: 1; }
-    .modal .period-inputs span { color: #7a7a8a; font-weight: 500; }
-    .modal .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-      justify-content: flex-end;
-    }
-    .modal .modal-actions button {
-      padding: 10px 22px;
-      border-radius: 40px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: 0.15s;
-    }
-    .modal .modal-actions button:hover { transform: scale(1.03); }
-    .modal .btn-save { background: #2a2a3a; color: white; }
-    .modal .btn-cancel { background: rgba(0,0,0,0.05); color: #4a4a5a; }
-    .modal .btn-danger { background: #e74c3c; color: white; }
-
-    .day-tasks-modal .task-list-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .day-tasks-modal .task-search {
-      flex: 1;
-      min-width: 120px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(0,0,0,0.06);
-      background: rgba(0,0,0,0.02);
-      font-size: 0.8rem;
-      color: #2a2a3a;
-    }
-    .day-tasks-modal .task-search:focus { outline: none; border-color: rgba(0,0,0,0.15); }
-    .day-tasks-modal .task-list-actions {
-      display: flex;
-      gap: 6px;
-    }
-    .day-tasks-modal .task-list-actions button {
-      background: none;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 20px;
-      color: #5a5a6a;
-      transition: 0.15s;
-    }
-    .day-tasks-modal .task-list-actions button:hover { background: rgba(0,0,0,0.04); }
-
-    .day-tasks-modal .task-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      margin-bottom: 4px;
-      background: rgba(255,255,255,0.5);
-      transition: 0.2s;
-      animation: fadeIn 0.2s ease;
-      border: 1px solid rgba(0,0,0,0.03);
-    }
-    .day-tasks-modal .task-item:hover { background: rgba(255,255,255,0.8); }
-    .day-tasks-modal .task-item .task-cat {
-      width: 10px;
-      height: 10px;
-      border-radius: 30px;
-      flex-shrink: 0;
-    }
-    .day-tasks-modal .task-item .task-name {
-      flex: 1;
-      font-size: 0.85rem;
-      color: #2a2a3a;
-      font-weight: 500;
-    }
-    .day-tasks-modal .task-item .task-meta {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-      font-size: 0.6rem;
-      color: #7a7a8a;
-      flex-wrap: wrap;
-    }
-    .day-tasks-modal .task-item .task-goal-badge {
-      background: #9b59b6;
-      color: white;
-      padding: 1px 8px;
-      border-radius: 10px;
-      font-size: 0.5rem;
-      font-weight: 600;
-    }
-    .day-tasks-modal .task-item .task-actions {
-      display: flex;
-      gap: 2px;
-    }
-    .day-tasks-modal .task-item .task-actions button {
-      background: none;
-      border: none;
-      font-size: 0.9rem;
-      cursor: pointer;
-      padding: 4px 6px;
-      border-radius: 20px;
-      color: #5a5a6a;
-      transition: 0.15s;
-    }
-    .day-tasks-modal .task-item .task-actions button:hover { background: rgba(0,0,0,0.04); transform: scale(1.1); }
-    .day-tasks-modal .task-item.done {
-      opacity: 0.5;
-      background: rgba(0,0,0,0.02);
-    }
-    .day-tasks-modal .task-item.done .task-name { text-decoration: line-through; }
-    .day-tasks-modal .no-tasks {
-      text-align: center;
-      color: #8a8a9a;
-      padding: 30px 0;
-      font-size: 0.9rem;
-    }
-
-    .daily-quest-badge {
-      background: linear-gradient(135deg, #f7b731, #f5a623);
-      color: white;
-      padding: 1px 10px;
-      border-radius: 20px;
-      font-size: 0.5rem;
-      font-weight: 700;
-      margin-left: 4px;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .goal-item {
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.5);
-      border: 1px solid rgba(0,0,0,0.04);
-      margin-bottom: 10px;
-      transition: 0.2s;
-    }
-    .goal-item:hover { background: rgba(255,255,255,0.8); }
-    .goal-item .goal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    .goal-item .goal-title {
-      font-weight: 600;
-      font-size: 1rem;
-      color: #2a2a3a;
-    }
-    .goal-item .goal-status {
-      font-size: 0.65rem;
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    .goal-item .goal-status.active { background: #d4edda; color: #155724; }
-    .goal-item .goal-status.done { background: #cce5ff; color: #004085; }
-    .goal-item .goal-desc {
-      font-size: 0.8rem;
-      color: #5a5a6a;
-      margin: 4px 0 8px;
-    }
-    .goal-item .goal-progress {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 6px 0;
-    }
-    .goal-item .goal-progress .bar {
-      flex: 1;
-      height: 4px;
-      border-radius: 10px;
-      background: rgba(0,0,0,0.06);
-      overflow: hidden;
-    }
-    .goal-item .goal-progress .bar .fill {
-      height: 100%;
-      border-radius: 10px;
-      transition: width 0.5s;
-      background: #9b59b6;
-    }
-    .goal-item .goal-progress .text {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #5a5a6a;
-    }
-    .goal-item .goal-tasks {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin: 6px 0;
-    }
-    .goal-item .goal-tasks .tag {
-      font-size: 0.55rem;
-      padding: 2px 8px;
-      border-radius: 10px;
-      background: rgba(0,0,0,0.04);
-      color: #4a4a5a;
-    }
-    .goal-item .goal-tasks .tag.done { opacity: 0.4; text-decoration: line-through; }
-    .goal-item .goal-photo {
-      margin-top: 8px;
-      border-radius: 12px;
-      overflow: hidden;
-      max-width: 100%;
-    }
-    .goal-item .goal-photo img {
-      width: 100%;
-      height: auto;
-      max-height: 200px;
-      object-fit: cover;
-      border-radius: 12px;
-    }
-    .goal-item .goal-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-    .goal-item .goal-actions button {
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: none;
-      font-size: 0.7rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.15s;
-      background: rgba(0,0,0,0.04);
-      color: #4a4a5a;
-    }
-    .goal-item .goal-actions button:hover { transform: scale(1.05); background: rgba(0,0,0,0.08); }
-
-    .timer-display {
-      font-size: 2.2rem;
-      font-weight: 700;
-      text-align: center;
-      padding: 12px 0;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 2px;
-      color: #2a2a3a;
-    }
-    .timer-controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin: 8px 0;
-    }
-    .timer-controls button {
-      padding: 8px 18px;
-      border-radius: 40px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.15s;
-      font-size: 0.85rem;
-    }
-    .timer-controls button:hover { transform: scale(1.05); }
-
-    /* ===== ПРОФИЛЬ ===== */
-    .profile-header-photo {
-      width: 100%;
-      height: 120px;
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #d5c8b8, #b8a48b);
-      position: relative;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .profile-header-photo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .profile-header-photo .placeholder {
-      color: rgba(255,255,255,0.7);
-      font-size: 0.8rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-    .profile-header-photo .placeholder i { font-size: 2rem; }
-
-    .profile-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      overflow: hidden;
-      margin: -40px auto 8px;
-      border: 4px solid white;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      position: relative;
-      cursor: pointer;
-      background: linear-gradient(145deg, #b8a48b, #8f7b66);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .profile-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .profile-avatar .placeholder {
-      font-size: 2.5rem;
-      color: rgba(255,255,255,0.8);
-    }
-    .profile-avatar .upload-badge {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: #6c5ce7;
-      color: white;
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      border: 2px solid white;
-    }
-
-    .profile-field {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.04);
-    }
-    .profile-field .label { color: #7a7a8a; font-size: 0.8rem; }
-    .profile-field .value { font-weight: 500; font-size: 0.9rem; color: #2a2a3a; }
-
-    .bmi-indicator {
-      display: inline-block;
-      padding: 2px 12px;
-      border-radius: 20px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-    .bmi-underweight { background: #f39c12; color: white; }
-    .bmi-normal { background: #2ecc71; color: white; }
-    .bmi-overweight { background: #f1c40f; color: #2a2a3a; }
-    .bmi-obese { background: #e74c3c; color: white; }
-
-    .weight-log {
-      max-height: 150px;
-      overflow-y: auto;
-      margin: 8px 0;
-    }
-    .weight-log .entry {
-      display: flex;
-      justify-content: space-between;
-      padding: 4px 0;
-      font-size: 0.8rem;
-      border-bottom: 1px solid rgba(0,0,0,0.03);
-    }
-    .weight-log .entry .date { color: #7a7a8a; }
-    .weight-log .entry .weight { font-weight: 600; }
-
-    .measurements-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin: 8px 0;
-    }
-    .measurements-grid .meas-item {
-      background: rgba(0,0,0,0.03);
-      padding: 8px 12px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    .measurements-grid .meas-item .meas-label {
-      font-size: 0.6rem;
-      color: #7a7a8a;
-      text-transform: uppercase;
-    }
-    .measurements-grid .meas-item .meas-value {
-      font-weight: 600;
-      font-size: 1rem;
-    }
-
-    /* ===== ЦВЕТОВЫЕ СХЕМЫ ===== */
-    .scheme-moss body { background: #dad3c8; }
-    .scheme-moss .app { background: rgba(240,235,227,0.92); border-color: rgba(196,181,160,0.3); }
-    .scheme-moss .profile-card { background: rgba(0,0,0,0.04); }
-    .scheme-moss .day-cell { background: rgba(255,255,255,0.5); }
-    .scheme-moss .day-cell:hover { background: rgba(255,255,255,0.8); }
-    .scheme-moss .avatar { background: linear-gradient(145deg, #b8a48b, #8f7b66); }
-    .scheme-moss .xp-bar-fill { background: linear-gradient(90deg, #8b9a7a, #6b8a5a); }
-
-    .scheme-aqua body { background: #c8dde0; }
-    .scheme-aqua .app { background: rgba(232,244,248,0.92); border-color: rgba(127,193,197,0.3); }
-    .scheme-aqua .profile-card { background: rgba(0,0,0,0.04); }
-    .scheme-aqua .day-cell { background: rgba(255,255,255,0.5); }
-    .scheme-aqua .day-cell:hover { background: rgba(255,255,255,0.8); }
-    .scheme-aqua .avatar { background: linear-gradient(145deg, #7fc1c5, #4fa3a8); }
-    .scheme-aqua .xp-bar-fill { background: linear-gradient(90deg, #4fa3a8, #2d8287); }
-
-    .scheme-berry body { background: #dcc8dc; }
-    .scheme-berry .app { background: rgba(245,238,245,0.92); border-color: rgba(201,160,201,0.3); }
-    .scheme-berry .profile-card { background: rgba(0,0,0,0.04); }
-    .scheme-berry .day-cell { background: rgba(255,255,255,0.5); }
-    .scheme-berry .day-cell:hover { background: rgba(255,255,255,0.8); }
-    .scheme-berry .avatar { background: linear-gradient(145deg, #c9a0c9, #b07cb0); }
-    .scheme-berry .xp-bar-fill { background: linear-gradient(90deg, #b07cb0, #8f5a8f); }
-
-    .scheme-sunset body { background: #f0d6c8; }
-    .scheme-sunset .app { background: rgba(253,240,232,0.92); border-color: rgba(247,184,154,0.3); }
-    .scheme-sunset .profile-card { background: rgba(0,0,0,0.04); }
-    .scheme-sunset .day-cell { background: rgba(255,255,255,0.5); }
-    .scheme-sunset .day-cell:hover { background: rgba(255,255,255,0.8); }
-    .scheme-sunset .avatar { background: linear-gradient(145deg, #f7b89a, #e8936b); }
-    .scheme-sunset .xp-bar-fill { background: linear-gradient(90deg, #e8936b, #d47045); }
-
-    .scheme-mono body { background: #d5d5d5; }
-    .scheme-mono .app { background: rgba(245,245,245,0.92); border-color: rgba(200,200,200,0.3); }
-    .scheme-mono .profile-card { background: rgba(0,0,0,0.04); }
-    .scheme-mono .day-cell { background: rgba(255,255,255,0.5); }
-    .scheme-mono .day-cell:hover { background: rgba(255,255,255,0.8); }
-    .scheme-mono .avatar { background: linear-gradient(145deg, #aaaaaa, #888888); }
-    .scheme-mono .xp-bar-fill { background: linear-gradient(90deg, #888888, #555555); }
-
-    body.dark-mode .app { background: rgba(38,38,51,0.92); border-color: rgba(63,63,85,0.3); }
-    body.dark-mode .profile-card { background: rgba(255,255,255,0.04); }
-    body.dark-mode .day-cell { background: rgba(255,255,255,0.04); color: #d0d0e0; border-color: rgba(255,255,255,0.04); }
-    body.dark-mode .day-cell:hover { background: rgba(255,255,255,0.08); }
-    body.dark-mode .day-cell.other-month { opacity: 0.2; }
-    body.dark-mode .bottom-bar { border-color: rgba(255,255,255,0.06); }
-    body.dark-mode .bottom-bar .stats-btn { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
-    body.dark-mode .menu-dropdown { background: rgba(38,38,51,0.96); color: #d0d0e0; border-color: rgba(63,63,85,0.3); }
-    body.dark-mode .menu-item { color: #d0d0e0; }
-    body.dark-mode .menu-item:hover { background: rgba(255,255,255,0.04); }
-    body.dark-mode .menu-dropdown h4 { color: #8a8aaa; }
-    body.dark-mode .modal { background: rgba(38,38,51,0.96); color: #d0d0e0; }
-    body.dark-mode .modal input, body.dark-mode .modal select, body.dark-mode .modal textarea { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #d0d0e0; }
-    body.dark-mode .modal .btn-cancel { background: rgba(255,255,255,0.06); color: #aaaac0; }
-    body.dark-mode .modal .btn-save { background: #5a5a7a; color: white; }
-    body.dark-mode .day-tasks-modal .task-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.04); }
-    body.dark-mode .day-tasks-modal .task-item:hover { background: rgba(255,255,255,0.08); }
-    body.dark-mode .day-tasks-modal .task-item .task-name { color: #d0d0e0; }
-    body.dark-mode .day-tasks-modal .task-item.done { opacity: 0.3; }
-    body.dark-mode .day-tasks-modal .task-search { background: rgba(255,255,255,0.04); color: #d0d0e0; border-color: rgba(255,255,255,0.06); }
-    body.dark-mode .scheme-opt.active { border-color: #8a8aaa; }
-    body.dark-mode .daily-progress { color: #8a8aaa; }
-    body.dark-mode .daily-progress .progress-bar { background: rgba(255,255,255,0.06); }
-    body.dark-mode .calendar-header h2 { color: #d0d0e0; }
-    body.dark-mode .weekdays { color: #6a6a8a; }
-    body.dark-mode .menu-btn, body.dark-mode .theme-toggle, body.dark-mode .bottom-bar button { color: #b0b0c8; }
-    body.dark-mode .profile-name { color: #d0d0e0; }
-    body.dark-mode .profile-level { background: rgba(255,255,255,0.06); color: #b0b0c8; }
-    body.dark-mode .xp-bar-wrap { background: rgba(255,255,255,0.06); }
-    body.dark-mode .modal h3 { color: #d0d0e0; }
-    body.dark-mode .modal label { color: #8a8aaa; }
-    body.dark-mode .category-legend { color: #8a8aaa; }
-    body.dark-mode .legend-item.active-filter { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
-    body.dark-mode .goal-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.04); }
-    body.dark-mode .goal-item:hover { background: rgba(255,255,255,0.08); }
-    body.dark-mode .goal-item .goal-title { color: #d0d0e0; }
-    body.dark-mode .goal-item .goal-desc { color: #8a8aaa; }
-    body.dark-mode .goal-item .goal-status.active { background: #1e3a2a; color: #7dcea0; }
-    body.dark-mode .goal-item .goal-status.done { background: #1a2a3a; color: #7db8d0; }
-    body.dark-mode .profile-field { border-color: rgba(255,255,255,0.04); }
-    body.dark-mode .profile-field .label { color: #8a8aaa; }
-    body.dark-mode .profile-field .value { color: #d0d0e0; }
-    body.dark-mode .measurements-grid .meas-item { background: rgba(255,255,255,0.04); }
-    body.dark-mode .measurements-grid .meas-item .meas-label { color: #8a8aaa; }
-    body.dark-mode .measurements-grid .meas-item .meas-value { color: #d0d0e0; }
-    body.dark-mode .weight-log .entry { border-color: rgba(255,255,255,0.04); }
-    body.dark-mode .weight-log .entry .date { color: #8a8aaa; }
-    body.dark-mode .weight-log .entry .weight { color: #d0d0e0; }
-
-    @media (max-width: 420px) {
-      .app { padding: 14px 12px 8px; }
-      .profile-card { padding: 2px 10px 2px 4px; }
-      .avatar { width: 34px; height: 34px; font-size: 1.1rem; }
-      .profile-name { font-size: 0.8rem; }
-      .day-cell { font-size: 0.7rem; border-radius: 14px; }
-      .scheme-options { grid-template-columns: repeat(5, 1fr); gap: 4px; }
-      .scheme-opt { font-size: 0.45rem; padding: 6px 2px; }
-      .day-tasks-modal .task-item { padding: 8px 10px; }
-      .day-tasks-modal .task-item .task-name { font-size: 0.8rem; }
-      .modal .period-inputs { flex-direction: column; gap: 6px; }
-      .modal .period-inputs span { display: none; }
-      .goal-item { padding: 12px; }
-      .bottom-bar .stats-btn { font-size: 0.7rem; padding: 6px 12px; }
-      .profile-header-photo { height: 80px; }
-      .profile-avatar { width: 60px; height: 60px; margin-top: -30px; }
-      .measurements-grid { grid-template-columns: 1fr 1fr; }
-    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Roboto,system-ui,sans-serif; transition:background 0.3s,color 0.25s,border 0.25s,box-shadow 0.3s,transform 0.2s; }
+    body { min-height:100vh; display:flex; justify-content:center; align-items:center; padding:12px; background:#e8e4de; transition:background 0.5s; }
+    .app { max-width:480px; width:100%; backdrop-filter:blur(2px); border-radius:36px; box-shadow:0 20px 40px rgba(0,0,0,0.08),0 6px 12px rgba(0,0,0,0.04); overflow:hidden; padding:20px 18px 12px; border:1px solid rgba(255,255,255,0.3); position:relative; transition:background 0.5s,border 0.5s; background:rgba(255,255,255,0.92); backdrop-filter:blur(8px); }
+    .top-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:8px; }
+    .menu-btn { font-size:1.8rem; background:rgba(0,0,0,0.04); border:none; cursor:pointer; padding:8px 12px; border-radius:20px; transition:0.15s; color:#4a4a5a; min-width:48px; min-height:48px; display:flex; align-items:center; justify-content:center; }
+    .menu-btn:hover { transform:scale(1.1); background:rgba(0,0,0,0.08); }
+    .menu-btn:active { transform:scale(0.95); }
+    .profile-card { display:flex; align-items:center; gap:10px; padding:4px 14px 4px 6px; border-radius:60px; background:rgba(0,0,0,0.04); flex:1; max-width:210px; cursor:pointer; }
+    .profile-card:hover { background:rgba(0,0,0,0.08); }
+    .avatar { width:40px; height:40px; border-radius:40px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; background:linear-gradient(145deg,#b8a48b,#8f7b66); box-shadow:0 2px 8px rgba(0,0,0,0.08); flex-shrink:0; overflow:hidden; object-fit:cover; }
+    .avatar img { width:100%; height:100%; object-fit:cover; }
+    .profile-info { display:flex; flex-direction:column; line-height:1.2; min-width:0; flex:1; }
+    .profile-name { font-weight:600; font-size:0.9rem; color:#2a2a3a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .profile-level { font-size:0.6rem; padding:0 10px; border-radius:20px; font-weight:600; display:inline-block; width:fit-content; background:rgba(0,0,0,0.06); color:#4a4a5a; }
+    .xp-bar-wrap { width:100%; height:4px; border-radius:10px; margin-top:3px; overflow:hidden; background:rgba(0,0,0,0.06); }
+    .xp-bar-fill { height:100%; border-radius:10px; transition:width 0.6s ease; width:0%; background:linear-gradient(90deg,#8b9a7a,#6b8a5a); }
+    .theme-toggle { border:none; font-size:1.3rem; width:42px; height:42px; border-radius:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:rgba(0,0,0,0.04); color:#4a4a5a; flex-shrink:0; }
+    .theme-toggle:hover { background:rgba(0,0,0,0.08); }
+    .menu-dropdown { display:none; position:absolute; top:75px; left:10px; right:10px; background:rgba(255,255,255,0.96); backdrop-filter:blur(12px); border-radius:28px; padding:20px 18px; z-index:100; box-shadow:0 20px 60px rgba(0,0,0,0.15); max-height:70vh; overflow-y:auto; border:1px solid rgba(255,255,255,0.3); }
+    .menu-dropdown.open { display:block; animation:slideDown 0.25s ease; }
+    @keyframes slideDown { from { opacity:0; transform:translateY(-15px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+    .menu-dropdown h4 { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; opacity:0.5; margin:14px 0 8px; font-weight:700; color:#4a4a5a; }
+    .menu-dropdown h4:first-child { margin-top:0; }
+    .menu-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:14px; cursor:pointer; font-weight:500; font-size:0.9rem; border:none; background:none; width:100%; text-align:left; color:#2a2a3a; }
+    .menu-item:hover { background:rgba(0,0,0,0.04); transform:translateX(4px); }
+    .menu-item i { width:22px; font-size:1rem; opacity:0.7; }
+    .scheme-options { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:6px 0 2px; }
+    .scheme-opt { padding:8px 4px; border-radius:14px; border:2px solid transparent; text-align:center; font-size:0.55rem; font-weight:600; cursor:pointer; transition:0.2s; color:white; text-shadow:0 1px 4px rgba(0,0,0,0.15); }
+    .scheme-opt:hover { transform:scale(1.05); }
+    .scheme-opt.active { border-color:#2a2a3a; box-shadow:0 0 20px rgba(0,0,0,0.08); }
+    .menu-close { position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.3rem; cursor:pointer; opacity:0.4; color:#2a2a3a; }
+    .menu-close:hover { opacity:0.8; }
+    .calendar-header { display:flex; justify-content:space-between; align-items:center; margin:4px 0 12px; padding:0 4px; }
+    .calendar-header h2 { font-weight:700; font-size:1.2rem; letter-spacing:-0.3px; color:#2a2a3a; }
+    .month-nav { display:flex; gap:12px; }
+    .month-nav button { background:none; border:none; font-size:1rem; cursor:pointer; padding:0 6px; color:#5a5a6a; transition:0.15s; }
+    .month-nav button:hover { transform:scale(1.2); }
+    .weekdays { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-weight:600; font-size:0.6rem; margin-bottom:4px; letter-spacing:0.3px; color:#7a7a8a; }
+    .days-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .day-cell { aspect-ratio:1/1; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:0.85rem; font-weight:500; padding:2px; position:relative; border:1px solid rgba(0,0,0,0.04); transition:0.15s; background:rgba(255,255,255,0.5); cursor:pointer; color:#2a2a3a; }
+    .day-cell:hover { transform:scale(1.04); z-index:2; background:rgba(255,255,255,0.8); }
+    .day-cell.other-month { opacity:0.3; }
+    .day-cell.today { border-color:rgba(0,0,0,0.2); border-width:2px; }
+    .day-cell .day-number { font-weight:500; font-size:0.85rem; }
+    .day-cell .task-indicators { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; margin-top:1px; }
+    .task-dot { width:6px; height:6px; border-radius:20px; display:inline-block; border:1px solid rgba(255,255,255,0.2); }
+    .task-dot.done { opacity:0.2; }
+    .task-dot.important { box-shadow:0 0 8px rgba(255,215,0,0.4); }
+    .task-dot.period { border-style:dashed; border-width:1.5px; }
+    .task-dot.goal { border-color:#9b59b6; }
+    .daily-progress { display:flex; align-items:center; margin:10px 0 4px; padding:6px 12px; border-radius:16px; font-size:0.7rem; font-weight:500; color:#4a4a5a; background:rgba(0,0,0,0.03); }
+    .daily-progress .progress-bar { flex:1; height:3px; border-radius:10px; margin:0 10px; overflow:hidden; background:rgba(0,0,0,0.06); }
+    .daily-progress .progress-bar .fill { height:100%; border-radius:10px; transition:width 0.5s; width:0%; background:linear-gradient(90deg,#8b9a7a,#6b8a5a); }
+    .bottom-bar { display:flex; justify-content:space-around; align-items:center; margin-top:16px; padding:6px 0 4px; border-top:1px solid rgba(0,0,0,0.06); }
+    .bottom-bar button { background:none; border:none; font-size:1.4rem; cursor:pointer; padding:8px 12px; border-radius:40px; transition:0.15s; position:relative; color:#4a4a5a; }
+    .bottom-bar button:hover { transform:translateY(-2px); background:rgba(0,0,0,0.04); }
+    .bottom-bar .badge { position:absolute; top:-2px; right:-2px; background:#e74c3c; color:white; font-size:0.5rem; border-radius:20px; padding:0 6px; font-weight:700; min-width:18px; text-align:center; }
+    .bottom-bar .stats-btn { background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:white; border-radius:40px; padding:8px 16px; font-weight:600; font-size:0.9rem; box-shadow:0 4px 15px rgba(108,92,231,0.3); }
+    .bottom-bar .stats-btn:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 6px 25px rgba(108,92,231,0.4); }
+    .bottom-bar .stats-btn i { margin-right:6px; }
+    .category-legend { display:flex; flex-wrap:wrap; gap:6px 10px; justify-content:center; margin:8px 0 0; font-size:0.55rem; font-weight:600; color:#5a5a6a; }
+    .legend-item { display:flex; align-items:center; gap:4px; cursor:pointer; padding:4px 10px; border-radius:20px; transition:0.2s; opacity:0.6; border:2px solid transparent; }
+    .legend-item:hover { opacity:1; transform:scale(1.05); }
+    .legend-item.active-filter { opacity:1; background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); }
+    .color-swatch { width:10px; height:10px; border-radius:30px; display:inline-block; }
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); backdrop-filter:blur(6px); justify-content:center; align-items:center; z-index:1000; padding:20px; }
+    .modal-overlay.active { display:flex; }
+    .modal { border-radius:28px; padding:24px 22px; max-width:400px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 30px 60px rgba(0,0,0,0.12); background:rgba(255,255,255,0.96); backdrop-filter:blur(8px); }
+    .modal h3 { margin-bottom:16px; font-weight:700; font-size:1.2rem; color:#2a2a3a; }
+    .modal label { font-weight:500; font-size:0.8rem; display:block; margin:10px 0 4px; color:#4a4a5a; }
+    .modal input, .modal select, .modal textarea { width:100%; padding:10px 14px; border-radius:14px; border:1px solid rgba(0,0,0,0.08); background:rgba(0,0,0,0.03); font-size:0.9rem; transition:0.2s; color:#2a2a3a; }
+    .modal input:focus, .modal textarea:focus { border-color:rgba(0,0,0,0.2); outline:none; }
+    .modal textarea { resize:vertical; min-height:60px; }
+    .modal .category-selector { display:flex; flex-wrap:wrap; gap:5px; margin:6px 0 10px; }
+    .modal .cat-btn { padding:5px 12px; border-radius:30px; border:2px solid transparent; font-size:0.7rem; font-weight:600; cursor:pointer; transition:0.15s; color:white; }
+    .modal .cat-btn.active { border-color:#2a2a3a; transform:scale(1.04); box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    .modal .period-inputs { display:flex; gap:10px; align-items:center; }
+    .modal .period-inputs input { flex:1; }
+    .modal .period-inputs span { color:#7a7a8a; font-weight:500; }
+    .modal .modal-actions { display:flex; gap:10px; margin-top:16px; justify-content:flex-end; }
+    .modal .modal-actions button { padding:10px 22px; border-radius:40px; border:none; font-weight:600; cursor:pointer; font-size:0.85rem; transition:0.15s; }
+    .modal .modal-actions button:hover { transform:scale(1.03); }
+    .modal .btn-save { background:#2a2a3a; color:white; }
+    .modal .btn-cancel { background:rgba(0,0,0,0.05); color:#4a4a5a; }
+    .modal .btn-danger { background:#e74c3c; color:white; }
+    .day-tasks-modal .task-list-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px; flex-wrap:wrap; }
+    .day-tasks-modal .task-search { flex:1; min-width:120px; padding:6px 12px; border-radius:20px; border:1px solid rgba(0,0,0,0.06); background:rgba(0,0,0,0.02); font-size:0.8rem; color:#2a2a3a; }
+    .day-tasks-modal .task-search:focus { outline:none; border-color:rgba(0,0,0,0.15); }
+    .day-tasks-modal .task-list-actions { display:flex; gap:6px; }
+    .day-tasks-modal .task-list-actions button { background:none; border:none; font-size:1rem; cursor:pointer; padding:4px 8px; border-radius:20px; color:#5a5a6a; transition:0.15s; }
+    .day-tasks-modal .task-list-actions button:hover { background:rgba(0,0,0,0.04); }
+    .day-tasks-modal .task-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:14px; margin-bottom:4px; background:rgba(255,255,255,0.5); transition:0.2s; animation:fadeIn 0.2s ease; border:1px solid rgba(0,0,0,0.03); }
+    .day-tasks-modal .task-item:hover { background:rgba(255,255,255,0.8); }
+    .day-tasks-modal .task-item .task-cat { width:10px; height:10px; border-radius:30px; flex-shrink:0; }
+    .day-tasks-modal .task-item .task-name { flex:1; font-size:0.85rem; color:#2a2a3a; font-weight:500; }
+    .day-tasks-modal .task-item .task-meta { display:flex; gap:4px; align-items:center; font-size:0.6rem; color:#7a7a8a; flex-wrap:wrap; }
+    .day-tasks-modal .task-item .task-goal-badge { background:#9b59b6; color:white; padding:1px 8px; border-radius:10px; font-size:0.5rem; font-weight:600; }
+    .day-tasks-modal .task-item .task-actions { display:flex; gap:2px; }
+    .day-tasks-modal .task-item .task-actions button { background:none; border:none; font-size:0.9rem; cursor:pointer; padding:4px 6px; border-radius:20px; color:#5a5a6a; transition:0.15s; }
+    .day-tasks-modal .task-item .task-actions button:hover { background:rgba(0,0,0,0.04); transform:scale(1.1); }
+    .day-tasks-modal .task-item.done { opacity:0.5; background:rgba(0,0,0,0.02); }
+    .day-tasks-modal .task-item.done .task-name { text-decoration:line-through; }
+    .day-tasks-modal .no-tasks { text-align:center; color:#8a8a9a; padding:30px 0; font-size:0.9rem; }
+    .daily-quest-badge { background:linear-gradient(135deg,#f7b731,#f5a623); color:white; padding:1px 10px; border-radius:20px; font-size:0.5rem; font-weight:700; margin-left:4px; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+    .goal-item { padding:14px 16px; border-radius:16px; background:rgba(255,255,255,0.5); border:1px solid rgba(0,0,0,0.04); margin-bottom:10px; transition:0.2s; }
+    .goal-item:hover { background:rgba(255,255,255,0.8); }
+    .goal-item .goal-header { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+    .goal-item .goal-title { font-weight:600; font-size:1rem; color:#2a2a3a; }
+    .goal-item .goal-status { font-size:0.65rem; padding:2px 10px; border-radius:20px; font-weight:600; white-space:nowrap; }
+    .goal-item .goal-status.active { background:#d4edda; color:#155724; }
+    .goal-item .goal-status.done { background:#cce5ff; color:#004085; }
+    .goal-item .goal-desc { font-size:0.8rem; color:#5a5a6a; margin:4px 0 8px; }
+    .goal-item .goal-progress { display:flex; align-items:center; gap:10px; margin:6px 0; }
+    .goal-item .goal-progress .bar { flex:1; height:4px; border-radius:10px; background:rgba(0,0,0,0.06); overflow:hidden; }
+    .goal-item .goal-progress .bar .fill { height:100%; border-radius:10px; transition:width 0.5s; background:#9b59b6; }
+    .goal-item .goal-progress .text { font-size:0.7rem; font-weight:600; color:#5a5a6a; }
+    .goal-item .goal-tasks { display:flex; flex-wrap:wrap; gap:4px; margin:6px 0; }
+    .goal-item .goal-tasks .tag { font-size:0.55rem; padding:2px 8px; border-radius:10px; background:rgba(0,0,0,0.04); color:#4a4a5a; }
+    .goal-item .goal-tasks .tag.done { opacity:0.4; text-decoration:line-through; }
+    .goal-item .goal-photo { margin-top:8px; border-radius:12px; overflow:hidden; max-width:100%; }
+    .goal-item .goal-photo img { width:100%; height:auto; max-height:200px; object-fit:cover; border-radius:12px; }
+    .goal-item .goal-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+    .goal-item .goal-actions button { padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; font-weight:600; cursor:pointer; transition:0.15s; background:rgba(0,0,0,0.04); color:#4a4a5a; }
+    .goal-item .goal-actions button:hover { transform:scale(1.05); background:rgba(0,0,0,0.08); }
+    .timer-display { font-size:2.2rem; font-weight:700; text-align:center; padding:12px 0; font-variant-numeric:tabular-nums; letter-spacing:2px; color:#2a2a3a; }
+    .timer-controls { display:flex; gap:10px; justify-content:center; margin:8px 0; }
+    .timer-controls button { padding:8px 18px; border-radius:40px; border:none; font-weight:600; cursor:pointer; transition:0.15s; font-size:0.85rem; }
+    .timer-controls button:hover { transform:scale(1.05); }
+    .profile-header-photo { width:100%; height:120px; border-radius:16px; overflow:hidden; margin-bottom:12px; background:linear-gradient(135deg,#d5c8b8,#b8a48b); position:relative; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .profile-header-photo img { width:100%; height:100%; object-fit:cover; }
+    .profile-header-photo .placeholder { color:rgba(255,255,255,0.7); font-size:0.8rem; display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .profile-header-photo .placeholder i { font-size:2rem; }
+    .profile-avatar { width:80px; height:80px; border-radius:50%; overflow:hidden; margin:-40px auto 8px; border:4px solid white; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; cursor:pointer; background:linear-gradient(145deg,#b8a48b,#8f7b66); display:flex; align-items:center; justify-content:center; }
+    .profile-avatar img { width:100%; height:100%; object-fit:cover; }
+    .profile-avatar .placeholder { font-size:2.5rem; color:rgba(255,255,255,0.8); }
+    .profile-avatar .upload-badge { position:absolute; bottom:0; right:0; background:#6c5ce7; color:white; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; border:2px solid white; }
+    .profile-field { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.04); }
+    .profile-field .label { color:#7a7a8a; font-size:0.8rem; }
+    .profile-field .value { font-weight:500; font-size:0.9rem; color:#2a2a3a; }
+    .bmi-indicator { display:inline-block; padding:2px 12px; border-radius:20px; font-size:0.7rem; font-weight:600; }
+    .bmi-underweight { background:#f39c12; color:white; }
+    .bmi-normal { background:#2ecc71; color:white; }
+    .bmi-overweight { background:#f1c40f; color:#2a2a3a; }
+    .bmi-obese { background:#e74c3c; color:white; }
+    .measurements-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0; }
+    .measurements-grid .meas-item { background:rgba(0,0,0,0.03); padding:8px 12px; border-radius:12px; text-align:center; }
+    .measurements-grid .meas-item .meas-label { font-size:0.6rem; color:#7a7a8a; text-transform:uppercase; }
+    .measurements-grid .meas-item .meas-value { font-weight:600; font-size:1rem; }
+    .profile-tabs { display:flex; gap:6px; margin:12px 0; flex-wrap:wrap; }
+    .profile-tabs button { padding:6px 14px; border-radius:20px; border:none; font-size:0.75rem; font-weight:600; cursor:pointer; background:rgba(0,0,0,0.04); color:#4a4a5a; }
+    .profile-tabs button.active { background:#6c5ce7; color:white; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    .chart-container { width:100%; height:200px; margin:10px 0; background:rgba(0,0,0,0.02); border-radius:12px; overflow:hidden; }
+    .chart-container canvas { width:100%; height:100%; }
+    .reminder-set { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:8px 0; }
+    .reminder-set select { padding:6px 12px; border-radius:12px; border:1px solid rgba(0,0,0,0.08); background:rgba(0,0,0,0.02); }
+    .rpg-avatar-box { text-align:center; padding:16px; background:rgba(0,0,0,0.03); border-radius:20px; margin:12px 0; }
+    .rpg-avatar-box .avatar-big { font-size:5rem; line-height:1; }
+    .rpg-avatar-box .level-badge { display:inline-block; background:#6c5ce7; color:white; padding:2px 16px; border-radius:20px; font-weight:700; font-size:0.9rem; margin:6px 0; }
+    .rpg-avatar-box .xp-bar { height:8px; border-radius:10px; background:rgba(0,0,0,0.06); overflow:hidden; margin:8px 0; }
+    .rpg-avatar-box .xp-bar .fill { height:100%; border-radius:10px; background:linear-gradient(90deg,#6c5ce7,#a29bfe); transition:width 0.5s; }
+    .rpg-avatar-box .achievements-list { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:8px 0; }
+    .rpg-avatar-box .achievement-icon { font-size:1.8rem; opacity:0.6; }
+    .rpg-avatar-box .achievement-icon.unlocked { opacity:1; }
+    .scheme-moss body { background:#dad3c8; }
+    .scheme-moss .app { background:rgba(240,235,227,0.92); border-color:rgba(196,181,160,0.3); }
+    .scheme-moss .profile-card { background:rgba(0,0,0,0.04); }
+    .scheme-moss .day-cell { background:rgba(255,255,255,0.5); }
+    .scheme-moss .day-cell:hover { background:rgba(255,255,255,0.8); }
+    .scheme-moss .avatar { background:linear-gradient(145deg,#b8a48b,#8f7b66); }
+    .scheme-moss .xp-bar-fill { background:linear-gradient(90deg,#8b9a7a,#6b8a5a); }
+    .scheme-aqua body { background:#c8dde0; }
+    .scheme-aqua .app { background:rgba(232,244,248,0.92); border-color:rgba(127,193,197,0.3); }
+    .scheme-aqua .profile-card { background:rgba(0,0,0,0.04); }
+    .scheme-aqua .day-cell { background:rgba(255,255,255,0.5); }
+    .scheme-aqua .day-cell:hover { background:rgba(255,255,255,0.8); }
+    .scheme-aqua .avatar { background:linear-gradient(145deg,#7fc1c5,#4fa3a8); }
+    .scheme-aqua .xp-bar-fill { background:linear-gradient(90deg,#4fa3a8,#2d8287); }
+    .scheme-berry body { background:#dcc8dc; }
+    .scheme-berry .app { background:rgba(245,238,245,0.92); border-color:rgba(201,160,201,0.3); }
+    .scheme-berry .profile-card { background:rgba(0,0,0,0.04); }
+    .scheme-berry .day-cell { background:rgba(255,255,255,0.5); }
+    .scheme-berry .day-cell:hover { background:rgba(255,255,255,0.8); }
+    .scheme-berry .avatar { background:linear-gradient(145deg,#c9a0c9,#b07cb0); }
+    .scheme-berry .xp-bar-fill { background:linear-gradient(90deg,#b07cb0,#8f5a8f); }
+    .scheme-sunset body { background:#f0d6c8; }
+    .scheme-sunset .app { background:rgba(253,240,232,0.92); border-color:rgba(247,184,154,0.3); }
+    .scheme-sunset .profile-card { background:rgba(0,0,0,0.04); }
+    .scheme-sunset .day-cell { background:rgba(255,255,255,0.5); }
+    .scheme-sunset .day-cell:hover { background:rgba(255,255,255,0.8); }
+    .scheme-sunset .avatar { background:linear-gradient(145deg,#f7b89a,#e8936b); }
+    .scheme-sunset .xp-bar-fill { background:linear-gradient(90deg,#e8936b,#d47045); }
+    .scheme-mono body { background:#d5d5d5; }
+    .scheme-mono .app { background:rgba(245,245,245,0.92); border-color:rgba(200,200,200,0.3); }
+    .scheme-mono .profile-card { background:rgba(0,0,0,0.04); }
+    .scheme-mono .day-cell { background:rgba(255,255,255,0.5); }
+    .scheme-mono .day-cell:hover { background:rgba(255,255,255,0.8); }
+    .scheme-mono .avatar { background:linear-gradient(145deg,#aaaaaa,#888888); }
+    .scheme-mono .xp-bar-fill { background:linear-gradient(90deg,#888888,#555555); }
+    body.dark-mode .app { background:rgba(38,38,51,0.92); border-color:rgba(63,63,85,0.3); }
+    body.dark-mode .profile-card { background:rgba(255,255,255,0.04); }
+    body.dark-mode .day-cell { background:rgba(255,255,255,0.04); color:#d0d0e0; border-color:rgba(255,255,255,0.04); }
+    body.dark-mode .day-cell:hover { background:rgba(255,255,255,0.08); }
+    body.dark-mode .day-cell.other-month { opacity:0.2; }
+    body.dark-mode .bottom-bar { border-color:rgba(255,255,255,0.06); }
+    body.dark-mode .bottom-bar .stats-btn { background:linear-gradient(135deg,#6c5ce7,#a29bfe); }
+    body.dark-mode .menu-dropdown { background:rgba(38,38,51,0.96); color:#d0d0e0; border-color:rgba(63,63,85,0.3); }
+    body.dark-mode .menu-item { color:#d0d0e0; }
+    body.dark-mode .menu-item:hover { background:rgba(255,255,255,0.04); }
+    body.dark-mode .menu-dropdown h4 { color:#8a8aaa; }
+    body.dark-mode .modal { background:rgba(38,38,51,0.96); color:#d0d0e0; }
+    body.dark-mode .modal input, body.dark-mode .modal select, body.dark-mode .modal textarea { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); color:#d0d0e0; }
+    body.dark-mode .modal .btn-cancel { background:rgba(255,255,255,0.06); color:#aaaac0; }
+    body.dark-mode .modal .btn-save { background:#5a5a7a; color:white; }
+    body.dark-mode .day-tasks-modal .task-item { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.04); }
+    body.dark-mode .day-tasks-modal .task-item:hover { background:rgba(255,255,255,0.08); }
+    body.dark-mode .day-tasks-modal .task-item .task-name { color:#d0d0e0; }
+    body.dark-mode .day-tasks-modal .task-item.done { opacity:0.3; }
+    body.dark-mode .day-tasks-modal .task-search { background:rgba(255,255,255,0.04); color:#d0d0e0; border-color:rgba(255,255,255,0.06); }
+    body.dark-mode .scheme-opt.active { border-color:#8a8aaa; }
+    body.dark-mode .daily-progress { color:#8a8aaa; }
+    body.dark-mode .daily-progress .progress-bar { background:rgba(255,255,255,0.06); }
+    body.dark-mode .calendar-header h2 { color:#d0d0e0; }
+    body.dark-mode .weekdays { color:#6a6a8a; }
+    body.dark-mode .menu-btn, body.dark-mode .theme-toggle, body.dark-mode .bottom-bar button { color:#b0b0c8; }
+    body.dark-mode .profile-name { color:#d0d0e0; }
+    body.dark-mode .profile-level { background:rgba(255,255,255,0.06); color:#b0b0c8; }
+    body.dark-mode .xp-bar-wrap { background:rgba(255,255,255,0.06); }
+    body.dark-mode .modal h3 { color:#d0d0e0; }
+    body.dark-mode .modal label { color:#8a8aaa; }
+    body.dark-mode .category-legend { color:#8a8aaa; }
+    body.dark-mode .legend-item.active-filter { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); }
+    body.dark-mode .goal-item { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.04); }
+    body.dark-mode .goal-item:hover { background:rgba(255,255,255,0.08); }
+    body.dark-mode .goal-item .goal-title { color:#d0d0e0; }
+    body.dark-mode .goal-item .goal-desc { color:#8a8aaa; }
+    body.dark-mode .goal-item .goal-status.active { background:#1e3a2a; color:#7dcea0; }
+    body.dark-mode .goal-item .goal-status.done { background:#1a2a3a; color:#7db8d0; }
+    body.dark-mode .profile-field { border-color:rgba(255,255,255,0.04); }
+    body.dark-mode .profile-field .label { color:#8a8aaa; }
+    body.dark-mode .profile-field .value { color:#d0d0e0; }
+    body.dark-mode .measurements-grid .meas-item { background:rgba(255,255,255,0.04); }
+    body.dark-mode .measurements-grid .meas-item .meas-label { color:#8a8aaa; }
+    body.dark-mode .measurements-grid .meas-item .meas-value { color:#d0d0e0; }
+    body.dark-mode .rpg-avatar-box { background:rgba(255,255,255,0.04); }
+    body.dark-mode .chart-container { background:rgba(255,255,255,0.04); }
+    body.dark-mode .reminder-set select { background:rgba(255,255,255,0.04); color:#d0d0e0; border-color:rgba(255,255,255,0.08); }
+    @media (max-width:420px){ .app { padding:14px 12px 8px; } .profile-card { padding:2px 10px 2px 4px; } .avatar { width:34px; height:34px; font-size:1.1rem; } .profile-name { font-size:0.8rem; } .day-cell { font-size:0.7rem; border-radius:14px; } .scheme-options { grid-template-columns:repeat(5,1fr); gap:4px; } .scheme-opt { font-size:0.45rem; padding:6px 2px; } .day-tasks-modal .task-item { padding:8px 10px; } .day-tasks-modal .task-item .task-name { font-size:0.8rem; } .modal .period-inputs { flex-direction:column; gap:6px; } .modal .period-inputs span { display:none; } .goal-item { padding:12px; } .bottom-bar .stats-btn { font-size:0.7rem; padding:6px 12px; } .profile-header-photo { height:80px; } .profile-avatar { width:60px; height:60px; margin-top:-30px; } .measurements-grid { grid-template-columns:1fr 1fr; } .profile-tabs button { font-size:0.65rem; padding:4px 10px; } .rpg-avatar-box .avatar-big { font-size:3.5rem; } }
   </style>
 </head>
 <body>
@@ -1018,9 +264,7 @@
     <div class="top-bar">
       <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
       <div class="profile-card" id="profileCard">
-        <div class="avatar" id="avatarPreview">
-          <span id="avatarPlaceholder">🧙</span>
-        </div>
+        <div class="avatar" id="avatarPreview"><span id="avatarPlaceholder">🧙</span></div>
         <div class="profile-info">
           <span class="profile-name" id="profileNameDisplay">Эльдар</span>
           <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
@@ -1066,16 +310,13 @@
         <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
       </div>
     </div>
-
     <div class="weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
     <div class="days-grid" id="daysGrid"></div>
-
     <div class="daily-progress" id="dailyProgress">
       <span>📅 Сегодня</span>
       <div class="progress-bar"><div class="fill" id="dailyProgressFill"></div></div>
       <span id="dailyProgressText">0/0</span>
     </div>
-
     <div class="category-legend" id="legendContainer"></div>
 
     <div class="bottom-bar">
@@ -1091,70 +332,74 @@
   <div class="modal-overlay" id="profileModal">
     <div class="modal">
       <h3><i class="fas fa-user-circle"></i> Мой профиль</h3>
-
-      <!-- Шапка профиля -->
-      <div class="profile-header-photo" id="headerPhoto">
-        <div class="placeholder">
-          <i class="fas fa-camera"></i>
-          <span>Загрузить обложку</span>
-        </div>
+      <div class="profile-header-photo" id="headerPhoto"><div class="placeholder"><i class="fas fa-camera"></i><span>Загрузить обложку</span></div></div>
+      <div class="profile-avatar" id="profileAvatar"><span class="placeholder" id="profileAvatarPlaceholder">🧙</span><div class="upload-badge"><i class="fas fa-camera"></i></div></div>
+      <div class="profile-tabs">
+        <button class="active" data-tab="tab-main">Основное</button>
+        <button data-tab="tab-weight">Вес</button>
+        <button data-tab="tab-measurements">Мерки</button>
+        <button data-tab="tab-reminders">Напоминания</button>
+        <button data-tab="tab-rpg">RPG Аватар</button>
       </div>
-
-      <!-- Аватар -->
-      <div class="profile-avatar" id="profileAvatar">
-        <span class="placeholder" id="profileAvatarPlaceholder">🧙</span>
-        <div class="upload-badge"><i class="fas fa-camera"></i></div>
+      <div class="tab-content active" id="tab-main">
+        <div class="profile-field"><span class="label">Имя</span><span class="value" id="profileNameValue">—</span></div>
+        <div class="profile-field"><span class="label">Возраст</span><span class="value" id="profileAgeValue">—</span></div>
+        <div class="profile-field"><span class="label">Пол</span><span class="value" id="profileGenderValue">—</span></div>
+        <div class="profile-field"><span class="label">Рост (см)</span><span class="value" id="profileHeightValue">—</span></div>
+        <div class="profile-field"><span class="label">Вес (кг)</span><span class="value" id="profileWeightValue">—</span></div>
+        <div class="profile-field"><span class="label">ИМТ</span><span class="value"><span id="bmiValue">—</span> <span id="bmiLabel" class="bmi-indicator"></span></span></div>
       </div>
-
-      <!-- Поля профиля -->
-      <div class="profile-field">
-        <span class="label">Имя</span>
-        <span class="value" id="profileNameValue">Эльдар</span>
-      </div>
-      <div class="profile-field">
-        <span class="label">Возраст</span>
-        <span class="value" id="profileAgeValue">—</span>
-      </div>
-      <div class="profile-field">
-        <span class="label">Пол</span>
-        <span class="value" id="profileGenderValue">—</span>
-      </div>
-      <div class="profile-field">
-        <span class="label">Рост (см)</span>
-        <span class="value" id="profileHeightValue">—</span>
-      </div>
-      <div class="profile-field">
-        <span class="label">Вес (кг)</span>
-        <span class="value" id="profileWeightValue">—</span>
-      </div>
-      <div class="profile-field">
-        <span class="label">ИМТ</span>
-        <span class="value"><span id="bmiValue">—</span> <span id="bmiLabel" class="bmi-indicator"></span></span>
-      </div>
-
-      <!-- Журнал веса -->
-      <div style="margin-top:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-weight:600; font-size:0.9rem;">📊 Журнал веса</span>
+      <div class="tab-content" id="tab-weight">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:600;">📊 График веса</span>
           <button id="addWeightBtn" style="background:none; border:none; font-size:0.8rem; color:#6c5ce7; cursor:pointer;">+ Добавить</button>
         </div>
-        <div class="weight-log" id="weightLog"></div>
+        <div class="chart-container"><canvas id="weightChart"></canvas></div>
+        <div style="font-size:0.7rem; color:#7a7a8a; text-align:center;">Последние 10 записей</div>
       </div>
-
-      <!-- Мерки -->
-      <div style="margin-top:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-weight:600; font-size:0.9rem;">📏 Мерки</span>
+      <div class="tab-content" id="tab-measurements">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:600;">📏 График мерок</span>
           <button id="addMeasurementBtn" style="background:none; border:none; font-size:0.8rem; color:#6c5ce7; cursor:pointer;">+ Добавить</button>
         </div>
-        <div class="measurements-grid" id="measurementsGrid">
+        <div class="chart-container"><canvas id="measurementsChart"></canvas></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
           <div class="meas-item"><div class="meas-label">Бицепс</div><div class="meas-value" id="measBiceps">—</div></div>
           <div class="meas-item"><div class="meas-label">Грудь</div><div class="meas-value" id="measChest">—</div></div>
           <div class="meas-item"><div class="meas-label">Бедро</div><div class="meas-value" id="measThigh">—</div></div>
           <div class="meas-item"><div class="meas-label">Талия</div><div class="meas-value" id="measWaist">—</div></div>
         </div>
       </div>
-
+      <div class="tab-content" id="tab-reminders">
+        <div style="margin:8px 0;">
+          <span style="font-weight:600;">📅 Напоминание о замерах</span>
+          <div class="reminder-set">
+            <select id="reminderPeriod">
+              <option value="0">Отключено</option>
+              <option value="1">Каждый месяц</option>
+              <option value="2">Раз в 2 месяца</option>
+              <option value="3">Раз в 3 месяца</option>
+              <option value="6">Раз в 6 месяцев</option>
+              <option value="12">Раз в год</option>
+            </select>
+            <button id="saveReminderBtn" class="btn-save" style="padding:4px 16px; border:none; border-radius:20px; color:white; background:#6c5ce7; cursor:pointer;">Сохранить</button>
+          </div>
+          <div id="reminderStatus" style="font-size:0.8rem; margin-top:4px; color:#7a7a8a;"></div>
+        </div>
+        <div style="margin-top:12px;">
+          <span style="font-weight:600;">📋 История замеров</span>
+          <div id="measurementHistory" style="max-height:150px; overflow-y:auto; font-size:0.8rem; margin-top:6px;"></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-rpg">
+        <div class="rpg-avatar-box">
+          <div class="avatar-big" id="rpgAvatarBig">🧙</div>
+          <div class="level-badge" id="rpgLevelBadge">Уровень 1</div>
+          <div class="xp-bar"><div class="fill" id="rpgXpBar" style="width:0%;"></div></div>
+          <div style="font-size:0.8rem; color:#7a7a8a;" id="rpgXpText">0 / 1 XP</div>
+          <div class="achievements-list" id="rpgAchievementsList"></div>
+        </div>
+      </div>
       <div class="modal-actions">
         <button class="btn-cancel" id="closeProfileBtn">Закрыть</button>
         <button class="btn-save" id="editProfileBtn">Редактировать</button>
@@ -1166,20 +411,12 @@
   <div class="modal-overlay" id="editProfileModal">
     <div class="modal">
       <h3><i class="fas fa-edit"></i> Редактировать профиль</h3>
-      <label>Имя</label>
-      <input type="text" id="editProfileName" placeholder="Ваше имя">
-      <label>Возраст</label>
-      <input type="number" id="editProfileAge" placeholder="Возраст">
+      <label>Имя</label><input type="text" id="editProfileName" placeholder="Ваше имя">
+      <label>Возраст</label><input type="number" id="editProfileAge" placeholder="Возраст">
       <label>Пол</label>
-      <select id="editProfileGender">
-        <option value="">Не указан</option>
-        <option value="Мужской">Мужской</option>
-        <option value="Женский">Женский</option>
-      </select>
-      <label>Рост (см)</label>
-      <input type="number" id="editProfileHeight" placeholder="Рост в см" step="0.1">
-      <label>Вес (кг)</label>
-      <input type="number" id="editProfileWeight" placeholder="Вес в кг" step="0.1">
+      <select id="editProfileGender"><option value="">Не указан</option><option value="Мужской">Мужской</option><option value="Женский">Женский</option></select>
+      <label>Рост (см)</label><input type="number" id="editProfileHeight" placeholder="Рост в см" step="0.1">
+      <label>Вес (кг)</label><input type="number" id="editProfileWeight" placeholder="Вес в кг" step="0.1">
       <div class="modal-actions">
         <button class="btn-cancel" id="cancelEditProfileBtn">Отмена</button>
         <button class="btn-save" id="saveEditProfileBtn">Сохранить</button>
@@ -1191,10 +428,8 @@
   <div class="modal-overlay" id="addWeightModal">
     <div class="modal">
       <h3><i class="fas fa-weight-scale"></i> Добавить вес</h3>
-      <label>Дата</label>
-      <input type="date" id="weightDate">
-      <label>Вес (кг)</label>
-      <input type="number" id="weightValue" step="0.1" placeholder="Вес в кг">
+      <label>Дата</label><input type="date" id="weightDate">
+      <label>Вес (кг)</label><input type="number" id="weightValue" step="0.1" placeholder="Вес в кг">
       <div class="modal-actions">
         <button class="btn-cancel" id="cancelWeightBtn">Отмена</button>
         <button class="btn-save" id="saveWeightBtn">Сохранить</button>
@@ -1206,14 +441,10 @@
   <div class="modal-overlay" id="addMeasurementModal">
     <div class="modal">
       <h3><i class="fas fa-ruler"></i> Добавить мерки</h3>
-      <label>Бицепс (см)</label>
-      <input type="number" id="measBicepsInput" step="0.1" placeholder="Бицепс">
-      <label>Грудь (см)</label>
-      <input type="number" id="measChestInput" step="0.1" placeholder="Грудь">
-      <label>Бедро (см)</label>
-      <input type="number" id="measThighInput" step="0.1" placeholder="Бедро">
-      <label>Талия (см)</label>
-      <input type="number" id="measWaistInput" step="0.1" placeholder="Талия">
+      <label>Бицепс (см)</label><input type="number" id="measBicepsInput" step="0.1" placeholder="Бицепс">
+      <label>Грудь (см)</label><input type="number" id="measChestInput" step="0.1" placeholder="Грудь">
+      <label>Бедро (см)</label><input type="number" id="measThighInput" step="0.1" placeholder="Бедро">
+      <label>Талия (см)</label><input type="number" id="measWaistInput" step="0.1" placeholder="Талия">
       <div class="modal-actions">
         <button class="btn-cancel" id="cancelMeasurementBtn">Отмена</button>
         <button class="btn-save" id="saveMeasurementBtn">Сохранить</button>
@@ -1225,18 +456,17 @@
   <div class="modal-overlay" id="addTaskModal">
     <div class="modal">
       <h3><i class="fas fa-plus-circle"></i> Новая задача</h3>
-      <label>Название</label>
-      <input type="text" id="taskTitleInput" placeholder="Что нужно сделать?">
+      <label>Название</label><input type="text" id="taskTitleInput" placeholder="Что нужно сделать?">
       <label>Период</label>
       <div class="period-inputs">
-        <input type="date" id="taskDateFrom" />
-        <span>→</span>
-        <input type="date" id="taskDateTo" />
+        <input type="date" id="taskDateFrom" /><span>→</span><input type="date" id="taskDateTo" />
       </div>
+      <label>Продолжительность (минут)</label>
+      <input type="number" id="taskDuration" placeholder="Например: 30" value="0" min="0" step="1">
       <label>Категория</label>
       <div class="category-selector" id="categorySelector"></div>
       <label style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-        <input type="checkbox" id="taskImportant"> <span>⭐ Важная (+5 XP)</span>
+        <input type="checkbox" id="taskImportant"> <span>⭐ Важная</span>
       </label>
       <label>Привязать к цели</label>
       <select id="taskGoalSelect"><option value="">Без цели</option></select>
@@ -1286,14 +516,10 @@
   <div class="modal-overlay" id="goalFormModal">
     <div class="modal">
       <h3 id="goalFormTitle"><i class="fas fa-plus-circle"></i> Новая цель</h3>
-      <label>Название</label>
-      <input type="text" id="goalFormTitleInput" placeholder="Название цели">
-      <label>Описание</label>
-      <textarea id="goalFormDesc" placeholder="Что хотите достичь?"></textarea>
-      <label>Срок</label>
-      <input type="date" id="goalFormDeadline">
-      <label>Фото при достижении</label>
-      <input type="file" id="goalFormPhoto" accept="image/*">
+      <label>Название</label><input type="text" id="goalFormTitleInput" placeholder="Название цели">
+      <label>Описание</label><textarea id="goalFormDesc" placeholder="Что хотите достичь?"></textarea>
+      <label>Срок</label><input type="date" id="goalFormDeadline">
+      <label>Фото при достижении</label><input type="file" id="goalFormPhoto" accept="image/*">
       <div class="modal-actions">
         <button class="btn-cancel" id="cancelGoalFormBtn">Отмена</button>
         <button class="btn-save" id="saveGoalFormBtn">Сохранить</button>
@@ -1321,15 +547,12 @@
   <div class="modal-overlay" id="editTaskModal">
     <div class="modal">
       <h3><i class="fas fa-edit"></i> Редактировать задачу</h3>
-      <label>Название</label>
-      <input type="text" id="editTaskTitle">
+      <label>Название</label><input type="text" id="editTaskTitle">
       <label>Категория</label>
       <div class="category-selector" id="editCategorySelector"></div>
       <label>Период</label>
       <div class="period-inputs">
-        <input type="date" id="editTaskDateFrom" />
-        <span>→</span>
-        <input type="date" id="editTaskDateTo" />
+        <input type="date" id="editTaskDateFrom" /><span>→</span><input type="date" id="editTaskDateTo" />
       </div>
       <label style="display:flex; align-items:center; gap:8px; margin-top:4px;">
         <input type="checkbox" id="editTaskImportant"> <span>⭐ Важная</span>
@@ -1384,10 +607,10 @@
       let goals = [];
       let nextTaskId = 1;
       let nextGoalId = 1;
-      let player = { name: 'Эльдар', level: 1, xp: 0, xpToNext: 100 };
+
+      let player = { name: 'Эльдар', totalXP: 0, level: 1 };
       let achievements = [];
 
-      // Данные профиля
       let profile = {
         name: 'Эльдар',
         age: '',
@@ -1397,7 +620,10 @@
         headerPhoto: null,
         avatarPhoto: null,
         weightLog: [],
-        measurements: { biceps: '', chest: '', thigh: '', waist: '' }
+        measurements: { biceps: '', chest: '', thigh: '', waist: '' },
+        measurementLog: [],
+        reminderPeriod: 0,
+        lastMeasurementDate: null
       };
 
       let editTaskId = null;
@@ -1409,26 +635,84 @@
       let timerRunning = false;
       let timerTaskId = null;
 
-      // ===== ЗАГРУЗКА =====
+      // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+      function getDateStr(offset = 0) {
+        const d = new Date(); d.setDate(d.getDate() + offset);
+        return d.toISOString().split('T')[0];
+      }
+
+      function formatDateKey(year, month, day) {
+        return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      }
+
+      function isDateInRange(dateStr, fromStr, toStr) {
+        return dateStr >= fromStr && dateStr <= toStr;
+      }
+
+      // ===== СИСТЕМА УРОВНЕЙ =====
+      function calculateLevel(totalXP) {
+        let level = 1;
+        while (level * (level + 1) / 2 <= totalXP) level++;
+        return level - 1;
+      }
+
+      function getXPToNextLevel(totalXP, level) {
+        const next = level + 1;
+        return next * (next + 1) / 2 - totalXP;
+      }
+
+      function getProgressToNextLevel(totalXP, level) {
+        const current = level * (level + 1) / 2;
+        const next = (level + 1) * (level + 2) / 2;
+        return Math.min(1, Math.max(0, (totalXP - current) / (next - current)));
+      }
+
+      function addXP(amount) {
+        if (amount <= 0) return;
+        player.totalXP += amount;
+        const newLevel = calculateLevel(player.totalXP);
+        if (newLevel > player.level) {
+          player.level = newLevel;
+          checkAchievements();
+          setTimeout(() => alert(`🎉 ПОВЫШЕНИЕ УРОВНЯ! Теперь вы уровень ${player.level}!`), 200);
+        } else {
+          player.level = newLevel;
+        }
+        updateAll();
+        updateRpgAvatar();
+        saveData();
+      }
+
+      // ===== ЗАГРУЗКА / СОХРАНЕНИЕ =====
       function loadData() {
         try {
-          const saved = localStorage.getItem('rpgCalendarData_v10');
+          const saved = localStorage.getItem('rpgCalendarData_v12');
           if (saved) {
             const data = JSON.parse(saved);
             tasks = data.tasks || [];
             goals = data.goals || [];
             nextTaskId = data.nextTaskId || 1;
             nextGoalId = data.nextGoalId || 1;
-            if (data.player) player = data.player;
+            if (data.player) {
+              player.totalXP = data.player.totalXP || 0;
+              player.name = data.player.name || 'Эльдар';
+              player.level = calculateLevel(player.totalXP);
+            }
             if (data.achievements) achievements = data.achievements;
-            if (data.profile) profile = data.profile;
+            if (data.profile) {
+              profile = data.profile;
+              if (!profile.measurementLog) profile.measurementLog = [];
+              if (!profile.reminderPeriod) profile.reminderPeriod = 0;
+              if (!profile.lastMeasurementDate) profile.lastMeasurementDate = null;
+            }
             tasks = tasks.map(t => ({
               ...t,
               done: t.done || false,
               important: t.important || false,
               dateFrom: t.dateFrom || t.date,
               dateTo: t.dateTo || t.date,
-              goalId: t.goalId || null
+              goalId: t.goalId || null,
+              duration: t.duration || 0
             }));
             goals = goals.map(g => ({
               ...g,
@@ -1436,13 +720,11 @@
               photo: g.photo || null,
               taskIds: g.taskIds || []
             }));
-            if (!profile.weightLog) profile.weightLog = [];
-            if (!profile.measurements) profile.measurements = { biceps: '', chest: '', thigh: '', waist: '' };
           } else {
             const today = getDateStr(0);
             tasks = [
-              { id: nextTaskId++, title: '🏃 Утренняя пробежка', date: today, dateFrom: today, dateTo: today, category: 'sport', done: false, important: true, goalId: null },
-              { id: nextTaskId++, title: '🥗 Здоровый завтрак', date: today, dateFrom: today, dateTo: today, category: 'food', done: false, important: false, goalId: null },
+              { id: nextTaskId++, title: '🏃 Утренняя пробежка', date: today, dateFrom: today, dateTo: today, category: 'sport', done: false, important: true, goalId: null, duration: 30 },
+              { id: nextTaskId++, title: '🥗 Здоровый завтрак', date: today, dateFrom: today, dateTo: today, category: 'food', done: false, important: false, goalId: null, duration: 15 },
             ];
             goals = [];
             profile = {
@@ -1454,107 +736,27 @@
               headerPhoto: null,
               avatarPhoto: null,
               weightLog: [],
-              measurements: { biceps: '', chest: '', thigh: '', waist: '' }
+              measurements: { biceps: '', chest: '', thigh: '', waist: '' },
+              measurementLog: [],
+              reminderPeriod: 0,
+              lastMeasurementDate: null
             };
+            player = { name: 'Эльдар', totalXP: 0, level: 1 };
           }
         } catch(e) { tasks = []; goals = []; }
+        player.level = calculateLevel(player.totalXP);
         updateAll();
         updateProfileDisplay();
+        updateRpgAvatar();
+        checkReminder();
       }
 
       function saveData() {
         try {
-          localStorage.setItem('rpgCalendarData_v10', JSON.stringify({
+          localStorage.setItem('rpgCalendarData_v12', JSON.stringify({
             tasks, goals, nextTaskId, nextGoalId, player, achievements, profile
           }));
         } catch(e) {}
-      }
-
-      function getDateStr(offset = 0) {
-        const d = new Date(); d.setDate(d.getDate() + offset);
-        return d.toISOString().split('T')[0];
-      }
-
-      function formatDateKey(year, month, day) {
-        return `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-      }
-
-      function isDateInRange(dateStr, fromStr, toStr) {
-        return dateStr >= fromStr && dateStr <= toStr;
-      }
-
-      // ===== ПРОФИЛЬ =====
-      function updateProfileDisplay() {
-        document.getElementById('profileNameDisplay').textContent = profile.name;
-        document.getElementById('profileNameValue').textContent = profile.name || '—';
-
-        document.getElementById('profileAgeValue').textContent = profile.age || '—';
-        document.getElementById('profileGenderValue').textContent = profile.gender || '—';
-        document.getElementById('profileHeightValue').textContent = profile.height ? profile.height + ' см' : '—';
-        document.getElementById('profileWeightValue').textContent = profile.weight ? profile.weight + ' кг' : '—';
-
-        // ИМТ
-        if (profile.height && profile.weight) {
-          const h = parseFloat(profile.height) / 100;
-          const w = parseFloat(profile.weight);
-          const bmi = w / (h * h);
-          document.getElementById('bmiValue').textContent = bmi.toFixed(1);
-          const label = document.getElementById('bmiLabel');
-          if (bmi < 18.5) { label.textContent = 'Недостаток веса'; label.className = 'bmi-indicator bmi-underweight'; }
-          else if (bmi < 25) { label.textContent = 'Норма'; label.className = 'bmi-indicator bmi-normal'; }
-          else if (bmi < 30) { label.textContent = 'Избыток веса'; label.className = 'bmi-indicator bmi-overweight'; }
-          else { label.textContent = 'Ожирение'; label.className = 'bmi-indicator bmi-obese'; }
-        } else {
-          document.getElementById('bmiValue').textContent = '—';
-          document.getElementById('bmiLabel').textContent = '';
-        }
-
-        // Аватар
-        const avatarContainer = document.getElementById('avatarPreview');
-        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
-        if (profile.avatarPhoto) {
-          avatarContainer.innerHTML = `<img src="${profile.avatarPhoto}" alt="Аватар" style="width:100%;height:100%;object-fit:cover;">`;
-        } else {
-          avatarContainer.innerHTML = `<span id="avatarPlaceholder">🧙</span>`;
-        }
-
-        // Аватар в профиле
-        const profAvatar = document.getElementById('profileAvatar');
-        const profAvatarPlaceholder = document.getElementById('profileAvatarPlaceholder');
-        if (profile.avatarPhoto) {
-          profAvatar.innerHTML = `<img src="${profile.avatarPhoto}" alt="Аватар" style="width:100%;height:100%;object-fit:cover;"><div class="upload-badge"><i class="fas fa-camera"></i></div>`;
-        } else {
-          profAvatar.innerHTML = `<span class="placeholder" id="profileAvatarPlaceholder">🧙</span><div class="upload-badge"><i class="fas fa-camera"></i></div>`;
-        }
-
-        // Шапка профиля
-        const headerContainer = document.getElementById('headerPhoto');
-        if (profile.headerPhoto) {
-          headerContainer.innerHTML = `<img src="${profile.headerPhoto}" alt="Обложка">`;
-        } else {
-          headerContainer.innerHTML = `<div class="placeholder"><i class="fas fa-camera"></i><span>Загрузить обложку</span></div>`;
-        }
-
-        // Журнал веса
-        renderWeightLog();
-
-        // Мерки
-        document.getElementById('measBiceps').textContent = profile.measurements.biceps || '—';
-        document.getElementById('measChest').textContent = profile.measurements.chest || '—';
-        document.getElementById('measThigh').textContent = profile.measurements.thigh || '—';
-        document.getElementById('measWaist').textContent = profile.measurements.waist || '—';
-      }
-
-      function renderWeightLog() {
-        const container = document.getElementById('weightLog');
-        if (!profile.weightLog || profile.weightLog.length === 0) {
-          container.innerHTML = '<div style="text-align:center; color:#8a8a9a; padding:8px 0; font-size:0.8rem;">Нет записей</div>';
-          return;
-        }
-        const sorted = [...profile.weightLog].sort((a, b) => b.date.localeCompare(a.date));
-        container.innerHTML = sorted.map(entry =>
-          `<div class="entry"><span class="date">${entry.date}</span><span class="weight">${entry.weight} кг</span></div>`
-        ).join('');
       }
 
       // ===== ОБНОВЛЕНИЯ =====
@@ -1568,30 +770,49 @@
         checkDailyQuest();
         checkAchievements();
         updateProfileDisplay();
-      }
-
-      function addXP(amount) {
-        player.xp += amount;
-        while (player.xp >= player.xpToNext) {
-          player.xp -= player.xpToNext;
-          player.level++;
-          player.xpToNext = Math.floor(player.xpToNext * 1.4) + 30;
-        }
-        updateProfile();
-        checkAchievements();
-        saveData();
+        updateRpgAvatar();
       }
 
       function updateProfile() {
         document.getElementById('profileLevel').textContent = `Lv.${player.level}`;
-        const pct = Math.min(100, (player.xp / player.xpToNext) * 100);
-        document.getElementById('xpBarFill').style.width = pct + '%';
-        const emojis = ['🧙','⚔️','🛡️','🧝','🐉','👑','🌟','💫'];
-        const idx = Math.min(Math.floor(player.level / 2), emojis.length-1);
-        // обновляем аватар если нет фото
+        const progress = getProgressToNextLevel(player.totalXP, player.level);
+        document.getElementById('xpBarFill').style.width = (progress * 100) + '%';
         if (!profile.avatarPhoto) {
-          const avatarContainer = document.getElementById('avatarPreview');
-          avatarContainer.innerHTML = `<span id="avatarPlaceholder">${emojis[idx] || '🧙'}</span>`;
+          const emojis = ['🧙','⚔️','🛡️','🧝','🐉','👑','🌟','💫','🔥','⚡'];
+          const idx = Math.min(player.level - 1, emojis.length-1);
+          const container = document.getElementById('avatarPreview');
+          container.innerHTML = `<span id="avatarPlaceholder">${emojis[idx] || '🧙'}</span>`;
+        }
+      }
+
+      function updateBadge() {
+        const undone = tasks.filter(t => !t.done).length;
+        document.getElementById('tasksBadge').textContent = undone;
+      }
+
+      function updateDailyProgress() {
+        const today = getDateStr(0);
+        const todayTasks = tasks.filter(t => isDateInRange(today, t.dateFrom, t.dateTo));
+        const done = todayTasks.filter(t => t.done).length;
+        const total = todayTasks.length;
+        document.getElementById('dailyProgressText').textContent = `${done}/${total}`;
+        const pct = total > 0 ? (done / total) * 100 : 0;
+        document.getElementById('dailyProgressFill').style.width = pct + '%';
+      }
+
+      function updateGoalsCount() {
+        document.getElementById('goalsCount').textContent = goals.length;
+      }
+
+      function checkDailyQuest() {
+        const today = getDateStr(0);
+        const todayTasks = tasks.filter(t => isDateInRange(today, t.dateFrom, t.dateTo) && !t.done);
+        const badge = document.getElementById('dailyQuestBadge');
+        if (todayTasks.length > 0) {
+          badge.style.display = 'inline';
+          badge.textContent = `⚡ ${todayTasks.length}`;
+        } else {
+          badge.style.display = 'none';
         }
       }
 
@@ -1613,47 +834,353 @@
           setTimeout(() => alert('🏅 ДОСТИЖЕНИЯ:\n' + list.join('\n')), 200);
         }
         document.getElementById('achCount').textContent = achievements.length;
+        updateRpgAvatar();
       }
 
-      function checkDailyQuest() {
-        const today = getDateStr(0);
-        const todayTasks = tasks.filter(t => isDateInRange(today, t.dateFrom, t.dateTo) && !t.done);
-        const badge = document.getElementById('dailyQuestBadge');
-        if (todayTasks.length > 0) {
-          badge.style.display = 'inline';
-          badge.textContent = `⚡ ${todayTasks.length}`;
+      // ===== ПРОФИЛЬ =====
+      function updateProfileDisplay() {
+        document.getElementById('profileNameDisplay').textContent = profile.name;
+        document.getElementById('profileNameValue').textContent = profile.name || '—';
+        document.getElementById('profileAgeValue').textContent = profile.age || '—';
+        document.getElementById('profileGenderValue').textContent = profile.gender || '—';
+        document.getElementById('profileHeightValue').textContent = profile.height ? profile.height + ' см' : '—';
+        document.getElementById('profileWeightValue').textContent = profile.weight ? profile.weight + ' кг' : '—';
+
+        if (profile.height && profile.weight) {
+          const h = parseFloat(profile.height) / 100;
+          const w = parseFloat(profile.weight);
+          const bmi = w / (h * h);
+          document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+          const label = document.getElementById('bmiLabel');
+          if (bmi < 18.5) { label.textContent = 'Недостаток веса'; label.className = 'bmi-indicator bmi-underweight'; }
+          else if (bmi < 25) { label.textContent = 'Норма'; label.className = 'bmi-indicator bmi-normal'; }
+          else if (bmi < 30) { label.textContent = 'Избыток веса'; label.className = 'bmi-indicator bmi-overweight'; }
+          else { label.textContent = 'Ожирение'; label.className = 'bmi-indicator bmi-obese'; }
         } else {
-          badge.style.display = 'none';
+          document.getElementById('bmiValue').textContent = '—';
+          document.getElementById('bmiLabel').textContent = '';
+        }
+
+        // Аватар верхний
+        const avatarContainer = document.getElementById('avatarPreview');
+        if (profile.avatarPhoto) {
+          avatarContainer.innerHTML = `<img src="${profile.avatarPhoto}" alt="Аватар" style="width:100%;height:100%;object-fit:cover;">`;
+        } else {
+          avatarContainer.innerHTML = `<span id="avatarPlaceholder">🧙</span>`;
+        }
+
+        // Аватар в профиле
+        const profAvatar = document.getElementById('profileAvatar');
+        if (profile.avatarPhoto) {
+          profAvatar.innerHTML = `<img src="${profile.avatarPhoto}" alt="Аватар" style="width:100%;height:100%;object-fit:cover;"><div class="upload-badge"><i class="fas fa-camera"></i></div>`;
+        } else {
+          profAvatar.innerHTML = `<span class="placeholder" id="profileAvatarPlaceholder">🧙</span><div class="upload-badge"><i class="fas fa-camera"></i></div>`;
+        }
+
+        // Шапка
+        const headerContainer = document.getElementById('headerPhoto');
+        if (profile.headerPhoto) {
+          headerContainer.innerHTML = `<img src="${profile.headerPhoto}" alt="Обложка">`;
+        } else {
+          headerContainer.innerHTML = `<div class="placeholder"><i class="fas fa-camera"></i><span>Загрузить обложку</span></div>`;
+        }
+
+        // Мерки
+        document.getElementById('measBiceps').textContent = profile.measurements.biceps || '—';
+        document.getElementById('measChest').textContent = profile.measurements.chest || '—';
+        document.getElementById('measThigh').textContent = profile.measurements.thigh || '—';
+        document.getElementById('measWaist').textContent = profile.measurements.waist || '—';
+
+        // Напоминания
+        document.getElementById('reminderPeriod').value = profile.reminderPeriod || 0;
+        updateReminderStatus();
+        renderMeasurementHistory();
+        drawWeightChart();
+        drawMeasurementsChart();
+      }
+
+      function updateReminderStatus() {
+        const status = document.getElementById('reminderStatus');
+        const period = profile.reminderPeriod || 0;
+        if (period === 0) { status.textContent = 'Напоминания отключены'; return; }
+        const lastDate = profile.lastMeasurementDate ? new Date(profile.lastMeasurementDate) : null;
+        if (lastDate) {
+          const nextDate = new Date(lastDate);
+          nextDate.setMonth(nextDate.getMonth() + period);
+          const today = new Date();
+          if (today >= nextDate) {
+            status.innerHTML = '<span style="color:#e74c3c;">⚠️ Пора делать замеры! (последний замер был ' + lastDate.toLocaleDateString() + ')</span>';
+          } else {
+            status.textContent = 'Следующий замер: ' + nextDate.toLocaleDateString() + ' (период: ' + period + ' мес.)';
+          }
+        } else {
+          status.textContent = 'Нет данных о последнем замере. Сделайте замер, чтобы запустить напоминания.';
         }
       }
 
-      function updateDailyProgress() {
-        const today = getDateStr(0);
-        const todayTasks = tasks.filter(t => isDateInRange(today, t.dateFrom, t.dateTo));
-        const done = todayTasks.filter(t => t.done).length;
-        const total = todayTasks.length;
-        document.getElementById('dailyProgressText').textContent = `${done}/${total}`;
-        const pct = total > 0 ? (done / total) * 100 : 0;
-        document.getElementById('dailyProgressFill').style.width = pct + '%';
+      function renderMeasurementHistory() {
+        const container = document.getElementById('measurementHistory');
+        const allEntries = [];
+        if (profile.weightLog) {
+          profile.weightLog.forEach(w => allEntries.push({ date: w.date, type: 'Вес', value: w.weight + ' кг' }));
+        }
+        if (profile.measurementLog) {
+          profile.measurementLog.forEach(m => {
+            const parts = [];
+            if (m.biceps) parts.push('Б:'+m.biceps);
+            if (m.chest) parts.push('Г:'+m.chest);
+            if (m.thigh) parts.push('Бед:'+m.thigh);
+            if (m.waist) parts.push('Т:'+m.waist);
+            allEntries.push({ date: m.date, type: 'Мерки', value: parts.join(' ') });
+          });
+        }
+        allEntries.sort((a,b) => b.date.localeCompare(a.date));
+        if (allEntries.length === 0) {
+          container.innerHTML = '<div style="color:#8a8a9a; text-align:center; padding:8px;">Нет записей</div>';
+          return;
+        }
+        container.innerHTML = allEntries.slice(0, 20).map(e =>
+          `<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(0,0,0,0.04);">
+            <span>${e.date}</span>
+            <span>${e.type}: ${e.value}</span>
+          </div>`
+        ).join('');
       }
 
-      function updateBadge() {
-        const undone = tasks.filter(t => !t.done).length;
-        document.getElementById('tasksBadge').textContent = undone;
+      // ===== ГРАФИКИ =====
+      function drawWeightChart() {
+        const canvas = document.getElementById('weightChart');
+        if (!canvas) return;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width || 300;
+        canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        const data = profile.weightLog || [];
+        if (data.length < 2) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#aaa';
+          ctx.font = '14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Недостаточно данных', canvas.width/2, canvas.height/2);
+          return;
+        }
+        const sorted = data.slice().sort((a,b) => a.date.localeCompare(b.date));
+        const values = sorted.map(d => parseFloat(d.weight));
+        const min = Math.min(...values) - 1;
+        const max = Math.max(...values) + 1;
+        const range = max - min || 1;
+        const pad = { top:20, bottom:20, left:30, right:10 };
+        const chartWidth = canvas.width - pad.left - pad.right;
+        const chartHeight = canvas.height - pad.top - pad.bottom;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#ccc';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, pad.top);
+        ctx.lineTo(pad.left, pad.top + chartHeight);
+        ctx.lineTo(pad.left + chartWidth, pad.top + chartHeight);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.strokeStyle = '#6c5ce7';
+        ctx.lineWidth = 2;
+        values.forEach((v, i) => {
+          const x = pad.left + (i / (values.length-1)) * chartWidth;
+          const y = pad.top + chartHeight - ((v - min) / range) * chartHeight;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        values.forEach((v, i) => {
+          const x = pad.left + (i / (values.length-1)) * chartWidth;
+          const y = pad.top + chartHeight - ((v - min) / range) * chartHeight;
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, 2 * Math.PI);
+          ctx.fillStyle = '#6c5ce7';
+          ctx.fill();
+          ctx.fillStyle = '#333';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(v.toFixed(1), x, y - 8);
+        });
+        ctx.fillStyle = '#888';
+        ctx.font = '8px sans-serif';
+        values.forEach((v, i) => {
+          if (i % 2 === 0 || i === values.length-1) {
+            const x = pad.left + (i / (values.length-1)) * chartWidth;
+            ctx.fillText(sorted[i].date.slice(5), x, pad.top + chartHeight + 14);
+          }
+        });
       }
 
-      function updateGoalsCount() {
-        document.getElementById('goalsCount').textContent = goals.length;
+      function drawMeasurementsChart() {
+        const canvas = document.getElementById('measurementsChart');
+        if (!canvas) return;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width || 300;
+        canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        const data = profile.measurementLog || [];
+        if (data.length < 2) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#aaa';
+          ctx.font = '14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Недостаточно данных', canvas.width/2, canvas.height/2);
+          return;
+        }
+        const sorted = data.slice().sort((a,b) => a.date.localeCompare(b.date));
+        const keys = ['biceps','chest','thigh','waist'];
+        const colors = ['#e74c3c','#3498db','#2ecc71','#f39c12'];
+        const labels = ['Бицепс','Грудь','Бедро','Талия'];
+        let allValues = [];
+        sorted.forEach(d => keys.forEach(k => { if (d[k]) allValues.push(parseFloat(d[k])); }));
+        if (allValues.length === 0) { ctx.fillText('Нет данных', canvas.width/2, canvas.height/2); return; }
+        const min = Math.min(...allValues) - 1;
+        const max = Math.max(...allValues) + 1;
+        const range = max - min || 1;
+        const pad = { top:20, bottom:20, left:30, right:10 };
+        const chartWidth = canvas.width - pad.left - pad.right;
+        const chartHeight = canvas.height - pad.top - pad.bottom;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#ccc';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, pad.top);
+        ctx.lineTo(pad.left, pad.top + chartHeight);
+        ctx.lineTo(pad.left + chartWidth, pad.top + chartHeight);
+        ctx.stroke();
+        keys.forEach((key, idx) => {
+          const values = sorted.map(d => d[key] ? parseFloat(d[key]) : null);
+          const valid = values.filter(v => v !== null);
+          if (valid.length < 2) return;
+          ctx.beginPath();
+          ctx.strokeStyle = colors[idx];
+          ctx.lineWidth = 2;
+          let started = false;
+          values.forEach((v, i) => {
+            if (v === null) { started = false; return; }
+            const x = pad.left + (i / (values.length-1)) * chartWidth;
+            const y = pad.top + chartHeight - ((v - min) / range) * chartHeight;
+            if (!started) { ctx.moveTo(x, y); started = true; }
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+          const lastIdx = values.length - 1;
+          for (let i = lastIdx; i >= 0; i--) {
+            if (values[i] !== null) {
+              const x = pad.left + (i / (values.length-1)) * chartWidth;
+              const y = pad.top + chartHeight - ((values[i] - min) / range) * chartHeight;
+              ctx.beginPath();
+              ctx.arc(x, y, 4, 0, 2 * Math.PI);
+              ctx.fillStyle = colors[idx];
+              ctx.fill();
+              break;
+            }
+          }
+        });
+        ctx.font = '9px sans-serif';
+        ctx.textAlign = 'left';
+        keys.forEach((k, idx) => {
+          const x = pad.left + 10 + idx * 70;
+          const y = pad.top + 10;
+          ctx.fillStyle = colors[idx];
+          ctx.fillRect(x, y-6, 12, 4);
+          ctx.fillStyle = '#333';
+          ctx.fillText(labels[idx], x+16, y);
+        });
+        ctx.fillStyle = '#888';
+        ctx.font = '8px sans-serif';
+        sorted.forEach((d, i) => {
+          if (i % 2 === 0 || i === sorted.length-1) {
+            const x = pad.left + (i / (sorted.length-1)) * chartWidth;
+            ctx.fillText(d.date.slice(5), x, pad.top + chartHeight + 14);
+          }
+        });
+      }
+
+      // ===== НАПОМИНАНИЯ =====
+      function checkReminder() {
+        const period = profile.reminderPeriod || 0;
+        if (period === 0) return;
+        const lastDate = profile.lastMeasurementDate ? new Date(profile.lastMeasurementDate) : null;
+        if (!lastDate) return;
+        const nextDate = new Date(lastDate);
+        nextDate.setMonth(nextDate.getMonth() + period);
+        const today = new Date();
+        if (today >= nextDate) {
+          setTimeout(() => {
+            alert('📢 Напоминание: пора делать замеры! (вес и мерки)');
+          }, 1000);
+        }
+      }
+
+      function saveReminderPeriod(period) {
+        profile.reminderPeriod = parseInt(period);
+        if (!profile.lastMeasurementDate) profile.lastMeasurementDate = getDateStr(0);
+        saveData();
+        updateProfileDisplay();
+      }
+
+      // ===== ДОБАВЛЕНИЕ ЗАМЕРОВ =====
+      function addWeightEntry(date, weight) {
+        if (!profile.weightLog) profile.weightLog = [];
+        profile.weightLog.push({ date, weight: parseFloat(weight) });
+        profile.weight = parseFloat(weight);
+        profile.lastMeasurementDate = date;
+        addXP(0.05);
+        saveData();
+        updateAll();
+        updateProfileDisplay();
+        drawWeightChart();
+        renderMeasurementHistory();
+      }
+
+      function addMeasurementEntry(date, biceps, chest, thigh, waist) {
+        if (!profile.measurementLog) profile.measurementLog = [];
+        const entry = { date };
+        if (biceps) entry.biceps = parseFloat(biceps);
+        if (chest) entry.chest = parseFloat(chest);
+        if (thigh) entry.thigh = parseFloat(thigh);
+        if (waist) entry.waist = parseFloat(waist);
+        profile.measurementLog.push(entry);
+        if (biceps) profile.measurements.biceps = parseFloat(biceps);
+        if (chest) profile.measurements.chest = parseFloat(chest);
+        if (thigh) profile.measurements.thigh = parseFloat(thigh);
+        if (waist) profile.measurements.waist = parseFloat(waist);
+        profile.lastMeasurementDate = date;
+        addXP(0.05);
+        saveData();
+        updateAll();
+        updateProfileDisplay();
+        drawMeasurementsChart();
+        renderMeasurementHistory();
+      }
+
+      // ===== RPG АВАТАР =====
+      function updateRpgAvatar() {
+        const level = player.level;
+        const totalXP = player.totalXP;
+        const xpToNext = getXPToNextLevel(totalXP, level);
+        const progress = getProgressToNextLevel(totalXP, level);
+        const avatars = ['🧙','⚔️','🛡️','🧝','🐉','👑','🌟','💫','🔥','⚡','🌊','🌪️','🌈','⭐','🌙','☀️','🪐','🚀','👾','🤖'];
+        const idx = Math.min(level - 1, avatars.length - 1);
+        document.getElementById('rpgAvatarBig').textContent = avatars[idx] || '🧙';
+        document.getElementById('rpgLevelBadge').textContent = `Уровень ${level}`;
+        document.getElementById('rpgXpBar').style.width = (progress * 100) + '%';
+        document.getElementById('rpgXpText').textContent = `${totalXP - level*(level+1)/2} / ${xpToNext} XP до следующего уровня`;
+        const container = document.getElementById('rpgAchievementsList');
+        if (achievements.length === 0) {
+          container.innerHTML = '<span style="font-size:0.8rem; color:#8a8a9a;">Нет достижений</span>';
+        } else {
+          const icons = ['🎯','🏅','🏆','👑','⭐','🌟','💫','🔥'];
+          container.innerHTML = achievements.map((a, i) =>
+            `<span class="achievement-icon unlocked" title="${a}">${icons[i % icons.length]}</span>`
+          ).join('');
+        }
       }
 
       // ===== ЗАДАЧИ =====
-      function getTasksForDate(dateStr) {
-        let filtered = tasks.filter(t => isDateInRange(dateStr, t.dateFrom, t.dateTo));
-        if (filterCategory) filtered = filtered.filter(t => t.category === filterCategory);
-        return filtered;
-      }
-
-      function addTask(title, dateFrom, dateTo, category, important = false, goalId = null) {
+      function addTask(title, dateFrom, dateTo, category, important, goalId, duration) {
         if (!title.trim()) return false;
         if (!dateFrom) return false;
         if (!dateTo) dateTo = dateFrom;
@@ -1661,19 +1188,17 @@
           id: nextTaskId++,
           title: title.trim(),
           date: dateFrom,
-          dateFrom: dateFrom,
-          dateTo: dateTo,
-          category: category,
+          dateFrom, dateTo,
+          category,
           done: false,
-          important: important,
-          goalId: goalId
+          important: !!important,
+          goalId: goalId || null,
+          duration: parseFloat(duration) || 0
         };
         tasks.push(newTask);
         if (goalId) {
           const goal = goals.find(g => g.id === goalId);
-          if (goal && !goal.taskIds.includes(newTask.id)) {
-            goal.taskIds.push(newTask.id);
-          }
+          if (goal && !goal.taskIds.includes(newTask.id)) goal.taskIds.push(newTask.id);
         }
         saveData();
         updateAll();
@@ -1682,40 +1207,37 @@
 
       function toggleTaskDone(taskId) {
         const task = tasks.find(t => t.id === taskId);
-        if (task) {
-          if (!task.done) {
-            let bonus = 10;
-            if (task.important) bonus += 5;
-            addXP(bonus);
-          }
-          task.done = !task.done;
-          if (task.goalId) {
-            const goal = goals.find(g => g.id === task.goalId);
-            if (goal) {
-              const goalTasks = tasks.filter(t => t.goalId === task.goalId);
-              const doneTasks = goalTasks.filter(t => t.done).length;
-              if (doneTasks === goalTasks.length && goalTasks.length > 0 && !goal.done) {
-                setTimeout(() => {
-                  if (confirm(`🎯 Все задачи цели "${goal.title}" выполнены! Отметить цель как достигнутую?`)) {
-                    toggleGoalDone(goal.id);
-                  }
-                }, 300);
-              }
+        if (!task) return;
+        if (!task.done) {
+          const xp = (task.duration || 0) * 0.01;
+          if (xp > 0) addXP(xp);
+          if (task.important) addXP(5);
+        }
+        task.done = !task.done;
+        if (task.goalId) {
+          const goal = goals.find(g => g.id === task.goalId);
+          if (goal) {
+            const goalTasks = tasks.filter(t => t.goalId === task.goalId);
+            const doneTasks = goalTasks.filter(t => t.done).length;
+            if (doneTasks === goalTasks.length && goalTasks.length > 0 && !goal.done) {
+              setTimeout(() => {
+                if (confirm(`🎯 Все задачи цели "${goal.title}" выполнены! Отметить цель как достигнутую?`)) {
+                  toggleGoalDone(goal.id);
+                }
+              }, 300);
             }
           }
-          saveData();
-          updateAll();
-          refreshCurrentView();
         }
+        saveData();
+        updateAll();
+        refreshCurrentView();
       }
 
       function deleteTask(taskId) {
         const task = tasks.find(t => t.id === taskId);
         if (task && task.goalId) {
           const goal = goals.find(g => g.id === task.goalId);
-          if (goal) {
-            goal.taskIds = goal.taskIds.filter(id => id !== taskId);
-          }
+          if (goal) goal.taskIds = goal.taskIds.filter(id => id !== taskId);
         }
         tasks = tasks.filter(t => t.id !== taskId);
         saveData();
@@ -1735,7 +1257,8 @@
           category: task.category,
           done: false,
           important: task.important,
-          goalId: task.goalId
+          goalId: task.goalId,
+          duration: task.duration
         };
         tasks.push(newTask);
         if (newTask.goalId) {
@@ -1752,16 +1275,12 @@
         if (!task) return false;
         if (task.goalId) {
           const oldGoal = goals.find(g => g.id === task.goalId);
-          if (oldGoal) {
-            oldGoal.taskIds = oldGoal.taskIds.filter(id => id !== taskId);
-          }
+          if (oldGoal) oldGoal.taskIds = oldGoal.taskIds.filter(id => id !== taskId);
         }
         task.goalId = goalId;
         if (goalId) {
           const goal = goals.find(g => g.id === goalId);
-          if (goal && !goal.taskIds.includes(taskId)) {
-            goal.taskIds.push(taskId);
-          }
+          if (goal && !goal.taskIds.includes(taskId)) goal.taskIds.push(taskId);
         }
         saveData();
         updateAll();
@@ -1785,7 +1304,7 @@
       }
 
       // ===== ЦЕЛИ =====
-      function addGoal(title, desc, deadline, photo = null) {
+      function addGoal(title, desc, deadline, photo) {
         if (!title.trim()) return false;
         const newGoal = {
           id: nextGoalId++,
@@ -1793,7 +1312,7 @@
           description: desc || '',
           deadline: deadline || '',
           done: false,
-          photo: photo,
+          photo: photo || null,
           taskIds: []
         };
         goals.push(newGoal);
@@ -1802,13 +1321,12 @@
         return true;
       }
 
-      function toggleGoalDone(goalId, photoData = null) {
+      function toggleGoalDone(goalId, photoData) {
         const goal = goals.find(g => g.id === goalId);
         if (!goal) return;
         goal.done = !goal.done;
-        if (goal.done && photoData) {
-          goal.photo = photoData;
-        } else if (goal.done && !photoData) {
+        if (goal.done && photoData) goal.photo = photoData;
+        else if (goal.done && !photoData) {
           const input = document.createElement('input');
           input.type = 'file';
           input.accept = 'image/*';
@@ -1819,9 +1337,7 @@
               reader.onload = function(ev) {
                 goal.photo = ev.target.result;
                 saveData();
-                if (document.getElementById('goalsModal').classList.contains('active')) {
-                  renderGoals();
-                }
+                if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
               };
               reader.readAsDataURL(file);
             }
@@ -1832,27 +1348,19 @@
         if (goal.done) {
           const goalTasks = tasks.filter(t => t.goalId === goalId);
           const undone = goalTasks.filter(t => !t.done);
-          if (undone.length === 0) {
-            addXP(25);
-          }
+          if (undone.length === 0) addXP(25);
         }
         saveData();
         updateAll();
-        if (document.getElementById('goalsModal').classList.contains('active')) {
-          renderGoals();
-        }
+        if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
       }
 
       function deleteGoal(goalId) {
-        tasks.forEach(t => {
-          if (t.goalId === goalId) t.goalId = null;
-        });
+        tasks.forEach(t => { if (t.goalId === goalId) t.goalId = null; });
         goals = goals.filter(g => g.id !== goalId);
         saveData();
         updateAll();
-        if (document.getElementById('goalsModal').classList.contains('active')) {
-          renderGoals();
-        }
+        if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
       }
 
       function editGoalData(goalId, title, desc, deadline, photo) {
@@ -1864,66 +1372,7 @@
         if (photo) goal.photo = photo;
         saveData();
         updateAll();
-        if (document.getElementById('goalsModal').classList.contains('active')) {
-          renderGoals();
-        }
-      }
-
-      // ===== ТАЙМЕР =====
-      function startTimer(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
-        timerTaskId = taskId;
-        document.getElementById('timerTaskName').textContent = `⏳ ${task.title}`;
-        timerSeconds = 25 * 60;
-        updateTimerDisplay();
-        document.getElementById('timerModal').classList.add('active');
-        if (timerInterval) clearInterval(timerInterval);
-        timerRunning = false;
-        document.getElementById('timerStartBtn').textContent = '▶ Старт';
-      }
-
-      function updateTimerDisplay() {
-        const mins = Math.floor(timerSeconds / 60);
-        const secs = timerSeconds % 60;
-        document.getElementById('timerDisplay').textContent =
-          `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-      }
-
-      function toggleTimer() {
-        if (timerRunning) {
-          clearInterval(timerInterval);
-          timerRunning = false;
-          document.getElementById('timerStartBtn').textContent = '▶ Старт';
-        } else {
-          timerRunning = true;
-          document.getElementById('timerStartBtn').textContent = '⏸ Пауза';
-          timerInterval = setInterval(() => {
-            if (timerSeconds <= 0) {
-              clearInterval(timerInterval);
-              timerRunning = false;
-              document.getElementById('timerStartBtn').textContent = '▶ Старт';
-              alert('⏰ Время вышло! Отличная работа!');
-              if (timerTaskId) {
-                toggleTaskDone(timerTaskId);
-                timerTaskId = null;
-              }
-              return;
-            }
-            timerSeconds--;
-            updateTimerDisplay();
-          }, 1000);
-        }
-      }
-
-      function resetTimer() {
-        clearInterval(timerInterval);
-        timerRunning = false;
-        timerSeconds = 25 * 60;
-        updateTimerDisplay();
-        document.getElementById('timerStartBtn').textContent = '▶ Старт';
-        timerTaskId = null;
-        document.getElementById('timerTaskName').textContent = '—';
+        if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
       }
 
       // ===== КАЛЕНДАРЬ =====
@@ -1932,13 +1381,11 @@
         const month = currentDate.getMonth();
         document.getElementById('monthYearLabel').textContent =
           new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(currentDate);
-
         const firstDay = new Date(year, month, 1);
         const startDay = (firstDay.getDay() + 6) % 7;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const daysInPrev = new Date(year, month, 0).getDate();
         const todayStr = getDateStr(0);
-
         let html = '';
         for (let i = startDay - 1; i >= 0; i--) {
           const day = daysInPrev - i;
@@ -1985,13 +1432,18 @@
         });
         let extra = '';
         if (dayTasks.length > maxDots) extra = `<span style="font-size:0.5rem; opacity:0.5;">+${dayTasks.length - maxDots}</span>`;
-
         const isToday = dateStr === todayStr;
         const cls = `day-cell ${isOther ? 'other-month' : ''} ${isToday ? 'today' : ''}`;
         return `<div class="${cls}" data-date="${dateStr}">
           <span class="day-number">${day}</span>
           <div class="task-indicators">${dots}${extra}</div>
         </div>`;
+      }
+
+      function getTasksForDate(dateStr) {
+        let filtered = tasks.filter(t => isDateInRange(dateStr, t.dateFrom, t.dateTo));
+        if (filterCategory) filtered = filtered.filter(t => t.category === filterCategory);
+        return filtered;
       }
 
       // ===== ДНЕВНОЙ СПИСОК =====
@@ -2011,22 +1463,13 @@
       function renderDayTasks(dateStr) {
         const container = document.getElementById('dayTasksList');
         let dayTasks = tasks.filter(t => isDateInRange(dateStr, t.dateFrom, t.dateTo));
-        if (filterCategory) {
-          dayTasks = dayTasks.filter(t => t.category === filterCategory);
-        }
-        if (hideDone) {
-          dayTasks = dayTasks.filter(t => !t.done);
-        }
+        if (filterCategory) dayTasks = dayTasks.filter(t => t.category === filterCategory);
+        if (hideDone) dayTasks = dayTasks.filter(t => !t.done);
         if (searchQuery.trim()) {
           const q = searchQuery.trim().toLowerCase();
           dayTasks = dayTasks.filter(t => t.title.toLowerCase().includes(q));
         }
-        dayTasks.sort((a, b) => {
-          if (a.important && !b.important) return -1;
-          if (!a.important && b.important) return 1;
-          return 0;
-        });
-
+        dayTasks.sort((a,b) => (a.important && !b.important) ? -1 : (!a.important && b.important) ? 1 : 0);
         if (dayTasks.length === 0) {
           container.innerHTML = `<div class="no-tasks">✨ Нет задач на этот день</div>`;
           return;
@@ -2040,7 +1483,7 @@
           const goal = goals.find(g => g.id === task.goalId);
           const goalBadge = goal ? `<span class="task-goal-badge">🎯 ${goal.title}</span>` : '';
           const periodText = task.dateFrom !== task.dateTo ? `📅 ${task.dateFrom} → ${task.dateTo}` : '';
-
+          const durationText = task.duration ? `⏱ ${task.duration} мин` : '';
           html += `
             <div class="task-item ${doneClass}">
               <span class="task-cat" style="background:${cat ? cat.color : '#999'};"></span>
@@ -2048,6 +1491,7 @@
               <div class="task-meta">
                 ${goalBadge}
                 ${periodText ? `<span style="font-size:0.55rem; opacity:0.6;">${periodText}</span>` : ''}
+                ${durationText ? `<span style="font-size:0.55rem; opacity:0.6;">${durationText}</span>` : ''}
               </div>
               <div class="task-actions">
                 <button class="task-attach-btn" data-id="${task.id}" title="Прикрепить к цели"><i class="fas fa-link"></i></button>
@@ -2066,14 +1510,10 @@
           btn.addEventListener('click', function(e) {
             e.stopPropagation();
             const id = parseInt(this.dataset.id);
-            if (this.dataset.delete) {
-              if (confirm('Удалить задачу?')) deleteTask(id);
-            } else {
-              toggleTaskDone(id);
-            }
+            if (this.dataset.delete) { if (confirm('Удалить задачу?')) deleteTask(id); }
+            else toggleTaskDone(id);
           });
         });
-
         container.querySelectorAll('.task-edit-btn').forEach(btn => {
           btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -2081,7 +1521,6 @@
             openEditTask(id);
           });
         });
-
         container.querySelectorAll('.task-duplicate-btn').forEach(btn => {
           btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -2091,7 +1530,6 @@
             if (date) renderDayTasks(date);
           });
         });
-
         container.querySelectorAll('.task-timer-btn').forEach(btn => {
           btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -2099,7 +1537,6 @@
             startTimer(id);
           });
         });
-
         container.querySelectorAll('.task-attach-btn').forEach(btn => {
           btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -2114,9 +1551,7 @@
           const date = document.getElementById('dayTasksTitle').dataset.date;
           if (date) renderDayTasks(date);
         }
-        if (document.getElementById('goalsModal').classList.contains('active')) {
-          renderGoals();
-        }
+        if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
       }
 
       // ===== РЕДАКТИРОВАНИЕ ЗАДАЧИ =====
@@ -2128,7 +1563,6 @@
         document.getElementById('editTaskDateFrom').value = task.dateFrom;
         document.getElementById('editTaskDateTo').value = task.dateTo;
         document.getElementById('editTaskImportant').checked = task.important;
-
         const container = document.getElementById('editCategorySelector');
         container.innerHTML = '';
         categories.forEach(cat => {
@@ -2143,7 +1577,6 @@
           });
           container.appendChild(btn);
         });
-
         document.getElementById('editTaskModal').classList.add('active');
       }
 
@@ -2162,18 +1595,16 @@
         document.getElementById('attachGoalModal').classList.add('active');
       }
 
-      // ===== ЦЕЛИ =====
+      // ===== ЦЕЛИ — ОТОБРАЖЕНИЕ =====
       function renderGoals() {
         const container = document.getElementById('goalsList');
         let filtered = goals;
         if (goalsFilter === 'active') filtered = goals.filter(g => !g.done);
         if (goalsFilter === 'done') filtered = goals.filter(g => g.done);
-
         if (filtered.length === 0) {
           container.innerHTML = `<div style="text-align:center; color:#8a8a9a; padding:20px 0;">🎯 Нет целей</div>`;
           return;
         }
-
         let html = '';
         filtered.forEach(goal => {
           const goalTasks = tasks.filter(t => t.goalId === goal.id);
@@ -2183,18 +1614,13 @@
           const statusClass = goal.done ? 'done' : 'active';
           const statusText = goal.done ? '✅ Выполнена' : '🔄 В процессе';
           const deadlineText = goal.deadline ? `⏰ ${goal.deadline}` : '';
-
           let tasksHtml = '';
           goalTasks.forEach(t => {
             const cat = categories.find(c => c.id === t.category);
             tasksHtml += `<span class="tag ${t.done ? 'done' : ''}" style="${cat ? 'background:'+cat.color+'20;' : ''}">${t.title}</span>`;
           });
-
           let photoHtml = '';
-          if (goal.photo) {
-            photoHtml = `<div class="goal-photo"><img src="${goal.photo}" alt="Фото цели" /></div>`;
-          }
-
+          if (goal.photo) photoHtml = `<div class="goal-photo"><img src="${goal.photo}" alt="Фото цели" /></div>`;
           html += `
             <div class="goal-item">
               <div class="goal-header">
@@ -2219,21 +1645,18 @@
           `;
         });
         container.innerHTML = html;
-
         container.querySelectorAll('.goal-done-btn').forEach(btn => {
           btn.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
             toggleGoalDone(id);
           });
         });
-
         container.querySelectorAll('.goal-edit-btn').forEach(btn => {
           btn.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
             openGoalForm(id);
           });
         });
-
         container.querySelectorAll('.goal-delete-btn').forEach(btn => {
           btn.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
@@ -2243,11 +1666,10 @@
       }
 
       // ===== ФОРМА ЦЕЛИ =====
-      function openGoalForm(goalId = null) {
+      function openGoalForm(goalId) {
         const modal = document.getElementById('goalFormModal');
         const title = document.getElementById('goalFormTitle');
         const deleteBtn = document.getElementById('deleteGoalBtn');
-
         if (goalId) {
           const goal = goals.find(g => g.id === goalId);
           if (!goal) return;
@@ -2278,7 +1700,7 @@
         document.getElementById('taskDateTo').value = today;
         document.getElementById('taskTitleInput').value = '';
         document.getElementById('taskImportant').checked = false;
-
+        document.getElementById('taskDuration').value = 0;
         const select = document.getElementById('taskGoalSelect');
         select.innerHTML = '<option value="">Без цели</option>';
         goals.forEach(g => {
@@ -2287,7 +1709,6 @@
           opt.textContent = g.title + (g.done ? ' ✅' : '');
           select.appendChild(opt);
         });
-
         const container = document.getElementById('categorySelector');
         container.innerHTML = '';
         let selectedCat = categories[0].id;
@@ -2305,6 +1726,62 @@
         });
       }
 
+      // ===== ТАЙМЕР =====
+      function startTimer(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+        timerTaskId = taskId;
+        document.getElementById('timerTaskName').textContent = `⏳ ${task.title}`;
+        timerSeconds = 25 * 60;
+        updateTimerDisplay();
+        document.getElementById('timerModal').classList.add('active');
+        if (timerInterval) clearInterval(timerInterval);
+        timerRunning = false;
+        document.getElementById('timerStartBtn').textContent = '▶ Старт';
+      }
+
+      function updateTimerDisplay() {
+        const mins = Math.floor(timerSeconds / 60);
+        const secs = timerSeconds % 60;
+        document.getElementById('timerDisplay').textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+      }
+
+      function toggleTimer() {
+        if (timerRunning) {
+          clearInterval(timerInterval);
+          timerRunning = false;
+          document.getElementById('timerStartBtn').textContent = '▶ Старт';
+        } else {
+          timerRunning = true;
+          document.getElementById('timerStartBtn').textContent = '⏸ Пауза';
+          timerInterval = setInterval(() => {
+            if (timerSeconds <= 0) {
+              clearInterval(timerInterval);
+              timerRunning = false;
+              document.getElementById('timerStartBtn').textContent = '▶ Старт';
+              alert('⏰ Время вышло! Отличная работа!');
+              if (timerTaskId) {
+                toggleTaskDone(timerTaskId);
+                timerTaskId = null;
+              }
+              return;
+            }
+            timerSeconds--;
+            updateTimerDisplay();
+          }, 1000);
+        }
+      }
+
+      function resetTimer() {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        timerSeconds = 25 * 60;
+        updateTimerDisplay();
+        document.getElementById('timerStartBtn').textContent = '▶ Старт';
+        timerTaskId = null;
+        document.getElementById('timerTaskName').textContent = '—';
+      }
+
       // ===== СТАТИСТИКА =====
       function showStats() {
         const total = tasks.length;
@@ -2314,27 +1791,25 @@
         const withGoal = tasks.filter(t => t.goalId).length;
         const totalGoals = goals.length;
         const doneGoals = goals.filter(g => g.done).length;
-        let byCat = {}; categories.forEach(c => byCat[c.id] = 0);
+        const totalXP = player.totalXP;
+        let byCat = {};
+        categories.forEach(c => byCat[c.id] = 0);
         tasks.forEach(t => { if (byCat[t.category] !== undefined) byCat[t.category]++; });
-
         let msg = `📊 СТАТИСТИКА\n━━━━━━━━━━━━━━\n`;
         msg += `📌 Задач: ${total}\n✅ Выполнено: ${done}\n⏳ Осталось: ${undone}\n⭐ Важных: ${important}\n🎯 Привязано к целям: ${withGoal}\n`;
         msg += `━━━━━━━━━━━━━━\n🎯 Целей: ${totalGoals}\n✅ Достигнуто: ${doneGoals}\n`;
+        msg += `━━━━━━━━━━━━━━\n⚡ Всего XP: ${totalXP}\n👤 Уровень: ${player.level}\n`;
         if (profile.weight) msg += `⚖️ Вес: ${profile.weight} кг\n`;
         if (profile.height) msg += `📏 Рост: ${profile.height} см\n`;
+        msg += `━━━━━━━━━━━━━━\n📂 По категориям:\n`;
+        categories.forEach(c => { const count = byCat[c.id] || 0; if (count > 0) msg += `  ${c.label}: ${count}\n`; });
         msg += `━━━━━━━━━━━━━━\n🏅 Достижений: ${achievements.length}`;
         alert(msg);
       }
 
       // ===== МЕНЮ =====
-      function toggleMenu() {
-        const menu = document.getElementById('menuDropdown');
-        menu.classList.toggle('open');
-      }
-
-      function closeMenu() {
-        document.getElementById('menuDropdown').classList.remove('open');
-      }
+      function toggleMenu() { document.getElementById('menuDropdown').classList.toggle('open'); }
+      function closeMenu() { document.getElementById('menuDropdown').classList.remove('open'); }
 
       // ===== ЭКСПОРТ =====
       function exportData() {
@@ -2354,22 +1829,14 @@
       function resetAll() {
         if (confirm('⚠️ Удалить все задачи, цели, прогресс и достижения?')) {
           if (confirm('Точно? Это нельзя отменить!')) {
-            tasks = [];
-            goals = [];
-            nextTaskId = 1;
-            nextGoalId = 1;
-            player = { name: 'Эльдар', level: 1, xp: 0, xpToNext: 100 };
+            tasks = []; goals = []; nextTaskId = 1; nextGoalId = 1;
+            player = { name: 'Эльдар', totalXP: 0, level: 1 };
             achievements = [];
             profile = {
-              name: 'Эльдар',
-              age: '',
-              gender: '',
-              height: '',
-              weight: '',
-              headerPhoto: null,
-              avatarPhoto: null,
-              weightLog: [],
-              measurements: { biceps: '', chest: '', thigh: '', waist: '' }
+              name: 'Эльдар', age: '', gender: '', height: '', weight: '',
+              headerPhoto: null, avatarPhoto: null, weightLog: [],
+              measurements: { biceps: '', chest: '', thigh: '', waist: '' },
+              measurementLog: [], reminderPeriod: 0, lastMeasurementDate: null
             };
             saveData();
             updateAll();
@@ -2390,7 +1857,6 @@
         localStorage.setItem('rpgScheme', scheme);
       }
 
-      // ===== ТЕМА =====
       function toggleTheme() {
         darkMode = !darkMode;
         document.body.classList.toggle('dark-mode', darkMode);
@@ -2399,13 +1865,9 @@
         localStorage.setItem('rpgDarkMode', darkMode ? '1' : '0');
       }
 
-      // ===== ФИЛЬТР =====
       function toggleFilter(categoryId) {
-        if (filterCategory === categoryId) {
-          filterCategory = null;
-        } else {
-          filterCategory = categoryId;
-        }
+        if (filterCategory === categoryId) filterCategory = null;
+        else filterCategory = categoryId;
         document.querySelectorAll('.legend-item').forEach(el => {
           el.classList.toggle('active-filter', el.dataset.cat === filterCategory);
         });
@@ -2417,7 +1879,6 @@
         }
       }
 
-      // ===== ЛЕГЕНДА =====
       function renderLegend() {
         const container = document.getElementById('legendContainer');
         container.innerHTML = categories.map(cat => `
@@ -2426,17 +1887,6 @@
             ${cat.label}
           </span>
         `).join('');
-      }
-
-      // ===== ЗАГРУЗКА ФОТО =====
-      function loadImageFile(input, callback) {
-        if (input.files && input.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            callback(e.target.result);
-          };
-          reader.readAsDataURL(input.files[0]);
-        }
       }
 
       // ===== ИНИЦИАЛИЗАЦИЯ =====
@@ -2449,47 +1899,82 @@
           document.getElementById('appContainer').classList.add('dark-mode');
           document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
         }
-
         loadData();
 
-        // ===== ВЕРХНИЙ БАР =====
-        const menuBtn = document.getElementById('menuBtn');
-        const menuClose = document.getElementById('menuClose');
-        const menuDropdown = document.getElementById('menuDropdown');
-
-        menuBtn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          menuDropdown.classList.toggle('open');
-        });
-
-        menuClose.addEventListener('click', function() {
-          menuDropdown.classList.remove('open');
-        });
-
+        // Меню
+        document.getElementById('menuBtn').addEventListener('click', function(e) { e.stopPropagation(); toggleMenu(); });
+        document.getElementById('menuClose').addEventListener('click', closeMenu);
         document.addEventListener('click', function(e) {
-          if (!menuDropdown.contains(e.target) && e.target !== menuBtn) {
-            menuDropdown.classList.remove('open');
-          }
+          const menu = document.getElementById('menuDropdown');
+          if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== document.getElementById('menuBtn')) closeMenu();
         });
 
+        // Верхний бар
         document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-
-        // ===== ПРОФИЛЬ =====
         document.getElementById('profileCard').addEventListener('click', function() {
           document.getElementById('profileModal').classList.add('active');
           updateProfileDisplay();
         });
 
+        // Меню пункты
         document.getElementById('menuProfile').addEventListener('click', function() {
           closeMenu();
           document.getElementById('profileModal').classList.add('active');
           updateProfileDisplay();
         });
+        document.getElementById('menuGoals').addEventListener('click', function() {
+          closeMenu();
+          document.getElementById('goalsModal').classList.add('active');
+          renderGoals();
+        });
+        document.getElementById('menuAddGoal').addEventListener('click', function() {
+          closeMenu();
+          openGoalForm(null);
+        });
+        document.getElementById('menuAchievements').addEventListener('click', function() {
+          closeMenu();
+          const list = achievements.length ? achievements.map((a,i) => `${i+1}. ${a}`).join('\n') : 'Пока нет достижений';
+          alert(`🏅 ДОСТИЖЕНИЯ (${achievements.length})\n━━━━━━━━━━━━\n${list}`);
+        });
+        document.getElementById('menuStats').addEventListener('click', function() { closeMenu(); showStats(); });
+        document.getElementById('menuExport').addEventListener('click', function() { closeMenu(); exportData(); });
+        document.getElementById('menuReset').addEventListener('click', function() { closeMenu(); resetAll(); });
 
+        // Схемы
+        document.querySelectorAll('.scheme-opt').forEach(opt => {
+          opt.addEventListener('click', function() {
+            applyScheme(this.dataset.scheme);
+            closeMenu();
+          });
+        });
+
+        // Навигация календаря
+        document.getElementById('prevMonth').addEventListener('click', function() {
+          currentDate.setMonth(currentDate.getMonth() - 1);
+          renderCalendar();
+        });
+        document.getElementById('nextMonth').addEventListener('click', function() {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          renderCalendar();
+        });
+
+        // Нижний бар
+        document.getElementById('addTaskBtn').addEventListener('click', openAddTaskModal);
+        document.getElementById('tasksListBtn').addEventListener('click', function() { openDayTasks(getDateStr(0)); });
+        document.getElementById('goalsBtn').addEventListener('click', function() {
+          document.getElementById('goalsModal').classList.add('active');
+          renderGoals();
+        });
+        document.getElementById('statsBtn').addEventListener('click', showStats);
+        document.getElementById('settingsBtn').addEventListener('click', function() {
+          document.getElementById('profileModal').classList.add('active');
+          updateProfileDisplay();
+        });
+
+        // Профиль — закрытие и редактирование
         document.getElementById('closeProfileBtn').addEventListener('click', function() {
           document.getElementById('profileModal').classList.remove('active');
         });
-
         document.getElementById('editProfileBtn').addEventListener('click', function() {
           document.getElementById('profileModal').classList.remove('active');
           document.getElementById('editProfileName').value = profile.name || '';
@@ -2499,12 +1984,9 @@
           document.getElementById('editProfileWeight').value = profile.weight || '';
           document.getElementById('editProfileModal').classList.add('active');
         });
-
-        // Редактирование профиля
         document.getElementById('cancelEditProfileBtn').addEventListener('click', function() {
           document.getElementById('editProfileModal').classList.remove('active');
         });
-
         document.getElementById('saveEditProfileBtn').addEventListener('click', function() {
           profile.name = document.getElementById('editProfileName').value.trim() || 'Эльдар';
           profile.age = document.getElementById('editProfileAge').value;
@@ -2518,60 +2000,61 @@
           updateProfileDisplay();
         });
 
-        // Загрузка обложки
+        // Загрузка обложки и аватара
         document.getElementById('headerPhoto').addEventListener('click', function() {
           const input = document.createElement('input');
           input.type = 'file';
           input.accept = 'image/*';
           input.onchange = function() {
-            loadImageFile(this, function(data) {
-              profile.headerPhoto = data;
-              saveData();
-              updateProfileDisplay();
-            });
+            const file = this.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                profile.headerPhoto = e.target.result;
+                saveData();
+                updateProfileDisplay();
+              };
+              reader.readAsDataURL(file);
+            }
           };
           input.click();
         });
-
-        // Загрузка аватара
         document.getElementById('profileAvatar').addEventListener('click', function() {
           const input = document.createElement('input');
           input.type = 'file';
           input.accept = 'image/*';
           input.onchange = function() {
-            loadImageFile(this, function(data) {
-              profile.avatarPhoto = data;
-              saveData();
-              updateAll();
-            });
+            const file = this.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                profile.avatarPhoto = e.target.result;
+                saveData();
+                updateAll();
+              };
+              reader.readAsDataURL(file);
+            }
           };
           input.click();
         });
 
-        // Добавление веса
+        // Вес и мерки
         document.getElementById('addWeightBtn').addEventListener('click', function() {
           document.getElementById('weightDate').value = getDateStr(0);
           document.getElementById('weightValue').value = profile.weight || '';
           document.getElementById('addWeightModal').classList.add('active');
         });
-
         document.getElementById('cancelWeightBtn').addEventListener('click', function() {
           document.getElementById('addWeightModal').classList.remove('active');
         });
-
         document.getElementById('saveWeightBtn').addEventListener('click', function() {
           const date = document.getElementById('weightDate').value;
           const weight = document.getElementById('weightValue').value;
           if (!date || !weight) { alert('Заполните все поля'); return; }
-          if (!profile.weightLog) profile.weightLog = [];
-          profile.weightLog.push({ date, weight: parseFloat(weight) });
-          profile.weight = parseFloat(weight);
-          saveData();
-          updateAll();
+          addWeightEntry(date, weight);
           document.getElementById('addWeightModal').classList.remove('active');
         });
 
-        // Добавление мерок
         document.getElementById('addMeasurementBtn').addEventListener('click', function() {
           document.getElementById('measBicepsInput').value = profile.measurements.biceps || '';
           document.getElementById('measChestInput').value = profile.measurements.chest || '';
@@ -2579,94 +2062,55 @@
           document.getElementById('measWaistInput').value = profile.measurements.waist || '';
           document.getElementById('addMeasurementModal').classList.add('active');
         });
-
         document.getElementById('cancelMeasurementBtn').addEventListener('click', function() {
           document.getElementById('addMeasurementModal').classList.remove('active');
         });
-
         document.getElementById('saveMeasurementBtn').addEventListener('click', function() {
-          profile.measurements.biceps = parseFloat(document.getElementById('measBicepsInput').value) || '';
-          profile.measurements.chest = parseFloat(document.getElementById('measChestInput').value) || '';
-          profile.measurements.thigh = parseFloat(document.getElementById('measThighInput').value) || '';
-          profile.measurements.waist = parseFloat(document.getElementById('measWaistInput').value) || '';
-          saveData();
-          updateAll();
+          const date = getDateStr(0);
+          const biceps = document.getElementById('measBicepsInput').value;
+          const chest = document.getElementById('measChestInput').value;
+          const thigh = document.getElementById('measThighInput').value;
+          const waist = document.getElementById('measWaistInput').value;
+          if (!biceps && !chest && !thigh && !waist) { alert('Введите хотя бы одну мерку'); return; }
+          addMeasurementEntry(date, biceps, chest, thigh, waist);
           document.getElementById('addMeasurementModal').classList.remove('active');
         });
 
-        // ===== МЕНЮ =====
-        document.getElementById('menuGoals').addEventListener('click', function() {
-          closeMenu();
-          document.getElementById('goalsModal').classList.add('active');
-          renderGoals();
+        // Напоминания
+        document.getElementById('saveReminderBtn').addEventListener('click', function() {
+          const period = document.getElementById('reminderPeriod').value;
+          saveReminderPeriod(period);
         });
 
-        document.getElementById('menuAddGoal').addEventListener('click', function() {
-          closeMenu();
-          openGoalForm(null);
-        });
-
-        document.getElementById('menuAchievements').addEventListener('click', function() {
-          closeMenu();
-          const list = achievements.length > 0 ? achievements.map((a, i) => `${i+1}. ${a}`).join('\n') : 'Пока нет достижений';
-          alert(`🏅 ДОСТИЖЕНИЯ (${achievements.length})\n━━━━━━━━━━━━\n${list}`);
-        });
-
-        document.getElementById('menuStats').addEventListener('click', function() { closeMenu(); showStats(); });
-        document.getElementById('menuExport').addEventListener('click', function() { closeMenu(); exportData(); });
-        document.getElementById('menuReset').addEventListener('click', function() { closeMenu(); resetAll(); });
-
-        // ===== СХЕМЫ =====
-        document.querySelectorAll('.scheme-opt').forEach(opt => {
-          opt.addEventListener('click', function() {
-            applyScheme(this.dataset.scheme);
-            closeMenu();
+        // Табы профиля
+        document.querySelectorAll('.profile-tabs button').forEach(btn => {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.profile-tabs button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const tabId = this.dataset.tab;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (tabId === 'tab-weight') drawWeightChart();
+            if (tabId === 'tab-measurements') drawMeasurementsChart();
+            if (tabId === 'tab-reminders') updateReminderStatus();
+            if (tabId === 'tab-rpg') updateRpgAvatar();
           });
         });
 
-        // ===== НАВИГАЦИЯ КАЛЕНДАРЯ =====
-        document.getElementById('prevMonth').addEventListener('click', function() {
-          currentDate.setMonth(currentDate.getMonth() - 1);
-          renderCalendar();
-        });
-        document.getElementById('nextMonth').addEventListener('click', function() {
-          currentDate.setMonth(currentDate.getMonth() + 1);
-          renderCalendar();
-        });
-
-        // ===== НИЖНИЙ БАР =====
-        document.getElementById('addTaskBtn').addEventListener('click', openAddTaskModal);
-        document.getElementById('tasksListBtn').addEventListener('click', function() {
-          openDayTasks(getDateStr(0));
-        });
-        document.getElementById('goalsBtn').addEventListener('click', function() {
-          document.getElementById('goalsModal').classList.add('active');
-          renderGoals();
-        });
-        document.getElementById('statsBtn').addEventListener('click', showStats);
-        document.getElementById('settingsBtn').addEventListener('click', function() {
-          document.getElementById('profileModal').classList.add('active');
-          updateProfileDisplay();
-        });
-
-        // ===== МОДАЛКИ: ЗАКРЫТИЕ ПО ОВЕРЛЕЮ =====
+        // Закрытие модалок по оверлею
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
           overlay.addEventListener('click', function(e) {
             if (e.target === this) this.classList.remove('active');
           });
         });
 
-        // ===== МОДАЛКА ЗАДАЧ =====
+        // Модалка задач
         document.getElementById('closeDayTasksBtn').addEventListener('click', function() {
           document.getElementById('dayTasksModal').classList.remove('active');
         });
-
-        // ===== МОДАЛКА ЦЕЛЕЙ =====
         document.getElementById('closeGoalsBtn').addEventListener('click', function() {
           document.getElementById('goalsModal').classList.remove('active');
         });
-
-        // ===== МОДАЛКА ТАЙМЕРА =====
         document.getElementById('closeTimerBtn').addEventListener('click', function() {
           clearInterval(timerInterval);
           timerRunning = false;
@@ -2674,25 +2118,23 @@
           resetTimer();
         });
 
-        // ===== ТАЙМЕР =====
+        // Таймер
         document.getElementById('timerStartBtn').addEventListener('click', toggleTimer);
         document.getElementById('timerPauseBtn').addEventListener('click', toggleTimer);
         document.getElementById('timerResetBtn').addEventListener('click', resetTimer);
 
-        // ===== СПИСОК ЗАДАЧ =====
+        // Список задач
         document.getElementById('taskSearch').addEventListener('input', function() {
           searchQuery = this.value;
           const date = document.getElementById('dayTasksTitle').dataset.date;
           if (date) renderDayTasks(date);
         });
-
         document.getElementById('toggleDoneBtn').addEventListener('click', function() {
           hideDone = !hideDone;
           this.innerHTML = hideDone ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
           const date = document.getElementById('dayTasksTitle').dataset.date;
           if (date) renderDayTasks(date);
         });
-
         document.getElementById('completeAllBtn').addEventListener('click', function() {
           const date = document.getElementById('dayTasksTitle').dataset.date;
           if (date) {
@@ -2701,9 +2143,9 @@
             if (confirm(`Выполнить все ${undone} задач за этот день?`)) {
               const dayTasks = tasks.filter(t => isDateInRange(date, t.dateFrom, t.dateTo) && !t.done);
               dayTasks.forEach(t => {
-                let bonus = 10;
-                if (t.important) bonus += 5;
-                addXP(bonus);
+                const xp = (t.duration || 0) * 0.01;
+                if (xp > 0) addXP(xp);
+                if (t.important) addXP(5);
                 t.done = true;
               });
               saveData();
@@ -2713,7 +2155,7 @@
           }
         });
 
-        // ===== МОДАЛКА ДОБАВЛЕНИЯ ЗАДАЧИ =====
+        // Добавление задачи
         document.getElementById('saveTaskBtn').addEventListener('click', function() {
           const title = document.getElementById('taskTitleInput').value.trim();
           const dateFrom = document.getElementById('taskDateFrom').value;
@@ -2723,22 +2165,21 @@
           const category = activeBtn ? activeBtn.dataset.cat : categories[0].id;
           const important = document.getElementById('taskImportant').checked;
           const goalId = document.getElementById('taskGoalSelect').value;
+          const duration = document.getElementById('taskDuration').value || 0;
           if (!title) { alert('Введите название задачи'); return; }
           if (!dateFrom) { alert('Выберите дату начала'); return; }
-          if (addTask(title, dateFrom, dateTo, category, important, goalId || null)) {
+          if (addTask(title, dateFrom, dateTo, category, important, goalId || null, duration)) {
             document.getElementById('addTaskModal').classList.remove('active');
           }
         });
-
         document.getElementById('cancelTaskBtn').addEventListener('click', function() {
           document.getElementById('addTaskModal').classList.remove('active');
         });
 
-        // ===== МОДАЛКА РЕДАКТИРОВАНИЯ ЗАДАЧИ =====
+        // Редактирование задачи
         document.getElementById('cancelEditBtn').addEventListener('click', function() {
           document.getElementById('editTaskModal').classList.remove('active');
         });
-
         document.getElementById('saveEditBtn').addEventListener('click', function() {
           const title = document.getElementById('editTaskTitle').value.trim();
           const dateFrom = document.getElementById('editTaskDateFrom').value;
@@ -2753,56 +2194,35 @@
           }
         });
 
-        // ===== ЦЕЛИ: ФИЛЬТРЫ =====
-        document.getElementById('goalsFilterAll').addEventListener('click', function() {
-          goalsFilter = 'all';
-          renderGoals();
-        });
-        document.getElementById('goalsFilterActive').addEventListener('click', function() {
-          goalsFilter = 'active';
-          renderGoals();
-        });
-        document.getElementById('goalsFilterDone').addEventListener('click', function() {
-          goalsFilter = 'done';
-          renderGoals();
-        });
-        document.getElementById('goalsAddBtn').addEventListener('click', function() {
-          openGoalForm(null);
-        });
+        // Цели
+        document.getElementById('goalsFilterAll').addEventListener('click', function() { goalsFilter = 'all'; renderGoals(); });
+        document.getElementById('goalsFilterActive').addEventListener('click', function() { goalsFilter = 'active'; renderGoals(); });
+        document.getElementById('goalsFilterDone').addEventListener('click', function() { goalsFilter = 'done'; renderGoals(); });
+        document.getElementById('goalsAddBtn').addEventListener('click', function() { openGoalForm(null); });
 
-        // ===== ФОРМА ЦЕЛИ =====
         document.getElementById('cancelGoalFormBtn').addEventListener('click', function() {
           document.getElementById('goalFormModal').classList.remove('active');
         });
-
         document.getElementById('saveGoalFormBtn').addEventListener('click', function() {
           const title = document.getElementById('goalFormTitleInput').value.trim();
           const desc = document.getElementById('goalFormDesc').value.trim();
           const deadline = document.getElementById('goalFormDeadline').value;
           if (!title) { alert('Введите название цели'); return; }
-
           const photoInput = document.getElementById('goalFormPhoto');
           if (photoInput.files && photoInput.files[0]) {
             const reader = new FileReader();
             reader.onload = function(ev) {
-              if (editGoalId) {
-                editGoalData(editGoalId, title, desc, deadline, ev.target.result);
-              } else {
-                addGoal(title, desc, deadline, ev.target.result);
-              }
+              if (editGoalId) editGoalData(editGoalId, title, desc, deadline, ev.target.result);
+              else addGoal(title, desc, deadline, ev.target.result);
               document.getElementById('goalFormModal').classList.remove('active');
             };
             reader.readAsDataURL(photoInput.files[0]);
           } else {
-            if (editGoalId) {
-              editGoalData(editGoalId, title, desc, deadline, null);
-            } else {
-              addGoal(title, desc, deadline, null);
-            }
+            if (editGoalId) editGoalData(editGoalId, title, desc, deadline, null);
+            else addGoal(title, desc, deadline, null);
             document.getElementById('goalFormModal').classList.remove('active');
           }
         });
-
         document.getElementById('deleteGoalBtn').addEventListener('click', function() {
           if (editGoalId && confirm('Удалить цель?')) {
             deleteGoal(editGoalId);
@@ -2810,38 +2230,23 @@
           }
         });
 
-        // ===== ПРИКРЕПЛЕНИЕ К ЦЕЛИ =====
+        // Прикрепление к цели
         document.getElementById('cancelAttachBtn').addEventListener('click', function() {
           document.getElementById('attachGoalModal').classList.remove('active');
         });
-
         document.getElementById('saveAttachBtn').addEventListener('click', function() {
           const select = document.getElementById('attachGoalSelect');
           const goalId = select.value;
           const newName = document.getElementById('attachGoalNewName').value.trim();
-
-          if (goalId === '' && !newName) {
-            alert('Выберите цель или введите название новой');
-            return;
-          }
-
+          if (goalId === '' && !newName) { alert('Выберите цель или введите название новой'); return; }
           let targetGoalId = goalId;
           if (goalId === '' && newName) {
-            const newGoal = {
-              id: nextGoalId++,
-              title: newName,
-              description: '',
-              deadline: '',
-              done: false,
-              photo: null,
-              taskIds: []
-            };
+            const newGoal = { id: nextGoalId++, title: newName, description: '', deadline: '', done: false, photo: null, taskIds: [] };
             goals.push(newGoal);
             targetGoalId = newGoal.id;
             saveData();
             updateAll();
           }
-
           if (attachTaskId && targetGoalId) {
             attachTaskToGoal(attachTaskId, targetGoalId);
             document.getElementById('attachGoalModal').classList.remove('active');
@@ -2850,7 +2255,6 @@
       }
 
       window._toggleFilter = toggleFilter;
-
       document.addEventListener('DOMContentLoaded', init);
     })();
   </script>
