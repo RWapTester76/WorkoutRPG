@@ -33,6 +33,7 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
             --gradient: linear-gradient(135deg, #5B6AF0, #8B9CF7);
+            --sidebar-width: 280px;
         }
 
         [data-theme="dark"] {
@@ -53,6 +54,7 @@
             transition: background var(--transition), color var(--transition);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
         /* =============================================================
@@ -69,11 +71,234 @@
         }
 
         /* =============================================================
+           САЙДБАР
+           ============================================================= */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 150;
+            display: none;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+            opacity: 1;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            max-width: 85vw;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            padding: 20px 16px 80px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--border);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-close:hover {
+            background: var(--text-secondary);
+            color: #fff;
+        }
+
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            background: var(--primary-light);
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .sidebar-profile:hover {
+            transform: scale(1.01);
+        }
+
+        .sidebar-profile .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .sidebar-profile .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sidebar-profile .info .name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-profile .info .level {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-section {
+            margin-bottom: 16px;
+        }
+
+        .sidebar-section .section-title {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            padding: 8px 12px 4px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-item:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .sidebar-item.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-item .icon {
+            font-size: 1.2rem;
+            width: 28px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-item .badge {
+            margin-left: auto;
+            background: var(--border);
+            color: var(--text-secondary);
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 12px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* =============================================================
+           БУРГЕР
+           ============================================================= */
+        .burger-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            box-shadow: var(--shadow);
+        }
+
+        .burger-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .burger-btn:active {
+            transform: scale(0.93);
+        }
+
+        /* =============================================================
            ВКЛАДКИ
            ============================================================= */
         .view {
             display: none;
-            animation: fadeSlide 0.3s ease;
+            animation: fadeSlide 0.25s ease;
             padding: 16px;
         }
 
@@ -84,7 +309,7 @@
         @keyframes fadeSlide {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform: translateY(8px);
             }
             to {
                 opacity: 1;
@@ -106,70 +331,6 @@
 
         .card:active {
             transform: scale(0.98);
-        }
-
-        /* =============================================================
-           НАВИГАЦИЯ
-           ============================================================= */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            background: var(--card-bg);
-            border-top: 1px solid var(--border);
-            padding: 8px 0 var(--safe-bottom);
-            z-index: 100;
-            display: flex;
-            justify-content: space-around;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .bottom-nav button {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 0.6rem;
-            font-weight: 500;
-            font-family: inherit;
-            padding: 4px 12px;
-            cursor: pointer;
-            transition: all var(--transition);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            position: relative;
-        }
-
-        .bottom-nav button .tab-icon {
-            font-size: 1.5rem;
-            transition: transform var(--transition);
-        }
-
-        .bottom-nav button.active {
-            color: var(--primary);
-        }
-
-        .bottom-nav button.active .tab-icon {
-            transform: scale(1.1);
-        }
-
-        .bottom-nav button.active::after {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 3px;
-            border-radius: 3px;
-            background: var(--gradient);
         }
 
         /* =============================================================
@@ -225,16 +386,6 @@
             background: rgba(239, 68, 68, 0.15);
         }
 
-        .btn-ghost {
-            background: transparent;
-            color: var(--text-secondary);
-            padding: 8px 16px;
-        }
-
-        .btn-ghost:hover {
-            background: var(--border);
-        }
-
         .fab {
             position: fixed;
             bottom: 88px;
@@ -271,40 +422,47 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0 8px;
-            margin-bottom: 16px;
+            padding: 8px 0 12px;
+            margin-bottom: 12px;
+        }
+
+        .top-bar .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .top-bar h1 {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
 
         .top-bar .greeting {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: var(--text-secondary);
             font-weight: 400;
         }
 
         .top-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .top-actions button {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: var(--card-bg);
             border: 1px solid var(--border);
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1rem;
             transition: all var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-secondary);
+            box-shadow: var(--shadow);
         }
 
         .top-actions button:hover {
@@ -429,6 +587,16 @@
             color: #4F46E5;
         }
 
+        .tag-photo {
+            background: #E0E7FF;
+            color: #4F46E5;
+        }
+
+        .tag-repeat {
+            background: #FCE7F3;
+            color: #BE185D;
+        }
+
         .quest-actions {
             display: flex;
             gap: 4px;
@@ -490,7 +658,7 @@
             display: none;
             align-items: flex-end;
             justify-content: center;
-            z-index: 200;
+            z-index: 300;
             padding: 20px;
         }
 
@@ -609,7 +777,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 0;
+            padding: 4px 0;
         }
 
         .modal .form-check input[type="checkbox"] {
@@ -649,6 +817,10 @@
         .modal .btn-row button[type="button"]:hover {
             background: var(--text-secondary);
             color: #fff;
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         /* =============================================================
@@ -711,6 +883,7 @@
             text-align: center;
             padding: 40px 20px;
             color: var(--text-secondary);
+            grid-column: 1/-1;
         }
 
         .gallery-empty .empty-icon {
@@ -794,7 +967,7 @@
         .month-nav {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .month-nav button {
@@ -821,7 +994,7 @@
 
         .month-nav span {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .day-detail {
@@ -855,10 +1028,6 @@
             padding: 2px 10px;
             border-radius: 20px;
             color: var(--primary);
-        }
-
-        .day-detail .mini-quest .photo-indicator {
-            font-size: 0.8rem;
         }
 
         /* =============================================================
@@ -1168,7 +1337,7 @@
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
-            z-index: 300;
+            z-index: 400;
             text-align: center;
             font-weight: 500;
             display: none;
@@ -1200,10 +1369,6 @@
                 max-width: 600px;
                 padding: 20px;
             }
-            .bottom-nav {
-                max-width: 600px;
-                border-radius: 20px 20px 0 0;
-            }
             .fab {
                 right: calc(50% - 300px + 24px);
             }
@@ -1211,9 +1376,6 @@
 
         @media (min-width: 1024px) {
             .app {
-                max-width: 800px;
-            }
-            .bottom-nav {
                 max-width: 800px;
             }
             .fab {
@@ -1238,42 +1400,13 @@
             background: var(--text-secondary);
         }
 
-        /* =============================================================
-           ДОПОЛНИТЕЛЬНО
-           ============================================================= */
-        .hidden {
-            display: none !important;
-        }
-
-        .mt-8 {
-            margin-top: 8px;
-        }
-        .mt-12 {
-            margin-top: 12px;
-        }
-        .mb-8 {
-            margin-bottom: 8px;
-        }
-        .gap-8 {
-            gap: 8px;
-        }
-
-        .flex {
-            display: flex;
-        }
-        .flex-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .flex-between {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .flex-col {
-            display: flex;
-            flex-direction: column;
+        .badge-count {
+            background: var(--border);
+            color: var(--text-secondary);
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -1283,18 +1416,87 @@
         <!-- ===== УВЕДОМЛЕНИЕ ===== -->
         <div id="notification" class="notification"></div>
 
+        <!-- ===== САЙДБАР ===== -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>📋 Меню</h2>
+                <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+            </div>
+
+            <!-- Профиль -->
+            <div class="sidebar-profile" onclick="switchTab('profile');closeSidebar();">
+                <div class="avatar" id="sidebarAvatar">🧑</div>
+                <div class="info">
+                    <div class="name" id="sidebarName">Игрок</div>
+                    <div class="level">Уровень <span id="sidebarLevel">1</span> · <span id="sidebarXP">0</span> XP</div>
+                </div>
+            </div>
+
+            <!-- Основное -->
+            <div class="sidebar-section">
+                <div class="section-title">Основное</div>
+                <button class="sidebar-item active" data-tab="day" onclick="switchTab('day');closeSidebar();">
+                    <span class="icon">📅</span> Сегодня
+                    <span class="badge" id="sidebarTodayCount">0</span>
+                </button>
+                <button class="sidebar-item" data-tab="month" onclick="switchTab('month');closeSidebar();">
+                    <span class="icon">📆</span> Календарь
+                </button>
+                <button class="sidebar-item" data-tab="quests" onclick="switchTab('quests');closeSidebar();">
+                    <span class="icon">📋</span> Все задачи
+                    <span class="badge" id="sidebarTotalCount">0</span>
+                </button>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Контент -->
+            <div class="sidebar-section">
+                <div class="section-title">Контент</div>
+                <button class="sidebar-item" data-tab="gallery" onclick="switchTab('gallery');closeSidebar();">
+                    <span class="icon">🖼️</span> Галерея
+                    <span class="badge" id="sidebarGalleryCount">0</span>
+                </button>
+                <button class="sidebar-item" data-tab="guilds" onclick="switchTab('guilds');closeSidebar();">
+                    <span class="icon">🏷️</span> Категории
+                </button>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Личное -->
+            <div class="sidebar-section">
+                <div class="section-title">Личное</div>
+                <button class="sidebar-item" data-tab="profile" onclick="switchTab('profile');closeSidebar();">
+                    <span class="icon">👤</span> Профиль
+                </button>
+                <button class="sidebar-item" data-tab="settings" onclick="switchTab('settings');closeSidebar();">
+                    <span class="icon">⚙️</span> Настройки
+                </button>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="sidebar-item" onclick="openModal();closeSidebar();" style="color:var(--primary);">
+                    <span class="icon">✨</span> Новая задача
+                </button>
+            </div>
+        </nav>
+
         <!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
         <div class="app" id="appContainer">
 
             <!-- ===== ВКЛАДКА: ДЕНЬ ===== -->
             <div id="view-day" class="view active">
                 <div class="top-bar">
-                    <div>
-                        <div class="greeting" id="greeting">Доброе утро 👋</div>
-                        <h1>Сегодня</h1>
+                    <div class="left">
+                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                        <div>
+                            <div class="greeting" id="greeting">Доброе утро 👋</div>
+                            <h1>Сегодня</h1>
+                        </div>
                     </div>
                     <div class="top-actions">
-                        <button onclick="switchTab('settings')" title="Настройки">⚙️</button>
                         <button id="themeToggle" onclick="toggleTheme()" title="Тема">🌙</button>
                     </div>
                 </div>
@@ -1313,7 +1515,10 @@
             <!-- ===== ВКЛАДКА: МЕСЯЦ ===== -->
             <div id="view-month" class="view">
                 <div class="top-bar">
-                    <h1>Календарь</h1>
+                    <div class="left">
+                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                        <h1>Календарь</h1>
+                    </div>
                     <div class="month-nav">
                         <button onclick="changeMonth(-1)">‹</button>
                         <span id="monthLabel">Январь 2026</span>
@@ -1338,7 +1543,10 @@
             <!-- ===== ВКЛАДКА: ЗАДАЧИ ===== -->
             <div id="view-quests" class="view">
                 <div class="top-bar">
-                    <h1>Все задачи</h1>
+                    <div class="left">
+                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                        <h1>Все задачи</h1>
+                    </div>
                     <button class="btn btn-primary" onclick="openModal()" style="padding:8px 16px;font-size:0.8rem;">+</button>
                 </div>
 
@@ -1349,14 +1557,24 @@
             <!-- ===== ВКЛАДКА: ГАЛЕРЕЯ ===== -->
             <div id="view-gallery" class="view">
                 <div class="top-bar">
-                    <h1>Галерея</h1>
-                    <span class="badge" id="galleryCount" style="font-size:0.7rem;color:var(--text-secondary);">0 фото</span>
+                    <div class="left">
+                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                        <h1>Галерея</h1>
+                    </div>
+                    <span class="badge-count" id="galleryCount">0 фото</span>
                 </div>
                 <div id="galleryGrid" class="gallery-grid"></div>
             </div>
 
             <!-- ===== ВКЛАДКА: ПРОФИЛЬ ===== -->
             <div id="view-profile" class="view profile-view">
+                <div class="top-bar">
+                    <div class="left">
+                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                        <h1>Профиль</h1>
+                    </div>
+                </div>
+
                 <div class="card profile-card">
                     <div class="profile-avatar">
                         <span id="avatarEmoji">🧑</span>
@@ -1406,7 +1624,10 @@
             <!-- ===== ВКЛАДКА: НАСТРОЙКИ ===== -->
             <div id="view-settings" class="view">
                 <div class="top-bar">
-                    <h1>Настройки</h1>
+                    <div class="left">
+                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                        <h1>Настройки</h1>
+                    </div>
                 </div>
 
                 <div class="settings-group">
@@ -1448,34 +1669,14 @@
             <!-- ===== ВКЛАДКА: КАТЕГОРИИ ===== -->
             <div id="view-guilds" class="view">
                 <div class="top-bar">
-                    <h1>Категории</h1>
+                    <div class="left">
+                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                        <h1>Категории</h1>
+                    </div>
                 </div>
                 <div id="guildGrid" class="guild-grid"></div>
             </div>
 
-            <!-- ===== НАВИГАЦИЯ ===== -->
-            <nav class="bottom-nav">
-                <button class="active" data-tab="day" onclick="switchTab('day')">
-                    <span class="tab-icon">📅</span>
-                    <span class="tab-label">День</span>
-                </button>
-                <button data-tab="month" onclick="switchTab('month')">
-                    <span class="tab-icon">📆</span>
-                    <span class="tab-label">Месяц</span>
-                </button>
-                <button data-tab="quests" onclick="switchTab('quests')">
-                    <span class="tab-icon">📋</span>
-                    <span class="tab-label">Задачи</span>
-                </button>
-                <button data-tab="gallery" onclick="switchTab('gallery')">
-                    <span class="tab-icon">🖼️</span>
-                    <span class="tab-label">Галерея</span>
-                </button>
-                <button data-tab="profile" onclick="switchTab('profile')">
-                    <span class="tab-icon">👤</span>
-                    <span class="tab-label">Профиль</span>
-                </button>
-            </nav>
         </div>
 
         <!-- ===== МОДАЛКА СОЗДАНИЯ ===== -->
@@ -1726,6 +1927,44 @@
         }
 
         // ============================================================
+        // ========== САЙДБАР ==========
+        // ============================================================
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function updateSidebar() {
+            document.getElementById('sidebarName').textContent = profile.name;
+            document.getElementById('sidebarLevel').textContent = profile.level;
+            document.getElementById('sidebarXP').textContent = profile.totalXP;
+
+            const titleData = getTitle(profile.level);
+            document.getElementById('sidebarAvatar').textContent = titleData.emoji;
+
+            const today = new Date().toISOString().split('T')[0];
+            const todayQuests = quests.filter(q => q.scheduledDate === today);
+            document.getElementById('sidebarTodayCount').textContent = todayQuests.length;
+            document.getElementById('sidebarTotalCount').textContent = quests.length;
+            document.getElementById('sidebarGalleryCount').textContent = gallery.length;
+
+            // Подсветка активного пункта
+            document.querySelectorAll('.sidebar-item[data-tab]').forEach(el => {
+                el.classList.toggle('active', el.dataset.tab === currentTab);
+            });
+        }
+
+        // ============================================================
         // ========== ТЕМА И ПРОФИЛЬ ==========
         // ============================================================
 
@@ -1803,19 +2042,17 @@
             if (!duration || duration < 1) { showNotification('Укажите длительность!', true); return; }
             if (!scheduledDate) { showNotification('Укажите дату!', true); return; }
 
-            // Получаем дни недели для повторения
             let repeatDays = [];
             if (repeat === 'custom') {
                 document.querySelectorAll('.repeat-day:checked').forEach(cb => {
                     repeatDays.push(parseInt(cb.value));
                 });
                 if (repeatDays.length === 0) {
-                    showNotification('Выберите хотя бы один день для повторения!', true);
+                    showNotification('Выберите хотя бы один день!', true);
                     return;
                 }
             }
 
-            // Обработка фото
             let photoData = null;
             if (hasPhoto) {
                 const fileInput = document.getElementById('photoFile');
@@ -1827,7 +2064,7 @@
                             note, isHabit, isOneTime, photoData);
                     };
                     reader.readAsDataURL(fileInput.files[0]);
-                    return; // Ждём загрузки фото
+                    return;
                 } else {
                     showNotification('Выберите фото!', true);
                     return;
@@ -1864,7 +2101,6 @@
             quests.push(quest);
             saveQuests();
 
-            // Если есть фото, сохраняем в галерею
             if (photoData) {
                 const galleryItem = {
                     id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36),
@@ -1906,7 +2142,6 @@
                 quest.status = 'done';
                 profile.totalXP += quest.xpEarned;
                 showNotification(`✅ +${quest.xpEarned} XP`);
-                // Проверяем, нужно ли создать следующую задачу
                 if (quest.repeat !== 'none' && quest.endDate) {
                     createNextQuest(quest);
                 }
@@ -1931,7 +2166,6 @@
                 nextDate.setDate(nextDate.getDate() + 7);
                 found = true;
             } else if (quest.repeat === 'custom' && quest.repeatDays.length > 0) {
-                // Ищем следующий подходящий день
                 for (let i = 1; i <= 7; i++) {
                     const checkDate = new Date(nextDate);
                     checkDate.setDate(checkDate.getDate() + i);
@@ -1946,9 +2180,7 @@
 
             if (found) {
                 const endDate = quest.endDate ? new Date(quest.endDate + 'T00:00:00') : null;
-                if (endDate && nextDate > endDate) {
-                    return; // Достигнут конец повторения
-                }
+                if (endDate && nextDate > endDate) return;
 
                 const newQuest = {
                     ...quest,
@@ -1976,7 +2208,6 @@
                 showNotification(`🗑️ Возвращено ${quest.xpEarned} XP`);
             }
 
-            // Удаляем связанное фото из галереи
             if (quest.photoId) {
                 const gIndex = gallery.findIndex(g => g.id === quest.photoId);
                 if (gIndex !== -1) gallery.splice(gIndex, 1);
@@ -2060,6 +2291,9 @@
             document.querySelectorAll('.view').forEach(view => {
                 view.classList.toggle('active', view.id === 'view-' + tabId);
             });
+            document.querySelectorAll('.sidebar-item[data-tab]').forEach(el => {
+                el.classList.toggle('active', el.dataset.tab === tabId);
+            });
             if (tabId === 'day') renderDay();
             if (tabId === 'month') renderMonth();
             if (tabId === 'quests') renderAllQuests();
@@ -2067,6 +2301,7 @@
             if (tabId === 'profile') renderProfile();
             if (tabId === 'guilds') renderGuilds();
             if (tabId === 'settings') renderSettings();
+            updateSidebar();
         }
 
         // ============================================================
@@ -2091,7 +2326,6 @@
                 select.appendChild(opt);
             });
 
-            // Показываем/скрываем выбор дней для повторения
             document.getElementById('questRepeat').onchange = function() {
                 const group = document.getElementById('repeatDaysGroup');
                 if (this.value === 'custom') {
@@ -2101,7 +2335,6 @@
                 }
             };
 
-            // Показываем/скрываем загрузку фото
             document.getElementById('questPhoto').onchange = function() {
                 const group = document.getElementById('photoUploadGroup');
                 if (this.checked) {
@@ -2137,7 +2370,6 @@
                 .filter(q => q.scheduledDate === today)
                 .sort((a, b) => (a.scheduledTime || '00:00').localeCompare(b.scheduledTime || '00:00'));
 
-            // Приветствие
             const hour = new Date().getHours();
             let greeting = 'Доброе утро 👋';
             if (hour >= 12 && hour < 18) greeting = 'Добрый день ☀️';
@@ -2179,8 +2411,8 @@
                                 ${q.isHabit ? '<span class="tag tag-habit">🔄 привычка</span>' : ''}
                                 ${q.isOneTime ? '<span class="tag tag-onetime">📌 одноразка</span>' : ''}
                                 ${isFuture ? '<span class="tag tag-future">🔮 будущая</span>' : ''}
-                                ${q.hasPhoto ? '<span class="tag" style="background:#E0E7FF;color:#4F46E5;">📸 фото</span>' : ''}
-                                ${q.repeat !== 'none' ? '<span class="tag" style="background:#FCE7F3;color:#BE185D;">🔄 повтор</span>' : ''}
+                                ${q.hasPhoto ? '<span class="tag tag-photo">📸 фото</span>' : ''}
+                                ${q.repeat !== 'none' ? '<span class="tag tag-repeat">🔄 повтор</span>' : ''}
                             </div>
                             ${q.note ? `<div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">📝 ${q.note}</div>` : ''}
                         </div>
@@ -2299,7 +2531,7 @@
                     <div class="mini-quest">
                         <span>${q.status === 'done' ? '✅' : '⏳'}</span>
                         <span>${q.title}</span>
-                        ${q.hasPhoto ? '<span class="photo-indicator">📸</span>' : ''}
+                        ${q.hasPhoto ? '<span>📸</span>' : ''}
                         <span class="guild-tag">${guild.name}</span>
                     </div>
                 `;
@@ -2376,8 +2608,8 @@
                                 ${q.duration ? `<span class="tag tag-time">⏱ ${q.duration}мин</span>` : ''}
                                 ${q.isHabit ? '<span class="tag tag-habit">🔄 привычка</span>' : ''}
                                 ${q.isOneTime ? '<span class="tag tag-onetime">📌 одноразка</span>' : ''}
-                                ${q.hasPhoto ? '<span class="tag" style="background:#E0E7FF;color:#4F46E5;">📸 фото</span>' : ''}
-                                ${q.repeat !== 'none' ? '<span class="tag" style="background:#FCE7F3;color:#BE185D;">🔄 повтор</span>' : ''}
+                                ${q.hasPhoto ? '<span class="tag tag-photo">📸 фото</span>' : ''}
+                                ${q.repeat !== 'none' ? '<span class="tag tag-repeat">🔄 повтор</span>' : ''}
                             </div>
                             ${q.note ? `<div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">📝 ${q.note}</div>` : ''}
                         </div>
@@ -2400,7 +2632,7 @@
 
             if (gallery.length === 0) {
                 container.innerHTML = `
-                    <div class="gallery-empty" style="grid-column:1/-1;">
+                    <div class="gallery-empty">
                         <div class="empty-icon">🖼️</div>
                         <p>Нет фотографий</p>
                         <p style="font-size:0.85rem;margin-top:4px;">Добавьте фото при создании задачи</p>
@@ -2409,7 +2641,6 @@
                 return;
             }
 
-            // Сортируем по дате (новые сверху)
             const sorted = [...gallery].sort((a, b) => b.uploadedAt - a.uploadedAt);
 
             container.innerHTML = sorted.map(item => {
@@ -2459,8 +2690,8 @@
 
         function renderProfile() {
             document.getElementById('profileName').textContent = profile.name;
-
             document.getElementById('profileLevelBig').textContent = profile.level;
+
             const titleData = getTitle(profile.level);
             document.getElementById('profileTitle').textContent = titleData.title;
             document.getElementById('avatarEmoji').textContent = titleData.emoji;
@@ -2482,6 +2713,7 @@
             document.getElementById('statStreak').textContent = streaks.current;
 
             document.getElementById('nameInput').value = profile.name;
+            updateSidebar();
         }
 
         function updateName() {
@@ -2505,9 +2737,7 @@
         // ========== РЕНДЕР: НАСТРОЙКИ ==========
         // ============================================================
 
-        function renderSettings() {
-            // Активные профили уже подсвечены через applyProfile/applyTheme
-        }
+        function renderSettings() {}
 
         // ============================================================
         // ========== РЕНДЕР: ГИЛЬДИИ ==========
@@ -2607,6 +2837,7 @@
             else if (currentTab === 'profile') renderProfile();
             else if (currentTab === 'guilds') renderGuilds();
             else if (currentTab === 'settings') renderSettings();
+            updateSidebar();
         }
 
         // ============================================================
@@ -2622,11 +2853,24 @@
                 if (e.key === 'Escape') {
                     closeModal();
                     closePhotoModal();
+                    closeSidebar();
                 }
             });
 
             document.getElementById('modal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('modal')) closeModal();
+            });
+
+            // Закрываем сайдбар при свайпе вправо
+            let touchStartX = 0;
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            });
+            document.addEventListener('touchend', (e) => {
+                const diff = e.changedTouches[0].clientX - touchStartX;
+                if (diff > 80 && document.getElementById('sidebar').classList.contains('open')) {
+                    closeSidebar();
+                }
             });
 
             console.log('🚀 FlowPlan загружен!');
@@ -2638,5 +2882,3 @@
 
 </body>
 </html>
-
-
