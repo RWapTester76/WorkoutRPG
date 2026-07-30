@@ -1,4 +1,6 @@
+Вот полностью обновлённый HTML-файл с расширенным календарём (День/Неделя/Месяц/Год) и всей статистикой.
 
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -282,6 +284,7 @@
             justify-content: center;
             color: var(--text);
             box-shadow: var(--shadow);
+            flex-shrink: 0;
         }
 
         .burger-btn:hover {
@@ -341,10 +344,10 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
             border-radius: 50px;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 600;
             font-family: inherit;
             cursor: pointer;
@@ -384,6 +387,17 @@
 
         .btn-danger:hover {
             background: rgba(239, 68, 68, 0.15);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .btn-ghost:hover {
+            background: var(--border);
         }
 
         .fab {
@@ -430,16 +444,20 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            min-width: 0;
         }
 
-        .top-bar h1 {
-            font-size: 1.4rem;
+        .top-bar .left h1 {
+            font-size: 1.3rem;
             font-weight: 700;
             letter-spacing: -0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .top-bar .greeting {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
             font-weight: 400;
         }
@@ -463,11 +481,419 @@
             justify-content: center;
             color: var(--text-secondary);
             box-shadow: var(--shadow);
+            flex-shrink: 0;
         }
 
         .top-actions button:hover {
             background: var(--primary-light);
             color: var(--primary);
+        }
+
+        /* =============================================================
+           КАЛЕНДАРЬ: РЕЖИМЫ
+           ============================================================= */
+        .calendar-modes {
+            display: flex;
+            gap: 4px;
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .calendar-modes .mode-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            white-space: nowrap;
+            min-width: 44px;
+        }
+
+        .calendar-modes .mode-btn.active {
+            background: var(--gradient);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(91, 106, 240, 0.25);
+        }
+
+        .calendar-modes .mode-btn:hover:not(.active) {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* =============================================================
+           КАЛЕНДАРЬ: ДЕНЬ
+           ============================================================= */
+        .day-schedule {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .day-schedule .hour-block {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .day-schedule .hour-block .hour-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 44px;
+            padding-top: 2px;
+        }
+
+        .day-schedule .hour-block .hour-events {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .day-schedule .hour-block .hour-events .event-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            background: var(--primary-light);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .day-schedule .hour-block .hour-events .event-item:hover {
+            transform: translateX(4px);
+        }
+
+        .day-schedule .hour-block .hour-events .event-item.done {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .day-schedule .hour-block .hour-events .event-item .event-time {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .day-schedule .hour-block .hour-events .event-item .event-guild {
+            font-size: 0.6rem;
+            padding: 1px 8px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            margin-left: auto;
+        }
+
+        /* =============================================================
+           КАЛЕНДАРЬ: НЕДЕЛЯ
+           ============================================================= */
+        .week-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .week-grid .week-day {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+            cursor: pointer;
+        }
+
+        .week-grid .week-day:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateX(4px);
+        }
+
+        .week-grid .week-day .day-label {
+            min-width: 80px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .week-grid .week-day .day-label .day-date {
+            font-weight: 400;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
+
+        .week-grid .week-day .day-tasks {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .week-grid .week-day .day-tasks .task-tag {
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .week-grid .week-day .day-tasks .task-tag.done {
+            opacity: 0.4;
+            text-decoration: line-through;
+        }
+
+        .week-grid .week-day .day-count {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* =============================================================
+           КАЛЕНДАРЬ: МЕСЯЦ
+           ============================================================= */
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-size: 0.85rem;
+            font-weight: 500;
+            position: relative;
+            padding: 2px;
+            background: transparent;
+        }
+
+        .calendar-day:hover {
+            background: var(--primary-light);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.2;
+        }
+
+        .calendar-day.today {
+            background: var(--gradient);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 4px 16px rgba(91, 106, 240, 0.25);
+        }
+
+        .calendar-day .day-dots {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+        }
+
+        .calendar-day .day-dots .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+        }
+
+        .calendar-day .day-photo {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 0.6rem;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .month-nav button {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .month-nav button:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .month-nav span {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .day-detail {
+            margin-top: 16px;
+        }
+
+        .day-detail h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .day-detail .mini-quest {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .day-detail .mini-quest:last-child {
+            border-bottom: none;
+        }
+
+        .day-detail .mini-quest .guild-tag {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            margin-left: auto;
+            background: var(--primary-light);
+            padding: 2px 10px;
+            border-radius: 20px;
+            color: var(--primary);
+        }
+
+        /* =============================================================
+           КАЛЕНДАРЬ: ГОД
+           ============================================================= */
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .year-grid .month-card {
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .year-grid .month-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .year-grid .month-card .month-name {
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
+        .year-grid .month-card .month-stats {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+        }
+
+        .year-grid .month-card .month-stats span {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .year-grid .month-card .month-xp {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 4px;
+        }
+
+        .year-grid .month-card .month-bar {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border);
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .year-grid .month-card .month-bar .fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--gradient);
+            transition: width 0.6s ease;
+        }
+
+        .year-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .year-nav button {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .year-nav button:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .year-nav span {
+            font-weight: 600;
+            font-size: 0.95rem;
         }
 
         /* =============================================================
@@ -893,141 +1319,40 @@
         }
 
         /* =============================================================
-           КАЛЕНДАРЬ
+           ФИЛЬТРЫ
            ============================================================= */
-        .calendar-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            text-align: center;
-            letter-spacing: 0.5px;
-        }
-
-        .calendar-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
+        .filter-bar {
             display: flex;
-            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all var(--transition);
+            font-family: inherit;
+            box-shadow: var(--shadow);
+            display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all var(--transition);
-            font-size: 0.85rem;
-            font-weight: 500;
-            position: relative;
-            padding: 2px;
-            background: transparent;
         }
 
-        .calendar-day:hover {
-            background: var(--primary-light);
-        }
-
-        .calendar-day.other-month {
-            opacity: 0.2;
-        }
-
-        .calendar-day.today {
+        .filter-btn.active {
+            border-color: var(--primary);
             background: var(--gradient);
             color: #fff;
-            font-weight: 700;
             box-shadow: 0 4px 16px rgba(91, 106, 240, 0.25);
         }
 
-        .calendar-day .day-dots {
-            display: flex;
-            gap: 2px;
-            margin-top: 2px;
-        }
-
-        .calendar-day .day-dots .dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-        }
-
-        .calendar-day .day-photo {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 0.6rem;
-        }
-
-        .month-nav {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .month-nav button {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            color: var(--text);
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .month-nav button:hover {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
-
-        .month-nav span {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .day-detail {
-            margin-top: 16px;
-        }
-
-        .day-detail h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .day-detail .mini-quest {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
-        }
-
-        .day-detail .mini-quest:last-child {
-            border-bottom: none;
-        }
-
-        .day-detail .mini-quest .guild-tag {
-            font-size: 0.6rem;
-            color: var(--text-secondary);
-            margin-left: auto;
-            background: var(--primary-light);
-            padding: 2px 10px;
-            border-radius: 20px;
-            color: var(--primary);
+        .filter-btn:hover {
+            transform: scale(1.06);
         }
 
         /* =============================================================
@@ -1286,43 +1611,6 @@
         }
 
         /* =============================================================
-           ФИЛЬТРЫ
-           ============================================================= */
-        .filter-bar {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            background: var(--card-bg);
-            cursor: pointer;
-            font-size: 0.95rem;
-            transition: all var(--transition);
-            font-family: inherit;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .filter-btn.active {
-            border-color: var(--primary);
-            background: var(--gradient);
-            color: #fff;
-            box-shadow: 0 4px 16px rgba(91, 106, 240, 0.25);
-        }
-
-        .filter-btn:hover {
-            transform: scale(1.06);
-        }
-
-        /* =============================================================
            УВЕДОМЛЕНИЯ
            ============================================================= */
         .notification {
@@ -1424,7 +1712,6 @@
                 <button class="sidebar-close" onclick="closeSidebar()">✕</button>
             </div>
 
-            <!-- Профиль -->
             <div class="sidebar-profile" onclick="switchTab('profile');closeSidebar();">
                 <div class="avatar" id="sidebarAvatar">🧑</div>
                 <div class="info">
@@ -1433,14 +1720,13 @@
                 </div>
             </div>
 
-            <!-- Основное -->
             <div class="sidebar-section">
                 <div class="section-title">Основное</div>
                 <button class="sidebar-item active" data-tab="day" onclick="switchTab('day');closeSidebar();">
                     <span class="icon">📅</span> Сегодня
                     <span class="badge" id="sidebarTodayCount">0</span>
                 </button>
-                <button class="sidebar-item" data-tab="month" onclick="switchTab('month');closeSidebar();">
+                <button class="sidebar-item" data-tab="calendar" onclick="switchTab('calendar');closeSidebar();">
                     <span class="icon">📆</span> Календарь
                 </button>
                 <button class="sidebar-item" data-tab="quests" onclick="switchTab('quests');closeSidebar();">
@@ -1451,7 +1737,6 @@
 
             <div class="sidebar-divider"></div>
 
-            <!-- Контент -->
             <div class="sidebar-section">
                 <div class="section-title">Контент</div>
                 <button class="sidebar-item" data-tab="gallery" onclick="switchTab('gallery');closeSidebar();">
@@ -1465,7 +1750,6 @@
 
             <div class="sidebar-divider"></div>
 
-            <!-- Личное -->
             <div class="sidebar-section">
                 <div class="section-title">Личное</div>
                 <button class="sidebar-item" data-tab="profile" onclick="switchTab('profile');closeSidebar();">
@@ -1512,32 +1796,28 @@
                 <button class="fab" onclick="openModal()">+</button>
             </div>
 
-            <!-- ===== ВКЛАДКА: МЕСЯЦ ===== -->
-            <div id="view-month" class="view">
+            <!-- ===== ВКЛАДКА: КАЛЕНДАРЬ ===== -->
+            <div id="view-calendar" class="view">
                 <div class="top-bar">
                     <div class="left">
                         <button class="burger-btn" onclick="toggleSidebar()">☰</button>
-                        <h1>Календарь</h1>
+                        <h1 id="calendarTitle">Календарь</h1>
                     </div>
-                    <div class="month-nav">
-                        <button onclick="changeMonth(-1)">‹</button>
-                        <span id="monthLabel">Январь 2026</span>
-                        <button onclick="changeMonth(1)">›</button>
+                    <div class="top-actions">
+                        <button onclick="calendarGoToday()" title="Сегодня">📌</button>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="calendar-header">
-                        <span>Пн</span><span>Вт</span><span>Ср</span>
-                        <span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
-                    </div>
-                    <div id="calendarDays" class="calendar-days"></div>
+                <!-- Режимы -->
+                <div class="calendar-modes" id="calendarModes">
+                    <button class="mode-btn active" data-mode="day" onclick="setCalendarMode('day')">День</button>
+                    <button class="mode-btn" data-mode="week" onclick="setCalendarMode('week')">Неделя</button>
+                    <button class="mode-btn" data-mode="month" onclick="setCalendarMode('month')">Месяц</button>
+                    <button class="mode-btn" data-mode="year" onclick="setCalendarMode('year')">Год</button>
                 </div>
 
-                <div id="dayDetail" class="card day-detail" style="display:none;margin-top:16px;">
-                    <h4 id="selectedDayTitle"></h4>
-                    <div id="selectedDayQuests"></div>
-                </div>
+                <!-- Контейнер для режимов -->
+                <div id="calendarContent"></div>
             </div>
 
             <!-- ===== ВКЛАДКА: ЗАДАЧИ ===== -->
@@ -1834,6 +2114,13 @@
             { min: 85, title: '🌟 Мифический', emoji: '🌟' },
         ];
 
+        const MONTHS = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+        const MONTHS_FULL = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь',
+            'Декабрь'
+        ];
+        const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        const WEEKDAYS_FULL = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+
         // ============================================================
         // ========== СОСТОЯНИЕ ==========
         // ============================================================
@@ -1844,11 +2131,14 @@
         let profile = {};
         let currentTab = 'day';
         let currentMonth = new Date();
+        let currentYear = new Date().getFullYear();
         let selectedDay = null;
         let filterGuild = null;
         let notificationTimeout = null;
         let currentTheme = 'light';
         let currentProfile = 'default';
+        let calendarMode = 'day';
+        let calendarDate = new Date();
 
         // ============================================================
         // ========== ЗАГРУЗКА / СОХРАНЕНИЕ ==========
@@ -1958,7 +2248,6 @@
             document.getElementById('sidebarTotalCount').textContent = quests.length;
             document.getElementById('sidebarGalleryCount').textContent = gallery.length;
 
-            // Подсветка активного пункта
             document.querySelectorAll('.sidebar-item[data-tab]').forEach(el => {
                 el.classList.toggle('active', el.dataset.tab === currentTab);
             });
@@ -2280,6 +2569,337 @@
         }
 
         // ============================================================
+        // ========== КАЛЕНДАРЬ: РЕЖИМЫ ==========
+        // ============================================================
+
+        let calendarMode = 'day';
+        let calendarDate = new Date();
+
+        function setCalendarMode(mode) {
+            calendarMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(el => {
+                el.classList.toggle('active', el.dataset.mode === mode);
+            });
+            renderCalendar();
+        }
+
+        function calendarGoToday() {
+            calendarDate = new Date();
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const container = document.getElementById('calendarContent');
+            document.getElementById('calendarTitle').textContent = 'Календарь';
+
+            switch (calendarMode) {
+                case 'day':
+                    renderCalendarDay(container);
+                    break;
+                case 'week':
+                    renderCalendarWeek(container);
+                    break;
+                case 'month':
+                    renderCalendarMonth(container);
+                    break;
+                case 'year':
+                    renderCalendarYear(container);
+                    break;
+            }
+        }
+
+        // ----- ДЕНЬ -----
+        function renderCalendarDay(container) {
+            const date = calendarDate;
+            const dateStr = date.toISOString().split('T')[0];
+            const dayQuests = quests.filter(q => q.scheduledDate === dateStr)
+                .sort((a, b) => (a.scheduledTime || '00:00').localeCompare(b.scheduledTime || '00:00'));
+
+            const dayName = WEEKDAYS_FULL[date.getDay() === 0 ? 6 : date.getDay() - 1];
+            const dayLabel = `${dayName}, ${date.getDate()} ${MONTHS_FULL[date.getMonth()]} ${date.getFullYear()}`;
+
+            let html = `
+                <div class="top-bar" style="margin-bottom:12px;">
+                    <div class="left">
+                        <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()-1);renderCalendar();">‹</button>
+                        <span style="font-weight:600;">${dayLabel}</span>
+                        <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()+1);renderCalendar();">›</button>
+                    </div>
+                </div>
+                <div class="day-schedule">
+            `;
+
+            if (dayQuests.length === 0) {
+                html += `
+                    <div class="empty-state" style="padding:40px 20px;">
+                        <div class="empty-icon">📅</div>
+                        <p>Нет задач на этот день</p>
+                    </div>
+                `;
+            } else {
+                // Группировка по часам
+                const hours = {};
+                dayQuests.forEach(q => {
+                    const hour = q.scheduledTime ? q.scheduledTime.split(':')[0] : '00';
+                    if (!hours[hour]) hours[hour] = [];
+                    hours[hour].push(q);
+                });
+
+                // Сортируем часы
+                const sortedHours = Object.keys(hours).sort();
+
+                for (let h = 0; h < 24; h++) {
+                    const hourStr = String(h).padStart(2, '0');
+                    const questsInHour = hours[hourStr] || [];
+                    const hasQuests = questsInHour.length > 0;
+
+                    html += `
+                        <div class="hour-block">
+                            <div class="hour-label">${hourStr}:00</div>
+                            <div class="hour-events">
+                    `;
+
+                    if (hasQuests) {
+                        questsInHour.forEach(q => {
+                            const guild = guilds.find(g => g.id === q.guildId) || { color: '#999', name: 'Без категории' };
+                            html += `
+                                <div class="event-item ${q.status === 'done' ? 'done' : ''}" 
+                                     onclick="toggleQuest('${q.id}')"
+                                     style="border-left:3px solid ${guild.color};">
+                                    <span class="event-time">${q.scheduledTime || ''}</span>
+                                    <span>${q.title}</span>
+                                    <span class="event-guild">${guild.icon} ${guild.name}</span>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        html += `<div style="font-size:0.7rem;color:var(--text-light);padding:4px 0;">—</div>`;
+                    }
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // ----- НЕДЕЛЯ -----
+        function renderCalendarWeek(container) {
+            const date = calendarDate;
+            // Находим понедельник
+            const dayOfWeek = date.getDay();
+            const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            const monday = new Date(date);
+            monday.setDate(date.getDate() - mondayOffset);
+
+            let html = `
+                <div class="top-bar" style="margin-bottom:12px;">
+                    <div class="left">
+                        <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()-7);renderCalendar();">‹</button>
+                        <span style="font-weight:600;">${monday.getDate()} ${MONTHS_FULL[monday.getMonth()]} — ${new Date(monday).setDate(monday.getDate()+6)} ${MONTHS_FULL[new Date(monday).setDate(monday.getDate())]}</span>
+                        <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()+7);renderCalendar();">›</button>
+                    </div>
+                </div>
+                <div class="week-grid">
+            `;
+
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(monday);
+                day.setDate(monday.getDate() + i);
+                const dateStr = day.toISOString().split('T')[0];
+                const dayQuests = quests.filter(q => q.scheduledDate === dateStr);
+                const isToday = dateStr === new Date().toISOString().split('T')[0];
+
+                const dayName = WEEKDAYS[i];
+                const dayNum = day.getDate();
+
+                html += `
+                    <div class="week-day" onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();" style="${isToday ? 'border-color:var(--primary);' : ''}">
+                        <div class="day-label">
+                            ${dayName}
+                            <div class="day-date">${dayNum} ${MONTHS[day.getMonth()]}</div>
+                        </div>
+                        <div class="day-tasks">
+                `;
+
+                if (dayQuests.length === 0) {
+                    html += `<span style="font-size:0.7rem;color:var(--text-light);">—</span>`;
+                } else {
+                    dayQuests.slice(0, 4).forEach(q => {
+                        const done = q.status === 'done';
+                        const guild = guilds.find(g => g.id === q.guildId) || { color: '#999' };
+                        html += `
+                            <span class="task-tag ${done ? 'done' : ''}" style="border-left:2px solid ${guild.color};">
+                                ${q.title}
+                            </span>
+                        `;
+                    });
+                    if (dayQuests.length > 4) {
+                        html += `<span class="task-tag" style="background:var(--border);">+${dayQuests.length - 4}</span>`;
+                    }
+                }
+
+                html += `
+                        </div>
+                        <div class="day-count">${dayQuests.length}</div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // ----- МЕСЯЦ -----
+        function renderCalendarMonth(container) {
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+
+            let html = `
+                <div class="top-bar" style="margin-bottom:12px;">
+                    <div class="left">
+                        <button class="btn btn-ghost" onclick="calendarDate.setMonth(calendarDate.getMonth()-1);renderCalendar();">‹</button>
+                        <span style="font-weight:600;">${MONTHS_FULL[month]} ${year}</span>
+                        <button class="btn btn-ghost" onclick="calendarDate.setMonth(calendarDate.getMonth()+1);renderCalendar();">›</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="calendar-header">
+                        <span>Пн</span><span>Вт</span><span>Ср</span>
+                        <span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+                    </div>
+                    <div class="calendar-days">
+            `;
+
+            const today = new Date().toISOString().split('T')[0];
+            let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+
+            // Предыдущий месяц
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            for (let i = startOffset - 1; i >= 0; i--) {
+                const day = prevMonthLastDay - i;
+                const date = new Date(year, month - 1, day);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayQuests = quests.filter(q => q.scheduledDate === dateStr);
+                const hasPhoto = gallery.some(g => g.date === dateStr);
+                html += `
+                    <div class="calendar-day other-month" onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();">
+                        <span class="day-number">${day}</span>
+                        ${dayQuests.length > 0 ? `<div class="day-dots">${dayQuests.slice(0,3).map(q => {
+                            const g = guilds.find(g => g.id === q.guildId) || { color: '#999' };
+                            return `<span class="dot" style="background:${g.color}"></span>`;
+                        }).join('')}</div>` : ''}
+                        ${hasPhoto ? '<span class="day-photo">📸</span>' : ''}
+                    </div>
+                `;
+            }
+
+            // Текущий месяц
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const date = new Date(year, month, day);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayQuests = quests.filter(q => q.scheduledDate === dateStr);
+                const hasPhoto = gallery.some(g => g.date === dateStr);
+                const isToday = dateStr === today;
+
+                html += `
+                    <div class="calendar-day ${isToday ? 'today' : ''} ${dayQuests.length > 0 ? 'has-quests' : ''}" 
+                         onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();">
+                        <span class="day-number">${day}</span>
+                        ${dayQuests.length > 0 ? `<div class="day-dots">${dayQuests.slice(0,3).map(q => {
+                            const g = guilds.find(g => g.id === q.guildId) || { color: '#999' };
+                            return `<span class="dot" style="background:${g.color}"></span>`;
+                        }).join('')}</div>` : ''}
+                        ${hasPhoto ? '<span class="day-photo">📸</span>' : ''}
+                    </div>
+                `;
+            }
+
+            // Следующий месяц
+            const remaining = 42 - (startOffset + lastDay.getDate());
+            for (let day = 1; day <= remaining; day++) {
+                const date = new Date(year, month + 1, day);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayQuests = quests.filter(q => q.scheduledDate === dateStr);
+                const hasPhoto = gallery.some(g => g.date === dateStr);
+                html += `
+                    <div class="calendar-day other-month" onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();">
+                        <span class="day-number">${day}</span>
+                        ${dayQuests.length > 0 ? `<div class="day-dots">${dayQuests.slice(0,3).map(q => {
+                            const g = guilds.find(g => g.id === q.guildId) || { color: '#999' };
+                            return `<span class="dot" style="background:${g.color}"></span>`;
+                        }).join('')}</div>` : ''}
+                        ${hasPhoto ? '<span class="day-photo">📸</span>' : ''}
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // ----- ГОД -----
+        function renderCalendarYear(container) {
+            const year = calendarDate.getFullYear();
+
+            let html = `
+                <div class="top-bar" style="margin-bottom:12px;">
+                    <div class="left">
+                        <button class="btn btn-ghost" onclick="calendarDate.setFullYear(calendarDate.getFullYear()-1);renderCalendar();">‹</button>
+                        <span style="font-weight:600;">${year}</span>
+                        <button class="btn btn-ghost" onclick="calendarDate.setFullYear(calendarDate.getFullYear()+1);renderCalendar();">›</button>
+                    </div>
+                </div>
+                <div class="year-grid">
+            `;
+
+            for (let month = 0; month < 12; month++) {
+                const monthStr = String(month + 1).padStart(2, '0');
+                const monthQuests = quests.filter(q => {
+                    const qDate = q.scheduledDate.split('-');
+                    return qDate[0] == year && qDate[1] == monthStr;
+                });
+
+                const total = monthQuests.length;
+                const done = monthQuests.filter(q => q.status === 'done').length;
+                const planned = monthQuests.filter(q => q.status === 'planned').length;
+                const skipped = monthQuests.filter(q => q.status === 'skipped').length;
+                const xpEarned = monthQuests.filter(q => q.status === 'done').reduce((sum, q) => sum + q.xpEarned, 0);
+
+                const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+                html += `
+                    <div class="card month-card" onclick="calendarDate=new Date(${year}, ${month}, 1);setCalendarMode('month');renderCalendar();">
+                        <div class="month-name">${MONTHS_FULL[month]}</div>
+                        <div class="month-stats">
+                            <span>✅ ${done}</span>
+                            <span>📋 ${planned}</span>
+                            <span>⏳ ${skipped}</span>
+                        </div>
+                        <div class="month-xp">${xpEarned.toFixed(1)} XP</div>
+                        <div class="month-bar">
+                            <div class="fill" style="width:${completionRate}%;"></div>
+                        </div>
+                        <div style="font-size:0.6rem;color:var(--text-light);margin-top:4px;">${completionRate}% выполнено</div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // ============================================================
         // ========== НАВИГАЦИЯ ==========
         // ============================================================
 
@@ -2295,7 +2915,7 @@
                 el.classList.toggle('active', el.dataset.tab === tabId);
             });
             if (tabId === 'day') renderDay();
-            if (tabId === 'month') renderMonth();
+            if (tabId === 'calendar') { renderCalendar(); }
             if (tabId === 'quests') renderAllQuests();
             if (tabId === 'gallery') renderGallery();
             if (tabId === 'profile') renderProfile();
@@ -2423,131 +3043,6 @@
                     </div>
                 `;
             }).join('');
-        }
-
-        // ============================================================
-        // ========== РЕНДЕР: МЕСЯЦ ==========
-        // ============================================================
-
-        function renderMonth() {
-            const year = currentMonth.getFullYear();
-            const month = currentMonth.getMonth();
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-
-            document.getElementById('monthLabel').textContent =
-                new Date(year, month).toLocaleString('ru', { month: 'long', year: 'numeric' });
-
-            const days = [];
-            const today = new Date().toISOString().split('T')[0];
-
-            let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-
-            const prevMonthLastDay = new Date(year, month, 0).getDate();
-            for (let i = startOffset - 1; i >= 0; i--) {
-                const day = prevMonthLastDay - i;
-                const date = new Date(year, month - 1, day).toISOString().split('T')[0];
-                days.push({ day, date, isCurrentMonth: false, isToday: date === today, quests: [], hasPhoto: false });
-            }
-
-            for (let day = 1; day <= lastDay.getDate(); day++) {
-                const date = new Date(year, month, day).toISOString().split('T')[0];
-                const dayQuests = quests.filter(q => q.scheduledDate === date);
-                const hasPhoto = gallery.some(g => g.date === date);
-                days.push({
-                    day,
-                    date,
-                    isCurrentMonth: true,
-                    isToday: date === today,
-                    quests: dayQuests,
-                    hasPhoto
-                });
-            }
-
-            const remaining = 42 - days.length;
-            for (let day = 1; day <= remaining; day++) {
-                const date = new Date(year, month + 1, day).toISOString().split('T')[0];
-                days.push({ day, date, isCurrentMonth: false, isToday: false, quests: [], hasPhoto: false });
-            }
-
-            const container = document.getElementById('calendarDays');
-            container.innerHTML = days.map(d => {
-                const dots = d.quests.slice(0, 3).map(q => {
-                    const guild = guilds.find(g => g.id === q.guildId) || { color: '#999' };
-                    return `<span class="dot" style="background:${guild.color}"></span>`;
-                }).join('');
-
-                return `
-                    <div class="calendar-day ${!d.isCurrentMonth ? 'other-month' : ''} ${d.isToday ? 'today' : ''} ${d.quests.length > 0 ? 'has-quests' : ''}"
-                         onclick="selectDay('${d.date}')">
-                        <span class="day-number">${d.day}</span>
-                        ${d.quests.length > 0 ? `<div class="day-dots">${dots}</div>` : ''}
-                        ${d.hasPhoto ? '<span class="day-photo">📸</span>' : ''}
-                    </div>
-                `;
-            }).join('');
-
-            if (selectedDay) {
-                renderDayDetail(selectedDay);
-            } else {
-                document.getElementById('dayDetail').style.display = 'none';
-            }
-        }
-
-        function changeMonth(delta) {
-            currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1);
-            renderMonth();
-        }
-
-        function selectDay(date) {
-            selectedDay = date;
-            renderDayDetail(date);
-        }
-
-        function renderDayDetail(date) {
-            const container = document.getElementById('dayDetail');
-            container.style.display = 'block';
-
-            document.getElementById('selectedDayTitle').textContent =
-                new Date(date + 'T00:00:00').toLocaleDateString('ru', {
-                    day: 'numeric',
-                    month: 'long',
-                    weekday: 'short'
-                });
-
-            const dayQuests = quests.filter(q => q.scheduledDate === date);
-            const dayPhotos = gallery.filter(g => g.date === date);
-            const list = document.getElementById('selectedDayQuests');
-
-            if (dayQuests.length === 0 && dayPhotos.length === 0) {
-                list.innerHTML = '<p style="color:var(--text-secondary);font-size:0.9rem;">✨ Нет задач и фото</p>';
-                return;
-            }
-
-            let html = '';
-            dayQuests.forEach(q => {
-                const guild = guilds.find(g => g.id === q.guildId) || { name: 'Без категории' };
-                html += `
-                    <div class="mini-quest">
-                        <span>${q.status === 'done' ? '✅' : '⏳'}</span>
-                        <span>${q.title}</span>
-                        ${q.hasPhoto ? '<span>📸</span>' : ''}
-                        <span class="guild-tag">${guild.name}</span>
-                    </div>
-                `;
-            });
-
-            dayPhotos.forEach(p => {
-                html += `
-                    <div class="mini-quest" onclick="viewPhoto('${p.id}')" style="cursor:pointer;">
-                        <span>🖼️</span>
-                        <span>${p.caption || 'Фото'}</span>
-                        <span class="guild-tag" style="background:#E0E7FF;color:#4F46E5;">галерея</span>
-                    </div>
-                `;
-            });
-
-            list.innerHTML = html;
         }
 
         // ============================================================
@@ -2831,7 +3326,7 @@
 
         function renderAll() {
             if (currentTab === 'day') renderDay();
-            else if (currentTab === 'month') renderMonth();
+            else if (currentTab === 'calendar') renderCalendar();
             else if (currentTab === 'quests') renderAllQuests();
             else if (currentTab === 'gallery') renderGallery();
             else if (currentTab === 'profile') renderProfile();
@@ -2861,7 +3356,6 @@
                 if (e.target === document.getElementById('modal')) closeModal();
             });
 
-            // Закрываем сайдбар при свайпе вправо
             let touchStartX = 0;
             document.addEventListener('touchstart', (e) => {
                 touchStartX = e.touches[0].clientX;
