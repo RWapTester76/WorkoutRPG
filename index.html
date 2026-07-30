@@ -1,13 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#0b0e14" />
-    <title>Журнал Героя ⚔️ RPG</title>
+    <title>Журнал Героя ⚔️</title>
 
-    <!-- Font Awesome 6 -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
@@ -15,53 +13,55 @@
     <!-- date-fns -->
     <script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0/index.global.min.js">
     </script>
-    <!-- SimpleLightbox -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js">
-    </script>
 
     <style>
-        /* ============================================================
-           БАЗОВЫЙ СБРОС И ПЕРЕМЕННЫЕ (будут переопределены схемами)
-           ============================================================ */
+        /* ===== БАЗОВЫЕ СТИЛИ ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        html {
-            font-size: 16px;
-            scroll-behavior: smooth;
+        :root {
+            --bg: #0b0e14;
+            --surface: #1a1f2b;
+            --surface2: #262d3d;
+            --surface3: #313a4f;
+            --text: #e8edf5;
+            --text-muted: #8892a8;
+            --accent: #6c5ce7;
+            --accent2: #a29bfe;
+            --accent-glow: #6c5ce766;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #e17055;
+            --info: #0984e3;
+            --border: #2d3548;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s ease;
+        }
+
+        .light-theme {
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --surface2: #e9ecf0;
+            --surface3: #d5dae3;
+            --text: #1a1f2b;
+            --text-muted: #4a5268;
+            --border: #ccd2dc;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            min-height: 100vh;
-            min-height: 100dvh;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            padding-bottom: 80px;
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background: var(--bg);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent);
-            border-radius: 10px;
-        }
-
-        /* Общие элементы */
-        a {
-            color: var(--accent);
-            text-decoration: none;
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+            padding-bottom: 70px;
+            overflow-x: hidden;
         }
 
         button {
@@ -69,54 +69,39 @@
             border: none;
             background: var(--accent);
             color: #fff;
-            padding: 10px 22px;
+            padding: 10px 20px;
             border-radius: 30px;
             font-weight: 600;
             font-size: 0.95rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition);
             box-shadow: 0 4px 16px var(--accent-glow);
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            touch-action: manipulation;
             min-height: 44px;
             min-width: 44px;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
         }
-        button::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.1);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        button:hover::after {
-            opacity: 1;
+        button:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
         }
         button:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
         }
         button.secondary {
             background: var(--surface2);
             color: var(--text);
-            box-shadow: 0 2px 8px var(--shadow-color);
+            box-shadow: none;
         }
         button.secondary:hover {
             background: var(--surface3);
-            transform: translateY(-2px);
-        }
-        button.success {
-            background: var(--success);
         }
         button.danger {
             background: var(--danger);
         }
-        button.warning {
-            background: var(--warning);
-            color: var(--text);
+        button.success {
+            background: var(--success);
         }
 
         input,
@@ -125,11 +110,11 @@
             background: var(--surface2);
             border: 2px solid var(--border);
             color: var(--text);
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: var(--radius-sm);
             width: 100%;
             font-size: 1rem;
-            transition: all 0.3s ease;
+            transition: border var(--transition);
             font-family: inherit;
         }
         input:focus,
@@ -138,33 +123,23 @@
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 4px var(--accent-glow);
-            transform: translateY(-1px);
         }
         textarea {
-            min-height: 100px;
+            min-height: 80px;
             resize: vertical;
-        }
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238892a8' stroke-width='2' fill='none'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 44px;
         }
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             font-weight: 500;
             font-size: 0.9rem;
             color: var(--text-muted);
         }
 
-        /* ============================================================
-           ШАПКА
-           ============================================================ */
+        /* ===== ШАПКА ===== */
         header {
             background: var(--surface);
-            padding: 12px clamp(16px, 4vw, 32px);
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -173,17 +148,14 @@
             top: 0;
             z-index: 100;
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: all 0.4s ease;
             gap: 12px;
             flex-wrap: wrap;
         }
         header h1 {
-            font-size: clamp(1.1rem, 3vw, 1.6rem);
+            font-size: 1.2rem;
             display: flex;
             align-items: center;
             gap: 10px;
-            white-space: nowrap;
         }
         header h1 i {
             color: var(--accent);
@@ -191,47 +163,41 @@
         .user-badge {
             display: flex;
             align-items: center;
-            gap: clamp(8px, 2vw, 18px);
-            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            gap: 12px;
+            font-size: 0.9rem;
             flex-wrap: wrap;
         }
-        .xp-bar-wrap {
-            width: clamp(80px, 15vw, 160px);
+        .xp-bar {
+            width: 120px;
             height: 8px;
             background: var(--surface2);
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
         }
-        .xp-bar-fill {
+        .xp-bar .fill {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, var(--accent2), var(--accent));
             border-radius: 20px;
-            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 0.6s ease;
         }
-        .theme-toggle {
+        .theme-btn {
             background: transparent;
             color: var(--text-muted);
             box-shadow: none;
-            padding: 4px 12px;
-            font-size: 1.3rem;
-            min-height: 40px;
-            min-width: 40px;
+            padding: 4px 10px;
+            font-size: 1.2rem;
+            min-height: 36px;
+            min-width: 36px;
         }
-        .theme-toggle:hover {
+        .theme-btn:hover {
             color: var(--text);
             transform: rotate(20deg);
             filter: none;
         }
-        .theme-toggle::after {
-            display: none;
-        }
 
-        /* ============================================================
-           НАВИГАЦИЯ
-           ============================================================ */
-        nav#mainNav {
+        /* ===== НАВИГАЦИЯ ===== */
+        nav {
             position: fixed;
             bottom: 0;
             left: 0;
@@ -243,35 +209,28 @@
             padding: 6px 0 env(safe-area-inset-bottom);
             z-index: 200;
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: all 0.4s ease;
         }
-        nav#mainNav a {
+        nav a {
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+            font-size: 0.6rem;
             color: var(--text-muted);
-            padding: 4px clamp(6px, 1vw, 14px);
+            padding: 4px 12px;
             border-radius: 30px;
-            transition: all 0.3s ease;
+            transition: all var(--transition);
             gap: 2px;
             min-height: 44px;
             justify-content: center;
-            touch-action: manipulation;
-            position: relative;
+            text-decoration: none;
         }
-        nav#mainNav a i {
-            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+        nav a i {
+            font-size: 1.3rem;
         }
-        nav#mainNav a .nav-label {
-            font-size: clamp(0.5rem, 1vw, 0.65rem);
-            line-height: 1;
-        }
-        nav#mainNav a.active {
+        nav a.active {
             color: var(--accent);
         }
-        nav#mainNav a.active::before {
+        nav a.active::before {
             content: '';
             position: absolute;
             top: -1px;
@@ -280,24 +239,17 @@
             height: 3px;
             background: var(--accent);
             border-radius: 0 0 4px 4px;
-            box-shadow: 0 0 12px var(--accent-glow);
-        }
-        nav#mainNav a:hover {
-            color: var(--text);
-            transform: translateY(-2px);
         }
 
-        /* ============================================================
-           ОСНОВНОЙ КОНТЕНТ
-           ============================================================ */
-        main#mainContent {
-            max-width: 1200px;
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        main {
+            max-width: 1100px;
             margin: 0 auto;
-            padding: clamp(16px, 3vw, 32px) clamp(12px, 3vw, 24px) 100px;
+            padding: 16px 16px 100px;
         }
         .page {
             display: none;
-            animation: fadeUp 0.4s ease;
+            animation: fadeUp 0.3s ease;
         }
         .page.active {
             display: block;
@@ -314,326 +266,240 @@
         }
 
         .section-title {
-            font-size: clamp(1.2rem, 3vw, 1.8rem);
-            margin-bottom: clamp(16px, 3vw, 28px);
+            font-size: 1.3rem;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
         }
         .section-title i {
             color: var(--accent);
         }
 
-        /* ============================================================
-           КАЛЕНДАРЬ
-           ============================================================ */
-        .calendar-header {
+        /* ===== КАЛЕНДАРЬ ===== */
+        .cal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             gap: 12px;
             flex-wrap: wrap;
         }
-        .calendar-header h2 {
+        .cal-header h2 {
             font-weight: 400;
-            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            font-size: 1.2rem;
             min-width: 140px;
             text-align: center;
-            color: var(--text);
         }
-        .calendar-header .nav-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        .calendar-header .nav-buttons button {
-            min-height: 44px;
-            min-width: 44px;
-            padding: 0 16px;
-            border-radius: 50%;
-        }
-        .calendar-grid {
+        .cal-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: clamp(3px, 0.5vw, 8px);
+            gap: 4px;
             background: var(--surface);
-            padding: clamp(8px, 1.5vw, 20px);
+            padding: 12px;
             border-radius: var(--radius);
-            box-shadow: 0 8px 32px var(--shadow-color);
-            touch-action: pan-y;
+            box-shadow: var(--shadow);
         }
-        .calendar-grid .weekday {
+        .cal-grid .wd {
             text-align: center;
             font-weight: 600;
             color: var(--text-muted);
-            padding: 6px 0;
-            font-size: clamp(0.6rem, 1vw, 0.8rem);
+            padding: 4px 0;
+            font-size: 0.75rem;
         }
-        .calendar-grid .day {
+        .cal-grid .day {
             aspect-ratio: 1/1;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: clamp(8px, 1.5vw, 14px);
+            border-radius: 10px;
             font-weight: 500;
             background: var(--surface2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition);
             cursor: pointer;
-            position: relative;
-            font-size: clamp(0.75rem, 1.2vw, 1rem);
-            touch-action: manipulation;
-            min-height: 36px;
-            user-select: none;
-            color: var(--text);
+            font-size: 0.9rem;
+            min-height: 32px;
         }
-        .calendar-grid .day:hover {
+        .cal-grid .day:hover {
             background: var(--surface3);
             transform: scale(1.05);
         }
-        .calendar-grid .day:active {
-            transform: scale(0.92);
-        }
-        .calendar-grid .day.empty {
+        .cal-grid .day.empty {
             background: transparent;
             cursor: default;
         }
-        .calendar-grid .day.empty:hover {
+        .cal-grid .day.empty:hover {
             transform: none;
         }
-        .calendar-grid .day.has-record {
+        .cal-grid .day.has-record {
             background: var(--accent);
             color: #fff;
             box-shadow: 0 0 20px var(--accent-glow);
         }
-        .calendar-grid .day.has-record::after {
-            content: '';
-            position: absolute;
-            bottom: clamp(2px, 0.4vw, 6px);
-            width: clamp(4px, 0.8vw, 8px);
-            height: clamp(4px, 0.8vw, 8px);
-            border-radius: 50%;
-            background: #fff;
-        }
-        .calendar-grid .day.today {
+        .cal-grid .day.today {
             border: 2px solid var(--accent2);
         }
-        .calendar-grid .day.selected {
+        .cal-grid .day.selected {
             outline: 3px solid var(--accent2);
             outline-offset: 2px;
             transform: scale(1.08);
         }
-        .calendar-grid .day .streak-indicator {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            font-size: clamp(0.4rem, 0.6vw, 0.6rem);
-        }
 
-        /* ============================================================
-           СПИСОК ЗАПИСЕЙ
-           ============================================================ */
+        /* ===== ЗАПИСИ ===== */
         .records-list {
-            margin-top: 20px;
+            margin-top: 16px;
             background: var(--surface);
             border-radius: var(--radius);
-            padding: clamp(12px, 2vw, 24px);
-            box-shadow: 0 8px 32px var(--shadow-color);
+            padding: 16px;
+            box-shadow: var(--shadow);
         }
-        .records-list .list-header {
+        .records-list .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
         }
-        .records-list .list-header h4 {
+        .records-list .header h4 {
             font-weight: 400;
-            font-size: 1.1rem;
-            color: var(--text);
+            font-size: 1rem;
         }
-        .records-list .record-item {
+        .record-item {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             border-bottom: 1px solid var(--border);
-            padding: clamp(10px, 1.5vw, 16px) 0;
-            gap: clamp(8px, 1.5vw, 16px);
-            transition: all 0.3s ease;
+            padding: 10px 0;
+            gap: 10px;
         }
-        .records-list .record-item:last-child {
+        .record-item:last-child {
             border-bottom: none;
         }
-        .records-list .record-item:hover {
-            background: var(--surface2);
-            margin: 0 -8px;
-            padding-left: 8px;
-            padding-right: 8px;
-            border-radius: var(--radius-sm);
-        }
-        .record-item .record-content {
+        .record-item .content {
             flex: 1;
             min-width: 0;
         }
-        .record-item .record-content .record-text {
-            margin-bottom: 6px;
+        .record-item .content .text {
             word-break: break-word;
-            font-size: clamp(0.9rem, 1.1vw, 1rem);
-            color: var(--text);
+            margin-bottom: 4px;
         }
-        .record-item .record-content .record-meta {
-            font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+        .record-item .content .meta {
+            font-size: 0.75rem;
             color: var(--text-muted);
             display: flex;
             flex-wrap: wrap;
-            gap: clamp(6px, 1vw, 14px);
+            gap: 10px;
         }
-        .record-item .record-content .record-meta i {
-            margin-right: 4px;
-        }
-        .record-item .record-content .record-meta .xp-badge {
-            background: var(--accent-glow);
-            padding: 0 8px;
-            border-radius: 20px;
+        .record-item .content .meta .xp {
             color: var(--accent2);
         }
-        .record-item .record-photos {
+        .record-item .photos {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             flex-wrap: wrap;
-            margin-top: 6px;
+            margin-top: 4px;
         }
-        .record-item .record-photos img {
-            width: clamp(50px, 8vw, 70px);
-            height: clamp(50px, 8vw, 70px);
+        .record-item .photos img {
+            width: 50px;
+            height: 50px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: transform 0.3s ease;
         }
-        .record-item .record-photos img:hover {
-            transform: scale(1.08);
-        }
-        .record-item .record-actions {
+        .record-item .actions {
             display: flex;
-            gap: clamp(4px, 0.8vw, 10px);
+            gap: 4px;
             flex-shrink: 0;
             align-items: center;
-            flex-wrap: wrap;
         }
-        .record-item .record-actions button {
+        .record-item .actions button {
             background: transparent;
             color: var(--text-muted);
             padding: 4px 8px;
             box-shadow: none;
-            font-size: clamp(0.8rem, 1vw, 0.95rem);
+            font-size: 0.85rem;
+            min-height: 32px;
+            min-width: 32px;
             border-radius: 8px;
-            min-height: 36px;
-            min-width: 36px;
         }
-        .record-item .record-actions button:hover {
-            background: var(--surface3);
+        .record-item .actions button:hover {
+            background: var(--surface2);
             color: var(--text);
             transform: none;
+            filter: none;
         }
-        .record-item .record-actions button::after {
-            display: none;
-        }
-        .record-item .record-actions .done-btn {
+        .record-item .actions .done {
             color: var(--success);
         }
-        .record-item .record-actions .done-btn.done {
+        .record-item .actions .done.active {
             color: var(--warning);
         }
-        .record-item .record-actions .edit-btn {
-            color: var(--info);
-        }
-        .record-item .record-actions .delete-btn {
+        .record-item .actions .del {
             color: var(--danger);
         }
 
-        /* ============================================================
-           ЖУРНАЛЫ (вкладки)
-           ============================================================ */
+        /* ===== ЖУРНАЛЫ ===== */
         .journal-tabs {
             display: flex;
             flex-wrap: wrap;
-            gap: clamp(4px, 0.8vw, 10px);
-            margin-bottom: 20px;
+            gap: 6px;
+            margin-bottom: 16px;
         }
         .journal-tabs .tab {
             background: var(--surface2);
-            padding: clamp(6px, 1vw, 10px) clamp(12px, 2vw, 20px);
+            padding: 6px 16px;
             border-radius: 30px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition);
             font-weight: 500;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: clamp(0.8rem, 1vw, 0.95rem);
-            touch-action: manipulation;
-            min-height: 40px;
             border: 2px solid transparent;
-            color: var(--text);
         }
         .journal-tabs .tab i {
-            font-size: clamp(0.8rem, 1.2vw, 1.1rem);
+            font-size: 0.9rem;
         }
         .journal-tabs .tab.active {
             background: var(--accent);
             color: #fff;
-            box-shadow: 0 4px 20px var(--accent-glow);
-            border-color: var(--accent2);
+            box-shadow: 0 4px 16px var(--accent-glow);
         }
         .journal-tabs .tab:hover:not(.active) {
             background: var(--surface3);
-            transform: translateY(-2px);
-        }
-        .journal-tabs .tab .streak-badge {
-            background: var(--warning);
-            color: var(--text);
-            border-radius: 20px;
-            padding: 0 8px;
-            font-size: 0.65rem;
-            font-weight: 700;
         }
 
         .journal-actions {
             display: flex;
-            gap: clamp(8px, 1.5vw, 16px);
+            gap: 10px;
             margin-bottom: 16px;
             flex-wrap: wrap;
         }
 
-        /* ============================================================
-           ЧЕЛЛЕНДЖ БАР
-           ============================================================ */
-        .challenge-bar {
-            background: linear-gradient(135deg, var(--surface2), var(--surface));
+        /* ===== ЧЕЛЛЕНДЖ ===== */
+        .challenge {
+            background: var(--surface2);
             border: 2px solid var(--warning);
             border-radius: var(--radius);
-            padding: clamp(12px, 2vw, 20px);
-            margin-bottom: 20px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 12px;
-            box-shadow: 0 0 30px var(--warning-glow);
+            gap: 10px;
         }
-        .challenge-bar .challenge-text {
+        .challenge .text {
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex: 1;
-            min-width: 200px;
-            color: var(--text);
+            gap: 10px;
         }
-        .challenge-bar .challenge-text i {
-            font-size: 1.8rem;
+        .challenge .text i {
             color: var(--warning);
+            font-size: 1.4rem;
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
@@ -642,148 +508,26 @@
                 transform: scale(1);
             }
             50% {
-                transform: scale(1.15);
+                transform: scale(1.2);
             }
         }
-        .challenge-bar .challenge-text span {
-            font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-        }
-        .challenge-bar .challenge-text .challenge-journal {
-            color: var(--accent2);
-            font-weight: 600;
-        }
-        .challenge-bar .challenge-status {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* ============================================================
-           НАСТРОЙКИ (ЦВЕТОВЫЕ СХЕМЫ)
-           ============================================================ */
-        .theme-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 16px 0;
-        }
-        .theme-option {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 8px;
-            border-radius: 12px;
-            border: 2px solid transparent;
-            background: var(--surface2);
-            min-width: 60px;
-        }
-        .theme-option:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent);
-        }
-        .theme-option.active {
-            border-color: var(--accent);
-            background: var(--accent-glow);
-        }
-        .theme-option .color-preview {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid var(--border);
-        }
-        .theme-option .theme-name {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-align: center;
-        }
-
-        /* ============================================================
-           МОДАЛЬНЫЕ ОКНА
-           ============================================================ */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            animation: fadeIn 0.3s ease;
-        }
-        .modal-overlay.open {
-            display: flex;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        .modal {
-            background: var(--surface);
-            max-width: 540px;
-            width: 100%;
-            padding: clamp(20px, 4vw, 36px);
-            border-radius: var(--radius);
-            box-shadow: 0 8px 48px var(--shadow-color);
-            max-height: 95vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        .modal h3 {
-            margin-bottom: 20px;
-            font-size: clamp(1.2rem, 2vw, 1.5rem);
+        .challenge .status {
             display: flex;
             align-items: center;
             gap: 10px;
-            color: var(--text);
-        }
-        .modal .form-group {
-            margin-bottom: 18px;
-        }
-        .modal .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-        }
-        .modal .form-actions button {
-            flex: 1;
-            min-width: 100px;
         }
 
-        /* ============================================================
-           ПРОФИЛЬ
-           ============================================================ */
+        /* ===== ПРОФИЛЬ ===== */
         .profile-avatar {
             display: flex;
             align-items: center;
-            gap: clamp(20px, 4vw, 40px);
+            gap: 24px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
-        .avatar-container {
-            width: clamp(120px, 20vw, 180px);
-            height: clamp(120px, 20vw, 180px);
+        .avatar {
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             background: var(--surface2);
             background-size: cover;
@@ -791,50 +535,35 @@
             border: 4px solid var(--accent);
             box-shadow: 0 0 40px var(--accent-glow);
             position: relative;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             flex-shrink: 0;
         }
-        .avatar-container.level-up {
-            animation: levelUp 0.8s ease;
-        }
-        @keyframes levelUp {
-            0% {
-                transform: scale(1) rotate(0deg);
-                box-shadow: 0 0 20px var(--accent-glow);
-            }
-            25% {
-                transform: scale(1.15) rotate(-5deg);
-                box-shadow: 0 0 60px var(--accent-glow);
-            }
-            50% {
-                transform: scale(1.2) rotate(5deg);
-                box-shadow: 0 0 80px var(--accent);
-            }
-            75% {
-                transform: scale(1.1) rotate(-3deg);
-            }
-            100% {
-                transform: scale(1) rotate(0deg);
-            }
-        }
-        .avatar-container .effect {
+        .avatar .level {
             position: absolute;
-            inset: -6px;
+            bottom: 0;
+            right: 0;
+            background: var(--accent);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: 3px solid var(--bg);
+        }
+        .avatar .effect {
+            position: absolute;
+            inset: -4px;
             border-radius: 50%;
             border: 3px solid transparent;
             pointer-events: none;
-            animation: pulseGlow 2.5s infinite;
+            animation: glowPulse 2s infinite;
         }
-        .avatar-container .effect.glow {
+        .avatar .effect.glow {
             border-color: var(--warning);
-            box-shadow: 0 0 50px var(--warning-glow);
         }
-        .avatar-container .effect.cape {
-            border-color: var(--accent2);
-            box-shadow: 0 0 50px var(--accent-glow);
-            animation-delay: 0.5s;
-        }
-        @keyframes pulseGlow {
+        @keyframes glowPulse {
             0%,
             100% {
                 transform: scale(1);
@@ -845,242 +574,203 @@
                 opacity: 1;
             }
         }
-        .avatar-container .level-badge {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: var(--accent);
-            color: #fff;
-            border-radius: 50%;
-            width: clamp(32px, 5vw, 48px);
-            height: clamp(32px, 5vw, 48px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: clamp(0.8rem, 1.2vw, 1.2rem);
-            border: 3px solid var(--bg);
-        }
 
         .profile-info {
             flex: 1;
-            min-width: 200px;
+            min-width: 180px;
         }
         .profile-info h2 {
-            font-size: clamp(1.3rem, 2.5vw, 1.8rem);
-            color: var(--text);
+            font-size: 1.4rem;
         }
-        .profile-info .profile-sub {
+        .profile-info .sub {
             color: var(--text-muted);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
-        .profile-info .stat-grid {
+        .profile-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(clamp(80px, 12vw, 120px), 1fr));
-            gap: clamp(8px, 1.5vw, 16px);
-            margin-top: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
         }
-        .profile-info .stat-card {
+        .profile-stats .stat {
             background: var(--surface2);
-            padding: clamp(10px, 1.5vw, 16px);
+            padding: 10px;
             border-radius: var(--radius-sm);
             text-align: center;
-            transition: all 0.3s ease;
         }
-        .profile-info .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 16px var(--shadow-color);
-        }
-        .profile-info .stat-card .number {
-            font-size: clamp(1.4rem, 2.5vw, 2rem);
+        .profile-stats .stat .num {
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--accent);
         }
-        .profile-info .stat-card .label {
-            font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+        .profile-stats .stat .label {
+            font-size: 0.65rem;
             color: var(--text-muted);
         }
 
         .profile-actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 16px;
+            gap: 8px;
+            margin-top: 12px;
         }
-
-        .profile-achievements {
-            margin-top: 24px;
+        .achievements {
+            margin-top: 20px;
         }
-        .profile-achievements .achieve-item {
+        .achievements .badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
             background: var(--surface2);
-            padding: 6px 16px;
+            padding: 4px 14px;
             border-radius: 30px;
             margin: 4px 6px 4px 0;
-            font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+            font-size: 0.8rem;
             border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            color: var(--text);
         }
-        .profile-achievements .achieve-item i {
+        .achievements .badge i {
             color: var(--warning);
         }
-        .profile-achievements .achieve-item:hover {
-            transform: scale(1.05);
-            border-color: var(--accent);
-        }
 
-        /* ============================================================
-           ЦЕЛИ
-           ============================================================ */
+        /* ===== ЦЕЛИ ===== */
         .goal-item {
             background: var(--surface);
-            padding: clamp(14px, 2vw, 20px);
+            padding: 14px 18px;
             border-radius: var(--radius);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 4px 16px var(--shadow-color);
-            transition: all 0.3s ease;
-            gap: 12px;
+            box-shadow: var(--shadow);
+            gap: 10px;
         }
-        .goal-item:hover {
-            transform: translateX(4px);
-            box-shadow: 0 8px 32px var(--shadow-color);
-        }
-        .goal-item.completed {
+        .goal-item.done {
             border-left: 4px solid var(--success);
         }
-        .goal-item .goal-info {
+        .goal-item .info {
             flex: 1;
-            min-width: 150px;
+            min-width: 140px;
         }
-        .goal-item .goal-info .goal-title {
+        .goal-item .info .title {
             font-weight: 600;
-            font-size: clamp(0.95rem, 1.1vw, 1.05rem);
-            color: var(--text);
         }
-        .goal-item .goal-info .goal-meta {
+        .goal-item .info .meta {
             font-size: 0.8rem;
             color: var(--text-muted);
-            margin-top: 2px;
         }
-        .goal-item .goal-info .goal-progress-wrap {
-            margin-top: 6px;
-            height: 8px;
+        .goal-item .info .progress {
+            margin-top: 4px;
+            height: 6px;
             background: var(--surface2);
             border-radius: 20px;
             overflow: hidden;
-            max-width: 300px;
+            max-width: 250px;
         }
-        .goal-item .goal-info .goal-progress-wrap .fill {
+        .goal-item .info .progress .fill {
             height: 100%;
             background: linear-gradient(90deg, var(--accent2), var(--accent));
             border-radius: 20px;
-            transition: width 0.6s ease;
+            transition: width 0.5s;
         }
-        .goal-item .goal-actions {
+        .goal-item .actions {
             display: flex;
-            gap: 8px;
-            flex-shrink: 0;
+            gap: 6px;
         }
 
-        /* ============================================================
-           ГАЛЕРЕЯ
-           ============================================================ */
+        /* ===== ГАЛЕРЕЯ ===== */
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(clamp(100px, 15vw, 180px), 1fr));
-            gap: clamp(8px, 1.5vw, 16px);
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
         }
-        .gallery-grid .gallery-item {
+        .gallery-grid .item {
             border-radius: var(--radius-sm);
             overflow: hidden;
             background: var(--surface2);
             aspect-ratio: 1/1;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
+            transition: transform var(--transition);
         }
-        .gallery-grid .gallery-item img {
+        .gallery-grid .item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
         }
-        .gallery-grid .gallery-item:hover img {
-            transform: scale(1.06);
-        }
-        .gallery-grid .gallery-item .gallery-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            display: flex;
-            align-items: flex-end;
-            padding: 12px;
-        }
-        .gallery-grid .gallery-item:hover .gallery-overlay {
-            opacity: 1;
-        }
-        .gallery-grid .gallery-item .gallery-overlay span {
-            color: #fff;
-            font-size: 0.7rem;
+        .gallery-grid .item:hover {
+            transform: scale(1.04);
         }
 
-        /* ============================================================
-           ГРАФИКИ
-           ============================================================ */
+        /* ===== ГРАФИКИ ===== */
         .charts-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: clamp(16px, 3vw, 28px);
+            gap: 16px;
         }
         .chart-box {
             background: var(--surface);
-            padding: clamp(14px, 2vw, 24px);
+            padding: 16px;
             border-radius: var(--radius);
-            box-shadow: 0 4px 16px var(--shadow-color);
-            min-height: 220px;
+            box-shadow: var(--shadow);
         }
         .chart-box h4 {
-            margin-bottom: 12px;
             font-weight: 400;
-            font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+            margin-bottom: 10px;
             color: var(--text-muted);
+            font-size: 0.95rem;
         }
         .chart-box canvas {
-            max-height: 200px;
+            max-height: 180px;
             width: 100% !important;
         }
-        .chart-box .chart-stats {
+
+        /* ===== МОДАЛКИ ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-overlay.open {
             display: flex;
-            justify-content: space-around;
-            margin-top: 12px;
+        }
+        .modal {
+            background: var(--surface);
+            max-width: 500px;
+            width: 100%;
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal h3 {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal .group {
+            margin-bottom: 14px;
+        }
+        .modal .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
             flex-wrap: wrap;
-            gap: 8px;
         }
-        .chart-box .chart-stats .stat-item {
-            text-align: center;
-        }
-        .chart-box .chart-stats .stat-item .num {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        .chart-box .chart-stats .stat-item .lbl {
-            font-size: 0.65rem;
-            color: var(--text-muted);
+        .modal .actions button {
+            flex: 1;
+            min-width: 80px;
         }
 
-        /* ============================================================
-           ТОСТЫ (уведомления)
-           ============================================================ */
+        /* ===== ТОСТЫ ===== */
         .toast-container {
             position: fixed;
             top: 80px;
@@ -1088,25 +778,24 @@
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-width: 360px;
+            gap: 8px;
+            max-width: 340px;
             width: calc(100% - 32px);
             pointer-events: none;
         }
         .toast {
             background: var(--surface);
             color: var(--text);
-            padding: 14px 20px;
+            padding: 12px 18px;
             border-radius: var(--radius-sm);
-            box-shadow: 0 8px 32px var(--shadow-color);
+            box-shadow: var(--shadow);
             border-left: 4px solid var(--accent);
-            animation: toastIn 0.4s ease, toastOut 0.4s ease 3.5s forwards;
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 3s forwards;
             pointer-events: auto;
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 0.95rem;
-            backdrop-filter: blur(8px);
+            gap: 10px;
+            font-size: 0.9rem;
         }
         .toast.success {
             border-left-color: var(--success);
@@ -1117,27 +806,21 @@
         .toast.error {
             border-left-color: var(--danger);
         }
-        .toast.info {
-            border-left-color: var(--info);
-        }
         .toast i {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             flex-shrink: 0;
         }
-        .toast .toast-close {
+        .toast .close {
             background: none;
             border: none;
             color: var(--text-muted);
             padding: 0 4px;
-            font-size: 1.2rem;
+            font-size: 1rem;
             cursor: pointer;
-            min-height: 30px;
-            min-width: 30px;
+            min-height: 28px;
+            min-width: 28px;
             box-shadow: none;
             margin-left: auto;
-        }
-        .toast .toast-close::after {
-            display: none;
         }
         @keyframes toastIn {
             from {
@@ -1160,13 +843,8 @@
             }
         }
 
-        /* ============================================================
-           АДАПТИВНОСТЬ
-           ============================================================ */
+        /* ===== АДАПТИВ ===== */
         @media (max-width: 768px) {
-            body {
-                padding-bottom: 70px;
-            }
             .charts-grid {
                 grid-template-columns: 1fr;
             }
@@ -1175,359 +853,224 @@
                 align-items: center;
                 text-align: center;
             }
-            .calendar-grid {
-                padding: 8px;
-                gap: 4px;
+            .cal-grid {
+                padding: 6px;
+                gap: 3px;
             }
-            .calendar-grid .day {
+            .cal-grid .day {
                 font-size: 0.75rem;
-                min-height: 32px;
-            }
-            header h1 {
-                font-size: 1rem;
-            }
-            header h1 span {
-                display: none;
-            }
-            .xp-bar-wrap {
-                width: 80px;
-            }
-            .modal {
-                padding: 16px;
-                margin: 8px;
-                max-height: 90vh;
-            }
-            .journal-tabs .tab {
-                font-size: 0.75rem;
-                padding: 6px 12px;
-            }
-            nav#mainNav a {
-                padding: 2px 6px;
-            }
-            nav#mainNav a .nav-label {
-                display: none;
-            }
-            nav#mainNav a i {
-                font-size: 1.4rem;
-            }
-            .challenge-bar {
-                flex-direction: column;
-                align-items: stretch;
-                text-align: center;
-            }
-            .challenge-bar .challenge-text {
-                justify-content: center;
-            }
-            .theme-selector {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .calendar-grid {
-                gap: 2px;
-                padding: 4px;
-            }
-            .calendar-grid .day {
-                font-size: 0.65rem;
                 min-height: 28px;
-                border-radius: 6px;
-            }
-            .calendar-grid .weekday {
-                font-size: 0.55rem;
-                padding: 4px 0;
             }
             .record-item {
                 flex-direction: column;
             }
-            .record-item .record-actions {
+            .record-item .actions {
                 align-self: flex-end;
             }
-            .profile-info .stat-grid {
-                grid-template-columns: repeat(3, 1fr);
+            nav a .label {
+                display: none;
+            }
+            nav a i {
+                font-size: 1.5rem;
+            }
+            header h1 span {
+                display: none;
+            }
+            .xp-bar {
+                width: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cal-grid {
+                gap: 2px;
+                padding: 4px;
+            }
+            .cal-grid .day {
+                font-size: 0.65rem;
+                min-height: 24px;
+                border-radius: 6px;
+            }
+            .cal-grid .wd {
+                font-size: 0.6rem;
             }
             .gallery-grid {
                 grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             }
-            .toast-container {
-                top: 70px;
-                right: 8px;
-                width: calc(100% - 16px);
+            .profile-stats {
+                grid-template-columns: repeat(2, 1fr);
             }
-        }
-
-        @media (min-width: 1200px) {
-            .calendar-grid {
-                padding: 24px;
-                gap: 10px;
-            }
-            .calendar-grid .day {
-                font-size: 1.1rem;
-                min-height: 60px;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
+            .modal {
+                padding: 16px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- ============================================================
-    ШАПКА
-    ============================================================ -->
+    <!-- ===== ШАПКА ===== -->
     <header>
         <h1><i class="fas fa-dragon"></i> <span>Журнал Героя</span></h1>
         <div class="user-badge">
-            <span id="userLevelDisplay">Ур. 1</span>
-            <div class="xp-bar-wrap">
-                <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
-            </div>
-            <button class="theme-toggle" id="themeToggle" title="Сменить тему">
-                <i class="fas fa-moon"></i>
-            </button>
+            <span id="levelDisplay">Ур. 1</span>
+            <div class="xp-bar"><div class="fill" id="xpFill"></div></div>
+            <button class="theme-btn" id="themeBtn"><i class="fas fa-moon"></i></button>
         </div>
     </header>
 
-    <!-- ============================================================
-    ОСНОВНОЙ КОНТЕНТ
-    ============================================================ -->
-    <main id="mainContent">
+    <!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
+    <main>
 
-        <!-- ===== СТРАНИЦА КАЛЕНДАРЬ ===== -->
+        <!-- СТРАНИЦА: КАЛЕНДАРЬ -->
         <section class="page active" id="page-calendar">
             <div class="section-title"><i class="fas fa-calendar-alt"></i> Календарь</div>
-            <div class="calendar-header">
-                <div class="nav-buttons">
-                    <button class="secondary" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
-                </div>
+            <div class="cal-header">
+                <button class="secondary" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
                 <h2 id="monthYear">Июль 2026</h2>
-                <div class="nav-buttons">
-                    <button class="secondary" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
-                    <button class="secondary" id="todayBtn"><i class="fas fa-home"></i></button>
-                </div>
+                <button class="secondary" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
             </div>
-            <div class="calendar-grid" id="calendarGrid"></div>
-            <div class="records-list" id="dayRecords">
-                <div class="list-header">
+            <div class="cal-grid" id="calendarGrid"></div>
+            <div class="records-list">
+                <div class="header">
                     <h4><i class="fas fa-list-ul"></i> Записи за день</h4>
-                    <button id="addRecordFromDay"><i class="fas fa-plus"></i> Добавить</button>
+                    <button id="addDayRecord"><i class="fas fa-plus"></i> Добавить</button>
                 </div>
-                <div id="dayRecordsList"><p style="color:var(--text-muted); text-align:center; padding:20px;">Выберите день в календаре</p></div>
+                <div id="dayRecords"><p style="color:var(--text-muted);text-align:center;padding:16px;">Выберите день</p></div>
             </div>
         </section>
 
-        <!-- ===== СТРАНИЦА ЖУРНАЛЫ ===== -->
+        <!-- СТРАНИЦА: ЖУРНАЛЫ -->
         <section class="page" id="page-journals">
             <div class="section-title"><i class="fas fa-book-open"></i> Журналы</div>
 
-            <!-- Челлендж -->
-            <div class="challenge-bar" id="challengeBar">
-                <div class="challenge-text">
+            <div class="challenge" id="challengeBar">
+                <div class="text">
                     <i class="fas fa-bolt"></i>
-                    <span>Ежедневный челлендж: <strong class="challenge-journal" id="challengeText">Запись в Спорт</strong></span>
+                    <span>Челлендж: <strong id="challengeText">Запись в Спорт</strong></span>
                 </div>
-                <div class="challenge-status">
-                    <span id="challengeStatus" style="font-size:0.85rem; color:var(--text-muted);">⏳ Ожидает</span>
-                    <button id="challengeCompleteBtn" class="warning" style="font-size:0.8rem; padding:6px 16px;">
-                        <i class="fas fa-check"></i> Выполнено
-                    </button>
+                <div class="status">
+                    <span id="challengeStatus">⏳ Ожидает</span>
+                    <button class="warning" id="challengeDone" style="padding:4px 14px;font-size:0.8rem;">✅ Выполнено</button>
                 </div>
             </div>
 
             <div class="journal-tabs" id="journalTabs"></div>
             <div class="journal-actions">
-                <button id="addRecordBtn"><i class="fas fa-plus"></i> Добавить запись</button>
+                <button id="addRecord"><i class="fas fa-plus"></i> Добавить запись</button>
                 <button class="secondary" id="refreshJournal"><i class="fas fa-sync"></i></button>
             </div>
-            <div class="records-list" id="journalRecordsList">
-                <p style="color:var(--text-muted); text-align:center; padding:20px;">Выберите журнал</p>
-            </div>
+            <div class="records-list" id="journalRecords"></div>
         </section>
 
-        <!-- ===== СТРАНИЦА ЦЕЛИ ===== -->
+        <!-- СТРАНИЦА: ЦЕЛИ -->
         <section class="page" id="page-goals">
             <div class="section-title">
                 <i class="fas fa-bullseye"></i> Цели
-                <button id="addGoalBtn" style="margin-left:auto;"><i class="fas fa-plus"></i> Новая цель</button>
+                <button id="addGoal" style="margin-left:auto;"><i class="fas fa-plus"></i> Новая</button>
             </div>
             <div id="goalsList"></div>
         </section>
 
-        <!-- ===== СТРАНИЦА ГРАФИКИ ===== -->
+        <!-- СТРАНИЦА: ГРАФИКИ -->
         <section class="page" id="page-charts">
-            <div class="section-title"><i class="fas fa-chart-pie"></i> Графики продуктивности</div>
+            <div class="section-title"><i class="fas fa-chart-pie"></i> Графики</div>
             <div class="charts-grid">
-                <div class="chart-box">
-                    <h4>📈 Активность за месяц</h4>
-                    <canvas id="lineChart"></canvas>
-                    <div class="chart-stats" id="lineStats"></div>
-                </div>
-                <div class="chart-box">
-                    <h4>📊 Распределение по журналам</h4>
-                    <canvas id="pieChart"></canvas>
-                    <div class="chart-stats" id="pieStats"></div>
-                </div>
+                <div class="chart-box"><h4>📈 Активность за месяц</h4><canvas id="lineChart"></canvas></div>
+                <div class="chart-box"><h4>📊 Распределение</h4><canvas id="pieChart"></canvas></div>
             </div>
         </section>
 
-        <!-- ===== СТРАНИЦА ГАЛЕРЕЯ ===== -->
+        <!-- СТРАНИЦА: ГАЛЕРЕЯ -->
         <section class="page" id="page-gallery">
             <div class="section-title"><i class="fas fa-images"></i> Фотогалерея</div>
             <div class="gallery-grid" id="galleryGrid"></div>
         </section>
 
-        <!-- ===== СТРАНИЦА ПРОФИЛЬ ===== -->
+        <!-- СТРАНИЦА: ПРОФИЛЬ -->
         <section class="page" id="page-profile">
             <div class="section-title"><i class="fas fa-user-astronaut"></i> Профиль</div>
             <div class="profile-avatar">
-                <div class="avatar-container" id="avatarContainer">
-                    <div class="level-badge" id="avatarLevelBadge">1</div>
+                <div class="avatar" id="avatarBox">
+                    <div class="level" id="avatarLevel">1</div>
                     <div class="effect glow" id="effectGlow"></div>
-                    <div class="effect cape" id="effectCape"></div>
                 </div>
                 <div class="profile-info">
                     <h2 id="profileName">Герой</h2>
-                    <div class="profile-sub">
-                        Уровень <span id="profileLevel">1</span> ·
-                        XP: <span id="profileXp">0</span>/<span id="profileXpMax">100</span> ·
-                        <span id="profileStreak">🔥 0 дней</span>
+                    <div class="sub">
+                        Уровень <span id="profLevel">1</span> ·
+                        XP: <span id="profXp">0</span>/<span id="profXpMax">100</span> ·
+                        <span id="profStreak">🔥 0 дн.</span>
                     </div>
-                    <div class="stat-grid">
-                        <div class="stat-card"><div class="number" id="statRecords">0</div><div class="label">Записей</div></div>
-                        <div class="stat-card"><div class="number" id="statGoals">0</div><div class="label">Целей</div></div>
-                        <div class="stat-card"><div class="number" id="statPhotos">0</div><div class="label">Фото</div></div>
-                        <div class="stat-card"><div class="number" id="statAchievements">0</div><div class="label">Достижений</div></div>
+                    <div class="profile-stats">
+                        <div class="stat"><div class="num" id="statRecords">0</div><div class="label">Записей</div></div>
+                        <div class="stat"><div class="num" id="statGoals">0</div><div class="label">Целей</div></div>
+                        <div class="stat"><div class="num" id="statPhotos">0</div><div class="label">Фото</div></div>
+                        <div class="stat"><div class="num" id="statAchievements">0</div><div class="label">Достижений</div></div>
                     </div>
                     <div class="profile-actions">
-                        <button id="editProfileBtn"><i class="fas fa-pen"></i> Редактировать</button>
-                        <button class="secondary" id="exportDataBtn"><i class="fas fa-download"></i> Экспорт</button>
-                        <button class="secondary" id="importDataBtn"><i class="fas fa-upload"></i> Импорт</button>
-                        <button class="secondary" id="exportCsvBtn"><i class="fas fa-file-csv"></i> CSV</button>
-                        <button class="secondary" id="settingsBtn"><i class="fas fa-palette"></i> Схемы</button>
+                        <button id="editProfile"><i class="fas fa-pen"></i> Редакт.</button>
+                        <button class="secondary" id="exportBtn"><i class="fas fa-download"></i> Экспорт</button>
+                        <button class="secondary" id="importBtn"><i class="fas fa-upload"></i> Импорт</button>
+                        <button class="secondary" id="csvBtn"><i class="fas fa-file-csv"></i> CSV</button>
                     </div>
                 </div>
             </div>
-            <div class="profile-achievements" id="achievementsList">
-                <h4 style="margin-bottom:12px;">🏅 Достижения</h4>
-                <div id="achievementsContainer"></div>
-            </div>
-
-            <!-- Настройки цветовых схем -->
-            <div id="settingsPanel" style="display:none; margin-top:30px; background:var(--surface); padding:clamp(16px,2vw,24px); border-radius:var(--radius); box-shadow:0 8px 32px var(--shadow-color);">
-                <h4 style="margin-bottom:16px;"><i class="fas fa-palette"></i> Цветовые схемы</h4>
-                <div class="theme-selector" id="themeSelector"></div>
+            <div class="achievements">
+                <h4 style="margin-bottom:8px;">🏅 Достижения</h4>
+                <div id="achievementsList"></div>
             </div>
         </section>
     </main>
 
-    <!-- ============================================================
-    НАВИГАЦИЯ
-    ============================================================ -->
+    <!-- ===== НАВИГАЦИЯ ===== -->
     <nav id="mainNav">
-        <a href="#calendar" data-page="calendar" class="active">
-            <i class="fas fa-calendar"></i>
-            <span class="nav-label">Календарь</span>
-        </a>
-        <a href="#journals" data-page="journals">
-            <i class="fas fa-book"></i>
-            <span class="nav-label">Журналы</span>
-        </a>
-        <a href="#goals" data-page="goals">
-            <i class="fas fa-bullseye"></i>
-            <span class="nav-label">Цели</span>
-        </a>
-        <a href="#charts" data-page="charts">
-            <i class="fas fa-chart-line"></i>
-            <span class="nav-label">Графики</span>
-        </a>
-        <a href="#gallery" data-page="gallery">
-            <i class="fas fa-images"></i>
-            <span class="nav-label">Галерея</span>
-        </a>
-        <a href="#profile" data-page="profile">
-            <i class="fas fa-user"></i>
-            <span class="nav-label">Профиль</span>
-        </a>
+        <a href="#calendar" data-page="calendar" class="active"><i class="fas fa-calendar"></i><span class="label">Календарь</span></a>
+        <a href="#journals" data-page="journals"><i class="fas fa-book"></i><span class="label">Журналы</span></a>
+        <a href="#goals" data-page="goals"><i class="fas fa-bullseye"></i><span class="label">Цели</span></a>
+        <a href="#charts" data-page="charts"><i class="fas fa-chart-line"></i><span class="label">Графики</span></a>
+        <a href="#gallery" data-page="gallery"><i class="fas fa-images"></i><span class="label">Галерея</span></a>
+        <a href="#profile" data-page="profile"><i class="fas fa-user"></i><span class="label">Профиль</span></a>
     </nav>
 
-    <!-- ============================================================
-    МОДАЛЬНОЕ ОКНО (запись)
-    ============================================================ -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal" id="modalContent">
-            <h3 id="modalTitle"><i class="fas fa-pen"></i> Запись</h3>
-            <div class="form-group">
-                <label>Текст записи</label>
-                <textarea id="modalText" placeholder="Что вы сделали?"></textarea>
-            </div>
-            <div class="form-group" id="modalJournalGroup">
-                <label>Журнал</label>
-                <select id="modalJournal"></select>
-            </div>
-            <div class="form-group">
-                <label>Дата</label>
-                <input type="date" id="modalDate" />
-            </div>
-            <div class="form-group">
-                <label>Фото (можно несколько)</label>
-                <input type="file" id="modalPhotos" accept="image/*" multiple />
-            </div>
-            <div class="form-group" id="modalExistingPhotosGroup" style="display:none;">
-                <label>Существующие фото</label>
-                <div id="modalExistingPhotos" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-            </div>
-            <div class="form-actions">
-                <button class="secondary" id="modalCancel">Отмена</button>
-                <button id="modalSave"><i class="fas fa-save"></i> Сохранить</button>
+    <!-- ===== МОДАЛКА: ЗАПИСЬ ===== -->
+    <div class="modal-overlay" id="recordModal">
+        <div class="modal">
+            <h3 id="recordModalTitle"><i class="fas fa-pen"></i> Новая запись</h3>
+            <div class="group"><label>Текст</label><textarea id="recordText" placeholder="Что вы сделали?"></textarea></div>
+            <div class="group"><label>Журнал</label><select id="recordJournal"></select></div>
+            <div class="group"><label>Дата</label><input type="date" id="recordDate" /></div>
+            <div class="group"><label>Фото</label><input type="file" id="recordPhotos" accept="image/*" multiple /></div>
+            <div class="actions">
+                <button class="secondary" id="recordCancel">Отмена</button>
+                <button id="recordSave"><i class="fas fa-save"></i> Сохранить</button>
             </div>
         </div>
     </div>
 
-    <!-- ============================================================
-    МОДАЛЬНОЕ ОКНО (цель)
-    ============================================================ -->
-    <div class="modal-overlay" id="goalModalOverlay">
-        <div class="modal" id="goalModalContent">
-            <h3 id="goalModalTitle"><i class="fas fa-bullseye"></i> Новая цель</h3>
-            <div class="form-group">
-                <label>Название цели</label>
-                <input type="text" id="goalTitleInput" placeholder="Например: бегать 3 раза в неделю" />
-            </div>
-            <div class="form-group">
-                <label>Привязать к журналу</label>
-                <select id="goalJournalSelect"></select>
-            </div>
-            <div class="form-group">
-                <label>Целевое значение (количество записей)</label>
-                <input type="number" id="goalTargetInput" min="1" value="3" />
-            </div>
-            <div class="form-group">
-                <label>Срок (дата)</label>
-                <input type="date" id="goalDeadlineInput" />
-            </div>
-            <div class="form-actions">
-                <button class="secondary" id="goalModalCancel">Отмена</button>
-                <button id="goalModalSave"><i class="fas fa-save"></i> Сохранить</button>
+    <!-- ===== МОДАЛКА: ЦЕЛЬ ===== -->
+    <div class="modal-overlay" id="goalModal">
+        <div class="modal">
+            <h3><i class="fas fa-bullseye"></i> Новая цель</h3>
+            <div class="group"><label>Название</label><input type="text" id="goalTitle" placeholder="Например: бегать 3 раза в неделю" /></div>
+            <div class="group"><label>Журнал</label><select id="goalJournal"></select></div>
+            <div class="group"><label>Целевое значение</label><input type="number" id="goalTarget" min="1" value="3" /></div>
+            <div class="group"><label>Срок</label><input type="date" id="goalDeadline" /></div>
+            <div class="actions">
+                <button class="secondary" id="goalCancel">Отмена</button>
+                <button id="goalSave"><i class="fas fa-save"></i> Сохранить</button>
             </div>
         </div>
     </div>
 
-    <!-- ============================================================
-    СКРЫТЫЕ ЭЛЕМЕНТЫ
-    ============================================================ -->
-    <input type="file" id="importFileInput" accept=".json" style="display:none" />
+    <!-- ===== СКРЫТЫЙ ИМПОРТ ===== -->
+    <input type="file" id="importFile" accept=".json" style="display:none" />
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- ============================================================
-    JAVASCRIPT
-    ============================================================ -->
     <script>
+        // ============================================================
+        // ВЕСЬ JAVASCRIPT — РАБОЧАЯ ВЕРСИЯ
+        // ============================================================
+
         (function() {
             'use strict';
 
@@ -1535,330 +1078,16 @@
             const { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isToday, subDays } = window
                 .dateFns;
 
-            // ---------- 7 ЦВЕТОВЫХ СХЕМ ----------
-            const THEMES = {
-                cosmic: {
-                    name: '🌌 Cosmic',
-                    css: `
-                --bg: #0a0a1a;
-                --surface: #14142e;
-                --surface2: #1e1e3f;
-                --surface3: #2a2a55;
-                --text: #e8e8ff;
-                --text-muted: #8a8ac0;
-                --text-dim: #5a5a8a;
-                --accent: #7c3aed;
-                --accent2: #a78bfa;
-                --accent-glow: #7c3aed55;
-                --success: #34d399;
-                --warning: #fbbf24;
-                --danger: #f87171;
-                --info: #60a5fa;
-                --border: #2a2a55;
-                --shadow-color: rgba(124, 58, 237, 0.2);
-                --warning-glow: rgba(251, 191, 36, 0.2);
-                --radius: 16px;
-                --radius-sm: 10px;
-              `
-                },
-                forest: {
-                    name: '🌿 Forest',
-                    css: `
-                --bg: #0f1a12;
-                --surface: #1a2a1f;
-                --surface2: #253a2b;
-                --surface3: #304a37;
-                --text: #e8f5e9;
-                --text-muted: #8aaa8f;
-                --text-dim: #5a7a5f;
-                --accent: #2e7d32;
-                --accent2: #66bb6a;
-                --accent-glow: #2e7d3255;
-                --success: #4caf50;
-                --warning: #ffd54f;
-                --danger: #ef5350;
-                --info: #42a5f5;
-                --border: #2a3a2f;
-                --shadow-color: rgba(46, 125, 50, 0.2);
-                --warning-glow: rgba(255, 213, 79, 0.2);
-                --radius: 16px;
-                --radius-sm: 10px;
-              `
-                },
-                ocean: {
-                    name: '🌊 Ocean',
-                    css: `
-                --bg: #0a1628;
-                --surface: #0f2440;
-                --surface2: #15305a;
-                --surface3: #1a3d70;
-                --text: #e0f2fe;
-                --text-muted: #7ab8d4;
-                --text-dim: #4a8aaa;
-                --accent: #0284c7;
-                --accent2: #38bdf8;
-                --accent-glow: #0284c755;
-                --success: #2dd4bf;
-                --warning: #fcd34d;
-                --danger: #f87171;
-                --info: #60a5fa;
-                --border: #1a3d70;
-                --shadow-color: rgba(2, 132, 199, 0.2);
-                --warning-glow: rgba(252, 211, 77, 0.2);
-                --radius: 16px;
-                --radius-sm: 10px;
-              `
-                },
-                sunset: {
-                    name: '🌅 Sunset',
-                    css: `
-                --bg: #1a0a0a;
-                --surface: #2a1414;
-                --surface2: #3a1e1e;
-                --surface3: #4a2828;
-                --text: #fef3e8;
-                --text-muted: #d4a08a;
-                --text-dim: #a0705a;
-                --accent: #e85d3a;
-                --accent2: #f58a6a;
-                --accent-glow: #e85d3a55;
-                --success: #34d399;
-                --warning: #fbbf24;
-                --danger: #f87171;
-                --info: #60a5fa;
-                --border: #3a2828;
-                --shadow-color: rgba(232, 93, 58, 0.2);
-                --warning-glow: rgba(251, 191, 36, 0.2);
-                --radius: 16px;
-                --radius-sm: 10px;
-              `
-                },
-                sakura: {
-                    name: '🌸 Sakura',
-                    css: `
-                --bg: #faf0f5;
-                --surface: #ffffff;
-                --surface2: #f5e8ee;
-                --surface3: #eddce6;
-                --text: #2d1b2a;
-                --text-muted: #8a6a7a;
-                --text-dim: #6a4a5a;
-                --accent: #e84393;
-                --accent2: #f06292;
-                --accent-glow: #e8439344;
-                --success: #2ecc71;
-                --warning: #fdcb6e;
-                --danger: #e17055;
-                --info: #74b9ff;
-                --border: #eddce6;
-                --shadow-color: rgba(232, 67, 147, 0.1);
-                --warning-glow: rgba(253, 203, 110, 0.2);
-                --radius: 20px;
-                --radius-sm: 12px;
-              `
-                },
-                cyber: {
-                    name: '🤖 Cyber',
-                    css: `
-                --bg: #0a0a0a;
-                --surface: #141414;
-                --surface2: #1e1e1e;
-                --surface3: #2a2a2a;
-                --text: #00ff41;
-                --text-muted: #00cc33;
-                --text-dim: #008822;
-                --accent: #ff00ff;
-                --accent2: #ff66ff;
-                --accent-glow: #ff00ff55;
-                --success: #00ff41;
-                --warning: #ffff00;
-                --danger: #ff0044;
-                --info: #00ccff;
-                --border: #2a2a2a;
-                --shadow-color: rgba(255, 0, 255, 0.2);
-                --warning-glow: rgba(255, 255, 0, 0.2);
-                --radius: 8px;
-                --radius-sm: 4px;
-              `
-                },
-                coffee: {
-                    name: '☕ Coffee',
-                    css: `
-                --bg: #1a1410;
-                --surface: #2a201a;
-                --surface2: #3a2a22;
-                --surface3: #4a352a;
-                --text: #f5e6d3;
-                --text-muted: #c4a88a;
-                --text-dim: #8a705a;
-                --accent: #c47a4a;
-                --accent2: #d49a6a;
-                --accent-glow: #c47a4a55;
-                --success: #6b8c5c;
-                --warning: #d4a050;
-                --danger: #c45a4a;
-                --info: #5a8aaa;
-                --border: #3a2a22;
-                --shadow-color: rgba(196, 122, 74, 0.2);
-                --warning-glow: rgba(212, 160, 80, 0.2);
-                --radius: 16px;
-                --radius-sm: 10px;
-              `
-                }
-            };
-
-            let currentTheme = 'cosmic';
-
-            // ---------- ЗВУКИ ----------
-            class SoundFX {
-                constructor() {
-                    this.ctx = null;
-                    this.enabled = true;
-                    try {
-                        this.ctx = new(window.AudioContext || window.webkitAudioContext)();
-                    } catch (e) {}
-                }
-
-                play(type) {
-                    if (!this.ctx || !this.enabled) return;
-                    try {
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        osc.connect(gain);
-                        gain.connect(this.ctx.destination);
-                        gain.gain.value = 0.08;
-
-                        switch (type) {
-                            case 'xp':
-                                osc.frequency.value = 600;
-                                osc.type = 'sine';
-                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
-                                osc.start(this.ctx.currentTime);
-                                osc.stop(this.ctx.currentTime + 0.15);
-                                break;
-                            case 'levelup':
-                                osc.frequency.setValueAtTime(523, this.ctx.currentTime);
-                                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.1);
-                                osc.frequency.setValueAtTime(784, this.ctx.currentTime + 0.2);
-                                osc.type = 'sine';
-                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
-                                osc.start(this.ctx.currentTime);
-                                osc.stop(this.ctx.currentTime + 0.35);
-                                break;
-                            case 'achievement':
-                                osc.frequency.setValueAtTime(440, this.ctx.currentTime);
-                                osc.frequency.setValueAtTime(554, this.ctx.currentTime + 0.12);
-                                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.24);
-                                osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.36);
-                                osc.type = 'square';
-                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
-                                osc.start(this.ctx.currentTime);
-                                osc.stop(this.ctx.currentTime + 0.5);
-                                break;
-                            case 'challenge':
-                                osc.frequency.setValueAtTime(523, this.ctx.currentTime);
-                                osc.frequency.setValueAtTime(392, this.ctx.currentTime + 0.15);
-                                osc.frequency.setValueAtTime(523, this.ctx.currentTime + 0.3);
-                                osc.type = 'triangle';
-                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
-                                osc.start(this.ctx.currentTime);
-                                osc.stop(this.ctx.currentTime + 0.4);
-                                break;
-                        }
-                    } catch (e) {}
-                }
-            }
-
-            const sound = new SoundFX();
-
-            // ---------- ТОСТЫ ----------
-            function showToast(message, type = 'info', duration = 3500) {
-                const container = document.getElementById('toastContainer');
-                const icons = {
-                    success: 'fa-check-circle',
-                    warning: 'fa-exclamation-triangle',
-                    error: 'fa-times-circle',
-                    info: 'fa-info-circle'
-                };
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML = `
-              <i class="fas ${icons[type] || icons.info}"></i>
-              <span>${message}</span>
-              <button class="toast-close"><i class="fas fa-times"></i></button>
-            `;
-                container.appendChild(toast);
-                const closeBtn = toast.querySelector('.toast-close');
-                closeBtn.addEventListener('click', () => { toast.remove(); });
-                setTimeout(() => {
-                    if (toast.parentNode) toast.remove();
-                }, duration);
-            }
-
-            // ---------- ПРИМЕНЕНИЕ ТЕМЫ ----------
-            function applyTheme(themeId) {
-                currentTheme = themeId;
-                const theme = THEMES[themeId];
-                if (!theme) return;
-
-                const style = document.createElement('style');
-                style.id = 'theme-styles';
-                style.textContent = `:root { ${theme.css} }`;
-
-                const oldStyle = document.getElementById('theme-styles');
-                if (oldStyle) oldStyle.remove();
-                document.head.appendChild(style);
-
-                // Обновляем активный элемент в селекторе
-                document.querySelectorAll('.theme-option').forEach(el => {
-                    el.classList.toggle('active', el.dataset.theme === themeId);
-                });
-
-                // Сохраняем в localStorage
-                try {
-                    localStorage.setItem('heroTheme', themeId);
-                } catch (e) {}
-
-                // Обновляем графики (они перерисовываются с новыми цветами)
-                renderCharts();
-            }
-
-            // ---------- ИНИЦИАЛИЗАЦИЯ СЕЛЕКТОРА ТЕМ ----------
-            function initThemeSelector() {
-                const container = document.getElementById('themeSelector');
-                container.innerHTML = '';
-                Object.entries(THEMES).forEach(([id, theme]) => {
-                    const div = document.createElement('div');
-                    div.className = 'theme-option' + (id === currentTheme ? ' active' : '');
-                    div.dataset.theme = id;
-
-                    // Извлекаем цвет акцента из CSS
-                    const accentMatch = theme.css.match(/--accent: ([^;]+)/);
-                    const accentColor = accentMatch ? accentMatch[1].trim() : '#6c5ce7';
-
-                    div.innerHTML = `
-                <div class="color-preview" style="background:${accentColor};"></div>
-                <span class="theme-name">${theme.name}</span>
-              `;
-                    div.addEventListener('click', () => {
-                        applyTheme(id);
-                        showToast(`🎨 Схема "${theme.name}" применена`, 'success');
-                        // Обновляем UI
-                        updateUI();
-                    });
-                    container.appendChild(div);
-                });
-            }
-
-            // ---------- СОСТОЯНИЕ / ХРАНИЛИЩЕ ----------
+            // ---------- ДАННЫЕ ----------
             const DEFAULT_DATA = {
                 user: {
                     name: 'Герой',
                     level: 1,
                     xp: 0,
                     xpToNext: 100,
-                    avatar: { base: 'warrior_1', effects: [] },
-                    unlockedAvatars: ['warrior_1']
+                    avatar: 'warrior_1',
+                    effects: [],
+                    unlocked: ['warrior_1']
                 },
                 journals: {
                     sport: { id: 'sport', label: 'Спорт', icon: 'fa-dumbbell', records: [] },
@@ -1870,371 +1099,360 @@
                     misc: { id: 'misc', label: 'Всякое', icon: 'fa-ellipsis-h', records: [] }
                 },
                 goals: [],
-                gallery: { photos: [] },
-                achievements: [],
-                settings: { theme: 'cosmic' }
+                gallery: [],
+                achievements: []
             };
 
             let data = null;
-            let editingRecordId = null;
-            let editingRecordJournal = null;
+            let currentPage = 'calendar';
+            let currentJournal = 'sport';
+            let currentMonth = new Date().getMonth();
+            let currentYear = new Date().getFullYear();
+            let selectedDate = format(new Date(), 'yyyy-MM-dd');
+            let editingId = null;
+            let editingJournal = null;
+            let challenge = null;
 
+            // ---------- ЗВУКИ ----------
+            const sound = {
+                ctx: null,
+                init() {
+                    try { this.ctx = new(window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+                },
+                play(type) {
+                    if (!this.ctx) return;
+                    try {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        gain.gain.value = 0.06;
+                        if (type === 'xp') {
+                            osc.frequency.value = 600;
+                            osc.type = 'sine';
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+                            osc.start(this.ctx.currentTime);
+                            osc.stop(this.ctx.currentTime + 0.15);
+                        } else if (type === 'level') {
+                            osc.frequency.setValueAtTime(523, this.ctx.currentTime);
+                            osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.1);
+                            osc.frequency.setValueAtTime(784, this.ctx.currentTime + 0.2);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+                            osc.start(this.ctx.currentTime);
+                            osc.stop(this.ctx.currentTime + 0.35);
+                        } else if (type === 'achieve') {
+                            osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+                            osc.frequency.setValueAtTime(554, this.ctx.currentTime + 0.12);
+                            osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.24);
+                            osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.36);
+                            osc.type = 'square';
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+                            osc.start(this.ctx.currentTime);
+                            osc.stop(this.ctx.currentTime + 0.5);
+                        }
+                    } catch (e) {}
+                }
+            };
+
+            // ---------- ТОСТЫ ----------
+            function toast(msg, type = 'info', duration = 3000) {
+                const container = document.getElementById('toastContainer');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle',
+                    info: 'fa-info-circle' };
+                const el = document.createElement('div');
+                el.className = `toast ${type}`;
+                el.innerHTML =
+                    `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span><button class="close"><i class="fas fa-times"></i></button>`;
+                container.appendChild(el);
+                el.querySelector('.close').addEventListener('click', () => el.remove());
+                setTimeout(() => { if (el.parentNode) el.remove(); }, duration);
+            }
+
+            // ---------- ХРАНЕНИЕ ----------
             function loadData() {
-                const saved = localStorage.getItem('heroJournalData');
+                const saved = localStorage.getItem('heroData');
                 if (saved) {
                     try { data = JSON.parse(saved); } catch (e) { data = null; }
                 }
                 if (!data) {
                     data = JSON.parse(JSON.stringify(DEFAULT_DATA));
                     const today = format(new Date(), 'yyyy-MM-dd');
-                    const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
-                    const twoDaysAgo = format(subDays(new Date(), 2), 'yyyy-MM-dd');
+                    const yest = format(subDays(new Date(), 1), 'yyyy-MM-dd');
                     data.journals.sport.records.push({
-                        id: 'rec1',
+                        id: 'r1',
                         date: today,
-                        text: '🏃 Пробежка 5 км за 30 минут',
+                        text: '🏃 Пробежка 5 км',
                         photos: [],
                         done: true,
-                        xpEarned: 18,
-                        createdAt: new Date().toISOString()
+                        xp: 18,
+                        created: Date.now()
                     });
                     data.journals.tasks.records.push({
-                        id: 'rec2',
-                        date: yesterday,
-                        text: '✅ Завершил проект по работе',
+                        id: 'r2',
+                        date: yest,
+                        text: '✅ Сделал отчёт',
                         photos: [],
                         done: true,
-                        xpEarned: 22,
-                        createdAt: new Date().toISOString()
+                        xp: 15,
+                        created: Date.now()
                     });
                     data.journals.hobby.records.push({
-                        id: 'rec3',
-                        date: twoDaysAgo,
-                        text: '🎨 Нарисовал эскиз нового персонажа',
+                        id: 'r3',
+                        date: today,
+                        text: '🎨 Рисовал скетч',
                         photos: [],
                         done: false,
-                        xpEarned: 14,
-                        createdAt: new Date().toISOString()
-                    });
-                    data.journals.food.records.push({
-                        id: 'rec4',
-                        date: today,
-                        text: '🥗 Приготовил здоровый ужин',
-                        photos: [],
-                        done: true,
-                        xpEarned: 12,
-                        createdAt: new Date().toISOString()
+                        xp: 12,
+                        created: Date.now()
                     });
                     saveData();
                 }
-
-                // Восстанавливаем тему
-                const savedTheme = localStorage.getItem('heroTheme') || data.settings?.theme || 'cosmic';
-                currentTheme = savedTheme;
-                applyTheme(currentTheme);
-
-                recalcXpToNext();
+                // Тема
+                const theme = localStorage.getItem('heroTheme') || 'dark';
+                if (theme === 'light') document.body.classList.add('light-theme');
+                recalcXp();
                 saveData();
                 return data;
             }
 
             function saveData() {
-                data.settings = data.settings || {};
-                data.settings.theme = currentTheme;
-                localStorage.setItem('heroJournalData', JSON.stringify(data));
+                localStorage.setItem('heroData', JSON.stringify(data));
             }
 
-            function recalcXpToNext() {
-                const lvl = data.user.level;
-                data.user.xpToNext = Math.floor(80 * Math.pow(lvl, 1.6));
+            function recalcXp() {
+                data.user.xpToNext = Math.floor(80 * Math.pow(data.user.level, 1.5));
             }
 
-            // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
-            function generateId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
+            // ---------- УТИЛИТЫ ----------
+            function genId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); }
 
             function getJournal(id) { return data.journals[id]; }
 
             function getAllRecords() {
                 let all = [];
-                for (let jid in data.journals) {
-                    all = all.concat(data.journals[jid].records.map(r => ({ ...r, journalId: jid })));
+                for (let j in data.journals) {
+                    all = all.concat(data.journals[j].records.map(r => ({ ...r, journalId: j })));
                 }
                 return all;
             }
 
-            function getRecordsForDate(dateStr) {
-                return getAllRecords().filter(r => r.date === dateStr);
+            function getRecordsForDate(date) {
+                return getAllRecords().filter(r => r.date === date);
             }
 
-            function getRecordsForJournal(journalId) {
-                return data.journals[journalId] ? data.journals[journalId].records.slice() : [];
+            function getRecordsForJournal(jid) {
+                return data.journals[jid] ? data.journals[jid].records.slice() : [];
             }
 
-            function getTotalRecords() { return getAllRecords().length; }
+            function totalRecords() { return getAllRecords().length; }
 
-            function getTotalPhotos() { return data.gallery.photos.length; }
+            function totalPhotos() { return data.gallery.length; }
 
-            // ---------- СЕРИИ (STREAK) ----------
-            function calculateStreak(journalId) {
-                const records = getRecordsForJournal(journalId);
-                if (records.length === 0) return 0;
-                const dates = [...new Set(records.map(r => r.date))].sort();
+            function calcStreak(jid) {
+                const recs = getRecordsForJournal(jid);
+                if (!recs.length) return 0;
+                const dates = [...new Set(recs.map(r => r.date))].sort();
                 let streak = 0;
-                let current = new Date();
                 for (let i = 0; i < 365; i++) {
-                    const dateStr = format(subDays(current, i), 'yyyy-MM-dd');
-                    if (dates.includes(dateStr)) {
-                        streak++;
-                    } else if (i > 0) {
-                        break;
-                    }
+                    const d = format(subDays(new Date(), i), 'yyyy-MM-dd');
+                    if (dates.includes(d)) streak++;
+                    else if (i > 0) break;
                 }
                 return streak;
             }
 
-            function getTotalStreak() {
+            function totalStreak() {
                 let max = 0;
-                for (let jid in data.journals) {
-                    const s = calculateStreak(jid);
+                for (let j in data.journals) {
+                    const s = calcStreak(j);
                     if (s > max) max = s;
                 }
                 return max;
             }
 
-            // ---------- ЧЕЛЛЕНДЖ ----------
-            let currentChallenge = null;
+            // ---------- АВАТАРЫ ----------
+            const AVATARS = {
+                warrior_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=w1&backgroundColor=6c5ce7',
+                warrior_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=w2&backgroundColor=6c5ce7',
+                mage_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=m1&backgroundColor=a29bfe',
+                mage_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=m2&backgroundColor=a29bfe',
+                elf_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=e1&backgroundColor=00b894',
+                elf_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=e2&backgroundColor=00b894',
+                dragon_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d1&backgroundColor=e17055',
+                dragon_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d2&backgroundColor=e17055',
+                knight_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=k1&backgroundColor=fdcb6e',
+                knight_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=k2&backgroundColor=fdcb6e',
+            };
 
-            function generateChallenge() {
-                const journalIds = Object.keys(data.journals);
-                const jid = journalIds[Math.floor(Math.random() * journalIds.length)];
-                const journal = getJournal(jid);
-                const actions = ['запись', 'выполнение задачи', 'добавление фото', 'прогресс по цели'];
-                const action = actions[Math.floor(Math.random() * actions.length)];
-                currentChallenge = {
-                    journalId: jid,
-                    journalLabel: journal.label,
-                    action: action,
-                    date: format(new Date(), 'yyyy-MM-dd'),
-                    completed: false
-                };
-                const todayRecords = getRecordsForDate(format(new Date(), 'yyyy-MM-dd'));
-                if (todayRecords.some(r => r.journalId === jid)) {
-                    currentChallenge.completed = true;
+            function getAvatar(id) { return AVATARS[id] || AVATARS.warrior_1; }
+
+            // ---------- RPG ----------
+            function calcXP(text) {
+                let base = 10 + Math.min(20, Math.floor(text.length / 8));
+                if (text.length > 50) base += 5;
+                return Math.min(50, base);
+            }
+
+            function addXP(amount) {
+                data.user.xp += amount;
+                let leveled = false;
+                while (data.user.xp >= data.user.xpToNext) {
+                    data.user.xp -= data.user.xpToNext;
+                    data.user.level++;
+                    recalcXp();
+                    leveled = true;
+                    const avatars = ['warrior_1', 'warrior_2', 'mage_1', 'mage_2', 'elf_1', 'elf_2', 'dragon_1', 'dragon_2',
+                        'knight_1', 'knight_2'
+                    ];
+                    const idx = Math.floor(data.user.level / 2);
+                    if (idx < avatars.length && !data.user.unlocked.includes(avatars[idx])) {
+                        data.user.unlocked.push(avatars[idx]);
+                        data.user.avatar = avatars[idx];
+                    }
+                    checkAchievements();
+                    sound.play('level');
+                    toast(`🎉 УРОВЕНЬ ${data.user.level}!`, 'success', 4000);
                 }
+                if (amount > 0 && !leveled) sound.play('xp');
+                saveData();
+                updateAll();
+            }
+
+            // ---------- ДОСТИЖЕНИЯ ----------
+            function checkAchievements() {
+                const ach = data.achievements || [];
+                const total = totalRecords();
+                const counts = {};
+                for (let j in data.journals) counts[j] = data.journals[j].records.length;
+                const streak = totalStreak();
+
+                const list = [
+                    { id: 'first', check: () => total >= 1, label: 'Первая запись', icon: 'fa-star' },
+                    { id: 'ten', check: () => total >= 10, label: '10 записей', icon: 'fa-medal' },
+                    { id: 'fifty', check: () => total >= 50, label: '50 записей', icon: 'fa-crown' },
+                    { id: 'sport5', check: () => counts.sport >= 5, label: 'Спортсмен 5', icon: 'fa-running' },
+                    { id: 'tasks10', check: () => counts.tasks >= 10, label: 'Организатор 10', icon: 'fa-tasks' },
+                    { id: 'photo5', check: () => data.gallery.length >= 5, label: 'Фотограф 5', icon: 'fa-camera' },
+                    { id: 'streak7', check: () => streak >= 7, label: '🔥 Серия 7 дней', icon: 'fa-fire' },
+                ];
+
+                let newAch = false;
+                list.forEach(a => {
+                    if (!ach.includes(a.id) && a.check()) {
+                        ach.push(a.id);
+                        newAch = true;
+                        sound.play('achieve');
+                        toast(`🏅 Достижение: ${a.label}!`, 'warning', 4000);
+                    }
+                });
+                if (newAch) {
+                    data.achievements = ach;
+                    saveData();
+                }
+            }
+
+            // ---------- ЧЕЛЛЕНДЖ ----------
+            function genChallenge() {
+                const keys = Object.keys(data.journals);
+                const jid = keys[Math.floor(Math.random() * keys.length)];
+                const j = getJournal(jid);
+                challenge = {
+                    jid: jid,
+                    label: j.label,
+                    done: getRecordsForDate(format(new Date(), 'yyyy-MM-dd')).some(r => r.journalId === jid)
+                };
                 updateChallengeUI();
-                return currentChallenge;
             }
 
             function updateChallengeUI() {
-                const text = document.getElementById('challengeText');
+                const el = document.getElementById('challengeText');
                 const status = document.getElementById('challengeStatus');
-                const btn = document.getElementById('challengeCompleteBtn');
-                if (!currentChallenge) {
-                    generateChallenge();
-                    return;
-                }
-                text.textContent = `${currentChallenge.journalLabel} (${currentChallenge.action})`;
-                if (currentChallenge.completed) {
-                    status.textContent = '✅ Выполнено! +Бонус XP';
+                const btn = document.getElementById('challengeDone');
+                if (!challenge) { genChallenge(); return; }
+                el.textContent = `${challenge.label}`;
+                if (challenge.done) {
+                    status.textContent = '✅ Выполнено!';
                     status.style.color = 'var(--success)';
                     btn.style.display = 'none';
                 } else {
-                    status.textContent = '⏳ Ожидает выполнения';
+                    status.textContent = '⏳ Ожидает';
                     status.style.color = 'var(--text-muted)';
                     btn.style.display = 'flex';
                 }
             }
 
             function completeChallenge() {
-                if (!currentChallenge || currentChallenge.completed) return;
-                const todayRecords = getRecordsForDate(format(new Date(), 'yyyy-MM-dd'));
-                const hasRecord = todayRecords.some(r => r.journalId === currentChallenge.journalId);
-                if (hasRecord) {
-                    currentChallenge.completed = true;
-                    const bonus = 30;
-                    addXP(bonus);
-                    sound.play('challenge');
-                    showToast(`🎯 Челлендж выполнен! +${bonus} XP бонус!`, 'success');
-                    updateChallengeUI();
-                    updateUI();
-                } else {
-                    showToast('Сначала сделайте запись в журнале "' + currentChallenge.journalLabel + '" сегодня!', 'warning');
-                }
-            }
-
-            // ---------- RPG: XP и УРОВНИ ----------
-            function calculateXP(text) {
-                let base = 10 + Math.min(25, Math.floor(text.length / 8));
-                if (text.length > 50) base += 5;
-                if (text.length > 100) base += 10;
-                return Math.min(60, base);
-            }
-
-            function addXP(amount) {
-                data.user.xp += amount;
-                let leveledUp = false;
-                while (data.user.xp >= data.user.xpToNext) {
-                    data.user.xp -= data.user.xpToNext;
-                    data.user.level += 1;
-                    recalcXpToNext();
-                    leveledUp = true;
-                    const avatars = ['warrior_1', 'warrior_2', 'mage_1', 'mage_2', 'elf_1', 'elf_2', 'dragon_1', 'dragon_2',
-                        'knight_1', 'knight_2'
-                    ];
-                    if (data.user.level % 2 === 0 && data.user.level / 2 <= avatars.length) {
-                        const newAvatar = avatars[Math.floor(data.user.level / 2) - 1];
-                        if (newAvatar && !data.user.unlockedAvatars.includes(newAvatar)) {
-                            data.user.unlockedAvatars.push(newAvatar);
-                            data.user.avatar.base = newAvatar;
-                        }
-                    }
-                    checkAchievements();
-                    sound.play('levelup');
-                    showToast(`🎉 УРОВЕНЬ ${data.user.level}! Вы стали сильнее!`, 'success', 4000);
-                    const avatarEl = document.getElementById('avatarContainer');
-                    avatarEl.classList.remove('level-up');
-                    void avatarEl.offsetWidth;
-                    avatarEl.classList.add('level-up');
-                }
-                if (amount > 0 && !leveledUp) {
+                if (!challenge || challenge.done) return;
+                const today = format(new Date(), 'yyyy-MM-dd');
+                if (getRecordsForDate(today).some(r => r.journalId === challenge.jid)) {
+                    challenge.done = true;
+                    addXP(30);
                     sound.play('xp');
+                    toast('🎯 Челлендж выполнен! +30 XP', 'success');
+                    updateChallengeUI();
+                    updateAll();
+                } else {
+                    toast('Сделайте запись в "' + challenge.label + '" сегодня!', 'warning');
                 }
-                saveData();
-                updateUI();
-            }
-
-            // ---------- ДОСТИЖЕНИЯ ----------
-            function checkAchievements() {
-                const achieved = data.achievements || [];
-                const allRecords = getAllRecords();
-                const total = allRecords.length;
-                const journalCounts = {};
-                for (let jid in data.journals) {
-                    journalCounts[jid] = data.journals[jid].records.length;
-                }
-                const streak = getTotalStreak();
-
-                const conditions = [
-                    { id: 'first_record', check: () => total >= 1, label: 'Первая запись', icon: 'fa-star' },
-                    { id: 'ten_records', check: () => total >= 10, label: '10 записей', icon: 'fa-medal' },
-                    { id: 'fifty_records', check: () => total >= 50, label: '50 записей', icon: 'fa-crown' },
-                    { id: 'hundred_records', check: () => total >= 100, label: '100 записей!', icon: 'fa-gem' },
-                    { id: 'sport_5', check: () => journalCounts.sport >= 5, label: 'Спортсмен (5)', icon: 'fa-running' },
-                    { id: 'sport_20', check: () => journalCounts.sport >= 20, label: 'Марафонец (20)', icon: 'fa-bolt' },
-                    { id: 'tasks_10', check: () => journalCounts.tasks >= 10, label: 'Организатор (10)',
-                    icon: 'fa-tasks' },
-                    { id: 'photo_5', check: () => data.gallery.photos.length >= 5, label: 'Фотограф (5)',
-                        icon: 'fa-camera' },
-                    { id: 'photo_20', check: () => data.gallery.photos.length >= 20, label: 'Фотохудожник (20)',
-                        icon: 'fa-images' },
-                    { id: 'streak_7', check: () => streak >= 7, label: '🔥 Серия 7 дней', icon: 'fa-fire' },
-                    { id: 'streak_30', check: () => streak >= 30, label: '🔥🔥 Серия 30 дней!', icon: 'fa-fire-alt' },
-                    { id: 'goals_3', check: () => data.goals.filter(g => g.completed).length >= 3,
-                        label: 'Целеустремлённый (3 цели)', icon: 'fa-bullseye' },
-                ];
-
-                let newAchievement = false;
-                conditions.forEach(c => {
-                    if (!achieved.includes(c.id) && c.check()) {
-                        achieved.push(c.id);
-                        newAchievement = true;
-                        sound.play('achievement');
-                        showToast(`🏅 Достижение: ${c.label}!`, 'warning', 4000);
-                    }
-                });
-                if (newAchievement) {
-                    data.achievements = achieved;
-                    saveData();
-                    updateUI();
-                }
-            }
-
-            // ---------- АВАТАРЫ ----------
-            const AVATAR_IMAGES = {
-                warrior_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=warrior1&backgroundColor=6c5ce7',
-                warrior_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=warrior2&backgroundColor=6c5ce7',
-                mage_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mage1&backgroundColor=a29bfe',
-                mage_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mage2&backgroundColor=a29bfe',
-                elf_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=elf1&backgroundColor=00b894',
-                elf_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=elf2&backgroundColor=00b894',
-                dragon_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dragon1&backgroundColor=e17055',
-                dragon_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dragon2&backgroundColor=e17055',
-                knight_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=knight1&backgroundColor=fdcb6e',
-                knight_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=knight2&backgroundColor=fdcb6e',
-            };
-
-            function getAvatarUrl(id) {
-                return AVATAR_IMAGES[id] || AVATAR_IMAGES.warrior_1;
             }
 
             // ---------- ОБНОВЛЕНИЕ UI ----------
-            function updateUI() {
-                const xpFill = document.getElementById('xpBarFill');
+            function updateAll() {
+                // XP бар
                 const pct = Math.min(100, (data.user.xp / data.user.xpToNext) * 100);
-                xpFill.style.width = pct + '%';
-                document.getElementById('userLevelDisplay').textContent = 'Ур. ' + data.user.level;
+                document.getElementById('xpFill').style.width = pct + '%';
+                document.getElementById('levelDisplay').textContent = 'Ур. ' + data.user.level;
 
+                // Профиль
                 document.getElementById('profileName').textContent = data.user.name;
-                document.getElementById('profileLevel').textContent = data.user.level;
-                document.getElementById('profileXp').textContent = data.user.xp;
-                document.getElementById('profileXpMax').textContent = data.user.xpToNext;
-                document.getElementById('statRecords').textContent = getTotalRecords();
+                document.getElementById('profLevel').textContent = data.user.level;
+                document.getElementById('profXp').textContent = data.user.xp;
+                document.getElementById('profXpMax').textContent = data.user.xpToNext;
+                document.getElementById('profStreak').textContent = '🔥 ' + totalStreak() + ' дн.';
+                document.getElementById('statRecords').textContent = totalRecords();
                 document.getElementById('statGoals').textContent = data.goals.length;
-                document.getElementById('statPhotos').textContent = getTotalPhotos();
+                document.getElementById('statPhotos').textContent = totalPhotos();
+                document.getElementById('statAchievements').textContent = (data.achievements || []).length;
+
+                // Аватар
+                document.getElementById('avatarBox').style.backgroundImage = `url(${getAvatar(data.user.avatar)})`;
+                document.getElementById('avatarLevel').textContent = data.user.level;
+                const hasGlow = (data.user.effects || []).includes('glow');
+                document.getElementById('effectGlow').style.display = hasGlow ? 'block' : 'none';
+
+                // Достижения
+                const achContainer = document.getElementById('achievementsList');
+                const achMap = {
+                    first: 'Первая запись',
+                    ten: '10 записей',
+                    fifty: '50 записей',
+                    sport5: 'Спортсмен 5',
+                    tasks10: 'Организатор 10',
+                    photo5: 'Фотограф 5',
+                    streak7: '🔥 Серия 7 дней'
+                };
+                const achIcons = {
+                    first: 'fa-star',
+                    ten: 'fa-medal',
+                    fifty: 'fa-crown',
+                    sport5: 'fa-running',
+                    tasks10: 'fa-tasks',
+                    photo5: 'fa-camera',
+                    streak7: 'fa-fire'
+                };
                 const achievements = data.achievements || [];
-                document.getElementById('statAchievements').textContent = achievements.length;
-                const streak = getTotalStreak();
-                document.getElementById('profileStreak').textContent = `🔥 ${streak} дней`;
-
-                const avatarUrl = getAvatarUrl(data.user.avatar.base);
-                const container = document.getElementById('avatarContainer');
-                container.style.backgroundImage = `url(${avatarUrl})`;
-                document.getElementById('avatarLevelBadge').textContent = data.user.level;
-
-                const effects = data.user.avatar.effects || [];
-                document.getElementById('effectGlow').style.display = effects.includes('glow') ? 'block' : 'none';
-                document.getElementById('effectCape').style.display = effects.includes('cape') ? 'block' : 'none';
-
-                const achContainer = document.getElementById('achievementsContainer');
-                const achievementsMap = {
-                    first_record: 'Первая запись',
-                    ten_records: '10 записей',
-                    fifty_records: '50 записей',
-                    hundred_records: '100 записей!',
-                    sport_5: 'Спортсмен (5)',
-                    sport_20: 'Марафонец (20)',
-                    tasks_10: 'Организатор (10)',
-                    photo_5: 'Фотограф (5)',
-                    photo_20: 'Фотохудожник (20)',
-                    streak_7: '🔥 Серия 7 дней',
-                    streak_30: '🔥🔥 Серия 30 дней!',
-                    goals_3: 'Целеустремлённый (3 цели)'
-                };
-                const icons = {
-                    first_record: 'fa-star',
-                    ten_records: 'fa-medal',
-                    fifty_records: 'fa-crown',
-                    hundred_records: 'fa-gem',
-                    sport_5: 'fa-running',
-                    sport_20: 'fa-bolt',
-                    tasks_10: 'fa-tasks',
-                    photo_5: 'fa-camera',
-                    photo_20: 'fa-images',
-                    streak_7: 'fa-fire',
-                    streak_30: 'fa-fire-alt',
-                    goals_3: 'fa-bullseye'
-                };
-                if (achievements.length === 0) {
-                    achContainer.innerHTML = '<p style="color:var(--text-muted)">Пока нет достижений. Продолжайте заполнять журналы!</p>';
+                if (!achievements.length) {
+                    achContainer.innerHTML = '<p style="color:var(--text-muted)">Нет достижений</p>';
                 } else {
                     achContainer.innerHTML = achievements.map(id =>
-                        `<span class="achieve-item"><i class="fas ${icons[id] || 'fa-award'}"></i> ${achievementsMap[id] || id}</span>`
+                        `<span class="badge"><i class="fas ${achIcons[id] || 'fa-award'}"></i> ${achMap[id] || id}</span>`
                     ).join('');
                 }
 
-                renderCalendar(currentMonth, currentYear);
+                // Календарь, журналы, цели, галерея, графики
+                renderCalendar();
                 renderJournalTabs();
-                renderCurrentJournal();
+                renderJournalRecords();
                 renderGoals();
                 renderGallery();
                 renderCharts();
@@ -2242,990 +1460,655 @@
             }
 
             // ---------- КАЛЕНДАРЬ ----------
-            let currentMonth = new Date().getMonth();
-            let currentYear = new Date().getFullYear();
-            let selectedDate = format(new Date(), 'yyyy-MM-dd');
-
-            function renderCalendar(month, year) {
+            function renderCalendar() {
                 const grid = document.getElementById('calendarGrid');
-                const firstDay = new Date(year, month, 1);
-                const start = startOfMonth(firstDay);
-                const end = endOfMonth(firstDay);
+                const first = new Date(currentYear, currentMonth, 1);
+                const start = startOfMonth(first);
+                const end = endOfMonth(first);
                 const days = eachDayOfInterval({ start, end });
-                const firstDayOfWeek = start.getDay();
+                const offset = (start.getDay() === 0) ? 6 : start.getDay() - 1;
 
                 grid.innerHTML = '';
-                const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-                const offset = (firstDayOfWeek === 0) ? 6 : firstDayOfWeek - 1;
-                for (let i = 0; i < 7; i++) {
-                    const wd = document.createElement('div');
-                    wd.className = 'weekday';
-                    wd.textContent = weekdays[i];
-                    grid.appendChild(wd);
-                }
+                const wd = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+                wd.forEach(w => { const d = document.createElement('div');
+                    d.className = 'wd';
+                    d.textContent = w;
+                    grid.appendChild(d); });
                 for (let i = 0; i < offset; i++) {
-                    const empty = document.createElement('div');
-                    empty.className = 'day empty';
-                    grid.appendChild(empty);
+                    const d = document.createElement('div');
+                    d.className = 'day empty';
+                    grid.appendChild(d);
                 }
-
                 days.forEach(day => {
-                    const dateStr = format(day, 'yyyy-MM-dd');
+                    const ds = format(day, 'yyyy-MM-dd');
                     const div = document.createElement('div');
                     div.className = 'day';
                     if (isToday(day)) div.classList.add('today');
-                    if (dateStr === selectedDate) div.classList.add('selected');
-                    const records = getRecordsForDate(dateStr);
-                    if (records.length > 0) div.classList.add('has-record');
-
-                    let maxStreak = 0;
-                    for (let jid in data.journals) {
-                        const s = calculateStreak(jid);
-                        if (s > maxStreak) maxStreak = s;
-                    }
-                    if (maxStreak >= 7 && records.length > 0) {
-                        const badge = document.createElement('span');
-                        badge.className = 'streak-indicator';
-                        badge.textContent = '🔥';
-                        div.appendChild(badge);
-                    }
-
+                    if (ds === selectedDate) div.classList.add('selected');
+                    if (getRecordsForDate(ds).length) div.classList.add('has-record');
                     div.textContent = format(day, 'd');
-                    div.dataset.date = dateStr;
+                    div.dataset.date = ds;
                     div.addEventListener('click', () => {
-                        selectedDate = dateStr;
-                        renderCalendar(month, year);
-                        renderDayRecords(dateStr);
+                        selectedDate = ds;
+                        renderCalendar();
+                        renderDayRecords();
                     });
                     grid.appendChild(div);
                 });
-
-                document.getElementById('monthYear').textContent = format(firstDay, 'MMMM yyyy');
-                renderDayRecords(selectedDate);
+                document.getElementById('monthYear').textContent = format(first, 'MMMM yyyy');
+                renderDayRecords();
             }
 
-            function renderDayRecords(dateStr) {
-                const container = document.getElementById('dayRecordsList');
-                const records = getRecordsForDate(dateStr);
-                if (records.length === 0) {
-                    container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">📭 Нет записей за этот день</p>';
+            function renderDayRecords() {
+                const container = document.getElementById('dayRecords');
+                const records = getRecordsForDate(selectedDate);
+                if (!records.length) {
+                    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:12px;">Нет записей</p>';
                     return;
                 }
-                records.sort((a, b) => (b.createdAt || b.id).localeCompare(a.createdAt || a.id));
                 container.innerHTML = records.map(r => {
-                    const journal = getJournal(r.journalId);
-                    const icon = journal ? journal.icon : 'fa-book';
+                    const j = getJournal(r.journalId);
                     return `
                 <div class="record-item">
-                  <div class="record-content">
-                    <div class="record-text">${r.text}</div>
-                    <div class="record-meta">
-                      <span><i class="fas ${icon}"></i> ${journal ? journal.label : '?'}</span>
-                      <span class="xp-badge"><i class="fas fa-star"></i> ${r.xpEarned || 0} XP</span>
+                  <div class="content">
+                    <div class="text">${r.text}</div>
+                    <div class="meta">
+                      <span><i class="fas ${j ? j.icon : 'fa-book'}"></i> ${j ? j.label : '?'}</span>
+                      <span class="xp">${r.xp || 0} XP</span>
                       <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
                     </div>
-                    ${r.photos && r.photos.length ? `<div class="record-photos">${r.photos.map(p => `<a href="${p}" data-lightbox="daygal"><img src="${p}" alt="photo" /></a>`).join('')}</div>` : ''}
+                    ${r.photos && r.photos.length ? `<div class="photos">${r.photos.map(p => `<img src="${p}" alt="photo" />`).join('')}</div>` : ''}
                   </div>
-                  <div class="record-actions">
-                    <button class="done-btn ${r.done ? 'done' : ''}" data-id="${r.id}" data-journal="${r.journalId}" title="Выполнено"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
-                    <button class="edit-btn" data-id="${r.id}" data-journal="${r.journalId}" title="Редактировать"><i class="fas fa-pen"></i></button>
-                    <button class="delete-btn" data-id="${r.id}" data-journal="${r.journalId}" title="Удалить"><i class="fas fa-trash"></i></button>
+                  <div class="actions">
+                    <button class="done ${r.done ? 'active' : ''}" data-id="${r.id}" data-journal="${r.journalId}"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
+                    <button class="del" data-id="${r.id}" data-journal="${r.journalId}"><i class="fas fa-trash"></i></button>
                   </div>
                 </div>
               `;
                 }).join('');
 
-                container.querySelectorAll('.done-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = btn.dataset.id;
-                        const jid = btn.dataset.journal;
-                        toggleRecordDone(jid, id);
+                container.querySelectorAll('.done').forEach(b => {
+                    b.addEventListener('click', () => toggleDone(b.dataset.id, b.dataset.journal));
+                });
+                container.querySelectorAll('.del').forEach(b => {
+                    b.addEventListener('click', () => {
+                        if (confirm('Удалить?')) deleteRecord(b.dataset.id, b.dataset.journal);
                     });
                 });
-                container.querySelectorAll('.edit-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = btn.dataset.id;
-                        const jid = btn.dataset.journal;
-                        openEditRecordModal(jid, id);
-                    });
-                });
-                container.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = btn.dataset.id;
-                        const jid = btn.dataset.journal;
-                        if (confirm('Удалить запись?')) deleteRecord(jid, id);
-                    });
-                });
-
-                if (window.SimpleLightbox) {
-                    new SimpleLightbox('.record-photos a', {});
-                }
             }
 
             // ---------- ЖУРНАЛЫ ----------
-            let currentJournalId = 'sport';
-
             function renderJournalTabs() {
                 const container = document.getElementById('journalTabs');
                 container.innerHTML = '';
                 for (let jid in data.journals) {
                     const j = data.journals[jid];
-                    const streak = calculateStreak(jid);
                     const tab = document.createElement('div');
-                    tab.className = 'tab' + (jid === currentJournalId ? ' active' : '');
-                    tab.innerHTML = `
-                <i class="fas ${j.icon}"></i> ${j.label}
-                ${streak >= 3 ? `<span class="streak-badge">🔥${streak}</span>` : ''}
-              `;
-                    tab.dataset.jid = jid;
+                    tab.className = 'tab' + (jid === currentJournal ? ' active' : '');
+                    tab.innerHTML = `<i class="fas ${j.icon}"></i> ${j.label}`;
                     tab.addEventListener('click', () => {
-                        currentJournalId = jid;
+                        currentJournal = jid;
                         renderJournalTabs();
-                        renderCurrentJournal();
+                        renderJournalRecords();
                     });
                     container.appendChild(tab);
                 }
             }
 
-            function renderCurrentJournal() {
-                const container = document.getElementById('journalRecordsList');
-                const records = getRecordsForJournal(currentJournalId);
-                if (records.length === 0) {
-                    container.innerHTML =
-                        '<p style="color:var(--text-muted); text-align:center; padding:30px;">📭 В этом журнале пока нет записей</p>';
+            function renderJournalRecords() {
+                const container = document.getElementById('journalRecords');
+                const records = getRecordsForJournal(currentJournal);
+                if (!records.length) {
+                    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;">Нет записей</p>';
                     return;
                 }
-                records.sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || b.id).localeCompare(a.createdAt || a
-                .id));
+                records.sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created);
                 container.innerHTML = records.map(r => {
                     return `
                 <div class="record-item">
-                  <div class="record-content">
-                    <div class="record-text">${r.text}</div>
-                    <div class="record-meta">
+                  <div class="content">
+                    <div class="text">${r.text}</div>
+                    <div class="meta">
                       <span><i class="far fa-calendar-alt"></i> ${r.date}</span>
-                      <span class="xp-badge"><i class="fas fa-star"></i> ${r.xpEarned || 0} XP</span>
+                      <span class="xp">${r.xp || 0} XP</span>
                       <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
                     </div>
-                    ${r.photos && r.photos.length ? `<div class="record-photos">${r.photos.map(p => `<a href="${p}" data-lightbox="journalgal"><img src="${p}" alt="photo" /></a>`).join('')}</div>` : ''}
+                    ${r.photos && r.photos.length ? `<div class="photos">${r.photos.map(p => `<img src="${p}" alt="photo" />`).join('')}</div>` : ''}
                   </div>
-                  <div class="record-actions">
-                    <button class="done-btn ${r.done ? 'done' : ''}" data-id="${r.id}" data-journal="${currentJournalId}" title="Выполнено"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
-                    <button class="edit-btn" data-id="${r.id}" data-journal="${currentJournalId}" title="Редактировать"><i class="fas fa-pen"></i></button>
-                    <button class="delete-btn" data-id="${r.id}" data-journal="${currentJournalId}" title="Удалить"><i class="fas fa-trash"></i></button>
+                  <div class="actions">
+                    <button class="done ${r.done ? 'active' : ''}" data-id="${r.id}" data-journal="${currentJournal}"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
+                    <button class="del" data-id="${r.id}" data-journal="${currentJournal}"><i class="fas fa-trash"></i></button>
                   </div>
                 </div>
               `;
                 }).join('');
 
-                container.querySelectorAll('.done-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = btn.dataset.id;
-                        const jid = btn.dataset.journal;
-                        toggleRecordDone(jid, id);
+                container.querySelectorAll('.done').forEach(b => {
+                    b.addEventListener('click', () => toggleDone(b.dataset.id, b.dataset.journal));
+                });
+                container.querySelectorAll('.del').forEach(b => {
+                    b.addEventListener('click', () => {
+                        if (confirm('Удалить?')) deleteRecord(b.dataset.id, b.dataset.journal);
                     });
                 });
-                container.querySelectorAll('.edit-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = btn.dataset.id;
-                        const jid = btn.dataset.journal;
-                        openEditRecordModal(jid, id);
-                    });
-                });
-                container.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = btn.dataset.id;
-                        const jid = btn.dataset.journal;
-                        if (confirm('Удалить запись?')) deleteRecord(jid, id);
-                    });
-                });
-
-                if (window.SimpleLightbox) {
-                    new SimpleLightbox('.record-photos a', {});
-                }
             }
 
             // ---------- ОПЕРАЦИИ С ЗАПИСЯМИ ----------
-            function addRecord(journalId, text, date, photos, done = false) {
-                const xp = calculateXP(text);
-                const record = {
-                    id: generateId(),
+            function addRecord(jid, text, date, photos, done = false) {
+                const xp = calcXP(text);
+                const rec = {
+                    id: genId(),
                     date: date || format(new Date(), 'yyyy-MM-dd'),
                     text: text.trim(),
                     photos: photos || [],
                     done: done,
-                    xpEarned: xp,
-                    createdAt: new Date().toISOString()
+                    xp: xp,
+                    created: Date.now()
                 };
-                data.journals[journalId].records.push(record);
+                data.journals[jid].records.push(rec);
                 (photos || []).forEach(url => {
-                    data.gallery.photos.push({
-                        id: generateId(),
-                        url: url,
-                        recordId: record.id,
-                        date: record.date
-                    });
+                    data.gallery.push({ id: genId(), url: url, date: rec.date });
                 });
                 addXP(xp);
 
-                if (currentChallenge && !currentChallenge.completed &&
-                    currentChallenge.journalId === journalId &&
-                    record.date === format(new Date(), 'yyyy-MM-dd')) {
+                // Челлендж
+                if (challenge && !challenge.done && challenge.jid === jid && rec.date === format(new Date(),
+                    'yyyy-MM-dd')) {
                     completeChallenge();
                 }
 
                 saveData();
-                updateUI();
-                renderCurrentJournal();
-                renderDayRecords(selectedDate);
-                renderGoals();
-                renderGallery();
-                renderCharts();
-                showToast(`✅ Запись добавлена! +${xp} XP`, 'success');
+                updateAll();
+                toast(`✅ Запись добавлена! +${xp} XP`, 'success');
             }
 
-            function updateRecord(journalId, recordId, text, date, photos) {
-                const journal = data.journals[journalId];
-                if (!journal) return;
-                const record = journal.records.find(r => r.id === recordId);
-                if (!record) return;
-                if (record.photos) {
-                    record.photos.forEach(url => {
-                        const pidx = data.gallery.photos.findIndex(p => p.url === url && p.recordId === recordId);
-                        if (pidx !== -1) data.gallery.photos.splice(pidx, 1);
-                    });
-                }
-                record.text = text.trim();
-                record.date = date || format(new Date(), 'yyyy-MM-dd');
-                record.photos = photos || [];
-                (photos || []).forEach(url => {
-                    data.gallery.photos.push({
-                        id: generateId(),
-                        url: url,
-                        recordId: record.id,
-                        date: record.date
-                    });
-                });
-                saveData();
-                updateUI();
-                renderCurrentJournal();
-                renderDayRecords(selectedDate);
-                renderGallery();
-                renderCharts();
-                showToast('✏️ Запись обновлена', 'info');
-            }
-
-            function deleteRecord(journalId, recordId) {
-                const journal = data.journals[journalId];
-                if (!journal) return;
-                const idx = journal.records.findIndex(r => r.id === recordId);
+            function deleteRecord(id, jid) {
+                const j = data.journals[jid];
+                if (!j) return;
+                const idx = j.records.findIndex(r => r.id === id);
                 if (idx === -1) return;
-                const record = journal.records[idx];
-                if (record.photos) {
-                    record.photos.forEach(url => {
-                        const pidx = data.gallery.photos.findIndex(p => p.url === url && p.recordId === recordId);
-                        if (pidx !== -1) data.gallery.photos.splice(pidx, 1);
+                const rec = j.records[idx];
+                if (rec.photos) {
+                    rec.photos.forEach(url => {
+                        const pi = data.gallery.findIndex(p => p.url === url);
+                        if (pi !== -1) data.gallery.splice(pi, 1);
                     });
                 }
-                journal.records.splice(idx, 1);
+                j.records.splice(idx, 1);
                 saveData();
-                updateUI();
-                renderCurrentJournal();
-                renderDayRecords(selectedDate);
-                renderGallery();
-                renderCharts();
-                showToast('🗑️ Запись удалена', 'error');
+                updateAll();
+                toast('🗑️ Запись удалена', 'error');
             }
 
-            function toggleRecordDone(journalId, recordId) {
-                const journal = data.journals[journalId];
-                if (!journal) return;
-                const record = journal.records.find(r => r.id === recordId);
-                if (!record) return;
-                record.done = !record.done;
-                if (record.done) {
-                    addXP(8);
-                    showToast('✅ Запись выполнена! +8 XP', 'success');
+            function toggleDone(id, jid) {
+                const j = data.journals[jid];
+                if (!j) return;
+                const rec = j.records.find(r => r.id === id);
+                if (!rec) return;
+                rec.done = !rec.done;
+                if (rec.done) {
+                    addXP(5);
+                    toast('✅ Выполнено! +5 XP', 'success');
                 }
                 saveData();
-                updateUI();
-                renderCurrentJournal();
-                renderDayRecords(selectedDate);
-                renderGoals();
-                renderCharts();
-            }
-
-            // ---------- РЕДАКТИРОВАНИЕ ЗАПИСИ ----------
-            function openEditRecordModal(journalId, recordId) {
-                const journal = data.journals[journalId];
-                if (!journal) return;
-                const record = journal.records.find(r => r.id === recordId);
-                if (!record) return;
-
-                editingRecordId = recordId;
-                editingRecordJournal = journalId;
-
-                const overlay = document.getElementById('modalOverlay');
-                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-pen"></i> Редактировать запись';
-                document.getElementById('modalText').value = record.text;
-                document.getElementById('modalDate').value = record.date;
-
-                const select = document.getElementById('modalJournal');
-                select.innerHTML = '';
-                for (let jid in data.journals) {
-                    const opt = document.createElement('option');
-                    opt.value = jid;
-                    opt.textContent = data.journals[jid].label;
-                    if (jid === journalId) opt.selected = true;
-                    select.appendChild(opt);
-                }
-                select.disabled = true;
-
-                const photosGroup = document.getElementById('modalExistingPhotosGroup');
-                const photosContainer = document.getElementById('modalExistingPhotos');
-                if (record.photos && record.photos.length) {
-                    photosGroup.style.display = 'block';
-                    photosContainer.innerHTML = record.photos.map((p, idx) =>
-                        `<div style="position:relative; display:inline-block;">
-                    <img src="${p}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" />
-                    <button type="button" class="remove-photo-btn" data-idx="${idx}" style="position:absolute; top:-6px; right:-6px; background:var(--danger); border-radius:50%; width:22px; height:22px; padding:0; font-size:12px; min-height:22px; min-width:22px; box-shadow:none; color:#fff; border:2px solid var(--bg);">×</button>
-                  </div>`
-                    ).join('');
-                    photosContainer.querySelectorAll('.remove-photo-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const idx = parseInt(btn.dataset.idx);
-                            record.photos.splice(idx, 1);
-                            openEditRecordModal(journalId, recordId);
-                        });
-                    });
-                } else {
-                    photosGroup.style.display = 'none';
-                }
-
-                document.getElementById('modalPhotos').value = '';
-                overlay.classList.add('open');
-
-                const saveBtn = document.getElementById('modalSave');
-                const cancelBtn = document.getElementById('modalCancel');
-
-                saveBtn.onclick = () => {
-                    const text = document.getElementById('modalText').value.trim();
-                    if (!text) { showToast('Введите текст записи', 'error'); return; }
-                    const date = document.getElementById('modalDate').value;
-                    const files = document.getElementById('modalPhotos').files;
-                    const photoUrls = [...(record.photos || [])];
-
-                    if (files.length > 0) {
-                        let loaded = 0;
-                        for (let f of files) {
-                            const reader = new FileReader();
-                            reader.onload = (e) => {
-                                photoUrls.push(e.target.result);
-                                loaded++;
-                                if (loaded === files.length) {
-                                    updateRecord(journalId, recordId, text, date, photoUrls);
-                                    closeModal();
-                                }
-                            };
-                            reader.readAsDataURL(f);
-                        }
-                    } else {
-                        updateRecord(journalId, recordId, text, date, photoUrls);
-                        closeModal();
-                    }
-                };
-                cancelBtn.onclick = closeModal;
-                overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
-            }
-
-            // ---------- МОДАЛЬНОЕ ОКНО (запись) ----------
-            function openRecordModal(journalId, date) {
-                editingRecordId = null;
-                editingRecordJournal = null;
-
-                const overlay = document.getElementById('modalOverlay');
-                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Новая запись';
-                document.getElementById('modalText').value = '';
-                document.getElementById('modalDate').value = date || format(new Date(), 'yyyy-MM-dd');
-                document.getElementById('modalPhotos').value = '';
-                document.getElementById('modalExistingPhotosGroup').style.display = 'none';
-
-                const select = document.getElementById('modalJournal');
-                select.innerHTML = '';
-                select.disabled = false;
-                for (let jid in data.journals) {
-                    const opt = document.createElement('option');
-                    opt.value = jid;
-                    opt.textContent = data.journals[jid].label;
-                    if (jid === journalId) opt.selected = true;
-                    select.appendChild(opt);
-                }
-
-                overlay.classList.add('open');
-
-                const saveBtn = document.getElementById('modalSave');
-                const cancelBtn = document.getElementById('modalCancel');
-
-                saveBtn.onclick = () => {
-                    const text = document.getElementById('modalText').value.trim();
-                    if (!text) { showToast('Введите текст записи', 'error'); return; }
-                    const jid = document.getElementById('modalJournal').value;
-                    const date = document.getElementById('modalDate').value;
-                    const files = document.getElementById('modalPhotos').files;
-                    const photoUrls = [];
-
-                    if (files.length > 0) {
-                        let loaded = 0;
-                        for (let f of files) {
-                            const reader = new FileReader();
-                            reader.onload = (e) => {
-                                photoUrls.push(e.target.result);
-                                loaded++;
-                                if (loaded === files.length) {
-                                    addRecord(jid, text, date, photoUrls);
-                                    closeModal();
-                                }
-                            };
-                            reader.readAsDataURL(f);
-                        }
-                    } else {
-                        addRecord(jid, text, date, []);
-                        closeModal();
-                    }
-                };
-                cancelBtn.onclick = closeModal;
-                overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
-            }
-
-            function closeModal() {
-                document.getElementById('modalOverlay').classList.remove('open');
-                editingRecordId = null;
-                editingRecordJournal = null;
+                updateAll();
             }
 
             // ---------- ЦЕЛИ ----------
             function renderGoals() {
                 const container = document.getElementById('goalsList');
-                if (data.goals.length === 0) {
-                    container.innerHTML =
-                        '<p style="color:var(--text-muted); text-align:center; padding:30px;">🎯 Целей пока нет. Создайте первую!</p>';
+                if (!data.goals.length) {
+                    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Нет целей</p>';
                     return;
                 }
-                container.innerHTML = data.goals.map((goal, index) => {
-                    const progress = Math.min(100, (goal.currentValue / goal.targetValue) * 100);
-                    const completed = goal.completed;
+                container.innerHTML = data.goals.map((g, idx) => {
+                    const prog = Math.min(100, (g.current / g.target) * 100);
                     return `
-                <div class="goal-item ${completed ? 'completed' : ''}">
-                  <div class="goal-info">
-                    <div class="goal-title">${completed ? '✅ ' : '🎯 '}${goal.title}</div>
-                    <div class="goal-meta">
-                      Журнал: ${getJournal(goal.journalId)?.label || '?'} ·
-                      Срок: ${goal.deadline || 'без срока'} ·
-                      ${completed ? 'Выполнена!' : `${goal.currentValue}/${goal.targetValue}`}
-                    </div>
-                    <div class="goal-progress-wrap">
-                      <div class="fill" style="width:${progress}%"></div>
-                    </div>
+                <div class="goal-item ${g.done ? 'done' : ''}">
+                  <div class="info">
+                    <div class="title">${g.done ? '✅ ' : '🎯 '}${g.title}</div>
+                    <div class="meta">${getJournal(g.journal)?.label || '?'} · ${g.done ? 'Выполнена!' : `${g.current}/${g.target}`}</div>
+                    <div class="progress"><div class="fill" style="width:${prog}%"></div></div>
                   </div>
-                  <div class="goal-actions">
-                    ${!completed ? `<button class="secondary" data-index="${index}" data-action="completeGoal" title="Отметить выполненной"><i class="fas fa-check"></i></button>` : ''}
-                    <button class="secondary" data-index="${index}" data-action="deleteGoal" title="Удалить"><i class="fas fa-trash"></i></button>
+                  <div class="actions">
+                    ${!g.done ? `<button class="secondary" data-idx="${idx}" data-action="completeGoal"><i class="fas fa-check"></i></button>` : ''}
+                    <button class="secondary danger" data-idx="${idx}" data-action="deleteGoal"><i class="fas fa-trash"></i></button>
                   </div>
                 </div>
               `;
                 }).join('');
 
-                container.querySelectorAll('[data-action="deleteGoal"]').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const idx = parseInt(btn.dataset.index);
+                container.querySelectorAll('[data-action="completeGoal"]').forEach(b => {
+                    b.addEventListener('click', () => {
+                        const idx = parseInt(b.dataset.idx);
+                        const g = data.goals[idx];
+                        if (g && !g.done) {
+                            g.done = true;
+                            addXP(50);
+                            toast('🎯 Цель выполнена! +50 XP', 'success');
+                            saveData();
+                            updateAll();
+                        }
+                    });
+                });
+                container.querySelectorAll('[data-action="deleteGoal"]').forEach(b => {
+                    b.addEventListener('click', () => {
+                        const idx = parseInt(b.dataset.idx);
                         if (confirm('Удалить цель?')) {
                             data.goals.splice(idx, 1);
                             saveData();
-                            updateUI();
-                            renderGoals();
-                        }
-                    });
-                });
-                container.querySelectorAll('[data-action="completeGoal"]').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const idx = parseInt(btn.dataset.index);
-                        const goal = data.goals[idx];
-                        if (goal && !goal.completed) {
-                            goal.completed = true;
-                            addXP(50);
-                            showToast('🎯 Цель выполнена! +50 XP', 'success');
-                            saveData();
-                            updateUI();
-                            renderGoals();
+                            updateAll();
                         }
                     });
                 });
             }
 
-            function addGoal(title, journalId, targetValue, deadline) {
-                const records = getRecordsForJournal(journalId);
-                const currentValue = records.length;
-                const completed = currentValue >= targetValue;
+            function addGoal(title, journal, target, deadline) {
+                const current = getRecordsForJournal(journal).length;
+                const done = current >= target;
                 const goal = {
-                    id: generateId(),
+                    id: genId(),
                     title: title.trim(),
-                    journalId,
-                    targetValue: parseInt(targetValue) || 1,
-                    currentValue: currentValue,
+                    journal: journal,
+                    target: parseInt(target) || 1,
+                    current: current,
                     deadline: deadline || '',
-                    completed: completed,
-                    createdAt: new Date().toISOString()
+                    done: done,
+                    created: Date.now()
                 };
-                if (completed) {
+                if (done) {
                     addXP(50);
-                    showToast('🎯 Цель сразу выполнена! +50 XP', 'success');
+                    toast('🎯 Цель сразу выполнена! +50 XP', 'success');
                 }
                 data.goals.push(goal);
                 saveData();
-                updateUI();
-                renderGoals();
-                showToast('✅ Цель создана!', 'success');
+                updateAll();
+                toast('✅ Цель создана!', 'success');
             }
 
             function updateGoalsProgress() {
-                let anyCompleted = false;
-                data.goals.forEach(goal => {
-                    const records = getRecordsForJournal(goal.journalId);
-                    goal.currentValue = records.length;
-                    if (!goal.completed && goal.currentValue >= goal.targetValue) {
-                        goal.completed = true;
-                        anyCompleted = true;
+                data.goals.forEach(g => {
+                    const cur = getRecordsForJournal(g.journal).length;
+                    g.current = cur;
+                    if (!g.done && cur >= g.target) {
+                        g.done = true;
                         addXP(50);
-                        showToast(`🎯 Цель "${goal.title}" выполнена! +50 XP`, 'success');
+                        toast(`🎯 Цель "${g.title}" выполнена!`, 'success');
                     }
                 });
-                if (anyCompleted) {
-                    saveData();
-                    updateUI();
-                    renderGoals();
-                }
+                saveData();
             }
 
             // ---------- ГАЛЕРЕЯ ----------
             function renderGallery() {
                 const container = document.getElementById('galleryGrid');
-                const photos = data.gallery.photos;
-                if (photos.length === 0) {
-                    container.innerHTML =
-                        '<p style="color:var(--text-muted); text-align:center; padding:30px;">🖼 Нет загруженных фото</p>';
+                if (!data.gallery.length) {
+                    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Нет фото</p>';
                     return;
                 }
-                container.innerHTML = photos.map(p => `
-              <div class="gallery-item">
-                <a href="${p.url}" data-lightbox="gallery">
-                  <img src="${p.url}" alt="Фото" loading="lazy" />
-                  <div class="gallery-overlay">
-                    <span><i class="far fa-calendar-alt"></i> ${p.date || ''}</span>
-                  </div>
-                </a>
-              </div>
-            `).join('');
-                if (window.SimpleLightbox) {
-                    new SimpleLightbox('.gallery-item a', {});
-                }
+                container.innerHTML = data.gallery.map(p =>
+                    `<div class="item"><img src="${p.url}" alt="photo" loading="lazy" /></div>`
+                ).join('');
             }
 
             // ---------- ГРАФИКИ ----------
-            let lineChartInstance = null;
-            let pieChartInstance = null;
+            let lineChart = null,
+                pieChart = null;
 
             function renderCharts() {
                 const now = new Date();
-                const month = now.getMonth();
-                const year = now.getFullYear();
                 const start = startOfMonth(now);
                 const end = endOfMonth(now);
                 const days = eachDayOfInterval({ start, end });
                 const labels = days.map(d => format(d, 'd'));
-                const counts = days.map(d => {
-                    const dateStr = format(d, 'yyyy-MM-dd');
-                    return getRecordsForDate(dateStr).length;
-                });
-                const totalThisMonth = counts.reduce((a, b) => a + b, 0);
+                const counts = days.map(d => getRecordsForDate(format(d, 'yyyy-MM-dd')).length);
 
-                // Получаем актуальный цвет из CSS
-                const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() ||
-                    '#6c5ce7';
-                const accentColor2 = getComputedStyle(document.documentElement).getPropertyValue('--accent2').trim() ||
-                    '#a29bfe';
+                const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6c5ce7';
 
-                const ctxLine = document.getElementById('lineChart').getContext('2d');
-                if (lineChartInstance) lineChartInstance.destroy();
-                lineChartInstance = new Chart(ctxLine, {
+                const ctx1 = document.getElementById('lineChart').getContext('2d');
+                if (lineChart) lineChart.destroy();
+                lineChart = new Chart(ctx1, {
                     type: 'line',
                     data: {
                         labels: labels,
                         datasets: [{
                             label: 'Записей',
                             data: counts,
-                            borderColor: accentColor,
-                            backgroundColor: accentColor + '33',
+                            borderColor: accent,
+                            backgroundColor: accent + '33',
                             tension: 0.4,
                             fill: true,
-                            pointBackgroundColor: accentColor,
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4
+                            pointBackgroundColor: accent,
+                            pointRadius: 3
                         }]
                     },
                     options: {
                         responsive: true,
-                        plugins: {
-                            legend: { display: false }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
                             y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text-muted)' } },
                             x: { ticks: { color: 'var(--text-muted)', maxTicksLimit: 15 } }
-                        },
-                        maintainAspectRatio: true
+                        }
                     }
                 });
 
-                document.getElementById('lineStats').innerHTML = `
-              <div class="stat-item"><div class="num">${totalThisMonth}</div><div class="lbl">записей за месяц</div></div>
-              <div class="stat-item"><div class="num">${Math.round(totalThisMonth / days.length * 10) / 10 || 0}</div><div class="lbl">в день</div></div>
-              <div class="stat-item"><div class="num">${getTotalRecords()}</div><div class="lbl">всего записей</div></div>
-            `;
-
-                // Круговая диаграмма
-                const journalLabels = [];
-                const journalCounts = [];
-                const colors = [accentColor, '#34d399', '#fbbf24', '#f87171', '#60a5fa', '#f472b6', '#2dd4bf'];
-                for (let jid in data.journals) {
-                    const cnt = data.journals[jid].records.length;
+                const jLabels = [];
+                const jCounts = [];
+                const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#0984e3', '#fd79a8', '#00cec9'];
+                for (let j in data.journals) {
+                    const cnt = data.journals[j].records.length;
                     if (cnt > 0) {
-                        journalLabels.push(data.journals[jid].label);
-                        journalCounts.push(cnt);
+                        jLabels.push(data.journals[j].label);
+                        jCounts.push(cnt);
                     }
                 }
-                const ctxPie = document.getElementById('pieChart').getContext('2d');
-                if (pieChartInstance) pieChartInstance.destroy();
-                if (journalLabels.length === 0) {
-                    pieChartInstance = new Chart(ctxPie, {
+                const ctx2 = document.getElementById('pieChart').getContext('2d');
+                if (pieChart) pieChart.destroy();
+                if (!jLabels.length) {
+                    pieChart = new Chart(ctx2, {
                         type: 'pie',
-                        data: {
-                            labels: ['Нет данных'],
-                            datasets: [{ data: [1], backgroundColor: ['#444'] }]
-                        },
-                        options: {
-                            plugins: {
-                                legend: { display: true, labels: { color: 'var(--text-muted)' } }
-                            },
-                            maintainAspectRatio: true
-                        }
+                        data: { labels: ['Нет данных'], datasets: [{ data: [1], backgroundColor: ['#444'] }] },
+                        options: { plugins: { legend: { display: true, labels: { color: 'var(--text-muted)' } } } }
                     });
-                    document.getElementById('pieStats').innerHTML = '';
                 } else {
-                    pieChartInstance = new Chart(ctxPie, {
+                    pieChart = new Chart(ctx2, {
                         type: 'pie',
                         data: {
-                            labels: journalLabels,
-                            datasets: [{
-                                data: journalCounts,
-                                backgroundColor: colors.slice(0, journalLabels.length),
-                                borderWidth: 2,
-                                borderColor: 'var(--bg)'
-                            }]
+                            labels: jLabels,
+                            datasets: [{ data: jCounts, backgroundColor: colors.slice(0, jLabels.length), borderWidth: 2,
+                                borderColor: 'var(--bg)' }]
                         },
                         options: {
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: { color: 'var(--text-muted)', padding: 12 }
-                                }
-                            },
-                            maintainAspectRatio: true
+                            plugins: { legend: { position: 'bottom', labels: { color: 'var(--text-muted)',
+                                        padding: 8 } } }
                         }
                     });
-                    const maxIdx = journalCounts.indexOf(Math.max(...journalCounts));
-                    document.getElementById('pieStats').innerHTML = `
-                <div class="stat-item"><div class="num">🏆 ${journalLabels[maxIdx] || ''}</div><div class="lbl">самый активный</div></div>
-                <div class="stat-item"><div class="num">${journalCounts.reduce((a,b) => a+b, 0)}</div><div class="lbl">всего записей</div></div>
-              `;
                 }
             }
 
             // ---------- ЭКСПОРТ / ИМПОРТ ----------
             function exportData() {
-                const json = JSON.stringify(data, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `hero_journal_backup_${format(new Date(), 'yyyy-MM-dd')}.json`;
+                a.download = `journal_backup_${format(new Date(), 'yyyy-MM-dd')}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
-                showToast('📦 Данные экспортированы', 'success');
+                toast('📦 Экспорт выполнен', 'success');
             }
 
             function exportCSV() {
-                const records = getAllRecords();
-                if (records.length === 0) {
-                    showToast('Нет записей для экспорта', 'warning');
-                    return;
-                }
+                const recs = getAllRecords();
+                if (!recs.length) { toast('Нет записей', 'warning'); return; }
                 let csv = 'Дата,Журнал,Текст,Выполнено,XP\n';
-                records.forEach(r => {
-                    const journal = getJournal(r.journalId);
+                recs.forEach(r => {
+                    const j = getJournal(r.journalId);
                     csv +=
-                        `${r.date},${journal ? journal.label : '?'},"${r.text.replace(/"/g, '""')}",${r.done ? 'Да' : 'Нет'},${r.xpEarned || 0}\n`;
+                        `${r.date},${j ? j.label : '?'},"${r.text.replace(/"/g,'""')}",${r.done ? 'Да' : 'Нет'},${r.xp || 0}\n`;
                 });
                 const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `journal_export_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+                a.download = `journal_${format(new Date(), 'yyyy-MM-dd')}.csv`;
                 a.click();
                 URL.revokeObjectURL(url);
-                showToast('📊 CSV экспортирован', 'success');
+                toast('📊 CSV экспортирован', 'success');
             }
 
             function importData(file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
-                        const imported = JSON.parse(e.target.result);
-                        if (imported.user && imported.journals) {
-                            data = imported;
-                            for (let jid in DEFAULT_DATA.journals) {
-                                if (!data.journals[jid]) {
-                                    data.journals[jid] = { ...DEFAULT_DATA.journals[jid], records: [] };
-                                }
+                        const imp = JSON.parse(e.target.result);
+                        if (imp.user && imp.journals) {
+                            data = imp;
+                            for (let j in DEFAULT_DATA.journals) {
+                                if (!data.journals[j]) data.journals[j] = { ...DEFAULT_DATA.journals[j], records: [] };
                             }
-                            recalcXpToNext();
+                            recalcXp();
                             saveData();
-                            updateUI();
-                            showToast('✅ Данные импортированы успешно!', 'success');
+                            updateAll();
+                            toast('✅ Импорт выполнен', 'success');
                         } else {
-                            showToast('Неверный формат файла', 'error');
+                            toast('Неверный формат', 'error');
                         }
-                    } catch (err) {
-                        showToast('Ошибка при чтении файла', 'error');
-                    }
+                    } catch (err) { toast('Ошибка чтения', 'error'); }
                 };
                 reader.readAsText(file);
             }
 
             // ---------- НАВИГАЦИЯ ----------
-            function navigateTo(pageId) {
-                document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-                const target = document.getElementById('page-' + pageId);
+            function navigate(page) {
+                currentPage = page;
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                const target = document.getElementById('page-' + page);
                 if (target) target.classList.add('active');
-                document.querySelectorAll('nav#mainNav a').forEach(a => {
-                    a.classList.toggle('active', a.dataset.page === pageId);
+                document.querySelectorAll('nav a').forEach(a => {
+                    a.classList.toggle('active', a.dataset.page === page);
                 });
-
-                // Показываем/скрываем панель настроек
-                const settingsPanel = document.getElementById('settingsPanel');
-                if (pageId === 'profile') {
-                    // Настройки показываем только если есть хеш #settings
-                    if (window.location.hash === '#settings') {
-                        settingsPanel.style.display = 'block';
-                    } else {
-                        settingsPanel.style.display = 'none';
-                    }
-                } else {
-                    settingsPanel.style.display = 'none';
-                }
-
-                if (pageId === 'calendar') {
-                    renderCalendar(currentMonth, currentYear);
-                } else if (pageId === 'journals') {
-                    renderJournalTabs();
-                    renderCurrentJournal();
-                } else if (pageId === 'goals') {
-                    renderGoals();
-                } else if (pageId === 'charts') {
-                    renderCharts();
-                } else if (pageId === 'gallery') {
-                    renderGallery();
-                } else if (pageId === 'profile') {
-                    updateUI();
-                    initThemeSelector();
-                }
-                updateChallengeUI();
+                // Обновляем контент при переходе
+                if (page === 'calendar') renderCalendar();
+                else if (page === 'journals') { renderJournalTabs();
+                    renderJournalRecords(); } else if (page === 'goals') renderGoals();
+                else if (page === 'charts') renderCharts();
+                else if (page === 'gallery') renderGallery();
+                else if (page === 'profile') updateAll();
+                window.location.hash = page;
             }
 
-            // ---------- РЕДАКТИРОВАНИЕ ПРОФИЛЯ ----------
-            function editProfile() {
-                const name = prompt('Введите ваше имя:', data.user.name);
-                if (name !== null && name.trim() !== '') {
-                    data.user.name = name.trim();
-                    saveData();
-                    updateUI();
-                    showToast('👤 Имя обновлено', 'info');
-                }
-                const avatars = data.user.unlockedAvatars || ['warrior_1'];
-                const avatarList = avatars.map(a => a).join(', ');
-                const newAvatar = prompt(`Выберите аватар (доступны: ${avatarList}):`, data.user.avatar.base);
-                if (newAvatar && avatars.includes(newAvatar)) {
-                    data.user.avatar.base = newAvatar;
-                    saveData();
-                    updateUI();
-                    showToast('🔄 Аватар изменён', 'info');
-                }
-                const effects = data.user.avatar.effects || [];
-                const effectStr = effects.length ? effects.join(', ') : 'нет';
-                const newEffect = prompt(`Введите эффекты через запятую (доступны: glow, cape):`, effectStr);
-                if (newEffect !== null) {
-                    const newEffects = newEffect.split(',').map(s => s.trim()).filter(s => ['glow', 'cape'].includes(s));
-                    data.user.avatar.effects = newEffects;
-                    saveData();
-                    updateUI();
-                    showToast('✨ Эффекты обновлены', 'info');
-                }
-            }
-
-            // ---------- МОДАЛЬНОЕ ОКНО (цель) ----------
-            function openGoalModal() {
-                const overlay = document.getElementById('goalModalOverlay');
-                document.getElementById('goalModalTitle').innerHTML = '<i class="fas fa-bullseye"></i> Новая цель';
-                document.getElementById('goalTitleInput').value = '';
-                document.getElementById('goalTargetInput').value = '3';
-                document.getElementById('goalDeadlineInput').value = '';
-                const select = document.getElementById('goalJournalSelect');
-                select.innerHTML = '';
-                for (let jid in data.journals) {
+            // ---------- МОДАЛКИ ----------
+            function openRecordModal(jid, date) {
+                editingId = null;
+                editingJournal = null;
+                document.getElementById('recordModalTitle').innerHTML = '<i class="fas fa-plus"></i> Новая запись';
+                document.getElementById('recordText').value = '';
+                document.getElementById('recordDate').value = date || format(new Date(), 'yyyy-MM-dd');
+                document.getElementById('recordPhotos').value = '';
+                const sel = document.getElementById('recordJournal');
+                sel.innerHTML = '';
+                sel.disabled = false;
+                for (let j in data.journals) {
                     const opt = document.createElement('option');
-                    opt.value = jid;
-                    opt.textContent = data.journals[jid].label;
-                    if (jid === currentJournalId) opt.selected = true;
-                    select.appendChild(opt);
+                    opt.value = j;
+                    opt.textContent = data.journals[j].label;
+                    if (j === jid) opt.selected = true;
+                    sel.appendChild(opt);
                 }
-                overlay.classList.add('open');
+                document.getElementById('recordModal').classList.add('open');
+            }
 
-                const saveBtn = document.getElementById('goalModalSave');
-                const cancelBtn = document.getElementById('goalModalCancel');
+            function closeRecordModal() {
+                document.getElementById('recordModal').classList.remove('open');
+            }
 
-                saveBtn.onclick = () => {
-                    const title = document.getElementById('goalTitleInput').value.trim();
-                    if (!title) { showToast('Введите название цели', 'error'); return; }
-                    const jid = document.getElementById('goalJournalSelect').value;
-                    const target = parseInt(document.getElementById('goalTargetInput').value) || 1;
-                    const deadline = document.getElementById('goalDeadlineInput').value;
-                    addGoal(title, jid, target, deadline);
-                    closeGoalModal();
-                };
-                cancelBtn.onclick = closeGoalModal;
-                overlay.onclick = (e) => { if (e.target === overlay) closeGoalModal(); };
+            function openGoalModal() {
+                document.getElementById('goalTitle').value = '';
+                document.getElementById('goalTarget').value = '3';
+                document.getElementById('goalDeadline').value = '';
+                const sel = document.getElementById('goalJournal');
+                sel.innerHTML = '';
+                for (let j in data.journals) {
+                    const opt = document.createElement('option');
+                    opt.value = j;
+                    opt.textContent = data.journals[j].label;
+                    if (j === currentJournal) opt.selected = true;
+                    sel.appendChild(opt);
+                }
+                document.getElementById('goalModal').classList.add('open');
             }
 
             function closeGoalModal() {
-                document.getElementById('goalModalOverlay').classList.remove('open');
+                document.getElementById('goalModal').classList.remove('open');
             }
 
             // ---------- ИНИЦИАЛИЗАЦИЯ ----------
             function init() {
                 loadData();
-                selectedDate = format(new Date(), 'yyyy-MM-dd');
-                generateChallenge();
-                updateGoalsProgress();
+                sound.init();
 
-                // Навигация по хешу
-                window.addEventListener('hashchange', () => {
-                    const hash = window.location.hash.replace('#', '') || 'calendar';
-                    navigateTo(hash);
-                });
-
-                document.querySelectorAll('nav#mainNav a').forEach(a => {
+                // Навигация
+                document.querySelectorAll('nav a').forEach(a => {
                     a.addEventListener('click', (e) => {
                         e.preventDefault();
-                        const page = a.dataset.page;
-                        window.location.hash = page;
-                        navigateTo(page);
+                        navigate(a.dataset.page);
                     });
                 });
 
+                // Календарь
                 document.getElementById('prevMonth').addEventListener('click', () => {
                     const d = new Date(currentYear, currentMonth, 1);
-                    const newD = subMonths(d, 1);
-                    currentMonth = newD.getMonth();
-                    currentYear = newD.getFullYear();
-                    renderCalendar(currentMonth, currentYear);
+                    const nd = subMonths(d, 1);
+                    currentMonth = nd.getMonth();
+                    currentYear = nd.getFullYear();
+                    renderCalendar();
                 });
                 document.getElementById('nextMonth').addEventListener('click', () => {
                     const d = new Date(currentYear, currentMonth, 1);
-                    const newD = addMonths(d, 1);
-                    currentMonth = newD.getMonth();
-                    currentYear = newD.getFullYear();
-                    renderCalendar(currentMonth, currentYear);
-                });
-                document.getElementById('todayBtn').addEventListener('click', () => {
-                    const now = new Date();
-                    currentMonth = now.getMonth();
-                    currentYear = now.getFullYear();
-                    selectedDate = format(now, 'yyyy-MM-dd');
-                    renderCalendar(currentMonth, currentYear);
+                    const nd = addMonths(d, 1);
+                    currentMonth = nd.getMonth();
+                    currentYear = nd.getFullYear();
+                    renderCalendar();
                 });
 
-                document.getElementById('addRecordBtn').addEventListener('click', () => {
-                    openRecordModal(currentJournalId, format(new Date(), 'yyyy-MM-dd'));
+                // Добавление записи
+                document.getElementById('addRecord').addEventListener('click', () => {
+                    openRecordModal(currentJournal, format(new Date(), 'yyyy-MM-dd'));
                 });
-                document.getElementById('addRecordFromDay').addEventListener('click', () => {
-                    openRecordModal(currentJournalId, selectedDate);
-                });
-
-                document.getElementById('addGoalBtn').addEventListener('click', openGoalModal);
-                document.getElementById('challengeCompleteBtn').addEventListener('click', completeChallenge);
-
-                document.getElementById('themeToggle').addEventListener('click', () => {
-                    const themes = Object.keys(THEMES);
-                    const currentIdx = themes.indexOf(currentTheme);
-                    const nextIdx = (currentIdx + 1) % themes.length;
-                    applyTheme(themes[nextIdx]);
-                    showToast(`🎨 Схема "${THEMES[themes[nextIdx]].name}" применена`, 'success');
-                    saveData();
+                document.getElementById('addDayRecord').addEventListener('click', () => {
+                    openRecordModal(currentJournal, selectedDate);
                 });
 
-                document.getElementById('editProfileBtn').addEventListener('click', editProfile);
-                document.getElementById('exportDataBtn').addEventListener('click', exportData);
-                document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
-                document.getElementById('importDataBtn').addEventListener('click', () => {
-                    document.getElementById('importFileInput').click();
+                // Сохранение записи
+                document.getElementById('recordSave').addEventListener('click', () => {
+                    const text = document.getElementById('recordText').value.trim();
+                    if (!text) { toast('Введите текст', 'error'); return; }
+                    const jid = document.getElementById('recordJournal').value;
+                    const date = document.getElementById('recordDate').value;
+                    const files = document.getElementById('recordPhotos').files;
+                    const urls = [];
+                    if (files.length) {
+                        let loaded = 0;
+                        for (let f of files) {
+                            const r = new FileReader();
+                            r.onload = (e) => {
+                                urls.push(e.target.result);
+                                loaded++;
+                                if (loaded === files.length) {
+                                    addRecord(jid, text, date, urls);
+                                    closeRecordModal();
+                                }
+                            };
+                            r.readAsDataURL(f);
+                        }
+                    } else {
+                        addRecord(jid, text, date, []);
+                        closeRecordModal();
+                    }
                 });
-                document.getElementById('importFileInput').addEventListener('change', (e) => {
+                document.getElementById('recordCancel').addEventListener('click', closeRecordModal);
+
+                // Цели
+                document.getElementById('addGoal').addEventListener('click', openGoalModal);
+                document.getElementById('goalSave').addEventListener('click', () => {
+                    const title = document.getElementById('goalTitle').value.trim();
+                    if (!title) { toast('Введите название', 'error'); return; }
+                    const journal = document.getElementById('goalJournal').value;
+                    const target = parseInt(document.getElementById('goalTarget').value) || 1;
+                    const deadline = document.getElementById('goalDeadline').value;
+                    addGoal(title, journal, target, deadline);
+                    closeGoalModal();
+                });
+                document.getElementById('goalCancel').addEventListener('click', closeGoalModal);
+
+                // Челлендж
+                document.getElementById('challengeDone').addEventListener('click', completeChallenge);
+
+                // Тема
+                document.getElementById('themeBtn').addEventListener('click', () => {
+                    document.body.classList.toggle('light-theme');
+                    const icon = document.getElementById('themeBtn').querySelector('i');
+                    icon.className = document.body.classList.contains('light-theme') ? 'fas fa-sun' : 'fas fa-moon';
+                    localStorage.setItem('heroTheme', document.body.classList.contains('light-theme') ? 'light' :
+                        'dark');
+                });
+
+                // Профиль
+                document.getElementById('editProfile').addEventListener('click', () => {
+                    const name = prompt('Имя:', data.user.name);
+                    if (name && name.trim()) {
+                        data.user.name = name.trim();
+                        saveData();
+                        updateAll();
+                        toast('✅ Имя обновлено', 'success');
+                    }
+                    const avatars = data.user.unlocked || ['warrior_1'];
+                    const list = avatars.join(', ');
+                    const av = prompt(`Аватар (${list}):`, data.user.avatar);
+                    if (av && avatars.includes(av)) {
+                        data.user.avatar = av;
+                        saveData();
+                        updateAll();
+                    }
+                    const effects = (data.user.effects || []).join(', ') || 'нет';
+                    const eff = prompt('Эффекты (glow):', effects);
+                    if (eff !== null) {
+                        data.user.effects = eff.split(',').map(s => s.trim()).filter(s => s === 'glow');
+                        saveData();
+                        updateAll();
+                    }
+                });
+
+                // Экспорт/Импорт
+                document.getElementById('exportBtn').addEventListener('click', exportData);
+                document.getElementById('csvBtn').addEventListener('click', exportCSV);
+                document.getElementById('importBtn').addEventListener('click', () => {
+                    document.getElementById('importFile').click();
+                });
+                document.getElementById('importFile').addEventListener('change', (e) => {
                     if (e.target.files.length) {
                         importData(e.target.files[0]);
                         e.target.value = '';
                     }
                 });
 
+                // Обновление журнала
                 document.getElementById('refreshJournal').addEventListener('click', () => {
-                    renderCurrentJournal();
-                    showToast('🔄 Обновлено', 'info');
+                    renderJournalRecords();
+                    toast('🔄 Обновлено', 'info');
                 });
 
-                // Кнопка настроек в профиле
-                document.getElementById('settingsBtn').addEventListener('click', () => {
-                    const panel = document.getElementById('settingsPanel');
-                    if (panel.style.display === 'none') {
-                        panel.style.display = 'block';
-                        initThemeSelector();
-                        window.location.hash = 'settings';
-                    } else {
-                        panel.style.display = 'none';
-                        window.location.hash = 'profile';
-                    }
-                });
-
+                // Закрытие модалок по Escape
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
-                        closeModal();
+                        closeRecordModal();
                         closeGoalModal();
                     }
                 });
 
-                const initialPage = window.location.hash.replace('#', '') || 'calendar';
-                navigateTo(initialPage);
-                updateUI();
-                initThemeSelector();
+                // Закрытие по клику на оверлей
+                document.getElementById('recordModal').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) closeRecordModal();
+                });
+                document.getElementById('goalModal').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) closeGoalModal();
+                });
 
-                showToast('⚔️ Добро пожаловать, Герой!', 'info', 3000);
+                // Хеш-навигация
+                window.addEventListener('hashchange', () => {
+                    const hash = window.location.hash.replace('#', '') || 'calendar';
+                    navigate(hash);
+                });
+
+                // Старт
+                const initial = window.location.hash.replace('#', '') || 'calendar';
+                navigate(initial);
+                genChallenge();
+                updateGoalsProgress();
+                updateAll();
+
+                toast('⚔️ Добро пожаловать, Герой!', 'info', 2500);
             }
 
             // Запуск
