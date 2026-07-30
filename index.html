@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RPG-планировщик</title>
+    <title>FlowPlan — планировщик</title>
     <style>
         /* =============================================================
            БАЗА
@@ -16,36 +16,113 @@
         }
 
         :root {
-            --primary: #7C5CFC;
-            --primary-glow: rgba(124, 92, 252, 0.35);
-            --primary-gradient: linear-gradient(135deg, #7C5CFC, #A78BFA);
-            --bg: #F0F2F5;
-            --card-bg: rgba(255, 255, 255, 0.65);
-            --card-border: rgba(255, 255, 255, 0.3);
-            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02);
-            --text: #1A1A2E;
-            --text-secondary: #6B7280;
-            --border-color: rgba(0, 0, 0, 0.06);
-            --glass-bg: rgba(255, 255, 255, 0.5);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --radius: 20px;
-            --radius-sm: 12px;
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Цветовые профили */
+            --profile-primary: #4F6EF7;
+            --profile-primary-light: #EEF1FF;
+            --profile-primary-dark: #3A56D4;
+            --profile-bg: #F5F7FA;
+            --profile-card: #FFFFFF;
+            --profile-text: #1A1A2E;
+            --profile-text-secondary: #6B7280;
+            --profile-border: rgba(0, 0, 0, 0.06);
+            --profile-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+            --profile-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --profile-glow: rgba(79, 110, 247, 0.2);
+            --profile-gradient: linear-gradient(135deg, #4F6EF7, #7C8CF8);
+        }
+
+        /* Профиль 1: Океан */
+        [data-profile="ocean"] {
+            --profile-primary: #0EA5E9;
+            --profile-primary-light: #E0F2FE;
+            --profile-primary-dark: #0284C7;
+            --profile-glow: rgba(14, 165, 233, 0.2);
+            --profile-gradient: linear-gradient(135deg, #0EA5E9, #38BDF8);
+        }
+
+        /* Профиль 2: Закат */
+        [data-profile="sunset"] {
+            --profile-primary: #F43F5E;
+            --profile-primary-light: #FFE4E8;
+            --profile-primary-dark: #E11D48;
+            --profile-glow: rgba(244, 63, 94, 0.2);
+            --profile-gradient: linear-gradient(135deg, #F43F5E, #FB7185);
+        }
+
+        /* Профиль 3: Изумруд */
+        [data-profile="emerald"] {
+            --profile-primary: #10B981;
+            --profile-primary-light: #D1FAE5;
+            --profile-primary-dark: #059669;
+            --profile-glow: rgba(16, 185, 129, 0.2);
+            --profile-gradient: linear-gradient(135deg, #10B981, #34D399);
+        }
+
+        /* Профиль 4: Фиолет */
+        [data-profile="purple"] {
+            --profile-primary: #8B5CF6;
+            --profile-primary-light: #EDE9FE;
+            --profile-primary-dark: #7C3AED;
+            --profile-glow: rgba(139, 92, 246, 0.2);
+            --profile-gradient: linear-gradient(135deg, #8B5CF6, #A78BFA);
+        }
+
+        /* Профиль 5: Уголь */
+        [data-profile="charcoal"] {
+            --profile-primary: #4B5563;
+            --profile-primary-light: #F3F4F6;
+            --profile-primary-dark: #374151;
+            --profile-glow: rgba(75, 85, 99, 0.15);
+            --profile-gradient: linear-gradient(135deg, #4B5563, #6B7280);
+        }
+
+        /* Применение переменных */
+        :root {
+            --primary: var(--profile-primary);
+            --primary-light: var(--profile-primary-light);
+            --primary-dark: var(--profile-primary-dark);
+            --bg: var(--profile-bg);
+            --card-bg: var(--profile-card);
+            --text: var(--profile-text);
+            --text-secondary: var(--profile-text-secondary);
+            --border-color: var(--profile-border);
+            --shadow: var(--profile-shadow);
+            --shadow-hover: var(--profile-shadow-hover);
+            --glow: var(--profile-glow);
+            --gradient: var(--profile-gradient);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
         }
 
         /* Тёмная тема */
         [data-theme="dark"] {
-            --bg: #0F0E1A;
-            --card-bg: rgba(30, 28, 58, 0.7);
-            --card-border: rgba(255, 255, 255, 0.06);
-            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --bg: #0F0F1A;
+            --card-bg: #1A1A2E;
             --text: #EAEAEA;
             --text-secondary: #9CA3AF;
             --border-color: rgba(255, 255, 255, 0.06);
-            --glass-bg: rgba(30, 28, 58, 0.5);
-            --glass-border: rgba(255, 255, 255, 0.06);
+            --shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Адаптация цветовых профилей под тёмную тему */
+        [data-theme="dark"][data-profile="ocean"] {
+            --primary-light: rgba(14, 165, 233, 0.15);
+        }
+        [data-theme="dark"][data-profile="sunset"] {
+            --primary-light: rgba(244, 63, 94, 0.15);
+        }
+        [data-theme="dark"][data-profile="emerald"] {
+            --primary-light: rgba(16, 185, 129, 0.15);
+        }
+        [data-theme="dark"][data-profile="purple"] {
+            --primary-light: rgba(139, 92, 246, 0.15);
+        }
+        [data-theme="dark"][data-profile="charcoal"] {
+            --primary-light: rgba(75, 85, 99, 0.15);
         }
 
         body {
@@ -55,7 +132,6 @@
             transition: background var(--transition), color var(--transition);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         /* =============================================================
@@ -76,7 +152,7 @@
            ============================================================= */
         .view {
             display: none;
-            animation: fadeSlide 0.3s ease;
+            animation: fadeSlide 0.25s ease;
             padding: 16px 16px 80px 16px;
         }
 
@@ -87,7 +163,7 @@
         @keyframes fadeSlide {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform: translateY(8px);
             }
             to {
                 opacity: 1;
@@ -99,58 +175,52 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0 16px 0;
+            padding: 4px 0 16px 0;
             margin-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .view-header h2 {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 700;
             letter-spacing: -0.5px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text);
         }
 
         .view-header .badge {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
+            background: var(--primary-light);
+            color: var(--primary);
             padding: 4px 14px;
             border-radius: 20px;
-            color: var(--text-secondary);
-            border: 1px solid var(--card-border);
         }
 
         /* =============================================================
-           СТЕКЛЯННЫЕ КАРТОЧКИ (GLASSMORPHISM)
+           КАРТОЧКИ
            ============================================================= */
-        .glass {
+        .card {
             background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
             border-radius: var(--radius);
-            box-shadow: var(--card-shadow);
+            box-shadow: var(--shadow);
+            padding: 16px 20px;
+            transition: all var(--transition);
+            border: 1px solid var(--border-color);
         }
 
-        .glass-sm {
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-sm {
             border-radius: var(--radius-sm);
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            box-shadow: var(--card-shadow);
+            padding: 12px 16px;
         }
 
         /* =============================================================
            КНОПКИ
            ============================================================= */
         .btn-primary {
-            background: var(--primary-gradient);
+            background: var(--gradient);
             color: #fff;
             border: none;
             padding: 10px 24px;
@@ -160,22 +230,40 @@
             cursor: pointer;
             transition: all var(--transition);
             font-family: inherit;
-            box-shadow: 0 4px 16px var(--primary-glow);
+            box-shadow: 0 4px 16px var(--glow);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px var(--primary-glow);
+            box-shadow: 0 8px 24px var(--glow);
         }
 
         .btn-primary:active {
             transform: scale(0.97);
         }
 
+        .btn-secondary {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
         .btn-danger {
-            background: rgba(239, 68, 68, 0.15);
+            background: rgba(239, 68, 68, 0.1);
             color: #EF4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.15);
             padding: 10px 20px;
             border-radius: 50px;
             cursor: pointer;
@@ -187,21 +275,21 @@
         }
 
         .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.25);
+            background: rgba(239, 68, 68, 0.2);
         }
 
         .fab {
             position: fixed;
             bottom: 88px;
             right: 24px;
-            width: 60px;
-            height: 60px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            background: var(--primary-gradient);
+            background: var(--gradient);
             color: #fff;
             border: none;
-            font-size: 30px;
-            box-shadow: 0 8px 32px var(--primary-glow);
+            font-size: 26px;
+            box-shadow: 0 4px 20px var(--glow);
             cursor: pointer;
             transition: all var(--transition);
             z-index: 50;
@@ -212,12 +300,12 @@
         }
 
         .fab:hover {
-            transform: scale(1.06) translateY(-2px);
-            box-shadow: 0 12px 40px var(--primary-glow);
+            transform: scale(1.05);
+            box-shadow: 0 8px 32px var(--glow);
         }
 
         .fab:active {
-            transform: scale(0.94);
+            transform: scale(0.93);
         }
 
         /* =============================================================
@@ -232,12 +320,10 @@
             max-width: 480px;
             display: flex;
             background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--card-border);
+            border-top: 1px solid var(--border-color);
             padding: 6px 0 var(--safe-bottom);
             z-index: 100;
-            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04);
         }
 
         .bottom-nav button {
@@ -261,7 +347,7 @@
         }
 
         .bottom-nav button .tab-icon {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             transition: transform var(--transition);
         }
 
@@ -270,7 +356,7 @@
         }
 
         .bottom-nav button.active .tab-icon {
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
 
         .bottom-nav button.active::after {
@@ -279,23 +365,19 @@
             top: -1px;
             left: 50%;
             transform: translateX(-50%);
-            width: 24px;
+            width: 20px;
             height: 3px;
             border-radius: 3px;
-            background: var(--primary-gradient);
-        }
-
-        .bottom-nav button:hover .tab-icon {
-            transform: scale(1.05);
+            background: var(--gradient);
         }
 
         /* =============================================================
-           КВЕСТЫ
+           КВЕСТЫ (ЗАДАЧИ)
            ============================================================= */
         .quest-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .quest-item {
@@ -304,17 +386,16 @@
             gap: 14px;
             padding: 14px 18px;
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
             border-radius: var(--radius-sm);
-            box-shadow: var(--card-shadow);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
             border-left: 4px solid;
             transition: all var(--transition);
         }
 
         .quest-item:hover {
-            transform: translateX(4px);
+            box-shadow: var(--shadow-hover);
+            transform: translateX(2px);
         }
 
         .quest-item.done {
@@ -326,8 +407,8 @@
         }
 
         .quest-item input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             accent-color: var(--primary);
             cursor: pointer;
@@ -341,7 +422,7 @@
         }
 
         .quest-item input[type="checkbox"]:checked {
-            background: var(--primary-gradient);
+            background: var(--gradient);
             border-color: var(--primary);
         }
 
@@ -352,7 +433,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
         }
 
@@ -375,13 +456,13 @@
         }
 
         .quest-guild {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-secondary);
             white-space: nowrap;
-            background: var(--glass-bg);
+            background: var(--primary-light);
             padding: 2px 10px;
             border-radius: 20px;
-            border: 1px solid var(--glass-border);
+            color: var(--primary);
         }
 
         .quest-meta {
@@ -398,14 +479,14 @@
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 4px;
             font-size: 1rem;
             opacity: 0.3;
             transition: all var(--transition);
             font-family: inherit;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -424,14 +505,14 @@
         }
 
         .empty-state .empty-icon {
-            font-size: 4rem;
+            font-size: 3.5rem;
             margin-bottom: 16px;
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
         .empty-state p {
             font-size: 1rem;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         /* =============================================================
@@ -443,9 +524,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -459,21 +540,19 @@
 
         .modal {
             background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--card-border);
             border-radius: var(--radius);
             padding: 28px;
             max-width: 400px;
             width: 100%;
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15);
             animation: modalSlide 0.3s ease;
+            border: 1px solid var(--border-color);
         }
 
         @keyframes modalSlide {
             from {
                 opacity: 0;
-                transform: scale(0.95) translateY(20px);
+                transform: scale(0.95) translateY(16px);
             }
             to {
                 opacity: 1;
@@ -485,10 +564,7 @@
             font-size: 1.3rem;
             font-weight: 700;
             margin-bottom: 20px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text);
         }
 
         .modal form {
@@ -503,19 +579,17 @@
             border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
             font-size: 0.95rem;
-            background: var(--glass-bg);
+            background: var(--bg);
             color: var(--text);
             font-family: inherit;
             transition: all var(--transition);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
         }
 
         .modal input:focus,
         .modal select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--primary-glow);
+            box-shadow: 0 0 0 4px var(--glow);
         }
 
         .modal label {
@@ -553,7 +627,7 @@
         }
 
         .modal-actions button[type="button"] {
-            background: var(--glass-bg);
+            background: var(--bg);
             color: var(--text-secondary);
             border: 1px solid var(--border-color);
         }
@@ -563,14 +637,14 @@
         }
 
         .modal-actions button[type="submit"] {
-            background: var(--primary-gradient);
+            background: var(--gradient);
             color: #fff;
-            box-shadow: 0 4px 16px var(--primary-glow);
+            box-shadow: 0 4px 16px var(--glow);
         }
 
         .modal-actions button[type="submit"]:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px var(--primary-glow);
+            box-shadow: 0 8px 24px var(--glow);
         }
 
         /* =============================================================
@@ -586,7 +660,7 @@
             gap: 4px;
             margin-bottom: 12px;
             font-weight: 600;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--text-secondary);
@@ -615,19 +689,19 @@
         }
 
         .calendar-day:hover {
-            background: var(--border-color);
+            background: var(--primary-light);
             transform: scale(1.04);
         }
 
         .calendar-day.other-month {
-            opacity: 0.25;
+            opacity: 0.2;
         }
 
         .calendar-day.today {
-            background: var(--primary-gradient);
+            background: var(--gradient);
             color: #fff;
             font-weight: 700;
-            box-shadow: 0 4px 16px var(--primary-glow);
+            box-shadow: 0 4px 16px var(--glow);
         }
 
         .calendar-day.has-quests {
@@ -658,10 +732,10 @@
         .month-nav button {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             cursor: pointer;
             color: var(--text);
             transition: all var(--transition);
@@ -672,7 +746,7 @@
         }
 
         .month-nav button:hover {
-            background: var(--primary-gradient);
+            background: var(--primary);
             color: #fff;
             border-color: var(--primary);
         }
@@ -684,11 +758,10 @@
 
         .day-detail {
             margin-top: 16px;
-            padding: 20px;
         }
 
         .day-detail h4 {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             margin-bottom: 12px;
         }
@@ -707,180 +780,105 @@
         }
 
         .quest-guild-tag {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-secondary);
             margin-left: auto;
-            background: var(--glass-bg);
+            background: var(--primary-light);
             padding: 2px 10px;
             border-radius: 20px;
+            color: var(--primary);
         }
 
         /* =============================================================
-           ПРОФИЛЬ + ПЕРСОНАЖ
+           ПРОФИЛЬ
            ============================================================= */
         .profile-view {
             max-width: 400px;
             margin: 0 auto;
         }
 
-        .profile-card {
+        .profile-header-card {
             padding: 24px;
             text-align: center;
             margin-bottom: 16px;
-        }
-
-        /* === ПЕРСОНАЖ === */
-        .character-container {
             position: relative;
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 16px;
+            overflow: hidden;
         }
 
-        .character-ring {
+        .profile-header-card::before {
+            content: '';
             position: absolute;
-            inset: -8px;
-            border-radius: 50%;
-            background: conic-gradient(from 0deg, var(--primary), #A78BFA, #7C5CFC, var(--primary));
-            opacity: 0.15;
-            animation: spinRing 8s linear infinite;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
         }
 
-        @keyframes spinRing {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .character-avatar {
-            width: 100%;
-            height: 100%;
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: var(--card-bg);
-            border: 3px solid var(--card-border);
+            background: var(--gradient);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4.5rem;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            transition: all var(--transition);
-            user-select: none;
-        }
-
-        /* Украшения персонажа */
-        .character-avatar .crown {
-            position: absolute;
-            top: -12px;
-            font-size: 1.8rem;
-            filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.4));
-            display: none;
-        }
-
-        .character-avatar .sparkle {
-            position: absolute;
-            font-size: 1.2rem;
-            animation: sparkle 2s ease-in-out infinite;
-            display: none;
-        }
-
-        .character-avatar .sparkle:nth-child(2) {
-            top: -4px;
-            right: -4px;
-            animation-delay: 0.3s;
-        }
-        .character-avatar .sparkle:nth-child(3) {
-            bottom: -4px;
-            left: -4px;
-            animation-delay: 0.6s;
-        }
-        .character-avatar .sparkle:nth-child(4) {
-            bottom: -4px;
-            right: -4px;
-            animation-delay: 0.9s;
-        }
-
-        @keyframes sparkle {
-            0%,
-            100% {
-                transform: scale(0.8) rotate(0deg);
-                opacity: 0.5;
-            }
-            50% {
-                transform: scale(1.3) rotate(20deg);
-                opacity: 1;
-            }
-        }
-
-        /* Уровни украшений */
-        .character-avatar.level-5 .crown {
-            display: block;
-        }
-        .character-avatar.level-10 .sparkle {
-            display: block;
-        }
-        .character-avatar.level-15 .crown {
             font-size: 2.4rem;
-            top: -16px;
-        }
-        .character-avatar.level-20 .sparkle {
-            display: block !important;
-        }
-
-        .character-status {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            font-weight: 500;
+            margin: 0 auto 12px;
+            color: #fff;
+            box-shadow: 0 4px 20px var(--glow);
+            user-select: none;
+            position: relative;
         }
 
-        .character-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin-top: 2px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .profile-avatar .level-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            opacity: 0.15;
         }
 
         .profile-name {
             font-size: 1.3rem;
             font-weight: 700;
-            margin-top: 4px;
+        }
+
+        .profile-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
         }
 
         .level-badge {
             display: inline-block;
-            background: var(--primary-gradient);
+            background: var(--gradient);
             color: #fff;
             padding: 4px 18px;
             border-radius: 50px;
             font-size: 0.8rem;
             font-weight: 600;
-            margin-top: 6px;
-            box-shadow: 0 4px 16px var(--primary-glow);
+            margin-top: 8px;
+            box-shadow: 0 4px 16px var(--glow);
         }
 
-        /* XP-бар */
         .xp-section {
-            padding: 20px;
+            padding: 16px 20px;
             margin: 16px 0;
         }
 
         .xp-bar {
             width: 100%;
-            height: 8px;
+            height: 6px;
             background: var(--border-color);
-            border-radius: 4px;
+            border-radius: 3px;
             overflow: hidden;
         }
 
         .xp-fill {
             height: 100%;
-            background: var(--primary-gradient);
-            border-radius: 4px;
+            background: var(--gradient);
+            border-radius: 3px;
             transition: width 0.6s ease;
         }
 
@@ -892,7 +890,7 @@
             color: var(--text-secondary);
         }
 
-        .profile-stats {
+        .profile-stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
@@ -900,22 +898,19 @@
         }
 
         .stat-card {
-            padding: 16px;
+            padding: 14px;
             text-align: center;
         }
 
         .stat-value {
             display: block;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary);
         }
 
         .stat-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-secondary);
             font-weight: 500;
             text-transform: uppercase;
@@ -934,18 +929,81 @@
             border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
             font-size: 0.95rem;
-            background: var(--glass-bg);
+            background: var(--bg);
             color: var(--text);
             font-family: inherit;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
             transition: all var(--transition);
         }
 
         .profile-edit input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--primary-glow);
+            box-shadow: 0 0 0 4px var(--glow);
+        }
+
+        /* =============================================================
+           НАСТРОЙКИ
+           ============================================================= */
+        .settings-section {
+            margin-bottom: 20px;
+        }
+
+        .settings-section h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .settings-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .settings-options .theme-option,
+        .settings-options .profile-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: var(--card-bg);
+        }
+
+        .settings-options .theme-option:hover,
+        .settings-options .profile-option:hover {
+            transform: scale(1.08);
+        }
+
+        .settings-options .theme-option.active,
+        .settings-options .profile-option.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--glow);
+        }
+
+        .profile-option .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .settings-actions button {
+            flex: 1;
+            min-width: 120px;
         }
 
         /* =============================================================
@@ -953,50 +1011,49 @@
            ============================================================= */
         .guild-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
         }
 
         .guild-card {
-            padding: 16px;
+            padding: 14px;
             text-align: center;
             transition: all var(--transition);
         }
 
         .guild-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
         }
 
         .guild-icon {
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
-            margin: 0 auto 8px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            font-size: 1.4rem;
+            margin: 0 auto 6px;
         }
 
         .guild-info h4 {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
         }
 
         .guild-count {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-secondary);
         }
 
         .guild-color-picker {
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .guild-color-picker input {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border: 2px solid var(--border-color);
             border-radius: 50%;
             cursor: pointer;
@@ -1015,28 +1072,27 @@
         }
 
         .filter-btn {
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             border: 2px solid transparent;
             background: var(--card-bg);
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: all var(--transition);
             font-family: inherit;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            box-shadow: var(--shadow);
         }
 
         .filter-btn.active {
             border-color: var(--primary);
-            background: var(--primary-gradient);
+            background: var(--gradient);
             color: #fff;
-            box-shadow: 0 4px 16px var(--primary-glow);
+            box-shadow: 0 4px 16px var(--glow);
         }
 
         .filter-btn:hover {
-            transform: scale(1.08);
+            transform: scale(1.06);
         }
 
         /* =============================================================
@@ -1049,25 +1105,24 @@
             transform: translateX(-50%);
             max-width: 400px;
             width: 90%;
-            padding: 14px 24px;
+            padding: 12px 24px;
             background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
             z-index: 300;
             text-align: center;
             font-weight: 500;
             display: none;
-            animation: notifSlide 0.4s ease;
+            animation: notifSlide 0.3s ease;
             border-left: 4px solid var(--primary);
+            color: var(--text);
         }
 
         @keyframes notifSlide {
             from {
                 opacity: 0;
-                transform: translate(-50%, -20px) scale(0.95);
+                transform: translate(-50%, -16px) scale(0.95);
             }
             to {
                 opacity: 1;
@@ -1082,31 +1137,35 @@
         /* =============================================================
            ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ
            ============================================================= */
-        .theme-toggle {
+        .top-actions {
             position: fixed;
-            top: 16px;
-            right: 16px;
+            top: 12px;
+            right: 12px;
             z-index: 150;
-            width: 44px;
-            height: 44px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .top-actions button {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
             cursor: pointer;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             transition: all var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: inherit;
+            color: var(--text);
         }
 
-        .theme-toggle:hover {
-            transform: scale(1.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        .top-actions button:hover {
+            transform: scale(1.06);
+            box-shadow: var(--shadow-hover);
         }
 
         /* =============================================================
@@ -1165,10 +1224,11 @@
         <!-- ===== УВЕДОМЛЕНИЕ ===== -->
         <div id="notification" class="notification"></div>
 
-        <!-- ===== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ===== -->
-        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Переключить тему">
-            🌙
-        </button>
+        <!-- ===== ВЕРХНИЕ КНОПКИ ===== -->
+        <div class="top-actions">
+            <button id="themeToggle" onclick="toggleTheme()" title="Тема">🌙</button>
+            <button onclick="switchTab('settings')" title="Настройки">⚙️</button>
+        </div>
 
         <!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
         <div class="app" id="appContainer">
@@ -1176,15 +1236,15 @@
             <!-- ===== ВКЛАДКА: ДЕНЬ ===== -->
             <div id="view-day" class="view active">
                 <div class="view-header">
-                    <h2>📅 Сегодня</h2>
+                    <h2>Сегодня</h2>
                     <span class="badge" id="todayBadge">0 задач</span>
                 </div>
 
                 <div id="todayQuests" class="quest-list">
                     <div class="empty-state">
-                        <div class="empty-icon">🎯</div>
-                        <p>Нет задач на сегодня</p>
-                        <button class="btn-primary" onclick="openModal()">+ Создать квест</button>
+                        <div class="empty-icon">✅</div>
+                        <p>Отличный день! Нет задач</p>
+                        <button class="btn-primary" onclick="openModal()">+ Создать задачу</button>
                     </div>
                 </div>
 
@@ -1194,7 +1254,7 @@
             <!-- ===== ВКЛАДКА: МЕСЯЦ ===== -->
             <div id="view-month" class="view">
                 <div class="view-header">
-                    <h2>📆 Месяц</h2>
+                    <h2>Календарь</h2>
                     <div class="month-nav">
                         <button onclick="changeMonth(-1)">‹</button>
                         <span id="monthLabel">Январь 2026</span>
@@ -1202,7 +1262,7 @@
                     </div>
                 </div>
 
-                <div class="calendar-grid glass">
+                <div class="card calendar-grid">
                     <div class="calendar-header">
                         <span>Пн</span><span>Вт</span><span>Ср</span>
                         <span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
@@ -1210,7 +1270,7 @@
                     <div id="calendarDays" class="calendar-days"></div>
                 </div>
 
-                <div id="dayDetail" class="day-detail glass" style="display:none;">
+                <div id="dayDetail" class="card day-detail" style="display:none;">
                     <h4 id="selectedDayTitle"></h4>
                     <div id="selectedDayQuests"></div>
                 </div>
@@ -1219,7 +1279,7 @@
             <!-- ===== ВКЛАДКА: ЗАДАЧИ ===== -->
             <div id="view-quests" class="view">
                 <div class="view-header">
-                    <h2>📋 Задачи</h2>
+                    <h2>Все задачи</h2>
                     <button class="btn-primary" onclick="openModal()" style="padding:6px 16px;font-size:0.8rem;">+</button>
                 </div>
 
@@ -1229,27 +1289,19 @@
 
             <!-- ===== ВКЛАДКА: ПРОФИЛЬ ===== -->
             <div id="view-profile" class="view profile-view">
-                <!-- Карточка профиля с персонажем -->
-                <div class="profile-card glass">
-                    <div class="character-container">
-                        <div class="character-ring"></div>
-                        <div class="character-avatar" id="characterAvatar">
-                            <span class="crown">👑</span>
-                            <span class="sparkle">✨</span>
-                            <span class="sparkle">✨</span>
-                            <span class="sparkle">✨</span>
-                            <span class="sparkle">✨</span>
-                            <span id="avatarEmoji">🧙</span>
-                        </div>
+                <!-- Карточка профиля -->
+                <div class="card profile-header-card">
+                    <div class="profile-avatar">
+                        <div class="level-ring"></div>
+                        <span id="avatarEmoji">🧑</span>
                     </div>
-                    <div class="character-status" id="characterStatus">🟢 В игре</div>
-                    <div class="character-title" id="characterTitle">⭐ Новичок</div>
                     <div class="profile-name" id="profileName">Игрок</div>
-                    <span class="level-badge">LVL <span id="profileLevelBig">1</span></span>
+                    <div class="profile-title" id="profileTitle">⭐ Начинающий</div>
+                    <span class="level-badge">Уровень <span id="profileLevelBig">1</span></span>
                 </div>
 
                 <!-- XP -->
-                <div class="xp-section glass">
+                <div class="card xp-section">
                     <div class="xp-bar">
                         <div id="xpFill" class="xp-fill" style="width:0%"></div>
                     </div>
@@ -1260,18 +1312,31 @@
                 </div>
 
                 <!-- Статистика -->
-                <div class="profile-stats">
-                    <div class="stat-card glass-sm">
+                <div class="profile-stats-grid">
+                    <div class="card card-sm stat-card">
                         <span class="stat-value" id="statToday">0</span>
                         <span class="stat-label">Сегодня</span>
                     </div>
-                    <div class="stat-card glass-sm">
+                    <div class="card card-sm stat-card">
                         <span class="stat-value" id="statDone">0</span>
                         <span class="stat-label">Выполнено</span>
                     </div>
-                    <div class="stat-card glass-sm">
+                    <div class="card card-sm stat-card">
                         <span class="stat-value" id="statTotal">0</span>
                         <span class="stat-label">Всего</span>
+                    </div>
+                </div>
+
+                <!-- Дополнительная статистика -->
+                <div class="card" style="margin:16px 0;padding:16px 20px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                        <span style="font-size:0.8rem;color:var(--text-secondary);">📊 Активность</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;">
+                        <div><span style="color:var(--text-secondary);">Текущий стрик:</span> <strong id="statStreak">0</strong> дней</div>
+                        <div><span style="color:var(--text-secondary);">Лучший стрик:</span> <strong id="statBestStreak">0</strong> дней</div>
+                        <div><span style="color:var(--text-secondary);">Выполнено %:</span> <strong id="statCompletion">0%</strong></div>
+                        <div><span style="color:var(--text-secondary);">Всего XP:</span> <strong id="statTotalXP">0</strong></div>
                     </div>
                 </div>
 
@@ -1281,13 +1346,58 @@
                     <button class="btn-primary" onclick="updateName()" style="padding:10px 20px;font-size:0.85rem;">Сохранить</button>
                 </div>
 
-                <button class="btn-danger" onclick="resetData()">🗑️ Сбросить все данные</button>
+                <button class="btn-danger" onclick="resetData()">🗑️ Сбросить данные</button>
+            </div>
+
+            <!-- ===== ВКЛАДКА: НАСТРОЙКИ ===== -->
+            <div id="view-settings" class="view">
+                <div class="view-header">
+                    <h2>Настройки</h2>
+                </div>
+
+                <!-- Цветовые профили -->
+                <div class="settings-section">
+                    <h4>🎨 Цветовая схема</h4>
+                    <div class="settings-options" id="profileOptions">
+                        <button class="profile-option active" data-profile="default" onclick="setProfile('default')" style="background:linear-gradient(135deg,#4F6EF7,#7C8CF8);border-color:#4F6EF7;"></button>
+                        <button class="profile-option" data-profile="ocean" onclick="setProfile('ocean')" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);border-color:#0EA5E9;"></button>
+                        <button class="profile-option" data-profile="sunset" onclick="setProfile('sunset')" style="background:linear-gradient(135deg,#F43F5E,#FB7185);border-color:#F43F5E;"></button>
+                        <button class="profile-option" data-profile="emerald" onclick="setProfile('emerald')" style="background:linear-gradient(135deg,#10B981,#34D399);border-color:#10B981;"></button>
+                        <button class="profile-option" data-profile="purple" onclick="setProfile('purple')" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);border-color:#8B5CF6;"></button>
+                        <button class="profile-option" data-profile="charcoal" onclick="setProfile('charcoal')" style="background:linear-gradient(135deg,#4B5563,#6B7280);border-color:#4B5563;"></button>
+                    </div>
+                </div>
+
+                <!-- Тема -->
+                <div class="settings-section">
+                    <h4>🌓 Режим</h4>
+                    <div class="settings-options">
+                        <button class="theme-option active" data-theme="light" onclick="setTheme('light')">☀️</button>
+                        <button class="theme-option" data-theme="dark" onclick="setTheme('dark')">🌙</button>
+                    </div>
+                </div>
+
+                <!-- Действия -->
+                <div class="settings-section">
+                    <h4>⚡ Действия</h4>
+                    <div class="settings-actions">
+                        <button class="btn-secondary" onclick="exportData()">📤 Экспорт</button>
+                        <button class="btn-secondary" onclick="importData()">📥 Импорт</button>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <button class="btn-danger" onclick="resetData()">🗑️ Сбросить всё</button>
+                    </div>
+                </div>
+
+                <div style="text-align:center;padding:20px 0;color:var(--text-secondary);font-size:0.75rem;">
+                    FlowPlan v2.0 · Сделано с ❤️
+                </div>
             </div>
 
             <!-- ===== ВКЛАДКА: ГИЛЬДИИ ===== -->
             <div id="view-guilds" class="view">
                 <div class="view-header">
-                    <h2>🏰 Гильдии</h2>
+                    <h2>Категории</h2>
                 </div>
                 <div id="guildGrid" class="guild-grid"></div>
             </div>
@@ -1311,8 +1421,8 @@
                     <span class="tab-label">Профиль</span>
                 </button>
                 <button data-tab="guilds" onclick="switchTab('guilds')">
-                    <span class="tab-icon">🏰</span>
-                    <span class="tab-label">Гильдии</span>
+                    <span class="tab-icon">🏷️</span>
+                    <span class="tab-label">Категории</span>
                 </button>
             </nav>
         </div>
@@ -1320,11 +1430,11 @@
         <!-- ===== МОДАЛКА ===== -->
         <div id="modal" class="modal-overlay">
             <div class="modal">
-                <h3>✨ Новый квест</h3>
+                <h3>✨ Новая задача</h3>
                 <form onsubmit="createQuest(event)">
-                    <input id="questTitle" placeholder="Название квеста" required />
+                    <input id="questTitle" placeholder="Название задачи" required />
                     <select id="questGuild" required>
-                        <option value="">Выбери гильдию</option>
+                        <option value="">Выбери категорию</option>
                     </select>
                     <input id="questDuration" type="number" placeholder="Длительность (мин)" required min="1" />
                     <input id="questDate" type="date" required />
@@ -1364,15 +1474,14 @@
         ];
 
         const TITLES = [
-            { min: 0, title: '⭐ Новичок', emoji: '🧙' },
-            { min: 3, title: '⚔️ Искатель', emoji: '⚔️' },
-            { min: 8, title: '🛡️ Защитник', emoji: '🛡️' },
-            { min: 15, title: '🏆 Чемпион', emoji: '🏆' },
-            { min: 25, title: '👑 Легенда', emoji: '👑' },
-            { min: 40, title: '🌟 Мастер', emoji: '🌟' },
-            { min: 60, title: '🔥 Герой', emoji: '🔥' },
-            { min: 85, title: '💫 Мифический', emoji: '💫' },
-            { min: 120, title: '✨ Божественный', emoji: '✨' },
+            { min: 0, title: '⭐ Начинающий', emoji: '🧑' },
+            { min: 3, title: '🌱 Исследователь', emoji: '🌱' },
+            { min: 8, title: '🚀 Продвинутый', emoji: '🚀' },
+            { min: 15, title: '🔥 Эксперт', emoji: '🔥' },
+            { min: 25, title: '🏆 Мастер', emoji: '🏆' },
+            { min: 40, title: '👑 Легенда', emoji: '👑' },
+            { min: 60, title: '💫 Герой', emoji: '💫' },
+            { min: 85, title: '🌟 Мифический', emoji: '🌟' },
         ];
 
         // ============================================================
@@ -1388,6 +1497,7 @@
         let filterGuild = null;
         let notificationTimeout = null;
         let currentTheme = 'light';
+        let currentProfile = 'default';
 
         // ============================================================
         // ========== ЗАГРУЗКА / СОХРАНЕНИЕ ==========
@@ -1406,7 +1516,9 @@
                     weightHistory: []
                 };
                 currentTheme = localStorage.getItem('theme') || 'light';
+                currentProfile = localStorage.getItem('profile_theme') || 'default';
                 applyTheme(currentTheme);
+                applyProfile(currentProfile);
                 updateProfileLevel();
             } catch (e) {
                 console.error('Ошибка загрузки:', e);
@@ -1423,6 +1535,8 @@
         function saveGuilds() { localStorage.setItem('guilds', JSON.stringify(guilds)); }
 
         function saveTheme() { localStorage.setItem('theme', currentTheme); }
+
+        function saveProfileTheme() { localStorage.setItem('profile_theme', currentProfile); }
 
         // ============================================================
         // ========== XP / УРОВЕНЬ ==========
@@ -1461,18 +1575,42 @@
         }
 
         // ============================================================
-        // ========== ТЕМА ==========
+        // ========== ТЕМА И ПРОФИЛЬ ==========
         // ============================================================
 
         function applyTheme(theme) {
             currentTheme = theme;
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+            document.querySelectorAll('.theme-option').forEach(el => {
+                el.classList.toggle('active', el.dataset.theme === theme);
+            });
             saveTheme();
         }
 
         function toggleTheme() {
             applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        }
+
+        function setTheme(theme) {
+            applyTheme(theme);
+        }
+
+        function applyProfile(profile) {
+            currentProfile = profile;
+            if (profile === 'default') {
+                document.documentElement.removeAttribute('data-profile');
+            } else {
+                document.documentElement.setAttribute('data-profile', profile);
+            }
+            document.querySelectorAll('.profile-option').forEach(el => {
+                el.classList.toggle('active', el.dataset.profile === profile);
+            });
+            saveProfileTheme();
+        }
+
+        function setProfile(profile) {
+            applyProfile(profile);
         }
 
         // ============================================================
@@ -1506,7 +1644,7 @@
             const isOneTime = document.getElementById('questOneTime').checked;
 
             if (!title) { showNotification('Введите название!', true); return; }
-            if (!guildId) { showNotification('Выберите гильдию!', true); return; }
+            if (!guildId) { showNotification('Выберите категорию!', true); return; }
             if (!duration || duration < 1) { showNotification('Укажите длительность!', true); return; }
             if (!scheduledDate) { showNotification('Укажите дату!', true); return; }
 
@@ -1530,7 +1668,7 @@
             quests.push(quest);
             saveQuests();
             closeModal();
-            showNotification(`✅ Квест создан! +${quest.xpEarned} XP`);
+            showNotification(`✅ Задача создана! +${quest.xpEarned} XP`);
             renderAll();
         }
 
@@ -1563,7 +1701,7 @@
         }
 
         function deleteQuest(id) {
-            if (!confirm('Удалить квест?')) return;
+            if (!confirm('Удалить задачу?')) return;
 
             const index = quests.findIndex(q => q.id === id);
             if (index === -1) return;
@@ -1583,6 +1721,79 @@
         }
 
         // ============================================================
+        // ========== СТРИКИ ==========
+        // ============================================================
+
+        function calculateStreaks() {
+            if (quests.length === 0) return { current: 0, best: 0 };
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Получаем все дни с выполненными задачами
+            const doneDays = new Set();
+            quests.forEach(q => {
+                if (q.status === 'done') {
+                    const date = new Date(q.scheduledDate + 'T00:00:00');
+                    date.setHours(0, 0, 0, 0);
+                    if (date <= today) {
+                        doneDays.add(q.scheduledDate);
+                    }
+                }
+            });
+
+            const sortedDays = Array.from(doneDays).sort();
+
+            if (sortedDays.length === 0) return { current: 0, best: 0 };
+
+            // Текущий стрик (с сегодня или последнего дня)
+            let currentStreak = 0;
+            let checkDate = new Date(today);
+
+            // Проверяем, есть ли задачи сегодня
+            const todayStr = today.toISOString().split('T')[0];
+            if (doneDays.has(todayStr)) {
+                currentStreak = 1;
+            } else {
+                // Если сегодня нет, начинаем со вчера
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+
+            while (true) {
+                const dateStr = checkDate.toISOString().split('T')[0];
+                if (doneDays.has(dateStr)) {
+                    currentStreak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+
+            // Лучший стрик
+            let bestStreak = 0;
+            let tempStreak = 0;
+            let prevDate = null;
+
+            for (const dateStr of sortedDays) {
+                const date = new Date(dateStr + 'T00:00:00');
+                if (prevDate === null) {
+                    tempStreak = 1;
+                } else {
+                    const diff = (date - prevDate) / (1000 * 60 * 60 * 24);
+                    if (diff === 1) {
+                        tempStreak++;
+                    } else {
+                        tempStreak = 1;
+                    }
+                }
+                prevDate = date;
+                if (tempStreak > bestStreak) bestStreak = tempStreak;
+            }
+
+            return { current: currentStreak, best: bestStreak };
+        }
+
+        // ============================================================
         // ========== НАВИГАЦИЯ ==========
         // ============================================================
 
@@ -1599,6 +1810,7 @@
             if (tabId === 'quests') renderAllQuests();
             if (tabId === 'profile') renderProfile();
             if (tabId === 'guilds') renderGuilds();
+            if (tabId === 'settings') renderSettings();
         }
 
         // ============================================================
@@ -1609,7 +1821,7 @@
             document.getElementById('modal').classList.add('open');
             document.getElementById('questDate').value = new Date().toISOString().split('T')[0];
             const select = document.getElementById('questGuild');
-            select.innerHTML = '<option value="">Выбери гильдию</option>';
+            select.innerHTML = '<option value="">Выбери категорию</option>';
             guilds.forEach(g => {
                 const opt = document.createElement('option');
                 opt.value = g.id;
@@ -1645,16 +1857,16 @@
             if (todayQuests.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">🎯</div>
-                        <p>Нет задач на сегодня</p>
-                        <button class="btn-primary" onclick="openModal()">+ Создать квест</button>
+                        <div class="empty-icon">✅</div>
+                        <p>Отличный день! Нет задач</p>
+                        <button class="btn-primary" onclick="openModal()">+ Создать задачу</button>
                     </div>
                 `;
                 return;
             }
 
             container.innerHTML = todayQuests.map(q => {
-                const guild = guilds.find(g => g.id === q.guildId) || { color: '#999', name: 'Без гильдии' };
+                const guild = guilds.find(g => g.id === q.guildId) || { color: '#999', name: 'Без категории' };
                 const isFuture = q.scheduledDate > today;
                 return `
                     <div class="quest-item ${q.status === 'done' ? 'done' : ''}" 
@@ -1777,7 +1989,7 @@
             }
 
             list.innerHTML = dayQuests.map(q => {
-                const guild = guilds.find(g => g.id === q.guildId) || { name: 'Без гильдии' };
+                const guild = guilds.find(g => g.id === q.guildId) || { name: 'Без категории' };
                 return `
                     <div class="quest-item-mini">
                         <span>${q.status === 'done' ? '✅' : '⏳'}</span>
@@ -1825,7 +2037,7 @@
             }
 
             container.innerHTML = filtered.map(q => {
-                const guild = guilds.find(g => g.id === q.guildId) || { color: '#999', name: 'Без гильдии' };
+                const guild = guilds.find(g => g.id === q.guildId) || { color: '#999', name: 'Без категории' };
                 return `
                     <div class="quest-item ${q.status === 'done' ? 'done' : ''}" 
                          style="border-left-color: ${guild.color}">
@@ -1851,15 +2063,18 @@
         }
 
         // ============================================================
-        // ========== РЕНДЕР: ПРОФИЛЬ + ПЕРСОНАЖ ==========
+        // ========== РЕНДЕР: ПРОФИЛЬ ==========
         // ============================================================
 
         function renderProfile() {
             // Имя
             document.getElementById('profileName').textContent = profile.name;
 
-            // Уровень
+            // Уровень и тайтл
             document.getElementById('profileLevelBig').textContent = profile.level;
+            const titleData = getTitle(profile.level);
+            document.getElementById('profileTitle').textContent = titleData.title;
+            document.getElementById('avatarEmoji').textContent = titleData.emoji;
 
             // XP
             const { currentXP, nextLevelXP } = getLevelFromXP(profile.totalXP);
@@ -1870,37 +2085,23 @@
 
             // Статистика
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('statToday').textContent = quests.filter(q => q.scheduledDate === today).length;
-            document.getElementById('statDone').textContent = quests.filter(q => q.status === 'done').length;
+            const todayQuests = quests.filter(q => q.scheduledDate === today);
+            const doneQuests = quests.filter(q => q.status === 'done');
+            document.getElementById('statToday').textContent = todayQuests.length;
+            document.getElementById('statDone').textContent = doneQuests.length;
             document.getElementById('statTotal').textContent = quests.length;
 
-            // ПЕРСОНАЖ
-            const titleData = getTitle(profile.level);
-            const avatar = document.getElementById('characterAvatar');
+            // Стрики
+            const streaks = calculateStreaks();
+            document.getElementById('statStreak').textContent = streaks.current;
+            document.getElementById('statBestStreak').textContent = streaks.best;
 
-            // Эмодзи
-            document.getElementById('avatarEmoji').textContent = titleData.emoji;
-
-            // Тайтл
-            document.getElementById('characterTitle').textContent = titleData.title;
-
-            // Статус
-            const todayQuests = quests.filter(q => q.scheduledDate === today);
-            const doneToday = todayQuests.filter(q => q.status === 'done').length;
-            if (doneToday > 0) {
-                document.getElementById('characterStatus').textContent = '🔥 В бою!';
-            } else if (todayQuests.length > 0) {
-                document.getElementById('characterStatus').textContent = '⚔️ Есть задачи!';
-            } else {
-                document.getElementById('characterStatus').textContent = '🟢 В игре';
-            }
-
-            // Украшения по уровням
-            avatar.className = 'character-avatar';
-            if (profile.level >= 5) avatar.classList.add('level-5');
-            if (profile.level >= 10) avatar.classList.add('level-10');
-            if (profile.level >= 15) avatar.classList.add('level-15');
-            if (profile.level >= 20) avatar.classList.add('level-20');
+            // Процент выполнения
+            const total = quests.length;
+            const done = doneQuests.length;
+            const completion = total > 0 ? Math.round((done / total) * 100) : 0;
+            document.getElementById('statCompletion').textContent = completion + '%';
+            document.getElementById('statTotalXP').textContent = profile.totalXP;
 
             // Поле имени
             document.getElementById('nameInput').value = profile.name;
@@ -1924,6 +2125,15 @@
         }
 
         // ============================================================
+        // ========== РЕНДЕР: НАСТРОЙКИ ==========
+        // ============================================================
+
+        function renderSettings() {
+            // Активные профили уже подсвечены через applyProfile/applyTheme
+            // Обновляем только если нужно
+        }
+
+        // ============================================================
         // ========== РЕНДЕР: ГИЛЬДИИ ==========
         // ============================================================
 
@@ -1932,8 +2142,8 @@
             container.innerHTML = guilds.map(g => {
                 const count = quests.filter(q => q.guildId === g.id).length;
                 return `
-                    <div class="guild-card glass-sm" style="border:2px solid ${g.color}40;">
-                        <div class="guild-icon" style="background:${g.color}20;color:${g.color};">${g.icon}</div>
+                    <div class="card card-sm guild-card" style="border:2px solid ${g.color}30;">
+                        <div class="guild-icon" style="background:${g.color}15;color:${g.color};">${g.icon}</div>
                         <div class="guild-info">
                             <h4>${g.name}</h4>
                             <span class="guild-count">${count} задач</span>
@@ -1959,6 +2169,56 @@
         }
 
         // ============================================================
+        // ========== ЭКСПОРТ / ИМПОРТ ==========
+        // ============================================================
+
+        function exportData() {
+            const data = {
+                guilds,
+                quests,
+                profile,
+                version: '2.0',
+                exported: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `flowplan_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('📤 Данные экспортированы!');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        if (data.guilds) guilds = data.guilds;
+                        if (data.quests) quests = data.quests;
+                        if (data.profile) profile = data.profile;
+                        saveGuilds();
+                        saveQuests();
+                        saveProfile();
+                        showNotification('📥 Данные импортированы!');
+                        renderAll();
+                    } catch (err) {
+                        showNotification('Ошибка импорта!', true);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // ============================================================
         // ========== ОБЩИЙ РЕНДЕР ==========
         // ============================================================
 
@@ -1968,6 +2228,7 @@
             else if (currentTab === 'quests') renderAllQuests();
             else if (currentTab === 'profile') renderProfile();
             else if (currentTab === 'guilds') renderGuilds();
+            else if (currentTab === 'settings') renderSettings();
         }
 
         // ============================================================
@@ -1987,8 +2248,8 @@
                 if (e.target === document.getElementById('modal')) closeModal();
             });
 
-            console.log('🚀 RPG-планировщик загружен!');
-            console.log(`📊 Квестов: ${quests.length}, LVL: ${profile.level}, XP: ${profile.totalXP}`);
+            console.log('🚀 FlowPlan загружен!');
+            console.log(`📊 Задач: ${quests.length}, Уровень: ${profile.level}, XP: ${profile.totalXP}`);
         }
 
         document.addEventListener('DOMContentLoaded', init);
