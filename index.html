@@ -4,14 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>Журнал активности · RPG календарь</title>
-  <!-- Font Awesome Icons (бесплатный набор) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
       transition: background 0.2s, color 0.15s, border 0.15s;
     }
 
@@ -25,7 +24,6 @@
       padding: 12px;
     }
 
-    /* основной контейнер — мобильный первый */
     .app {
       max-width: 480px;
       width: 100%;
@@ -36,6 +34,7 @@
       overflow: hidden;
       padding: 20px 18px 12px;
       border: 1px solid rgba(255,255,255,0.4);
+      position: relative;
     }
 
     /* ===== ВЕРХНИЙ БАР ===== */
@@ -69,6 +68,8 @@
       padding: 4px 14px 4px 6px;
       border-radius: 60px;
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
+      flex: 1;
+      max-width: 200px;
     }
 
     .avatar {
@@ -84,17 +85,22 @@
       font-size: 1.3rem;
       background: linear-gradient(145deg, #b8a48b, #8f7b66);
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      flex-shrink: 0;
     }
 
     .profile-info {
       display: flex;
       flex-direction: column;
       line-height: 1.2;
+      min-width: 0;
     }
     .profile-name {
       font-weight: 600;
       font-size: 0.95rem;
       letter-spacing: -0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .profile-level {
       font-size: 0.7rem;
@@ -106,6 +112,11 @@
       display: inline-block;
       width: fit-content;
       background: #d9cec0;
+    }
+    .profile-xp {
+      font-size: 0.6rem;
+      color: #6b6b80;
+      margin-top: 1px;
     }
 
     .theme-toggle {
@@ -121,6 +132,7 @@
       cursor: pointer;
       color: #3d3d4e;
       transition: 0.15s;
+      flex-shrink: 0;
     }
     .theme-toggle:hover {
       background: #d5cec4;
@@ -186,6 +198,10 @@
       border: 1px solid transparent;
       transition: 0.1s;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      cursor: pointer;
+    }
+    .day-cell:hover {
+      background: #efece6;
     }
 
     .day-cell.other-month {
@@ -198,7 +214,6 @@
       font-size: 0.9rem;
     }
 
-    /* индикаторы задач (цветные метки) */
     .task-indicators {
       display: flex;
       flex-wrap: wrap;
@@ -213,6 +228,10 @@
       border-radius: 20px;
       display: inline-block;
       border: 1px solid rgba(255,255,255,0.4);
+    }
+    .task-dot.done {
+      opacity: 0.4;
+      text-decoration: line-through;
     }
 
     /* ===== НИЖНИЙ БАР ===== */
@@ -233,12 +252,24 @@
       padding: 8px 12px;
       border-radius: 40px;
       transition: 0.1s;
+      position: relative;
     }
     .bottom-bar button:hover {
       background: #e3ddd5;
     }
+    .bottom-bar .badge {
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      background: #e74c3c;
+      color: white;
+      font-size: 0.5rem;
+      border-radius: 20px;
+      padding: 0 6px;
+      font-weight: 700;
+    }
 
-    /* ===== ДОПОЛНИТЕЛЬНО: список категорий (для цвета) ===== */
+    /* ===== ЛЕГЕНДА ===== */
     .category-legend {
       display: flex;
       flex-wrap: wrap;
@@ -259,6 +290,134 @@
       height: 14px;
       border-radius: 30px;
       display: inline-block;
+    }
+
+    /* ===== МОДАЛЬНОЕ ОКНО ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 32px;
+      padding: 28px 24px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    }
+    .modal h3 {
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+    .modal label {
+      font-weight: 500;
+      font-size: 0.85rem;
+      display: block;
+      margin: 12px 0 4px;
+    }
+    .modal input, .modal select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      border: 1px solid #ddd;
+      background: #f8f6f2;
+      font-size: 0.95rem;
+    }
+    .modal .category-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 6px 0 10px;
+    }
+    .modal .cat-btn {
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 2px solid transparent;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.1s;
+      color: white;
+    }
+    .modal .cat-btn.active {
+      border-color: #1e1e2a;
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .modal .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+    .modal .modal-actions button {
+      padding: 10px 24px;
+      border-radius: 40px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .modal .btn-save {
+      background: #2d2d3f;
+      color: white;
+    }
+    .modal .btn-cancel {
+      background: #eae5de;
+      color: #3d3d4e;
+    }
+
+    /* ===== СПИСОК ЗАДАЧ НА ДЕНЬ ===== */
+    .day-tasks-modal .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 4px;
+      border-bottom: 1px solid #eee;
+    }
+    .day-tasks-modal .task-item .task-cat {
+      width: 12px;
+      height: 12px;
+      border-radius: 30px;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    .day-tasks-modal .task-item .task-name {
+      flex: 1;
+      font-size: 0.9rem;
+    }
+    .day-tasks-modal .task-item .task-done-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #2d2d3f;
+      padding: 0 8px;
+    }
+    .day-tasks-modal .task-item.done .task-name {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+    .day-tasks-modal .no-tasks {
+      text-align: center;
+      color: #999;
+      padding: 20px 0;
     }
 
     /* ===== ТЕМНАЯ ТЕМА ===== */
@@ -284,10 +443,16 @@
       background: #4f4f6b;
       color: #d9d4e0;
     }
+    body.dark-mode .profile-xp {
+      color: #b0acc9;
+    }
     body.dark-mode .day-cell {
       background: #2f2f40;
       color: #eae6f0;
       border-color: #3f3f55;
+    }
+    body.dark-mode .day-cell:hover {
+      background: #3a3a4e;
     }
     body.dark-mode .day-cell.other-month {
       background: #252533;
@@ -308,8 +473,27 @@
     body.dark-mode .category-legend {
       color: #b8b4cc;
     }
+    body.dark-mode .modal {
+      background: #2f2f40;
+      color: #eae6f0;
+    }
+    body.dark-mode .modal input,
+    body.dark-mode .modal select {
+      background: #3f3f55;
+      border-color: #55556b;
+      color: #eae6f0;
+    }
+    body.dark-mode .modal .btn-cancel {
+      background: #44445a;
+      color: #ddd;
+    }
+    body.dark-mode .modal .btn-save {
+      background: #6b6b8a;
+    }
+    body.dark-mode .day-tasks-modal .task-item {
+      border-color: #44445a;
+    }
 
-    /* адаптив */
     @media (max-width: 420px) {
       .app { padding: 14px 12px 8px; }
       .profile-card { padding: 2px 10px 2px 4px; }
@@ -325,10 +509,11 @@
     <div class="top-bar">
       <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
       <div class="profile-card">
-        <div class="avatar">🧙</div>
+        <div class="avatar" id="avatarEmoji">🧙</div>
         <div class="profile-info">
-          <span class="profile-name">Эльдар</span>
-          <span class="profile-level"><i class="fas fa-star" style="font-size:0.6rem;"></i> Lv. 14</span>
+          <span class="profile-name" id="profileName">Эльдар</span>
+          <span class="profile-level" id="profileLevel"><i class="fas fa-star" style="font-size:0.6rem;"></i> Lv. 1</span>
+          <span class="profile-xp" id="profileXp">XP: 0 / 100</span>
         </div>
       </div>
       <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
@@ -349,21 +534,52 @@
 
     <div class="days-grid" id="daysGrid"></div>
 
-    <!-- Легенда категорий (цвета) -->
+    <!-- Легенда -->
     <div class="category-legend" id="legendContainer"></div>
 
-    <!-- Нижний бар быстрых функций -->
+    <!-- Нижний бар -->
     <div class="bottom-bar">
-      <button><i class="fas fa-calendar-plus"></i></button>
-      <button><i class="fas fa-tasks"></i></button>
-      <button><i class="fas fa-chart-simple"></i></button>
-      <button><i class="fas fa-user-gear"></i></button>
+      <button id="addTaskBtn"><i class="fas fa-calendar-plus"></i></button>
+      <button id="tasksListBtn"><i class="fas fa-tasks"></i><span class="badge" id="tasksBadge">0</span></button>
+      <button id="statsBtn"><i class="fas fa-chart-simple"></i></button>
+      <button id="settingsBtn"><i class="fas fa-user-gear"></i></button>
+    </div>
+  </div>
+
+  <!-- Модалка добавления задачи -->
+  <div class="modal-overlay" id="addTaskModal">
+    <div class="modal">
+      <h3><i class="fas fa-plus-circle"></i> Новая задача</h3>
+      <label>Название</label>
+      <input type="text" id="taskTitleInput" placeholder="Что нужно сделать?" value="">
+
+      <label>Дата</label>
+      <input type="date" id="taskDateInput">
+
+      <label>Категория</label>
+      <div class="category-selector" id="categorySelector"></div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cancelTaskBtn">Отмена</button>
+        <button class="btn-save" id="saveTaskBtn">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка списка задач на день -->
+  <div class="modal-overlay" id="dayTasksModal">
+    <div class="modal day-tasks-modal">
+      <h3 id="dayTasksTitle">Задачи на 01.07.2026</h3>
+      <div id="dayTasksList"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="closeDayTasksBtn">Закрыть</button>
+      </div>
     </div>
   </div>
 
   <script>
     (function() {
-      // ------ ДАННЫЕ КАТЕГОРИЙ (цвета) ------
+      // ------ КАТЕГОРИИ ------
       const categories = [
         { id: 'sport', label: 'Спорт', color: '#e67e22' },
         { id: 'food', label: 'Питание', color: '#2ecc71' },
@@ -374,125 +590,358 @@
         { id: 'other', label: 'Другое', color: '#f39c12' }
       ];
 
-      // ------ ТЕСТОВЫЕ ЗАДАЧИ (дата: категория) ------
-      // формат: 'YYYY-MM-DD': [categoryId, ...]
-      const tasksData = {
-        '2026-07-03': ['sport', 'food'],
-        '2026-07-07': ['tasks'],
-        '2026-07-10': ['hobby', 'travel'],
-        '2026-07-15': ['debt', 'other'],
-        '2026-07-20': ['sport', 'hobby'],
-        '2026-07-25': ['food', 'tasks', 'travel'],
-        '2026-07-28': ['other'],
-        '2026-07-30': ['sport', 'debt'],
-        '2026-08-05': ['travel', 'hobby'],
-        '2026-06-28': ['food', 'tasks'],
-        '2026-08-12': ['sport', 'food', 'hobby'],
-        '2026-07-01': ['other']
-      };
-
       // ------ СОСТОЯНИЕ ------
-      let currentDate = new Date(2026, 6, 1); // июль 2026
+      let currentDate = new Date();
+      currentDate.setHours(0,0,0,0);
       let darkMode = false;
 
-      // DOM
-      const daysGrid = document.getElementById('daysGrid');
-      const monthLabel = document.getElementById('monthYearLabel');
-      const themeToggle = document.getElementById('themeToggle');
-      const legendContainer = document.getElementById('legendContainer');
+      // Данные: задачи { id, title, date, category, done }
+      let tasks = [];
+      let nextTaskId = 1;
 
-      // ------ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ------
-      function formatDateKey(year, month, day) {
-        return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      // RPG
+      let player = {
+        name: 'Эльдар',
+        level: 1,
+        xp: 0,
+        xpToNext: 100
+      };
+
+      // ------ ЗАГРУЗКА / СОХРАНЕНИЕ ------
+      function loadData() {
+        try {
+          const saved = localStorage.getItem('rpgCalendarData');
+          if (saved) {
+            const data = JSON.parse(saved);
+            tasks = data.tasks || [];
+            nextTaskId = data.nextTaskId || 1;
+            if (data.player) {
+              player = data.player;
+            }
+            // миграция: если нет поля done, добавить
+            tasks = tasks.map(t => ({ ...t, done: t.done || false }));
+          } else {
+            // тестовые данные
+            const testTasks = [
+              { id: nextTaskId++, title: 'Утренняя пробежка', date: getDateStr(0), category: 'sport', done: false },
+              { id: nextTaskId++, title: 'Завтрак из 5 продуктов', date: getDateStr(0), category: 'food', done: false },
+              { id: nextTaskId++, title: 'Сделать уборку', date: getDateStr(1), category: 'tasks', done: false },
+              { id: nextTaskId++, title: 'Почитать книгу', date: getDateStr(2), category: 'hobby', done: false },
+              { id: nextTaskId++, title: 'План поездки', date: getDateStr(3), category: 'travel', done: false },
+            ];
+            tasks = testTasks;
+          }
+        } catch(e) { tasks = []; }
+        updateBadge();
+        updateProfile();
       }
 
-      function getTasksForDate(year, month, day) {
-        const key = formatDateKey(year, month, day);
-        return tasksData[key] || [];
+      function saveData() {
+        try {
+          localStorage.setItem('rpgCalendarData', JSON.stringify({
+            tasks, nextTaskId, player
+          }));
+        } catch(e) {}
       }
 
-      // ------ РЕНДЕР КАЛЕНДАРЯ ------
+      function getDateStr(offset = 0) {
+        const d = new Date();
+        d.setDate(d.getDate() + offset);
+        return d.toISOString().split('T')[0];
+      }
+
+      // ------ RPG ------
+      function addXP(amount = 10) {
+        player.xp += amount;
+        while (player.xp >= player.xpToNext) {
+          player.xp -= player.xpToNext;
+          player.level++;
+          player.xpToNext = Math.floor(player.xpToNext * 1.4) + 20;
+          // анимация уровня (можно уведомление)
+        }
+        updateProfile();
+        saveData();
+      }
+
+      function updateProfile() {
+        document.getElementById('profileLevel').innerHTML = `<i class="fas fa-star" style="font-size:0.6rem;"></i> Lv. ${player.level}`;
+        document.getElementById('profileXp').textContent = `XP: ${player.xp} / ${player.xpToNext}`;
+        // смена аватара по уровню
+        const emojis = ['🧙','⚔️','🛡️','🧝','🐉','👑'];
+        const idx = Math.min(Math.floor(player.level / 3), emojis.length-1);
+        document.getElementById('avatarEmoji').textContent = emojis[idx] || '🧙';
+      }
+
+      // ------ РАБОТА С ЗАДАЧАМИ ------
+      function getTasksForDate(dateStr) {
+        return tasks.filter(t => t.date === dateStr);
+      }
+
+      function getTasksForDateWithDone(dateStr) {
+        return tasks.filter(t => t.date === dateStr);
+      }
+
+      function addTask(title, date, category) {
+        if (!title.trim()) return false;
+        const newTask = {
+          id: nextTaskId++,
+          title: title.trim(),
+          date: date,
+          category: category,
+          done: false
+        };
+        tasks.push(newTask);
+        saveData();
+        updateBadge();
+        renderCalendar();
+        return true;
+      }
+
+      function toggleTaskDone(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+          if (!task.done) {
+            addXP(10);
+          }
+          task.done = !task.done;
+          saveData();
+          updateBadge();
+          renderCalendar();
+          // обновить список в модалке, если открыта
+          const dayTasksModal = document.getElementById('dayTasksModal');
+          if (dayTasksModal.classList.contains('active')) {
+            const date = document.getElementById('dayTasksTitle').dataset.date;
+            if (date) renderDayTasks(date);
+          }
+        }
+      }
+
+      function deleteTask(taskId) {
+        tasks = tasks.filter(t => t.id !== taskId);
+        saveData();
+        updateBadge();
+        renderCalendar();
+        const dayTasksModal = document.getElementById('dayTasksModal');
+        if (dayTasksModal.classList.contains('active')) {
+          const date = document.getElementById('dayTasksTitle').dataset.date;
+          if (date) renderDayTasks(date);
+        }
+      }
+
+      function updateBadge() {
+        const undone = tasks.filter(t => !t.done).length;
+        document.getElementById('tasksBadge').textContent = undone;
+      }
+
+      // ------ КАЛЕНДАРЬ ------
       function renderCalendar() {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
 
-        monthLabel.textContent = new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(currentDate);
+        document.getElementById('monthYearLabel').textContent =
+          new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(currentDate);
 
-        // первый день месяца и кол-во дней
         const firstDayOfMonth = new Date(year, month, 1);
-        const startDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7; // 0 = понедельник
+        const startDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const daysInPrevMonth = new Date(year, month, 0).getDate();
 
         let gridHtml = '';
 
-        // дни предыдущего месяца
+        // предыдущий месяц
         for (let i = startDayOfWeek - 1; i >= 0; i--) {
           const day = daysInPrevMonth - i;
           const prevMonth = month === 0 ? 11 : month - 1;
           const prevYear = month === 0 ? year - 1 : year;
-          const tasks = getTasksForDate(prevYear, prevMonth, day);
-          gridHtml += createDayCell(day, true, tasks);
+          const dateStr = formatDateKey(prevYear, prevMonth, day);
+          const dayTasks = getTasksForDate(dateStr);
+          gridHtml += createDayCell(day, true, dayTasks, dateStr);
         }
 
-        // дни текущего месяца
+        // текущий месяц
         for (let day = 1; day <= daysInMonth; day++) {
-          const tasks = getTasksForDate(year, month, day);
-          gridHtml += createDayCell(day, false, tasks);
+          const dateStr = formatDateKey(year, month, day);
+          const dayTasks = getTasksForDate(dateStr);
+          gridHtml += createDayCell(day, false, dayTasks, dateStr);
         }
 
-        // дни следующего месяца (заполняем до 42 ячеек)
+        // следующий месяц
         const totalCells = startDayOfWeek + daysInMonth;
         const remaining = (7 - (totalCells % 7)) % 7;
         for (let day = 1; day <= remaining; day++) {
           const nextMonth = month === 11 ? 0 : month + 1;
           const nextYear = month === 11 ? year + 1 : year;
-          const tasks = getTasksForDate(nextYear, nextMonth, day);
-          gridHtml += createDayCell(day, true, tasks);
+          const dateStr = formatDateKey(nextYear, nextMonth, day);
+          const dayTasks = getTasksForDate(dateStr);
+          gridHtml += createDayCell(day, true, dayTasks, dateStr);
         }
 
-        daysGrid.innerHTML = gridHtml;
+        document.getElementById('daysGrid').innerHTML = gridHtml;
+
+        // добавить обработчики на клик по дню
+        document.querySelectorAll('.day-cell').forEach(el => {
+          el.addEventListener('click', function() {
+            const date = this.dataset.date;
+            if (date) openDayTasks(date);
+          });
+        });
       }
 
-      function createDayCell(day, isOtherMonth, tasks) {
-        // ограничиваем количество отображаемых точек (макс 4)
+      function formatDateKey(year, month, day) {
+        return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      }
+
+      function createDayCell(day, isOtherMonth, dayTasks, dateStr) {
         const maxDots = 4;
-        const dots = tasks.slice(0, maxDots).map(catId => {
-          const cat = categories.find(c => c.id === catId);
-          return cat ? `<span class="task-dot" style="background:${cat.color};"></span>` : '';
+        const dots = dayTasks.slice(0, maxDots).map(t => {
+          const cat = categories.find(c => c.id === t.category);
+          const doneClass = t.done ? 'done' : '';
+          return cat ? `<span class="task-dot ${doneClass}" style="background:${cat.color};"></span>` : '';
         }).join('');
 
-        // если задач больше 4, показываем +N
         let extra = '';
-        if (tasks.length > maxDots) {
-          extra = `<span style="font-size:0.55rem; margin-left:1px; opacity:0.7;">+${tasks.length - maxDots}</span>`;
+        if (dayTasks.length > maxDots) {
+          extra = `<span style="font-size:0.55rem; margin-left:1px; opacity:0.7;">+${dayTasks.length - maxDots}</span>`;
         }
 
         const className = `day-cell ${isOtherMonth ? 'other-month' : ''}`;
-        return `<div class="${className}">
+        return `<div class="${className}" data-date="${dateStr}">
           <span class="day-number">${day}</span>
           <div class="task-indicators">${dots}${extra}</div>
         </div>`;
       }
 
-      // ------ ЛЕГЕНДА (категории) ------
-      function renderLegend() {
-        legendContainer.innerHTML = categories.map(cat => `
-          <span class="legend-item">
-            <span class="color-swatch" style="background:${cat.color};"></span>
-            ${cat.label}
-          </span>
-        `).join('');
+      // ------ ОТКРЫТИЕ СПИСКА ЗАДАЧ НА ДЕНЬ ------
+      function openDayTasks(dateStr) {
+        const modal = document.getElementById('dayTasksModal');
+        const title = document.getElementById('dayTasksTitle');
+        const parts = dateStr.split('-');
+        const d = new Date(parts[0], parts[1]-1, parts[2]);
+        title.textContent = `Задачи на ${d.toLocaleDateString('ru-RU')}`;
+        title.dataset.date = dateStr;
+        modal.classList.add('active');
+        renderDayTasks(dateStr);
       }
 
-      // ------ СМЕНА ТЕМЫ ------
+      function renderDayTasks(dateStr) {
+        const container = document.getElementById('dayTasksList');
+        const dayTasks = getTasksForDateWithDone(dateStr);
+        if (dayTasks.length === 0) {
+          container.innerHTML = `<div class="no-tasks">Нет задач на этот день</div>`;
+          return;
+        }
+        let html = '';
+        dayTasks.forEach(task => {
+          const cat = categories.find(c => c.id === task.category);
+          const doneClass = task.done ? 'done' : '';
+          const doneIcon = task.done ? 'fa-circle-check' : 'fa-circle';
+          html += `
+            <div class="task-item ${doneClass}">
+              <span class="task-cat" style="background:${cat ? cat.color : '#999'};"></span>
+              <span class="task-name">${task.title}</span>
+              <div>
+                <button class="task-done-btn" data-id="${task.id}" title="Выполнено"><i class="fas ${doneIcon}"></i></button>
+                <button class="task-done-btn" data-id="${task.id}" data-delete="true" title="Удалить" style="color:#e74c3c;"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+
+        // обработчики
+        container.querySelectorAll('.task-done-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const id = parseInt(this.dataset.id);
+            if (this.dataset.delete) {
+              if (confirm('Удалить задачу?')) deleteTask(id);
+            } else {
+              toggleTaskDone(id);
+            }
+          });
+        });
+      }
+
+      // ------ МОДАЛКА ДОБАВЛЕНИЯ ------
+      function openAddTaskModal() {
+        const modal = document.getElementById('addTaskModal');
+        modal.classList.add('active');
+        // дата по умолчанию сегодня
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('taskDateInput').value = today;
+        document.getElementById('taskTitleInput').value = '';
+        // категории
+        const container = document.getElementById('categorySelector');
+        container.innerHTML = '';
+        let selectedCat = categories[0].id;
+        categories.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.className = `cat-btn${cat.id === selectedCat ? ' active' : ''}`;
+          btn.style.background = cat.color;
+          btn.textContent = cat.label;
+          btn.dataset.cat = cat.id;
+          btn.addEventListener('click', function() {
+            container.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedCat = this.dataset.cat;
+          });
+          container.appendChild(btn);
+        });
+        // сохраняем выбранную категорию
+        window._selectedCategory = selectedCat;
+
+        document.getElementById('saveTaskBtn').onclick = function() {
+          const title = document.getElementById('taskTitleInput').value.trim();
+          const date = document.getElementById('taskDateInput').value;
+          const activeBtn = document.querySelector('#categorySelector .cat-btn.active');
+          const category = activeBtn ? activeBtn.dataset.cat : categories[0].id;
+          if (!title) { alert('Введите название задачи'); return; }
+          if (!date) { alert('Выберите дату'); return; }
+          if (addTask(title, date, category)) {
+            modal.classList.remove('active');
+            renderCalendar();
+            updateBadge();
+          }
+        };
+        document.getElementById('cancelTaskBtn').onclick = function() {
+          modal.classList.remove('active');
+        };
+      }
+
+      // ------ СТАТИСТИКА ------
+      function showStats() {
+        const total = tasks.length;
+        const done = tasks.filter(t => t.done).length;
+        const undone = total - done;
+        const byCategory = {};
+        categories.forEach(c => byCategory[c.id] = 0);
+        tasks.forEach(t => { if (byCategory[t.category] !== undefined) byCategory[t.category]++; });
+
+        let msg = `📊 СТАТИСТИКА\nВсего задач: ${total}\n✅ Выполнено: ${done}\n⏳ Осталось: ${undone}\n\nПо категориям:\n`;
+        categories.forEach(c => {
+          msg += `  ${c.label}: ${byCategory[c.id] || 0}\n`;
+        });
+        alert(msg);
+      }
+
+      // ------ НАСТРОЙКИ (смена имени) ------
+      function showSettings() {
+        const newName = prompt('Введите новое имя:', player.name);
+        if (newName && newName.trim()) {
+          player.name = newName.trim();
+          document.getElementById('profileName').textContent = player.name;
+          saveData();
+        }
+      }
+
+      // ------ ТЕМА ------
       function toggleTheme() {
         darkMode = !darkMode;
         document.body.classList.toggle('dark-mode', darkMode);
-        themeToggle.innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        document.getElementById('themeToggle').innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
       }
 
-      // ------ НАВИГАЦИЯ ПО МЕСЯЦАМ ------
+      // ------ НАВИГАЦИЯ ------
       function changeMonth(delta) {
         currentDate.setMonth(currentDate.getMonth() + delta);
         renderCalendar();
@@ -500,32 +949,49 @@
 
       // ------ ИНИЦИАЛИЗАЦИЯ ------
       function init() {
+        loadData();
         renderCalendar();
         renderLegend();
+        updateProfile();
+        updateBadge();
 
-        // обработчики
         document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
         document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
-        themeToggle.addEventListener('click', toggleTheme);
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
-        // меню (заглушка)
-        document.getElementById('menuBtn').addEventListener('click', () => {
-          alert('📋 Меню журнала: фильтры, статистика, настройки профиля.');
+        document.getElementById('addTaskBtn').addEventListener('click', openAddTaskModal);
+        document.getElementById('tasksListBtn').addEventListener('click', () => {
+          // показать список всех задач (простой вариант — открыть сегодня)
+          const today = new Date().toISOString().split('T')[0];
+          openDayTasks(today);
         });
+        document.getElementById('statsBtn').addEventListener('click', showStats);
+        document.getElementById('settingsBtn').addEventListener('click', showSettings);
 
-        // быстрые кнопки (заглушки)
-        document.querySelectorAll('.bottom-bar button').forEach((btn, idx) => {
-          btn.addEventListener('click', (e) => {
-            const actions = ['➕ Добавить задачу', '📋 Список задач', '📊 Статистика', '⚙️ Настройки'];
-            alert(actions[idx] || 'Действие');
+        document.getElementById('closeDayTasksBtn').addEventListener('click', () => {
+          document.getElementById('dayTasksModal').classList.remove('active');
+        });
+        // закрытие по клику вне модалки
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+          overlay.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
           });
         });
 
-        // тёмная тема по умолчанию выключена
-        if (darkMode) {
-          document.body.classList.add('dark-mode');
-          themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-        }
+        // меню
+        document.getElementById('menuBtn').addEventListener('click', () => {
+          alert('📋 Меню:\n- Фильтры по категориям\n- Архив выполненных\n- Экспорт данных');
+        });
+      }
+
+      function renderLegend() {
+        const container = document.getElementById('legendContainer');
+        container.innerHTML = categories.map(cat => `
+          <span class="legend-item">
+            <span class="color-swatch" style="background:${cat.color};"></span>
+            ${cat.label}
+          </span>
+        `).join('');
       }
 
       init();
