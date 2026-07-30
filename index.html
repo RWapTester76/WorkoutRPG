@@ -1,3774 +1,535 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FlowPlan</title>
-    <style>
-        /* =============================================================
-           БАЗА
-           ============================================================= */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #6C5CE7;
-            --primary-light: rgba(108, 92, 231, 0.12);
-            --primary-dark: #5A4BD1;
-            --bg: #F0F2F8;
-            --card-bg: #FFFFFF;
-            --text: #1A1A2E;
-            --text-secondary: #6B7280;
-            --text-light: #9CA3AF;
-            --border: #E8EAF0;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
-            --radius: 16px;
-            --radius-sm: 10px;
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
-            --gradient: linear-gradient(135deg, #6C5CE7, #A78BFA);
-        }
-
-        [data-theme="dark"] {
-            --bg: #12121F;
-            --card-bg: #1C1C30;
-            --text: #EAEAEA;
-            --text-secondary: #9CA3AF;
-            --text-light: #6B7280;
-            --border: rgba(255, 255, 255, 0.06);
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
-        }
-
-        body {
-            font-family: var(--font);
-            background: var(--bg);
-            color: var(--text);
-            transition: background var(--transition), color var(--transition);
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* =============================================================
-           ПРИЛОЖЕНИЕ
-           ============================================================= */
-        .app {
-            max-width: 480px;
-            margin: 0 auto;
-            min-height: 100vh;
-            padding: 0 16px 100px;
-            background: var(--bg);
-            transition: background var(--transition);
-        }
-
-        /* =============================================================
-           ВКЛАДКИ
-           ============================================================= */
-        .view {
-            display: none;
-            animation: fadeUp 0.3s ease;
-            padding-top: 8px;
-        }
-
-        .view.active {
-            display: block;
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* =============================================================
-           ШАПКА
-           ============================================================= */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0 16px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header-left .greeting {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-
-        .header-left h1 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
-        }
-
-        .header-left h1 span {
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .header-actions button {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: none;
-            background: var(--card-bg);
-            color: var(--text-secondary);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
-        }
-
-        .header-actions button:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-            transform: scale(1.04);
-        }
-
-        .header-actions button:active {
-            transform: scale(0.94);
-        }
-
-        /* =============================================================
-           НАВИГАЦИЯ (НОВАЯ)
-           ============================================================= */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            background: var(--card-bg);
-            border-top: 1px solid var(--border);
-            padding: 6px 8px var(--safe-bottom);
-            z-index: 100;
-            display: flex;
-            justify-content: space-around;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
-        }
-
-        .bottom-nav .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0px;
-            padding: 4px 6px;
-            border: none;
-            background: none;
-            color: var(--text-secondary);
-            font-size: 0.5rem;
-            font-weight: 500;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all var(--transition);
-            position: relative;
-            letter-spacing: 0.2px;
-            text-transform: uppercase;
-            min-width: 36px;
-            border-radius: var(--radius-sm);
-        }
-
-        .bottom-nav .nav-item .nav-icon {
-            font-size: 1.3rem;
-            transition: transform var(--transition);
-            line-height: 1;
-        }
-
-        .bottom-nav .nav-item .nav-label {
-            opacity: 0.6;
-            font-size: 0.45rem;
-            margin-top: 1px;
-        }
-
-        .bottom-nav .nav-item.active {
-            color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .bottom-nav .nav-item.active .nav-icon {
-            transform: scale(1.08);
-        }
-
-        .bottom-nav .nav-item .nav-badge {
-            position: absolute;
-            top: 0px;
-            right: 0px;
-            background: #EF4444;
-            color: #fff;
-            font-size: 0.45rem;
-            font-weight: 600;
-            padding: 1px 4px;
-            border-radius: 10px;
-            min-width: 14px;
-            text-align: center;
-            line-height: 1.3;
-        }
-
-        /* =============================================================
-           КАРТОЧКИ
-           ============================================================= */
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            transition: all var(--transition);
-        }
-
-        .card:hover {
-            box-shadow: var(--shadow-hover);
-        }
-
-        .card-sm {
-            border-radius: var(--radius-sm);
-            padding: 10px 12px;
-        }
-
-        /* =============================================================
-           КНОПКИ
-           ============================================================= */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 18px;
-            border: none;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-
-        .btn-primary {
-            background: var(--gradient);
-            color: #fff;
-            box-shadow: 0 2px 16px rgba(108, 92, 231, 0.25);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(108, 92, 231, 0.35);
-        }
-
-        .btn-primary:active {
-            transform: scale(0.96);
-        }
-
-        .btn-secondary {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.08);
-            color: #EF4444;
-            border: 1px solid rgba(239, 68, 68, 0.12);
-        }
-
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.15);
-        }
-
-        .btn-ghost {
-            background: transparent;
-            color: var(--text-secondary);
-            padding: 4px 10px;
-            font-size: 0.7rem;
-        }
-
-        .btn-ghost:hover {
-            background: var(--border);
-        }
-
-        .fab {
-            position: fixed;
-            bottom: 88px;
-            right: 24px;
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: var(--gradient);
-            color: #fff;
-            border: none;
-            font-size: 24px;
-            box-shadow: 0 4px 24px rgba(108, 92, 231, 0.3);
-            cursor: pointer;
-            transition: all var(--transition);
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fab:hover {
-            transform: scale(1.06);
-            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.4);
-        }
-
-        .fab:active {
-            transform: scale(0.93);
-        }
-
-        /* =============================================================
-           ЗАДАЧИ
-           ============================================================= */
-        .quest-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .quest-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            background: var(--card-bg);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            transition: all var(--transition);
-            position: relative;
-        }
-
-        .quest-item:active {
-            transform: scale(0.98);
-        }
-
-        .quest-item.done {
-            opacity: 0.4;
-        }
-
-        .quest-item.done .quest-title {
-            text-decoration: line-through;
-        }
-
-        .quest-item .quest-color {
-            width: 4px;
-            height: 36px;
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .quest-item .checkbox {
-            width: 20px;
-            height: 20px;
-            min-width: 20px;
-            border-radius: 50%;
-            border: 2px solid var(--border);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition);
-            background: var(--bg);
-        }
-
-        .quest-item .checkbox.checked {
-            background: var(--gradient);
-            border-color: var(--primary);
-        }
-
-        .quest-item .checkbox.checked::after {
-            content: '✓';
-            font-size: 12px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .quest-item .quest-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .quest-item .quest-title {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .quest-item .quest-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-top: 3px;
-        }
-
-        .quest-item .quest-meta .tag {
-            font-size: 0.5rem;
-            font-weight: 500;
-            padding: 1px 8px;
-            border-radius: 20px;
-            background: var(--border);
-            color: var(--text-secondary);
-        }
-
-        .quest-item .quest-meta .tag-guild {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .quest-item .quest-actions {
-            display: flex;
-            gap: 2px;
-        }
-
-        .quest-item .quest-actions button {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .quest-item .quest-actions button:hover {
-            background: var(--border);
-        }
-
-        .quest-item .quest-actions button.danger:hover {
-            background: rgba(239, 68, 68, 0.1);
-            color: #EF4444;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-state .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            opacity: 0.3;
-        }
-
-        .empty-state p {
-            font-size: 0.9rem;
-            margin-bottom: 12px;
-        }
-
-        /* =============================================================
-           МОДАЛКА
-           ============================================================= */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-            z-index: 200;
-            padding: 20px;
-        }
-
-        .modal-overlay.open {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--card-bg);
-            border-radius: var(--radius) var(--radius) 0 0;
-            max-width: 480px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 20px 18px 28px;
-            animation: slideUp 0.3s ease;
-            border: 1px solid var(--border);
-            border-bottom: none;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .modal-header h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .modal-close {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: none;
-            background: var(--border);
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-close:hover {
-            background: var(--text-secondary);
-            color: #fff;
-        }
-
-        .modal form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .modal .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .modal .form-group label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .modal input,
-        .modal select,
-        .modal textarea {
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
-            transition: all var(--transition);
-            width: 100%;
-        }
-
-        .modal input:focus,
-        .modal select:focus,
-        .modal textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.08);
-        }
-
-        .modal textarea {
-            resize: vertical;
-            min-height: 50px;
-        }
-
-        .modal .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .modal .form-check {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 2px 0;
-        }
-
-        .modal .form-check input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .modal .form-check label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        .modal .form-hint {
-            font-size: 0.6rem;
-            color: var(--text-light);
-            margin-top: 2px;
-        }
-
-        .modal .btn-row {
-            display: flex;
-            gap: 8px;
-            margin-top: 6px;
-        }
-
-        .modal .btn-row button {
-            flex: 1;
-        }
-
-        .modal .btn-row button[type="button"] {
-            background: var(--border);
-            color: var(--text-secondary);
-        }
-
-        .modal .btn-row button[type="button"]:hover {
-            background: var(--text-secondary);
-            color: #fff;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* =============================================================
-           КАЛЕНДАРЬ
-           ============================================================= */
-        .calendar-modes {
-            display: flex;
-            gap: 4px;
-            background: var(--card-bg);
-            border-radius: var(--radius-sm);
-            padding: 4px;
-            border: 1px solid var(--border);
-            margin-bottom: 14px;
-        }
-
-        .calendar-modes .mode-btn {
-            flex: 1;
-            padding: 6px 10px;
-            border: none;
-            border-radius: 6px;
-            background: transparent;
-            color: var(--text-secondary);
-            font-size: 0.65rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-        }
-
-        .calendar-modes .mode-btn.active {
-            background: var(--gradient);
-            color: #fff;
-            box-shadow: 0 2px 12px rgba(108, 92, 231, 0.2);
-        }
-
-        .calendar-modes .mode-btn:hover:not(.active) {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .calendar-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 3px;
-            margin-bottom: 6px;
-            font-weight: 600;
-            font-size: 0.5rem;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            text-align: center;
-            letter-spacing: 0.3px;
-        }
-
-        .calendar-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 3px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all var(--transition);
-            font-size: 0.75rem;
-            font-weight: 500;
-            position: relative;
-            background: transparent;
-        }
-
-        .calendar-day:hover {
-            background: var(--primary-light);
-            transform: scale(1.04);
-        }
-
-        .calendar-day.other-month {
-            opacity: 0.2;
-        }
-
-        .calendar-day.today {
-            background: var(--gradient);
-            color: #fff;
-            font-weight: 700;
-            box-shadow: 0 2px 16px rgba(108, 92, 231, 0.25);
-        }
-
-        .calendar-day .day-dots {
-            display: flex;
-            gap: 2px;
-            margin-top: 1px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .calendar-day .day-dots .dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-        }
-
-        .calendar-day .day-photo {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 0.5rem;
-        }
-
-        .month-nav {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .month-nav button {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            color: var(--text);
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .month-nav button:hover {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
-
-        .month-nav span {
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        /* =============================================================
-           КАЛЕНДАРЬ: ДЕНЬ
-           ============================================================= */
-        .day-schedule .hour-block {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 4px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .day-schedule .hour-block .hour-label {
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            min-width: 34px;
-            padding-top: 2px;
-        }
-
-        .day-schedule .hour-block .hour-events {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .day-schedule .hour-block .hour-events .event {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 8px;
-            border-radius: var(--radius-sm);
-            background: var(--primary-light);
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all var(--transition);
-            border-left: 3px solid var(--primary);
-        }
-
-        .day-schedule .hour-block .hour-events .event:hover {
-            transform: translateX(4px);
-        }
-
-        .day-schedule .hour-block .hour-events .event.done {
-            opacity: 0.4;
-            text-decoration: line-through;
-        }
-
-        .day-schedule .hour-block .hour-events .event .time {
-            font-size: 0.55rem;
-            color: var(--text-secondary);
-        }
-
-        .day-schedule .hour-block .hour-events .event .guild {
-            font-size: 0.5rem;
-            padding: 1px 6px;
-            border-radius: 20px;
-            background: var(--card-bg);
-            margin-left: auto;
-        }
-
-        /* =============================================================
-           КАЛЕНДАРЬ: НЕДЕЛЯ
-           ============================================================= */
-        .week-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .week-grid .week-day {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            background: var(--card-bg);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            transition: all var(--transition);
-            cursor: pointer;
-        }
-
-        .week-grid .week-day:hover {
-            box-shadow: var(--shadow-hover);
-            transform: translateX(4px);
-        }
-
-        .week-grid .week-day .label {
-            min-width: 52px;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-
-        .week-grid .week-day .label .date {
-            font-weight: 400;
-            color: var(--text-secondary);
-            font-size: 0.55rem;
-        }
-
-        .week-grid .week-day .tasks {
-            flex: 1;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 3px;
-        }
-
-        .week-grid .week-day .tasks .tag {
-            font-size: 0.5rem;
-            padding: 1px 6px;
-            border-radius: 20px;
-            background: var(--primary-light);
-            color: var(--primary);
-            border-left: 2px solid var(--primary);
-        }
-
-        .week-grid .week-day .tasks .tag.done {
-            opacity: 0.3;
-            text-decoration: line-through;
-        }
-
-        .week-grid .week-day .count {
-            font-size: 0.6rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* =============================================================
-           КАЛЕНДАРЬ: ГОД
-           ============================================================= */
-        .year-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .year-grid .month-card {
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition);
-            border: 2px solid transparent;
-        }
-
-        .year-grid .month-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--primary-light);
-        }
-
-        .year-grid .month-card .name {
-            font-weight: 600;
-            font-size: 0.7rem;
-            margin-bottom: 4px;
-        }
-
-        .year-grid .month-card .stats {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            font-size: 0.55rem;
-            color: var(--text-secondary);
-        }
-
-        .year-grid .month-card .stats span {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-        }
-
-        .year-grid .month-card .xp {
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-top: 3px;
-        }
-
-        .year-grid .month-card .bar {
-            height: 4px;
-            border-radius: 2px;
-            background: var(--border);
-            margin-top: 4px;
-            overflow: hidden;
-        }
-
-        .year-grid .month-card .bar .fill {
-            height: 100%;
-            border-radius: 2px;
-            background: var(--gradient);
-            transition: width 0.6s ease;
-        }
-
-        /* =============================================================
-           ПРОФИЛЬ (НОВЫЙ ДИЗАЙН)
-           ============================================================= */
-        .profile-header-card {
-            padding: 0;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .profile-cover {
-            width: 100%;
-            height: 120px;
-            background: var(--gradient);
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .profile-cover img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-cover .cover-placeholder {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
-
-        .profile-cover .cover-upload {
-            position: absolute;
-            bottom: 6px;
-            right: 6px;
-            background: rgba(0, 0, 0, 0.4);
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-        }
-
-        .profile-avatar-wrapper {
-            display: flex;
-            align-items: flex-end;
-            gap: 14px;
-            padding: 0 16px;
-            margin-top: -40px;
-        }
-
-        .profile-avatar {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            border: 4px solid var(--card-bg);
-            background: var(--gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: #fff;
-            cursor: pointer;
-            position: relative;
-            flex-shrink: 0;
-            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.2);
-            overflow: hidden;
-        }
-
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-avatar .avatar-upload {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.5);
-            color: #fff;
-            border: none;
-            padding: 2px;
-            font-size: 0.45rem;
-            cursor: pointer;
-            display: none;
-        }
-
-        .profile-avatar:hover .avatar-upload {
-            display: block;
-        }
-
-        .profile-name-wrap {
-            flex: 1;
-            min-width: 0;
-            padding-bottom: 6px;
-        }
-
-        .profile-name-wrap .name {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .profile-name-wrap .title {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-        }
-
-        .profile-name-wrap .level {
-            display: inline-block;
-            background: var(--gradient);
-            color: #fff;
-            padding: 1px 12px;
-            border-radius: 50px;
-            font-size: 0.6rem;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        .profile-body {
-            padding: 14px 16px 16px;
-        }
-
-        .profile-body .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .profile-body .info-grid .item label {
-            font-size: 0.5rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            font-weight: 600;
-        }
-
-        .profile-body .info-grid .item input,
-        .profile-body .info-grid .item select {
-            padding: 6px 10px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
-            width: 100%;
-            margin-top: 1px;
-        }
-
-        .profile-body .info-grid .item input:focus,
-        .profile-body .info-grid .item select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .profile-body .bmi-box {
-            background: var(--primary-light);
-            border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .profile-body .bmi-box .value {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--primary);
-        }
-
-        .profile-body .bmi-box .status {
-            font-size: 0.65rem;
-            font-weight: 600;
-            padding: 2px 12px;
-            border-radius: 50px;
-        }
-
-        .status.normal {
-            background: #D1FAE5;
-            color: #059669;
-        }
-        .status.underweight {
-            background: #FEF3C7;
-            color: #D97706;
-        }
-        .status.overweight {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-        .status.obese {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-
-        .profile-body .section-title {
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin: 10px 0 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            padding: 4px 0;
-        }
-
-        .profile-body .section-title .toggle {
-            font-size: 0.7rem;
-            color: var(--text-light);
-        }
-
-        .profile-body .weight-chart {
-            height: 80px;
-            margin: 6px 0 10px;
-            position: relative;
-            background: var(--bg);
-            border-radius: var(--radius-sm);
-            padding: 6px;
-        }
-
-        .profile-body .weight-chart canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        .profile-body .weight-list .entry {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.75rem;
-        }
-
-        .profile-body .weight-list .entry .date {
-            color: var(--text-secondary);
-        }
-
-        .profile-body .weight-list .entry .val {
-            font-weight: 600;
-        }
-
-        .profile-body .weight-add {
-            display: flex;
-            gap: 6px;
-            margin-top: 6px;
-        }
-
-        .profile-body .weight-add input {
-            flex: 1;
-            padding: 6px 10px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
-        }
-
-        .profile-body .weight-add button {
-            padding: 6px 14px;
-            border-radius: var(--radius-sm);
-            border: none;
-            background: var(--primary-light);
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.75rem;
-        }
-
-        .profile-body .measure-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin-top: 4px;
-        }
-
-        .profile-body .measure-grid .m-item label {
-            font-size: 0.5rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            font-weight: 600;
-        }
-
-        .profile-body .measure-grid .m-item input {
-            padding: 6px 10px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
-            width: 100%;
-            margin-top: 1px;
-        }
-
-        .profile-body .measure-grid .m-item input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .collapsible-content {
-            overflow: hidden;
-            transition: max-height 0.35s ease;
-            max-height: 0;
-        }
-
-        .collapsible-content.open {
-            max-height: 600px;
-        }
-
-        /* =============================================================
-           ИНФО
-           ============================================================= */
-        .info-section {
-            margin-bottom: 14px;
-        }
-
-        .info-section h4 {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .info-section p,
-        .info-section li {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            line-height: 1.7;
-        }
-
-        .info-section ul {
-            padding-left: 16px;
-            list-style: none;
-        }
-
-        .info-section ul li::before {
-            content: '◆ ';
-            color: var(--primary);
-            font-size: 0.5rem;
-        }
-
-        .info-grid-cards {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .info-grid-cards .info-mini {
-            background: var(--primary-light);
-            border-radius: var(--radius-sm);
-            padding: 10px;
-            text-align: center;
-        }
-
-        .info-grid-cards .info-mini .num {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .info-grid-cards .info-mini .label {
-            font-size: 0.55rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-
-        /* =============================================================
-           ГАЛЕРЕЯ
-           ============================================================= */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .gallery-item {
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-            aspect-ratio: 1;
-            background: var(--border);
-            cursor: pointer;
-            transition: all var(--transition);
-            position: relative;
-        }
-
-        .gallery-item:hover {
-            transform: scale(1.03);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .gallery-item .overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.4));
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 6px 8px;
-            opacity: 0;
-            transition: all var(--transition);
-        }
-
-        .gallery-item:hover .overlay {
-            opacity: 1;
-        }
-
-        .gallery-item .overlay .caption {
-            font-size: 0.6rem;
-            color: #fff;
-            font-weight: 500;
-        }
-
-        .gallery-empty {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-            grid-column: 1/-1;
-        }
-
-        .gallery-empty .icon {
-            font-size: 2.5rem;
-            margin-bottom: 8px;
-            opacity: 0.3;
-        }
-
-        /* =============================================================
-           ФИЛЬТРЫ
-           ============================================================= */
-        .filter-bar {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            background: var(--card-bg);
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: all var(--transition);
-            font-family: inherit;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .filter-btn.active {
-            border-color: var(--primary);
-            background: var(--gradient);
-            color: #fff;
-            box-shadow: 0 2px 12px rgba(108, 92, 231, 0.2);
-        }
-
-        .filter-btn:hover {
-            transform: scale(1.06);
-        }
-
-        /* =============================================================
-           НАСТРОЙКИ
-           ============================================================= */
-        .settings-group {
-            margin-bottom: 16px;
-        }
-
-        .settings-group h4 {
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            margin-bottom: 8px;
-        }
-
-        .settings-options {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .settings-options .opt {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: 2px solid var(--border);
-            cursor: pointer;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            background: var(--card-bg);
-        }
-
-        .settings-options .opt:hover {
-            transform: scale(1.06);
-        }
-
-        .settings-options .opt.active {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
-        }
-
-        .settings-options .opt .swatch {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-        }
-
-        .settings-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .settings-actions button {
-            flex: 1;
-            min-width: 70px;
-            font-size: 0.7rem;
-            padding: 6px 12px;
-        }
-
-        /* =============================================================
-           ГИЛЬДИИ
-           ============================================================= */
-        .guild-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-            gap: 8px;
-        }
-
-        .guild-card {
-            text-align: center;
-            padding: 10px;
-            transition: all var(--transition);
-            border: 2px solid transparent;
-        }
-
-        .guild-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--primary-light);
-        }
-
-        .guild-card .icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            margin: 0 auto 4px;
-        }
-
-        .guild-card .name {
-            font-size: 0.65rem;
-            font-weight: 600;
-        }
-
-        .guild-card .count {
-            font-size: 0.5rem;
-            color: var(--text-secondary);
-        }
-
-        .guild-card .color-picker {
-            margin-top: 4px;
-        }
-
-        .guild-card .color-picker input {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            cursor: pointer;
-            padding: 0;
-            background: none;
-        }
-
-        /* =============================================================
-           УВЕДОМЛЕНИЯ
-           ============================================================= */
-        .notification {
-            position: fixed;
-            top: 14px;
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: 400px;
-            width: 90%;
-            padding: 10px 18px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            z-index: 300;
-            text-align: center;
-            font-weight: 500;
-            display: none;
-            animation: notifIn 0.3s ease;
-            border-left: 4px solid var(--primary);
-            color: var(--text);
-            font-size: 0.85rem;
-        }
-
-        @keyframes notifIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -16px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0) scale(1);
-            }
-        }
-
-        .notification.show {
-            display: block;
-        }
-
-        /* =============================================================
-           АДАПТИВ
-           ============================================================= */
-        @media (min-width: 768px) {
-            .app {
-                max-width: 600px;
-                padding: 0 24px 100px;
-            }
-            .bottom-nav {
-                max-width: 600px;
-                border-radius: 16px 16px 0 0;
-                padding: 8px 12px var(--safe-bottom);
-            }
-            .fab {
-                right: calc(50% - 300px + 24px);
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .app {
-                max-width: 800px;
-            }
-            .bottom-nav {
-                max-width: 800px;
-            }
-            .fab {
-                right: calc(50% - 400px + 24px);
-            }
-        }
-
-        .badge-count {
-            font-size: 0.5rem;
-            color: var(--text-secondary);
-            background: var(--border);
-            padding: 1px 8px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-
-        /* =============================================================
-           СТАТИСТИКА В ПРОФИЛЕ
-           ============================================================= */
-        .profile-stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-bottom: 12px;
-        }
-
-        .profile-stats-row .stat-item {
-            background: var(--primary-light);
-            border-radius: var(--radius-sm);
-            padding: 8px;
-            text-align: center;
-        }
-
-        .profile-stats-row .stat-item .num {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .profile-stats-row .stat-item .label {
-            font-size: 0.5rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Журнал активности · RPG календарь</title>
+  <!-- Font Awesome Icons (бесплатный набор) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      transition: background 0.2s, color 0.15s, border 0.15s;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #f5f1eb;
+      color: #1e1e2a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+
+    /* основной контейнер — мобильный первый */
+    .app {
+      max-width: 480px;
+      width: 100%;
+      background: #ffffffdd;
+      backdrop-filter: blur(2px);
+      border-radius: 36px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 6px 12px rgba(0,0,0,0.05);
+      overflow: hidden;
+      padding: 20px 18px 12px;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    /* ===== ВЕРХНИЙ БАР ===== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .menu-btn {
+      font-size: 1.6rem;
+      background: none;
+      border: none;
+      color: #3d3d4e;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 20px;
+      transition: 0.15s;
+    }
+    .menu-btn:hover {
+      background: #eae6df;
+    }
+
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f0ede8;
+      padding: 4px 14px 4px 6px;
+      border-radius: 60px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      background: #8b7a6b;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1.3rem;
+      background: linear-gradient(145deg, #b8a48b, #8f7b66);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .profile-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.2px;
+    }
+    .profile-level {
+      font-size: 0.7rem;
+      background: #c9bdb0;
+      padding: 0 10px;
+      border-radius: 20px;
+      color: #2c2c3a;
+      font-weight: 500;
+      display: inline-block;
+      width: fit-content;
+      background: #d9cec0;
+    }
+
+    .theme-toggle {
+      background: #eae5de;
+      border: none;
+      font-size: 1.4rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #3d3d4e;
+      transition: 0.15s;
+    }
+    .theme-toggle:hover {
+      background: #d5cec4;
+    }
+
+    /* ===== КАЛЕНДАРЬ ===== */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0 16px;
+      padding: 0 4px;
+    }
+    .calendar-header h2 {
+      font-weight: 600;
+      font-size: 1.25rem;
+      letter-spacing: -0.3px;
+      color: #2a2a3a;
+    }
+    .month-nav {
+      display: flex;
+      gap: 14px;
+    }
+    .month-nav button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: #4b4b5e;
+      cursor: pointer;
+      padding: 0 6px;
+    }
+
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-weight: 500;
+      font-size: 0.7rem;
+      color: #6b6b80;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .day-cell {
+      aspect-ratio: 1 / 1;
+      background: #faf8f5;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #1e1e2a;
+      padding: 2px;
+      position: relative;
+      border: 1px solid transparent;
+      transition: 0.1s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .day-cell.other-month {
+      color: #a9a9bc;
+      background: #f3f0eb;
+    }
+
+    .day-cell .day-number {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    /* индикаторы задач (цветные метки) */
+    .task-indicators {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .task-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 20px;
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    /* ===== НИЖНИЙ БАР ===== */
+    .bottom-bar {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 28px;
+      padding: 8px 0 6px;
+      border-top: 1px solid #e3ddd5;
+    }
+    .bottom-bar button {
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      color: #4d4d62;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 40px;
+      transition: 0.1s;
+    }
+    .bottom-bar button:hover {
+      background: #e3ddd5;
+    }
+
+    /* ===== ДОПОЛНИТЕЛЬНО: список категорий (для цвета) ===== */
+    .category-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      justify-content: center;
+      margin: 12px 0 0;
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: #3e3e52;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .color-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 30px;
+      display: inline-block;
+    }
+
+    /* ===== ТЕМНАЯ ТЕМА ===== */
+    body.dark-mode {
+      background: #1a1a24;
+    }
+    body.dark-mode .app {
+      background: #262633dd;
+      backdrop-filter: blur(4px);
+      border-color: #3f3f55;
+    }
+    body.dark-mode .top-bar,
+    body.dark-mode .bottom-bar {
+      border-color: #3d3d50;
+    }
+    body.dark-mode .profile-card {
+      background: #343344;
+    }
+    body.dark-mode .profile-name {
+      color: #eae6f0;
+    }
+    body.dark-mode .profile-level {
+      background: #4f4f6b;
+      color: #d9d4e0;
+    }
+    body.dark-mode .day-cell {
+      background: #2f2f40;
+      color: #eae6f0;
+      border-color: #3f3f55;
+    }
+    body.dark-mode .day-cell.other-month {
+      background: #252533;
+      color: #6b6b88;
+    }
+    body.dark-mode .calendar-header h2 {
+      color: #dddcec;
+    }
+    body.dark-mode .menu-btn,
+    body.dark-mode .theme-toggle,
+    body.dark-mode .month-nav button,
+    body.dark-mode .bottom-bar button {
+      color: #cbc8dd;
+    }
+    body.dark-mode .bottom-bar {
+      border-top-color: #3d3d50;
+    }
+    body.dark-mode .category-legend {
+      color: #b8b4cc;
+    }
+
+    /* адаптив */
+    @media (max-width: 420px) {
+      .app { padding: 14px 12px 8px; }
+      .profile-card { padding: 2px 10px 2px 4px; }
+      .avatar { width: 34px; height: 34px; font-size: 1rem; }
+      .profile-name { font-size: 0.8rem; }
+      .day-cell { font-size: 0.75rem; border-radius: 16px; }
+    }
+  </style>
 </head>
 <body>
-
-    <div id="app">
-        <!-- ===== УВЕДОМЛЕНИЕ ===== -->
-        <div id="notification" class="notification"></div>
-
-        <!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
-        <div class="app" id="appContainer">
-
-            <!-- ===== ВКЛАДКА: ДЕНЬ ===== -->
-            <div id="view-day" class="view active">
-                <div class="header">
-                    <div class="header-left">
-                        <div>
-                            <div class="greeting" id="greeting">Доброе утро 👋</div>
-                            <h1><span>Сегодня</span></h1>
-                        </div>
-                    </div>
-                    <div class="header-actions">
-                        <button onclick="switchTab('info')" title="Инфо">ℹ️</button>
-                        <button id="themeToggle" onclick="toggleTheme()" title="Тема">🌙</button>
-                    </div>
-                </div>
-
-                <div id="todayQuests" class="quest-list">
-                    <div class="empty-state">
-                        <div class="empty-icon">🎯</div>
-                        <p>Нет задач на сегодня</p>
-                        <button class="btn btn-primary" onclick="openModal()">+ Создать</button>
-                    </div>
-                </div>
-
-                <button class="fab" onclick="openModal()">+</button>
-            </div>
-
-            <!-- ===== ВКЛАДКА: КАЛЕНДАРЬ ===== -->
-            <div id="view-calendar" class="view">
-                <div class="header">
-                    <div class="header-left">
-                        <h1><span>Календарь</span></h1>
-                    </div>
-                    <div class="header-actions">
-                        <button onclick="calendarGoToday()" title="Сегодня">📌</button>
-                        <button onclick="switchTab('info')" title="Инфо">ℹ️</button>
-                    </div>
-                </div>
-
-                <div class="calendar-modes">
-                    <button class="mode-btn active" data-mode="day" onclick="setCalendarMode('day')">День</button>
-                    <button class="mode-btn" data-mode="week" onclick="setCalendarMode('week')">Неделя</button>
-                    <button class="mode-btn" data-mode="month" onclick="setCalendarMode('month')">Месяц</button>
-                    <button class="mode-btn" data-mode="year" onclick="setCalendarMode('year')">Год</button>
-                </div>
-
-                <div id="calendarContent"></div>
-            </div>
-
-            <!-- ===== ВКЛАДКА: ЗАДАЧИ ===== -->
-            <div id="view-quests" class="view">
-                <div class="header">
-                    <div class="header-left">
-                        <h1><span>Задачи</span></h1>
-                    </div>
-                    <div class="header-actions">
-                        <button class="btn btn-primary" onclick="openModal()" style="padding:4px 14px;font-size:0.7rem;border-radius:50px;">+</button>
-                        <button onclick="switchTab('info')" title="Инфо">ℹ️</button>
-                    </div>
-                </div>
-
-                <div class="filter-bar" id="questFilters"></div>
-                <div id="allQuests" class="quest-list"></div>
-            </div>
-
-            <!-- ===== ВКЛАДКА: ГАЛЕРЕЯ ===== -->
-            <div id="view-gallery" class="view">
-                <div class="header">
-                    <div class="header-left">
-                        <h1><span>Галерея</span></h1>
-                    </div>
-                    <div class="header-actions">
-                        <span class="badge-count" id="galleryCount">0</span>
-                        <button onclick="switchTab('info')" title="Инфо">ℹ️</button>
-                    </div>
-                </div>
-                <div id="galleryGrid" class="gallery-grid"></div>
-            </div>
-
-            <!-- ===== ВКЛАДКА: ПРОФИЛЬ ===== -->
-            <div id="view-profile" class="view">
-                <div class="header">
-                    <div class="header-left">
-                        <h1><span>Профиль</span></h1>
-                    </div>
-                    <div class="header-actions">
-                        <button onclick="switchTab('info')" title="Инфо">ℹ️</button>
-                        <button id="themeToggle2" onclick="toggleTheme()" title="Тема">🌙</button>
-                    </div>
-                </div>
-
-                <div class="card profile-header-card">
-                    <!-- Обложка -->
-                    <div class="profile-cover" id="profileCover" onclick="document.getElementById('coverInput').click()">
-                        <img id="coverPreview" src="" style="display:none;" />
-                        <div class="cover-placeholder" id="coverPlaceholder">📷 Обложка</div>
-                        <button class="cover-upload">📷</button>
-                        <input type="file" id="coverInput" accept="image/*" style="display:none;" onchange="uploadCover(event)" />
-                    </div>
-
-                    <!-- Аватар + имя -->
-                    <div class="profile-avatar-wrapper">
-                        <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('avatarInput').click()">
-                            <span id="avatarEmoji">🧑</span>
-                            <img id="avatarPreview" src="" style="display:none;width:100%;height:100%;object-fit:cover;" />
-                            <button class="avatar-upload">📷</button>
-                            <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)" />
-                        </div>
-                        <div class="profile-name-wrap">
-                            <div class="name" id="profileName">Игрок</div>
-                            <div class="title" id="profileTitle">⭐ Начинающий</div>
-                            <span class="level">Уровень <span id="profileLevelBig">1</span></span>
-                        </div>
-                    </div>
-
-                    <!-- Тело профиля -->
-                    <div class="profile-body">
-                        <!-- Статистика -->
-                        <div class="profile-stats-row">
-                            <div class="stat-item">
-                                <div class="num" id="statToday">0</div>
-                                <div class="label">Сегодня</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="num" id="statDone">0</div>
-                                <div class="label">Выполнено</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="num" id="statStreak">0</div>
-                                <div class="label">Стрик</div>
-                            </div>
-                        </div>
-
-                        <div class="info-grid">
-                            <div class="item">
-                                <label>Имя</label>
-                                <input id="profileNameInput" placeholder="Имя" />
-                            </div>
-                            <div class="item">
-                                <label>Возраст</label>
-                                <input id="profileAge" type="number" placeholder="25" />
-                            </div>
-                            <div class="item">
-                                <label>Пол</label>
-                                <select id="profileGender">
-                                    <option value="male">Мужской</option>
-                                    <option value="female">Женский</option>
-                                </select>
-                            </div>
-                            <div class="item">
-                                <label>Рост (см)</label>
-                                <input id="profileHeight" type="number" placeholder="175" />
-                            </div>
-                            <div class="item">
-                                <label>Вес (кг)</label>
-                                <input id="profileWeight" type="number" placeholder="70" />
-                            </div>
-                            <div class="item" style="display:flex;align-items:flex-end;">
-                                <button class="btn btn-primary" onclick="saveProfileInfo()" style="width:100%;padding:4px;font-size:0.7rem;">Сохранить</button>
-                            </div>
-                        </div>
-
-                        <!-- BMI -->
-                        <div class="bmi-box" id="bmiBox">
-                            <div>
-                                <div style="font-size:0.55rem;color:var(--text-secondary);">Индекс массы тела</div>
-                                <div class="value" id="bmiValue">—</div>
-                            </div>
-                            <div class="status" id="bmiStatus">—</div>
-                        </div>
-
-                        <!-- Журнал веса -->
-                        <div class="section-title" onclick="toggleWeightJournal()">
-                            📊 Журнал веса
-                            <span class="toggle" id="weightToggle">▼</span>
-                        </div>
-                        <div class="collapsible-content open" id="weightContent">
-                            <div class="weight-chart">
-                                <canvas id="weightChart"></canvas>
-                            </div>
-                            <div class="weight-list" id="weightJournalList">
-                                <div style="color:var(--text-light);font-size:0.75rem;">Нет записей</div>
-                            </div>
-                            <div class="weight-add">
-                                <input id="newWeight" type="number" placeholder="Вес (кг)" step="0.1" />
-                                <button onclick="addWeight()">+</button>
-                            </div>
-                        </div>
-
-                        <!-- Мерки -->
-                        <div class="section-title" onclick="toggleMeasurements()">
-                            📏 Мерки
-                            <span class="toggle" id="measureToggle">▼</span>
-                        </div>
-                        <div class="collapsible-content open" id="measureContent">
-                            <div class="measure-grid">
-                                <div class="m-item">
-                                    <label>Бицепс</label>
-                                    <input id="measBiceps" type="number" placeholder="см" step="0.5" />
-                                </div>
-                                <div class="m-item">
-                                    <label>Грудь</label>
-                                    <input id="measChest" type="number" placeholder="см" step="0.5" />
-                                </div>
-                                <div class="m-item">
-                                    <label>Бедро</label>
-                                    <input id="measThigh" type="number" placeholder="см" step="0.5" />
-                                </div>
-                                <div class="m-item">
-                                    <label>Талия</label>
-                                    <input id="measWaist" type="number" placeholder="см" step="0.5" />
-                                </div>
-                                <div style="grid-column:1/-1;">
-                                    <button class="btn btn-secondary" onclick="saveMeasurements()" style="width:100%;padding:4px;font-size:0.7rem;">Сохранить мерки</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button class="btn btn-danger" onclick="resetData()" style="width:100%;margin-top:10px;padding:6px;font-size:0.75rem;">🗑️ Сбросить данные</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ===== ВКЛАДКА: ИНФО ===== -->
-            <div id="view-info" class="view">
-                <div class="header">
-                    <div class="header-left">
-                        <h1><span>Информация</span></h1>
-                    </div>
-                    <div class="header-actions">
-                        <button onclick="switchTab('day')" title="Назад">✕</button>
-                    </div>
-                </div>
-
-                <!-- Быстрая статистика -->
-                <div class="info-grid-cards" style="margin-bottom:14px;">
-                    <div class="info-mini">
-                        <div class="num" id="infoTotalQuests">0</div>
-                        <div class="label">Всего задач</div>
-                    </div>
-                    <div class="info-mini">
-                        <div class="num" id="infoTotalXP">0</div>
-                        <div class="label">Всего XP</div>
-                    </div>
-                    <div class="info-mini">
-                        <div class="num" id="infoLevel">1</div>
-                        <div class="label">Уровень</div>
-                    </div>
-                    <div class="info-mini">
-                        <div class="num" id="infoPhotos">0</div>
-                        <div class="label">Фото в галерее</div>
-                    </div>
-                </div>
-
-                <div class="card info-section">
-                    <h4>📋 О приложении</h4>
-                    <p>FlowPlan — умный планировщик с геймификацией. Помогает структурировать задачи, отслеживать прогресс и достигать целей.</p>
-                </div>
-
-                <div class="card info-section">
-                    <h4>🎮 RPG-система</h4>
-                    <ul>
-                        <li><strong>Опыт (XP)</strong> — за выполненные задачи: 1 XP = 1 мин × 0.01</li>
-                        <li><strong>Уровень (LVL)</strong> — по формуле: N×(N+1)/2 XP для уровня N</li>
-                        <li><strong>Стрики</strong> — дни подряд с выполненными задачами</li>
-                        <li><strong>Эпические квесты</strong> — цели дают +1 XP</li>
-                    </ul>
-                </div>
-
-                <div class="card info-section">
-                    <h4>🏷️ Категории (Гильдии)</h4>
-                    <ul>
-                        <li>Тело 💪 — тренировки, подходы, вес</li>
-                        <li>Творчество 🎨 — рисунки, тексты, музыка</li>
-                        <li>Бизнес 💼 — проекты, контрагенты</li>
-                        <li>Привычки 🔄 — формирование за 21 день</li>
-                        <li>Одноразки 📌 — разовые задачи</li>
-                        <li>Путешествия ✈️ — страны, бюджет</li>
-                        <li>Долги 💰 — суммы, проценты</li>
-                        <li>Питание 🥗 — калории, БЖУ</li>
-                        <li>Другое 📂 — всё остальное</li>
-                    </ul>
-                </div>
-
-                <div class="card info-section">
-                    <h4>📊 Статистика</h4>
-                    <ul>
-                        <li>Тепловая карта активности</li>
-                        <li>Прогресс-бары по категориям</li>
-                        <li>Стрики общий и по гильдиям</li>
-                        <li>История уровней</li>
-                    </ul>
-                </div>
-
-                <div style="text-align:center;padding:12px 0;color:var(--text-light);font-size:0.6rem;">
-                    FlowPlan v2.0
-                </div>
-            </div>
-
-            <!-- ===== ВКЛАДКА: НАСТРОЙКИ ===== -->
-            <div id="view-settings" class="view">
-                <div class="header">
-                    <div class="header-left">
-                        <h1><span>Настройки</span></h1>
-                    </div>
-                    <div class="header-actions">
-                        <button onclick="switchTab('info')" title="Инфо">ℹ️</button>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <h4>🎨 Цветовая схема</h4>
-                    <div class="settings-options" id="profileOptions">
-                        <button class="opt active" data-profile="default" onclick="setProfile('default')" style="background:linear-gradient(135deg,#6C5CE7,#A78BFA);border-color:#6C5CE7;"></button>
-                        <button class="opt" data-profile="ocean" onclick="setProfile('ocean')" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);border-color:#0EA5E9;"></button>
-                        <button class="opt" data-profile="sunset" onclick="setProfile('sunset')" style="background:linear-gradient(135deg,#F43F5E,#FB7185);border-color:#F43F5E;"></button>
-                        <button class="opt" data-profile="emerald" onclick="setProfile('emerald')" style="background:linear-gradient(135deg,#10B981,#34D399);border-color:#10B981;"></button>
-                        <button class="opt" data-profile="purple" onclick="setProfile('purple')" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);border-color:#8B5CF6;"></button>
-                        <button class="opt" data-profile="charcoal" onclick="setProfile('charcoal')" style="background:linear-gradient(135deg,#4B5563,#6B7280);border-color:#4B5563;"></button>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <h4>🌓 Режим</h4>
-                    <div class="settings-options">
-                        <button class="opt active" data-theme="light" onclick="setTheme('light')">☀️</button>
-                        <button class="opt" data-theme="dark" onclick="setTheme('dark')">🌙</button>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <h4>⚡ Действия</h4>
-                    <div class="settings-actions">
-                        <button class="btn btn-secondary" onclick="exportData()">📤 Экспорт</button>
-                        <button class="btn btn-secondary" onclick="importData()">📥 Импорт</button>
-                    </div>
-                    <div style="margin-top:6px;">
-                        <button class="btn btn-danger" onclick="resetData()" style="width:100%;padding:6px;font-size:0.75rem;">🗑️ Сбросить всё</button>
-                    </div>
-                </div>
-
-                <div style="text-align:center;padding:12px 0;color:var(--text-light);font-size:0.6rem;">
-                    FlowPlan v2.0
-                </div>
-            </div>
-
-            <!-- ===== ВКЛАДКА: КАТЕГОРИИ ===== -->
-            <div id="view-guilds" class="view">
-                <div class="header">
-                    <div class="header-left">
-                        <h1><span>Категории</span></h1>
-                    </div>
-                    <div class="header-actions">
-                        <button onclick="switchTab('info')" title="Инфо">ℹ️</button>
-                    </div>
-                </div>
-                <div id="guildGrid" class="guild-grid"></div>
-            </div>
-
+  <div class="app" id="appContainer">
+    <!-- Верхний бар -->
+    <div class="top-bar">
+      <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+      <div class="profile-card">
+        <div class="avatar">🧙</div>
+        <div class="profile-info">
+          <span class="profile-name">Эльдар</span>
+          <span class="profile-level"><i class="fas fa-star" style="font-size:0.6rem;"></i> Lv. 14</span>
         </div>
-
-        <!-- ===== НАВИГАЦИЯ (НОВАЯ) ===== -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-tab="day" onclick="switchTab('day')">
-                <span class="nav-icon">📅</span>
-                <span class="nav-label">День</span>
-            </button>
-            <button class="nav-item" data-tab="calendar" onclick="switchTab('calendar')">
-                <span class="nav-icon">📆</span>
-                <span class="nav-label">Календарь</span>
-            </button>
-            <button class="nav-item" data-tab="quests" onclick="switchTab('quests')">
-                <span class="nav-icon">📋</span>
-                <span class="nav-label">Задачи</span>
-                <span class="nav-badge" id="navTotalBadge" style="display:none;">0</span>
-            </button>
-            <button class="nav-item" data-tab="gallery" onclick="switchTab('gallery')">
-                <span class="nav-icon">🖼️</span>
-                <span class="nav-label">Галерея</span>
-            </button>
-            <button class="nav-item" data-tab="profile" onclick="switchTab('profile')">
-                <span class="nav-icon">👤</span>
-                <span class="nav-label">Профиль</span>
-            </button>
-            <button class="nav-item" data-tab="settings" onclick="switchTab('settings')">
-                <span class="nav-icon">⚙️</span>
-                <span class="nav-label">Настройки</span>
-            </button>
-            <button class="nav-item" data-tab="info" onclick="switchTab('info')">
-                <span class="nav-icon">ℹ️</span>
-                <span class="nav-label">Инфо</span>
-            </button>
-        </nav>
-
-        <!-- ===== МОДАЛКА ===== -->
-        <div id="modal" class="modal-overlay">
-            <div class="modal">
-                <div class="modal-header">
-                    <h3>✨ Новая задача</h3>
-                    <button class="modal-close" onclick="closeModal()">✕</button>
-                </div>
-                <form onsubmit="createQuest(event)">
-                    <div class="form-group">
-                        <label>Название</label>
-                        <input id="questTitle" placeholder="Что нужно сделать?" required />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Категория</label>
-                        <select id="questGuild" required>
-                            <option value="">Выберите</option>
-                        </select>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Длительность (мин)</label>
-                            <input id="questDuration" type="number" placeholder="30" required min="1" />
-                        </div>
-                        <div class="form-group">
-                            <label>Дата</label>
-                            <input id="questDate" type="date" required />
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Время</label>
-                            <input id="questTime" type="time" />
-                        </div>
-                        <div class="form-group">
-                            <label>Повторять</label>
-                            <select id="questRepeat">
-                                <option value="none">Нет</option>
-                                <option value="daily">Каждый день</option>
-                                <option value="weekly">Каждую неделю</option>
-                                <option value="custom">По дням</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="repeatDaysGroup" class="form-group hidden">
-                        <label>Дни недели</label>
-                        <div style="display:flex;gap:3px;flex-wrap:wrap;">
-                            <label style="font-size:0.7rem;display:flex;align-items:center;gap:2px;cursor:pointer;">
-                                <input type="checkbox" class="repeat-day" value="1" /> Пн
-                            </label>
-                            <label style="font-size:0.7rem;display:flex;align-items:center;gap:2px;cursor:pointer;">
-                                <input type="checkbox" class="repeat-day" value="2" /> Вт
-                            </label>
-                            <label style="font-size:0.7rem;display:flex;align-items:center;gap:2px;cursor:pointer;">
-                                <input type="checkbox" class="repeat-day" value="3" /> Ср
-                            </label>
-                            <label style="font-size:0.7rem;display:flex;align-items:center;gap:2px;cursor:pointer;">
-                                <input type="checkbox" class="repeat-day" value="4" /> Чт
-                            </label>
-                            <label style="font-size:0.7rem;display:flex;align-items:center;gap:2px;cursor:pointer;">
-                                <input type="checkbox" class="repeat-day" value="5" /> Пт
-                            </label>
-                            <label style="font-size:0.7rem;display:flex;align-items:center;gap:2px;cursor:pointer;">
-                                <input type="checkbox" class="repeat-day" value="6" /> Сб
-                            </label>
-                            <label style="font-size:0.7rem;display:flex;align-items:center;gap:2px;cursor:pointer;">
-                                <input type="checkbox" class="repeat-day" value="0" /> Вс
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>До какого числа</label>
-                        <input id="questEndDate" type="date" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Заметка</label>
-                        <textarea id="questNote" placeholder="Дополнительно..."></textarea>
-                    </div>
-
-                    <div class="form-check">
-                        <input id="questHabit" type="checkbox" />
-                        <label for="questHabit">Привычка (21 день)</label>
-                    </div>
-
-                    <div class="form-check">
-                        <input id="questOneTime" type="checkbox" />
-                        <label for="questOneTime">Одноразовая</label>
-                    </div>
-
-                    <div class="form-check">
-                        <input id="questPhoto" type="checkbox" />
-                        <label for="questPhoto">📸 Добавить фото</label>
-                    </div>
-
-                    <div id="photoUploadGroup" class="form-group hidden">
-                        <label>Фото</label>
-                        <input id="photoFile" type="file" accept="image/*" />
-                    </div>
-
-                    <div class="btn-row">
-                        <button type="button" onclick="closeModal()">Отмена</button>
-                        <button type="submit">Создать</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- ===== МОДАЛКА ФОТО ===== -->
-        <div id="photoModal" class="modal-overlay" onclick="closePhotoModal()">
-            <div class="modal" style="border-radius:var(--radius);max-width:480px;padding:0;overflow:hidden;background:transparent;box-shadow:none;border:none;" onclick="event.stopPropagation();">
-                <img id="photoModalImg" src="" alt="Фото" style="width:100%;border-radius:var(--radius);display:block;" />
-                <div style="background:var(--card-bg);padding:10px 14px;border-radius:0 0 var(--radius) var(--radius);border:1px solid var(--border);border-top:none;">
-                    <div id="photoModalCaption" style="font-weight:500;font-size:0.85rem;"></div>
-                    <div id="photoModalDate" style="font-size:0.65rem;color:var(--text-secondary);margin-top:2px;"></div>
-                </div>
-            </div>
-        </div>
+      </div>
+      <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
     </div>
 
-    <script>
-        // ============================================================
-        // ========== ДАННЫЕ ==========
-        // ============================================================
+    <!-- Календарь -->
+    <div class="calendar-header">
+      <h2 id="monthYearLabel">Июль 2026</h2>
+      <div class="month-nav">
+        <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+        <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
 
-        const DEFAULT_GUILDS = [
-            { id: 'body', name: 'Тело', color: '#FF6B6B', icon: '💪' },
-            { id: 'creativity', name: 'Творчество', color: '#4ECDC4', icon: '🎨' },
-            { id: 'business', name: 'Бизнес', color: '#45B7D1', icon: '💼' },
-            { id: 'habits', name: 'Привычки', color: '#96CEB4', icon: '🔄' },
-            { id: 'oneTime', name: 'Одноразки', color: '#FFEAA7', icon: '📌' },
-            { id: 'travel', name: 'Путешествия', color: '#DDA0DD', icon: '✈️' },
-            { id: 'debts', name: 'Долги', color: '#FF8A5C', icon: '💰' },
-            { id: 'other', name: 'Другое', color: '#A8A8A8', icon: '📂' },
-            { id: 'nutrition', name: 'Питание', color: '#7EC8E3', icon: '🥗' }
-        ];
+    <div class="weekdays">
+      <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+    </div>
 
-        const TITLES = [
-            { min: 0, title: '⭐ Начинающий', emoji: '🧑' },
-            { min: 3, title: '🌱 Исследователь', emoji: '🌱' },
-            { min: 8, title: '🚀 Продвинутый', emoji: '🚀' },
-            { min: 15, title: '🔥 Эксперт', emoji: '🔥' },
-            { min: 25, title: '🏆 Мастер', emoji: '🏆' },
-            { min: 40, title: '👑 Легенда', emoji: '👑' },
-            { min: 60, title: '💫 Герой', emoji: '💫' },
-            { min: 85, title: '🌟 Мифический', emoji: '🌟' },
-        ];
+    <div class="days-grid" id="daysGrid"></div>
 
-        const MONTHS = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
-        const MONTHS_FULL = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь',
-            'Декабрь'
-        ];
-        const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-        const WEEKDAYS_FULL = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+    <!-- Легенда категорий (цвета) -->
+    <div class="category-legend" id="legendContainer"></div>
 
-        // ============================================================
-        // ========== СОСТОЯНИЕ ==========
-        // ============================================================
+    <!-- Нижний бар быстрых функций -->
+    <div class="bottom-bar">
+      <button><i class="fas fa-calendar-plus"></i></button>
+      <button><i class="fas fa-tasks"></i></button>
+      <button><i class="fas fa-chart-simple"></i></button>
+      <button><i class="fas fa-user-gear"></i></button>
+    </div>
+  </div>
 
-        let guilds = [];
-        let quests = [];
-        let gallery = [];
-        let profile = {};
-        let currentTab = 'day';
-        let filterGuild = null;
-        let notificationTimeout = null;
-        let currentTheme = 'light';
-        let currentProfile = 'default';
-        let calendarDate = new Date();
-        let calendarMode = 'day';
+  <script>
+    (function() {
+      // ------ ДАННЫЕ КАТЕГОРИЙ (цвета) ------
+      const categories = [
+        { id: 'sport', label: 'Спорт', color: '#e67e22' },
+        { id: 'food', label: 'Питание', color: '#2ecc71' },
+        { id: 'tasks', label: 'Дела', color: '#3498db' },
+        { id: 'hobby', label: 'Хобби', color: '#9b59b6' },
+        { id: 'travel', label: 'Путешествия', color: '#1abc9c' },
+        { id: 'debt', label: 'Долги', color: '#e74c3c' },
+        { id: 'other', label: 'Другое', color: '#f39c12' }
+      ];
 
-        // ============================================================
-        // ========== ЗАГРУЗКА / СОХРАНЕНИЕ ==========
-        // ============================================================
+      // ------ ТЕСТОВЫЕ ЗАДАЧИ (дата: категория) ------
+      // формат: 'YYYY-MM-DD': [categoryId, ...]
+      const tasksData = {
+        '2026-07-03': ['sport', 'food'],
+        '2026-07-07': ['tasks'],
+        '2026-07-10': ['hobby', 'travel'],
+        '2026-07-15': ['debt', 'other'],
+        '2026-07-20': ['sport', 'hobby'],
+        '2026-07-25': ['food', 'tasks', 'travel'],
+        '2026-07-28': ['other'],
+        '2026-07-30': ['sport', 'debt'],
+        '2026-08-05': ['travel', 'hobby'],
+        '2026-06-28': ['food', 'tasks'],
+        '2026-08-12': ['sport', 'food', 'hobby'],
+        '2026-07-01': ['other']
+      };
 
-        function loadData() {
-            try {
-                guilds = JSON.parse(localStorage.getItem('guilds')) || DEFAULT_GUILDS;
-                quests = JSON.parse(localStorage.getItem('quests')) || [];
-                gallery = JSON.parse(localStorage.getItem('gallery')) || [];
-                profile = JSON.parse(localStorage.getItem('profile')) || {
-                    name: 'Игрок',
-                    totalXP: 0,
-                    level: 1,
-                    age: '',
-                    gender: 'male',
-                    height: '',
-                    weight: '',
-                    weightJournal: [],
-                    measurements: { biceps: '', chest: '', thigh: '', waist: '' },
-                    cover: '',
-                    avatar: ''
-                };
-                currentTheme = localStorage.getItem('theme') || 'light';
-                currentProfile = localStorage.getItem('profile_theme') || 'default';
-                applyTheme(currentTheme);
-                applyProfile(currentProfile);
-                updateProfileLevel();
-            } catch (e) {
-                console.error('Ошибка загрузки:', e);
-                guilds = DEFAULT_GUILDS;
-                quests = [];
-                gallery = [];
-                profile = {
-                    name: 'Игрок',
-                    totalXP: 0,
-                    level: 1,
-                    age: '',
-                    gender: 'male',
-                    height: '',
-                    weight: '',
-                    weightJournal: [],
-                    measurements: { biceps: '', chest: '', thigh: '', waist: '' },
-                    cover: '',
-                    avatar: ''
-                };
-            }
+      // ------ СОСТОЯНИЕ ------
+      let currentDate = new Date(2026, 6, 1); // июль 2026
+      let darkMode = false;
+
+      // DOM
+      const daysGrid = document.getElementById('daysGrid');
+      const monthLabel = document.getElementById('monthYearLabel');
+      const themeToggle = document.getElementById('themeToggle');
+      const legendContainer = document.getElementById('legendContainer');
+
+      // ------ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ------
+      function formatDateKey(year, month, day) {
+        return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      }
+
+      function getTasksForDate(year, month, day) {
+        const key = formatDateKey(year, month, day);
+        return tasksData[key] || [];
+      }
+
+      // ------ РЕНДЕР КАЛЕНДАРЯ ------
+      function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        monthLabel.textContent = new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(currentDate);
+
+        // первый день месяца и кол-во дней
+        const firstDayOfMonth = new Date(year, month, 1);
+        const startDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7; // 0 = понедельник
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        let gridHtml = '';
+
+        // дни предыдущего месяца
+        for (let i = startDayOfWeek - 1; i >= 0; i--) {
+          const day = daysInPrevMonth - i;
+          const prevMonth = month === 0 ? 11 : month - 1;
+          const prevYear = month === 0 ? year - 1 : year;
+          const tasks = getTasksForDate(prevYear, prevMonth, day);
+          gridHtml += createDayCell(day, true, tasks);
         }
 
-        function saveQuests() { localStorage.setItem('quests', JSON.stringify(quests)); }
-
-        function saveGallery() { localStorage.setItem('gallery', JSON.stringify(gallery)); }
-
-        function saveProfile() { localStorage.setItem('profile', JSON.stringify(profile)); }
-
-        function saveGuilds() { localStorage.setItem('guilds', JSON.stringify(guilds)); }
-
-        function saveTheme() { localStorage.setItem('theme', currentTheme); }
-
-        function saveProfileTheme() { localStorage.setItem('profile_theme', currentProfile); }
-
-        // ============================================================
-        // ========== XP / УРОВЕНЬ ==========
-        // ============================================================
-
-        function calculateXP(minutes) {
-            return Math.round(minutes * 0.01 * 100) / 100;
+        // дни текущего месяца
+        for (let day = 1; day <= daysInMonth; day++) {
+          const tasks = getTasksForDate(year, month, day);
+          gridHtml += createDayCell(day, false, tasks);
         }
 
-        function xpForLevel(level) {
-            return level * (level + 1) / 2;
+        // дни следующего месяца (заполняем до 42 ячеек)
+        const totalCells = startDayOfWeek + daysInMonth;
+        const remaining = (7 - (totalCells % 7)) % 7;
+        for (let day = 1; day <= remaining; day++) {
+          const nextMonth = month === 11 ? 0 : month + 1;
+          const nextYear = month === 11 ? year + 1 : year;
+          const tasks = getTasksForDate(nextYear, nextMonth, day);
+          gridHtml += createDayCell(day, true, tasks);
         }
 
-        function getLevelFromXP(totalXP) {
-            let level = 1;
-            while (xpForLevel(level) <= totalXP) level++;
-            level--;
-            const currentXP = totalXP - xpForLevel(level);
-            const nextLevelXP = xpForLevel(level + 1) - xpForLevel(level);
-            return { level, currentXP, nextLevelXP };
+        daysGrid.innerHTML = gridHtml;
+      }
+
+      function createDayCell(day, isOtherMonth, tasks) {
+        // ограничиваем количество отображаемых точек (макс 4)
+        const maxDots = 4;
+        const dots = tasks.slice(0, maxDots).map(catId => {
+          const cat = categories.find(c => c.id === catId);
+          return cat ? `<span class="task-dot" style="background:${cat.color};"></span>` : '';
+        }).join('');
+
+        // если задач больше 4, показываем +N
+        let extra = '';
+        if (tasks.length > maxDots) {
+          extra = `<span style="font-size:0.55rem; margin-left:1px; opacity:0.7;">+${tasks.length - maxDots}</span>`;
         }
 
-        function updateProfileLevel() {
-            const { level, currentXP, nextLevelXP } = getLevelFromXP(profile.totalXP);
-            profile.level = level;
-            saveProfile();
-            return { level, currentXP, nextLevelXP };
+        const className = `day-cell ${isOtherMonth ? 'other-month' : ''}`;
+        return `<div class="${className}">
+          <span class="day-number">${day}</span>
+          <div class="task-indicators">${dots}${extra}</div>
+        </div>`;
+      }
+
+      // ------ ЛЕГЕНДА (категории) ------
+      function renderLegend() {
+        legendContainer.innerHTML = categories.map(cat => `
+          <span class="legend-item">
+            <span class="color-swatch" style="background:${cat.color};"></span>
+            ${cat.label}
+          </span>
+        `).join('');
+      }
+
+      // ------ СМЕНА ТЕМЫ ------
+      function toggleTheme() {
+        darkMode = !darkMode;
+        document.body.classList.toggle('dark-mode', darkMode);
+        themeToggle.innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      }
+
+      // ------ НАВИГАЦИЯ ПО МЕСЯЦАМ ------
+      function changeMonth(delta) {
+        currentDate.setMonth(currentDate.getMonth() + delta);
+        renderCalendar();
+      }
+
+      // ------ ИНИЦИАЛИЗАЦИЯ ------
+      function init() {
+        renderCalendar();
+        renderLegend();
+
+        // обработчики
+        document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+        document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // меню (заглушка)
+        document.getElementById('menuBtn').addEventListener('click', () => {
+          alert('📋 Меню журнала: фильтры, статистика, настройки профиля.');
+        });
+
+        // быстрые кнопки (заглушки)
+        document.querySelectorAll('.bottom-bar button').forEach((btn, idx) => {
+          btn.addEventListener('click', (e) => {
+            const actions = ['➕ Добавить задачу', '📋 Список задач', '📊 Статистика', '⚙️ Настройки'];
+            alert(actions[idx] || 'Действие');
+          });
+        });
+
+        // тёмная тема по умолчанию выключена
+        if (darkMode) {
+          document.body.classList.add('dark-mode');
+          themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
         }
-
-        function getTitle(level) {
-            let result = TITLES[0];
-            for (const t of TITLES) {
-                if (level >= t.min) result = t;
-            }
-            return result;
-        }
-
-        // ============================================================
-        // ========== ТЕМА ==========
-        // ============================================================
-
-        function applyTheme(theme) {
-            currentTheme = theme;
-            document.documentElement.setAttribute('data-theme', theme);
-            const btn = document.getElementById('themeToggle');
-            const btn2 = document.getElementById('themeToggle2');
-            if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-            if (btn2) btn2.textContent = theme === 'dark' ? '☀️' : '🌙';
-            document.querySelectorAll('.opt[data-theme]').forEach(el => {
-                el.classList.toggle('active', el.dataset.theme === theme);
-            });
-            saveTheme();
-        }
-
-        function toggleTheme() {
-            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
-        }
-
-        function setTheme(theme) {
-            applyTheme(theme);
-        }
-
-        // ============================================================
-        // ========== ПРОФИЛЬ ЦВЕТА ==========
-        // ============================================================
-
-        function applyProfile(profile) {
-            currentProfile = profile;
-            if (profile === 'default') {
-                document.documentElement.removeAttribute('data-profile');
-            } else {
-                document.documentElement.setAttribute('data-profile', profile);
-            }
-            document.querySelectorAll('.opt[data-profile]').forEach(el => {
-                el.classList.toggle('active', el.dataset.profile === profile);
-            });
-            saveProfileTheme();
-        }
-
-        function setProfile(profile) {
-            applyProfile(profile);
-        }
-
-        // ============================================================
-        // ========== УВЕДОМЛЕНИЯ ==========
-        // ============================================================
-
-        function showNotification(msg, isError = false) {
-            const el = document.getElementById('notification');
-            el.textContent = msg;
-            el.style.display = 'block';
-            el.style.borderLeftColor = isError ? '#EF4444' : 'var(--primary)';
-            clearTimeout(notificationTimeout);
-            notificationTimeout = setTimeout(() => {
-                el.style.display = 'none';
-            }, 3000);
-        }
-
-        // ============================================================
-        // ========== КВЕСТЫ ==========
-        // ============================================================
-
-        function createQuest(e) {
-            e.preventDefault();
-
-            const title = document.getElementById('questTitle').value.trim();
-            const guildId = document.getElementById('questGuild').value;
-            const duration = parseInt(document.getElementById('questDuration').value);
-            const scheduledDate = document.getElementById('questDate').value;
-            const scheduledTime = document.getElementById('questTime').value;
-            const repeat = document.getElementById('questRepeat').value;
-            const endDate = document.getElementById('questEndDate').value;
-            const note = document.getElementById('questNote').value.trim();
-            const isHabit = document.getElementById('questHabit').checked;
-            const isOneTime = document.getElementById('questOneTime').checked;
-            const hasPhoto = document.getElementById('questPhoto').checked;
-
-            if (!title) { showNotification('Введите название!', true); return; }
-            if (!guildId) { showNotification('Выберите категорию!', true); return; }
-            if (!duration || duration < 1) { showNotification('Укажите длительность!', true); return; }
-            if (!scheduledDate) { showNotification('Укажите дату!', true); return; }
-
-            let repeatDays = [];
-            if (repeat === 'custom') {
-                document.querySelectorAll('.repeat-day:checked').forEach(cb => {
-                    repeatDays.push(parseInt(cb.value));
-                });
-                if (repeatDays.length === 0) {
-                    showNotification('Выберите хотя бы один день!', true);
-                    return;
-                }
-            }
-
-            let photoData = null;
-            if (hasPhoto) {
-                const fileInput = document.getElementById('photoFile');
-                if (fileInput.files && fileInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        photoData = ev.target.result;
-                        saveQuestWithPhoto(title, guildId, duration, scheduledDate, scheduledTime, repeat, repeatDays, endDate,
-                            note, isHabit, isOneTime, photoData);
-                    };
-                    reader.readAsDataURL(fileInput.files[0]);
-                    return;
-                } else {
-                    showNotification('Выберите фото!', true);
-                    return;
-                }
-            }
-
-            saveQuestWithPhoto(title, guildId, duration, scheduledDate, scheduledTime, repeat, repeatDays, endDate, note, isHabit,
-                isOneTime, null);
-        }
-
-        function saveQuestWithPhoto(title, guildId, duration, scheduledDate, scheduledTime, repeat, repeatDays, endDate, note,
-            isHabit, isOneTime, photoData) {
-            const quest = {
-                id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36),
-                title,
-                guildId,
-                duration,
-                scheduledDate,
-                scheduledTime: scheduledTime || '',
-                repeat: repeat || 'none',
-                repeatDays: repeatDays || [],
-                endDate: endDate || null,
-                note: note || '',
-                isHabit,
-                isOneTime,
-                status: 'planned',
-                xpEarned: calculateXP(duration),
-                createdAt: Date.now(),
-                updatedAt: Date.now(),
-                hasPhoto: !!photoData,
-                photoId: null
-            };
-
-            quests.push(quest);
-            saveQuests();
-
-            if (photoData) {
-                const galleryItem = {
-                    id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36),
-                    questId: quest.id,
-                    date: scheduledDate,
-                    photo: photoData,
-                    caption: title,
-                    uploadedAt: Date.now()
-                };
-                gallery.push(galleryItem);
-                saveGallery();
-                quest.photoId = galleryItem.id;
-                saveQuests();
-                showNotification('✅ Задача и фото сохранены!');
-            } else {
-                showNotification(`✅ Задача создана! +${quest.xpEarned} XP`);
-            }
-
-            closeModal();
-            renderAll();
-        }
-
-        function toggleQuest(id) {
-            const quest = quests.find(q => q.id === id);
-            if (!quest) return;
-
-            const today = new Date().toISOString().split('T')[0];
-            if (quest.scheduledDate > today) {
-                showNotification('Нельзя выполнить будущую задачу!', true);
-                return;
-            }
-
-            if (quest.status === 'done') {
-                quest.status = 'planned';
-                profile.totalXP -= quest.xpEarned;
-                if (profile.totalXP < 0) profile.totalXP = 0;
-                showNotification(`↩️ Возвращено ${quest.xpEarned} XP`);
-            } else {
-                quest.status = 'done';
-                profile.totalXP += quest.xpEarned;
-                showNotification(`✅ +${quest.xpEarned} XP`);
-                if (quest.repeat !== 'none' && quest.endDate) {
-                    createNextQuest(quest);
-                }
-            }
-
-            quest.updatedAt = Date.now();
-            saveQuests();
-            updateProfileLevel();
-            saveProfile();
-            renderAll();
-        }
-
-        function createNextQuest(quest) {
-            let nextDate = new Date(quest.scheduledDate + 'T00:00:00');
-            let found = false;
-
-            if (quest.repeat === 'daily') {
-                nextDate.setDate(nextDate.getDate() + 1);
-                found = true;
-            } else if (quest.repeat === 'weekly') {
-                nextDate.setDate(nextDate.getDate() + 7);
-                found = true;
-            } else if (quest.repeat === 'custom' && quest.repeatDays.length > 0) {
-                for (let i = 1; i <= 7; i++) {
-                    const checkDate = new Date(nextDate);
-                    checkDate.setDate(checkDate.getDate() + i);
-                    const dayOfWeek = checkDate.getDay();
-                    if (quest.repeatDays.includes(dayOfWeek)) {
-                        nextDate = checkDate;
-                        found = true;
-                        break;
-                    }
-                }
-            }
-
-            if (found) {
-                const endDate = quest.endDate ? new Date(quest.endDate + 'T00:00:00') : null;
-                if (endDate && nextDate > endDate) return;
-
-                const newQuest = {
-                    ...quest,
-                    id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36),
-                    scheduledDate: nextDate.toISOString().split('T')[0],
-                    status: 'planned',
-                    createdAt: Date.now(),
-                    updatedAt: Date.now()
-                };
-                quests.push(newQuest);
-                saveQuests();
-            }
-        }
-
-        function deleteQuest(id) {
-            if (!confirm('Удалить задачу?')) return;
-
-            const index = quests.findIndex(q => q.id === id);
-            if (index === -1) return;
-
-            const quest = quests[index];
-            if (quest.status === 'done') {
-                profile.totalXP -= quest.xpEarned;
-                if (profile.totalXP < 0) profile.totalXP = 0;
-                showNotification(`🗑️ Возвращено ${quest.xpEarned} XP`);
-            }
-
-            if (quest.photoId) {
-                const gIndex = gallery.findIndex(g => g.id === quest.photoId);
-                if (gIndex !== -1) gallery.splice(gIndex, 1);
-                saveGallery();
-            }
-
-            quests.splice(index, 1);
-            saveQuests();
-            updateProfileLevel();
-            saveProfile();
-            renderAll();
-        }
-
-        // ============================================================
-        // ========== СТРИКИ ==========
-        // ============================================================
-
-        function calculateStreaks() {
-            if (quests.length === 0) return { current: 0, best: 0 };
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const doneDays = new Set();
-            quests.forEach(q => {
-                if (q.status === 'done') {
-                    const date = new Date(q.scheduledDate + 'T00:00:00');
-                    date.setHours(0, 0, 0, 0);
-                    if (date <= today) {
-                        doneDays.add(q.scheduledDate);
-                    }
-                }
-            });
-
-            const sortedDays = Array.from(doneDays).sort();
-            if (sortedDays.length === 0) return { current: 0, best: 0 };
-
-            let currentStreak = 0;
-            const todayStr = today.toISOString().split('T')[0];
-            if (doneDays.has(todayStr)) {
-                currentStreak = 1;
-                let checkDate = new Date(today);
-                checkDate.setDate(checkDate.getDate() - 1);
-                while (true) {
-                    const dateStr = checkDate.toISOString().split('T')[0];
-                    if (doneDays.has(dateStr)) {
-                        currentStreak++;
-                        checkDate.setDate(checkDate.getDate() - 1);
-                    } else break;
-                }
-            }
-
-            let bestStreak = 0;
-            let tempStreak = 0;
-            let prevDate = null;
-            for (const dateStr of sortedDays) {
-                const date = new Date(dateStr + 'T00:00:00');
-                if (prevDate === null) {
-                    tempStreak = 1;
-                } else {
-                    const diff = (date - prevDate) / (1000 * 60 * 60 * 24);
-                    if (diff === 1) tempStreak++;
-                    else tempStreak = 1;
-                }
-                prevDate = date;
-                if (tempStreak > bestStreak) bestStreak = tempStreak;
-            }
-
-            return { current: currentStreak, best: bestStreak };
-        }
-
-        // ============================================================
-        // ========== КАЛЕНДАРЬ ==========
-        // ============================================================
-
-        function setCalendarMode(mode) {
-            calendarMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(el => {
-                el.classList.toggle('active', el.dataset.mode === mode);
-            });
-            renderCalendar();
-        }
-
-        function calendarGoToday() {
-            calendarDate = new Date();
-            renderCalendar();
-        }
-
-        function renderCalendar() {
-            const container = document.getElementById('calendarContent');
-
-            switch (calendarMode) {
-                case 'day':
-                    renderDayView(container);
-                    break;
-                case 'week':
-                    renderWeekView(container);
-                    break;
-                case 'month':
-                    renderMonthView(container);
-                    break;
-                case 'year':
-                    renderYearView(container);
-                    break;
-            }
-        }
-
-        function renderDayView(container) {
-            const date = calendarDate;
-            const dateStr = date.toISOString().split('T')[0];
-            const dayQuests = quests.filter(q => q.scheduledDate === dateStr)
-                .sort((a, b) => (a.scheduledTime || '00:00').localeCompare(b.scheduledTime || '00:00'));
-
-            const dayName = WEEKDAYS_FULL[date.getDay() === 0 ? 6 : date.getDay() - 1];
-            const dayLabel = `${dayName}, ${date.getDate()} ${MONTHS_FULL[date.getMonth()]} ${date.getFullYear()}`;
-
-            let html = `
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                    <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()-1);renderCalendar();">‹</button>
-                    <span style="font-weight:600;font-size:0.9rem;">${dayLabel}</span>
-                    <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()+1);renderCalendar();">›</button>
-                </div>
-                <div class="day-schedule">
-            `;
-
-            if (dayQuests.length === 0) {
-                html += `
-                    <div class="empty-state" style="padding:20px;">
-                        <div class="empty-icon">📅</div>
-                        <p style="font-size:0.85rem;">Нет задач</p>
-                    </div>
-                `;
-            } else {
-                const hours = {};
-                dayQuests.forEach(q => {
-                    const hour = q.scheduledTime ? q.scheduledTime.split(':')[0] : '00';
-                    if (!hours[hour]) hours[hour] = [];
-                    hours[hour].push(q);
-                });
-
-                for (let h = 0; h < 24; h++) {
-                    const hourStr = String(h).padStart(2, '0');
-                    const questsInHour = hours[hourStr] || [];
-                    const hasQuests = questsInHour.length > 0;
-
-                    html += `
-                        <div class="hour-block">
-                            <div class="hour-label">${hourStr}:00</div>
-                            <div class="hour-events">
-                    `;
-
-                    if (hasQuests) {
-                        questsInHour.forEach(q => {
-                            const guild = guilds.find(g => g.id === q.guildId) || { color: '#999', name: 'Без категории' };
-                            html += `
-                                <div class="event ${q.status === 'done' ? 'done' : ''}" 
-                                     onclick="toggleQuest('${q.id}')"
-                                     style="border-left-color:${guild.color};">
-                                    <span class="time">${q.scheduledTime || ''}</span>
-                                    <span>${q.title}</span>
-                                    <span class="guild">${guild.icon}</span>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        html += `<div style="font-size:0.55rem;color:var(--text-light);padding:2px 0;">—</div>`;
-                    }
-
-                    html += `
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        function renderWeekView(container) {
-            const date = calendarDate;
-            const dayOfWeek = date.getDay();
-            const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-            const monday = new Date(date);
-            monday.setDate(date.getDate() - mondayOffset);
-
-            let html = `
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                    <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()-7);renderCalendar();">‹</button>
-                    <span style="font-weight:600;font-size:0.85rem;">${monday.getDate()} ${MONTHS_FULL[monday.getMonth()]} — ${new Date(monday).setDate(monday.getDate()+6)} ${MONTHS_FULL[new Date(monday).setDate(monday.getDate())]}</span>
-                    <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()+7);renderCalendar();">›</button>
-                </div>
-                <div class="week-grid">
-            `;
-
-            for (let i = 0; i < 7; i++) {
-                const day = new Date(monday);
-                day.setDate(monday.getDate() + i);
-                const dateStr = day.toISOString().split('T')[0];
-                const dayQuests = quests.filter(q => q.scheduledDate === dateStr);
-                const isToday = dateStr === new Date().toISOString().split('T')[0];
-
-                html += `
-                    <div class="week-day" onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();" style="${isToday ? 'border-color:var(--primary);' : ''}">
-                        <div class="label">
-                            ${WEEKDAYS[i]}
-                            <div class="date">${day.getDate()} ${MONTHS[day.getMonth()]}</div>
-                        </div>
-                        <div class="tasks">
-                `;
-
-                if (dayQuests.length === 0) {
-                    html += `<span style="font-size:0.55rem;color:var(--text-light);">—</span>`;
-                } else {
-                    dayQuests.slice(0, 3).forEach(q => {
-                        const done = q.status === 'done';
-                        const guild = guilds.find(g => g.id === q.guildId) || { color: '#999' };
-                        html += `
-                            <span class="tag ${done ? 'done' : ''}" style="border-left-color:${guild.color};">
-                                ${q.title}
-                            </span>
-                        `;
-                    });
-                    if (dayQuests.length > 3) {
-                        html += `<span class="tag" style="background:var(--border);">+${dayQuests.length - 3}</span>`;
-                    }
-                }
-
-                html += `
-                        </div>
-                        <div class="count">${dayQuests.length}</div>
-                    </div>
-                `;
-            }
-
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        function renderMonthView(container) {
-            const year = calendarDate.getFullYear();
-            const month = calendarDate.getMonth();
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-
-            let html = `
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                    <button class="btn btn-ghost" onclick="calendarDate.setMonth(calendarDate.getMonth()-1);renderCalendar();">‹</button>
-                    <span style="font-weight:600;font-size:0.9rem;">${MONTHS_FULL[month]} ${year}</span>
-                    <button class="btn btn-ghost" onclick="calendarDate.setMonth(calendarDate.getMonth()+1);renderCalendar();">›</button>
-                </div>
-                <div class="card">
-                    <div class="calendar-header">
-                        <span>Пн</span><span>Вт</span><span>Ср</span>
-                        <span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
-                    </div>
-                    <div class="calendar-days">
-            `;
-
-            const today = new Date().toISOString().split('T')[0];
-            let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-
-            const prevMonthLastDay = new Date(year, month, 0).getDate();
-            for (let i = startOffset - 1; i >= 0; i--) {
-                const day = prevMonthLastDay - i;
-                const date = new Date(year, month - 1, day);
-                const dateStr = date.toISOString().split('T')[0];
-                const dayQuests = quests.filter(q => q.scheduledDate === dateStr);
-                const hasPhoto = gallery.some(g => g.date === dateStr);
-                html += `
-                    <div class="calendar-day other-month" onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();">
-                        <span>${day}</span>
-                        ${dayQuests.length > 0 ? `<div class="day-dots">${dayQuests.slice(0,3).map(q => {
-                            const g = guilds.find(g => g.id === q.guildId) || { color: '#999' };
-                            return `<span class="dot" style="background:${g.color}"></span>`;
-                        }).join('')}</div>` : ''}
-                        ${hasPhoto ? '<span class="day-photo">📸</span>' : ''}
-                    </div>
-                `;
-            }
-
-            for (let day = 1; day <= lastDay.getDate(); day++) {
-                const date = new Date(year, month, day);
-                const dateStr = date.toISOString().split('T')[0];
-                const dayQuests = quests.filter(q => q.scheduledDate === dateStr);
-                const hasPhoto = gallery.some(g => g.date === dateStr);
-                const isToday = dateStr === today;
-
-                html += `
-                    <div class="calendar-day ${isToday ? 'today' : ''}" 
-                         onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();">
-                        <span>${day}</span>
-                        ${dayQuests.length > 0 ? `<div class="day-dots">${dayQuests.slice(0,3).map(q => {
-                            const g = guilds.find(g => g.id === q.guildId) || { color: '#999' };
-                            return `<span class="dot" style="background:${g.color}"></span>`;
-                        }).join('')}</div>` : ''}
-                        ${hasPhoto ? '<span class="day-photo">📸</span>' : ''}
-                    </div>
-                `;
-            }
-
-            const remaining = 42 - (startOffset + lastDay.getDate());
-            for (let day = 1; day <= remaining; day++) {
-                const date = new Date(year, month + 1, day);
-                const dateStr = date.toISOString().split('T')[0];
-                const dayQuests = quests.filter(q => q.scheduledDate === dateStr);
-                const hasPhoto = gallery.some(g => g.date === dateStr);
-                html += `
-                    <div class="calendar-day other-month" onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();">
-                        <span>${day}</span>
-                        ${dayQuests.length > 0 ? `<div class="day-dots">${dayQuests.slice(0,3).map(q => {
-                            const g = guilds.find(g => g.id === q.guildId) || { color: '#999' };
-                            return `<span class="dot" style="background:${g.color}"></span>`;
-                        }).join('')}</div>` : ''}
-                        ${hasPhoto ? '<span class="day-photo">📸</span>' : ''}
-                    </div>
-                `;
-            }
-
-            html += `
-                    </div>
-                </div>
-            `;
-
-            container.innerHTML = html;
-        }
-
-        function renderYearView(container) {
-            const year = calendarDate.getFullYear();
-
-            let html = `
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                    <button class="btn btn-ghost" onclick="calendarDate.setFullYear(calendarDate.getFullYear()-1);renderCalendar();">‹</button>
-                    <span style="font-weight:600;font-size:0.9rem;">${year}</span>
-                    <button class="btn btn-ghost" onclick="calendarDate.setFullYear(calendarDate.getFullYear()+1);renderCalendar();">›</button>
-                </div>
-                <div class="year-grid">
-            `;
-
-            for (let month = 0; month < 12; month++) {
-                const monthStr = String(month + 1).padStart(2, '0');
-                const monthQuests = quests.filter(q => {
-                    const qDate = q.scheduledDate.split('-');
-                    return qDate[0] == year && qDate[1] == monthStr;
-                });
-
-                const total = monthQuests.length;
-                const done = monthQuests.filter(q => q.status === 'done').length;
-                const planned = monthQuests.filter(q => q.status === 'planned').length;
-                const xpEarned = monthQuests.filter(q => q.status === 'done').reduce((sum, q) => sum + q.xpEarned, 0);
-                const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
-
-                html += `
-                    <div class="card month-card" onclick="calendarDate=new Date(${year}, ${month}, 1);setCalendarMode('month');renderCalendar();">
-                        <div class="name">${MONTHS_FULL[month]}</div>
-                        <div class="stats">
-                            <span>✅ ${done}</span>
-                            <span>📋 ${planned}</span>
-                        </div>
-                        <div class="xp">${xpEarned.toFixed(1)} XP</div>
-                        <div class="bar">
-                            <div class="fill" style="width:${completionRate}%;"></div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        // ============================================================
-        // ========== НАВИГАЦИЯ ==========
-        // ============================================================
-
-        function switchTab(tabId) {
-            currentTab = tabId;
-            document.querySelectorAll('.view').forEach(view => {
-                view.classList.toggle('active', view.id === 'view-' + tabId);
-            });
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.toggle('active', el.dataset.tab === tabId);
-            });
-            if (tabId === 'day') renderDay();
-            if (tabId === 'calendar') renderCalendar();
-            if (tabId === 'quests') renderAllQuests();
-            if (tabId === 'gallery') renderGallery();
-            if (tabId === 'profile') renderProfile();
-            if (tabId === 'guilds') renderGuilds();
-            if (tabId === 'settings') renderSettings();
-            if (tabId === 'info') renderInfo();
-        }
-
-        // ============================================================
-        // ========== МОДАЛКА ==========
-        // ============================================================
-
-        function openModal() {
-            document.getElementById('modal').classList.add('open');
-            document.getElementById('questDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('questEndDate').value = '';
-            document.getElementById('questRepeat').value = 'none';
-            document.getElementById('repeatDaysGroup').classList.add('hidden');
-            document.getElementById('photoUploadGroup').classList.add('hidden');
-            document.getElementById('questPhoto').checked = false;
-
-            const select = document.getElementById('questGuild');
-            select.innerHTML = '<option value="">Выберите</option>';
-            guilds.forEach(g => {
-                const opt = document.createElement('option');
-                opt.value = g.id;
-                opt.textContent = g.icon + ' ' + g.name;
-                select.appendChild(opt);
-            });
-
-            document.getElementById('questRepeat').onchange = function() {
-                const group = document.getElementById('repeatDaysGroup');
-                if (this.value === 'custom') {
-                    group.classList.remove('hidden');
-                } else {
-                    group.classList.add('hidden');
-                }
-            };
-
-            document.getElementById('questPhoto').onchange = function() {
-                const group = document.getElementById('photoUploadGroup');
-                if (this.checked) {
-                    group.classList.remove('hidden');
-                } else {
-                    group.classList.add('hidden');
-                }
-            };
-
-            document.getElementById('questTitle').focus();
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.remove('open');
-            document.getElementById('questTitle').value = '';
-            document.getElementById('questDuration').value = '';
-            document.getElementById('questTime').value = '';
-            document.getElementById('questNote').value = '';
-            document.getElementById('questHabit').checked = false;
-            document.getElementById('questOneTime').checked = false;
-            document.getElementById('questPhoto').checked = false;
-            document.getElementById('photoUploadGroup').classList.add('hidden');
-            document.querySelectorAll('.repeat-day').forEach(cb => cb.checked = false);
-        }
-
-        // ============================================================
-        // ========== РЕНДЕР: ДЕНЬ ==========
-        // ============================================================
-
-        function renderDay() {
-            const today = new Date().toISOString().split('T')[0];
-            const todayQuests = quests
-                .filter(q => q.scheduledDate === today)
-                .sort((a, b) => (a.scheduledTime || '00:00').localeCompare(b.scheduledTime || '00:00'));
-
-            const hour = new Date().getHours();
-            let greeting = 'Доброе утро 👋';
-            if (hour >= 12 && hour < 18) greeting = 'Добрый день ☀️';
-            else if (hour >= 18) greeting = 'Добрый вечер 🌙';
-            document.getElementById('greeting').textContent = greeting;
-
-            const container = document.getElementById('todayQuests');
-
-            if (todayQuests.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🎯</div>
-                        <p>Нет задач на сегодня</p>
-                        <button class="btn btn-primary" onclick="openModal()">+ Создать</button>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = todayQuests.map(q => {
-                const guild = guilds.find(g => g.id === q.guildId) || { color: '#999', name: 'Без категории', icon: '📌' };
-                const isFuture = q.scheduledDate > today;
-                const done = q.status === 'done';
-
-                return `
-                    <div class="quest-item ${done ? 'done' : ''}">
-                        <div class="quest-color" style="background:${guild.color}"></div>
-                        <div class="checkbox ${done ? 'checked' : ''}" 
-                             onclick="${!isFuture ? `toggleQuest('${q.id}')` : ''}"
-                             style="${isFuture ? 'cursor:not-allowed;opacity:0.4;' : ''}">
-                        </div>
-                        <div class="quest-content">
-                            <div class="quest-title">${q.title}</div>
-                            <div class="quest-meta">
-                                <span class="tag tag-guild">${guild.icon} ${guild.name}</span>
-                                ${q.duration ? `<span class="tag">⏱ ${q.duration}мин</span>` : ''}
-                                ${q.scheduledTime ? `<span class="tag">🕐 ${q.scheduledTime}</span>` : ''}
-                                ${q.isHabit ? '<span class="tag" style="background:#D1FAE5;color:#059669;">🔄 привычка</span>' : ''}
-                                ${isFuture ? '<span class="tag" style="background:#E0E7FF;color:#4F46E5;">🔮 будущая</span>' : ''}
-                                ${q.hasPhoto ? '<span class="tag" style="background:#E0E7FF;color:#4F46E5;">📸</span>' : ''}
-                            </div>
-                            ${q.note ? `<div style="font-size:0.65rem;color:var(--text-secondary);margin-top:2px;">${q.note}</div>` : ''}
-                        </div>
-                        <div class="quest-actions">
-                            ${q.hasPhoto ? `<button onclick="viewPhoto('${q.photoId}')">🖼️</button>` : ''}
-                            <button class="danger" onclick="deleteQuest('${q.id}')">✕</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            const badge = document.getElementById('navTotalBadge');
-            const activeQuests = todayQuests.filter(q => q.status !== 'done');
-            if (activeQuests.length > 0) {
-                badge.style.display = 'block';
-                badge.textContent = activeQuests.length;
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        // ============================================================
-        // ========== РЕНДЕР: ВСЕ ЗАДАЧИ ==========
-        // ============================================================
-
-        function renderAllQuests() {
-            const filterContainer = document.getElementById('questFilters');
-            filterContainer.innerHTML = `
-                <button class="filter-btn ${!filterGuild ? 'active' : ''}" onclick="filterGuild=null;renderAllQuests();">🏠</button>
-                ${guilds.map(g => `
-                    <button class="filter-btn ${filterGuild === g.id ? 'active' : ''}" 
-                            onclick="filterGuild='${g.id}';renderAllQuests();"
-                            style="border-color:${filterGuild === g.id ? g.color : 'transparent'}">
-                        ${g.icon}
-                    </button>
-                `).join('')}
-            `;
-
-            let filtered = quests;
-            if (filterGuild) {
-                filtered = filtered.filter(q => q.guildId === filterGuild);
-            }
-            filtered = filtered.sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate));
-
-            const container = document.getElementById('allQuests');
-
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📋</div>
-                        <p>Нет задач</p>
-                        <button class="btn btn-primary" onclick="openModal()">+ Создать</button>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = filtered.map(q => {
-                const guild = guilds.find(g => g.id === q.guildId) || { color: '#999', name: 'Без категории', icon: '📌' };
-                const done = q.status === 'done';
-                const today = new Date().toISOString().split('T')[0];
-                const isFuture = q.scheduledDate > today;
-
-                return `
-                    <div class="quest-item ${done ? 'done' : ''}">
-                        <div class="quest-color" style="background:${guild.color}"></div>
-                        <div class="checkbox ${done ? 'checked' : ''}" 
-                             onclick="${!isFuture ? `toggleQuest('${q.id}')` : ''}"
-                             style="${isFuture ? 'cursor:not-allowed;opacity:0.4;' : ''}">
-                        </div>
-                        <div class="quest-content">
-                            <div class="quest-title">${q.title}</div>
-                            <div class="quest-meta">
-                                <span class="tag tag-guild">${guild.icon} ${guild.name}</span>
-                                <span class="tag">📅 ${q.scheduledDate}</span>
-                                ${q.duration ? `<span class="tag">⏱ ${q.duration}мин</span>` : ''}
-                                ${q.isHabit ? '<span class="tag" style="background:#D1FAE5;color:#059669;">🔄</span>' : ''}
-                                ${q.hasPhoto ? '<span class="tag" style="background:#E0E7FF;color:#4F46E5;">📸</span>' : ''}
-                            </div>
-                            ${q.note ? `<div style="font-size:0.65rem;color:var(--text-secondary);margin-top:2px;">${q.note}</div>` : ''}
-                        </div>
-                        <div class="quest-actions">
-                            ${q.hasPhoto ? `<button onclick="viewPhoto('${q.photoId}')">🖼️</button>` : ''}
-                            <button class="danger" onclick="deleteQuest('${q.id}')">✕</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ============================================================
-        // ========== РЕНДЕР: ГАЛЕРЕЯ ==========
-        // ============================================================
-
-        function renderGallery() {
-            const container = document.getElementById('galleryGrid');
-            document.getElementById('galleryCount').textContent = gallery.length;
-
-            if (gallery.length === 0) {
-                container.innerHTML = `
-                    <div class="gallery-empty">
-                        <div class="icon">🖼️</div>
-                        <p style="font-size:0.85rem;">Нет фотографий</p>
-                        <p style="font-size:0.7rem;">Добавьте фото при создании задачи</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const sorted = [...gallery].sort((a, b) => b.uploadedAt - a.uploadedAt);
-
-            container.innerHTML = sorted.map(item => {
-                const date = new Date(item.date + 'T00:00:00').toLocaleDateString('ru', {
-                    day: 'numeric',
-                    month: 'short'
-                });
-                return `
-                    <div class="gallery-item" onclick="viewPhoto('${item.id}')" style="position:relative;">
-                        <img src="${item.photo}" alt="${item.caption || 'Фото'}" loading="lazy" />
-                        <div class="overlay">
-                            <div class="caption">${item.caption || ''}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ============================================================
-        // ========== ФОТО ==========
-        // ============================================================
-
-        function viewPhoto(id) {
-            const item = gallery.find(g => g.id === id);
-            if (!item) return;
-
-            const modal = document.getElementById('photoModal');
-            document.getElementById('photoModalImg').src = item.photo;
-            document.getElementById('photoModalCaption').textContent = item.caption || 'Без подписи';
-            document.getElementById('photoModalDate').textContent =
-                new Date(item.date + 'T00:00:00').toLocaleDateString('ru', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                });
-            modal.classList.add('open');
-        }
-
-        function closePhotoModal() {
-            document.getElementById('photoModal').classList.remove('open');
-        }
-
-        // ============================================================
-        // ========== РЕНДЕР: ПРОФИЛЬ ==========
-        // ============================================================
-
-        function renderProfile() {
-            document.getElementById('profileName').textContent = profile.name;
-            document.getElementById('profileLevelBig').textContent = profile.level;
-
-            const titleData = getTitle(profile.level);
-            document.getElementById('profileTitle').textContent = titleData.title;
-
-            // Аватар
-            const avatarEmoji = document.getElementById('avatarEmoji');
-            const avatarPreview = document.getElementById('avatarPreview');
-            if (profile.avatar) {
-                avatarEmoji.style.display = 'none';
-                avatarPreview.style.display = 'block';
-                avatarPreview.src = profile.avatar;
-            } else {
-                avatarEmoji.style.display = 'block';
-                avatarPreview.style.display = 'none';
-                avatarEmoji.textContent = titleData.emoji;
-            }
-
-            // Обложка
-            const coverPlaceholder = document.getElementById('coverPlaceholder');
-            const coverPreview = document.getElementById('coverPreview');
-            if (profile.cover) {
-                coverPlaceholder.style.display = 'none';
-                coverPreview.style.display = 'block';
-                coverPreview.src = profile.cover;
-            } else {
-                coverPlaceholder.style.display = 'flex';
-                coverPreview.style.display = 'none';
-            }
-
-            // Информация
-            document.getElementById('profileNameInput').value = profile.name || '';
-            document.getElementById('profileAge').value = profile.age || '';
-            document.getElementById('profileGender').value = profile.gender || 'male';
-            document.getElementById('profileHeight').value = profile.height || '';
-            document.getElementById('profileWeight').value = profile.weight || '';
-
-            // Статистика в профиле
-            const today = new Date().toISOString().split('T')[0];
-            const todayQuests = quests.filter(q => q.scheduledDate === today);
-            const doneQuests = quests.filter(q => q.status === 'done');
-            const streaks = calculateStreaks();
-            document.getElementById('statToday').textContent = todayQuests.length;
-            document.getElementById('statDone').textContent = doneQuests.length;
-            document.getElementById('statStreak').textContent = streaks.current;
-
-            // BMI
-            updateBMI();
-
-            // Журнал веса
-            renderWeightJournal();
-
-            // Мерки
-            document.getElementById('measBiceps').value = profile.measurements?.biceps || '';
-            document.getElementById('measChest').value = profile.measurements?.chest || '';
-            document.getElementById('measThigh').value = profile.measurements?.thigh || '';
-            document.getElementById('measWaist').value = profile.measurements?.waist || '';
-
-            // Состояние сворачивания
-            const weightOpen = localStorage.getItem('weightOpen') !== 'false';
-            const measureOpen = localStorage.getItem('measureOpen') !== 'false';
-            document.getElementById('weightContent').classList.toggle('open', weightOpen);
-            document.getElementById('weightToggle').textContent = weightOpen ? '▼' : '▶';
-            document.getElementById('measureContent').classList.toggle('open', measureOpen);
-            document.getElementById('measureToggle').textContent = measureOpen ? '▼' : '▶';
-        }
-
-        function updateBMI() {
-            const height = parseFloat(profile.height);
-            const weight = parseFloat(profile.weight);
-            const bmiValue = document.getElementById('bmiValue');
-            const bmiStatus = document.getElementById('bmiStatus');
-
-            if (height > 0 && weight > 0) {
-                const heightM = height / 100;
-                const bmi = weight / (heightM * heightM);
-                bmiValue.textContent = bmi.toFixed(1);
-
-                let status = '';
-                let className = '';
-                if (bmi < 18.5) {
-                    status = 'Недостаточный';
-                    className = 'underweight';
-                } else if (bmi < 25) {
-                    status = 'Норма';
-                    className = 'normal';
-                } else if (bmi < 30) {
-                    status = 'Избыточный';
-                    className = 'overweight';
-                } else {
-                    status = 'Ожирение';
-                    className = 'obese';
-                }
-                bmiStatus.textContent = status;
-                bmiStatus.className = 'status ' + className;
-            } else {
-                bmiValue.textContent = '—';
-                bmiStatus.textContent = '—';
-                bmiStatus.className = 'status';
-            }
-        }
-
-        function renderWeightJournal() {
-            const container = document.getElementById('weightJournalList');
-            const entries = profile.weightJournal || [];
-
-            if (entries.length === 0) {
-                container.innerHTML = '<div style="color:var(--text-light);font-size:0.75rem;">Нет записей</div>';
-                drawWeightChart([]);
-                return;
-            }
-
-            const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
-            container.innerHTML = sorted.slice(0, 8).map(entry => {
-                const date = new Date(entry.date).toLocaleDateString('ru', { day: 'numeric', month: 'short' });
-                return `
-                    <div class="entry">
-                        <span class="date">${date}</span>
-                        <span class="val">${entry.weight} кг</span>
-                    </div>
-                `;
-            }).join('');
-
-            drawWeightChart(entries);
-        }
-
-        function drawWeightChart(entries) {
-            const canvas = document.getElementById('weightChart');
-            if (!canvas) return;
-
-            const ctx = canvas.getContext('2d');
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = canvas.parentElement.clientWidth - 12;
-            canvas.height = 70;
-
-            if (entries.length < 2) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = 'var(--text-light)';
-                ctx.font = '11px system-ui';
-                ctx.textAlign = 'center';
-                ctx.fillText('📊 Добавьте больше записей для графика', canvas.width / 2, canvas.height / 2 + 4);
-                return;
-            }
-
-            const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
-            const values = sorted.map(e => e.weight);
-            const min = Math.min(...values) - 2;
-            const max = Math.max(...values) + 2;
-            const range = max - min || 1;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Линия
-            ctx.beginPath();
-            ctx.strokeStyle = 'var(--primary)';
-            ctx.lineWidth = 2.5;
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-
-            const padding = 10;
-            const width = canvas.width - padding * 2;
-            const height = canvas.height - padding * 2;
-
-            values.forEach((v, i) => {
-                const x = padding + (i / (values.length - 1)) * width;
-                const y = padding + height - ((v - min) / range) * height;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            ctx.stroke();
-
-            // Заливка под графиком
-            const lastX = padding + width;
-            const lastY = padding + height - ((values[values.length - 1] - min) / range) * height;
-            ctx.lineTo(lastX, padding + height);
-            ctx.lineTo(padding, padding + height);
-            ctx.closePath();
-            ctx.fillStyle = 'var(--primary-light)';
-            ctx.fill();
-
-            // Точки
-            values.forEach((v, i) => {
-                const x = padding + (i / (values.length - 1)) * width;
-                const y = padding + height - ((v - min) / range) * height;
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = 'var(--primary)';
-                ctx.fill();
-                ctx.strokeStyle = 'var(--card-bg)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            });
-
-            // Подписи
-            ctx.fillStyle = 'var(--text-secondary)';
-            ctx.font = '8px system-ui';
-            ctx.textAlign = 'left';
-            ctx.fillText(values[0].toFixed(1) + ' кг', padding, canvas.height - 2);
-            ctx.textAlign = 'right';
-            ctx.fillText(values[values.length - 1].toFixed(1) + ' кг', canvas.width - padding, canvas.height - 2);
-        }
-
-        function toggleWeightJournal() {
-            const content = document.getElementById('weightContent');
-            const toggle = document.getElementById('weightToggle');
-            const isOpen = content.classList.toggle('open');
-            toggle.textContent = isOpen ? '▼' : '▶';
-            localStorage.setItem('weightOpen', isOpen);
-            if (isOpen) {
-                setTimeout(() => drawWeightChart(profile.weightJournal || []), 100);
-            }
-        }
-
-        function toggleMeasurements() {
-            const content = document.getElementById('measureContent');
-            const toggle = document.getElementById('measureToggle');
-            const isOpen = content.classList.toggle('open');
-            toggle.textContent = isOpen ? '▼' : '▶';
-            localStorage.setItem('measureOpen', isOpen);
-        }
-
-        function addWeight() {
-            const input = document.getElementById('newWeight');
-            const weight = parseFloat(input.value);
-            if (!weight || weight < 20 || weight > 300) {
-                showNotification('Введите корректный вес!', true);
-                return;
-            }
-
-            if (!profile.weightJournal) profile.weightJournal = [];
-            profile.weightJournal.push({
-                date: new Date().toISOString(),
-                weight: weight
-            });
-            profile.weight = weight;
-
-            saveProfile();
-            renderProfile();
-            showNotification('✅ Вес добавлен!');
-            input.value = '';
-            setTimeout(() => drawWeightChart(profile.weightJournal || []), 200);
-        }
-
-        function saveProfileInfo() {
-            const name = document.getElementById('profileNameInput').value.trim();
-            const age = document.getElementById('profileAge').value;
-            const gender = document.getElementById('profileGender').value;
-            const height = parseFloat(document.getElementById('profileHeight').value);
-            const weight = parseFloat(document.getElementById('profileWeight').value);
-
-            if (name) profile.name = name;
-            profile.age = age || '';
-            profile.gender = gender || 'male';
-            profile.height = height || '';
-            profile.weight = weight || '';
-
-            saveProfile();
-            renderProfile();
-            showNotification('✅ Профиль сохранён!');
-        }
-
-        function saveMeasurements() {
-            profile.measurements = {
-                biceps: parseFloat(document.getElementById('measBiceps').value) || '',
-                chest: parseFloat(document.getElementById('measChest').value) || '',
-                thigh: parseFloat(document.getElementById('measThigh').value) || '',
-                waist: parseFloat(document.getElementById('measWaist').value) || ''
-            };
-
-            saveProfile();
-            showNotification('✅ Мерки сохранены!');
-        }
-
-        function uploadCover(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                profile.cover = e.target.result;
-                saveProfile();
-                renderProfile();
-                showNotification('✅ Обложка обновлена!');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function uploadAvatar(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                profile.avatar = e.target.result;
-                saveProfile();
-                renderProfile();
-                showNotification('✅ Аватар обновлён!');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function resetData() {
-            if (confirm('Точно сбросить всё? Данные не восстановить!')) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        // ============================================================
-        // ========== РЕНДЕР: ИНФО ==========
-        // ============================================================
-
-        function renderInfo() {
-            document.getElementById('infoTotalQuests').textContent = quests.length;
-            document.getElementById('infoTotalXP').textContent = profile.totalXP;
-            document.getElementById('infoLevel').textContent = profile.level;
-            document.getElementById('infoPhotos').textContent = gallery.length;
-        }
-
-        // ============================================================
-        // ========== РЕНДЕР: НАСТРОЙКИ ==========
-        // ============================================================
-
-        function renderSettings() {}
-
-        // ============================================================
-        // ========== РЕНДЕР: ГИЛЬДИИ ==========
-        // ============================================================
-
-        function renderGuilds() {
-            const container = document.getElementById('guildGrid');
-            container.innerHTML = guilds.map(g => {
-                const count = quests.filter(q => q.guildId === g.id).length;
-                return `
-                    <div class="card guild-card" style="border-color:${g.color}30;">
-                        <div class="icon" style="background:${g.color}15;color:${g.color};">${g.icon}</div>
-                        <div class="name">${g.name}</div>
-                        <div class="count">${count} задач</div>
-                        <div class="color-picker">
-                            <input type="color" value="${g.color}" 
-                                   onchange="updateGuildColor('${g.id}', this.value)" />
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateGuildColor(id, color) {
-            const guild = guilds.find(g => g.id === id);
-            if (guild) {
-                guild.color = color;
-                saveGuilds();
-                renderGuilds();
-                showNotification('Цвет обновлён!');
-                renderAll();
-            }
-        }
-
-        // ============================================================
-        // ========== ЭКСПОРТ / ИМПОРТ ==========
-        // ============================================================
-
-        function exportData() {
-            const data = {
-                guilds,
-                quests,
-                gallery,
-                profile,
-                version: '2.0',
-                exported: new Date().toISOString()
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `flowplan_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            showNotification('📤 Данные экспортированы!');
-        }
-
-        function importData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    try {
-                        const data = JSON.parse(ev.target.result);
-                        if (data.guilds) guilds = data.guilds;
-                        if (data.quests) quests = data.quests;
-                        if (data.gallery) gallery = data.gallery;
-                        if (data.profile) profile = data.profile;
-                        saveGuilds();
-                        saveQuests();
-                        saveGallery();
-                        saveProfile();
-                        showNotification('📥 Данные импортированы!');
-                        renderAll();
-                    } catch (err) {
-                        showNotification('Ошибка импорта!', true);
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        }
-
-        // ============================================================
-        // ========== ОБЩИЙ РЕНДЕР ==========
-        // ============================================================
-
-        function renderAll() {
-            if (currentTab === 'day') renderDay();
-            else if (currentTab === 'calendar') renderCalendar();
-            else if (currentTab === 'quests') renderAllQuests();
-            else if (currentTab === 'gallery') renderGallery();
-            else if (currentTab === 'profile') renderProfile();
-            else if (currentTab === 'guilds') renderGuilds();
-            else if (currentTab === 'settings') renderSettings();
-            else if (currentTab === 'info') renderInfo();
-        }
-
-        // ============================================================
-        // ========== ИНИЦИАЛИЗАЦИЯ ==========
-        // ============================================================
-
-        function init() {
-            loadData();
-            switchTab('day');
-            renderAll();
-
-            window.addEventListener('resize', () => {
-                if (currentTab === 'profile') {
-                    setTimeout(() => drawWeightChart(profile.weightJournal || []), 200);
-                }
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeModal();
-                    closePhotoModal();
-                }
-            });
-
-            document.getElementById('modal').addEventListener('click', (e) => {
-                if (e.target === document.getElementById('modal')) closeModal();
-            });
-
-            console.log('🚀 FlowPlan загружен!');
-            console.log(`📊 Задач: ${quests.length}, Фото: ${gallery.length}, Уровень: ${profile.level}, XP: ${profile.totalXP}`);
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
-
+      }
+
+      init();
+    })();
+  </script>
 </body>
 </html>
