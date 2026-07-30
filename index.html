@@ -1,3 +1,6 @@
+Вот обновлённый HTML-файл RPG-планировщика с визуальным персонажем, современным дизайном в стиле «неоморфизм + стекло» и переключателем дня/ночи.
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -5,7 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RPG-планировщик</title>
     <style>
-        /* ========== БАЗОВЫЕ СТИЛИ ========== */
+        /* =============================================================
+           БАЗА
+           ============================================================= */
         * {
             margin: 0;
             padding: 0;
@@ -13,50 +18,67 @@
         }
 
         :root {
-            --primary: #6C5CE7;
-            --primary-dark: #5A4BD1;
-            --bg: #F8F9FA;
-            --card-bg: #FFFFFF;
-            --border-color: #E9ECEF;
-            --text: #212529;
-            --text-secondary: #6C757D;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            --radius: 12px;
+            --primary: #7C5CFC;
+            --primary-glow: rgba(124, 92, 252, 0.35);
+            --primary-gradient: linear-gradient(135deg, #7C5CFC, #A78BFA);
+            --bg: #F0F2F5;
+            --card-bg: rgba(255, 255, 255, 0.65);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02);
+            --text: #1A1A2E;
+            --text-secondary: #6B7280;
+            --border-color: rgba(0, 0, 0, 0.06);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
         }
 
-        .dark {
-            --bg: #1A1A2E;
-            --card-bg: #16213E;
-            --border-color: #2A3A5E;
+        /* Тёмная тема */
+        [data-theme="dark"] {
+            --bg: #0F0E1A;
+            --card-bg: rgba(30, 28, 58, 0.7);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             --text: #EAEAEA;
-            --text-secondary: #A0A0B0;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --text-secondary: #9CA3AF;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --glass-bg: rgba(30, 28, 58, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.06);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+            font-family: var(--font);
             background: var(--bg);
             color: var(--text);
-            margin: 0;
-            padding: 0;
-            transition: background 0.3s, color 0.3s;
+            transition: background var(--transition), color var(--transition);
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ========== ОБЩИЕ КЛАССЫ ========== */
+        /* =============================================================
+           ПРИЛОЖЕНИЕ
+           ============================================================= */
         .app {
             max-width: 480px;
             margin: 0 auto;
             min-height: 100vh;
-            background: var(--bg);
             position: relative;
             padding-bottom: 80px;
+            background: var(--bg);
+            transition: background var(--transition);
         }
 
+        /* =============================================================
+           ВКЛАДКИ
+           ============================================================= */
         .view {
             display: none;
-            animation: fadeIn 0.25s ease;
+            animation: fadeSlide 0.3s ease;
             padding: 16px 16px 80px 16px;
         }
 
@@ -64,96 +86,145 @@
             display: block;
         }
 
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .view-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 8px 0 16px 0;
             margin-bottom: 16px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .view-header h2 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .view-header .badge {
+            font-size: 0.75rem;
             font-weight: 600;
-        }
-
-        .stats-mini {
-            display: flex;
-            gap: 12px;
-            font-size: 0.85rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 4px 14px;
+            border-radius: 20px;
             color: var(--text-secondary);
+            border: 1px solid var(--card-border);
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
+        /* =============================================================
+           СТЕКЛЯННЫЕ КАРТОЧКИ (GLASSMORPHISM)
+           ============================================================= */
+        .glass {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            box-shadow: var(--card-shadow);
         }
 
-        .empty-state p {
-            font-size: 1.1rem;
-            margin-bottom: 16px;
+        .glass-sm {
+            border-radius: var(--radius-sm);
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
         }
 
-        /* ========== КНОПКИ ========== */
+        /* =============================================================
+           КНОПКИ
+           ============================================================= */
         .btn-primary {
-            background: var(--primary);
-            color: white;
+            background: var(--primary-gradient);
+            color: #fff;
             border: none;
-            padding: 8px 20px;
-            border-radius: 8px;
+            padding: 10px 24px;
+            border-radius: 50px;
             font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all var(--transition);
             font-family: inherit;
+            box-shadow: 0 4px 16px var(--primary-glow);
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--primary-glow);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
         }
 
         .btn-danger {
-            background: #FF6B6B;
-            color: white;
-            border: none;
+            background: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: 50px;
             cursor: pointer;
             font-size: 0.9rem;
-            margin-top: 20px;
-            width: 100%;
+            font-weight: 600;
+            transition: all var(--transition);
             font-family: inherit;
+            width: 100%;
         }
 
         .btn-danger:hover {
-            background: #E55A5A;
+            background: rgba(239, 68, 68, 0.25);
         }
 
         .fab {
             position: fixed;
             bottom: 88px;
             right: 24px;
-            width: 56px;
-            height: 56px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            background: var(--primary);
-            color: white;
+            background: var(--primary-gradient);
+            color: #fff;
             border: none;
-            font-size: 28px;
-            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.4);
+            font-size: 30px;
+            box-shadow: 0 8px 32px var(--primary-glow);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--transition);
             z-index: 50;
             font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .fab:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.5);
+            transform: scale(1.06) translateY(-2px);
+            box-shadow: 0 12px 40px var(--primary-glow);
         }
 
-        /* ========== НАВИГАЦИЯ ========== */
+        .fab:active {
+            transform: scale(0.94);
+        }
+
+        /* =============================================================
+           НАВИГАЦИЯ
+           ============================================================= */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -163,10 +234,12 @@
             max-width: 480px;
             display: flex;
             background: var(--card-bg);
-            border-top: 1px solid var(--border-color);
-            padding: 8px 0 var(--safe-bottom);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--card-border);
+            padding: 6px 0 var(--safe-bottom);
             z-index: 100;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.04);
         }
 
         .bottom-nav button {
@@ -174,60 +247,120 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
+            gap: 1px;
             background: none;
             border: none;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
+            font-weight: 500;
             color: var(--text-secondary);
-            padding: 4px 0;
+            padding: 6px 0;
             cursor: pointer;
-            transition: color 0.2s;
+            transition: all var(--transition);
             font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            position: relative;
+        }
+
+        .bottom-nav button .tab-icon {
+            font-size: 1.5rem;
+            transition: transform var(--transition);
         }
 
         .bottom-nav button.active {
             color: var(--primary);
         }
 
-        .tab-icon {
-            font-size: 1.5rem;
+        .bottom-nav button.active .tab-icon {
+            transform: scale(1.1);
         }
 
-        .tab-label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .bottom-nav button.active::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 3px;
+            border-radius: 3px;
+            background: var(--primary-gradient);
         }
 
-        /* ========== КВЕСТЫ ========== */
+        .bottom-nav button:hover .tab-icon {
+            transform: scale(1.05);
+        }
+
+        /* =============================================================
+           КВЕСТЫ
+           ============================================================= */
         .quest-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .quest-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
+            gap: 14px;
+            padding: 14px 18px;
             background: var(--card-bg);
-            border-radius: var(--radius);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--card-shadow);
             border-left: 4px solid;
-            box-shadow: var(--shadow);
-            transition: all 0.2s;
+            transition: all var(--transition);
         }
 
         .quest-item:hover {
-            transform: translateX(2px);
+            transform: translateX(4px);
         }
 
         .quest-item.done {
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
         .quest-item.done .quest-title {
             text-decoration: line-through;
+        }
+
+        .quest-item input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 2px solid var(--border-color);
+            background: var(--bg);
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .quest-item input[type="checkbox"]:checked {
+            background: var(--primary-gradient);
+            border-color: var(--primary);
+        }
+
+        .quest-item input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .quest-item input[type="checkbox"]:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         .quest-content {
@@ -239,20 +372,24 @@
             display: flex;
             justify-content: space-between;
             gap: 8px;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.95rem;
         }
 
         .quest-guild {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
             white-space: nowrap;
+            background: var(--glass-bg);
+            padding: 2px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
         }
 
         .quest-meta {
             display: flex;
             gap: 12px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
             margin-top: 4px;
             flex-wrap: wrap;
@@ -265,74 +402,195 @@
             cursor: pointer;
             padding: 4px 8px;
             font-size: 1rem;
-            opacity: 0.4;
-            transition: opacity 0.2s;
+            opacity: 0.3;
+            transition: all var(--transition);
             font-family: inherit;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .quest-delete:hover {
             opacity: 1;
-            color: #FF6B6B;
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
         }
 
-        .quest-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: var(--primary);
-            flex-shrink: 0;
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
         }
 
-        .quest-item input[type="checkbox"]:disabled {
-            cursor: not-allowed;
+        .empty-state .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
             opacity: 0.5;
         }
 
-        /* ========== ФИЛЬТРЫ ========== */
-        .quest-filters {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            background: var(--card-bg);
-            cursor: pointer;
+        .empty-state p {
             font-size: 1rem;
-            transition: all 0.2s;
-            font-family: inherit;
+            margin-bottom: 20px;
         }
 
-        .filter-btn.active {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
+        /* =============================================================
+           МОДАЛКА
+           ============================================================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
         }
 
-        .filter-btn:hover {
-            transform: scale(1.05);
+        .modal-overlay.open {
+            display: flex;
         }
 
-        /* ========== КАЛЕНДАРЬ ========== */
-        .calendar-grid {
+        .modal {
             background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--card-border);
             border-radius: var(--radius);
-            padding: 16px;
-            box-shadow: var(--shadow);
+            padding: 28px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal input,
+        .modal select {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            background: var(--glass-bg);
+            color: var(--text);
+            font-family: inherit;
+            transition: all var(--transition);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .modal input:focus,
+        .modal select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+
+        .modal label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .modal label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all var(--transition);
+        }
+
+        .modal-actions button[type="button"] {
+            background: var(--glass-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-actions button[type="button"]:hover {
+            background: var(--border-color);
+        }
+
+        .modal-actions button[type="submit"] {
+            background: var(--primary-gradient);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--primary-glow);
+        }
+
+        .modal-actions button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--primary-glow);
+        }
+
+        /* =============================================================
+           КАЛЕНДАРЬ
+           ============================================================= */
+        .calendar-grid {
+            padding: 20px;
         }
 
         .calendar-header {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 4px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             color: var(--text-secondary);
             text-align: center;
         }
@@ -349,26 +607,29 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all var(--transition);
+            font-size: 0.85rem;
+            font-weight: 500;
             position: relative;
             padding: 2px;
-            font-size: 0.85rem;
         }
 
         .calendar-day:hover {
             background: var(--border-color);
+            transform: scale(1.04);
         }
 
         .calendar-day.other-month {
-            opacity: 0.3;
+            opacity: 0.25;
         }
 
         .calendar-day.today {
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
+            background: var(--primary-gradient);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 4px 16px var(--primary-glow);
         }
 
         .calendar-day.has-quests {
@@ -384,8 +645,8 @@
         }
 
         .day-dot {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             flex-shrink: 0;
         }
@@ -393,41 +654,52 @@
         .month-nav {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .month-nav button {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
             cursor: pointer;
-            color: var(--text-secondary);
-            padding: 0 8px;
+            color: var(--text);
+            transition: all var(--transition);
             font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .month-nav button:hover {
-            color: var(--text);
+            background: var(--primary-gradient);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .month-nav span {
+            font-weight: 600;
+            font-size: 1rem;
         }
 
         .day-detail {
             margin-top: 16px;
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px;
-            box-shadow: var(--shadow);
+            padding: 20px;
         }
 
         .day-detail h4 {
-            margin-bottom: 12px;
             font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
         }
 
         .quest-item-mini {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 0;
+            gap: 10px;
+            padding: 8px 0;
             border-bottom: 1px solid var(--border-color);
             font-size: 0.9rem;
         }
@@ -440,150 +712,163 @@
             font-size: 0.7rem;
             color: var(--text-secondary);
             margin-left: auto;
+            background: var(--glass-bg);
+            padding: 2px 10px;
+            border-radius: 20px;
         }
 
-        /* ========== МОДАЛКА ========== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-            padding: 20px;
-        }
-
-        .modal-overlay.open {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 24px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.3s ease;
-        }
-
-        .modal h3 {
-            margin-bottom: 16px;
-            font-size: 1.2rem;
-        }
-
-        .modal form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .modal input,
-        .modal select,
-        .modal textarea {
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
-            width: 100%;
-        }
-
-        .modal input:focus,
-        .modal select:focus,
-        .modal textarea:focus {
-            outline: 2px solid var(--primary);
-            outline-offset: 1px;
-        }
-
-        .modal label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .modal-actions button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        .modal-actions button[type="button"] {
-            background: var(--border-color);
-            color: var(--text-secondary);
-        }
-
-        .modal-actions button[type="submit"] {
-            background: var(--primary);
-            color: white;
-        }
-
-        .modal-actions button[type="submit"]:hover {
-            background: var(--primary-dark);
-        }
-
-        /* ========== ПРОФИЛЬ ========== */
+        /* =============================================================
+           ПРОФИЛЬ + ПЕРСОНАЖ
+           ============================================================= */
         .profile-view {
             max-width: 400px;
             margin: 0 auto;
         }
 
-        .profile-header {
+        .profile-card {
+            padding: 24px;
             text-align: center;
-            padding: 20px 0;
+            margin-bottom: 16px;
         }
 
-        .avatar {
-            width: 72px;
-            height: 72px;
+        /* === ПЕРСОНАЖ === */
+        .character-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 16px;
+        }
+
+        .character-ring {
+            position: absolute;
+            inset: -8px;
             border-radius: 50%;
-            background: var(--primary);
-            color: white;
+            background: conic-gradient(from 0deg, var(--primary), #A78BFA, #7C5CFC, var(--primary));
+            opacity: 0.15;
+            animation: spinRing 8s linear infinite;
+        }
+
+        @keyframes spinRing {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .character-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 3px solid var(--card-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 12px;
-            font-weight: 600;
+            font-size: 4.5rem;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: all var(--transition);
+            user-select: none;
+        }
+
+        /* Украшения персонажа */
+        .character-avatar .crown {
+            position: absolute;
+            top: -12px;
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.4));
+            display: none;
+        }
+
+        .character-avatar .sparkle {
+            position: absolute;
+            font-size: 1.2rem;
+            animation: sparkle 2s ease-in-out infinite;
+            display: none;
+        }
+
+        .character-avatar .sparkle:nth-child(2) {
+            top: -4px;
+            right: -4px;
+            animation-delay: 0.3s;
+        }
+        .character-avatar .sparkle:nth-child(3) {
+            bottom: -4px;
+            left: -4px;
+            animation-delay: 0.6s;
+        }
+        .character-avatar .sparkle:nth-child(4) {
+            bottom: -4px;
+            right: -4px;
+            animation-delay: 0.9s;
+        }
+
+        @keyframes sparkle {
+            0%,
+            100% {
+                transform: scale(0.8) rotate(0deg);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.3) rotate(20deg);
+                opacity: 1;
+            }
+        }
+
+        /* Уровни украшений */
+        .character-avatar.level-5 .crown {
+            display: block;
+        }
+        .character-avatar.level-10 .sparkle {
+            display: block;
+        }
+        .character-avatar.level-15 .crown {
+            font-size: 2.4rem;
+            top: -16px;
+        }
+        .character-avatar.level-20 .sparkle {
+            display: block !important;
+        }
+
+        .character-status {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .character-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 2px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 4px;
         }
 
         .level-badge {
             display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 4px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            background: var(--primary-gradient);
+            color: #fff;
+            padding: 4px 18px;
+            border-radius: 50px;
+            font-size: 0.8rem;
             font-weight: 600;
-            margin-top: 8px;
+            margin-top: 6px;
+            box-shadow: 0 4px 16px var(--primary-glow);
         }
 
+        /* XP-бар */
         .xp-section {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px;
+            padding: 20px;
             margin: 16px 0;
-            box-shadow: var(--shadow);
         }
 
         .xp-bar {
@@ -596,107 +881,114 @@
 
         .xp-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary), #A78BFA);
+            background: var(--primary-gradient);
             border-radius: 4px;
-            transition: width 0.3s ease;
+            transition: width 0.6s ease;
         }
 
         .xp-info {
             display: flex;
             justify-content: space-between;
             margin-top: 8px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
         }
 
         .profile-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            gap: 10px;
             margin: 16px 0;
         }
 
         .stat-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
             padding: 16px;
             text-align: center;
-            box-shadow: var(--shadow);
         }
 
         .stat-value {
             display: block;
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .profile-edit {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             margin: 16px 0;
         }
 
         .profile-edit input {
             flex: 1;
-            padding: 10px 12px;
+            padding: 12px 16px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             font-size: 0.95rem;
-            background: var(--bg);
+            background: var(--glass-bg);
             color: var(--text);
             font-family: inherit;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: all var(--transition);
         }
 
         .profile-edit input:focus {
-            outline: 2px solid var(--primary);
-            outline-offset: 1px;
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
         }
 
-        /* ========== ГИЛЬДИИ ========== */
+        /* =============================================================
+           ГИЛЬДИИ
+           ============================================================= */
         .guild-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 12px;
         }
 
         .guild-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
             padding: 16px;
             text-align: center;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--border-color);
-            transition: all 0.2s;
+            transition: all var(--transition);
         }
 
         .guild-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
         }
 
         .guild-icon {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             margin: 0 auto 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
         }
 
         .guild-info h4 {
-            font-size: 0.95rem;
-            margin-bottom: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
         .guild-count {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
         }
 
@@ -705,15 +997,53 @@
         }
 
         .guild-color-picker input {
-            width: 32px;
-            height: 32px;
-            border: none;
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border-color);
             border-radius: 50%;
             cursor: pointer;
             padding: 0;
+            background: none;
         }
 
-        /* ========== УВЕДОМЛЕНИЯ ========== */
+        /* =============================================================
+           ФИЛЬТРЫ
+           ============================================================= */
+        .quest-filters {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all var(--transition);
+            font-family: inherit;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .filter-btn.active {
+            border-color: var(--primary);
+            background: var(--primary-gradient);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--primary-glow);
+        }
+
+        .filter-btn:hover {
+            transform: scale(1.08);
+        }
+
+        /* =============================================================
+           УВЕДОМЛЕНИЯ
+           ============================================================= */
         .notification {
             position: fixed;
             top: 20px;
@@ -721,72 +1051,81 @@
             transform: translateX(-50%);
             max-width: 400px;
             width: 90%;
-            padding: 12px 20px;
+            padding: 14px 24px;
             background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
             z-index: 300;
             text-align: center;
             font-weight: 500;
             display: none;
-            animation: slideDown 0.3s ease;
+            animation: notifSlide 0.4s ease;
             border-left: 4px solid var(--primary);
+        }
+
+        @keyframes notifSlide {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
         }
 
         .notification.show {
             display: block;
         }
 
-        /* ========== АНИМАЦИИ ========== */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* =============================================================
+           ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ
+           ============================================================= */
+        .theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 150;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .theme-toggle:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -20px);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
-            }
-        }
-
-        /* ========== АДАПТИВ ========== */
+        /* =============================================================
+           АДАПТИВ
+           ============================================================= */
         @media (min-width: 768px) {
             .app {
                 max-width: 600px;
                 padding: 20px;
             }
-
             .bottom-nav {
                 max-width: 600px;
                 border-radius: 16px 16px 0 0;
             }
-
             .fab {
                 right: calc(50% - 300px + 24px);
             }
-
             .view {
                 padding: 20px;
             }
@@ -796,30 +1135,27 @@
             .app {
                 max-width: 800px;
             }
-
             .bottom-nav {
                 max-width: 800px;
             }
-
             .fab {
                 right: calc(50% - 400px + 24px);
             }
         }
 
-        /* ========== СКРОЛЛ ========== */
+        /* =============================================================
+           СКРОЛЛ
+           ============================================================= */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
-
         ::-webkit-scrollbar-track {
-            background: var(--bg);
+            background: transparent;
         }
-
         ::-webkit-scrollbar-thumb {
             background: var(--border-color);
-            border-radius: 3px;
+            border-radius: 2px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-secondary);
         }
@@ -831,6 +1167,11 @@
         <!-- ===== УВЕДОМЛЕНИЕ ===== -->
         <div id="notification" class="notification"></div>
 
+        <!-- ===== ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ===== -->
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Переключить тему">
+            🌙
+        </button>
+
         <!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
         <div class="app" id="appContainer">
 
@@ -838,17 +1179,14 @@
             <div id="view-day" class="view active">
                 <div class="view-header">
                     <h2>📅 Сегодня</h2>
-                    <div class="stats-mini">
-                        <span>✅ <span id="todayDone">0</span></span>
-                        <span>📋 <span id="todayTotal">0</span></span>
-                        <span>⭐ LVL <span id="profileLevel">1</span></span>
-                    </div>
+                    <span class="badge" id="todayBadge">0 задач</span>
                 </div>
 
                 <div id="todayQuests" class="quest-list">
                     <div class="empty-state">
-                        <p>Нет задач на сегодня 🎉</p>
-                        <button class="btn-primary" onclick="openModal()">+ Создать</button>
+                        <div class="empty-icon">🎯</div>
+                        <p>Нет задач на сегодня</p>
+                        <button class="btn-primary" onclick="openModal()">+ Создать квест</button>
                     </div>
                 </div>
 
@@ -866,7 +1204,7 @@
                     </div>
                 </div>
 
-                <div class="calendar-grid">
+                <div class="calendar-grid glass">
                     <div class="calendar-header">
                         <span>Пн</span><span>Вт</span><span>Ср</span>
                         <span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
@@ -874,7 +1212,7 @@
                     <div id="calendarDays" class="calendar-days"></div>
                 </div>
 
-                <div id="dayDetail" class="day-detail" style="display:none;">
+                <div id="dayDetail" class="day-detail glass" style="display:none;">
                     <h4 id="selectedDayTitle"></h4>
                     <div id="selectedDayQuests"></div>
                 </div>
@@ -883,8 +1221,8 @@
             <!-- ===== ВКЛАДКА: ЗАДАЧИ ===== -->
             <div id="view-quests" class="view">
                 <div class="view-header">
-                    <h2>📋 Все задачи</h2>
-                    <button class="btn-primary" onclick="openModal()">+</button>
+                    <h2>📋 Задачи</h2>
+                    <button class="btn-primary" onclick="openModal()" style="padding:6px 16px;font-size:0.8rem;">+</button>
                 </div>
 
                 <div id="questFilters" class="quest-filters"></div>
@@ -893,13 +1231,27 @@
 
             <!-- ===== ВКЛАДКА: ПРОФИЛЬ ===== -->
             <div id="view-profile" class="view profile-view">
-                <div class="profile-header">
-                    <div class="avatar" id="profileAvatar">И</div>
-                    <h2 id="profileName">Игрок</h2>
+                <!-- Карточка профиля с персонажем -->
+                <div class="profile-card glass">
+                    <div class="character-container">
+                        <div class="character-ring"></div>
+                        <div class="character-avatar" id="characterAvatar">
+                            <span class="crown">👑</span>
+                            <span class="sparkle">✨</span>
+                            <span class="sparkle">✨</span>
+                            <span class="sparkle">✨</span>
+                            <span class="sparkle">✨</span>
+                            <span id="avatarEmoji">🧙</span>
+                        </div>
+                    </div>
+                    <div class="character-status" id="characterStatus">🟢 В игре</div>
+                    <div class="character-title" id="characterTitle">⭐ Новичок</div>
+                    <div class="profile-name" id="profileName">Игрок</div>
                     <span class="level-badge">LVL <span id="profileLevelBig">1</span></span>
                 </div>
 
-                <div class="xp-section">
+                <!-- XP -->
+                <div class="xp-section glass">
                     <div class="xp-bar">
                         <div id="xpFill" class="xp-fill" style="width:0%"></div>
                     </div>
@@ -909,27 +1261,29 @@
                     </div>
                 </div>
 
+                <!-- Статистика -->
                 <div class="profile-stats">
-                    <div class="stat-card">
+                    <div class="stat-card glass-sm">
                         <span class="stat-value" id="statToday">0</span>
-                        <span class="stat-label">Задач сегодня</span>
+                        <span class="stat-label">Сегодня</span>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card glass-sm">
                         <span class="stat-value" id="statDone">0</span>
                         <span class="stat-label">Выполнено</span>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card glass-sm">
                         <span class="stat-value" id="statTotal">0</span>
-                        <span class="stat-label">Всего задач</span>
+                        <span class="stat-label">Всего</span>
                     </div>
                 </div>
 
+                <!-- Редактирование -->
                 <div class="profile-edit">
                     <input id="nameInput" placeholder="Ваше имя" />
-                    <button class="btn-primary" onclick="updateName()">Сохранить</button>
+                    <button class="btn-primary" onclick="updateName()" style="padding:10px 20px;font-size:0.85rem;">Сохранить</button>
                 </div>
 
-                <button class="btn-danger" onclick="resetData()">Сбросить все данные</button>
+                <button class="btn-danger" onclick="resetData()">🗑️ Сбросить все данные</button>
             </div>
 
             <!-- ===== ВКЛАДКА: ГИЛЬДИИ ===== -->
@@ -940,7 +1294,7 @@
                 <div id="guildGrid" class="guild-grid"></div>
             </div>
 
-            <!-- ===== НИЖНЯЯ НАВИГАЦИЯ ===== -->
+            <!-- ===== НАВИГАЦИЯ ===== -->
             <nav class="bottom-nav">
                 <button class="active" data-tab="day" onclick="switchTab('day')">
                     <span class="tab-icon">📅</span>
@@ -970,7 +1324,7 @@
             <div class="modal">
                 <h3>✨ Новый квест</h3>
                 <form onsubmit="createQuest(event)">
-                    <input id="questTitle" placeholder="Название" required />
+                    <input id="questTitle" placeholder="Название квеста" required />
                     <select id="questGuild" required>
                         <option value="">Выбери гильдию</option>
                     </select>
@@ -1011,6 +1365,18 @@
             { id: 'nutrition', name: 'Питание', color: '#7EC8E3', icon: '🥗' }
         ];
 
+        const TITLES = [
+            { min: 0, title: '⭐ Новичок', emoji: '🧙' },
+            { min: 3, title: '⚔️ Искатель', emoji: '⚔️' },
+            { min: 8, title: '🛡️ Защитник', emoji: '🛡️' },
+            { min: 15, title: '🏆 Чемпион', emoji: '🏆' },
+            { min: 25, title: '👑 Легенда', emoji: '👑' },
+            { min: 40, title: '🌟 Мастер', emoji: '🌟' },
+            { min: 60, title: '🔥 Герой', emoji: '🔥' },
+            { min: 85, title: '💫 Мифический', emoji: '💫' },
+            { min: 120, title: '✨ Божественный', emoji: '✨' },
+        ];
+
         // ============================================================
         // ========== СОСТОЯНИЕ ==========
         // ============================================================
@@ -1023,9 +1389,10 @@
         let selectedDay = null;
         let filterGuild = null;
         let notificationTimeout = null;
+        let currentTheme = 'light';
 
         // ============================================================
-        // ========== ЗАГРУЗКА ДАННЫХ ==========
+        // ========== ЗАГРУЗКА / СОХРАНЕНИЕ ==========
         // ============================================================
 
         function loadData() {
@@ -1040,29 +1407,27 @@
                     height: 0,
                     weightHistory: []
                 };
+                currentTheme = localStorage.getItem('theme') || 'light';
+                applyTheme(currentTheme);
                 updateProfileLevel();
             } catch (e) {
-                console.error('Ошибка загрузки данных:', e);
+                console.error('Ошибка загрузки:', e);
                 guilds = DEFAULT_GUILDS;
                 quests = [];
                 profile = { name: 'Игрок', totalXP: 0, level: 1, age: 0, height: 0, weightHistory: [] };
             }
         }
 
-        function saveQuests() {
-            localStorage.setItem('quests', JSON.stringify(quests));
-        }
+        function saveQuests() { localStorage.setItem('quests', JSON.stringify(quests)); }
 
-        function saveProfile() {
-            localStorage.setItem('profile', JSON.stringify(profile));
-        }
+        function saveProfile() { localStorage.setItem('profile', JSON.stringify(profile)); }
 
-        function saveGuilds() {
-            localStorage.setItem('guilds', JSON.stringify(guilds));
-        }
+        function saveGuilds() { localStorage.setItem('guilds', JSON.stringify(guilds)); }
+
+        function saveTheme() { localStorage.setItem('theme', currentTheme); }
 
         // ============================================================
-        // ========== XP КАЛЬКУЛЯТОР ==========
+        // ========== XP / УРОВЕНЬ ==========
         // ============================================================
 
         function calculateXP(minutes) {
@@ -1089,6 +1454,29 @@
             return { level, currentXP, nextLevelXP };
         }
 
+        function getTitle(level) {
+            let result = TITLES[0];
+            for (const t of TITLES) {
+                if (level >= t.min) result = t;
+            }
+            return result;
+        }
+
+        // ============================================================
+        // ========== ТЕМА ==========
+        // ============================================================
+
+        function applyTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+            saveTheme();
+        }
+
+        function toggleTheme() {
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        }
+
         // ============================================================
         // ========== УВЕДОМЛЕНИЯ ==========
         // ============================================================
@@ -1097,7 +1485,7 @@
             const el = document.getElementById('notification');
             el.textContent = msg;
             el.style.display = 'block';
-            el.style.borderLeftColor = isError ? '#FF6B6B' : 'var(--primary)';
+            el.style.borderLeftColor = isError ? '#EF4444' : 'var(--primary)';
             clearTimeout(notificationTimeout);
             notificationTimeout = setTimeout(() => {
                 el.style.display = 'none';
@@ -1105,7 +1493,7 @@
         }
 
         // ============================================================
-        // ========== РАБОТА С КВЕСТАМИ ==========
+        // ========== КВЕСТЫ ==========
         // ============================================================
 
         function createQuest(e) {
@@ -1123,12 +1511,6 @@
             if (!guildId) { showNotification('Выберите гильдию!', true); return; }
             if (!duration || duration < 1) { showNotification('Укажите длительность!', true); return; }
             if (!scheduledDate) { showNotification('Укажите дату!', true); return; }
-
-            // Проверка на будущую дату
-            const today = new Date().toISOString().split('T')[0];
-            if (scheduledDate > today) {
-                // Можно создать будущую задачу, но нельзя выполнить
-            }
 
             const quest = {
                 id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36),
@@ -1192,7 +1574,7 @@
             if (quest.status === 'done') {
                 profile.totalXP -= quest.xpEarned;
                 if (profile.totalXP < 0) profile.totalXP = 0;
-                showNotification(`🗑️ Удалено, возвращено ${quest.xpEarned} XP`);
+                showNotification(`🗑️ Возвращено ${quest.xpEarned} XP`);
             }
 
             quests.splice(index, 1);
@@ -1208,18 +1590,12 @@
 
         function switchTab(tabId) {
             currentTab = tabId;
-
-            // Обновить кнопки
             document.querySelectorAll('.bottom-nav button').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.tab === tabId);
             });
-
-            // Обновить вьюхи
             document.querySelectorAll('.view').forEach(view => {
                 view.classList.toggle('active', view.id === 'view-' + tabId);
             });
-
-            // Перерендер активной вкладки
             if (tabId === 'day') renderDay();
             if (tabId === 'month') renderMonth();
             if (tabId === 'quests') renderAllQuests();
@@ -1234,7 +1610,6 @@
         function openModal() {
             document.getElementById('modal').classList.add('open');
             document.getElementById('questDate').value = new Date().toISOString().split('T')[0];
-            // Заполнить гильдии
             const select = document.getElementById('questGuild');
             select.innerHTML = '<option value="">Выбери гильдию</option>';
             guilds.forEach(g => {
@@ -1265,17 +1640,16 @@
                 .filter(q => q.scheduledDate === today)
                 .sort((a, b) => (a.scheduledTime || '00:00').localeCompare(b.scheduledTime || '00:00'));
 
-            document.getElementById('todayDone').textContent = todayQuests.filter(q => q.status === 'done').length;
-            document.getElementById('todayTotal').textContent = todayQuests.length;
-            document.getElementById('profileLevel').textContent = profile.level;
+            document.getElementById('todayBadge').textContent = todayQuests.length + ' задач';
 
             const container = document.getElementById('todayQuests');
 
             if (todayQuests.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <p>Нет задач на сегодня 🎉</p>
-                        <button class="btn-primary" onclick="openModal()">+ Создать</button>
+                        <div class="empty-icon">🎯</div>
+                        <p>Нет задач на сегодня</p>
+                        <button class="btn-primary" onclick="openModal()">+ Создать квест</button>
                     </div>
                 `;
                 return;
@@ -1326,10 +1700,8 @@
             const days = [];
             const today = new Date().toISOString().split('T')[0];
 
-            // Начало с понедельника
             let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
 
-            // Предыдущий месяц
             const prevMonthLastDay = new Date(year, month, 0).getDate();
             for (let i = startOffset - 1; i >= 0; i--) {
                 const day = prevMonthLastDay - i;
@@ -1337,7 +1709,6 @@
                 days.push({ day, date, isCurrentMonth: false, isToday: date === today, quests: [] });
             }
 
-            // Текущий месяц
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const date = new Date(year, month, day).toISOString().split('T')[0];
                 days.push({
@@ -1349,7 +1720,6 @@
                 });
             }
 
-            // Следующий месяц
             const remaining = 42 - days.length;
             for (let day = 1; day <= remaining; day++) {
                 const date = new Date(year, month + 1, day).toISOString().split('T')[0];
@@ -1372,7 +1742,6 @@
                 `;
             }).join('');
 
-            // Если есть выбранный день
             if (selectedDay) {
                 renderDayDetail(selectedDay);
             } else {
@@ -1394,18 +1763,18 @@
             const container = document.getElementById('dayDetail');
             container.style.display = 'block';
 
-            const title = document.getElementById('selectedDayTitle');
-            title.textContent = new Date(date + 'T00:00:00').toLocaleDateString('ru', {
-                day: 'numeric',
-                month: 'long',
-                weekday: 'short'
-            });
+            document.getElementById('selectedDayTitle').textContent =
+                new Date(date + 'T00:00:00').toLocaleDateString('ru', {
+                    day: 'numeric',
+                    month: 'long',
+                    weekday: 'short'
+                });
 
             const dayQuests = quests.filter(q => q.scheduledDate === date);
             const list = document.getElementById('selectedDayQuests');
 
             if (dayQuests.length === 0) {
-                list.innerHTML = '<p style="color:var(--text-secondary);">Нет задач</p>';
+                list.innerHTML = '<p style="color:var(--text-secondary);font-size:0.9rem;">✨ Нет задач</p>';
                 return;
             }
 
@@ -1413,7 +1782,7 @@
                 const guild = guilds.find(g => g.id === q.guildId) || { name: 'Без гильдии' };
                 return `
                     <div class="quest-item-mini">
-                        <span class="quest-status-badge">${q.status === 'done' ? '✅' : '⏳'}</span>
+                        <span>${q.status === 'done' ? '✅' : '⏳'}</span>
                         <span>${q.title}</span>
                         <span class="quest-guild-tag">${guild.name}</span>
                     </div>
@@ -1426,7 +1795,6 @@
         // ============================================================
 
         function renderAllQuests() {
-            // Фильтры
             const filterContainer = document.getElementById('questFilters');
             filterContainer.innerHTML = `
                 <button class="filter-btn ${!filterGuild ? 'active' : ''}" onclick="filterGuild=null;renderAllQuests();">🏠</button>
@@ -1437,14 +1805,12 @@
                         ${g.icon}
                     </button>
                 `).join('')}
-                <button class="filter-btn" onclick="showNotification('✅ Только выполненные')">✅</button>
             `;
 
             let filtered = quests;
             if (filterGuild) {
                 filtered = filtered.filter(q => q.guildId === filterGuild);
             }
-
             filtered = filtered.sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate));
 
             const container = document.getElementById('allQuests');
@@ -1452,6 +1818,7 @@
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
+                        <div class="empty-icon">📋</div>
                         <p>Нет задач</p>
                         <button class="btn-primary" onclick="openModal()">+ Создать</button>
                     </div>
@@ -1465,7 +1832,7 @@
                     <div class="quest-item ${q.status === 'done' ? 'done' : ''}" 
                          style="border-left-color: ${guild.color}">
                         <div class="quest-status">
-                            <span class="status-badge">${q.status === 'done' ? '✅' : '⏳'}</span>
+                            <span>${q.status === 'done' ? '✅' : '⏳'}</span>
                         </div>
                         <div class="quest-content">
                             <div class="quest-title">
@@ -1486,27 +1853,58 @@
         }
 
         // ============================================================
-        // ========== РЕНДЕР: ПРОФИЛЬ ==========
+        // ========== РЕНДЕР: ПРОФИЛЬ + ПЕРСОНАЖ ==========
         // ============================================================
 
         function renderProfile() {
-            document.getElementById('profileAvatar').textContent = profile.name.charAt(0).toUpperCase() || 'И';
+            // Имя
             document.getElementById('profileName').textContent = profile.name;
+
+            // Уровень
             document.getElementById('profileLevelBig').textContent = profile.level;
 
+            // XP
             const { currentXP, nextLevelXP } = getLevelFromXP(profile.totalXP);
             document.getElementById('xpCurrent').textContent = `${currentXP} / ${nextLevelXP} XP`;
             document.getElementById('xpTotal').textContent = profile.totalXP;
-
             const progress = nextLevelXP > 0 ? (currentXP / nextLevelXP) * 100 : 0;
             document.getElementById('xpFill').style.width = Math.min(progress, 100) + '%';
 
+            // Статистика
             const today = new Date().toISOString().split('T')[0];
-            const todayQuests = quests.filter(q => q.scheduledDate === today);
-            document.getElementById('statToday').textContent = todayQuests.length;
+            document.getElementById('statToday').textContent = quests.filter(q => q.scheduledDate === today).length;
             document.getElementById('statDone').textContent = quests.filter(q => q.status === 'done').length;
             document.getElementById('statTotal').textContent = quests.length;
 
+            // ПЕРСОНАЖ
+            const titleData = getTitle(profile.level);
+            const avatar = document.getElementById('characterAvatar');
+
+            // Эмодзи
+            document.getElementById('avatarEmoji').textContent = titleData.emoji;
+
+            // Тайтл
+            document.getElementById('characterTitle').textContent = titleData.title;
+
+            // Статус
+            const todayQuests = quests.filter(q => q.scheduledDate === today);
+            const doneToday = todayQuests.filter(q => q.status === 'done').length;
+            if (doneToday > 0) {
+                document.getElementById('characterStatus').textContent = '🔥 В бою!';
+            } else if (todayQuests.length > 0) {
+                document.getElementById('characterStatus').textContent = '⚔️ Есть задачи!';
+            } else {
+                document.getElementById('characterStatus').textContent = '🟢 В игре';
+            }
+
+            // Украшения по уровням
+            avatar.className = 'character-avatar';
+            if (profile.level >= 5) avatar.classList.add('level-5');
+            if (profile.level >= 10) avatar.classList.add('level-10');
+            if (profile.level >= 15) avatar.classList.add('level-15');
+            if (profile.level >= 20) avatar.classList.add('level-20');
+
+            // Поле имени
             document.getElementById('nameInput').value = profile.name;
         }
 
@@ -1536,8 +1934,8 @@
             container.innerHTML = guilds.map(g => {
                 const count = quests.filter(q => q.guildId === g.id).length;
                 return `
-                    <div class="guild-card" style="border-color:${g.color}">
-                        <div class="guild-icon" style="background:${g.color}">${g.icon}</div>
+                    <div class="guild-card glass-sm" style="border:2px solid ${g.color}40;">
+                        <div class="guild-icon" style="background:${g.color}20;color:${g.color};">${g.icon}</div>
                         <div class="guild-info">
                             <h4>${g.name}</h4>
                             <span class="guild-count">${count} задач</span>
@@ -1583,25 +1981,79 @@
             switchTab('day');
             renderAll();
 
-            // Закрыть модалку по ESC
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeModal();
             });
 
-            // Закрыть модалку по клику вне
             document.getElementById('modal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('modal')) closeModal();
             });
 
             console.log('🚀 RPG-планировщик загружен!');
-            console.log(`📊 Всего квестов: ${quests.length}`);
-            console.log(`🏰 Гильдий: ${guilds.length}`);
-            console.log(`⭐ Уровень: ${profile.level}, XP: ${profile.totalXP}`);
+            console.log(`📊 Квестов: ${quests.length}, LVL: ${profile.level}, XP: ${profile.totalXP}`);
         }
 
-        // Запуск
         document.addEventListener('DOMContentLoaded', init);
     </script>
 
 </body>
 </html>
+```
+
+---
+
+Что нового и как это работает
+
+🎨 Визуальный персонаж
+
+· В профиле появился анимированный аватар с вращающимся кольцом
+· Эмодзи персонажа меняется в зависимости от уровня (🧙 → ⚔️ → 🛡️ → 🏆 → 👑 → 🌟 → 🔥 → 💫 → ✨)
+· Статус динамический: «В игре» / «Есть задачи!» / «В бою!»
+· Украшения появляются по мере прокачки:
+  · LVL 5+ — 👑 корона
+  · LVL 10+ — ✨ искры вокруг аватара
+  · LVL 15+ — увеличенная корона
+  · LVL 20+ — все искры активны
+
+🌓 Режим дня/ночи
+
+· Кнопка 🌙/☀️ в правом верхнем углу
+· Плавный переход всех цветов
+· Сохраняется в localStorage
+
+💎 Современный дизайн (тренды 2025)
+
+· Glassmorphism — стеклянные карточки с размытием
+· Neumorphism — мягкие тени и градиенты
+· Градиентные акценты — кнопки, заголовки, XP-бар
+· Плавные анимации — при переключении вкладок, наведении, кликах
+· Минималистичная типографика — Inter, чистые пропорции
+· Адаптив — от 320px до десктопа
+
+🧩 Полный функционал
+
+· Все 5 вкладок (День, Месяц, Задачи, Профиль, Гильдии)
+· Создание квестов с гильдиями, датой, временем
+· Выполнение/отмена с начислением XP
+· Удаление с возвратом XP
+· Календарь с цветными маркерами
+· Фильтрация задач по гильдиям
+· Редактирование имени
+· Сброс данных
+
+---
+
+Как запустить
+
+1. Сохрани как index.html
+2. Открой в браузере
+3. Всё готово! 🎮
+
+---
+
+Хочешь добавить ещё что-то? Например:
+
+· Звуки при выполнении квеста
+· Анимированные частицы при повышении уровня
+· Список достижений
+· Статистику с графиками
