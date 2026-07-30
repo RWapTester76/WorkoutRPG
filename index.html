@@ -1,1777 +1,2995 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Журнал Героя ⚔️</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0b0e14" />
+    <title>Журнал Героя ⚔️ RPG</title>
 
-  <!-- Font Awesome 6 (бесплатные иконки) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <!-- Chart.js для графиков -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- date-fns для работы с датами -->
-  <script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0/index.global.min.js"></script>
-  <!-- SimpleLightbox для галереи -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js"></script>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <!-- date-fns -->
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0/index.global.min.js">
+    </script>
+    <!-- SimpleLightbox -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js">
+    </script>
 
-  <style>
-    /* ---------- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---------- */
-    :root {
-      --bg: #0b0e14;
-      --surface: #1a1f2b;
-      --surface2: #262d3d;
-      --text: #e8edf5;
-      --text-muted: #8892a8;
-      --accent: #6c5ce7;
-      --accent-glow: #6c5ce766;
-      --border: #2d3548;
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-      --radius: 16px;
-      --transition: 0.3s ease;
-    }
+    <style>
+        /* ============================================================
+           ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И СБРОС
+           ============================================================ */
+        :root {
+            --bg: #0b0e14;
+            --surface: #1a1f2b;
+            --surface2: #262d3d;
+            --surface3: #313a4f;
+            --text: #e8edf5;
+            --text-muted: #8892a8;
+            --text-dim: #5a6478;
+            --accent: #6c5ce7;
+            --accent2: #a29bfe;
+            --accent-glow: #6c5ce766;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #e17055;
+            --info: #0984e3;
+            --border: #2d3548;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
 
-    /* Светлая тема (переключается через класс .light-theme) */
-    .light-theme {
-      --bg: #f0f2f5;
-      --surface: #ffffff;
-      --surface2: #e9ecf0;
-      --text: #1a1f2b;
-      --text-muted: #4a5268;
-      --border: #ccd2dc;
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    }
+        /* Светлая тема */
+        .light-theme {
+            --bg: #eef0f3;
+            --surface: #ffffff;
+            --surface2: #e9ecf2;
+            --surface3: #d5dae3;
+            --text: #1a1f2b;
+            --text-muted: #4a5268;
+            --text-dim: #7a8498;
+            --border: #c8ced8;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      transition: background var(--transition), color var(--transition);
-      padding-bottom: 80px;
-    }
-    a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    button {
-      cursor: pointer;
-      border: none;
-      background: var(--accent);
-      color: #fff;
-      padding: 8px 18px;
-      border-radius: 30px;
-      font-weight: 600;
-      transition: all var(--transition);
-      box-shadow: 0 4px 12px var(--accent-glow);
-    }
-    button:hover {
-      transform: scale(1.04);
-      filter: brightness(1.1);
-    }
-    button.secondary {
-      background: var(--surface2);
-      color: var(--text);
-      box-shadow: none;
-    }
-    button.secondary:hover {
-      background: var(--border);
-    }
-    input,
-    textarea,
-    select {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 14px;
-      border-radius: 10px;
-      width: 100%;
-      font-size: 1rem;
-      transition: border var(--transition);
-    }
-    input:focus,
-    textarea:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    textarea {
-      min-height: 80px;
-      resize: vertical;
-    }
-    ::-webkit-scrollbar {
-      width: 6px;
-      background: var(--bg);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--accent);
-      border-radius: 10px;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    /* ---------- ШАПКА ---------- */
-    header {
-      background: var(--surface);
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(6px);
-      transition: background var(--transition);
-    }
-    header h1 {
-      font-size: 1.4rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    header h1 i {
-      color: var(--accent);
-    }
-    .user-badge {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 0.95rem;
-    }
-    .xp-bar-wrap {
-      width: 140px;
-      height: 8px;
-      background: var(--surface2);
-      border-radius: 20px;
-      overflow: hidden;
-    }
-    .xp-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #a29bfe, #6c5ce7);
-      border-radius: 20px;
-      transition: width 0.6s ease;
-    }
-    .theme-toggle {
-      background: transparent;
-      color: var(--text-muted);
-      box-shadow: none;
-      padding: 4px 10px;
-      font-size: 1.2rem;
-    }
-    .theme-toggle:hover {
-      color: var(--text);
-      transform: none;
-      filter: none;
-    }
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
 
-    /* ---------- НАВИГАЦИЯ ---------- */
-    nav#mainNav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-around;
-      padding: 8px 0 env(safe-area-inset-bottom);
-      z-index: 200;
-      backdrop-filter: blur(8px);
-      transition: background var(--transition);
-    }
-    nav#mainNav a {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      padding: 4px 12px;
-      border-radius: 30px;
-      transition: all var(--transition);
-      gap: 2px;
-    }
-    nav#mainNav a i {
-      font-size: 1.4rem;
-    }
-    nav#mainNav a.active {
-      color: var(--accent);
-      background: var(--accent-glow);
-    }
-    nav#mainNav a:hover {
-      color: var(--text);
-    }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            transition: background var(--transition), color var(--transition);
+            padding-bottom: 80px;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
-    /* ---------- ОСНОВНОЙ КОНТЕЙНЕР ---------- */
-    main#mainContent {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 20px 20px 100px;
-    }
-    .page {
-      display: none;
-      animation: fadeUp 0.3s ease;
-    }
-    .page.active {
-      display: block;
-    }
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(16px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
 
-    /* ---------- КАЛЕНДАРЬ ---------- */
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .calendar-header h2 {
-      font-weight: 400;
-    }
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      background: var(--surface);
-      padding: 16px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .calendar-grid .weekday {
-      text-align: center;
-      font-weight: 600;
-      color: var(--text-muted);
-      padding: 6px 0;
-      font-size: 0.8rem;
-    }
-    .calendar-grid .day {
-      aspect-ratio: 1/1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      font-weight: 500;
-      background: var(--surface2);
-      transition: all var(--transition);
-      cursor: pointer;
-      position: relative;
-      font-size: 0.95rem;
-    }
-    .calendar-grid .day:hover {
-      background: var(--border);
-    }
-    .calendar-grid .day.empty {
-      background: transparent;
-      cursor: default;
-    }
-    .calendar-grid .day.has-record {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 0 12px var(--accent-glow);
-    }
-    .calendar-grid .day.has-record::after {
-      content: '';
-      position: absolute;
-      bottom: 4px;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #fff;
-    }
-    .calendar-grid .day.today {
-      border: 2px solid var(--text);
-    }
-    .calendar-grid .day.selected {
-      outline: 3px solid var(--accent);
-      outline-offset: 2px;
-    }
+        /* Общие элементы */
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        button {
+            cursor: pointer;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all var(--transition);
+            box-shadow: 0 4px 16px var(--accent-glow);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            touch-action: manipulation;
+            min-height: 44px;
+            min-width: 44px;
+            justify-content: center;
+        }
+        button:hover {
+            transform: scale(1.04);
+            filter: brightness(1.1);
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        button.secondary {
+            background: var(--surface2);
+            color: var(--text);
+            box-shadow: var(--shadow-sm);
+        }
+        button.secondary:hover {
+            background: var(--surface3);
+        }
+        button.success {
+            background: var(--success);
+        }
+        button.danger {
+            background: var(--danger);
+        }
+        button.warning {
+            background: var(--warning);
+            color: #1a1f2b;
+        }
 
-    /* ---------- СПИСОК ЗАПИСЕЙ (в календаре и журналах) ---------- */
-    .records-list {
-      margin-top: 20px;
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow);
-    }
-    .records-list .record-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      border-bottom: 1px solid var(--border);
-      padding: 12px 0;
-      gap: 12px;
-    }
-    .records-list .record-item:last-child {
-      border-bottom: none;
-    }
-    .record-item .record-content {
-      flex: 1;
-    }
-    .record-item .record-content .record-text {
-      margin-bottom: 6px;
-      word-break: break-word;
-    }
-    .record-item .record-content .record-meta {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .record-item .record-content .record-meta i {
-      margin-right: 4px;
-    }
-    .record-item .record-photos {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 6px;
-    }
-    .record-item .record-photos img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform var(--transition);
-    }
-    .record-item .record-photos img:hover {
-      transform: scale(1.05);
-    }
-    .record-item .record-actions {
-      display: flex;
-      gap: 8px;
-      flex-shrink: 0;
-      align-items: center;
-    }
-    .record-item .record-actions button {
-      background: transparent;
-      color: var(--text-muted);
-      padding: 4px 8px;
-      box-shadow: none;
-      font-size: 0.9rem;
-      border-radius: 8px;
-    }
-    .record-item .record-actions button:hover {
-      background: var(--surface2);
-      color: var(--text);
-      transform: none;
-    }
-    .record-item .record-actions .done-btn {
-      color: #4caf50;
-    }
-    .record-item .record-actions .done-btn.done {
-      color: #ff9800;
-    }
+        input,
+        textarea,
+        select {
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            width: 100%;
+            font-size: 1rem;
+            transition: border var(--transition);
+            font-family: var(--font);
+        }
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238892a8' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 44px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
 
-    /* ---------- ЖУРНАЛЫ (вкладка) ---------- */
-    .journal-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .journal-tabs .tab {
-      background: var(--surface2);
-      padding: 8px 18px;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: all var(--transition);
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .journal-tabs .tab i {
-      font-size: 1rem;
-    }
-    .journal-tabs .tab.active {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 4px 16px var(--accent-glow);
-    }
-    .journal-tabs .tab:hover:not(.active) {
-      background: var(--border);
-    }
+        /* ============================================================
+           ШАПКА
+           ============================================================ */
+        header {
+            background: var(--surface);
+            padding: 12px clamp(16px, 4vw, 32px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: background var(--transition);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        header h1 {
+            font-size: clamp(1.1rem, 3vw, 1.6rem);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+        header h1 i {
+            color: var(--accent);
+        }
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 2vw, 18px);
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            flex-wrap: wrap;
+        }
+        .xp-bar-wrap {
+            width: clamp(80px, 15vw, 160px);
+            height: 8px;
+            background: var(--surface2);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .xp-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent2), var(--accent));
+            border-radius: 20px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .theme-toggle {
+            background: transparent;
+            color: var(--text-muted);
+            box-shadow: none;
+            padding: 4px 12px;
+            font-size: 1.3rem;
+            min-height: 40px;
+            min-width: 40px;
+        }
+        .theme-toggle:hover {
+            color: var(--text);
+            transform: rotate(20deg);
+            filter: none;
+        }
 
-    .journal-actions {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
+        /* ============================================================
+           НАВИГАЦИЯ
+           ============================================================ */
+        nav#mainNav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 0 env(safe-area-inset-bottom);
+            z-index: 200;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: background var(--transition);
+        }
+        nav#mainNav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+            color: var(--text-muted);
+            padding: 4px clamp(6px, 1vw, 14px);
+            border-radius: 30px;
+            transition: all var(--transition);
+            gap: 2px;
+            min-height: 44px;
+            justify-content: center;
+            touch-action: manipulation;
+            position: relative;
+        }
+        nav#mainNav a i {
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+        }
+        nav#mainNav a .nav-label {
+            font-size: clamp(0.5rem, 1vw, 0.65rem);
+            line-height: 1;
+        }
+        nav#mainNav a.active {
+            color: var(--accent);
+        }
+        nav#mainNav a.active::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 0 0 4px 4px;
+        }
+        nav#mainNav a:hover {
+            color: var(--text);
+        }
 
-    /* ---------- МОДАЛЬНОЕ ОКНО ---------- */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 999;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-overlay.open {
-      display: flex;
-    }
-    .modal {
-      background: var(--surface);
-      max-width: 500px;
-      width: 90%;
-      padding: 28px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .modal h3 {
-      margin-bottom: 20px;
-    }
-    .modal .form-group {
-      margin-bottom: 16px;
-    }
-    .modal .form-group label {
-      display: block;
-      margin-bottom: 4px;
-      font-weight: 500;
-      font-size: 0.9rem;
-    }
-    .modal .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 20px;
-    }
+        /* ============================================================
+           ОСНОВНОЙ КОНТЕНТ
+           ============================================================ */
+        main#mainContent {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: clamp(16px, 3vw, 32px) clamp(12px, 3vw, 24px) 100px;
+        }
+        .page {
+            display: none;
+            animation: fadeUp 0.4s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    /* ---------- ПРОФИЛЬ ---------- */
-    .profile-avatar {
-      display: flex;
-      align-items: center;
-      gap: 30px;
-      flex-wrap: wrap;
-      margin-bottom: 30px;
-    }
-    .avatar-container {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      background: var(--surface2);
-      background-size: cover;
-      background-position: center;
-      border: 4px solid var(--accent);
-      box-shadow: 0 0 30px var(--accent-glow);
-      position: relative;
-      transition: all 0.4s ease;
-      flex-shrink: 0;
-    }
-    .avatar-container .effect {
-      position: absolute;
-      inset: -8px;
-      border-radius: 50%;
-      border: 3px solid transparent;
-      pointer-events: none;
-      animation: pulseGlow 2s infinite;
-    }
-    .avatar-container .effect.glow {
-      border-color: #f9ca24;
-      box-shadow: 0 0 40px #f9ca2480;
-    }
-    .avatar-container .effect.cape {
-      border-color: #6c5ce7;
-      box-shadow: 0 0 40px #6c5ce780;
-    }
-    @keyframes pulseGlow {
-      0%,
-      100% {
-        transform: scale(1);
-        opacity: 0.8;
-      }
-      50% {
-        transform: scale(1.06);
-        opacity: 1;
-      }
-    }
+        .section-title {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-bottom: clamp(16px, 3vw, 28px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .section-title i {
+            color: var(--accent);
+        }
 
-    .profile-info {
-      flex: 1;
-    }
-    .profile-info .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .profile-info .stat-card {
-      background: var(--surface2);
-      padding: 12px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    .profile-info .stat-card .number {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--accent);
-    }
-    .profile-info .stat-card .label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
+        /* ============================================================
+           КАЛЕНДАРЬ
+           ============================================================ */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .calendar-header h2 {
+            font-weight: 400;
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            min-width: 140px;
+            text-align: center;
+        }
+        .calendar-header .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .calendar-header .nav-buttons button {
+            min-height: 44px;
+            min-width: 44px;
+            padding: 0 16px;
+            border-radius: 50%;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: clamp(3px, 0.5vw, 8px);
+            background: var(--surface);
+            padding: clamp(8px, 1.5vw, 20px);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            touch-action: pan-y;
+        }
+        .calendar-grid .weekday {
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 6px 0;
+            font-size: clamp(0.6rem, 1vw, 0.8rem);
+        }
+        .calendar-grid .day {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: clamp(8px, 1.5vw, 14px);
+            font-weight: 500;
+            background: var(--surface2);
+            transition: all var(--transition);
+            cursor: pointer;
+            position: relative;
+            font-size: clamp(0.75rem, 1.2vw, 1rem);
+            touch-action: manipulation;
+            min-height: 36px;
+            user-select: none;
+        }
+        .calendar-grid .day:hover {
+            background: var(--surface3);
+            transform: scale(1.05);
+        }
+        .calendar-grid .day:active {
+            transform: scale(0.92);
+        }
+        .calendar-grid .day.empty {
+            background: transparent;
+            cursor: default;
+        }
+        .calendar-grid .day.empty:hover {
+            transform: none;
+        }
+        .calendar-grid .day.has-record {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .calendar-grid .day.has-record::after {
+            content: '';
+            position: absolute;
+            bottom: clamp(2px, 0.4vw, 6px);
+            width: clamp(4px, 0.8vw, 8px);
+            height: clamp(4px, 0.8vw, 8px);
+            border-radius: 50%;
+            background: #fff;
+        }
+        .calendar-grid .day.today {
+            border: 2px solid var(--text);
+        }
+        .calendar-grid .day.selected {
+            outline: 3px solid var(--accent2);
+            outline-offset: 2px;
+            transform: scale(1.08);
+        }
+        .calendar-grid .day .streak-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: clamp(0.4rem, 0.6vw, 0.6rem);
+        }
 
-    .profile-achievements {
-      margin-top: 24px;
-    }
-    .profile-achievements .achieve-item {
-      display: inline-block;
-      background: var(--surface2);
-      padding: 6px 16px;
-      border-radius: 30px;
-      margin: 4px 6px 4px 0;
-      font-size: 0.85rem;
-    }
-    .profile-achievements .achieve-item i {
-      color: #f9ca24;
-      margin-right: 6px;
-    }
+        /* ============================================================
+           СПИСОК ЗАПИСЕЙ
+           ============================================================ */
+        .records-list {
+            margin-top: 20px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: clamp(12px, 2vw, 24px);
+            box-shadow: var(--shadow);
+        }
+        .records-list .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .records-list .list-header h4 {
+            font-weight: 400;
+            font-size: 1.1rem;
+        }
+        .records-list .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+            padding: clamp(10px, 1.5vw, 16px) 0;
+            gap: clamp(8px, 1.5vw, 16px);
+            transition: background var(--transition);
+        }
+        .records-list .record-item:last-child {
+            border-bottom: none;
+        }
+        .records-list .record-item:hover {
+            background: var(--surface2);
+            margin: 0 -8px;
+            padding-left: 8px;
+            padding-right: 8px;
+            border-radius: var(--radius-sm);
+        }
+        .record-item .record-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .record-item .record-content .record-text {
+            margin-bottom: 6px;
+            word-break: break-word;
+            font-size: clamp(0.9rem, 1.1vw, 1rem);
+        }
+        .record-item .record-content .record-meta {
+            font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+            color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(6px, 1vw, 14px);
+        }
+        .record-item .record-content .record-meta i {
+            margin-right: 4px;
+        }
+        .record-item .record-content .record-meta .xp-badge {
+            background: var(--accent-glow);
+            padding: 0 8px;
+            border-radius: 20px;
+            color: var(--accent2);
+        }
+        .record-item .record-photos {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .record-item .record-photos img {
+            width: clamp(50px, 8vw, 70px);
+            height: clamp(50px, 8vw, 70px);
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform var(--transition);
+        }
+        .record-item .record-photos img:hover {
+            transform: scale(1.08);
+        }
+        .record-item .record-actions {
+            display: flex;
+            gap: clamp(4px, 0.8vw, 10px);
+            flex-shrink: 0;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .record-item .record-actions button {
+            background: transparent;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            box-shadow: none;
+            font-size: clamp(0.8rem, 1vw, 0.95rem);
+            border-radius: 8px;
+            min-height: 36px;
+            min-width: 36px;
+        }
+        .record-item .record-actions button:hover {
+            background: var(--surface3);
+            color: var(--text);
+            transform: none;
+        }
+        .record-item .record-actions .done-btn {
+            color: var(--success);
+        }
+        .record-item .record-actions .done-btn.done {
+            color: var(--warning);
+        }
+        .record-item .record-actions .edit-btn {
+            color: var(--info);
+        }
+        .record-item .record-actions .delete-btn {
+            color: var(--danger);
+        }
 
-    /* ---------- ЦЕЛИ ---------- */
-    .goal-item {
-      background: var(--surface);
-      padding: 16px;
-      border-radius: var(--radius);
-      margin-bottom: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--shadow);
-    }
-    .goal-item .goal-info {
-      flex: 1;
-    }
-    .goal-item .goal-info .goal-title {
-      font-weight: 600;
-    }
-    .goal-item .goal-info .goal-progress {
-      margin-top: 4px;
-      height: 6px;
-      background: var(--surface2);
-      border-radius: 10px;
-      width: 100%;
-      max-width: 300px;
-    }
-    .goal-item .goal-info .goal-progress .fill {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 10px;
-      transition: width 0.4s;
-    }
-    .goal-item .goal-actions {
-      display: flex;
-      gap: 8px;
-    }
+        /* ============================================================
+           ЖУРНАЛЫ (вкладки)
+           ============================================================ */
+        .journal-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(4px, 0.8vw, 10px);
+            margin-bottom: 20px;
+        }
+        .journal-tabs .tab {
+            background: var(--surface2);
+            padding: clamp(6px, 1vw, 10px) clamp(12px, 2vw, 20px);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: clamp(0.8rem, 1vw, 0.95rem);
+            touch-action: manipulation;
+            min-height: 40px;
+            border: 2px solid transparent;
+        }
+        .journal-tabs .tab i {
+            font-size: clamp(0.8rem, 1.2vw, 1.1rem);
+        }
+        .journal-tabs .tab.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            border-color: var(--accent2);
+        }
+        .journal-tabs .tab:hover:not(.active) {
+            background: var(--surface3);
+            transform: translateY(-2px);
+        }
+        .journal-tabs .tab .streak-badge {
+            background: var(--warning);
+            color: #1a1f2b;
+            border-radius: 20px;
+            padding: 0 8px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
 
-    /* ---------- ГАЛЕРЕЯ ---------- */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
-    }
-    .gallery-grid .gallery-item {
-      border-radius: var(--radius);
-      overflow: hidden;
-      background: var(--surface2);
-      aspect-ratio: 1/1;
-      cursor: pointer;
-      transition: transform var(--transition);
-    }
-    .gallery-grid .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .gallery-grid .gallery-item:hover {
-      transform: scale(1.03);
-    }
+        .journal-actions {
+            display: flex;
+            gap: clamp(8px, 1.5vw, 16px);
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
 
-    /* ---------- ГРАФИКИ ---------- */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .chart-box {
-      background: var(--surface);
-      padding: 16px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      min-height: 200px;
-    }
-    .chart-box h4 {
-      margin-bottom: 12px;
-      font-weight: 400;
-    }
-    .chart-box canvas {
-      max-height: 200px;
-      width: 100% !important;
-    }
+        /* ============================================================
+           ЧЕЛЛЕНДЖ БАР
+           ============================================================ */
+        .challenge-bar {
+            background: linear-gradient(135deg, var(--surface2), var(--surface));
+            border: 2px solid var(--warning);
+            border-radius: var(--radius);
+            padding: clamp(12px, 2vw, 20px);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 0 30px rgba(253, 203, 110, 0.1);
+        }
+        .challenge-bar .challenge-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 200px;
+        }
+        .challenge-bar .challenge-text i {
+            font-size: 1.8rem;
+            color: var(--warning);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+        }
+        .challenge-bar .challenge-text span {
+            font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+        }
+        .challenge-bar .challenge-text .challenge-journal {
+            color: var(--accent2);
+            font-weight: 600;
+        }
+        .challenge-bar .challenge-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-    /* ---------- АДАПТИВ ---------- */
-    @media (max-width: 700px) {
-      .charts-grid {
-        grid-template-columns: 1fr;
-      }
-      .profile-avatar {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-      .calendar-grid {
-        padding: 8px;
-        gap: 4px;
-      }
-      .calendar-grid .day {
-        font-size: 0.8rem;
-      }
-      header h1 {
-        font-size: 1.1rem;
-      }
-      .xp-bar-wrap {
-        width: 100px;
-      }
-    }
-  </style>
+        /* ============================================================
+           МОДАЛЬНЫЕ ОКНА
+           ============================================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .modal {
+            background: var(--surface);
+            max-width: 540px;
+            width: 100%;
+            padding: clamp(20px, 4vw, 36px);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            max-height: 95vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal h3 {
+            margin-bottom: 20px;
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal .form-group {
+            margin-bottom: 18px;
+        }
+        .modal .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        .modal .form-actions button {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        /* ============================================================
+           ПРОФИЛЬ
+           ============================================================ */
+        .profile-avatar {
+            display: flex;
+            align-items: center;
+            gap: clamp(20px, 4vw, 40px);
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .avatar-container {
+            width: clamp(120px, 20vw, 180px);
+            height: clamp(120px, 20vw, 180px);
+            border-radius: 50%;
+            background: var(--surface2);
+            background-size: cover;
+            background-position: center;
+            border: 4px solid var(--accent);
+            box-shadow: 0 0 40px var(--accent-glow);
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+        .avatar-container.level-up {
+            animation: levelUp 0.8s ease;
+        }
+        @keyframes levelUp {
+            0% {
+                transform: scale(1) rotate(0deg);
+                box-shadow: 0 0 20px var(--accent-glow);
+            }
+            25% {
+                transform: scale(1.15) rotate(-5deg);
+                box-shadow: 0 0 60px var(--accent-glow);
+            }
+            50% {
+                transform: scale(1.2) rotate(5deg);
+                box-shadow: 0 0 80px var(--accent);
+            }
+            75% {
+                transform: scale(1.1) rotate(-3deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+        .avatar-container .effect {
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            pointer-events: none;
+            animation: pulseGlow 2.5s infinite;
+        }
+        .avatar-container .effect.glow {
+            border-color: #f9ca24;
+            box-shadow: 0 0 50px #f9ca2480;
+        }
+        .avatar-container .effect.cape {
+            border-color: var(--accent2);
+            box-shadow: 0 0 50px var(--accent-glow);
+            animation-delay: 0.5s;
+        }
+        @keyframes pulseGlow {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 1;
+            }
+        }
+        .avatar-container .level-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            width: clamp(32px, 5vw, 48px);
+            height: clamp(32px, 5vw, 48px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: clamp(0.8rem, 1.2vw, 1.2rem);
+            border: 3px solid var(--bg);
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 200px;
+        }
+        .profile-info h2 {
+            font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+        }
+        .profile-info .profile-sub {
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .profile-info .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(clamp(80px, 12vw, 120px), 1fr));
+            gap: clamp(8px, 1.5vw, 16px);
+            margin-top: 12px;
+        }
+        .profile-info .stat-card {
+            background: var(--surface2);
+            padding: clamp(10px, 1.5vw, 16px);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            transition: transform var(--transition);
+        }
+        .profile-info .stat-card:hover {
+            transform: translateY(-4px);
+        }
+        .profile-info .stat-card .number {
+            font-size: clamp(1.4rem, 2.5vw, 2rem);
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .profile-info .stat-card .label {
+            font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+            color: var(--text-muted);
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .profile-achievements {
+            margin-top: 24px;
+        }
+        .profile-achievements .achieve-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface2);
+            padding: 6px 16px;
+            border-radius: 30px;
+            margin: 4px 6px 4px 0;
+            font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+        }
+        .profile-achievements .achieve-item i {
+            color: #f9ca24;
+        }
+        .profile-achievements .achieve-item:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+
+        /* ============================================================
+           ЦЕЛИ
+           ============================================================ */
+        .goal-item {
+            background: var(--surface);
+            padding: clamp(14px, 2vw, 20px);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+            gap: 12px;
+        }
+        .goal-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow);
+        }
+        .goal-item.completed {
+            border-left: 4px solid var(--success);
+        }
+        .goal-item .goal-info {
+            flex: 1;
+            min-width: 150px;
+        }
+        .goal-item .goal-info .goal-title {
+            font-weight: 600;
+            font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+        }
+        .goal-item .goal-info .goal-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .goal-item .goal-info .goal-progress-wrap {
+            margin-top: 6px;
+            height: 8px;
+            background: var(--surface2);
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 300px;
+        }
+        .goal-item .goal-info .goal-progress-wrap .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent2), var(--accent));
+            border-radius: 20px;
+            transition: width 0.6s ease;
+        }
+        .goal-item .goal-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* ============================================================
+           ГАЛЕРЕЯ
+           ============================================================ */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(clamp(100px, 15vw, 180px), 1fr));
+            gap: clamp(8px, 1.5vw, 16px);
+        }
+        .gallery-grid .gallery-item {
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: var(--surface2);
+            aspect-ratio: 1/1;
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+        }
+        .gallery-grid .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition);
+        }
+        .gallery-grid .gallery-item:hover img {
+            transform: scale(1.06);
+        }
+        .gallery-grid .gallery-item .gallery-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+            opacity: 0;
+            transition: opacity var(--transition);
+            display: flex;
+            align-items: flex-end;
+            padding: 12px;
+        }
+        .gallery-grid .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+        .gallery-grid .gallery-item .gallery-overlay span {
+            color: #fff;
+            font-size: 0.7rem;
+        }
+
+        /* ============================================================
+           ГРАФИКИ
+           ============================================================ */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(16px, 3vw, 28px);
+        }
+        .chart-box {
+            background: var(--surface);
+            padding: clamp(14px, 2vw, 24px);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            min-height: 220px;
+        }
+        .chart-box h4 {
+            margin-bottom: 12px;
+            font-weight: 400;
+            font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+            color: var(--text-muted);
+        }
+        .chart-box canvas {
+            max-height: 200px;
+            width: 100% !important;
+        }
+        .chart-box .chart-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .chart-box .chart-stats .stat-item {
+            text-align: center;
+        }
+        .chart-box .chart-stats .stat-item .num {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .chart-box .chart-stats .stat-item .lbl {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+           ТОСТЫ (уведомления)
+           ============================================================ */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 16px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 360px;
+            width: calc(100% - 32px);
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--surface);
+            color: var(--text);
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent);
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 3.5s forwards;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            backdrop-filter: blur(8px);
+        }
+        .toast.success {
+            border-left-color: var(--success);
+        }
+        .toast.warning {
+            border-left-color: var(--warning);
+        }
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+        .toast.info {
+            border-left-color: var(--info);
+        }
+        .toast i {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .toast .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0 4px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            min-height: 30px;
+            min-width: 30px;
+            box-shadow: none;
+            margin-left: auto;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+        }
+
+        /* ============================================================
+           АДАПТИВНОСТЬ
+           ============================================================ */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 70px;
+            }
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .profile-avatar {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .calendar-grid {
+                padding: 8px;
+                gap: 4px;
+            }
+            .calendar-grid .day {
+                font-size: 0.75rem;
+                min-height: 32px;
+            }
+            header h1 {
+                font-size: 1rem;
+            }
+            header h1 span {
+                display: none;
+            }
+            .xp-bar-wrap {
+                width: 80px;
+            }
+            .modal {
+                padding: 16px;
+                margin: 8px;
+                max-height: 90vh;
+            }
+            .journal-tabs .tab {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+            nav#mainNav a {
+                padding: 2px 6px;
+            }
+            nav#mainNav a .nav-label {
+                display: none;
+            }
+            nav#mainNav a i {
+                font-size: 1.4rem;
+            }
+            .challenge-bar {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .challenge-bar .challenge-text {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-grid {
+                gap: 2px;
+                padding: 4px;
+            }
+            .calendar-grid .day {
+                font-size: 0.65rem;
+                min-height: 28px;
+                border-radius: 6px;
+            }
+            .calendar-grid .weekday {
+                font-size: 0.55rem;
+                padding: 4px 0;
+            }
+            .record-item {
+                flex-direction: column;
+            }
+            .record-item .record-actions {
+                align-self: flex-end;
+            }
+            .profile-info .stat-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            .toast-container {
+                top: 70px;
+                right: 8px;
+                width: calc(100% - 16px);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .calendar-grid {
+                padding: 24px;
+                gap: 10px;
+            }
+            .calendar-grid .day {
+                font-size: 1.1rem;
+                min-height: 60px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- ШАПКА -->
-  <header>
-    <h1><i class="fas fa-dragon"></i> Журнал Героя</h1>
-    <div class="user-badge">
-      <span id="userLevelDisplay">Ур. 1</span>
-      <div class="xp-bar-wrap">
-        <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
-      </div>
-      <button class="theme-toggle" id="themeToggle" title="Сменить тему"><i class="fas fa-moon"></i></button>
-    </div>
-  </header>
-
-  <!-- ОСНОВНОЙ КОНТЕНТ -->
-  <main id="mainContent">
-    <!-- ===== СТРАНИЦА КАЛЕНДАРЬ ===== -->
-    <section class="page active" id="page-calendar">
-      <div class="calendar-header">
-        <button class="secondary" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
-        <h2 id="monthYear">Июль 2026</h2>
-        <button class="secondary" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
-      </div>
-      <div class="calendar-grid" id="calendarGrid"></div>
-      <div class="records-list" id="dayRecords">
-        <h4>Записи за выбранный день</h4>
-        <div id="dayRecordsList"><p style="color:var(--text-muted)">Выберите день в календаре</p></div>
-      </div>
-    </section>
-
-    <!-- ===== СТРАНИЦА ЖУРНАЛЫ ===== -->
-    <section class="page" id="page-journals">
-      <div class="journal-tabs" id="journalTabs"></div>
-      <div class="journal-actions">
-        <button id="addRecordBtn"><i class="fas fa-plus"></i> Добавить запись</button>
-        <button class="secondary" id="refreshJournal"><i class="fas fa-sync"></i></button>
-      </div>
-      <div class="records-list" id="journalRecordsList"></div>
-    </section>
-
-    <!-- ===== СТРАНИЦА ЦЕЛИ ===== -->
-    <section class="page" id="page-goals">
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
-        <h3>🎯 Мои цели</h3>
-        <button id="addGoalBtn"><i class="fas fa-plus"></i> Новая цель</button>
-      </div>
-      <div id="goalsList"></div>
-    </section>
-
-    <!-- ===== СТРАНИЦА ГРАФИКИ ===== -->
-    <section class="page" id="page-charts">
-      <h3 style="margin-bottom:20px;">📊 Графики продуктивности</h3>
-      <div class="charts-grid">
-        <div class="chart-box"><h4>Активность по дням (за месяц)</h4><canvas id="lineChart"></canvas></div>
-        <div class="chart-box"><h4>Распределение по журналам</h4><canvas id="pieChart"></canvas></div>
-      </div>
-    </section>
-
-    <!-- ===== СТРАНИЦА ГАЛЕРЕЯ ===== -->
-    <section class="page" id="page-gallery">
-      <h3 style="margin-bottom:20px;">🖼 Фотогалерея</h3>
-      <div class="gallery-grid" id="galleryGrid"></div>
-    </section>
-
-    <!-- ===== СТРАНИЦА ПРОФИЛЬ ===== -->
-    <section class="page" id="page-profile">
-      <h3 style="margin-bottom:20px;">👤 Профиль</h3>
-      <div class="profile-avatar">
-        <div class="avatar-container" id="avatarContainer">
-          <div class="effect glow" id="effectGlow"></div>
-          <div class="effect cape" id="effectCape"></div>
+    <!-- ============================================================
+    ШАПКА
+    ============================================================ -->
+    <header>
+        <h1><i class="fas fa-dragon"></i> <span>Журнал Героя</span></h1>
+        <div class="user-badge">
+            <span id="userLevelDisplay">Ур. 1</span>
+            <div class="xp-bar-wrap">
+                <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
+            </div>
+            <button class="theme-toggle" id="themeToggle" title="Сменить тему">
+                <i class="fas fa-moon"></i>
+            </button>
         </div>
-        <div class="profile-info">
-          <h2 id="profileName">Герой</h2>
-          <p style="color:var(--text-muted);">Уровень <span id="profileLevel">1</span> · XP: <span id="profileXp">0</span>/<span id="profileXpMax">100</span></p>
-          <div class="stat-grid">
-            <div class="stat-card"><div class="number" id="statRecords">0</div><div class="label">Записей</div></div>
-            <div class="stat-card"><div class="number" id="statGoals">0</div><div class="label">Целей</div></div>
-            <div class="stat-card"><div class="number" id="statPhotos">0</div><div class="label">Фото</div></div>
-          </div>
-          <div style="margin-top:12px;">
-            <button id="editProfileBtn"><i class="fas fa-pen"></i> Редактировать</button>
-            <button class="secondary" id="exportDataBtn"><i class="fas fa-download"></i> Экспорт</button>
-            <button class="secondary" id="importDataBtn"><i class="fas fa-upload"></i> Импорт</button>
-          </div>
+    </header>
+
+    <!-- ============================================================
+    ОСНОВНОЙ КОНТЕНТ
+    ============================================================ -->
+    <main id="mainContent">
+
+        <!-- ===== СТРАНИЦА КАЛЕНДАРЬ ===== -->
+        <section class="page active" id="page-calendar">
+            <div class="section-title"><i class="fas fa-calendar-alt"></i> Календарь</div>
+            <div class="calendar-header">
+                <div class="nav-buttons">
+                    <button class="secondary" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                </div>
+                <h2 id="monthYear">Июль 2026</h2>
+                <div class="nav-buttons">
+                    <button class="secondary" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                    <button class="secondary" id="todayBtn"><i class="fas fa-home"></i></button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="records-list" id="dayRecords">
+                <div class="list-header">
+                    <h4><i class="fas fa-list-ul"></i> Записи за день</h4>
+                    <button id="addRecordFromDay"><i class="fas fa-plus"></i> Добавить</button>
+                </div>
+                <div id="dayRecordsList"><p style="color:var(--text-muted); text-align:center; padding:20px;">Выберите день в календаре</p></div>
+            </div>
+        </section>
+
+        <!-- ===== СТРАНИЦА ЖУРНАЛЫ ===== -->
+        <section class="page" id="page-journals">
+            <div class="section-title"><i class="fas fa-book-open"></i> Журналы</div>
+
+            <!-- Челлендж -->
+            <div class="challenge-bar" id="challengeBar">
+                <div class="challenge-text">
+                    <i class="fas fa-bolt"></i>
+                    <span>Ежедневный челлендж: <strong class="challenge-journal" id="challengeText">Запись в Спорт</strong></span>
+                </div>
+                <div class="challenge-status">
+                    <span id="challengeStatus" style="font-size:0.85rem; color:var(--text-muted);">⏳ Ожидает</span>
+                    <button id="challengeCompleteBtn" class="warning" style="font-size:0.8rem; padding:6px 16px;">
+                        <i class="fas fa-check"></i> Выполнено
+                    </button>
+                </div>
+            </div>
+
+            <div class="journal-tabs" id="journalTabs"></div>
+            <div class="journal-actions">
+                <button id="addRecordBtn"><i class="fas fa-plus"></i> Добавить запись</button>
+                <button class="secondary" id="refreshJournal"><i class="fas fa-sync"></i></button>
+            </div>
+            <div class="records-list" id="journalRecordsList">
+                <p style="color:var(--text-muted); text-align:center; padding:20px;">Выберите журнал</p>
+            </div>
+        </section>
+
+        <!-- ===== СТРАНИЦА ЦЕЛИ ===== -->
+        <section class="page" id="page-goals">
+            <div class="section-title">
+                <i class="fas fa-bullseye"></i> Цели
+                <button id="addGoalBtn" style="margin-left:auto;"><i class="fas fa-plus"></i> Новая цель</button>
+            </div>
+            <div id="goalsList"></div>
+        </section>
+
+        <!-- ===== СТРАНИЦА ГРАФИКИ ===== -->
+        <section class="page" id="page-charts">
+            <div class="section-title"><i class="fas fa-chart-pie"></i> Графики продуктивности</div>
+            <div class="charts-grid">
+                <div class="chart-box">
+                    <h4>📈 Активность за месяц</h4>
+                    <canvas id="lineChart"></canvas>
+                    <div class="chart-stats" id="lineStats"></div>
+                </div>
+                <div class="chart-box">
+                    <h4>📊 Распределение по журналам</h4>
+                    <canvas id="pieChart"></canvas>
+                    <div class="chart-stats" id="pieStats"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== СТРАНИЦА ГАЛЕРЕЯ ===== -->
+        <section class="page" id="page-gallery">
+            <div class="section-title"><i class="fas fa-images"></i> Фотогалерея</div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+        </section>
+
+        <!-- ===== СТРАНИЦА ПРОФИЛЬ ===== -->
+        <section class="page" id="page-profile">
+            <div class="section-title"><i class="fas fa-user-astronaut"></i> Профиль</div>
+            <div class="profile-avatar">
+                <div class="avatar-container" id="avatarContainer">
+                    <div class="level-badge" id="avatarLevelBadge">1</div>
+                    <div class="effect glow" id="effectGlow"></div>
+                    <div class="effect cape" id="effectCape"></div>
+                </div>
+                <div class="profile-info">
+                    <h2 id="profileName">Герой</h2>
+                    <div class="profile-sub">
+                        Уровень <span id="profileLevel">1</span> ·
+                        XP: <span id="profileXp">0</span>/<span id="profileXpMax">100</span> ·
+                        <span id="profileStreak">🔥 0 дней</span>
+                    </div>
+                    <div class="stat-grid">
+                        <div class="stat-card"><div class="number" id="statRecords">0</div><div class="label">Записей</div></div>
+                        <div class="stat-card"><div class="number" id="statGoals">0</div><div class="label">Целей</div></div>
+                        <div class="stat-card"><div class="number" id="statPhotos">0</div><div class="label">Фото</div></div>
+                        <div class="stat-card"><div class="number" id="statAchievements">0</div><div class="label">Достижений</div></div>
+                    </div>
+                    <div class="profile-actions">
+                        <button id="editProfileBtn"><i class="fas fa-pen"></i> Редактировать</button>
+                        <button class="secondary" id="exportDataBtn"><i class="fas fa-download"></i> Экспорт</button>
+                        <button class="secondary" id="importDataBtn"><i class="fas fa-upload"></i> Импорт</button>
+                        <button class="secondary" id="exportCsvBtn"><i class="fas fa-file-csv"></i> CSV</button>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-achievements" id="achievementsList">
+                <h4 style="margin-bottom:12px;">🏅 Достижения</h4>
+                <div id="achievementsContainer"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ============================================================
+    НАВИГАЦИЯ
+    ============================================================ -->
+    <nav id="mainNav">
+        <a href="#calendar" data-page="calendar" class="active">
+            <i class="fas fa-calendar"></i>
+            <span class="nav-label">Календарь</span>
+        </a>
+        <a href="#journals" data-page="journals">
+            <i class="fas fa-book"></i>
+            <span class="nav-label">Журналы</span>
+        </a>
+        <a href="#goals" data-page="goals">
+            <i class="fas fa-bullseye"></i>
+            <span class="nav-label">Цели</span>
+        </a>
+        <a href="#charts" data-page="charts">
+            <i class="fas fa-chart-line"></i>
+            <span class="nav-label">Графики</span>
+        </a>
+        <a href="#gallery" data-page="gallery">
+            <i class="fas fa-images"></i>
+            <span class="nav-label">Галерея</span>
+        </a>
+        <a href="#profile" data-page="profile">
+            <i class="fas fa-user"></i>
+            <span class="nav-label">Профиль</span>
+        </a>
+    </nav>
+
+    <!-- ============================================================
+    МОДАЛЬНОЕ ОКНО (запись)
+    ============================================================ -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent">
+            <h3 id="modalTitle"><i class="fas fa-pen"></i> Запись</h3>
+            <div class="form-group">
+                <label>Текст записи</label>
+                <textarea id="modalText" placeholder="Что вы сделали?"></textarea>
+            </div>
+            <div class="form-group" id="modalJournalGroup">
+                <label>Журнал</label>
+                <select id="modalJournal"></select>
+            </div>
+            <div class="form-group">
+                <label>Дата</label>
+                <input type="date" id="modalDate" />
+            </div>
+            <div class="form-group">
+                <label>Фото (можно несколько)</label>
+                <input type="file" id="modalPhotos" accept="image/*" multiple />
+            </div>
+            <div class="form-group" id="modalExistingPhotosGroup" style="display:none;">
+                <label>Существующие фото</label>
+                <div id="modalExistingPhotos" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            </div>
+            <div class="form-actions">
+                <button class="secondary" id="modalCancel">Отмена</button>
+                <button id="modalSave"><i class="fas fa-save"></i> Сохранить</button>
+            </div>
         </div>
-      </div>
-      <div class="profile-achievements" id="achievementsList">
-        <h4>🏅 Достижения</h4>
-        <div id="achievementsContainer"></div>
-      </div>
-    </section>
-  </main>
-
-  <!-- НАВИГАЦИЯ -->
-  <nav id="mainNav">
-    <a href="#calendar" data-page="calendar" class="active"><i class="fas fa-calendar"></i><span>Календарь</span></a>
-    <a href="#journals" data-page="journals"><i class="fas fa-book"></i><span>Журналы</span></a>
-    <a href="#goals" data-page="goals"><i class="fas fa-bullseye"></i><span>Цели</span></a>
-    <a href="#charts" data-page="charts"><i class="fas fa-chart-line"></i><span>Графики</span></a>
-    <a href="#gallery" data-page="gallery"><i class="fas fa-images"></i><span>Галерея</span></a>
-    <a href="#profile" data-page="profile"><i class="fas fa-user"></i><span>Профиль</span></a>
-  </nav>
-
-  <!-- МОДАЛЬНОЕ ОКНО (добавление / редактирование) -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal" id="modalContent">
-      <h3 id="modalTitle">Новая запись</h3>
-      <div class="form-group">
-        <label>Текст записи</label>
-        <textarea id="modalText" placeholder="Что вы сделали?"></textarea>
-      </div>
-      <div class="form-group" id="modalJournalGroup">
-        <label>Журнал</label>
-        <select id="modalJournal"></select>
-      </div>
-      <div class="form-group">
-        <label>Дата</label>
-        <input type="date" id="modalDate" />
-      </div>
-      <div class="form-group">
-        <label>Фото (можно несколько)</label>
-        <input type="file" id="modalPhotos" accept="image/*" multiple />
-      </div>
-      <div class="form-actions">
-        <button class="secondary" id="modalCancel">Отмена</button>
-        <button id="modalSave">Сохранить</button>
-      </div>
     </div>
-  </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО для ЦЕЛИ -->
-  <div class="modal-overlay" id="goalModalOverlay">
-    <div class="modal" id="goalModalContent">
-      <h3 id="goalModalTitle">Новая цель</h3>
-      <div class="form-group">
-        <label>Название цели</label>
-        <input type="text" id="goalTitleInput" placeholder="Например: бегать 3 раза в неделю" />
-      </div>
-      <div class="form-group">
-        <label>Привязать к журналу</label>
-        <select id="goalJournalSelect"></select>
-      </div>
-      <div class="form-group">
-        <label>Целевое значение (количество записей)</label>
-        <input type="number" id="goalTargetInput" min="1" value="3" />
-      </div>
-      <div class="form-group">
-        <label>Срок (дата)</label>
-        <input type="date" id="goalDeadlineInput" />
-      </div>
-      <div class="form-actions">
-        <button class="secondary" id="goalModalCancel">Отмена</button>
-        <button id="goalModalSave">Сохранить</button>
-      </div>
+    <!-- ============================================================
+    МОДАЛЬНОЕ ОКНО (цель)
+    ============================================================ -->
+    <div class="modal-overlay" id="goalModalOverlay">
+        <div class="modal" id="goalModalContent">
+            <h3 id="goalModalTitle"><i class="fas fa-bullseye"></i> Новая цель</h3>
+            <div class="form-group">
+                <label>Название цели</label>
+                <input type="text" id="goalTitleInput" placeholder="Например: бегать 3 раза в неделю" />
+            </div>
+            <div class="form-group">
+                <label>Привязать к журналу</label>
+                <select id="goalJournalSelect"></select>
+            </div>
+            <div class="form-group">
+                <label>Целевое значение (количество записей)</label>
+                <input type="number" id="goalTargetInput" min="1" value="3" />
+            </div>
+            <div class="form-group">
+                <label>Срок (дата)</label>
+                <input type="date" id="goalDeadlineInput" />
+            </div>
+            <div class="form-actions">
+                <button class="secondary" id="goalModalCancel">Отмена</button>
+                <button id="goalModalSave"><i class="fas fa-save"></i> Сохранить</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- СКРЫТЫЙ INPUT ДЛЯ ИМПОРТА -->
-  <input type="file" id="importFileInput" accept=".json" style="display:none" />
+    <!-- ============================================================
+    СКРЫТЫЕ ЭЛЕМЕНТЫ
+    ============================================================ -->
+    <input type="file" id="importFileInput" accept=".json" style="display:none" />
+    <div class="toast-container" id="toastContainer"></div>
 
-  <script>
-    // ============================================================
-    //  ВЕСЬ JAVASCRIPT — МОДУЛЬНЫЙ, НО В ОДНОМ ФАЙЛЕ
-    // ============================================================
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
 
-    (function() {
-      'use strict';
+            // ---------- БИБЛИОТЕКИ ----------
+            const { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday,
+                    parseISO, formatISO, differenceInDays, subDays, isAfter, isBefore, isWithinInterval
+                } = window.dateFns;
 
-      // ---------- БИБЛИОТЕКИ ----------
-      const { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, parseISO, formatISO, differenceInDays } = window.dateFns;
-
-      // ---------- СОСТОЯНИЕ / ХРАНИЛИЩЕ ----------
-      const DEFAULT_DATA = {
-        user: {
-          name: 'Герой',
-          level: 1,
-          xp: 0,
-          xpToNext: 100,
-          avatar: { base: 'warrior_1', effects: [] },
-          unlockedAvatars: ['warrior_1']
-        },
-        journals: {
-          sport: { id: 'sport', label: 'Спорт', icon: 'fa-dumbbell', records: [] },
-          food: { id: 'food', label: 'Питание', icon: 'fa-utensils', records: [] },
-          tasks: { id: 'tasks', label: 'Дела', icon: 'fa-check-double', records: [] },
-          hobby: { id: 'hobby', label: 'Хобби', icon: 'fa-paint-brush', records: [] },
-          travel: { id: 'travel', label: 'Путешествия', icon: 'fa-plane', records: [] },
-          debts: { id: 'debts', label: 'Долги', icon: 'fa-hand-holding-usd', records: [] },
-          misc: { id: 'misc', label: 'Всякое', icon: 'fa-ellipsis-h', records: [] }
-        },
-        goals: [],
-        gallery: { photos: [] },
-        achievements: [] // список id полученных достижений
-      };
-
-      let data = null;
-
-      function loadData() {
-        const saved = localStorage.getItem('heroJournalData');
-        if (saved) {
-          try { data = JSON.parse(saved); } catch (e) { data = null; }
-        }
-        if (!data) {
-          data = JSON.parse(JSON.stringify(DEFAULT_DATA));
-          // добавим тестовые записи для демонстрации
-          const today = format(new Date(), 'yyyy-MM-dd');
-          const yesterday = format(new Date(Date.now() - 86400000), 'yyyy-MM-dd');
-          data.journals.sport.records.push({
-            id: 'rec1',
-            date: today,
-            text: 'Пробежка 5 км за 30 минут',
-            photos: [],
-            done: true,
-            xpEarned: 15
-          });
-          data.journals.tasks.records.push({
-            id: 'rec2',
-            date: yesterday,
-            text: 'Завершил проект по работе',
-            photos: [],
-            done: true,
-            xpEarned: 20
-          });
-          data.journals.hobby.records.push({
-            id: 'rec3',
-            date: today,
-            text: 'Нарисовал эскиз нового персонажа',
-            photos: [],
-            done: false,
-            xpEarned: 12
-          });
-          // добавим фото в галерею (пустые для примера)
-          saveData();
-        }
-        // обновить XP до следующего уровня
-        recalcXpToNext();
-        saveData();
-        return data;
-      }
-
-      function saveData() {
-        localStorage.setItem('heroJournalData', JSON.stringify(data));
-      }
-
-      function recalcXpToNext() {
-        const lvl = data.user.level;
-        data.user.xpToNext = Math.floor(100 * Math.pow(lvl, 1.5));
-      }
-
-      // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
-      function generateId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
-
-      function getJournalIds() { return Object.keys(data.journals); }
-
-      function getJournal(id) { return data.journals[id]; }
-
-      function getAllRecords() {
-        let all = [];
-        for (let jid in data.journals) {
-          all = all.concat(data.journals[jid].records.map(r => ({ ...r, journalId: jid })));
-        }
-        return all;
-      }
-
-      function getRecordsForDate(dateStr) {
-        return getAllRecords().filter(r => r.date === dateStr);
-      }
-
-      function getRecordsForJournal(journalId) {
-        return data.journals[journalId] ? data.journals[journalId].records.slice() : [];
-      }
-
-      function getTotalRecords() { return getAllRecords().length; }
-
-      function getTotalPhotos() { return data.gallery.photos.length; }
-
-      function getCompletedGoals() { return data.goals.filter(g => g.completed).length; }
-
-      // ---------- RPG: XP и УРОВНИ ----------
-      function calculateXP(text) {
-        let base = 10 + Math.min(20, Math.floor(text.length / 10));
-        return Math.min(50, base);
-      }
-
-      function addXP(amount) {
-        data.user.xp += amount;
-        while (data.user.xp >= data.user.xpToNext) {
-          data.user.xp -= data.user.xpToNext;
-          data.user.level += 1;
-          recalcXpToNext();
-          // открываем новый аватар каждые 2 уровня
-          const avatars = ['warrior_1', 'warrior_2', 'mage_1', 'mage_2', 'elf_1', 'elf_2', 'dragon_1'];
-          if (data.user.level % 2 === 0 && data.user.level / 2 < avatars.length) {
-            const newAvatar = avatars[data.user.level / 2];
-            if (!data.user.unlockedAvatars.includes(newAvatar)) {
-              data.user.unlockedAvatars.push(newAvatar);
-              data.user.avatar.base = newAvatar;
-            }
-          }
-          // проверить достижения
-          checkAchievements();
-          // уведомление о новом уровне
-          alert(`🎉 Поздравляем! Вы достигли ${data.user.level} уровня!`);
-        }
-        saveData();
-        updateUI();
-      }
-
-      // ---------- ДОСТИЖЕНИЯ ----------
-      function checkAchievements() {
-        const achieved = data.achievements || [];
-        const allRecords = getAllRecords();
-        const total = allRecords.length;
-        const journalCounts = {};
-        for (let jid in data.journals) {
-          journalCounts[jid] = data.journals[jid].records.length;
-        }
-
-        const conditions = [
-          { id: 'first_record', check: () => total >= 1, label: 'Первая запись', icon: 'fa-star' },
-          { id: 'ten_records', check: () => total >= 10, label: '10 записей', icon: 'fa-medal' },
-          { id: 'fifty_records', check: () => total >= 50, label: '50 записей', icon: 'fa-crown' },
-          { id: 'sport_5', check: () => journalCounts.sport >= 5, label: 'Спортсмен (5 записей)', icon: 'fa-running' },
-          { id: 'tasks_10', check: () => journalCounts.tasks >= 10, label: 'Организатор (10 дел)', icon: 'fa-tasks' },
-          { id: 'photo_5', check: () => data.gallery.photos.length >= 5, label: 'Фотограф (5 фото)', icon: 'fa-camera' },
-        ];
-
-        let newAchievement = false;
-        conditions.forEach(c => {
-          if (!achieved.includes(c.id) && c.check()) {
-            achieved.push(c.id);
-            newAchievement = true;
-            // покажем уведомление
-            setTimeout(() => {
-              alert(`🏅 Достижение: ${c.label}!`);
-            }, 300);
-          }
-        });
-        if (newAchievement) {
-          data.achievements = achieved;
-          saveData();
-          updateUI();
-        }
-      }
-
-      // ---------- АВАТАРЫ ----------
-      const AVATAR_IMAGES = {
-        warrior_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=warrior1',
-        warrior_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=warrior2',
-        mage_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mage1',
-        mage_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mage2',
-        elf_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=elf1',
-        elf_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=elf2',
-        dragon_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dragon1',
-      };
-
-      function getAvatarUrl(id) {
-        return AVATAR_IMAGES[id] || AVATAR_IMAGES.warrior_1;
-      }
-
-      // ---------- ОБНОВЛЕНИЕ UI ----------
-      function updateUI() {
-        // XP бар
-        const xpFill = document.getElementById('xpBarFill');
-        const pct = Math.min(100, (data.user.xp / data.user.xpToNext) * 100);
-        xpFill.style.width = pct + '%';
-        document.getElementById('userLevelDisplay').textContent = 'Ур. ' + data.user.level;
-
-        // Профиль
-        document.getElementById('profileName').textContent = data.user.name;
-        document.getElementById('profileLevel').textContent = data.user.level;
-        document.getElementById('profileXp').textContent = data.user.xp;
-        document.getElementById('profileXpMax').textContent = data.user.xpToNext;
-        document.getElementById('statRecords').textContent = getTotalRecords();
-        document.getElementById('statGoals').textContent = data.goals.length;
-        document.getElementById('statPhotos').textContent = getTotalPhotos();
-
-        // Аватар
-        const avatarUrl = getAvatarUrl(data.user.avatar.base);
-        const container = document.getElementById('avatarContainer');
-        container.style.backgroundImage = `url(${avatarUrl})`;
-        // Эффекты
-        const effects = data.user.avatar.effects || [];
-        document.getElementById('effectGlow').style.display = effects.includes('glow') ? 'block' : 'none';
-        document.getElementById('effectCape').style.display = effects.includes('cape') ? 'block' : 'none';
-
-        // Достижения
-        const achContainer = document.getElementById('achievementsContainer');
-        const achievementsMap = {
-          first_record: 'Первая запись',
-          ten_records: '10 записей',
-          fifty_records: '50 записей',
-          sport_5: 'Спортсмен (5)',
-          tasks_10: 'Организатор (10)',
-          photo_5: 'Фотограф (5)'
-        };
-        const icons = {
-          first_record: 'fa-star',
-          ten_records: 'fa-medal',
-          fifty_records: 'fa-crown',
-          sport_5: 'fa-running',
-          tasks_10: 'fa-tasks',
-          photo_5: 'fa-camera'
-        };
-        const achieved = data.achievements || [];
-        if (achieved.length === 0) {
-          achContainer.innerHTML = '<p style="color:var(--text-muted)">Пока нет достижений. Продолжайте заполнять журналы!</p>';
-        } else {
-          achContainer.innerHTML = achieved.map(id =>
-            `<span class="achieve-item"><i class="fas ${icons[id] || 'fa-award'}"></i> ${achievementsMap[id] || id}</span>`
-          ).join('');
-        }
-
-        // Обновить календарь, журналы и т.д. (вызывается отдельно)
-        renderCalendar(currentMonth, currentYear);
-        renderJournalTabs();
-        renderCurrentJournal();
-        renderGoals();
-        renderGallery();
-        renderCharts();
-      }
-
-      // ---------- КАЛЕНДАРЬ ----------
-      let currentMonth = new Date().getMonth();
-      let currentYear = new Date().getFullYear();
-      let selectedDate = format(new Date(), 'yyyy-MM-dd');
-
-      function renderCalendar(month, year) {
-        const grid = document.getElementById('calendarGrid');
-        const firstDay = new Date(year, month, 1);
-        const start = startOfMonth(firstDay);
-        const end = endOfMonth(firstDay);
-        const days = eachDayOfInterval({ start, end });
-        const firstDayOfWeek = start.getDay(); // 0=вс
-
-        grid.innerHTML = '';
-        // Заголовки дней недели
-        const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-        // Смещение, чтобы Пн был первым
-        const offset = (firstDayOfWeek === 0) ? 6 : firstDayOfWeek - 1;
-        for (let i = 0; i < 7; i++) {
-          const wd = document.createElement('div');
-          wd.className = 'weekday';
-          wd.textContent = weekdays[i];
-          grid.appendChild(wd);
-        }
-        // Пустые ячейки до первого дня
-        for (let i = 0; i < offset; i++) {
-          const empty = document.createElement('div');
-          empty.className = 'day empty';
-          grid.appendChild(empty);
-        }
-        // Дни
-        days.forEach(day => {
-          const dateStr = format(day, 'yyyy-MM-dd');
-          const div = document.createElement('div');
-          div.className = 'day';
-          if (isToday(day)) div.classList.add('today');
-          if (dateStr === selectedDate) div.classList.add('selected');
-          const records = getRecordsForDate(dateStr);
-          if (records.length > 0) div.classList.add('has-record');
-          div.textContent = format(day, 'd');
-          div.dataset.date = dateStr;
-          div.addEventListener('click', () => {
-            selectedDate = dateStr;
-            renderCalendar(month, year);
-            renderDayRecords(dateStr);
-          });
-          grid.appendChild(div);
-        });
-
-        document.getElementById('monthYear').textContent = format(firstDay, 'MMMM yyyy');
-        // Показать записи за выбранный день
-        renderDayRecords(selectedDate);
-      }
-
-      function renderDayRecords(dateStr) {
-        const container = document.getElementById('dayRecordsList');
-        const records = getRecordsForDate(dateStr);
-        if (records.length === 0) {
-          container.innerHTML = '<p style="color:var(--text-muted)">Нет записей за этот день.</p>';
-          return;
-        }
-        container.innerHTML = records.map(r => {
-          const journal = getJournal(r.journalId);
-          const icon = journal ? journal.icon : 'fa-book';
-          return `
-            <div class="record-item">
-              <div class="record-content">
-                <div class="record-text">${r.text}</div>
-                <div class="record-meta">
-                  <span><i class="fas ${icon}"></i> ${journal ? journal.label : '?'}</span>
-                  <span><i class="fas fa-star"></i> ${r.xpEarned || 0} XP</span>
-                  <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
-                </div>
-                ${r.photos && r.photos.length ? `<div class="record-photos">${r.photos.map(p => `<img src="${p}" alt="photo" data-lightbox="daygal" />`).join('')}</div>` : ''}
-              </div>
-              <div class="record-actions">
-                <button class="done-btn ${r.done ? 'done' : ''}" data-id="${r.id}" data-journal="${r.journalId}" title="Отметить выполненным"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
-                <button data-id="${r.id}" data-journal="${r.journalId}" class="delete-record" title="Удалить"><i class="fas fa-trash"></i></button>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-        // Обработчики для кнопок done/delete
-        container.querySelectorAll('.done-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            const jid = btn.dataset.journal;
-            toggleRecordDone(jid, id);
-          });
-        });
-        container.querySelectorAll('.delete-record').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            const jid = btn.dataset.journal;
-            if (confirm('Удалить запись?')) deleteRecord(jid, id);
-          });
-        });
-
-        // Инициализируем лайтбокс для фото
-        if (window.SimpleLightbox) {
-          new SimpleLightbox('.record-photos a', { /* options */ });
-        }
-      }
-
-      // ---------- ЖУРНАЛЫ ----------
-      let currentJournalId = 'sport';
-
-      function renderJournalTabs() {
-        const container = document.getElementById('journalTabs');
-        container.innerHTML = '';
-        for (let jid in data.journals) {
-          const j = data.journals[jid];
-          const tab = document.createElement('div');
-          tab.className = 'tab' + (jid === currentJournalId ? ' active' : '');
-          tab.innerHTML = `<i class="fas ${j.icon}"></i> ${j.label}`;
-          tab.dataset.jid = jid;
-          tab.addEventListener('click', () => {
-            currentJournalId = jid;
-            renderJournalTabs();
-            renderCurrentJournal();
-          });
-          container.appendChild(tab);
-        }
-      }
-
-      function renderCurrentJournal() {
-        const container = document.getElementById('journalRecordsList');
-        const records = getRecordsForJournal(currentJournalId);
-        if (records.length === 0) {
-          container.innerHTML = '<p style="color:var(--text-muted)">В этом журнале пока нет записей.</p>';
-          return;
-        }
-        // Сортируем по дате (новые сверху)
-        records.sort((a, b) => b.date.localeCompare(a.date));
-        container.innerHTML = records.map(r => {
-          return `
-            <div class="record-item">
-              <div class="record-content">
-                <div class="record-text">${r.text}</div>
-                <div class="record-meta">
-                  <span><i class="far fa-calendar-alt"></i> ${r.date}</span>
-                  <span><i class="fas fa-star"></i> ${r.xpEarned || 0} XP</span>
-                  <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
-                </div>
-                ${r.photos && r.photos.length ? `<div class="record-photos">${r.photos.map(p => `<img src="${p}" alt="photo" data-lightbox="journalgal" />`).join('')}</div>` : ''}
-              </div>
-              <div class="record-actions">
-                <button class="done-btn ${r.done ? 'done' : ''}" data-id="${r.id}" data-journal="${currentJournalId}" title="Отметить выполненным"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
-                <button data-id="${r.id}" data-journal="${currentJournalId}" class="delete-record" title="Удалить"><i class="fas fa-trash"></i></button>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-        container.querySelectorAll('.done-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            const jid = btn.dataset.journal;
-            toggleRecordDone(jid, id);
-          });
-        });
-        container.querySelectorAll('.delete-record').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            const jid = btn.dataset.journal;
-            if (confirm('Удалить запись?')) deleteRecord(jid, id);
-          });
-        });
-
-        if (window.SimpleLightbox) {
-          new SimpleLightbox('.record-photos a', { /* options */ });
-        }
-      }
-
-      // ---------- ОПЕРАЦИИ С ЗАПИСЯМИ ----------
-      function addRecord(journalId, text, date, photos, done = false) {
-        const xp = calculateXP(text);
-        const record = {
-          id: generateId(),
-          date: date || format(new Date(), 'yyyy-MM-dd'),
-          text: text,
-          photos: photos || [],
-          done: done,
-          xpEarned: xp
-        };
-        data.journals[journalId].records.push(record);
-        // Добавляем фото в галерею
-        (photos || []).forEach(url => {
-          data.gallery.photos.push({
-            id: generateId(),
-            url: url,
-            recordId: record.id,
-            date: record.date
-          });
-        });
-        // Начисляем XP
-        addXP(xp);
-        saveData();
-        updateUI();
-        // После добавления обновить страницы
-        renderCurrentJournal();
-        renderDayRecords(selectedDate);
-        renderGoals();
-        renderGallery();
-        renderCharts();
-      }
-
-      function deleteRecord(journalId, recordId) {
-        const journal = data.journals[journalId];
-        if (!journal) return;
-        const idx = journal.records.findIndex(r => r.id === recordId);
-        if (idx === -1) return;
-        const record = journal.records[idx];
-        // Удаляем фото из галереи
-        if (record.photos) {
-          record.photos.forEach(url => {
-            const pidx = data.gallery.photos.findIndex(p => p.url === url && p.recordId === recordId);
-            if (pidx !== -1) data.gallery.photos.splice(pidx, 1);
-          });
-        }
-        journal.records.splice(idx, 1);
-        saveData();
-        updateUI();
-        renderCurrentJournal();
-        renderDayRecords(selectedDate);
-        renderGallery();
-        renderCharts();
-      }
-
-      function toggleRecordDone(journalId, recordId) {
-        const journal = data.journals[journalId];
-        if (!journal) return;
-        const record = journal.records.find(r => r.id === recordId);
-        if (!record) return;
-        record.done = !record.done;
-        if (record.done) {
-          // Бонусные XP за выполнение
-          addXP(5);
-        }
-        saveData();
-        updateUI();
-        renderCurrentJournal();
-        renderDayRecords(selectedDate);
-        renderGoals();
-        renderCharts();
-      }
-
-      // ---------- ЦЕЛИ ----------
-      function renderGoals() {
-        const container = document.getElementById('goalsList');
-        if (data.goals.length === 0) {
-          container.innerHTML = '<p style="color:var(--text-muted)">Целей пока нет. Создайте первую!</p>';
-          return;
-        }
-        container.innerHTML = data.goals.map((goal, index) => {
-          const progress = Math.min(100, (goal.currentValue / goal.targetValue) * 100);
-          const done = goal.completed ? '✅ Выполнена' : `Прогресс: ${goal.currentValue}/${goal.targetValue}`;
-          return `
-            <div class="goal-item">
-              <div class="goal-info">
-                <div class="goal-title">${goal.title}</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">Журнал: ${getJournal(goal.journalId)?.label || '?'} · Срок: ${goal.deadline || 'нет'}</div>
-                <div class="goal-progress"><div class="fill" style="width:${progress}%"></div></div>
-                <div style="font-size:0.85rem; margin-top:4px;">${done}</div>
-              </div>
-              <div class="goal-actions">
-                <button class="secondary" data-index="${index}" data-action="deleteGoal"><i class="fas fa-trash"></i></button>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-        container.querySelectorAll('[data-action="deleteGoal"]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const idx = parseInt(btn.dataset.index);
-            if (confirm('Удалить цель?')) {
-              data.goals.splice(idx, 1);
-              saveData();
-              updateUI();
-              renderGoals();
-            }
-          });
-        });
-      }
-
-      function addGoal(title, journalId, targetValue, deadline) {
-        const goal = {
-          id: generateId(),
-          title,
-          journalId,
-          targetValue: parseInt(targetValue) || 1,
-          currentValue: 0,
-          deadline: deadline || '',
-          completed: false
-        };
-        // Рассчитываем текущее значение из записей
-        const records = getRecordsForJournal(journalId);
-        goal.currentValue = records.length;
-        if (goal.currentValue >= goal.targetValue) {
-          goal.completed = true;
-          // Бонус XP за выполнение цели
-          addXP(50);
-        }
-        data.goals.push(goal);
-        saveData();
-        updateUI();
-        renderGoals();
-      }
-
-      function updateGoalsProgress() {
-        data.goals.forEach(goal => {
-          const records = getRecordsForJournal(goal.journalId);
-          goal.currentValue = records.length;
-          if (!goal.completed && goal.currentValue >= goal.targetValue) {
-            goal.completed = true;
-            addXP(50);
-          }
-        });
-        saveData();
-        updateUI();
-        renderGoals();
-      }
-
-      // ---------- ГАЛЕРЕЯ ----------
-      function renderGallery() {
-        const container = document.getElementById('galleryGrid');
-        const photos = data.gallery.photos;
-        if (photos.length === 0) {
-          container.innerHTML = '<p style="color:var(--text-muted)">Нет загруженных фото.</p>';
-          return;
-        }
-        container.innerHTML = photos.map(p => `
-          <div class="gallery-item">
-            <a href="${p.url}" data-lightbox="gallery"><img src="${p.url}" alt="Фото" /></a>
-          </div>
-        `).join('');
-        if (window.SimpleLightbox) {
-          new SimpleLightbox('.gallery-item a', { /* options */ });
-        }
-      }
-
-      // ---------- ГРАФИКИ ----------
-      let lineChartInstance = null;
-      let pieChartInstance = null;
-
-      function renderCharts() {
-        // Линейный график: количество записей по дням за текущий месяц
-        const now = new Date();
-        const month = now.getMonth();
-        const year = now.getFullYear();
-        const start = startOfMonth(now);
-        const end = endOfMonth(now);
-        const days = eachDayOfInterval({ start, end });
-        const labels = days.map(d => format(d, 'd'));
-        const counts = days.map(d => {
-          const dateStr = format(d, 'yyyy-MM-dd');
-          return getRecordsForDate(dateStr).length;
-        });
-
-        const ctxLine = document.getElementById('lineChart').getContext('2d');
-        if (lineChartInstance) lineChartInstance.destroy();
-        lineChartInstance = new Chart(ctxLine, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Записей',
-              data: counts,
-              borderColor: '#6c5ce7',
-              backgroundColor: 'rgba(108,92,231,0.1)',
-              tension: 0.3,
-              fill: true,
-              pointBackgroundColor: '#6c5ce7'
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false }
-            },
-            scales: {
-              y: { beginAtZero: true, ticks: { stepSize: 1 } }
-            }
-          }
-        });
-
-        // Круговая диаграмма: распределение по журналам
-        const journalLabels = [];
-        const journalCounts = [];
-        for (let jid in data.journals) {
-          const cnt = data.journals[jid].records.length;
-          if (cnt > 0) {
-            journalLabels.push(data.journals[jid].label);
-            journalCounts.push(cnt);
-          }
-        }
-        const ctxPie = document.getElementById('pieChart').getContext('2d');
-        if (pieChartInstance) pieChartInstance.destroy();
-        if (journalLabels.length === 0) {
-          // Показать пустой график
-          pieChartInstance = new Chart(ctxPie, {
-            type: 'pie',
-            data: {
-              labels: ['Нет данных'],
-              datasets: [{ data: [1], backgroundColor: ['#444'] }]
-            },
-            options: { plugins: { legend: { display: true } } }
-          });
-        } else {
-          const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#0984e3', '#fd79a8', '#00cec9'];
-          pieChartInstance = new Chart(ctxPie, {
-            type: 'pie',
-            data: {
-              labels: journalLabels,
-              datasets: [{
-                data: journalCounts,
-                backgroundColor: colors.slice(0, journalLabels.length),
-                borderWidth: 0
-              }]
-            },
-            options: {
-              plugins: {
-                legend: { position: 'bottom', labels: { color: '#e8edf5' } }
-              }
-            }
-          });
-        }
-      }
-
-      // ---------- НАВИГАЦИЯ ----------
-      function navigateTo(pageId) {
-        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-        const target = document.getElementById('page-' + pageId);
-        if (target) target.classList.add('active');
-        document.querySelectorAll('nav#mainNav a').forEach(a => {
-          a.classList.toggle('active', a.dataset.page === pageId);
-        });
-        // Обновить содержимое при переключении
-        if (pageId === 'calendar') {
-          renderCalendar(currentMonth, currentYear);
-        } else if (pageId === 'journals') {
-          renderJournalTabs();
-          renderCurrentJournal();
-        } else if (pageId === 'goals') {
-          renderGoals();
-        } else if (pageId === 'charts') {
-          renderCharts();
-        } else if (pageId === 'gallery') {
-          renderGallery();
-        } else if (pageId === 'profile') {
-          updateUI();
-        }
-      }
-
-      // ---------- МОДАЛЬНОЕ ОКНО (запись) ----------
-      function openRecordModal(journalId, date) {
-        const overlay = document.getElementById('modalOverlay');
-        document.getElementById('modalTitle').textContent = 'Новая запись';
-        document.getElementById('modalText').value = '';
-        document.getElementById('modalDate').value = date || format(new Date(), 'yyyy-MM-dd');
-        document.getElementById('modalPhotos').value = '';
-        // Заполнить список журналов
-        const select = document.getElementById('modalJournal');
-        select.innerHTML = '';
-        for (let jid in data.journals) {
-          const opt = document.createElement('option');
-          opt.value = jid;
-          opt.textContent = data.journals[jid].label;
-          if (jid === journalId) opt.selected = true;
-          select.appendChild(opt);
-        }
-        overlay.classList.add('open');
-        // Сохраняем обработчик
-        const saveBtn = document.getElementById('modalSave');
-        const cancelBtn = document.getElementById('modalCancel');
-        const newSave = () => {
-          const text = document.getElementById('modalText').value.trim();
-          if (!text) { alert('Введите текст записи'); return; }
-          const jid = document.getElementById('modalJournal').value;
-          const date = document.getElementById('modalDate').value;
-          const files = document.getElementById('modalPhotos').files;
-          const photoUrls = [];
-          if (files.length > 0) {
-            for (let f of files) {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                photoUrls.push(e.target.result);
-                if (photoUrls.length === files.length) {
-                  addRecord(jid, text, date, photoUrls);
-                  closeModal();
+            // ---------- ЗВУКИ (Web Audio API) ----------
+            class SoundFX {
+                constructor() {
+                    this.ctx = null;
+                    this.enabled = true;
+                    try {
+                        this.ctx = new(window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {}
                 }
-              };
-              reader.readAsDataURL(f);
+
+                play(type) {
+                    if (!this.ctx || !this.enabled) return;
+                    try {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        gain.gain.value = 0.1;
+
+                        switch (type) {
+                            case 'xp':
+                                osc.frequency.value = 600;
+                                osc.type = 'sine';
+                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+                                osc.start(this.ctx.currentTime);
+                                osc.stop(this.ctx.currentTime + 0.2);
+                                break;
+                            case 'levelup':
+                                osc.frequency.setValueAtTime(523, this.ctx.currentTime);
+                                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.1);
+                                osc.frequency.setValueAtTime(784, this.ctx.currentTime + 0.2);
+                                osc.type = 'sine';
+                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+                                osc.start(this.ctx.currentTime);
+                                osc.stop(this.ctx.currentTime + 0.4);
+                                break;
+                            case 'achievement':
+                                osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+                                osc.frequency.setValueAtTime(554, this.ctx.currentTime + 0.1);
+                                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.2);
+                                osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.3);
+                                osc.type = 'square';
+                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+                                osc.start(this.ctx.currentTime);
+                                osc.stop(this.ctx.currentTime + 0.5);
+                                break;
+                            case 'challenge':
+                                osc.frequency.setValueAtTime(523, this.ctx.currentTime);
+                                osc.frequency.setValueAtTime(392, this.ctx.currentTime + 0.15);
+                                osc.frequency.setValueAtTime(523, this.ctx.currentTime + 0.3);
+                                osc.type = 'triangle';
+                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+                                osc.start(this.ctx.currentTime);
+                                osc.stop(this.ctx.currentTime + 0.4);
+                                break;
+                        }
+                    } catch (e) {}
+                }
             }
-            // если нет файлов, сразу добавляем
-          } else {
-            addRecord(jid, text, date, []);
-            closeModal();
-          }
-        };
-        saveBtn.onclick = newSave;
-        cancelBtn.onclick = closeModal;
-        overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
-      }
 
-      function closeModal() {
-        document.getElementById('modalOverlay').classList.remove('open');
-      }
+            const sound = new SoundFX();
 
-      // ---------- МОДАЛЬНОЕ ОКНО (цель) ----------
-      function openGoalModal() {
-        const overlay = document.getElementById('goalModalOverlay');
-        document.getElementById('goalModalTitle').textContent = 'Новая цель';
-        document.getElementById('goalTitleInput').value = '';
-        document.getElementById('goalTargetInput').value = '3';
-        document.getElementById('goalDeadlineInput').value = '';
-        // Заполнить журналы
-        const select = document.getElementById('goalJournalSelect');
-        select.innerHTML = '';
-        for (let jid in data.journals) {
-          const opt = document.createElement('option');
-          opt.value = jid;
-          opt.textContent = data.journals[jid].label;
-          if (jid === currentJournalId) opt.selected = true;
-          select.appendChild(opt);
-        }
-        overlay.classList.add('open');
-        const saveBtn = document.getElementById('goalModalSave');
-        const cancelBtn = document.getElementById('goalModalCancel');
-        saveBtn.onclick = () => {
-          const title = document.getElementById('goalTitleInput').value.trim();
-          if (!title) { alert('Введите название цели'); return; }
-          const jid = document.getElementById('goalJournalSelect').value;
-          const target = parseInt(document.getElementById('goalTargetInput').value) || 1;
-          const deadline = document.getElementById('goalDeadlineInput').value;
-          addGoal(title, jid, target, deadline);
-          closeGoalModal();
-        };
-        cancelBtn.onclick = closeGoalModal;
-        overlay.onclick = (e) => { if (e.target === overlay) closeGoalModal(); };
-      }
+            // ---------- ТОСТЫ ----------
+            function showToast(message, type = 'info', duration = 3500) {
+                const container = document.getElementById('toastContainer');
+                const icons = {
+                    success: 'fa-check-circle',
+                    warning: 'fa-exclamation-triangle',
+                    error: 'fa-times-circle',
+                    info: 'fa-info-circle'
+                };
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+              <i class="fas ${icons[type] || icons.info}"></i>
+              <span>${message}</span>
+              <button class="toast-close"><i class="fas fa-times"></i></button>
+            `;
+                container.appendChild(toast);
+                const closeBtn = toast.querySelector('.toast-close');
+                closeBtn.addEventListener('click', () => {
+                    toast.remove();
+                });
+                setTimeout(() => {
+                    if (toast.parentNode) toast.remove();
+                }, duration);
+            }
 
-      function closeGoalModal() {
-        document.getElementById('goalModalOverlay').classList.remove('open');
-      }
+            // ---------- СОСТОЯНИЕ / ХРАНИЛИЩЕ ----------
+            const DEFAULT_DATA = {
+                user: {
+                    name: 'Герой',
+                    level: 1,
+                    xp: 0,
+                    xpToNext: 100,
+                    avatar: { base: 'warrior_1', effects: [] },
+                    unlockedAvatars: ['warrior_1']
+                },
+                journals: {
+                    sport: { id: 'sport', label: 'Спорт', icon: 'fa-dumbbell', records: [] },
+                    food: { id: 'food', label: 'Питание', icon: 'fa-utensils', records: [] },
+                    tasks: { id: 'tasks', label: 'Дела', icon: 'fa-check-double', records: [] },
+                    hobby: { id: 'hobby', label: 'Хобби', icon: 'fa-paint-brush', records: [] },
+                    travel: { id: 'travel', label: 'Путешествия', icon: 'fa-plane', records: [] },
+                    debts: { id: 'debts', label: 'Долги', icon: 'fa-hand-holding-usd', records: [] },
+                    misc: { id: 'misc', label: 'Всякое', icon: 'fa-ellipsis-h', records: [] }
+                },
+                goals: [],
+                gallery: { photos: [] },
+                achievements: [],
+                settings: { theme: 'dark' }
+            };
 
-      // ---------- ЭКСПОРТ / ИМПОРТ ----------
-      function exportData() {
-        const json = JSON.stringify(data, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'hero_journal_backup.json';
-        a.click();
-        URL.revokeObjectURL(url);
-      }
+            let data = null;
+            let editingRecordId = null;
+            let editingRecordJournal = null;
 
-      function importData(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const imported = JSON.parse(e.target.result);
-            if (imported.user && imported.journals) {
-              data = imported;
-              saveData();
-              updateUI();
-              alert('Данные импортированы успешно!');
+            function loadData() {
+                const saved = localStorage.getItem('heroJournalData');
+                if (saved) {
+                    try { data = JSON.parse(saved); } catch (e) { data = null; }
+                }
+                if (!data) {
+                    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+                    // Тестовые данные
+                    const today = format(new Date(), 'yyyy-MM-dd');
+                    const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+                    const twoDaysAgo = format(subDays(new Date(), 2), 'yyyy-MM-dd');
+                    data.journals.sport.records.push({
+                        id: 'rec1',
+                        date: today,
+                        text: '🏃 Пробежка 5 км за 30 минут',
+                        photos: [],
+                        done: true,
+                        xpEarned: 18
+                    });
+                    data.journals.tasks.records.push({
+                        id: 'rec2',
+                        date: yesterday,
+                        text: '✅ Завершил проект по работе',
+                        photos: [],
+                        done: true,
+                        xpEarned: 22
+                    });
+                    data.journals.hobby.records.push({
+                        id: 'rec3',
+                        date: twoDaysAgo,
+                        text: '🎨 Нарисовал эскиз нового персонажа',
+                        photos: [],
+                        done: false,
+                        xpEarned: 14
+                    });
+                    data.journals.food.records.push({
+                        id: 'rec4',
+                        date: today,
+                        text: '🥗 Приготовил здоровый ужин',
+                        photos: [],
+                        done: true,
+                        xpEarned: 12
+                    });
+                    saveData();
+                }
+                // Применяем тему
+                if (data.settings && data.settings.theme === 'light') {
+                    document.body.classList.add('light-theme');
+                    document.querySelector('#themeToggle i').className = 'fas fa-sun';
+                }
+                recalcXpToNext();
+                saveData();
+                return data;
+            }
+
+            function saveData() {
+                data.settings = data.settings || { theme: 'dark' };
+                data.settings.theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+                localStorage.setItem('heroJournalData', JSON.stringify(data));
+            }
+
+            function recalcXpToNext() {
+                const lvl = data.user.level;
+                data.user.xpToNext = Math.floor(80 * Math.pow(lvl, 1.6));
+            }
+
+            // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+            function generateId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
+
+            function getJournalIds() { return Object.keys(data.journals); }
+
+            function getJournal(id) { return data.journals[id]; }
+
+            function getAllRecords() {
+                let all = [];
+                for (let jid in data.journals) {
+                    all = all.concat(data.journals[jid].records.map(r => ({ ...r, journalId: jid })));
+                }
+                return all;
+            }
+
+            function getRecordsForDate(dateStr) {
+                return getAllRecords().filter(r => r.date === dateStr);
+            }
+
+            function getRecordsForJournal(journalId) {
+                return data.journals[journalId] ? data.journals[journalId].records.slice() : [];
+            }
+
+            function getTotalRecords() { return getAllRecords().length; }
+
+            function getTotalPhotos() { return data.gallery.photos.length; }
+
+            function getCompletedGoals() { return data.goals.filter(g => g.completed).length; }
+
+            // ---------- СЕРИИ (STREAK) ----------
+            function calculateStreak(journalId) {
+                const records = getRecordsForJournal(journalId);
+                if (records.length === 0) return 0;
+                const dates = [...new Set(records.map(r => r.date))].sort();
+                let streak = 0;
+                let current = new Date();
+                // Проверяем от сегодня назад
+                for (let i = 0; i < 365; i++) {
+                    const dateStr = format(subDays(current, i), 'yyyy-MM-dd');
+                    if (dates.includes(dateStr)) {
+                        streak++;
+                    } else if (i > 0) {
+                        break;
+                    }
+                }
+                return streak;
+            }
+
+            function getTotalStreak() {
+                let max = 0;
+                for (let jid in data.journals) {
+                    const s = calculateStreak(jid);
+                    if (s > max) max = s;
+                }
+                return max;
+            }
+
+            // ---------- ЧЕЛЛЕНДЖ ----------
+            let currentChallenge = null;
+
+            function generateChallenge() {
+                const journalIds = getJournalIds();
+                const jid = journalIds[Math.floor(Math.random() * journalIds.length)];
+                const journal = getJournal(jid);
+                const actions = ['запись', 'выполнение задачи', 'добавление фото', 'прогресс по цели'];
+                const action = actions[Math.floor(Math.random() * actions.length)];
+                currentChallenge = {
+                    journalId: jid,
+                    journalLabel: journal.label,
+                    action: action,
+                    date: format(new Date(), 'yyyy-MM-dd'),
+                    completed: false
+                };
+                // Проверяем, не выполнен ли уже сегодня
+                const todayRecords = getRecordsForDate(format(new Date(), 'yyyy-MM-dd'));
+                if (todayRecords.some(r => r.journalId === jid)) {
+                    currentChallenge.completed = true;
+                }
+                updateChallengeUI();
+                return currentChallenge;
+            }
+
+            function updateChallengeUI() {
+                const text = document.getElementById('challengeText');
+                const status = document.getElementById('challengeStatus');
+                const btn = document.getElementById('challengeCompleteBtn');
+                if (!currentChallenge) {
+                    generateChallenge();
+                    return;
+                }
+                text.textContent = `${currentChallenge.journalLabel} (${currentChallenge.action})`;
+                if (currentChallenge.completed) {
+                    status.textContent = '✅ Выполнено! +Бонус XP';
+                    status.style.color = 'var(--success)';
+                    btn.style.display = 'none';
+                } else {
+                    status.textContent = '⏳ Ожидает выполнения';
+                    status.style.color = 'var(--text-muted)';
+                    btn.style.display = 'flex';
+                }
+            }
+
+            function completeChallenge() {
+                if (!currentChallenge || currentChallenge.completed) return;
+                // Проверяем, есть ли запись в этом журнале сегодня
+                const todayRecords = getRecordsForDate(format(new Date(), 'yyyy-MM-dd'));
+                const hasRecord = todayRecords.some(r => r.journalId === currentChallenge.journalId);
+                if (hasRecord) {
+                    currentChallenge.completed = true;
+                    // Бонус XP (двойной)
+                    const bonus = 30;
+                    addXP(bonus);
+                    sound.play('challenge');
+                    showToast(`🎯 Челлендж выполнен! +${bonus} XP бонус!`, 'success');
+                    updateChallengeUI();
+                    updateUI();
+                } else {
+                    showToast('Сначала сделайте запись в журнале "' + currentChallenge.journalLabel + '" сегодня!', 'warning');
+                }
+            }
+
+            // ---------- RPG: XP и УРОВНИ ----------
+            function calculateXP(text) {
+                let base = 10 + Math.min(25, Math.floor(text.length / 8));
+                // Бонус за длину текста
+                if (text.length > 50) base += 5;
+                if (text.length > 100) base += 10;
+                return Math.min(60, base);
+            }
+
+            function addXP(amount) {
+                data.user.xp += amount;
+                let leveledUp = false;
+                while (data.user.xp >= data.user.xpToNext) {
+                    data.user.xp -= data.user.xpToNext;
+                    data.user.level += 1;
+                    recalcXpToNext();
+                    leveledUp = true;
+                    // Открываем новый аватар каждые 2 уровня
+                    const avatars = ['warrior_1', 'warrior_2', 'mage_1', 'mage_2', 'elf_1', 'elf_2', 'dragon_1', 'dragon_2',
+                        'knight_1', 'knight_2'
+                    ];
+                    if (data.user.level % 2 === 0 && data.user.level / 2 <= avatars.length) {
+                        const newAvatar = avatars[Math.floor(data.user.level / 2) - 1];
+                        if (newAvatar && !data.user.unlockedAvatars.includes(newAvatar)) {
+                            data.user.unlockedAvatars.push(newAvatar);
+                            data.user.avatar.base = newAvatar;
+                        }
+                    }
+                    // Проверяем достижения
+                    checkAchievements();
+                    sound.play('levelup');
+                    showToast(`🎉 УРОВЕНЬ ${data.user.level}! Вы стали сильнее!`, 'success', 4000);
+                    // Анимация аватара
+                    const avatarEl = document.getElementById('avatarContainer');
+                    avatarEl.classList.remove('level-up');
+                    void avatarEl.offsetWidth;
+                    avatarEl.classList.add('level-up');
+                }
+                if (amount > 0 && !leveledUp) {
+                    sound.play('xp');
+                }
+                saveData();
+                updateUI();
+            }
+
+            // ---------- ДОСТИЖЕНИЯ ----------
+            function checkAchievements() {
+                const achieved = data.achievements || [];
+                const allRecords = getAllRecords();
+                const total = allRecords.length;
+                const journalCounts = {};
+                for (let jid in data.journals) {
+                    journalCounts[jid] = data.journals[jid].records.length;
+                }
+                const streak = getTotalStreak();
+
+                const conditions = [
+                    { id: 'first_record', check: () => total >= 1, label: 'Первая запись', icon: 'fa-star' },
+                    { id: 'ten_records', check: () => total >= 10, label: '10 записей', icon: 'fa-medal' },
+                    { id: 'fifty_records', check: () => total >= 50, label: '50 записей', icon: 'fa-crown' },
+                    { id: 'hundred_records', check: () => total >= 100, label: '100 записей!', icon: 'fa-gem' },
+                    { id: 'sport_5', check: () => journalCounts.sport >= 5, label: 'Спортсмен (5)', icon: 'fa-running' },
+                    { id: 'sport_20', check: () => journalCounts.sport >= 20, label: 'Марафонец (20)', icon: 'fa-bolt' },
+                    { id: 'tasks_10', check: () => journalCounts.tasks >= 10, label: 'Организатор (10)', icon: 'fa-tasks' },
+                    { id: 'photo_5', check: () => data.gallery.photos.length >= 5, label: 'Фотограф (5)',
+                    icon: 'fa-camera' },
+                    { id: 'photo_20', check: () => data.gallery.photos.length >= 20, label: 'Фотохудожник (20)',
+                        icon: 'fa-images' },
+                    { id: 'streak_7', check: () => streak >= 7, label: '🔥 Серия 7 дней', icon: 'fa-fire' },
+                    { id: 'streak_30', check: () => streak >= 30, label: '🔥🔥 Серия 30 дней!', icon: 'fa-fire-alt' },
+                    { id: 'goals_3', check: () => data.goals.filter(g => g.completed).length >= 3, label: 'Целеустремлённый (3 цели)',
+                        icon: 'fa-bullseye' },
+                ];
+
+                let newAchievement = false;
+                conditions.forEach(c => {
+                    if (!achieved.includes(c.id) && c.check()) {
+                        achieved.push(c.id);
+                        newAchievement = true;
+                        sound.play('achievement');
+                        showToast(`🏅 Достижение: ${c.label}!`, 'warning', 4000);
+                    }
+                });
+                if (newAchievement) {
+                    data.achievements = achieved;
+                    saveData();
+                    updateUI();
+                }
+            }
+
+            // ---------- АВАТАРЫ ----------
+            const AVATAR_IMAGES = {
+                warrior_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=warrior1&backgroundColor=6c5ce7',
+                warrior_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=warrior2&backgroundColor=6c5ce7',
+                mage_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mage1&backgroundColor=a29bfe',
+                mage_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mage2&backgroundColor=a29bfe',
+                elf_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=elf1&backgroundColor=00b894',
+                elf_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=elf2&backgroundColor=00b894',
+                dragon_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dragon1&backgroundColor=e17055',
+                dragon_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dragon2&backgroundColor=e17055',
+                knight_1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=knight1&backgroundColor=fdcb6e',
+                knight_2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=knight2&backgroundColor=fdcb6e',
+            };
+
+            function getAvatarUrl(id) {
+                return AVATAR_IMAGES[id] || AVATAR_IMAGES.warrior_1;
+            }
+
+            // ---------- ОБНОВЛЕНИЕ UI ----------
+            function updateUI() {
+                // XP бар
+                const xpFill = document.getElementById('xpBarFill');
+                const pct = Math.min(100, (data.user.xp / data.user.xpToNext) * 100);
+                xpFill.style.width = pct + '%';
+                document.getElementById('userLevelDisplay').textContent = 'Ур. ' + data.user.level;
+
+                // Профиль
+                document.getElementById('profileName').textContent = data.user.name;
+                document.getElementById('profileLevel').textContent = data.user.level;
+                document.getElementById('profileXp').textContent = data.user.xp;
+                document.getElementById('profileXpMax').textContent = data.user.xpToNext;
+                document.getElementById('statRecords').textContent = getTotalRecords();
+                document.getElementById('statGoals').textContent = data.goals.length;
+                document.getElementById('statPhotos').textContent = getTotalPhotos();
+                const achievements = data.achievements || [];
+                document.getElementById('statAchievements').textContent = achievements.length;
+                const streak = getTotalStreak();
+                document.getElementById('profileStreak').textContent = `🔥 ${streak} дней`;
+
+                // Аватар
+                const avatarUrl = getAvatarUrl(data.user.avatar.base);
+                const container = document.getElementById('avatarContainer');
+                container.style.backgroundImage = `url(${avatarUrl})`;
+                document.getElementById('avatarLevelBadge').textContent = data.user.level;
+
+                // Эффекты
+                const effects = data.user.avatar.effects || [];
+                document.getElementById('effectGlow').style.display = effects.includes('glow') ? 'block' : 'none';
+                document.getElementById('effectCape').style.display = effects.includes('cape') ? 'block' : 'none';
+
+                // Достижения
+                const achContainer = document.getElementById('achievementsContainer');
+                const achievementsMap = {
+                    first_record: 'Первая запись',
+                    ten_records: '10 записей',
+                    fifty_records: '50 записей',
+                    hundred_records: '100 записей!',
+                    sport_5: 'Спортсмен (5)',
+                    sport_20: 'Марафонец (20)',
+                    tasks_10: 'Организатор (10)',
+                    photo_5: 'Фотограф (5)',
+                    photo_20: 'Фотохудожник (20)',
+                    streak_7: '🔥 Серия 7 дней',
+                    streak_30: '🔥🔥 Серия 30 дней!',
+                    goals_3: 'Целеустремлённый (3 цели)'
+                };
+                const icons = {
+                    first_record: 'fa-star',
+                    ten_records: 'fa-medal',
+                    fifty_records: 'fa-crown',
+                    hundred_records: 'fa-gem',
+                    sport_5: 'fa-running',
+                    sport_20: 'fa-bolt',
+                    tasks_10: 'fa-tasks',
+                    photo_5: 'fa-camera',
+                    photo_20: 'fa-images',
+                    streak_7: 'fa-fire',
+                    streak_30: 'fa-fire-alt',
+                    goals_3: 'fa-bullseye'
+                };
+                if (achievements.length === 0) {
+                    achContainer.innerHTML = '<p style="color:var(--text-muted)">Пока нет достижений. Продолжайте заполнять журналы!</p>';
+                } else {
+                    achContainer.innerHTML = achievements.map(id =>
+                        `<span class="achieve-item"><i class="fas ${icons[id] || 'fa-award'}"></i> ${achievementsMap[id] || id}</span>`
+                    ).join('');
+                }
+
+                // Обновить календарь, журналы и т.д.
+                renderCalendar(currentMonth, currentYear);
+                renderJournalTabs();
+                renderCurrentJournal();
+                renderGoals();
+                renderGallery();
+                renderCharts();
+                updateChallengeUI();
+            }
+
+            // ---------- КАЛЕНДАРЬ ----------
+            let currentMonth = new Date().getMonth();
+            let currentYear = new Date().getFullYear();
+            let selectedDate = format(new Date(), 'yyyy-MM-dd');
+
+            function renderCalendar(month, year) {
+                const grid = document.getElementById('calendarGrid');
+                const firstDay = new Date(year, month, 1);
+                const start = startOfMonth(firstDay);
+                const end = endOfMonth(firstDay);
+                const days = eachDayOfInterval({ start, end });
+                const firstDayOfWeek = start.getDay();
+
+                grid.innerHTML = '';
+                const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+                const offset = (firstDayOfWeek === 0) ? 6 : firstDayOfWeek - 1;
+                for (let i = 0; i < 7; i++) {
+                    const wd = document.createElement('div');
+                    wd.className = 'weekday';
+                    wd.textContent = weekdays[i];
+                    grid.appendChild(wd);
+                }
+                for (let i = 0; i < offset; i++) {
+                    const empty = document.createElement('div');
+                    empty.className = 'day empty';
+                    grid.appendChild(empty);
+                }
+
+                // Собираем данные о сериях для отображения
+                const streakData = {};
+                for (let jid in data.journals) {
+                    streakData[jid] = calculateStreak(jid);
+                }
+
+                days.forEach(day => {
+                    const dateStr = format(day, 'yyyy-MM-dd');
+                    const div = document.createElement('div');
+                    div.className = 'day';
+                    if (isToday(day)) div.classList.add('today');
+                    if (dateStr === selectedDate) div.classList.add('selected');
+                    const records = getRecordsForDate(dateStr);
+                    if (records.length > 0) div.classList.add('has-record');
+
+                    // Показываем иконку серии если есть
+                    let maxStreak = 0;
+                    for (let jid in data.journals) {
+                        const s = calculateStreak(jid);
+                        if (s > maxStreak) maxStreak = s;
+                    }
+                    if (maxStreak >= 7 && records.length > 0) {
+                        const badge = document.createElement('span');
+                        badge.className = 'streak-indicator';
+                        badge.textContent = '🔥';
+                        div.appendChild(badge);
+                    }
+
+                    div.textContent = format(day, 'd');
+                    div.dataset.date = dateStr;
+                    div.addEventListener('click', () => {
+                        selectedDate = dateStr;
+                        renderCalendar(month, year);
+                        renderDayRecords(dateStr);
+                    });
+                    // Свайп поддержка
+                    div.addEventListener('touchstart', (e) => {
+                        // Не мешаем скроллу
+                    }, { passive: true });
+                    grid.appendChild(div);
+                });
+
+                document.getElementById('monthYear').textContent = format(firstDay, 'MMMM yyyy');
+                renderDayRecords(selectedDate);
+            }
+
+            function renderDayRecords(dateStr) {
+                const container = document.getElementById('dayRecordsList');
+                const records = getRecordsForDate(dateStr);
+                if (records.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">📭 Нет записей за этот день</p>';
+                    return;
+                }
+                // Сортировка по времени добавления (новые сверху)
+                records.sort((a, b) => (b.createdAt || b.id).localeCompare(a.createdAt || a.id));
+                container.innerHTML = records.map(r => {
+                    const journal = getJournal(r.journalId);
+                    const icon = journal ? journal.icon : 'fa-book';
+                    return `
+                <div class="record-item">
+                  <div class="record-content">
+                    <div class="record-text">${r.text}</div>
+                    <div class="record-meta">
+                      <span><i class="fas ${icon}"></i> ${journal ? journal.label : '?'}</span>
+                      <span class="xp-badge"><i class="fas fa-star"></i> ${r.xpEarned || 0} XP</span>
+                      <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
+                    </div>
+                    ${r.photos && r.photos.length ? `<div class="record-photos">${r.photos.map(p => `<a href="${p}" data-lightbox="daygal"><img src="${p}" alt="photo" /></a>`).join('')}</div>` : ''}
+                  </div>
+                  <div class="record-actions">
+                    <button class="done-btn ${r.done ? 'done' : ''}" data-id="${r.id}" data-journal="${r.journalId}" title="Выполнено"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
+                    <button class="edit-btn" data-id="${r.id}" data-journal="${r.journalId}" title="Редактировать"><i class="fas fa-pen"></i></button>
+                    <button class="delete-btn" data-id="${r.id}" data-journal="${r.journalId}" title="Удалить"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+
+                // Обработчики
+                container.querySelectorAll('.done-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const jid = btn.dataset.journal;
+                        toggleRecordDone(jid, id);
+                    });
+                });
+                container.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const jid = btn.dataset.journal;
+                        openEditRecordModal(jid, id);
+                    });
+                });
+                container.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const jid = btn.dataset.journal;
+                        if (confirm('Удалить запись?')) deleteRecord(jid, id);
+                    });
+                });
+
+                if (window.SimpleLightbox) {
+                    new SimpleLightbox('.record-photos a', {});
+                }
+            }
+
+            // ---------- ЖУРНАЛЫ ----------
+            let currentJournalId = 'sport';
+
+            function renderJournalTabs() {
+                const container = document.getElementById('journalTabs');
+                container.innerHTML = '';
+                for (let jid in data.journals) {
+                    const j = data.journals[jid];
+                    const streak = calculateStreak(jid);
+                    const tab = document.createElement('div');
+                    tab.className = 'tab' + (jid === currentJournalId ? ' active' : '');
+                    tab.innerHTML = `
+                <i class="fas ${j.icon}"></i> ${j.label}
+                ${streak >= 3 ? `<span class="streak-badge">🔥${streak}</span>` : ''}
+              `;
+                    tab.dataset.jid = jid;
+                    tab.addEventListener('click', () => {
+                        currentJournalId = jid;
+                        renderJournalTabs();
+                        renderCurrentJournal();
+                    });
+                    container.appendChild(tab);
+                }
+            }
+
+            function renderCurrentJournal() {
+                const container = document.getElementById('journalRecordsList');
+                const records = getRecordsForJournal(currentJournalId);
+                if (records.length === 0) {
+                    container.innerHTML =
+                    '<p style="color:var(--text-muted); text-align:center; padding:30px;">📭 В этом журнале пока нет записей</p>';
+                    return;
+                }
+                records.sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || b.id).localeCompare(a.createdAt || a
+                .id));
+                container.innerHTML = records.map(r => {
+                    return `
+                <div class="record-item">
+                  <div class="record-content">
+                    <div class="record-text">${r.text}</div>
+                    <div class="record-meta">
+                      <span><i class="far fa-calendar-alt"></i> ${r.date}</span>
+                      <span class="xp-badge"><i class="fas fa-star"></i> ${r.xpEarned || 0} XP</span>
+                      <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
+                    </div>
+                    ${r.photos && r.photos.length ? `<div class="record-photos">${r.photos.map(p => `<a href="${p}" data-lightbox="journalgal"><img src="${p}" alt="photo" /></a>`).join('')}</div>` : ''}
+                  </div>
+                  <div class="record-actions">
+                    <button class="done-btn ${r.done ? 'done' : ''}" data-id="${r.id}" data-journal="${currentJournalId}" title="Выполнено"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
+                    <button class="edit-btn" data-id="${r.id}" data-journal="${currentJournalId}" title="Редактировать"><i class="fas fa-pen"></i></button>
+                    <button class="delete-btn" data-id="${r.id}" data-journal="${currentJournalId}" title="Удалить"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+
+                container.querySelectorAll('.done-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const jid = btn.dataset.journal;
+                        toggleRecordDone(jid, id);
+                    });
+                });
+                container.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const jid = btn.dataset.journal;
+                        openEditRecordModal(jid, id);
+                    });
+                });
+                container.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const jid = btn.dataset.journal;
+                        if (confirm('Удалить запись?')) deleteRecord(jid, id);
+                    });
+                });
+
+                if (window.SimpleLightbox) {
+                    new SimpleLightbox('.record-photos a', {});
+                }
+            }
+
+            // ---------- ОПЕРАЦИИ С ЗАПИСЯМИ ----------
+            function addRecord(journalId, text, date, photos, done = false) {
+                const xp = calculateXP(text);
+                const record = {
+                    id: generateId(),
+                    date: date || format(new Date(), 'yyyy-MM-dd'),
+                    text: text.trim(),
+                    photos: photos || [],
+                    done: done,
+                    xpEarned: xp,
+                    createdAt: new Date().toISOString()
+                };
+                data.journals[journalId].records.push(record);
+                (photos || []).forEach(url => {
+                    data.gallery.photos.push({
+                        id: generateId(),
+                        url: url,
+                        recordId: record.id,
+                        date: record.date
+                    });
+                });
+                addXP(xp);
+
+                // Проверяем челлендж
+                if (currentChallenge && !currentChallenge.completed &&
+                    currentChallenge.journalId === journalId &&
+                    record.date === format(new Date(), 'yyyy-MM-dd')) {
+                    completeChallenge();
+                }
+
+                saveData();
+                updateUI();
+                renderCurrentJournal();
+                renderDayRecords(selectedDate);
+                renderGoals();
+                renderGallery();
+                renderCharts();
+                showToast(`✅ Запись добавлена! +${xp} XP`, 'success');
+            }
+
+            function updateRecord(journalId, recordId, text, date, photos) {
+                const journal = data.journals[journalId];
+                if (!journal) return;
+                const record = journal.records.find(r => r.id === recordId);
+                if (!record) return;
+                // Удаляем старые фото из галереи
+                if (record.photos) {
+                    record.photos.forEach(url => {
+                        const pidx = data.gallery.photos.findIndex(p => p.url === url && p.recordId === recordId);
+                        if (pidx !== -1) data.gallery.photos.splice(pidx, 1);
+                    });
+                }
+                record.text = text.trim();
+                record.date = date || format(new Date(), 'yyyy-MM-dd');
+                record.photos = photos || [];
+                // Добавляем новые фото в галерею
+                (photos || []).forEach(url => {
+                    data.gallery.photos.push({
+                        id: generateId(),
+                        url: url,
+                        recordId: record.id,
+                        date: record.date
+                    });
+                });
+                saveData();
+                updateUI();
+                renderCurrentJournal();
+                renderDayRecords(selectedDate);
+                renderGallery();
+                renderCharts();
+                showToast('✏️ Запись обновлена', 'info');
+            }
+
+            function deleteRecord(journalId, recordId) {
+                const journal = data.journals[journalId];
+                if (!journal) return;
+                const idx = journal.records.findIndex(r => r.id === recordId);
+                if (idx === -1) return;
+                const record = journal.records[idx];
+                if (record.photos) {
+                    record.photos.forEach(url => {
+                        const pidx = data.gallery.photos.findIndex(p => p.url === url && p.recordId === recordId);
+                        if (pidx !== -1) data.gallery.photos.splice(pidx, 1);
+                    });
+                }
+                journal.records.splice(idx, 1);
+                saveData();
+                updateUI();
+                renderCurrentJournal();
+                renderDayRecords(selectedDate);
+                renderGallery();
+                renderCharts();
+                showToast('🗑️ Запись удалена', 'error');
+            }
+
+            function toggleRecordDone(journalId, recordId) {
+                const journal = data.journals[journalId];
+                if (!journal) return;
+                const record = journal.records.find(r => r.id === recordId);
+                if (!record) return;
+                record.done = !record.done;
+                if (record.done) {
+                    addXP(8);
+                    showToast('✅ Запись выполнена! +8 XP', 'success');
+                }
+                saveData();
+                updateUI();
+                renderCurrentJournal();
+                renderDayRecords(selectedDate);
+                renderGoals();
+                renderCharts();
+            }
+
+            // ---------- РЕДАКТИРОВАНИЕ ЗАПИСИ ----------
+            function openEditRecordModal(journalId, recordId) {
+                const journal = data.journals[journalId];
+                if (!journal) return;
+                const record = journal.records.find(r => r.id === recordId);
+                if (!record) return;
+
+                editingRecordId = recordId;
+                editingRecordJournal = journalId;
+
+                const overlay = document.getElementById('modalOverlay');
+                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-pen"></i> Редактировать запись';
+                document.getElementById('modalText').value = record.text;
+                document.getElementById('modalDate').value = record.date;
+
+                // Заполняем список журналов
+                const select = document.getElementById('modalJournal');
+                select.innerHTML = '';
+                for (let jid in data.journals) {
+                    const opt = document.createElement('option');
+                    opt.value = jid;
+                    opt.textContent = data.journals[jid].label;
+                    if (jid === journalId) opt.selected = true;
+                    select.appendChild(opt);
+                }
+                select.disabled = true; // Не даём менять журнал при редактировании
+
+                // Показываем существующие фото
+                const photosGroup = document.getElementById('modalExistingPhotosGroup');
+                const photosContainer = document.getElementById('modalExistingPhotos');
+                if (record.photos && record.photos.length) {
+                    photosGroup.style.display = 'block';
+                    photosContainer.innerHTML = record.photos.map(p =>
+                        `<div style="position:relative; display:inline-block;">
+                    <img src="${p}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" />
+                    <button type="button" class="remove-photo-btn" style="position:absolute; top:-6px; right:-6px; background:var(--danger); border-radius:50%; width:20px; height:20px; padding:0; font-size:10px; min-height:20px; min-width:20px; box-shadow:none;">×</button>
+                  </div>`
+                    ).join('');
+                    // Обработчики удаления фото
+                    photosContainer.querySelectorAll('.remove-photo-btn').forEach((btn, idx) => {
+                        btn.addEventListener('click', () => {
+                            record.photos.splice(idx, 1);
+                            openEditRecordModal(journalId, recordId);
+                        });
+                    });
+                } else {
+                    photosGroup.style.display = 'none';
+                }
+
+                document.getElementById('modalPhotos').value = '';
+
+                overlay.classList.add('open');
+
+                const saveBtn = document.getElementById('modalSave');
+                const cancelBtn = document.getElementById('modalCancel');
+
+                saveBtn.onclick = () => {
+                    const text = document.getElementById('modalText').value.trim();
+                    if (!text) { showToast('Введите текст записи', 'error'); return; }
+                    const date = document.getElementById('modalDate').value;
+                    const files = document.getElementById('modalPhotos').files;
+                    const photoUrls = [...(record.photos || [])];
+
+                    if (files.length > 0) {
+                        let loaded = 0;
+                        for (let f of files) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                photoUrls.push(e.target.result);
+                                loaded++;
+                                if (loaded === files.length) {
+                                    updateRecord(journalId, recordId, text, date, photoUrls);
+                                    closeModal();
+                                }
+                            };
+                            reader.readAsDataURL(f);
+                        }
+                    } else {
+                        updateRecord(journalId, recordId, text, date, photoUrls);
+                        closeModal();
+                    }
+                };
+                cancelBtn.onclick = closeModal;
+                overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+            }
+
+            // ---------- МОДАЛЬНОЕ ОКНО (запись) ----------
+            function openRecordModal(journalId, date) {
+                editingRecordId = null;
+                editingRecordJournal = null;
+
+                const overlay = document.getElementById('modalOverlay');
+                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Новая запись';
+                document.getElementById('modalText').value = '';
+                document.getElementById('modalDate').value = date || format(new Date(), 'yyyy-MM-dd');
+                document.getElementById('modalPhotos').value = '';
+                document.getElementById('modalExistingPhotosGroup').style.display = 'none';
+
+                const select = document.getElementById('modalJournal');
+                select.innerHTML = '';
+                select.disabled = false;
+                for (let jid in data.journals) {
+                    const opt = document.createElement('option');
+                    opt.value = jid;
+                    opt.textContent = data.journals[jid].label;
+                    if (jid === journalId) opt.selected = true;
+                    select.appendChild(opt);
+                }
+
+                overlay.classList.add('open');
+
+                const saveBtn = document.getElementById('modalSave');
+                const cancelBtn = document.getElementById('modalCancel');
+
+                saveBtn.onclick = () => {
+                    const text = document.getElementById('modalText').value.trim();
+                    if (!text) { showToast('Введите текст записи', 'error'); return; }
+                    const jid = document.getElementById('modalJournal').value;
+                    const date = document.getElementById('modalDate').value;
+                    const files = document.getElementById('modalPhotos').files;
+                    const photoUrls = [];
+
+                    if (files.length > 0) {
+                        let loaded = 0;
+                        for (let f of files) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                photoUrls.push(e.target.result);
+                                loaded++;
+                                if (loaded === files.length) {
+                                    addRecord(jid, text, date, photoUrls);
+                                    closeModal();
+                                }
+                            };
+                            reader.readAsDataURL(f);
+                        }
+                    } else {
+                        addRecord(jid, text, date, []);
+                        closeModal();
+                    }
+                };
+                cancelBtn.onclick = closeModal;
+                overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+            }
+
+            function closeModal() {
+                document.getElementById('modalOverlay').classList.remove('open');
+                editingRecordId = null;
+                editingRecordJournal = null;
+            }
+
+            // ---------- ЦЕЛИ ----------
+            function renderGoals() {
+                const container = document.getElementById('goalsList');
+                if (data.goals.length === 0) {
+                    container.innerHTML =
+                        '<p style="color:var(--text-muted); text-align:center; padding:30px;">🎯 Целей пока нет. Создайте первую!</p>';
+                    return;
+                }
+                container.innerHTML = data.goals.map((goal, index) => {
+                    const progress = Math.min(100, (goal.currentValue / goal.targetValue) * 100);
+                    const completed = goal.completed;
+                    return `
+                <div class="goal-item ${completed ? 'completed' : ''}">
+                  <div class="goal-info">
+                    <div class="goal-title">${completed ? '✅ ' : '🎯 '}${goal.title}</div>
+                    <div class="goal-meta">
+                      Журнал: ${getJournal(goal.journalId)?.label || '?'} ·
+                      Срок: ${goal.deadline || 'без срока'} ·
+                      ${completed ? 'Выполнена!' : `${goal.currentValue}/${goal.targetValue}`}
+                    </div>
+                    <div class="goal-progress-wrap">
+                      <div class="fill" style="width:${progress}%"></div>
+                    </div>
+                  </div>
+                  <div class="goal-actions">
+                    ${!completed ? `<button class="secondary" data-index="${index}" data-action="completeGoal" title="Отметить выполненной"><i class="fas fa-check"></i></button>` : ''}
+                    <button class="secondary" data-index="${index}" data-action="deleteGoal" title="Удалить"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+
+                container.querySelectorAll('[data-action="deleteGoal"]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const idx = parseInt(btn.dataset.index);
+                        if (confirm('Удалить цель?')) {
+                            data.goals.splice(idx, 1);
+                            saveData();
+                            updateUI();
+                            renderGoals();
+                        }
+                    });
+                });
+                container.querySelectorAll('[data-action="completeGoal"]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const idx = parseInt(btn.dataset.index);
+                        const goal = data.goals[idx];
+                        if (goal && !goal.completed) {
+                            goal.completed = true;
+                            addXP(50);
+                            showToast('🎯 Цель выполнена! +50 XP', 'success');
+                            saveData();
+                            updateUI();
+                            renderGoals();
+                        }
+                    });
+                });
+            }
+
+            function addGoal(title, journalId, targetValue, deadline) {
+                const records = getRecordsForJournal(journalId);
+                const currentValue = records.length;
+                const completed = currentValue >= targetValue;
+                const goal = {
+                    id: generateId(),
+                    title: title.trim(),
+                    journalId,
+                    targetValue: parseInt(targetValue) || 1,
+                    currentValue: currentValue,
+                    deadline: deadline || '',
+                    completed: completed,
+                    createdAt: new Date().toISOString()
+                };
+                if (completed) {
+                    addXP(50);
+                    showToast('🎯 Цель сразу выполнена! +50 XP', 'success');
+                }
+                data.goals.push(goal);
+                saveData();
+                updateUI();
+                renderGoals();
+                showToast('✅ Цель создана!', 'success');
+            }
+
+            function updateGoalsProgress() {
+                let anyCompleted = false;
+                data.goals.forEach(goal => {
+                    const records = getRecordsForJournal(goal.journalId);
+                    goal.currentValue = records.length;
+                    if (!goal.completed && goal.currentValue >= goal.targetValue) {
+                        goal.completed = true;
+                        anyCompleted = true;
+                        addXP(50);
+                        showToast(`🎯 Цель "${goal.title}" выполнена! +50 XP`, 'success');
+                    }
+                });
+                if (anyCompleted) {
+                    saveData();
+                    updateUI();
+                    renderGoals();
+                }
+            }
+
+            // ---------- ГАЛЕРЕЯ ----------
+            function renderGallery() {
+                const container = document.getElementById('galleryGrid');
+                const photos = data.gallery.photos;
+                if (photos.length === 0) {
+                    container.innerHTML =
+                    '<p style="color:var(--text-muted); text-align:center; padding:30px;">🖼 Нет загруженных фото</p>';
+                    return;
+                }
+                container.innerHTML = photos.map(p => `
+              <div class="gallery-item">
+                <a href="${p.url}" data-lightbox="gallery">
+                  <img src="${p.url}" alt="Фото" loading="lazy" />
+                  <div class="gallery-overlay">
+                    <span><i class="far fa-calendar-alt"></i> ${p.date || ''}</span>
+                  </div>
+                </a>
+              </div>
+            `).join('');
+                if (window.SimpleLightbox) {
+                    new SimpleLightbox('.gallery-item a', {});
+                }
+            }
+
+            // ---------- ГРАФИКИ ----------
+            let lineChartInstance = null;
+            let pieChartInstance = null;
+
+            function renderCharts() {
+                const now = new Date();
+                const month = now.getMonth();
+                const year = now.getFullYear();
+                const start = startOfMonth(now);
+                const end = endOfMonth(now);
+                const days = eachDayOfInterval({ start, end });
+                const labels = days.map(d => format(d, 'd'));
+                const counts = days.map(d => {
+                    const dateStr = format(d, 'yyyy-MM-dd');
+                    return getRecordsForDate(dateStr).length;
+                });
+                const totalThisMonth = counts.reduce((a, b) => a + b, 0);
+
+                // Линейный график
+                const ctxLine = document.getElementById('lineChart').getContext('2d');
+                if (lineChartInstance) lineChartInstance.destroy();
+                lineChartInstance = new Chart(ctxLine, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Записей',
+                            data: counts,
+                            borderColor: '#6c5ce7',
+                            backgroundColor: 'rgba(108,92,231,0.15)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#6c5ce7',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text-muted)' } },
+                            x: { ticks: { color: 'var(--text-muted)', maxTicksLimit: 15 } }
+                        },
+                        maintainAspectRatio: true
+                    }
+                });
+
+                document.getElementById('lineStats').innerHTML = `
+              <div class="stat-item"><div class="num">${totalThisMonth}</div><div class="lbl">записей за месяц</div></div>
+              <div class="stat-item"><div class="num">${Math.round(totalThisMonth / days.length * 10) / 10 || 0}</div><div class="lbl">в день</div></div>
+              <div class="stat-item"><div class="num">${getTotalRecords()}</div><div class="lbl">всего записей</div></div>
+            `;
+
+                // Круговая диаграмма
+                const journalLabels = [];
+                const journalCounts = [];
+                const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#0984e3', '#fd79a8', '#00cec9'];
+                for (let jid in data.journals) {
+                    const cnt = data.journals[jid].records.length;
+                    if (cnt > 0) {
+                        journalLabels.push(data.journals[jid].label);
+                        journalCounts.push(cnt);
+                    }
+                }
+                const ctxPie = document.getElementById('pieChart').getContext('2d');
+                if (pieChartInstance) pieChartInstance.destroy();
+                if (journalLabels.length === 0) {
+                    pieChartInstance = new Chart(ctxPie, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Нет данных'],
+                            datasets: [{ data: [1], backgroundColor: ['#444'] }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: true, labels: { color: 'var(--text-muted)' } }
+                            },
+                            maintainAspectRatio: true
+                        }
+                    });
+                    document.getElementById('pieStats').innerHTML = '';
+                } else {
+                    pieChartInstance = new Chart(ctxPie, {
+                        type: 'pie',
+                        data: {
+                            labels: journalLabels,
+                            datasets: [{
+                                data: journalCounts,
+                                backgroundColor: colors.slice(0, journalLabels.length),
+                                borderWidth: 2,
+                                borderColor: 'var(--bg)'
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { color: 'var(--text-muted)', padding: 12 }
+                                }
+                            },
+                            maintainAspectRatio: true
+                        }
+                    });
+                    // Находим лучший журнал
+                    const maxIdx = journalCounts.indexOf(Math.max(...journalCounts));
+                    document.getElementById('pieStats').innerHTML = `
+                <div class="stat-item"><div class="num">🏆 ${journalLabels[maxIdx] || ''}</div><div class="lbl">самый активный</div></div>
+                <div class="stat-item"><div class="num">${journalCounts.reduce((a,b) => a+b, 0)}</div><div class="lbl">всего записей</div></div>
+              `;
+                }
+            }
+
+            // ---------- ЭКСПОРТ / ИМПОРТ ----------
+            function exportData() {
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `hero_journal_backup_${format(new Date(), 'yyyy-MM-dd')}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('📦 Данные экспортированы', 'success');
+            }
+
+            function exportCSV() {
+                const records = getAllRecords();
+                if (records.length === 0) {
+                    showToast('Нет записей для экспорта', 'warning');
+                    return;
+                }
+                let csv = 'Дата,Журнал,Текст,Выполнено,XP\n';
+                records.forEach(r => {
+                    const journal = getJournal(r.journalId);
+                    csv +=
+                        `${r.date},${journal ? journal.label : '?'},"${r.text.replace(/"/g, '""')}",${r.done ? 'Да' : 'Нет'},${r.xpEarned || 0}\n`;
+                });
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `journal_export_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('📊 CSV экспортирован', 'success');
+            }
+
+            function importData(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (imported.user && imported.journals) {
+                            data = imported;
+                            // Восстанавливаем структуру
+                            for (let jid in DEFAULT_DATA.journals) {
+                                if (!data.journals[jid]) {
+                                    data.journals[jid] = { ...DEFAULT_DATA.journals[jid], records: [] };
+                                }
+                            }
+                            recalcXpToNext();
+                            saveData();
+                            updateUI();
+                            showToast('✅ Данные импортированы успешно!', 'success');
+                        } else {
+                            showToast('Неверный формат файла', 'error');
+                        }
+                    } catch (err) {
+                        showToast('Ошибка при чтении файла', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            // ---------- НАВИГАЦИЯ ----------
+            function navigateTo(pageId) {
+                document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+                const target = document.getElementById('page-' + pageId);
+                if (target) target.classList.add('active');
+                document.querySelectorAll('nav#mainNav a').forEach(a => {
+                    a.classList.toggle('active', a.dataset.page === pageId);
+                });
+                if (pageId === 'calendar') {
+                    renderCalendar(currentMonth, currentYear);
+                } else if (pageId === 'journals') {
+                    renderJournalTabs();
+                    renderCurrentJournal();
+                } else if (pageId === 'goals') {
+                    renderGoals();
+                } else if (pageId === 'charts') {
+                    renderCharts();
+                } else if (pageId === 'gallery') {
+                    renderGallery();
+                } else if (pageId === 'profile') {
+                    updateUI();
+                }
+                // Обновляем челлендж при любой навигации
+                updateChallengeUI();
+            }
+
+            // ---------- РЕДАКТИРОВАНИЕ ПРОФИЛЯ ----------
+            function editProfile() {
+                const name = prompt('Введите ваше имя:', data.user.name);
+                if (name !== null && name.trim() !== '') {
+                    data.user.name = name.trim();
+                    saveData();
+                    updateUI();
+                    showToast('👤 Имя обновлено', 'info');
+                }
+                // Смена аватара
+                const avatars = data.user.unlockedAvatars || ['warrior_1'];
+                const avatarList = avatars.map(a => a).join(', ');
+                const newAvatar = prompt(`Выберите аватар (доступны: ${avatarList}):`, data.user.avatar.base);
+                if (newAvatar && avatars.includes(newAvatar)) {
+                    data.user.avatar.base = newAvatar;
+                    saveData();
+                    updateUI();
+                    showToast('🔄 Аватар изменён', 'info');
+                }
+                // Эффекты
+                const effects = data.user.avatar.effects || [];
+                const effectStr = effects.length ? effects.join(', ') : 'нет';
+                const newEffect = prompt(`Введите эффекты через запятую (доступны: glow, cape):`, effectStr);
+                if (newEffect !== null) {
+                    const newEffects = newEffect.split(',').map(s => s.trim()).filter(s => ['glow', 'cape'].includes(s));
+                    data.user.avatar.effects = newEffects;
+                    saveData();
+                    updateUI();
+                    showToast('✨ Эффекты обновлены', 'info');
+                }
+            }
+
+            // ---------- МОДАЛЬНОЕ ОКНО (цель) ----------
+            function openGoalModal() {
+                const overlay = document.getElementById('goalModalOverlay');
+                document.getElementById('goalModalTitle').innerHTML = '<i class="fas fa-bullseye"></i> Новая цель';
+                document.getElementById('goalTitleInput').value = '';
+                document.getElementById('goalTargetInput').value = '3';
+                document.getElementById('goalDeadlineInput').value = '';
+                const select = document.getElementById('goalJournalSelect');
+                select.innerHTML = '';
+                for (let jid in data.journals) {
+                    const opt = document.createElement('option');
+                    opt.value = jid;
+                    opt.textContent = data.journals[jid].label;
+                    if (jid === currentJournalId) opt.selected = true;
+                    select.appendChild(opt);
+                }
+                overlay.classList.add('open');
+
+                const saveBtn = document.getElementById('goalModalSave');
+                const cancelBtn = document.getElementById('goalModalCancel');
+
+                saveBtn.onclick = () => {
+                    const title = document.getElementById('goalTitleInput').value.trim();
+                    if (!title) { showToast('Введите название цели', 'error'); return; }
+                    const jid = document.getElementById('goalJournalSelect').value;
+                    const target = parseInt(document.getElementById('goalTargetInput').value) || 1;
+                    const deadline = document.getElementById('goalDeadlineInput').value;
+                    addGoal(title, jid, target, deadline);
+                    closeGoalModal();
+                };
+                cancelBtn.onclick = closeGoalModal;
+                overlay.onclick = (e) => { if (e.target === overlay) closeGoalModal(); };
+            }
+
+            function closeGoalModal() {
+                document.getElementById('goalModalOverlay').classList.remove('open');
+            }
+
+            // ---------- ИНИЦИАЛИЗАЦИЯ ----------
+            function init() {
+                loadData();
+
+                // Установить начальную дату
+                selectedDate = format(new Date(), 'yyyy-MM-dd');
+
+                // Генерация челленджа
+                generateChallenge();
+
+                // Обновить прогресс целей
+                updateGoalsProgress();
+
+                // Навигация по хешу
+                window.addEventListener('hashchange', () => {
+                    const hash = window.location.hash.replace('#', '') || 'calendar';
+                    navigateTo(hash);
+                });
+
+                // Обработчики кнопок навигации
+                document.querySelectorAll('nav#mainNav a').forEach(a => {
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const page = a.dataset.page;
+                        window.location.hash = page;
+                        navigateTo(page);
+                    });
+                });
+
+                // Кнопки переключения месяца
+                document.getElementById('prevMonth').addEventListener('click', () => {
+                    const d = new Date(currentYear, currentMonth, 1);
+                    const newD = subMonths(d, 1);
+                    currentMonth = newD.getMonth();
+                    currentYear = newD.getFullYear();
+                    renderCalendar(currentMonth, currentYear);
+                });
+                document.getElementById('nextMonth').addEventListener('click', () => {
+                    const d = new Date(currentYear, currentMonth, 1);
+                    const newD = addMonths(d, 1);
+                    currentMonth = newD.getMonth();
+                    currentYear = newD.getFullYear();
+                    renderCalendar(currentMonth, currentYear);
+                });
+                document.getElementById('todayBtn').addEventListener('click', () => {
+                    const now = new Date();
+                    currentMonth = now.getMonth();
+                    currentYear = now.getFullYear();
+                    selectedDate = format(now, 'yyyy-MM-dd');
+                    renderCalendar(currentMonth, currentYear);
+                });
+
+                // Добавление записи
+                document.getElementById('addRecordBtn').addEventListener('click', () => {
+                    openRecordModal(currentJournalId, format(new Date(), 'yyyy-MM-dd'));
+                });
+                document.getElementById('addRecordFromDay').addEventListener('click', () => {
+                    openRecordModal(currentJournalId, selectedDate);
+                });
+
+                // Добавление цели
+                document.getElementById('addGoalBtn').addEventListener('click', openGoalModal);
+
+                // Челлендж
+                document.getElementById('challengeCompleteBtn').addEventListener('click', completeChallenge);
+
+                // Тема
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    document.body.classList.toggle('light-theme');
+                    const icon = document.getElementById('themeToggle').querySelector('i');
+                    if (document.body.classList.contains('light-theme')) {
+                        icon.className = 'fas fa-sun';
+                    } else {
+                        icon.className = 'fas fa-moon';
+                    }
+                    saveData();
+                });
+
+                // Профиль
+                document.getElementById('editProfileBtn').addEventListener('click', editProfile);
+                document.getElementById('exportDataBtn').addEventListener('click', exportData);
+                document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+                document.getElementById('importDataBtn').addEventListener('click', () => {
+                    document.getElementById('importFileInput').click();
+                });
+                document.getElementById('importFileInput').addEventListener('change', (e) => {
+                    if (e.target.files.length) {
+                        importData(e.target.files[0]);
+                        e.target.value = '';
+                    }
+                });
+
+                // Обновить журнал
+                document.getElementById('refreshJournal').addEventListener('click', () => {
+                    renderCurrentJournal();
+                    showToast('🔄 Обновлено', 'info');
+                });
+
+                // Запись нажатия клавиш в модалке
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        closeGoalModal();
+                    }
+                });
+
+                // Первоначальная загрузка
+                const initialPage = window.location.hash.replace('#', '') || 'calendar';
+                navigateTo(initialPage);
+                updateUI();
+
+                // Сохраняем тему при загрузке
+                if (data.settings && data.settings.theme === 'light') {
+                    document.body.classList.add('light-theme');
+                    document.querySelector('#themeToggle i').className = 'fas fa-sun';
+                }
+
+                showToast('⚔️ Добро пожаловать, Герой!', 'info', 3000);
+            }
+
+            // Запуск
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
             } else {
-              alert('Неверный формат файла.');
+                init();
             }
-          } catch (err) {
-            alert('Ошибка при чтении файла.');
-          }
-        };
-        reader.readAsText(file);
-      }
 
-      // ---------- РЕДАКТИРОВАНИЕ ПРОФИЛЯ ----------
-      function editProfile() {
-        const name = prompt('Введите ваше имя:', data.user.name);
-        if (name !== null && name.trim() !== '') {
-          data.user.name = name.trim();
-          saveData();
-          updateUI();
-        }
-        // Смена аватара (из разблокированных)
-        const avatars = data.user.unlockedAvatars || ['warrior_1'];
-        let choices = avatars.map(a => `${a}`).join(', ');
-        const newAvatar = prompt(`Выберите аватар (доступны: ${choices}):`, data.user.avatar.base);
-        if (newAvatar && avatars.includes(newAvatar)) {
-          data.user.avatar.base = newAvatar;
-          saveData();
-          updateUI();
-        }
-        // Эффекты (вкл/выкл)
-        const effects = data.user.avatar.effects || [];
-        let effectStr = effects.length ? effects.join(', ') : 'нет';
-        const newEffect = prompt(`Введите эффекты через запятую (доступны: glow, cape):`, effectStr);
-        if (newEffect !== null) {
-          const newEffects = newEffect.split(',').map(s => s.trim()).filter(s => ['glow', 'cape'].includes(s));
-          data.user.avatar.effects = newEffects;
-          saveData();
-          updateUI();
-        }
-      }
-
-      // ---------- ИНИЦИАЛИЗАЦИЯ ----------
-      function init() {
-        loadData();
-        // Установить начальную дату
-        selectedDate = format(new Date(), 'yyyy-MM-dd');
-        // Обновить прогресс целей
-        updateGoalsProgress();
-        // Навигация по хешу
-        window.addEventListener('hashchange', () => {
-          const hash = window.location.hash.replace('#', '') || 'calendar';
-          navigateTo(hash);
-        });
-        // Обработчики кнопок навигации
-        document.querySelectorAll('nav#mainNav a').forEach(a => {
-          a.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page = a.dataset.page;
-            window.location.hash = page;
-            navigateTo(page);
-          });
-        });
-        // Кнопки переключения месяца
-        document.getElementById('prevMonth').addEventListener('click', () => {
-          const d = new Date(currentYear, currentMonth, 1);
-          const newD = subMonths(d, 1);
-          currentMonth = newD.getMonth();
-          currentYear = newD.getFullYear();
-          renderCalendar(currentMonth, currentYear);
-        });
-        document.getElementById('nextMonth').addEventListener('click', () => {
-          const d = new Date(currentYear, currentMonth, 1);
-          const newD = addMonths(d, 1);
-          currentMonth = newD.getMonth();
-          currentYear = newD.getFullYear();
-          renderCalendar(currentMonth, currentYear);
-        });
-        // Добавление записи
-        document.getElementById('addRecordBtn').addEventListener('click', () => {
-          openRecordModal(currentJournalId, format(new Date(), 'yyyy-MM-dd'));
-        });
-        // Добавление цели
-        document.getElementById('addGoalBtn').addEventListener('click', openGoalModal);
-        // Тема
-        document.getElementById('themeToggle').addEventListener('click', () => {
-          document.body.classList.toggle('light-theme');
-          const icon = document.getElementById('themeToggle').querySelector('i');
-          if (document.body.classList.contains('light-theme')) {
-            icon.className = 'fas fa-sun';
-          } else {
-            icon.className = 'fas fa-moon';
-          }
-        });
-        // Профиль
-        document.getElementById('editProfileBtn').addEventListener('click', editProfile);
-        document.getElementById('exportDataBtn').addEventListener('click', exportData);
-        document.getElementById('importDataBtn').addEventListener('click', () => {
-          document.getElementById('importFileInput').click();
-        });
-        document.getElementById('importFileInput').addEventListener('change', (e) => {
-          if (e.target.files.length) {
-            importData(e.target.files[0]);
-            e.target.value = '';
-          }
-        });
-        // Обновить журнал (кнопка)
-        document.getElementById('refreshJournal').addEventListener('click', () => {
-          renderCurrentJournal();
-        });
-
-        // Первоначальная загрузка
-        const initialPage = window.location.hash.replace('#', '') || 'calendar';
-        navigateTo(initialPage);
-        // Обновить UI полностью
-        updateUI();
-        // Автоматическое обновление целей при добавлении записей (уже в addRecord)
-        // Периодическое обновление графиков (можно по таймеру, но не нужно)
-      }
-
-      // Запуск после загрузки DOM
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-      } else {
-        init();
-      }
-
-    })();
-  </script>
+        })();
+    </script>
 </body>
 </html>
