@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FlowPlan — Планировщик</title>
+    <title>FlowPlan</title>
     <style>
         /* =============================================================
            БАЗА
@@ -17,34 +17,33 @@
 
         :root {
             --primary: #5B6AF0;
-            --primary-light: #EEF1FF;
+            --primary-light: rgba(91, 106, 240, 0.08);
             --primary-dark: #4A56D4;
-            --bg: #F4F6FA;
+            --bg: #F5F6FA;
             --card-bg: #FFFFFF;
             --text: #1A1A2E;
             --text-secondary: #6B7280;
             --text-light: #9CA3AF;
-            --border: #E5E7EB;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.08);
-            --radius: 20px;
-            --radius-sm: 12px;
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --border: #EDEDF0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --radius: 14px;
+            --radius-sm: 10px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
             --gradient: linear-gradient(135deg, #5B6AF0, #8B9CF7);
-            --sidebar-width: 280px;
         }
 
         [data-theme="dark"] {
-            --bg: #0F0F1A;
+            --bg: #11111D;
             --card-bg: #1A1A2E;
             --text: #EAEAEA;
             --text-secondary: #9CA3AF;
             --text-light: #6B7280;
             --border: rgba(255, 255, 255, 0.06);
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
         }
 
         body {
@@ -54,7 +53,7 @@
             transition: background var(--transition), color var(--transition);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* =============================================================
@@ -64,234 +63,9 @@
             max-width: 480px;
             margin: 0 auto;
             min-height: 100vh;
-            padding-bottom: 80px;
+            padding: 0 16px 90px;
             background: var(--bg);
             transition: background var(--transition);
-            position: relative;
-        }
-
-        /* =============================================================
-           САЙДБАР
-           ============================================================= */
-        .sidebar-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 150;
-            display: none;
-            opacity: 0;
-            transition: opacity var(--transition);
-        }
-
-        .sidebar-overlay.open {
-            display: block;
-            opacity: 1;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            max-width: 85vw;
-            background: var(--card-bg);
-            border-right: 1px solid var(--border);
-            z-index: 200;
-            transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow-y: auto;
-            padding: 20px 16px 80px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar.open {
-            transform: translateX(0);
-        }
-
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 16px;
-        }
-
-        .sidebar-header h2 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .sidebar-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            background: var(--border);
-            color: var(--text-secondary);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sidebar-close:hover {
-            background: var(--text-secondary);
-            color: #fff;
-        }
-
-        .sidebar-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            background: var(--primary-light);
-            margin-bottom: 16px;
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-
-        .sidebar-profile:hover {
-            transform: scale(1.01);
-        }
-
-        .sidebar-profile .avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: #fff;
-            flex-shrink: 0;
-        }
-
-        .sidebar-profile .info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .sidebar-profile .info .name {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .sidebar-profile .info .level {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .sidebar-section {
-            margin-bottom: 16px;
-        }
-
-        .sidebar-section .section-title {
-            font-size: 0.65rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-light);
-            padding: 8px 12px 4px;
-        }
-
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all var(--transition);
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-family: inherit;
-            font-size: 0.9rem;
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-        }
-
-        .sidebar-item:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .sidebar-item.active {
-            background: var(--primary-light);
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .sidebar-item .icon {
-            font-size: 1.2rem;
-            width: 28px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .sidebar-item .badge {
-            margin-left: auto;
-            background: var(--border);
-            color: var(--text-secondary);
-            font-size: 0.6rem;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        .sidebar-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 8px 12px;
-        }
-
-        .sidebar-footer {
-            margin-top: auto;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
-        }
-
-        /* =============================================================
-           БУРГЕР
-           ============================================================= */
-        .burger-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text);
-            box-shadow: var(--shadow);
-            flex-shrink: 0;
-        }
-
-        .burger-btn:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .burger-btn:active {
-            transform: scale(0.93);
         }
 
         /* =============================================================
@@ -299,18 +73,18 @@
            ============================================================= */
         .view {
             display: none;
-            animation: fadeSlide 0.25s ease;
-            padding: 16px;
+            animation: fadeIn 0.2s ease;
+            padding-top: 12px;
         }
 
         .view.active {
             display: block;
         }
 
-        @keyframes fadeSlide {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: translateY(6px);
             }
             to {
                 opacity: 1;
@@ -319,15 +93,165 @@
         }
 
         /* =============================================================
+           ШАПКА
+           ============================================================= */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-left .greeting {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .header-left h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .header-actions button {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header-actions button:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .header-actions button:active {
+            transform: scale(0.94);
+        }
+
+        /* =============================================================
+           НАВИГАЦИЯ (МИНИМАЛИСТИЧНАЯ)
+           ============================================================= */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 6px 0 var(--safe-bottom);
+            z-index: 100;
+            display: flex;
+            justify-content: space-around;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            padding: 6px 12px;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 0.55rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+            letter-spacing: 0.2px;
+            text-transform: uppercase;
+            min-width: 44px;
+        }
+
+        .bottom-nav .nav-item .nav-icon {
+            font-size: 1.3rem;
+            transition: transform var(--transition);
+            line-height: 1;
+        }
+
+        .bottom-nav .nav-item .nav-label {
+            opacity: 0.7;
+            font-size: 0.5rem;
+        }
+
+        .bottom-nav .nav-item.active {
+            color: var(--primary);
+        }
+
+        .bottom-nav .nav-item.active .nav-icon {
+            transform: scale(1.05);
+        }
+
+        .bottom-nav .nav-item.active::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 2.5px;
+            border-radius: 2px;
+            background: var(--gradient);
+        }
+
+        .bottom-nav .nav-item .nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            background: #EF4444;
+            color: #fff;
+            font-size: 0.5rem;
+            font-weight: 600;
+            padding: 1px 5px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* =============================================================
            КАРТОЧКИ
            ============================================================= */
         .card {
             background: var(--card-bg);
             border-radius: var(--radius);
-            padding: 16px 20px;
+            padding: 16px 18px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             transition: all var(--transition);
+        }
+
+        .card-sm {
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
         }
 
         /* =============================================================
@@ -337,7 +261,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             padding: 10px 20px;
             border: none;
             border-radius: 50px;
@@ -351,16 +275,16 @@
         .btn-primary {
             background: var(--gradient);
             color: #fff;
-            box-shadow: 0 4px 16px rgba(91, 106, 240, 0.25);
+            box-shadow: 0 2px 12px rgba(91, 106, 240, 0.2);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(91, 106, 240, 0.35);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(91, 106, 240, 0.3);
         }
 
         .btn-primary:active {
-            transform: scale(0.96);
+            transform: scale(0.97);
         }
 
         .btn-secondary {
@@ -374,19 +298,19 @@
         }
 
         .btn-danger {
-            background: rgba(239, 68, 68, 0.08);
+            background: rgba(239, 68, 68, 0.06);
             color: #EF4444;
-            border: 1px solid rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.1);
         }
 
         .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.15);
+            background: rgba(239, 68, 68, 0.12);
         }
 
         .btn-ghost {
             background: transparent;
             color: var(--text-secondary);
-            padding: 6px 12px;
+            padding: 6px 10px;
             font-size: 0.75rem;
         }
 
@@ -398,14 +322,14 @@
             position: fixed;
             bottom: 88px;
             right: 24px;
-            width: 56px;
-            height: 56px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             background: var(--gradient);
             color: #fff;
             border: none;
-            font-size: 28px;
-            box-shadow: 0 4px 20px rgba(91, 106, 240, 0.3);
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(91, 106, 240, 0.25);
             cursor: pointer;
             transition: all var(--transition);
             z-index: 50;
@@ -415,479 +339,12 @@
         }
 
         .fab:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 32px rgba(91, 106, 240, 0.4);
+            transform: scale(1.04);
+            box-shadow: 0 6px 28px rgba(91, 106, 240, 0.35);
         }
 
         .fab:active {
             transform: scale(0.93);
-        }
-
-        /* =============================================================
-           ВЕРХНЯЯ ПАНЕЛЬ
-           ============================================================= */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0 12px;
-            margin-bottom: 12px;
-        }
-
-        .top-bar .left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 0;
-        }
-
-        .top-bar .left h1 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .top-bar .greeting {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-
-        .top-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .top-actions button {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            box-shadow: var(--shadow);
-            flex-shrink: 0;
-        }
-
-        .top-actions button:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        /* =============================================================
-           КАЛЕНДАРЬ: РЕЖИМЫ
-           ============================================================= */
-        .calendar-modes {
-            display: flex;
-            gap: 4px;
-            background: var(--card-bg);
-            border-radius: var(--radius-sm);
-            padding: 4px;
-            border: 1px solid var(--border);
-            margin-bottom: 16px;
-            overflow-x: auto;
-        }
-
-        .calendar-modes .mode-btn {
-            flex: 1;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 8px;
-            background: transparent;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-            white-space: nowrap;
-            min-width: 44px;
-        }
-
-        .calendar-modes .mode-btn.active {
-            background: var(--gradient);
-            color: #fff;
-            box-shadow: 0 2px 12px rgba(91, 106, 240, 0.25);
-        }
-
-        .calendar-modes .mode-btn:hover:not(.active) {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        /* =============================================================
-           КАЛЕНДАРЬ: ДЕНЬ
-           ============================================================= */
-        .day-schedule {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .day-schedule .hour-block {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 6px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .day-schedule .hour-block .hour-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            min-width: 44px;
-            padding-top: 2px;
-        }
-
-        .day-schedule .hour-block .hour-events {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .day-schedule .hour-block .hour-events .event-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
-            border-radius: var(--radius-sm);
-            background: var(--primary-light);
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-
-        .day-schedule .hour-block .hour-events .event-item:hover {
-            transform: translateX(4px);
-        }
-
-        .day-schedule .hour-block .hour-events .event-item.done {
-            opacity: 0.5;
-            text-decoration: line-through;
-        }
-
-        .day-schedule .hour-block .hour-events .event-item .event-time {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .day-schedule .hour-block .hour-events .event-item .event-guild {
-            font-size: 0.6rem;
-            padding: 1px 8px;
-            border-radius: 20px;
-            background: var(--card-bg);
-            margin-left: auto;
-        }
-
-        /* =============================================================
-           КАЛЕНДАРЬ: НЕДЕЛЯ
-           ============================================================= */
-        .week-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .week-grid .week-day {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            background: var(--card-bg);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            transition: all var(--transition);
-            cursor: pointer;
-        }
-
-        .week-grid .week-day:hover {
-            box-shadow: var(--shadow-hover);
-            transform: translateX(4px);
-        }
-
-        .week-grid .week-day .day-label {
-            min-width: 80px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .week-grid .week-day .day-label .day-date {
-            font-weight: 400;
-            color: var(--text-secondary);
-            font-size: 0.7rem;
-        }
-
-        .week-grid .week-day .day-tasks {
-            flex: 1;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .week-grid .week-day .day-tasks .task-tag {
-            font-size: 0.6rem;
-            padding: 2px 8px;
-            border-radius: 20px;
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .week-grid .week-day .day-tasks .task-tag.done {
-            opacity: 0.4;
-            text-decoration: line-through;
-        }
-
-        .week-grid .week-day .day-count {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* =============================================================
-           КАЛЕНДАРЬ: МЕСЯЦ
-           ============================================================= */
-        .calendar-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            text-align: center;
-            letter-spacing: 0.5px;
-        }
-
-        .calendar-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all var(--transition);
-            font-size: 0.85rem;
-            font-weight: 500;
-            position: relative;
-            padding: 2px;
-            background: transparent;
-        }
-
-        .calendar-day:hover {
-            background: var(--primary-light);
-        }
-
-        .calendar-day.other-month {
-            opacity: 0.2;
-        }
-
-        .calendar-day.today {
-            background: var(--gradient);
-            color: #fff;
-            font-weight: 700;
-            box-shadow: 0 4px 16px rgba(91, 106, 240, 0.25);
-        }
-
-        .calendar-day .day-dots {
-            display: flex;
-            gap: 2px;
-            margin-top: 2px;
-        }
-
-        .calendar-day .day-dots .dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-        }
-
-        .calendar-day .day-photo {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 0.6rem;
-        }
-
-        .month-nav {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .month-nav button {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            color: var(--text);
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .month-nav button:hover {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
-
-        .month-nav span {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .day-detail {
-            margin-top: 16px;
-        }
-
-        .day-detail h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .day-detail .mini-quest {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
-        }
-
-        .day-detail .mini-quest:last-child {
-            border-bottom: none;
-        }
-
-        .day-detail .mini-quest .guild-tag {
-            font-size: 0.6rem;
-            color: var(--text-secondary);
-            margin-left: auto;
-            background: var(--primary-light);
-            padding: 2px 10px;
-            border-radius: 20px;
-            color: var(--primary);
-        }
-
-        /* =============================================================
-           КАЛЕНДАРЬ: ГОД
-           ============================================================= */
-        .year-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .year-grid .month-card {
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-
-        .year-grid .month-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .year-grid .month-card .month-name {
-            font-weight: 600;
-            font-size: 0.8rem;
-            margin-bottom: 6px;
-        }
-
-        .year-grid .month-card .month-stats {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-        }
-
-        .year-grid .month-card .month-stats span {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-        }
-
-        .year-grid .month-card .month-xp {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-top: 4px;
-        }
-
-        .year-grid .month-card .month-bar {
-            height: 4px;
-            border-radius: 2px;
-            background: var(--border);
-            margin-top: 6px;
-            overflow: hidden;
-        }
-
-        .year-grid .month-card .month-bar .fill {
-            height: 100%;
-            border-radius: 2px;
-            background: var(--gradient);
-            transition: width 0.6s ease;
-        }
-
-        .year-nav {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .year-nav button {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            color: var(--text);
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .year-nav button:hover {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
-
-        .year-nav span {
-            font-weight: 600;
-            font-size: 0.95rem;
         }
 
         /* =============================================================
@@ -896,20 +353,19 @@
         .quest-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .quest-item {
             display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 14px 16px;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
             background: var(--card-bg);
             border-radius: var(--radius-sm);
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             transition: all var(--transition);
-            position: relative;
         }
 
         .quest-item:active {
@@ -917,7 +373,7 @@
         }
 
         .quest-item.done {
-            opacity: 0.5;
+            opacity: 0.45;
         }
 
         .quest-item.done .quest-title {
@@ -925,9 +381,9 @@
         }
 
         .quest-item .checkbox {
-            width: 22px;
-            height: 22px;
-            min-width: 22px;
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
             border-radius: 50%;
             border: 2px solid var(--border);
             cursor: pointer;
@@ -935,135 +391,96 @@
             align-items: center;
             justify-content: center;
             transition: all var(--transition);
-            margin-top: 1px;
             background: var(--bg);
         }
 
         .quest-item .checkbox.checked {
             background: var(--gradient);
             border-color: var(--primary);
-            color: #fff;
         }
 
         .quest-item .checkbox.checked::after {
             content: '✓';
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
             color: #fff;
         }
 
-        .quest-content {
+        .quest-item .quest-content {
             flex: 1;
             min-width: 0;
         }
 
-        .quest-title {
+        .quest-item .quest-title {
             font-weight: 600;
-            font-size: 0.95rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
+            font-size: 0.9rem;
         }
 
-        .quest-tags {
+        .quest-item .quest-meta {
             display: flex;
             flex-wrap: wrap;
             gap: 4px;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
-        .tag {
-            font-size: 0.6rem;
+        .quest-item .quest-meta .tag {
+            font-size: 0.55rem;
             font-weight: 500;
-            padding: 2px 10px;
+            padding: 1px 8px;
             border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .tag-guild {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .tag-time {
             background: var(--border);
             color: var(--text-secondary);
         }
 
-        .tag-habit {
-            background: #D1FAE5;
-            color: #059669;
+        .quest-item .quest-meta .tag-guild {
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
-        .tag-onetime {
-            background: #FEF3C7;
-            color: #D97706;
-        }
-
-        .tag-future {
-            background: #E0E7FF;
-            color: #4F46E5;
-        }
-
-        .tag-photo {
-            background: #E0E7FF;
-            color: #4F46E5;
-        }
-
-        .tag-repeat {
-            background: #FCE7F3;
-            color: #BE185D;
-        }
-
-        .quest-actions {
+        .quest-item .quest-actions {
             display: flex;
-            gap: 4px;
-            align-items: center;
-            margin-left: 4px;
+            gap: 2px;
         }
 
-        .quest-actions button {
-            width: 28px;
-            height: 28px;
+        .quest-item .quest-actions button {
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             border: none;
             background: transparent;
             color: var(--text-secondary);
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: all var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .quest-actions button:hover {
+        .quest-item .quest-actions button:hover {
             background: var(--border);
-            color: var(--text);
         }
 
-        .quest-actions button.danger:hover {
+        .quest-item .quest-actions button.danger:hover {
             background: rgba(239, 68, 68, 0.1);
             color: #EF4444;
         }
 
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 48px 20px;
             color: var(--text-secondary);
         }
 
         .empty-state .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 16px;
+            font-size: 3rem;
+            margin-bottom: 12px;
             opacity: 0.3;
         }
 
         .empty-state p {
-            font-size: 1rem;
-            margin-bottom: 16px;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
         }
 
         /* =============================================================
@@ -1072,13 +489,13 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             display: none;
             align-items: flex-end;
             justify-content: center;
-            z-index: 300;
+            z-index: 200;
             padding: 20px;
         }
 
@@ -1091,18 +508,18 @@
             border-radius: var(--radius) var(--radius) 0 0;
             max-width: 480px;
             width: 100%;
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
-            padding: 24px 20px 32px;
-            animation: modalSlide 0.3s ease;
+            padding: 20px 18px 28px;
+            animation: slideUp 0.25s ease;
             border: 1px solid var(--border);
             border-bottom: none;
         }
 
-        @keyframes modalSlide {
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -1114,22 +531,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .modal-header h3 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
         }
 
         .modal-close {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             border: none;
             background: var(--border);
             color: var(--text-secondary);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all var(--transition);
             display: flex;
@@ -1145,17 +562,17 @@
         .modal form {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
         .modal .form-group {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
         }
 
         .modal .form-group label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--text-secondary);
         }
@@ -1163,10 +580,10 @@
         .modal input,
         .modal select,
         .modal textarea {
-            padding: 12px 14px;
+            padding: 10px 12px;
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             background: var(--bg);
             color: var(--text);
             font-family: inherit;
@@ -1179,50 +596,50 @@
         .modal textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(91, 106, 240, 0.1);
+            box-shadow: 0 0 0 3px rgba(91, 106, 240, 0.08);
         }
 
         .modal textarea {
             resize: vertical;
-            min-height: 80px;
+            min-height: 60px;
         }
 
         .modal .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
         }
 
         .modal .form-check {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 4px 0;
+            gap: 8px;
+            padding: 2px 0;
         }
 
         .modal .form-check input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             accent-color: var(--primary);
             cursor: pointer;
         }
 
         .modal .form-check label {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             cursor: pointer;
         }
 
         .modal .form-hint {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-light);
             margin-top: 2px;
         }
 
         .modal .btn-row {
             display: flex;
-            gap: 10px;
-            margin-top: 8px;
+            gap: 8px;
+            margin-top: 6px;
         }
 
         .modal .btn-row button {
@@ -1244,127 +661,156 @@
         }
 
         /* =============================================================
-           ГАЛЕРЕЯ
+           КАЛЕНДАРЬ
            ============================================================= */
-        .gallery-grid {
+        .calendar-modes {
+            display: flex;
+            gap: 4px;
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            border: 1px solid var(--border);
+            margin-bottom: 14px;
+        }
+
+        .calendar-modes .mode-btn {
+            flex: 1;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .calendar-modes .mode-btn.active {
+            background: var(--gradient);
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(91, 106, 240, 0.2);
+        }
+
+        .calendar-modes .mode-btn:hover:not(.active) {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .calendar-header {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-size: 0.8rem;
+            font-weight: 500;
+            position: relative;
+            background: transparent;
+        }
+
+        .calendar-day:hover {
+            background: var(--primary-light);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.2;
+        }
+
+        .calendar-day.today {
+            background: var(--gradient);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 2px 12px rgba(91, 106, 240, 0.2);
+        }
+
+        .calendar-day .day-dots {
+            display: flex;
+            gap: 2px;
+            margin-top: 1px;
+        }
+
+        .calendar-day .day-dots .dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        .calendar-day .day-photo {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 0.5rem;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
 
-        .gallery-item {
-            position: relative;
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-            aspect-ratio: 1;
-            background: var(--border);
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-
-        .gallery-item:hover {
-            transform: scale(1.02);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .gallery-item .gallery-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.4));
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 10px;
-            opacity: 0;
-            transition: all var(--transition);
-        }
-
-        .gallery-item:hover .gallery-overlay {
-            opacity: 1;
-        }
-
-        .gallery-item .gallery-overlay .date {
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .gallery-item .gallery-overlay .caption {
-            font-size: 0.75rem;
-            color: #fff;
-            font-weight: 500;
-        }
-
-        .gallery-empty {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-            grid-column: 1/-1;
-        }
-
-        .gallery-empty .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 12px;
-            opacity: 0.3;
-        }
-
-        /* =============================================================
-           ФИЛЬТРЫ
-           ============================================================= */
-        .filter-bar {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            width: 36px;
-            height: 36px;
+        .month-nav button {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            border: 2px solid transparent;
+            border: 1px solid var(--border);
             background: var(--card-bg);
+            color: var(--text);
+            font-size: 1rem;
             cursor: pointer;
-            font-size: 0.95rem;
             transition: all var(--transition);
             font-family: inherit;
-            box-shadow: var(--shadow);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .filter-btn.active {
-            border-color: var(--primary);
-            background: var(--gradient);
+        .month-nav button:hover {
+            background: var(--primary);
             color: #fff;
-            box-shadow: 0 4px 16px rgba(91, 106, 240, 0.25);
+            border-color: var(--primary);
         }
 
-        .filter-btn:hover {
-            transform: scale(1.06);
+        .month-nav span {
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
         /* =============================================================
            ПРОФИЛЬ
            ============================================================= */
-        .profile-view {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
         .profile-cover {
             width: 100%;
-            height: 140px;
+            height: 110px;
             border-radius: var(--radius) var(--radius) 0 0;
             background: var(--gradient);
             position: relative;
             overflow: hidden;
             cursor: pointer;
+            opacity: 0.6;
         }
 
         .profile-cover img {
@@ -1378,22 +824,22 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
             font-weight: 500;
         }
 
         .profile-cover .cover-upload {
             position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background: rgba(0, 0, 0, 0.5);
+            bottom: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.4);
             color: #fff;
             border: none;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            font-size: 0.9rem;
+            width: 28px;
+            height: 28px;
+            font-size: 0.8rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -1403,24 +849,23 @@
         }
 
         .profile-avatar-wrapper {
-            position: relative;
-            margin-top: -50px;
-            padding: 0 20px;
             display: flex;
             align-items: flex-end;
-            gap: 16px;
+            gap: 14px;
+            padding: 0 18px;
+            margin-top: -36px;
         }
 
         .profile-avatar {
-            width: 80px;
-            height: 80px;
+            width: 68px;
+            height: 68px;
             border-radius: 50%;
-            border: 4px solid var(--card-bg);
+            border: 3px solid var(--card-bg);
             background: var(--gradient);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             color: #fff;
             cursor: pointer;
             position: relative;
@@ -1443,181 +888,64 @@
             background: rgba(0, 0, 0, 0.5);
             color: #fff;
             border: none;
-            padding: 4px;
-            font-size: 0.6rem;
+            padding: 2px;
+            font-size: 0.5rem;
             cursor: pointer;
             display: none;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
         }
 
         .profile-avatar:hover .avatar-upload {
             display: block;
         }
 
-        .profile-name-wrapper {
+        .profile-name-wrap {
             flex: 1;
             min-width: 0;
-            padding-bottom: 8px;
+            padding-bottom: 4px;
         }
 
-        .profile-name-wrapper .profile-name {
-            font-size: 1.2rem;
+        .profile-name-wrap .name {
+            font-size: 1.1rem;
             font-weight: 700;
         }
 
-        .profile-name-wrapper .profile-title {
-            font-size: 0.75rem;
+        .profile-name-wrap .title {
+            font-size: 0.7rem;
             color: var(--text-secondary);
         }
 
-        .profile-name-wrapper .profile-level {
+        .profile-name-wrap .level {
             display: inline-block;
             background: var(--gradient);
             color: #fff;
-            padding: 2px 14px;
+            padding: 1px 12px;
             border-radius: 50px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 600;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .profile-body {
-            padding: 16px 20px 20px;
+            padding: 16px 18px 18px;
         }
 
         .profile-body .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .profile-body .info-grid .info-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .profile-body .info-grid .info-item label {
-            font-size: 0.6rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            font-weight: 600;
-        }
-
-        .profile-body .info-grid .info-item input {
-            padding: 8px 10px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.9rem;
-            background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
-            width: 100%;
-            margin-top: 2px;
-        }
-
-        .profile-body .info-grid .info-item input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(91, 106, 240, 0.1);
-        }
-
-        .profile-body .bmi-section {
-            background: var(--primary-light);
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .profile-body .bmi-section .bmi-value {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--primary);
-        }
-
-        .profile-body .bmi-section .bmi-status {
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 4px 14px;
-            border-radius: 50px;
-        }
-
-        .bmi-status.normal {
-            background: #D1FAE5;
-            color: #059669;
-        }
-        .bmi-status.underweight {
-            background: #FEF3C7;
-            color: #D97706;
-        }
-        .bmi-status.overweight {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-        .bmi-status.obese {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-
-        .profile-body .weight-journal {
-            margin-bottom: 16px;
-        }
-
-        .profile-body .weight-journal h4 {
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-        }
-
-        .profile-body .weight-journal .weight-entry {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.85rem;
-        }
-
-        .profile-body .weight-journal .weight-entry .date {
-            color: var(--text-secondary);
-        }
-
-        .profile-body .weight-journal .weight-entry .value {
-            font-weight: 600;
-        }
-
-        .profile-body .measurements-section h4 {
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-        }
-
-        .profile-body .measurements-section .measurement-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
             gap: 8px;
+            margin-bottom: 12px;
         }
 
-        .profile-body .measurements-section .measurement-grid .meas-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .profile-body .measurements-section .measurement-grid .meas-item label {
-            font-size: 0.6rem;
+        .profile-body .info-grid .item label {
+            font-size: 0.55rem;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.3px;
             font-weight: 600;
         }
 
-        .profile-body .measurements-section .measurement-grid .meas-item input {
+        .profile-body .info-grid .item input,
+        .profile-body .info-grid .item select {
             padding: 6px 10px;
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
@@ -1626,45 +954,260 @@
             color: var(--text);
             font-family: inherit;
             width: 100%;
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
-        .profile-body .measurements-section .measurement-grid .meas-item input:focus {
+        .profile-body .info-grid .item input:focus,
+        .profile-body .info-grid .item select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(91, 106, 240, 0.1);
         }
 
-        .profile-body .save-btn {
+        .profile-body .bmi-box {
+            background: var(--primary-light);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-body .bmi-box .value {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .profile-body .bmi-box .status {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 50px;
+        }
+
+        .status.normal {
+            background: #D1FAE5;
+            color: #059669;
+        }
+        .status.underweight {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        .status.overweight {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+        .status.obese {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .profile-body .section-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 12px 0 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .profile-body .weight-list .entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+        }
+
+        .profile-body .weight-list .entry .date {
+            color: var(--text-secondary);
+        }
+
+        .profile-body .weight-list .entry .val {
+            font-weight: 600;
+        }
+
+        .profile-body .weight-add {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .profile-body .weight-add input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        .profile-body .weight-add button {
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+        }
+
+        .profile-body .measure-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .profile-body .measure-grid .m-item label {
+            font-size: 0.55rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 600;
+        }
+
+        .profile-body .measure-grid .m-item input {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
             width: 100%;
-            margin-top: 16px;
+            margin-top: 1px;
+        }
+
+        /* =============================================================
+           ГАЛЕРЕЯ
+           ============================================================= */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .gallery-item {
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: var(--border);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.02);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.3));
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 6px 8px;
+            opacity: 0;
+            transition: all var(--transition);
+        }
+
+        .gallery-item:hover .overlay {
+            opacity: 1;
+        }
+
+        .gallery-item .overlay .caption {
+            font-size: 0.65rem;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .gallery-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            grid-column: 1/-1;
+        }
+
+        .gallery-empty .icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            opacity: 0.3;
+        }
+
+        /* =============================================================
+           ФИЛЬТРЫ
+           ============================================================= */
+        .filter-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all var(--transition);
+            font-family: inherit;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-btn.active {
+            border-color: var(--primary);
+            background: var(--gradient);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(91, 106, 240, 0.2);
+        }
+
+        .filter-btn:hover {
+            transform: scale(1.04);
         }
 
         /* =============================================================
            НАСТРОЙКИ
            ============================================================= */
         .settings-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .settings-group h4 {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+            margin-bottom: 8px;
         }
 
         .settings-options {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
-        .settings-options .option-btn {
-            width: 40px;
-            height: 40px;
+        .settings-options .opt {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             border: 2px solid var(--border);
             cursor: pointer;
@@ -1672,48 +1215,48 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1rem;
             background: var(--card-bg);
         }
 
-        .settings-options .option-btn:hover {
-            transform: scale(1.05);
+        .settings-options .opt:hover {
+            transform: scale(1.04);
         }
 
-        .settings-options .option-btn.active {
+        .settings-options .opt.active {
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(91, 106, 240, 0.15);
+            box-shadow: 0 0 0 3px rgba(91, 106, 240, 0.1);
         }
 
-        .settings-options .option-btn .swatch {
-            width: 28px;
-            height: 28px;
+        .settings-options .opt .swatch {
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
         }
 
         .settings-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .settings-actions button {
             flex: 1;
-            min-width: 100px;
+            min-width: 80px;
         }
 
         /* =============================================================
-           ГИЛЬДИИ (КАТЕГОРИИ)
+           ГИЛЬДИИ
            ============================================================= */
         .guild-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
         }
 
         .guild-card {
             text-align: center;
-            padding: 14px;
+            padding: 12px;
             transition: all var(--transition);
         }
 
@@ -1721,34 +1264,34 @@
             transform: scale(0.96);
         }
 
-        .guild-icon {
-            width: 48px;
-            height: 48px;
+        .guild-card .icon {
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
-            margin: 0 auto 6px;
+            font-size: 1.2rem;
+            margin: 0 auto 4px;
         }
 
         .guild-card .name {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 600;
         }
 
         .guild-card .count {
-            font-size: 0.65rem;
+            font-size: 0.55rem;
             color: var(--text-secondary);
         }
 
         .guild-card .color-picker {
-            margin-top: 6px;
+            margin-top: 4px;
         }
 
         .guild-card .color-picker input {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border: 2px solid var(--border);
             border-radius: 50%;
             cursor: pointer;
@@ -1766,24 +1309,25 @@
             transform: translateX(-50%);
             max-width: 400px;
             width: 90%;
-            padding: 12px 20px;
+            padding: 10px 18px;
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
-            z-index: 400;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            z-index: 300;
             text-align: center;
             font-weight: 500;
             display: none;
-            animation: notifSlide 0.3s ease;
-            border-left: 4px solid var(--primary);
+            animation: notifIn 0.25s ease;
+            border-left: 3px solid var(--primary);
             color: var(--text);
+            font-size: 0.9rem;
         }
 
-        @keyframes notifSlide {
+        @keyframes notifIn {
             from {
                 opacity: 0;
-                transform: translate(-50%, -16px) scale(0.95);
+                transform: translate(-50%, -12px) scale(0.96);
             }
             to {
                 opacity: 1;
@@ -1801,7 +1345,12 @@
         @media (min-width: 768px) {
             .app {
                 max-width: 600px;
-                padding: 20px;
+                padding: 0 24px 100px;
+            }
+            .bottom-nav {
+                max-width: 600px;
+                border-radius: 16px 16px 0 0;
+                padding: 8px 0 var(--safe-bottom);
             }
             .fab {
                 right: calc(50% - 300px + 24px);
@@ -1812,35 +1361,235 @@
             .app {
                 max-width: 800px;
             }
+            .bottom-nav {
+                max-width: 800px;
+            }
             .fab {
                 right: calc(50% - 400px + 24px);
             }
         }
 
-        /* =============================================================
-           СКРОЛЛ
-           ============================================================= */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
+        .badge-count {
+            font-size: 0.55rem;
+            color: var(--text-secondary);
             background: var(--border);
-            border-radius: 2px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
+            padding: 1px 8px;
+            border-radius: 20px;
+            font-weight: 500;
         }
 
-        .badge-count {
-            background: var(--border);
+        /* =============================================================
+           КАЛЕНДАРЬ: ДЕНЬ
+           ============================================================= */
+        .day-schedule .hour-block {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .day-schedule .hour-block .hour-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 36px;
+            padding-top: 2px;
+        }
+
+        .day-schedule .hour-block .hour-events {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .day-schedule .hour-block .hour-events .event {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            background: var(--primary-light);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .day-schedule .hour-block .hour-events .event:hover {
+            transform: translateX(3px);
+        }
+
+        .day-schedule .hour-block .hour-events .event.done {
+            opacity: 0.4;
+            text-decoration: line-through;
+        }
+
+        .day-schedule .hour-block .hour-events .event .time {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        .day-schedule .hour-block .hour-events .event .guild {
+            font-size: 0.55rem;
+            padding: 1px 6px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            margin-left: auto;
+        }
+
+        /* =============================================================
+           КАЛЕНДАРЬ: НЕДЕЛЯ
+           ============================================================= */
+        .week-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .week-grid .week-day {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+            cursor: pointer;
+        }
+
+        .week-grid .week-day:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateX(3px);
+        }
+
+        .week-grid .week-day .label {
+            min-width: 60px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .week-grid .week-day .label .date {
+            font-weight: 400;
             color: var(--text-secondary);
             font-size: 0.6rem;
-            padding: 2px 8px;
+        }
+
+        .week-grid .week-day .tasks {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+
+        .week-grid .week-day .tasks .tag {
+            font-size: 0.55rem;
+            padding: 1px 6px;
             border-radius: 20px;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .week-grid .week-day .tasks .tag.done {
+            opacity: 0.3;
+            text-decoration: line-through;
+        }
+
+        .week-grid .week-day .count {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+        }
+
+        /* =============================================================
+           КАЛЕНДАРЬ: ГОД
+           ============================================================= */
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .year-grid .month-card {
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .year-grid .month-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .year-grid .month-card .name {
             font-weight: 600;
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+        }
+
+        .year-grid .month-card .stats {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        .year-grid .month-card .xp {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 3px;
+        }
+
+        .year-grid .month-card .bar {
+            height: 3px;
+            border-radius: 2px;
+            background: var(--border);
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .year-grid .month-card .bar .fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--gradient);
+            transition: width 0.4s ease;
+        }
+
+        .year-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .year-nav button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .year-nav button:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .year-nav span {
+            font-weight: 600;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -1850,83 +1599,19 @@
         <!-- ===== УВЕДОМЛЕНИЕ ===== -->
         <div id="notification" class="notification"></div>
 
-        <!-- ===== САЙДБАР ===== -->
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2>📋 Меню</h2>
-                <button class="sidebar-close" onclick="closeSidebar()">✕</button>
-            </div>
-
-            <div class="sidebar-profile" onclick="switchTab('profile');closeSidebar();">
-                <div class="avatar" id="sidebarAvatar">🧑</div>
-                <div class="info">
-                    <div class="name" id="sidebarName">Игрок</div>
-                    <div class="level">Уровень <span id="sidebarLevel">1</span> · <span id="sidebarXP">0</span> XP</div>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <div class="section-title">Основное</div>
-                <button class="sidebar-item active" data-tab="day" onclick="switchTab('day');closeSidebar();">
-                    <span class="icon">📅</span> Сегодня
-                    <span class="badge" id="sidebarTodayCount">0</span>
-                </button>
-                <button class="sidebar-item" data-tab="calendar" onclick="switchTab('calendar');closeSidebar();">
-                    <span class="icon">📆</span> Календарь
-                </button>
-                <button class="sidebar-item" data-tab="quests" onclick="switchTab('quests');closeSidebar();">
-                    <span class="icon">📋</span> Все задачи
-                    <span class="badge" id="sidebarTotalCount">0</span>
-                </button>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <div class="sidebar-section">
-                <div class="section-title">Контент</div>
-                <button class="sidebar-item" data-tab="gallery" onclick="switchTab('gallery');closeSidebar();">
-                    <span class="icon">🖼️</span> Галерея
-                    <span class="badge" id="sidebarGalleryCount">0</span>
-                </button>
-                <button class="sidebar-item" data-tab="guilds" onclick="switchTab('guilds');closeSidebar();">
-                    <span class="icon">🏷️</span> Категории
-                </button>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <div class="sidebar-section">
-                <div class="section-title">Личное</div>
-                <button class="sidebar-item" data-tab="profile" onclick="switchTab('profile');closeSidebar();">
-                    <span class="icon">👤</span> Профиль
-                </button>
-                <button class="sidebar-item" data-tab="settings" onclick="switchTab('settings');closeSidebar();">
-                    <span class="icon">⚙️</span> Настройки
-                </button>
-            </div>
-
-            <div class="sidebar-footer">
-                <button class="sidebar-item" onclick="openModal();closeSidebar();" style="color:var(--primary);">
-                    <span class="icon">✨</span> Новая задача
-                </button>
-            </div>
-        </nav>
-
         <!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
         <div class="app" id="appContainer">
 
             <!-- ===== ВКЛАДКА: ДЕНЬ ===== -->
             <div id="view-day" class="view active">
-                <div class="top-bar">
-                    <div class="left">
-                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                <div class="header">
+                    <div class="header-left">
                         <div>
                             <div class="greeting" id="greeting">Доброе утро 👋</div>
                             <h1>Сегодня</h1>
                         </div>
                     </div>
-                    <div class="top-actions">
+                    <div class="header-actions">
                         <button id="themeToggle" onclick="toggleTheme()" title="Тема">🌙</button>
                     </div>
                 </div>
@@ -1935,7 +1620,7 @@
                     <div class="empty-state">
                         <div class="empty-icon">🎯</div>
                         <p>Нет задач на сегодня</p>
-                        <button class="btn btn-primary" onclick="openModal()">+ Создать задачу</button>
+                        <button class="btn btn-primary" onclick="openModal()">+ Создать</button>
                     </div>
                 </div>
 
@@ -1944,17 +1629,16 @@
 
             <!-- ===== ВКЛАДКА: КАЛЕНДАРЬ ===== -->
             <div id="view-calendar" class="view">
-                <div class="top-bar">
-                    <div class="left">
-                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
-                        <h1 id="calendarTitle">Календарь</h1>
+                <div class="header">
+                    <div class="header-left">
+                        <h1>Календарь</h1>
                     </div>
-                    <div class="top-actions">
+                    <div class="header-actions">
                         <button onclick="calendarGoToday()" title="Сегодня">📌</button>
                     </div>
                 </div>
 
-                <div class="calendar-modes" id="calendarModes">
+                <div class="calendar-modes">
                     <button class="mode-btn active" data-mode="day" onclick="setCalendarMode('day')">День</button>
                     <button class="mode-btn" data-mode="week" onclick="setCalendarMode('week')">Неделя</button>
                     <button class="mode-btn" data-mode="month" onclick="setCalendarMode('month')">Месяц</button>
@@ -1966,12 +1650,13 @@
 
             <!-- ===== ВКЛАДКА: ЗАДАЧИ ===== -->
             <div id="view-quests" class="view">
-                <div class="top-bar">
-                    <div class="left">
-                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
-                        <h1>Все задачи</h1>
+                <div class="header">
+                    <div class="header-left">
+                        <h1>Задачи</h1>
                     </div>
-                    <button class="btn btn-primary" onclick="openModal()" style="padding:8px 16px;font-size:0.8rem;">+</button>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="openModal()" style="padding:6px 14px;font-size:0.75rem;border-radius:50px;">+</button>
+                    </div>
                 </div>
 
                 <div class="filter-bar" id="questFilters"></div>
@@ -1980,23 +1665,22 @@
 
             <!-- ===== ВКЛАДКА: ГАЛЕРЕЯ ===== -->
             <div id="view-gallery" class="view">
-                <div class="top-bar">
-                    <div class="left">
-                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                <div class="header">
+                    <div class="header-left">
                         <h1>Галерея</h1>
                     </div>
-                    <span class="badge-count" id="galleryCount">0 фото</span>
+                    <span class="badge-count" id="galleryCount">0</span>
                 </div>
                 <div id="galleryGrid" class="gallery-grid"></div>
             </div>
 
             <!-- ===== ВКЛАДКА: ПРОФИЛЬ ===== -->
-            <div id="view-profile" class="view profile-view">
+            <div id="view-profile" class="view">
                 <div class="card" style="padding:0;overflow:hidden;">
                     <!-- Обложка -->
                     <div class="profile-cover" id="profileCover" onclick="document.getElementById('coverInput').click()">
                         <img id="coverPreview" src="" style="display:none;" />
-                        <div class="cover-placeholder" id="coverPlaceholder">📷 Загрузить обложку</div>
+                        <div class="cover-placeholder" id="coverPlaceholder">📷 Обложка</div>
                         <button class="cover-upload">📷</button>
                         <input type="file" id="coverInput" accept="image/*" style="display:none;" onchange="uploadCover(event)" />
                     </div>
@@ -2005,107 +1689,100 @@
                     <div class="profile-avatar-wrapper">
                         <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('avatarInput').click()">
                             <span id="avatarEmoji">🧑</span>
-                            <img id="avatarPreview" src="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                            <img id="avatarPreview" src="" style="display:none;width:100%;height:100%;object-fit:cover;" />
                             <button class="avatar-upload">📷</button>
                             <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)" />
                         </div>
-                        <div class="profile-name-wrapper">
-                            <div class="profile-name" id="profileName">Игрок</div>
-                            <div class="profile-title" id="profileTitle">⭐ Начинающий</div>
-                            <span class="profile-level">Уровень <span id="profileLevelBig">1</span></span>
+                        <div class="profile-name-wrap">
+                            <div class="name" id="profileName">Игрок</div>
+                            <div class="title" id="profileTitle">⭐ Начинающий</div>
+                            <span class="level">Уровень <span id="profileLevelBig">1</span></span>
                         </div>
                     </div>
 
                     <!-- Тело профиля -->
                     <div class="profile-body">
-                        <!-- Информация -->
                         <div class="info-grid">
-                            <div class="info-item">
+                            <div class="item">
                                 <label>Имя</label>
-                                <input id="profileNameInput" placeholder="Ваше имя" />
+                                <input id="profileNameInput" placeholder="Имя" />
                             </div>
-                            <div class="info-item">
+                            <div class="item">
                                 <label>Возраст</label>
                                 <input id="profileAge" type="number" placeholder="25" />
                             </div>
-                            <div class="info-item">
+                            <div class="item">
                                 <label>Пол</label>
                                 <select id="profileGender">
                                     <option value="male">Мужской</option>
                                     <option value="female">Женский</option>
                                 </select>
                             </div>
-                            <div class="info-item">
+                            <div class="item">
                                 <label>Рост (см)</label>
                                 <input id="profileHeight" type="number" placeholder="175" />
                             </div>
-                            <div class="info-item">
+                            <div class="item">
                                 <label>Вес (кг)</label>
                                 <input id="profileWeight" type="number" placeholder="70" />
                             </div>
-                            <div class="info-item">
-                                <label>&nbsp;</label>
-                                <button class="btn btn-primary" onclick="saveProfileInfo()" style="width:100%;padding:8px;">Сохранить</button>
+                            <div class="item" style="display:flex;align-items:flex-end;">
+                                <button class="btn btn-primary" onclick="saveProfileInfo()" style="width:100%;padding:6px;font-size:0.75rem;">Сохранить</button>
                             </div>
                         </div>
 
                         <!-- BMI -->
-                        <div class="bmi-section" id="bmiSection">
+                        <div class="bmi-box">
                             <div>
-                                <div style="font-size:0.7rem;color:var(--text-secondary);">Индекс массы тела</div>
-                                <div class="bmi-value" id="bmiValue">—</div>
+                                <div style="font-size:0.6rem;color:var(--text-secondary);">ИМТ</div>
+                                <div class="value" id="bmiValue">—</div>
                             </div>
-                            <div class="bmi-status" id="bmiStatus">—</div>
+                            <div class="status" id="bmiStatus">—</div>
                         </div>
 
                         <!-- Журнал веса -->
-                        <div class="weight-journal">
-                            <h4>📊 Журнал веса</h4>
-                            <div id="weightJournalList">
-                                <div style="color:var(--text-light);font-size:0.85rem;">Нет записей</div>
-                            </div>
-                            <div style="display:flex;gap:8px;margin-top:8px;">
-                                <input id="newWeight" type="number" placeholder="Вес (кг)" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-family:inherit;" />
-                                <button class="btn btn-secondary" onclick="addWeight()" style="padding:8px 16px;">+</button>
-                            </div>
+                        <div class="section-title">📊 Журнал веса</div>
+                        <div class="weight-list" id="weightJournalList">
+                            <div style="color:var(--text-light);font-size:0.8rem;">Нет записей</div>
+                        </div>
+                        <div class="weight-add">
+                            <input id="newWeight" type="number" placeholder="Вес (кг)" step="0.1" />
+                            <button onclick="addWeight()">+</button>
                         </div>
 
                         <!-- Мерки -->
-                        <div class="measurements-section">
-                            <h4>📏 Мерки</h4>
-                            <div class="measurement-grid">
-                                <div class="meas-item">
-                                    <label>Бицепс</label>
-                                    <input id="measBiceps" type="number" placeholder="см" step="0.5" />
-                                </div>
-                                <div class="meas-item">
-                                    <label>Грудь</label>
-                                    <input id="measChest" type="number" placeholder="см" step="0.5" />
-                                </div>
-                                <div class="meas-item">
-                                    <label>Бедро</label>
-                                    <input id="measThigh" type="number" placeholder="см" step="0.5" />
-                                </div>
-                                <div class="meas-item">
-                                    <label>Талия</label>
-                                    <input id="measWaist" type="number" placeholder="см" step="0.5" />
-                                </div>
-                                <div class="meas-item" style="grid-column:1/-1;">
-                                    <button class="btn btn-secondary" onclick="saveMeasurements()" style="width:100%;padding:8px;">Сохранить мерки</button>
-                                </div>
+                        <div class="section-title">📏 Мерки</div>
+                        <div class="measure-grid">
+                            <div class="m-item">
+                                <label>Бицепс</label>
+                                <input id="measBiceps" type="number" placeholder="см" step="0.5" />
+                            </div>
+                            <div class="m-item">
+                                <label>Грудь</label>
+                                <input id="measChest" type="number" placeholder="см" step="0.5" />
+                            </div>
+                            <div class="m-item">
+                                <label>Бедро</label>
+                                <input id="measThigh" type="number" placeholder="см" step="0.5" />
+                            </div>
+                            <div class="m-item">
+                                <label>Талия</label>
+                                <input id="measWaist" type="number" placeholder="см" step="0.5" />
+                            </div>
+                            <div style="grid-column:1/-1;">
+                                <button class="btn btn-secondary" onclick="saveMeasurements()" style="width:100%;padding:6px;font-size:0.75rem;">Сохранить мерки</button>
                             </div>
                         </div>
 
-                        <button class="btn btn-danger save-btn" onclick="resetData()">🗑️ Сбросить данные</button>
+                        <button class="btn btn-danger" onclick="resetData()" style="width:100%;margin-top:12px;padding:8px;font-size:0.8rem;">🗑️ Сбросить</button>
                     </div>
                 </div>
             </div>
 
             <!-- ===== ВКЛАДКА: НАСТРОЙКИ ===== -->
             <div id="view-settings" class="view">
-                <div class="top-bar">
-                    <div class="left">
-                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                <div class="header">
+                    <div class="header-left">
                         <h1>Настройки</h1>
                     </div>
                 </div>
@@ -2113,44 +1790,43 @@
                 <div class="settings-group">
                     <h4>🎨 Цветовая схема</h4>
                     <div class="settings-options" id="profileOptions">
-                        <button class="option-btn active" data-profile="default" onclick="setProfile('default')" style="background:linear-gradient(135deg,#5B6AF0,#8B9CF7);border-color:#5B6AF0;"></button>
-                        <button class="option-btn" data-profile="ocean" onclick="setProfile('ocean')" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);border-color:#0EA5E9;"></button>
-                        <button class="option-btn" data-profile="sunset" onclick="setProfile('sunset')" style="background:linear-gradient(135deg,#F43F5E,#FB7185);border-color:#F43F5E;"></button>
-                        <button class="option-btn" data-profile="emerald" onclick="setProfile('emerald')" style="background:linear-gradient(135deg,#10B981,#34D399);border-color:#10B981;"></button>
-                        <button class="option-btn" data-profile="purple" onclick="setProfile('purple')" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);border-color:#8B5CF6;"></button>
-                        <button class="option-btn" data-profile="charcoal" onclick="setProfile('charcoal')" style="background:linear-gradient(135deg,#4B5563,#6B7280);border-color:#4B5563;"></button>
+                        <button class="opt active" data-profile="default" onclick="setProfile('default')" style="background:linear-gradient(135deg,#5B6AF0,#8B9CF7);border-color:#5B6AF0;"></button>
+                        <button class="opt" data-profile="ocean" onclick="setProfile('ocean')" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);border-color:#0EA5E9;"></button>
+                        <button class="opt" data-profile="sunset" onclick="setProfile('sunset')" style="background:linear-gradient(135deg,#F43F5E,#FB7185);border-color:#F43F5E;"></button>
+                        <button class="opt" data-profile="emerald" onclick="setProfile('emerald')" style="background:linear-gradient(135deg,#10B981,#34D399);border-color:#10B981;"></button>
+                        <button class="opt" data-profile="purple" onclick="setProfile('purple')" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);border-color:#8B5CF6;"></button>
+                        <button class="opt" data-profile="charcoal" onclick="setProfile('charcoal')" style="background:linear-gradient(135deg,#4B5563,#6B7280);border-color:#4B5563;"></button>
                     </div>
                 </div>
 
                 <div class="settings-group">
                     <h4>🌓 Режим</h4>
                     <div class="settings-options">
-                        <button class="option-btn active" data-theme="light" onclick="setTheme('light')">☀️</button>
-                        <button class="option-btn" data-theme="dark" onclick="setTheme('dark')">🌙</button>
+                        <button class="opt active" data-theme="light" onclick="setTheme('light')">☀️</button>
+                        <button class="opt" data-theme="dark" onclick="setTheme('dark')">🌙</button>
                     </div>
                 </div>
 
                 <div class="settings-group">
                     <h4>⚡ Действия</h4>
                     <div class="settings-actions">
-                        <button class="btn btn-secondary" onclick="exportData()">📤 Экспорт</button>
-                        <button class="btn btn-secondary" onclick="importData()">📥 Импорт</button>
+                        <button class="btn btn-secondary" onclick="exportData()" style="font-size:0.75rem;padding:8px 14px;">📤 Экспорт</button>
+                        <button class="btn btn-secondary" onclick="importData()" style="font-size:0.75rem;padding:8px 14px;">📥 Импорт</button>
                     </div>
-                    <div style="margin-top:10px;">
-                        <button class="btn btn-danger" onclick="resetData()" style="width:100%;">🗑️ Сбросить всё</button>
+                    <div style="margin-top:8px;">
+                        <button class="btn btn-danger" onclick="resetData()" style="width:100%;padding:8px;font-size:0.8rem;">🗑️ Сбросить всё</button>
                     </div>
                 </div>
 
-                <div style="text-align:center;padding:20px 0;color:var(--text-light);font-size:0.7rem;">
-                    FlowPlan v2.0 · Сделано с ❤️
+                <div style="text-align:center;padding:16px 0;color:var(--text-light);font-size:0.65rem;">
+                    FlowPlan v2.0
                 </div>
             </div>
 
             <!-- ===== ВКЛАДКА: КАТЕГОРИИ ===== -->
             <div id="view-guilds" class="view">
-                <div class="top-bar">
-                    <div class="left">
-                        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+                <div class="header">
+                    <div class="header-left">
                         <h1>Категории</h1>
                     </div>
                 </div>
@@ -2159,7 +1835,32 @@
 
         </div>
 
-        <!-- ===== МОДАЛКА СОЗДАНИЯ ===== -->
+        <!-- ===== НАВИГАЦИЯ ===== -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-tab="day" onclick="switchTab('day')">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">День</span>
+            </button>
+            <button class="nav-item" data-tab="calendar" onclick="switchTab('calendar')">
+                <span class="nav-icon">📆</span>
+                <span class="nav-label">Календарь</span>
+            </button>
+            <button class="nav-item" data-tab="quests" onclick="switchTab('quests')">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">Задачи</span>
+                <span class="nav-badge" id="navTotalBadge" style="display:none;">0</span>
+            </button>
+            <button class="nav-item" data-tab="gallery" onclick="switchTab('gallery')">
+                <span class="nav-icon">🖼️</span>
+                <span class="nav-label">Галерея</span>
+            </button>
+            <button class="nav-item" data-tab="profile" onclick="switchTab('profile')">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Профиль</span>
+            </button>
+        </nav>
+
+        <!-- ===== МОДАЛКА ===== -->
         <div id="modal" class="modal-overlay">
             <div class="modal">
                 <div class="modal-header">
@@ -2175,7 +1876,7 @@
                     <div class="form-group">
                         <label>Категория</label>
                         <select id="questGuild" required>
-                            <option value="">Выберите категорию</option>
+                            <option value="">Выберите</option>
                         </select>
                     </div>
 
@@ -2198,72 +1899,69 @@
                         <div class="form-group">
                             <label>Повторять</label>
                             <select id="questRepeat">
-                                <option value="none">Не повторять</option>
+                                <option value="none">Нет</option>
                                 <option value="daily">Каждый день</option>
                                 <option value="weekly">Каждую неделю</option>
-                                <option value="custom">По дням недели</option>
+                                <option value="custom">По дням</option>
                             </select>
                         </div>
                     </div>
 
                     <div id="repeatDaysGroup" class="form-group hidden">
                         <label>Дни недели</label>
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                            <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            <label style="font-size:0.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;">
                                 <input type="checkbox" class="repeat-day" value="1" /> Пн
                             </label>
-                            <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                            <label style="font-size:0.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;">
                                 <input type="checkbox" class="repeat-day" value="2" /> Вт
                             </label>
-                            <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                            <label style="font-size:0.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;">
                                 <input type="checkbox" class="repeat-day" value="3" /> Ср
                             </label>
-                            <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                            <label style="font-size:0.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;">
                                 <input type="checkbox" class="repeat-day" value="4" /> Чт
                             </label>
-                            <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                            <label style="font-size:0.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;">
                                 <input type="checkbox" class="repeat-day" value="5" /> Пт
                             </label>
-                            <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                            <label style="font-size:0.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;">
                                 <input type="checkbox" class="repeat-day" value="6" /> Сб
                             </label>
-                            <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                            <label style="font-size:0.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;">
                                 <input type="checkbox" class="repeat-day" value="0" /> Вс
                             </label>
                         </div>
-                        <div class="form-hint">Выберите дни для повторения</div>
                     </div>
 
                     <div class="form-group">
                         <label>До какого числа</label>
                         <input id="questEndDate" type="date" />
-                        <div class="form-hint">Оставьте пустым для однократной задачи</div>
                     </div>
 
                     <div class="form-group">
                         <label>Заметка</label>
-                        <textarea id="questNote" placeholder="Дополнительная информация..."></textarea>
+                        <textarea id="questNote" placeholder="Дополнительно..."></textarea>
                     </div>
 
                     <div class="form-check">
                         <input id="questHabit" type="checkbox" />
-                        <label for="questHabit">Привычка (формируется за 21 день)</label>
+                        <label for="questHabit">Привычка (21 день)</label>
                     </div>
 
                     <div class="form-check">
                         <input id="questOneTime" type="checkbox" />
-                        <label for="questOneTime">Одноразовая задача</label>
+                        <label for="questOneTime">Одноразовая</label>
                     </div>
 
                     <div class="form-check">
                         <input id="questPhoto" type="checkbox" />
-                        <label for="questPhoto">📸 Добавить фото для галереи</label>
+                        <label for="questPhoto">📸 Добавить фото</label>
                     </div>
 
                     <div id="photoUploadGroup" class="form-group hidden">
-                        <label>Выберите фото</label>
+                        <label>Фото</label>
                         <input id="photoFile" type="file" accept="image/*" />
-                        <div class="form-hint">Фото будет сохранено в галерее</div>
                     </div>
 
                     <div class="btn-row">
@@ -2274,13 +1972,13 @@
             </div>
         </div>
 
-        <!-- ===== МОДАЛКА ПРОСМОТРА ФОТО ===== -->
+        <!-- ===== МОДАЛКА ФОТО ===== -->
         <div id="photoModal" class="modal-overlay" onclick="closePhotoModal()">
             <div class="modal" style="border-radius:var(--radius);max-width:480px;padding:0;overflow:hidden;background:transparent;box-shadow:none;border:none;" onclick="event.stopPropagation();">
                 <img id="photoModalImg" src="" alt="Фото" style="width:100%;border-radius:var(--radius);display:block;" />
-                <div style="background:var(--card-bg);padding:16px 20px;border-radius:0 0 var(--radius) var(--radius);border:1px solid var(--border);border-top:none;">
-                    <div id="photoModalCaption" style="font-weight:500;"></div>
-                    <div id="photoModalDate" style="font-size:0.8rem;color:var(--text-secondary);margin-top:4px;"></div>
+                <div style="background:var(--card-bg);padding:12px 16px;border-radius:0 0 var(--radius) var(--radius);border:1px solid var(--border);border-top:none;">
+                    <div id="photoModalCaption" style="font-weight:500;font-size:0.9rem;"></div>
+                    <div id="photoModalDate" style="font-size:0.7rem;color:var(--text-secondary);margin-top:2px;"></div>
                 </div>
             </div>
         </div>
@@ -2330,9 +2028,6 @@
         let gallery = [];
         let profile = {};
         let currentTab = 'day';
-        let currentMonth = new Date();
-        let currentYear = new Date().getFullYear();
-        let selectedDay = null;
         let filterGuild = null;
         let notificationTimeout = null;
         let currentTheme = 'light';
@@ -2437,51 +2132,14 @@
         }
 
         // ============================================================
-        // ========== САЙДБАР ==========
-        // ============================================================
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('open');
-            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('open');
-            document.getElementById('sidebarOverlay').classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        function updateSidebar() {
-            document.getElementById('sidebarName').textContent = profile.name;
-            document.getElementById('sidebarLevel').textContent = profile.level;
-            document.getElementById('sidebarXP').textContent = profile.totalXP;
-
-            const titleData = getTitle(profile.level);
-            document.getElementById('sidebarAvatar').textContent = titleData.emoji;
-
-            const today = new Date().toISOString().split('T')[0];
-            const todayQuests = quests.filter(q => q.scheduledDate === today);
-            document.getElementById('sidebarTodayCount').textContent = todayQuests.length;
-            document.getElementById('sidebarTotalCount').textContent = quests.length;
-            document.getElementById('sidebarGalleryCount').textContent = gallery.length;
-
-            document.querySelectorAll('.sidebar-item[data-tab]').forEach(el => {
-                el.classList.toggle('active', el.dataset.tab === currentTab);
-            });
-        }
-
-        // ============================================================
-        // ========== ТЕМА И ПРОФИЛЬ ==========
+        // ========== ТЕМА ==========
         // ============================================================
 
         function applyTheme(theme) {
             currentTheme = theme;
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
-            document.querySelectorAll('.option-btn[data-theme]').forEach(el => {
+            document.querySelectorAll('.opt[data-theme]').forEach(el => {
                 el.classList.toggle('active', el.dataset.theme === theme);
             });
             saveTheme();
@@ -2495,6 +2153,10 @@
             applyTheme(theme);
         }
 
+        // ============================================================
+        // ========== ПРОФИЛЬ ЦВЕТА ==========
+        // ============================================================
+
         function applyProfile(profile) {
             currentProfile = profile;
             if (profile === 'default') {
@@ -2502,7 +2164,7 @@
             } else {
                 document.documentElement.setAttribute('data-profile', profile);
             }
-            document.querySelectorAll('.option-btn[data-profile]').forEach(el => {
+            document.querySelectorAll('.opt[data-profile]').forEach(el => {
                 el.classList.toggle('active', el.dataset.profile === profile);
             });
             saveProfileTheme();
@@ -2664,7 +2326,6 @@
         }
 
         function createNextQuest(quest) {
-            const today = new Date();
             let nextDate = new Date(quest.scheduledDate + 'T00:00:00');
             let found = false;
 
@@ -2807,25 +2468,24 @@
 
         function renderCalendar() {
             const container = document.getElementById('calendarContent');
-            document.getElementById('calendarTitle').textContent = 'Календарь';
 
             switch (calendarMode) {
                 case 'day':
-                    renderCalendarDay(container);
+                    renderDayView(container);
                     break;
                 case 'week':
-                    renderCalendarWeek(container);
+                    renderWeekView(container);
                     break;
                 case 'month':
-                    renderCalendarMonth(container);
+                    renderMonthView(container);
                     break;
                 case 'year':
-                    renderCalendarYear(container);
+                    renderYearView(container);
                     break;
             }
         }
 
-        function renderCalendarDay(container) {
+        function renderDayView(container) {
             const date = calendarDate;
             const dateStr = date.toISOString().split('T')[0];
             const dayQuests = quests.filter(q => q.scheduledDate === dateStr)
@@ -2835,21 +2495,19 @@
             const dayLabel = `${dayName}, ${date.getDate()} ${MONTHS_FULL[date.getMonth()]} ${date.getFullYear()}`;
 
             let html = `
-                <div class="top-bar" style="margin-bottom:12px;">
-                    <div class="left">
-                        <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()-1);renderCalendar();">‹</button>
-                        <span style="font-weight:600;">${dayLabel}</span>
-                        <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()+1);renderCalendar();">›</button>
-                    </div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()-1);renderCalendar();">‹</button>
+                    <span style="font-weight:600;font-size:0.95rem;">${dayLabel}</span>
+                    <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()+1);renderCalendar();">›</button>
                 </div>
                 <div class="day-schedule">
             `;
 
             if (dayQuests.length === 0) {
                 html += `
-                    <div class="empty-state" style="padding:40px 20px;">
+                    <div class="empty-state" style="padding:30px 20px;">
                         <div class="empty-icon">📅</div>
-                        <p>Нет задач на этот день</p>
+                        <p style="font-size:0.9rem;">Нет задач</p>
                     </div>
                 `;
             } else {
@@ -2859,8 +2517,6 @@
                     if (!hours[hour]) hours[hour] = [];
                     hours[hour].push(q);
                 });
-
-                const sortedHours = Object.keys(hours).sort();
 
                 for (let h = 0; h < 24; h++) {
                     const hourStr = String(h).padStart(2, '0');
@@ -2877,17 +2533,17 @@
                         questsInHour.forEach(q => {
                             const guild = guilds.find(g => g.id === q.guildId) || { color: '#999', name: 'Без категории' };
                             html += `
-                                <div class="event-item ${q.status === 'done' ? 'done' : ''}" 
+                                <div class="event ${q.status === 'done' ? 'done' : ''}" 
                                      onclick="toggleQuest('${q.id}')"
-                                     style="border-left:3px solid ${guild.color};">
-                                    <span class="event-time">${q.scheduledTime || ''}</span>
+                                     style="border-left:2px solid ${guild.color};">
+                                    <span class="time">${q.scheduledTime || ''}</span>
                                     <span>${q.title}</span>
-                                    <span class="event-guild">${guild.icon} ${guild.name}</span>
+                                    <span class="guild">${guild.icon}</span>
                                 </div>
                             `;
                         });
                     } else {
-                        html += `<div style="font-size:0.7rem;color:var(--text-light);padding:4px 0;">—</div>`;
+                        html += `<div style="font-size:0.6rem;color:var(--text-light);padding:2px 0;">—</div>`;
                     }
 
                     html += `
@@ -2901,7 +2557,7 @@
             container.innerHTML = html;
         }
 
-        function renderCalendarWeek(container) {
+        function renderWeekView(container) {
             const date = calendarDate;
             const dayOfWeek = date.getDay();
             const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -2909,12 +2565,10 @@
             monday.setDate(date.getDate() - mondayOffset);
 
             let html = `
-                <div class="top-bar" style="margin-bottom:12px;">
-                    <div class="left">
-                        <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()-7);renderCalendar();">‹</button>
-                        <span style="font-weight:600;">${monday.getDate()} ${MONTHS_FULL[monday.getMonth()]} — ${new Date(monday).setDate(monday.getDate()+6)} ${MONTHS_FULL[new Date(monday).setDate(monday.getDate())]}</span>
-                        <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()+7);renderCalendar();">›</button>
-                    </div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()-7);renderCalendar();">‹</button>
+                    <span style="font-weight:600;font-size:0.9rem;">${monday.getDate()} ${MONTHS_FULL[monday.getMonth()]} — ${new Date(monday).setDate(monday.getDate()+6)} ${MONTHS_FULL[new Date(monday).setDate(monday.getDate())]}</span>
+                    <button class="btn btn-ghost" onclick="calendarDate.setDate(calendarDate.getDate()+7);renderCalendar();">›</button>
                 </div>
                 <div class="week-grid">
             `;
@@ -2926,38 +2580,35 @@
                 const dayQuests = quests.filter(q => q.scheduledDate === dateStr);
                 const isToday = dateStr === new Date().toISOString().split('T')[0];
 
-                const dayName = WEEKDAYS[i];
-                const dayNum = day.getDate();
-
                 html += `
                     <div class="week-day" onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();" style="${isToday ? 'border-color:var(--primary);' : ''}">
-                        <div class="day-label">
-                            ${dayName}
-                            <div class="day-date">${dayNum} ${MONTHS[day.getMonth()]}</div>
+                        <div class="label">
+                            ${WEEKDAYS[i]}
+                            <div class="date">${day.getDate()} ${MONTHS[day.getMonth()]}</div>
                         </div>
-                        <div class="day-tasks">
+                        <div class="tasks">
                 `;
 
                 if (dayQuests.length === 0) {
-                    html += `<span style="font-size:0.7rem;color:var(--text-light);">—</span>`;
+                    html += `<span style="font-size:0.6rem;color:var(--text-light);">—</span>`;
                 } else {
-                    dayQuests.slice(0, 4).forEach(q => {
+                    dayQuests.slice(0, 3).forEach(q => {
                         const done = q.status === 'done';
                         const guild = guilds.find(g => g.id === q.guildId) || { color: '#999' };
                         html += `
-                            <span class="task-tag ${done ? 'done' : ''}" style="border-left:2px solid ${guild.color};">
+                            <span class="tag ${done ? 'done' : ''}" style="border-left:2px solid ${guild.color};">
                                 ${q.title}
                             </span>
                         `;
                     });
-                    if (dayQuests.length > 4) {
-                        html += `<span class="task-tag" style="background:var(--border);">+${dayQuests.length - 4}</span>`;
+                    if (dayQuests.length > 3) {
+                        html += `<span class="tag" style="background:var(--border);">+${dayQuests.length - 3}</span>`;
                     }
                 }
 
                 html += `
                         </div>
-                        <div class="day-count">${dayQuests.length}</div>
+                        <div class="count">${dayQuests.length}</div>
                     </div>
                 `;
             }
@@ -2966,19 +2617,17 @@
             container.innerHTML = html;
         }
 
-        function renderCalendarMonth(container) {
+        function renderMonthView(container) {
             const year = calendarDate.getFullYear();
             const month = calendarDate.getMonth();
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
 
             let html = `
-                <div class="top-bar" style="margin-bottom:12px;">
-                    <div class="left">
-                        <button class="btn btn-ghost" onclick="calendarDate.setMonth(calendarDate.getMonth()-1);renderCalendar();">‹</button>
-                        <span style="font-weight:600;">${MONTHS_FULL[month]} ${year}</span>
-                        <button class="btn btn-ghost" onclick="calendarDate.setMonth(calendarDate.getMonth()+1);renderCalendar();">›</button>
-                    </div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <button class="btn btn-ghost" onclick="calendarDate.setMonth(calendarDate.getMonth()-1);renderCalendar();">‹</button>
+                    <span style="font-weight:600;font-size:0.95rem;">${MONTHS_FULL[month]} ${year}</span>
+                    <button class="btn btn-ghost" onclick="calendarDate.setMonth(calendarDate.getMonth()+1);renderCalendar();">›</button>
                 </div>
                 <div class="card">
                     <div class="calendar-header">
@@ -3000,7 +2649,7 @@
                 const hasPhoto = gallery.some(g => g.date === dateStr);
                 html += `
                     <div class="calendar-day other-month" onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();">
-                        <span class="day-number">${day}</span>
+                        <span>${day}</span>
                         ${dayQuests.length > 0 ? `<div class="day-dots">${dayQuests.slice(0,3).map(q => {
                             const g = guilds.find(g => g.id === q.guildId) || { color: '#999' };
                             return `<span class="dot" style="background:${g.color}"></span>`;
@@ -3018,9 +2667,9 @@
                 const isToday = dateStr === today;
 
                 html += `
-                    <div class="calendar-day ${isToday ? 'today' : ''} ${dayQuests.length > 0 ? 'has-quests' : ''}" 
+                    <div class="calendar-day ${isToday ? 'today' : ''}" 
                          onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();">
-                        <span class="day-number">${day}</span>
+                        <span>${day}</span>
                         ${dayQuests.length > 0 ? `<div class="day-dots">${dayQuests.slice(0,3).map(q => {
                             const g = guilds.find(g => g.id === q.guildId) || { color: '#999' };
                             return `<span class="dot" style="background:${g.color}"></span>`;
@@ -3038,7 +2687,7 @@
                 const hasPhoto = gallery.some(g => g.date === dateStr);
                 html += `
                     <div class="calendar-day other-month" onclick="calendarDate=new Date('${dateStr}T00:00:00');setCalendarMode('day');renderCalendar();">
-                        <span class="day-number">${day}</span>
+                        <span>${day}</span>
                         ${dayQuests.length > 0 ? `<div class="day-dots">${dayQuests.slice(0,3).map(q => {
                             const g = guilds.find(g => g.id === q.guildId) || { color: '#999' };
                             return `<span class="dot" style="background:${g.color}"></span>`;
@@ -3056,16 +2705,14 @@
             container.innerHTML = html;
         }
 
-        function renderCalendarYear(container) {
+        function renderYearView(container) {
             const year = calendarDate.getFullYear();
 
             let html = `
-                <div class="top-bar" style="margin-bottom:12px;">
-                    <div class="left">
-                        <button class="btn btn-ghost" onclick="calendarDate.setFullYear(calendarDate.getFullYear()-1);renderCalendar();">‹</button>
-                        <span style="font-weight:600;">${year}</span>
-                        <button class="btn btn-ghost" onclick="calendarDate.setFullYear(calendarDate.getFullYear()+1);renderCalendar();">›</button>
-                    </div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <button class="btn btn-ghost" onclick="calendarDate.setFullYear(calendarDate.getFullYear()-1);renderCalendar();">‹</button>
+                    <span style="font-weight:600;font-size:0.95rem;">${year}</span>
+                    <button class="btn btn-ghost" onclick="calendarDate.setFullYear(calendarDate.getFullYear()+1);renderCalendar();">›</button>
                 </div>
                 <div class="year-grid">
             `;
@@ -3080,24 +2727,20 @@
                 const total = monthQuests.length;
                 const done = monthQuests.filter(q => q.status === 'done').length;
                 const planned = monthQuests.filter(q => q.status === 'planned').length;
-                const skipped = monthQuests.filter(q => q.status === 'skipped').length;
                 const xpEarned = monthQuests.filter(q => q.status === 'done').reduce((sum, q) => sum + q.xpEarned, 0);
-
                 const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
 
                 html += `
                     <div class="card month-card" onclick="calendarDate=new Date(${year}, ${month}, 1);setCalendarMode('month');renderCalendar();">
-                        <div class="month-name">${MONTHS_FULL[month]}</div>
-                        <div class="month-stats">
+                        <div class="name">${MONTHS_FULL[month]}</div>
+                        <div class="stats">
                             <span>✅ ${done}</span>
                             <span>📋 ${planned}</span>
-                            <span>⏳ ${skipped}</span>
                         </div>
-                        <div class="month-xp">${xpEarned.toFixed(1)} XP</div>
-                        <div class="month-bar">
+                        <div class="xp">${xpEarned.toFixed(1)} XP</div>
+                        <div class="bar">
                             <div class="fill" style="width:${completionRate}%;"></div>
                         </div>
-                        <div style="font-size:0.6rem;color:var(--text-light);margin-top:4px;">${completionRate}% выполнено</div>
                     </div>
                 `;
             }
@@ -3115,17 +2758,16 @@
             document.querySelectorAll('.view').forEach(view => {
                 view.classList.toggle('active', view.id === 'view-' + tabId);
             });
-            document.querySelectorAll('.sidebar-item[data-tab]').forEach(el => {
+            document.querySelectorAll('.nav-item').forEach(el => {
                 el.classList.toggle('active', el.dataset.tab === tabId);
             });
             if (tabId === 'day') renderDay();
-            if (tabId === 'calendar') { renderCalendar(); }
+            if (tabId === 'calendar') renderCalendar();
             if (tabId === 'quests') renderAllQuests();
             if (tabId === 'gallery') renderGallery();
             if (tabId === 'profile') renderProfile();
             if (tabId === 'guilds') renderGuilds();
             if (tabId === 'settings') renderSettings();
-            updateSidebar();
         }
 
         // ============================================================
@@ -3142,7 +2784,7 @@
             document.getElementById('questPhoto').checked = false;
 
             const select = document.getElementById('questGuild');
-            select.innerHTML = '<option value="">Выберите категорию</option>';
+            select.innerHTML = '<option value="">Выберите</option>';
             guilds.forEach(g => {
                 const opt = document.createElement('option');
                 opt.value = g.id;
@@ -3207,7 +2849,7 @@
                     <div class="empty-state">
                         <div class="empty-icon">🎯</div>
                         <p>Нет задач на сегодня</p>
-                        <button class="btn btn-primary" onclick="openModal()">+ Создать задачу</button>
+                        <button class="btn btn-primary" onclick="openModal()">+ Создать</button>
                     </div>
                 `;
                 return;
@@ -3225,28 +2867,33 @@
                              style="${isFuture ? 'cursor:not-allowed;opacity:0.4;' : ''}">
                         </div>
                         <div class="quest-content">
-                            <div class="quest-title">
-                                <span>${q.title}</span>
-                            </div>
-                            <div class="quest-tags">
+                            <div class="quest-title">${q.title}</div>
+                            <div class="quest-meta">
                                 <span class="tag tag-guild">${guild.icon} ${guild.name}</span>
-                                ${q.duration ? `<span class="tag tag-time">⏱ ${q.duration}мин</span>` : ''}
-                                ${q.scheduledTime ? `<span class="tag tag-time">🕐 ${q.scheduledTime}</span>` : ''}
-                                ${q.isHabit ? '<span class="tag tag-habit">🔄 привычка</span>' : ''}
-                                ${q.isOneTime ? '<span class="tag tag-onetime">📌 одноразка</span>' : ''}
-                                ${isFuture ? '<span class="tag tag-future">🔮 будущая</span>' : ''}
-                                ${q.hasPhoto ? '<span class="tag tag-photo">📸 фото</span>' : ''}
-                                ${q.repeat !== 'none' ? '<span class="tag tag-repeat">🔄 повтор</span>' : ''}
+                                ${q.duration ? `<span class="tag">⏱ ${q.duration}мин</span>` : ''}
+                                ${q.scheduledTime ? `<span class="tag">🕐 ${q.scheduledTime}</span>` : ''}
+                                ${q.isHabit ? '<span class="tag" style="background:#D1FAE5;color:#059669;">🔄 привычка</span>' : ''}
+                                ${isFuture ? '<span class="tag" style="background:#E0E7FF;color:#4F46E5;">🔮 будущая</span>' : ''}
+                                ${q.hasPhoto ? '<span class="tag" style="background:#E0E7FF;color:#4F46E5;">📸</span>' : ''}
                             </div>
-                            ${q.note ? `<div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">📝 ${q.note}</div>` : ''}
+                            ${q.note ? `<div style="font-size:0.7rem;color:var(--text-secondary);margin-top:2px;">${q.note}</div>` : ''}
                         </div>
                         <div class="quest-actions">
-                            ${q.hasPhoto ? `<button onclick="viewPhoto('${q.photoId}')" title="Просмотр фото">🖼️</button>` : ''}
-                            <button class="danger" onclick="deleteQuest('${q.id}')" title="Удалить">✕</button>
+                            ${q.hasPhoto ? `<button onclick="viewPhoto('${q.photoId}')">🖼️</button>` : ''}
+                            <button class="danger" onclick="deleteQuest('${q.id}')">✕</button>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            // Обновляем бейдж
+            const badge = document.getElementById('navTotalBadge');
+            if (todayQuests.filter(q => q.status !== 'done').length > 0) {
+                badge.style.display = 'block';
+                badge.textContent = todayQuests.filter(q => q.status !== 'done').length;
+            } else {
+                badge.style.display = 'none';
+            }
         }
 
         // ============================================================
@@ -3298,23 +2945,19 @@
                              style="${isFuture ? 'cursor:not-allowed;opacity:0.4;' : ''}">
                         </div>
                         <div class="quest-content">
-                            <div class="quest-title">
-                                <span>${q.title}</span>
-                            </div>
-                            <div class="quest-tags">
+                            <div class="quest-title">${q.title}</div>
+                            <div class="quest-meta">
                                 <span class="tag tag-guild">${guild.icon} ${guild.name}</span>
-                                <span class="tag tag-time">📅 ${q.scheduledDate}</span>
-                                ${q.duration ? `<span class="tag tag-time">⏱ ${q.duration}мин</span>` : ''}
-                                ${q.isHabit ? '<span class="tag tag-habit">🔄 привычка</span>' : ''}
-                                ${q.isOneTime ? '<span class="tag tag-onetime">📌 одноразка</span>' : ''}
-                                ${q.hasPhoto ? '<span class="tag tag-photo">📸 фото</span>' : ''}
-                                ${q.repeat !== 'none' ? '<span class="tag tag-repeat">🔄 повтор</span>' : ''}
+                                <span class="tag">📅 ${q.scheduledDate}</span>
+                                ${q.duration ? `<span class="tag">⏱ ${q.duration}мин</span>` : ''}
+                                ${q.isHabit ? '<span class="tag" style="background:#D1FAE5;color:#059669;">🔄</span>' : ''}
+                                ${q.hasPhoto ? '<span class="tag" style="background:#E0E7FF;color:#4F46E5;">📸</span>' : ''}
                             </div>
-                            ${q.note ? `<div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">📝 ${q.note}</div>` : ''}
+                            ${q.note ? `<div style="font-size:0.7rem;color:var(--text-secondary);margin-top:2px;">${q.note}</div>` : ''}
                         </div>
                         <div class="quest-actions">
-                            ${q.hasPhoto ? `<button onclick="viewPhoto('${q.photoId}')" title="Просмотр фото">🖼️</button>` : ''}
-                            <button class="danger" onclick="deleteQuest('${q.id}')" title="Удалить">✕</button>
+                            ${q.hasPhoto ? `<button onclick="viewPhoto('${q.photoId}')">🖼️</button>` : ''}
+                            <button class="danger" onclick="deleteQuest('${q.id}')">✕</button>
                         </div>
                     </div>
                 `;
@@ -3327,14 +2970,14 @@
 
         function renderGallery() {
             const container = document.getElementById('galleryGrid');
-            document.getElementById('galleryCount').textContent = gallery.length + ' фото';
+            document.getElementById('galleryCount').textContent = gallery.length;
 
             if (gallery.length === 0) {
                 container.innerHTML = `
                     <div class="gallery-empty">
-                        <div class="empty-icon">🖼️</div>
-                        <p>Нет фотографий</p>
-                        <p style="font-size:0.85rem;margin-top:4px;">Добавьте фото при создании задачи</p>
+                        <div class="icon">🖼️</div>
+                        <p style="font-size:0.9rem;">Нет фотографий</p>
+                        <p style="font-size:0.75rem;">Добавьте фото при создании задачи</p>
                     </div>
                 `;
                 return;
@@ -3348,11 +2991,10 @@
                     month: 'short'
                 });
                 return `
-                    <div class="gallery-item" onclick="viewPhoto('${item.id}')">
+                    <div class="gallery-item" onclick="viewPhoto('${item.id}')" style="position:relative;">
                         <img src="${item.photo}" alt="${item.caption || 'Фото'}" loading="lazy" />
-                        <div class="gallery-overlay">
-                            <div class="date">${date}</div>
-                            <div class="caption">${item.caption || 'Без подписи'}</div>
+                        <div class="overlay">
+                            <div class="caption">${item.caption || ''}</div>
                         </div>
                     </div>
                 `;
@@ -3388,7 +3030,6 @@
         // ============================================================
 
         function renderProfile() {
-            // Имя и уровень
             document.getElementById('profileName').textContent = profile.name;
             document.getElementById('profileLevelBig').textContent = profile.level;
 
@@ -3438,8 +3079,6 @@
             document.getElementById('measChest').value = profile.measurements?.chest || '';
             document.getElementById('measThigh').value = profile.measurements?.thigh || '';
             document.getElementById('measWaist').value = profile.measurements?.waist || '';
-
-            updateSidebar();
         }
 
         function updateBMI() {
@@ -3456,24 +3095,24 @@
                 let status = '';
                 let className = '';
                 if (bmi < 18.5) {
-                    status = 'Недостаточный вес';
+                    status = 'Недостаточный';
                     className = 'underweight';
                 } else if (bmi < 25) {
-                    status = 'Нормальный вес';
+                    status = 'Норма';
                     className = 'normal';
                 } else if (bmi < 30) {
-                    status = 'Избыточный вес';
+                    status = 'Избыточный';
                     className = 'overweight';
                 } else {
                     status = 'Ожирение';
                     className = 'obese';
                 }
                 bmiStatus.textContent = status;
-                bmiStatus.className = 'bmi-status ' + className;
+                bmiStatus.className = 'status ' + className;
             } else {
                 bmiValue.textContent = '—';
                 bmiStatus.textContent = '—';
-                bmiStatus.className = 'bmi-status';
+                bmiStatus.className = 'status';
             }
         }
 
@@ -3482,17 +3121,17 @@
             const entries = profile.weightJournal || [];
 
             if (entries.length === 0) {
-                container.innerHTML = '<div style="color:var(--text-light);font-size:0.85rem;">Нет записей</div>';
+                container.innerHTML = '<div style="color:var(--text-light);font-size:0.8rem;">Нет записей</div>';
                 return;
             }
 
             const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
-            container.innerHTML = sorted.slice(0, 10).map(entry => {
+            container.innerHTML = sorted.slice(0, 8).map(entry => {
                 const date = new Date(entry.date).toLocaleDateString('ru', { day: 'numeric', month: 'short' });
                 return `
-                    <div class="weight-entry">
+                    <div class="entry">
                         <span class="date">${date}</span>
-                        <span class="value">${entry.weight} кг</span>
+                        <span class="val">${entry.weight} кг</span>
                     </div>
                 `;
             }).join('');
@@ -3511,8 +3150,6 @@
                 date: new Date().toISOString(),
                 weight: weight
             });
-
-            // Обновляем текущий вес
             profile.weight = weight;
 
             saveProfile();
@@ -3601,8 +3238,8 @@
             container.innerHTML = guilds.map(g => {
                 const count = quests.filter(q => q.guildId === g.id).length;
                 return `
-                    <div class="card guild-card" style="border:2px solid ${g.color}30;">
-                        <div class="guild-icon" style="background:${g.color}15;color:${g.color};">${g.icon}</div>
+                    <div class="card guild-card" style="border:2px solid ${g.color}25;">
+                        <div class="icon" style="background:${g.color}15;color:${g.color};">${g.icon}</div>
                         <div class="name">${g.name}</div>
                         <div class="count">${count} задач</div>
                         <div class="color-picker">
@@ -3690,7 +3327,6 @@
             else if (currentTab === 'profile') renderProfile();
             else if (currentTab === 'guilds') renderGuilds();
             else if (currentTab === 'settings') renderSettings();
-            updateSidebar();
         }
 
         // ============================================================
@@ -3706,23 +3342,11 @@
                 if (e.key === 'Escape') {
                     closeModal();
                     closePhotoModal();
-                    closeSidebar();
                 }
             });
 
             document.getElementById('modal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('modal')) closeModal();
-            });
-
-            let touchStartX = 0;
-            document.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-            });
-            document.addEventListener('touchend', (e) => {
-                const diff = e.changedTouches[0].clientX - touchStartX;
-                if (diff > 80 && document.getElementById('sidebar').classList.contains('open')) {
-                    closeSidebar();
-                }
             });
 
             console.log('🚀 FlowPlan загружен!');
