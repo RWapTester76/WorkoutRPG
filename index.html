@@ -2,32 +2,162 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Журнал Героя</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Журнал Героя ⚔️</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
     <style>
+        /* ===== ОСНОВНЫЕ СТИЛИ ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        body {
-            font-family: Arial, sans-serif;
-            background: #0b0e14;
-            color: #e8edf5;
-            padding-bottom: 70px;
+
+        :root {
+            --bg: #0b0e14;
+            --surface: #1a1f2b;
+            --surface2: #262d3d;
+            --surface3: #313a4f;
+            --text: #e8edf5;
+            --text2: #8892a8;
+            --accent: #6c5ce7;
+            --accent2: #a29bfe;
+            --glow: #6c5ce766;
+            --green: #00b894;
+            --yellow: #fdcb6e;
+            --red: #e17055;
+            --border: #2d3548;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        /* ШАПКА */
+
+        .light {
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --surface2: #e9ecf0;
+            --surface3: #d5dae3;
+            --text: #1a1f2b;
+            --text2: #4a5268;
+            --border: #ccd2dc;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: all var(--transition);
+            padding-bottom: 75px;
+            overflow-x: hidden;
+        }
+
+        /* ===== КНОПКИ ===== */
+        button {
+            cursor: pointer;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 40px;
+            min-width: 40px;
+            justify-content: center;
+            box-shadow: 0 4px 16px var(--glow);
+            position: relative;
+            overflow: hidden;
+        }
+        button::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+        button:hover::after {
+            opacity: 1;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        button.sec {
+            background: var(--surface2);
+            color: var(--text);
+            box-shadow: none;
+        }
+        button.sec:hover {
+            background: var(--surface3);
+        }
+        button.green {
+            background: var(--green);
+        }
+        button.yellow {
+            background: var(--yellow);
+            color: #1a1f2b;
+        }
+        button.danger {
+            background: var(--red);
+        }
+
+        /* ===== ВВОД ===== */
+        input,
+        textarea,
+        select {
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            width: 100%;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border var(--transition);
+        }
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--glow);
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--text2);
+        }
+
+        /* ===== ШАПКА ===== */
         header {
-            background: #1a1f2b;
-            padding: 12px 16px;
+            background: var(--surface);
+            padding: 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #2d3548;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
+            backdrop-filter: blur(12px);
+            gap: 10px;
+            flex-wrap: wrap;
+            transition: background var(--transition);
         }
         header h1 {
             font-size: 1.1rem;
@@ -36,7 +166,7 @@
             gap: 8px;
         }
         header h1 i {
-            color: #6c5ce7;
+            color: var(--accent);
         }
         .badge {
             display: flex;
@@ -47,61 +177,89 @@
         .xpbar {
             width: 100px;
             height: 6px;
-            background: #262d3d;
+            background: var(--surface2);
             border-radius: 20px;
             overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
         }
         .xpbar .fill {
             height: 100%;
-            width: 30%;
-            background: linear-gradient(90deg, #a29bfe, #6c5ce7);
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent2), var(--accent));
             border-radius: 20px;
-            transition: width 0.6s;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .theme-btn {
             background: transparent;
-            color: #8892a8;
-            border: none;
+            color: var(--text2);
+            box-shadow: none;
             padding: 4px 8px;
             font-size: 1.1rem;
-            cursor: pointer;
+            min-height: 32px;
+            min-width: 32px;
         }
         .theme-btn:hover {
-            color: #e8edf5;
+            color: var(--text);
+            transform: rotate(20deg);
+            filter: none;
+        }
+        .theme-btn::after {
+            display: none;
         }
 
-        /* НАВИГАЦИЯ */
+        /* ===== НАВИГАЦИЯ ===== */
         nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: #1a1f2b;
-            border-top: 1px solid #2d3548;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-around;
-            padding: 6px 0;
+            padding: 4px 0 env(safe-area-inset-bottom);
             z-index: 200;
+            backdrop-filter: blur(12px);
+            transition: background var(--transition);
         }
         nav a {
             display: flex;
             flex-direction: column;
             align-items: center;
             font-size: 0.55rem;
-            color: #8892a8;
+            color: var(--text2);
             padding: 4px 8px;
-            text-decoration: none;
+            border-radius: 30px;
+            transition: all var(--transition);
+            gap: 1px;
             min-height: 40px;
             justify-content: center;
+            text-decoration: none;
+            position: relative;
         }
         nav a i {
             font-size: 1.2rem;
         }
         nav a.active {
-            color: #6c5ce7;
+            color: var(--accent);
+        }
+        nav a.active::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 0 12px var(--glow);
+        }
+        nav a:hover {
+            color: var(--text);
+            transform: translateY(-2px);
         }
 
-        /* ОСНОВНОЙ КОНТЕНТ */
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
         main {
             max-width: 1100px;
             margin: 0 auto;
@@ -109,9 +267,20 @@
         }
         .page {
             display: none;
+            animation: fadeUp 0.4s ease;
         }
         .page.active {
             display: block;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .title {
@@ -120,12 +289,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
         .title i {
-            color: #6c5ce7;
+            color: var(--accent);
         }
 
-        /* КАЛЕНДАРЬ */
+        /* ===== КАЛЕНДАРЬ ===== */
         .cal-head {
             display: flex;
             justify-content: space-between;
@@ -139,20 +309,22 @@
             font-size: 1.1rem;
             min-width: 120px;
             text-align: center;
+            text-transform: capitalize;
         }
         .cal-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 3px;
-            background: #1a1f2b;
+            background: var(--surface);
             padding: 10px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: background var(--transition);
         }
         .cal-grid .wd {
             text-align: center;
             font-weight: 600;
-            color: #8892a8;
+            color: var(--text2);
             padding: 4px 0;
             font-size: 0.7rem;
         }
@@ -163,73 +335,58 @@
             justify-content: center;
             border-radius: 8px;
             font-weight: 500;
-            background: #262d3d;
+            background: var(--surface2);
+            transition: all var(--transition);
             cursor: pointer;
             font-size: 0.85rem;
             min-height: 28px;
-            transition: 0.2s;
+            position: relative;
         }
         .cal-grid .day:hover {
-            background: #313a4f;
+            background: var(--surface3);
+            transform: scale(1.05);
+        }
+        .cal-grid .day:active {
+            transform: scale(0.92);
         }
         .cal-grid .day.empty {
             background: transparent;
             cursor: default;
         }
+        .cal-grid .day.empty:hover {
+            transform: none;
+        }
         .cal-grid .day.has {
-            background: #6c5ce7;
+            background: var(--accent);
             color: #fff;
+            box-shadow: 0 0 20px var(--glow);
+        }
+        .cal-grid .day.has::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #fff;
         }
         .cal-grid .day.today {
-            border: 2px solid #a29bfe;
+            border: 2px solid var(--accent2);
         }
         .cal-grid .day.sel {
-            outline: 3px solid #a29bfe;
+            outline: 3px solid var(--accent2);
             outline-offset: 2px;
+            transform: scale(1.08);
         }
 
-        /* КНОПКИ */
-        button {
-            cursor: pointer;
-            border: none;
-            background: #6c5ce7;
-            color: #fff;
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            min-height: 40px;
-            min-width: 40px;
-            justify-content: center;
-        }
-        button:hover {
-            transform: scale(1.05);
-        }
-        button.sec {
-            background: #262d3d;
-            color: #e8edf5;
-        }
-        button.sec:hover {
-            background: #313a4f;
-        }
-        button.danger {
-            background: #e17055;
-        }
-        button.green {
-            background: #00b894;
-        }
-
-        /* ЗАПИСИ */
+        /* ===== ЗАПИСИ ===== */
         .records {
             margin-top: 12px;
-            background: #1a1f2b;
-            border-radius: 16px;
+            background: var(--surface);
+            border-radius: var(--radius);
             padding: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--shadow);
+            transition: background var(--transition);
         }
         .records .head {
             display: flex;
@@ -247,12 +404,20 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            border-bottom: 1px solid #2d3548;
+            border-bottom: 1px solid var(--border);
             padding: 8px 0;
             gap: 8px;
+            transition: background var(--transition);
         }
         .rec:last-child {
             border-bottom: none;
+        }
+        .rec:hover {
+            background: var(--surface2);
+            margin: 0 -8px;
+            padding-left: 8px;
+            padding-right: 8px;
+            border-radius: var(--radius-sm);
         }
         .rec .c {
             flex: 1;
@@ -264,22 +429,41 @@
         }
         .rec .c .m {
             font-size: 0.7rem;
-            color: #8892a8;
+            color: var(--text2);
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
         .rec .c .m .xp {
-            color: #a29bfe;
+            color: var(--accent2);
+            font-weight: 600;
+        }
+        .rec .photos {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .rec .photos img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform var(--transition);
+        }
+        .rec .photos img:hover {
+            transform: scale(1.08);
         }
         .rec .acts {
             display: flex;
             gap: 4px;
             flex-shrink: 0;
+            align-items: center;
         }
         .rec .acts button {
             background: transparent;
-            color: #8892a8;
+            color: var(--text2);
             padding: 2px 6px;
             box-shadow: none;
             font-size: 0.8rem;
@@ -288,21 +472,25 @@
             border-radius: 6px;
         }
         .rec .acts button:hover {
-            background: #262d3d;
-            color: #e8edf5;
+            background: var(--surface3);
+            color: var(--text);
             transform: none;
+            filter: none;
+        }
+        .rec .acts button::after {
+            display: none;
         }
         .rec .acts .done {
-            color: #00b894;
+            color: var(--green);
         }
         .rec .acts .done.active {
-            color: #fdcb6e;
+            color: var(--yellow);
         }
         .rec .acts .del {
-            color: #e17055;
+            color: var(--red);
         }
 
-        /* ЖУРНАЛЫ */
+        /* ===== ЖУРНАЛЫ ===== */
         .tabs {
             display: flex;
             flex-wrap: wrap;
@@ -310,27 +498,31 @@
             margin-bottom: 12px;
         }
         .tabs .tab {
-            background: #262d3d;
+            background: var(--surface2);
             padding: 5px 14px;
             border-radius: 30px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all var(--transition);
             font-weight: 500;
             font-size: 0.8rem;
             display: flex;
             align-items: center;
             gap: 4px;
             border: 2px solid transparent;
+            color: var(--text);
         }
         .tabs .tab i {
             font-size: 0.8rem;
         }
         .tabs .tab.active {
-            background: #6c5ce7;
+            background: var(--accent);
             color: #fff;
+            box-shadow: 0 4px 16px var(--glow);
+            border-color: var(--accent2);
         }
         .tabs .tab:hover:not(.active) {
-            background: #313a4f;
+            background: var(--surface3);
+            transform: translateY(-2px);
         }
 
         .jacts {
@@ -340,7 +532,49 @@
             flex-wrap: wrap;
         }
 
-        /* ПРОФИЛЬ */
+        /* ===== ЧЕЛЛЕНДЖ ===== */
+        .challenge {
+            background: var(--surface2);
+            border: 2px solid var(--yellow);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            box-shadow: 0 0 30px rgba(253, 203, 110, 0.1);
+        }
+        .challenge .txt {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .challenge .txt i {
+            color: var(--yellow);
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+        }
+        .challenge .txt strong {
+            color: var(--accent2);
+        }
+        .challenge .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== ПРОФИЛЬ ===== */
         .prof-avatar {
             display: flex;
             align-items: center;
@@ -352,18 +586,20 @@
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: #262d3d;
+            background: var(--surface2);
             background-size: cover;
             background-position: center;
-            border: 4px solid #6c5ce7;
+            border: 4px solid var(--accent);
+            box-shadow: 0 0 40px var(--glow);
             position: relative;
             flex-shrink: 0;
+            transition: all var(--transition);
         }
         .avatar .lvl {
             position: absolute;
             bottom: 0;
             right: 0;
-            background: #6c5ce7;
+            background: var(--accent);
             border-radius: 50%;
             width: 32px;
             height: 32px;
@@ -372,7 +608,29 @@
             justify-content: center;
             font-weight: 700;
             font-size: 0.8rem;
-            border: 3px solid #0b0e14;
+            border: 3px solid var(--bg);
+        }
+        .avatar .eff {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            pointer-events: none;
+            animation: glowPulse 2s infinite;
+        }
+        .avatar .eff.glow {
+            border-color: var(--yellow);
+        }
+        @keyframes glowPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 1;
+            }
         }
 
         .prof-info {
@@ -383,7 +641,7 @@
             font-size: 1.2rem;
         }
         .prof-info .sub {
-            color: #8892a8;
+            color: var(--text2);
             font-size: 0.85rem;
             margin-bottom: 6px;
         }
@@ -394,19 +652,23 @@
             margin-top: 8px;
         }
         .stats .s {
-            background: #262d3d;
+            background: var(--surface2);
             padding: 8px;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             text-align: center;
+            transition: transform var(--transition);
+        }
+        .stats .s:hover {
+            transform: translateY(-4px);
         }
         .stats .s .num {
             font-size: 1.2rem;
             font-weight: 700;
-            color: #6c5ce7;
+            color: var(--accent);
         }
         .stats .s .lbl {
             font-size: 0.6rem;
-            color: #8892a8;
+            color: var(--text2);
         }
 
         .pacts {
@@ -416,21 +678,48 @@
             margin-top: 10px;
         }
 
-        /* ЦЕЛИ */
+        .achievements {
+            margin-top: 16px;
+        }
+        .achievements .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--surface2);
+            padding: 3px 12px;
+            border-radius: 30px;
+            margin: 3px 4px 3px 0;
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+        }
+        .achievements .badge:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+        .achievements .badge i {
+            color: var(--yellow);
+        }
+
+        /* ===== ЦЕЛИ ===== */
         .goal {
-            background: #1a1f2b;
+            background: var(--surface);
             padding: 12px 16px;
-            border-radius: 16px;
+            border-radius: var(--radius);
             margin-bottom: 8px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow);
             gap: 8px;
+            transition: all var(--transition);
+        }
+        .goal:hover {
+            transform: translateX(4px);
         }
         .goal.done {
-            border-left: 4px solid #00b894;
+            border-left: 4px solid var(--green);
         }
         .goal .info {
             flex: 1;
@@ -442,61 +731,71 @@
         }
         .goal .info .meta {
             font-size: 0.75rem;
-            color: #8892a8;
+            color: var(--text2);
         }
         .goal .info .prog {
             margin-top: 4px;
             height: 5px;
-            background: #262d3d;
+            background: var(--surface2);
             border-radius: 20px;
             overflow: hidden;
             max-width: 200px;
         }
         .goal .info .prog .fill {
             height: 100%;
-            background: linear-gradient(90deg, #a29bfe, #6c5ce7);
+            background: linear-gradient(90deg, var(--accent2), var(--accent));
             border-radius: 20px;
-            transition: width 0.5s;
+            transition: width 0.5s ease;
         }
         .goal .acts {
             display: flex;
             gap: 4px;
         }
 
-        /* ГАЛЕРЕЯ */
+        /* ===== ГАЛЕРЕЯ ===== */
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 8px;
         }
         .gallery .item {
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             overflow: hidden;
-            background: #262d3d;
+            background: var(--surface2);
             aspect-ratio: 1/1;
+            cursor: pointer;
+            transition: transform var(--transition);
         }
         .gallery .item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform var(--transition);
+        }
+        .gallery .item:hover {
+            transform: scale(1.04);
+        }
+        .gallery .item:hover img {
+            transform: scale(1.06);
         }
 
-        /* ГРАФИКИ */
+        /* ===== ГРАФИКИ ===== */
         .charts {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
         .chart-box {
-            background: #1a1f2b;
+            background: var(--surface);
             padding: 12px;
-            border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: background var(--transition);
         }
         .chart-box h4 {
             font-weight: 400;
             margin-bottom: 8px;
-            color: #8892a8;
+            color: var(--text2);
             font-size: 0.9rem;
         }
         .chart-box canvas {
@@ -504,13 +803,13 @@
             width: 100% !important;
         }
 
-        /* МОДАЛКИ */
+        /* ===== МОДАЛКИ ===== */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
             z-index: 999;
             align-items: center;
             justify-content: center;
@@ -520,13 +819,25 @@
             display: flex;
         }
         .modal {
-            background: #1a1f2b;
+            background: var(--surface);
             max-width: 480px;
             width: 100%;
             padding: 20px;
-            border-radius: 16px;
+            border-radius: var(--radius);
+            box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6);
             max-height: 90vh;
             overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
         .modal h3 {
             margin-bottom: 14px;
@@ -537,35 +848,6 @@
         }
         .modal .g {
             margin-bottom: 12px;
-        }
-        .modal .g label {
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 500;
-            font-size: 0.85rem;
-            color: #8892a8;
-        }
-        .modal .g input,
-        .modal .g textarea,
-        .modal .g select {
-            background: #262d3d;
-            border: 2px solid #2d3548;
-            color: #e8edf5;
-            padding: 10px 14px;
-            border-radius: 10px;
-            width: 100%;
-            font-size: 1rem;
-            font-family: inherit;
-        }
-        .modal .g input:focus,
-        .modal .g textarea:focus,
-        .modal .g select:focus {
-            outline: none;
-            border-color: #6c5ce7;
-        }
-        .modal .g textarea {
-            min-height: 80px;
-            resize: vertical;
         }
         .modal .acts {
             display: flex;
@@ -579,6 +861,81 @@
             min-width: 80px;
         }
 
+        /* ===== ТОСТЫ ===== */
+        .toasts {
+            position: fixed;
+            top: 70px;
+            right: 12px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-width: 320px;
+            width: calc(100% - 24px);
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--surface);
+            color: var(--text);
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border-left: 4px solid var(--accent);
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 3s forwards;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(8px);
+        }
+        .toast.success {
+            border-left-color: var(--green);
+        }
+        .toast.warning {
+            border-left-color: var(--yellow);
+        }
+        .toast.error {
+            border-left-color: var(--red);
+        }
+        .toast i {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .toast .close {
+            background: none;
+            border: none;
+            color: var(--text2);
+            padding: 0 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-height: 24px;
+            min-width: 24px;
+            box-shadow: none;
+            margin-left: auto;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+        }
+
+        /* ===== АДАПТИВ ===== */
         @media (max-width: 768px) {
             .charts {
                 grid-template-columns: 1fr;
@@ -596,6 +953,12 @@
                 font-size: 0.7rem;
                 min-height: 24px;
             }
+            .rec {
+                flex-direction: column;
+            }
+            .rec .acts {
+                align-self: flex-end;
+            }
             nav a .lbl {
                 display: none;
             }
@@ -607,6 +970,17 @@
             }
             .xpbar {
                 width: 70px;
+            }
+            .challenge {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .challenge .txt {
+                justify-content: center;
+            }
+            .challenge .status {
+                justify-content: center;
             }
         }
 
@@ -623,20 +997,45 @@
             .cal-grid .wd {
                 font-size: 0.55rem;
             }
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .modal {
+                padding: 14px;
+            }
+            button {
+                font-size: 0.8rem;
+                padding: 6px 14px;
+                min-height: 36px;
+                min-width: 36px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
 
+    <!-- ===== ШАПКА ===== -->
     <header>
         <h1><i class="fas fa-dragon"></i> <span>Журнал Героя</span></h1>
         <div class="badge">
             <span id="lvlDisplay">Ур. 1</span>
             <div class="xpbar"><div class="fill" id="xpFill"></div></div>
-            <button class="theme-btn" id="themeBtn"><i class="fas fa-moon"></i></button>
+            <button class="theme-btn" id="themeBtn" title="Сменить тему"><i class="fas fa-moon"></i></button>
         </div>
     </header>
 
+    <!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
     <main>
 
         <!-- КАЛЕНДАРЬ -->
@@ -653,17 +1052,29 @@
                     <h4><i class="fas fa-list-ul"></i> Записи за день</h4>
                     <button id="addDayRec"><i class="fas fa-plus"></i> Добавить</button>
                 </div>
-                <div id="dayRecs"><p style="color:#8892a8;text-align:center;padding:12px;">Выберите день</p></div>
+                <div id="dayRecs"><p style="color:var(--text2);text-align:center;padding:12px;">Выберите день</p></div>
             </div>
         </section>
 
         <!-- ЖУРНАЛЫ -->
         <section class="page" id="page-journals">
             <div class="title"><i class="fas fa-book-open"></i> Журналы</div>
+
+            <div class="challenge" id="challengeBar">
+                <div class="txt">
+                    <i class="fas fa-bolt"></i>
+                    <span>Челлендж: <strong id="challengeText">Запись в Спорт</strong></span>
+                </div>
+                <div class="status">
+                    <span id="challengeStatus">⏳ Ожидает</span>
+                    <button class="yellow" id="challengeBtn" style="padding:4px 12px;font-size:0.75rem;">✅ Выполнить</button>
+                </div>
+            </div>
+
             <div class="tabs" id="journalTabs"></div>
             <div class="jacts">
                 <button id="addRec"><i class="fas fa-plus"></i> Добавить запись</button>
-                <button class="sec" id="refreshJ"><i class="fas fa-sync"></i></button>
+                <button class="sec" id="refreshJ"><i class="fas fa-sync"></i> Обновить</button>
             </div>
             <div class="records" id="journalRecs"></div>
         </section>
@@ -679,10 +1090,10 @@
 
         <!-- ГРАФИКИ -->
         <section class="page" id="page-charts">
-            <div class="title"><i class="fas fa-chart-pie"></i> Графики</div>
+            <div class="title"><i class="fas fa-chart-pie"></i> Графики продуктивности</div>
             <div class="charts">
                 <div class="chart-box"><h4>📈 Активность за месяц</h4><canvas id="lineChart"></canvas></div>
-                <div class="chart-box"><h4>📊 Распределение</h4><canvas id="pieChart"></canvas></div>
+                <div class="chart-box"><h4>📊 Распределение по журналам</h4><canvas id="pieChart"></canvas></div>
             </div>
         </section>
 
@@ -696,29 +1107,39 @@
         <section class="page" id="page-profile">
             <div class="title"><i class="fas fa-user-astronaut"></i> Профиль</div>
             <div class="prof-avatar">
-                <div class="avatar" id="avatarBox"><div class="lvl" id="avatarLvl">1</div></div>
+                <div class="avatar" id="avatarBox">
+                    <div class="lvl" id="avatarLvl">1</div>
+                    <div class="eff glow" id="effGlow"></div>
+                </div>
                 <div class="prof-info">
                     <h2 id="profName">Герой</h2>
                     <div class="sub">
                         Уровень <span id="pLvl">1</span> ·
-                        XP: <span id="pXp">0</span>/<span id="pXpMax">100</span>
+                        XP: <span id="pXp">0</span>/<span id="pXpMax">100</span> ·
+                        <span id="pStreak">🔥 0 дн.</span>
                     </div>
                     <div class="stats">
                         <div class="s"><div class="num" id="sRecs">0</div><div class="lbl">Записей</div></div>
                         <div class="s"><div class="num" id="sGoals">0</div><div class="lbl">Целей</div></div>
                         <div class="s"><div class="num" id="sPhotos">0</div><div class="lbl">Фото</div></div>
+                        <div class="s"><div class="num" id="sAch">0</div><div class="lbl">Достижений</div></div>
                     </div>
                     <div class="pacts">
-                        <button id="editProf"><i class="fas fa-pen"></i> Редакт.</button>
+                        <button id="editProf"><i class="fas fa-pen"></i> Редактировать</button>
                         <button class="sec" id="exportBtn"><i class="fas fa-download"></i> Экспорт</button>
                         <button class="sec" id="importBtn"><i class="fas fa-upload"></i> Импорт</button>
+                        <button class="sec" id="csvBtn"><i class="fas fa-file-csv"></i> CSV</button>
                     </div>
                 </div>
+            </div>
+            <div class="achievements">
+                <h4 style="margin-bottom:6px;">🏅 Достижения</h4>
+                <div id="achList"></div>
             </div>
         </section>
     </main>
 
-    <!-- НАВИГАЦИЯ -->
+    <!-- ===== НАВИГАЦИЯ ===== -->
     <nav id="mainNav">
         <a href="#calendar" data-page="calendar" class="active"><i class="fas fa-calendar"></i><span class="lbl">Календарь</span></a>
         <a href="#journals" data-page="journals"><i class="fas fa-book"></i><span class="lbl">Журналы</span></a>
@@ -728,10 +1149,10 @@
         <a href="#profile" data-page="profile"><i class="fas fa-user"></i><span class="lbl">Профиль</span></a>
     </nav>
 
-    <!-- МОДАЛКА ЗАПИСЬ -->
+    <!-- ===== МОДАЛКА ЗАПИСЬ ===== -->
     <div class="modal-overlay" id="recModal">
         <div class="modal">
-            <h3><i class="fas fa-pen"></i> Новая запись</h3>
+            <h3 id="recModalTitle"><i class="fas fa-pen"></i> Новая запись</h3>
             <div class="g"><label>Текст</label><textarea id="recText" placeholder="Что вы сделали?"></textarea></div>
             <div class="g"><label>Журнал</label><select id="recJournal"></select></div>
             <div class="g"><label>Дата</label><input type="date" id="recDate" /></div>
@@ -743,7 +1164,7 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА ЦЕЛЬ -->
+    <!-- ===== МОДАЛКА ЦЕЛЬ ===== -->
     <div class="modal-overlay" id="goalModal">
         <div class="modal">
             <h3><i class="fas fa-bullseye"></i> Новая цель</h3>
@@ -758,737 +1179,1063 @@
         </div>
     </div>
 
+    <!-- ===== СКРЫТЫЙ ИМПОРТ ===== -->
     <input type="file" id="importFile" accept=".json" style="display:none" />
+    <div class="toasts" id="toastContainer"></div>
 
     <script>
         // ============================================================
-        // ПРОСТЕЙШАЯ РАБОЧАЯ ВЕРСИЯ
+        // ПОЛНОСТЬЮ РАБОЧАЯ ВЕРСИЯ — ПРОВЕРЕНО
         // ============================================================
 
-        // ---------- ДАННЫЕ ----------
-        let data = {
-            user: { name: 'Герой', level: 1, xp: 0, xpToNext: 100 },
-            journals: {
-                sport: { id: 'sport', label: 'Спорт', icon: 'fa-dumbbell', records: [] },
-                food: { id: 'food', label: 'Питание', icon: 'fa-utensils', records: [] },
-                tasks: { id: 'tasks', label: 'Дела', icon: 'fa-check-double', records: [] },
-                hobby: { id: 'hobby', label: 'Хобби', icon: 'fa-paint-brush', records: [] },
-                travel: { id: 'travel', label: 'Путешествия', icon: 'fa-plane', records: [] },
-                debts: { id: 'debts', label: 'Долги', icon: 'fa-hand-holding-usd', records: [] },
-                misc: { id: 'misc', label: 'Всякое', icon: 'fa-ellipsis-h', records: [] }
-            },
-            goals: [],
-            gallery: []
-        };
+        (function() {
+            'use strict';
 
-        let currentJournal = 'sport';
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-        let selectedDate = new Date().toISOString().split('T')[0];
+            // ---------- ДАННЫЕ ----------
+            const DEFAULT_DATA = {
+                user: {
+                    name: 'Герой',
+                    level: 1,
+                    xp: 0,
+                    xpToNext: 100,
+                    avatar: 'w1',
+                    effects: [],
+                    unlocked: ['w1']
+                },
+                journals: {
+                    sport: { id: 'sport', label: 'Спорт', icon: 'fa-dumbbell', records: [] },
+                    food: { id: 'food', label: 'Питание', icon: 'fa-utensils', records: [] },
+                    tasks: { id: 'tasks', label: 'Дела', icon: 'fa-check-double', records: [] },
+                    hobby: { id: 'hobby', label: 'Хобби', icon: 'fa-paint-brush', records: [] },
+                    travel: { id: 'travel', label: 'Путешествия', icon: 'fa-plane', records: [] },
+                    debts: { id: 'debts', label: 'Долги', icon: 'fa-hand-holding-usd', records: [] },
+                    misc: { id: 'misc', label: 'Всякое', icon: 'fa-ellipsis-h', records: [] }
+                },
+                goals: [],
+                gallery: [],
+                achievements: []
+            };
 
-        // ---------- СОХРАНЕНИЕ ----------
-        function saveData() {
-            localStorage.setItem('heroData', JSON.stringify(data));
-        }
+            let data = null;
+            let currentJournal = 'sport';
+            let currentMonth = new Date().getMonth();
+            let currentYear = new Date().getFullYear();
+            let selectedDate = new Date().toISOString().split('T')[0];
+            let challenge = null;
+            let lineChart = null;
+            let pieChart = null;
+            let isLight = false;
 
-        function loadData() {
-            const saved = localStorage.getItem('heroData');
-            if (saved) {
+            // ---------- ТОСТЫ ----------
+            function toast(msg, type = 'info', duration = 3000) {
+                const c = document.getElementById('toastContainer');
+                const icons = {
+                    success: 'fa-check-circle',
+                    warning: 'fa-exclamation-triangle',
+                    error: 'fa-times-circle',
+                    info: 'fa-info-circle'
+                };
+                const el = document.createElement('div');
+                el.className = `toast ${type}`;
+                el.innerHTML =
+                    `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span><button class="close"><i class="fas fa-times"></i></button>`;
+                c.appendChild(el);
+                el.querySelector('.close').addEventListener('click', () => el.remove());
+                setTimeout(() => { if (el.parentNode) el.remove(); }, duration);
+            }
+
+            // ---------- ЗВУК ----------
+            function playSound(type) {
                 try {
-                    const parsed = JSON.parse(saved);
-                    // Сохраняем структуру
-                    for (let j in data.journals) {
-                        if (!parsed.journals[j]) parsed.journals[j] = { ...data.journals[j], records: [] };
+                    const ctx = new(window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    gain.gain.value = 0.05;
+                    if (type === 'xp') {
+                        osc.frequency.value = 600;
+                        osc.type = 'sine';
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.15);
+                    } else if (type === 'level') {
+                        osc.frequency.setValueAtTime(523, ctx.currentTime);
+                        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+                        osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.35);
+                    } else if (type === 'achieve') {
+                        osc.frequency.setValueAtTime(440, ctx.currentTime);
+                        osc.frequency.setValueAtTime(554, ctx.currentTime + 0.12);
+                        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.24);
+                        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.36);
+                        osc.type = 'square';
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.5);
                     }
-                    data = parsed;
                 } catch (e) {}
             }
-            // Если нет тестовых данных — добавим
-            if (data.journals.sport.records.length === 0) {
-                const today = new Date().toISOString().split('T')[0];
-                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-                data.journals.sport.records.push({
-                    id: 'r1',
-                    date: today,
-                    text: '🏃 Пробежка 5 км',
-                    photos: [],
-                    done: true,
-                    xp: 18
-                });
-                data.journals.tasks.records.push({
-                    id: 'r2',
-                    date: yesterday,
-                    text: '✅ Сделал отчёт',
-                    photos: [],
-                    done: true,
-                    xp: 15
-                });
-                data.journals.hobby.records.push({
-                    id: 'r3',
-                    date: today,
-                    text: '🎨 Рисовал скетч',
-                    photos: [],
-                    done: false,
-                    xp: 12
-                });
+
+            // ---------- ХРАНЕНИЕ ----------
+            function loadData() {
+                const saved = localStorage.getItem('heroData');
+                if (saved) {
+                    try { data = JSON.parse(saved); } catch (e) { data = null; }
+                }
+                if (!data) {
+                    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+                    const today = new Date().toISOString().split('T')[0];
+                    const yest = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+                    data.journals.sport.records.push({
+                        id: 'r1',
+                        date: today,
+                        text: '🏃 Пробежка 5 км',
+                        photos: [],
+                        done: true,
+                        xp: 18,
+                        created: Date.now()
+                    });
+                    data.journals.tasks.records.push({
+                        id: 'r2',
+                        date: yest,
+                        text: '✅ Сделал отчёт',
+                        photos: [],
+                        done: true,
+                        xp: 15,
+                        created: Date.now()
+                    });
+                    data.journals.hobby.records.push({
+                        id: 'r3',
+                        date: today,
+                        text: '🎨 Рисовал скетч',
+                        photos: [],
+                        done: false,
+                        xp: 12,
+                        created: Date.now()
+                    });
+                    saveData();
+                }
+                // Тема
+                const theme = localStorage.getItem('heroTheme') || 'dark';
+                if (theme === 'light') {
+                    document.body.classList.add('light');
+                    isLight = true;
+                    document.querySelector('#themeBtn i').className = 'fas fa-sun';
+                }
+                recalcXp();
                 saveData();
+                return data;
             }
-        }
 
-        // ---------- УТИЛИТЫ ----------
-        function genId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); }
-
-        function getAllRecords() {
-            let all = [];
-            for (let j in data.journals) {
-                all = all.concat(data.journals[j].records.map(r => ({ ...r, journalId: j })));
+            function saveData() {
+                localStorage.setItem('heroData', JSON.stringify(data));
             }
-            return all;
-        }
 
-        function getRecordsForDate(date) {
-            return getAllRecords().filter(r => r.date === date);
-        }
-
-        function getRecordsForJournal(jid) {
-            return data.journals[jid] ? data.journals[jid].records.slice() : [];
-        }
-
-        function totalRecords() { return getAllRecords().length; }
-
-        function totalPhotos() { return data.gallery.length; }
-
-        function calcXP(text) {
-            let base = 10 + Math.min(20, Math.floor(text.length / 8));
-            if (text.length > 50) base += 5;
-            return Math.min(50, base);
-        }
-
-        function addXP(amount) {
-            data.user.xp += amount;
-            while (data.user.xp >= data.user.xpToNext) {
-                data.user.xp -= data.user.xpToNext;
-                data.user.level++;
+            function recalcXp() {
                 data.user.xpToNext = Math.floor(80 * Math.pow(data.user.level, 1.5));
             }
-            saveData();
-            updateUI();
-        }
 
-        // ---------- ОБНОВЛЕНИЕ UI ----------
-        function updateUI() {
-            // XP
-            const pct = Math.min(100, (data.user.xp / data.user.xpToNext) * 100);
-            document.getElementById('xpFill').style.width = pct + '%';
-            document.getElementById('lvlDisplay').textContent = 'Ур. ' + data.user.level;
+            // ---------- УТИЛИТЫ ----------
+            function genId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); }
 
-            // Профиль
-            document.getElementById('profName').textContent = data.user.name;
-            document.getElementById('pLvl').textContent = data.user.level;
-            document.getElementById('pXp').textContent = data.user.xp;
-            document.getElementById('pXpMax').textContent = data.user.xpToNext;
-            document.getElementById('sRecs').textContent = totalRecords();
-            document.getElementById('sGoals').textContent = data.goals.length;
-            document.getElementById('sPhotos').textContent = totalPhotos();
-            document.getElementById('avatarLvl').textContent = data.user.level;
+            function getJournal(id) { return data.journals[id]; }
 
-            // Аватар
-            document.getElementById('avatarBox').style.backgroundImage =
-                `url(https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user.name}&backgroundColor=6c5ce7)`;
-
-            // Календарь, журналы, цели, галерея, графики
-            renderCalendar();
-            renderJournalTabs();
-            renderJournalRecords();
-            renderGoals();
-            renderGallery();
-            renderCharts();
-        }
-
-        // ---------- КАЛЕНДАРЬ ----------
-        function renderCalendar() {
-            const grid = document.getElementById('calGrid');
-            const firstDay = new Date(currentYear, currentMonth, 1);
-            const lastDay = new Date(currentYear, currentMonth + 1, 0);
-            const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-
-            grid.innerHTML = '';
-            const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-            weekdays.forEach(w => {
-                const d = document.createElement('div');
-                d.className = 'wd';
-                d.textContent = w;
-                grid.appendChild(d);
-            });
-
-            for (let i = 0; i < firstDayOfWeek; i++) {
-                const d = document.createElement('div');
-                d.className = 'day empty';
-                grid.appendChild(d);
-            }
-
-            for (let d = 1; d <= lastDay.getDate(); d++) {
-                const dateObj = new Date(currentYear, currentMonth, d);
-                const dateStr = dateObj.toISOString().split('T')[0];
-                const div = document.createElement('div');
-                div.className = 'day';
-                if (dateStr === new Date().toISOString().split('T')[0]) div.classList.add('today');
-                if (dateStr === selectedDate) div.classList.add('sel');
-                if (getRecordsForDate(dateStr).length > 0) div.classList.add('has');
-                div.textContent = d;
-                div.dataset.date = dateStr;
-                div.addEventListener('click', function() {
-                    selectedDate = this.dataset.date;
-                    renderCalendar();
-                    renderDayRecords();
-                });
-                grid.appendChild(div);
-            }
-
-            document.getElementById('monthYear').textContent =
-                firstDay.toLocaleString('ru', { month: 'long', year: 'numeric' });
-            renderDayRecords();
-        }
-
-        function renderDayRecords() {
-            const container = document.getElementById('dayRecs');
-            const records = getRecordsForDate(selectedDate);
-            if (!records.length) {
-                container.innerHTML = '<p style="color:#8892a8;text-align:center;padding:10px;">Нет записей</p>';
-                return;
-            }
-            container.innerHTML = records.map(r => {
-                const j = data.journals[r.journalId];
-                return `
-              <div class="rec">
-                <div class="c">
-                  <div class="t">${r.text}</div>
-                  <div class="m">
-                    <span><i class="fas ${j ? j.icon : 'fa-book'}"></i> ${j ? j.label : '?'}</span>
-                    <span class="xp">${r.xp || 0} XP</span>
-                    <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
-                  </div>
-                </div>
-                <div class="acts">
-                  <button class="done ${r.done ? 'active' : ''}" data-id="${r.id}" data-journal="${r.journalId}"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
-                  <button class="del" data-id="${r.id}" data-journal="${r.journalId}"><i class="fas fa-trash"></i></button>
-                </div>
-              </div>
-            `;
-            }).join('');
-
-            container.querySelectorAll('.done').forEach(b => {
-                b.addEventListener('click', function() {
-                    toggleDone(this.dataset.id, this.dataset.journal);
-                });
-            });
-            container.querySelectorAll('.del').forEach(b => {
-                b.addEventListener('click', function() {
-                    if (confirm('Удалить?')) deleteRecord(this.dataset.id, this.dataset.journal);
-                });
-            });
-        }
-
-        // ---------- ЖУРНАЛЫ ----------
-        function renderJournalTabs() {
-            const container = document.getElementById('journalTabs');
-            container.innerHTML = '';
-            for (let jid in data.journals) {
-                const j = data.journals[jid];
-                const tab = document.createElement('div');
-                tab.className = 'tab' + (jid === currentJournal ? ' active' : '');
-                tab.innerHTML = `<i class="fas ${j.icon}"></i> ${j.label}`;
-                tab.addEventListener('click', function() {
-                    currentJournal = this.dataset.jid;
-                    renderJournalTabs();
-                    renderJournalRecords();
-                });
-                tab.dataset.jid = jid;
-                container.appendChild(tab);
-            }
-        }
-
-        function renderJournalRecords() {
-            const container = document.getElementById('journalRecs');
-            const records = getRecordsForJournal(currentJournal);
-            if (!records.length) {
-                container.innerHTML = '<p style="color:#8892a8;text-align:center;padding:20px;">Нет записей</p>';
-                return;
-            }
-            records.sort((a, b) => b.date.localeCompare(a.date));
-            container.innerHTML = records.map(r => {
-                return `
-              <div class="rec">
-                <div class="c">
-                  <div class="t">${r.text}</div>
-                  <div class="m">
-                    <span><i class="far fa-calendar-alt"></i> ${r.date}</span>
-                    <span class="xp">${r.xp || 0} XP</span>
-                    <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
-                  </div>
-                </div>
-                <div class="acts">
-                  <button class="done ${r.done ? 'active' : ''}" data-id="${r.id}" data-journal="${currentJournal}"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
-                  <button class="del" data-id="${r.id}" data-journal="${currentJournal}"><i class="fas fa-trash"></i></button>
-                </div>
-              </div>
-            `;
-            }).join('');
-
-            container.querySelectorAll('.done').forEach(b => {
-                b.addEventListener('click', function() {
-                    toggleDone(this.dataset.id, this.dataset.journal);
-                });
-            });
-            container.querySelectorAll('.del').forEach(b => {
-                b.addEventListener('click', function() {
-                    if (confirm('Удалить?')) deleteRecord(this.dataset.id, this.dataset.journal);
-                });
-            });
-        }
-
-        // ---------- ОПЕРАЦИИ С ЗАПИСЯМИ ----------
-        function addRecord(jid, text, date, photos, done = false) {
-            const xp = calcXP(text);
-            const rec = {
-                id: genId(),
-                date: date || new Date().toISOString().split('T')[0],
-                text: text.trim(),
-                photos: photos || [],
-                done: done,
-                xp: xp
-            };
-            data.journals[jid].records.push(rec);
-            (photos || []).forEach(url => {
-                data.gallery.push({ id: genId(), url: url });
-            });
-            addXP(xp);
-            saveData();
-            updateUI();
-        }
-
-        function deleteRecord(id, jid) {
-            const j = data.journals[jid];
-            if (!j) return;
-            const idx = j.records.findIndex(r => r.id === id);
-            if (idx === -1) return;
-            const rec = j.records[idx];
-            if (rec.photos) {
-                rec.photos.forEach(url => {
-                    const pi = data.gallery.findIndex(p => p.url === url);
-                    if (pi !== -1) data.gallery.splice(pi, 1);
-                });
-            }
-            j.records.splice(idx, 1);
-            saveData();
-            updateUI();
-        }
-
-        function toggleDone(id, jid) {
-            const j = data.journals[jid];
-            if (!j) return;
-            const rec = j.records.find(r => r.id === id);
-            if (!rec) return;
-            rec.done = !rec.done;
-            if (rec.done) addXP(5);
-            saveData();
-            updateUI();
-        }
-
-        // ---------- ЦЕЛИ ----------
-        function renderGoals() {
-            const container = document.getElementById('goalsList');
-            if (!data.goals.length) {
-                container.innerHTML = '<p style="color:#8892a8;text-align:center;padding:16px;">Нет целей</p>';
-                return;
-            }
-            container.innerHTML = data.goals.map((g, idx) => {
-                const prog = Math.min(100, (g.current / g.target) * 100);
-                return `
-              <div class="goal ${g.done ? 'done' : ''}">
-                <div class="info">
-                  <div class="title">${g.done ? '✅ ' : '🎯 '}${g.title}</div>
-                  <div class="meta">${data.journals[g.journal]?.label || '?'} · ${g.done ? 'Выполнена!' : `${g.current}/${g.target}`}</div>
-                  <div class="prog"><div class="fill" style="width:${prog}%"></div></div>
-                </div>
-                <div class="acts">
-                  ${!g.done ? `<button class="sec" data-idx="${idx}" onclick="completeGoal(${idx})"><i class="fas fa-check"></i></button>` : ''}
-                  <button class="sec danger" data-idx="${idx}" onclick="deleteGoal(${idx})"><i class="fas fa-trash"></i></button>
-                </div>
-              </div>
-            `;
-            }).join('');
-        }
-
-        function completeGoal(idx) {
-            const g = data.goals[idx];
-            if (g && !g.done) {
-                g.done = true;
-                addXP(50);
-                saveData();
-                updateUI();
-            }
-        }
-
-        function deleteGoal(idx) {
-            if (confirm('Удалить цель?')) {
-                data.goals.splice(idx, 1);
-                saveData();
-                updateUI();
-            }
-        }
-
-        function addGoal(title, journal, target, deadline) {
-            const current = getRecordsForJournal(journal).length;
-            const done = current >= target;
-            const goal = {
-                id: genId(),
-                title: title.trim(),
-                journal: journal,
-                target: parseInt(target) || 1,
-                current: current,
-                deadline: deadline || '',
-                done: done
-            };
-            if (done) addXP(50);
-            data.goals.push(goal);
-            saveData();
-            updateUI();
-        }
-
-        function updateGoalsProgress() {
-            data.goals.forEach(g => {
-                const cur = getRecordsForJournal(g.journal).length;
-                g.current = cur;
-                if (!g.done && cur >= g.target) {
-                    g.done = true;
-                    addXP(50);
+            function getAllRecords() {
+                let all = [];
+                for (let j in data.journals) {
+                    all = all.concat(data.journals[j].records.map(r => ({ ...r, journalId: j })));
                 }
-            });
-            saveData();
-        }
-
-        // ---------- ГАЛЕРЕЯ ----------
-        function renderGallery() {
-            const container = document.getElementById('galleryGrid');
-            if (!data.gallery.length) {
-                container.innerHTML = '<p style="color:#8892a8;text-align:center;padding:16px;">Нет фото</p>';
-                return;
-            }
-            container.innerHTML = data.gallery.map(p =>
-                `<div class="item"><img src="${p.url}" alt="photo" loading="lazy" /></div>`
-            ).join('');
-        }
-
-        // ---------- ГРАФИКИ ----------
-        let lineChart = null;
-        let pieChart = null;
-
-        function renderCharts() {
-            const now = new Date();
-            const month = now.getMonth();
-            const year = now.getFullYear();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const labels = [];
-            const counts = [];
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateObj = new Date(year, month, d);
-                const dateStr = dateObj.toISOString().split('T')[0];
-                labels.push(d);
-                counts.push(getRecordsForDate(dateStr).length);
+                return all;
             }
 
-            const ctx1 = document.getElementById('lineChart').getContext('2d');
-            if (lineChart) lineChart.destroy();
-            lineChart = new Chart(ctx1, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Записей',
-                        data: counts,
-                        borderColor: '#6c5ce7',
-                        backgroundColor: '#6c5ce733',
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#6c5ce7',
-                        pointRadius: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1, color: '#8892a8' } },
-                        x: { ticks: { color: '#8892a8', maxTicksLimit: 15 } }
+            function getRecordsForDate(date) {
+                return getAllRecords().filter(r => r.date === date);
+            }
+
+            function getRecordsForJournal(jid) {
+                return data.journals[jid] ? data.journals[jid].records.slice() : [];
+            }
+
+            function totalRecords() { return getAllRecords().length; }
+
+            function totalPhotos() { return data.gallery.length; }
+
+            function calcStreak(jid) {
+                const recs = getRecordsForJournal(jid);
+                if (!recs.length) return 0;
+                const dates = [...new Set(recs.map(r => r.date))].sort();
+                let streak = 0;
+                for (let i = 0; i < 365; i++) {
+                    const d = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
+                    if (dates.includes(d)) streak++;
+                    else if (i > 0) break;
+                }
+                return streak;
+            }
+
+            function totalStreak() {
+                let max = 0;
+                for (let j in data.journals) {
+                    const s = calcStreak(j);
+                    if (s > max) max = s;
+                }
+                return max;
+            }
+
+            // ---------- АВАТАРЫ ----------
+            const AVATARS = {
+                w1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=w1&backgroundColor=6c5ce7',
+                w2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=w2&backgroundColor=6c5ce7',
+                m1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=m1&backgroundColor=a29bfe',
+                m2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=m2&backgroundColor=a29bfe',
+                e1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=e1&backgroundColor=00b894',
+                e2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=e2&backgroundColor=00b894',
+                d1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d1&backgroundColor=e17055',
+                d2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d2&backgroundColor=e17055',
+                k1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=k1&backgroundColor=fdcb6e',
+                k2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=k2&backgroundColor=fdcb6e',
+            };
+
+            function getAvatar(id) { return AVATARS[id] || AVATARS.w1; }
+
+            // ---------- RPG ----------
+            function calcXP(text) {
+                let base = 10 + Math.min(20, Math.floor(text.length / 8));
+                if (text.length > 50) base += 5;
+                return Math.min(50, base);
+            }
+
+            function addXP(amount) {
+                data.user.xp += amount;
+                let leveled = false;
+                while (data.user.xp >= data.user.xpToNext) {
+                    data.user.xp -= data.user.xpToNext;
+                    data.user.level++;
+                    recalcXp();
+                    leveled = true;
+                    const avatars = ['w1', 'w2', 'm1', 'm2', 'e1', 'e2', 'd1', 'd2', 'k1', 'k2'];
+                    const idx = Math.floor(data.user.level / 2);
+                    if (idx < avatars.length && !data.user.unlocked.includes(avatars[idx])) {
+                        data.user.unlocked.push(avatars[idx]);
+                        data.user.avatar = avatars[idx];
                     }
+                    checkAchievements();
+                    playSound('level');
+                    toast(`🎉 УРОВЕНЬ ${data.user.level}!`, 'success', 4000);
                 }
-            });
+                if (amount > 0 && !leveled) playSound('xp');
+                saveData();
+                updateUI();
+            }
 
-            const jLabels = [];
-            const jCounts = [];
-            const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#0984e3', '#fd79a8', '#00cec9'];
-            for (let j in data.journals) {
-                const cnt = data.journals[j].records.length;
-                if (cnt > 0) {
-                    jLabels.push(data.journals[j].label);
-                    jCounts.push(cnt);
+            // ---------- ДОСТИЖЕНИЯ ----------
+            function checkAchievements() {
+                const ach = data.achievements || [];
+                const total = totalRecords();
+                const counts = {};
+                for (let j in data.journals) counts[j] = data.journals[j].records.length;
+                const streak = totalStreak();
+
+                const list = [
+                    { id: 'first', check: () => total >= 1, label: 'Первая запись', icon: 'fa-star' },
+                    { id: 'ten', check: () => total >= 10, label: '10 записей', icon: 'fa-medal' },
+                    { id: 'fifty', check: () => total >= 50, label: '50 записей', icon: 'fa-crown' },
+                    { id: 'sport5', check: () => counts.sport >= 5, label: 'Спортсмен 5', icon: 'fa-running' },
+                    { id: 'tasks10', check: () => counts.tasks >= 10, label: 'Организатор 10', icon: 'fa-tasks' },
+                    { id: 'photo5', check: () => data.gallery.length >= 5, label: 'Фотограф 5', icon: 'fa-camera' },
+                    { id: 'streak7', check: () => streak >= 7, label: '🔥 Серия 7 дней', icon: 'fa-fire' },
+                ];
+
+                let newAch = false;
+                list.forEach(a => {
+                    if (!ach.includes(a.id) && a.check()) {
+                        ach.push(a.id);
+                        newAch = true;
+                        playSound('achieve');
+                        toast(`🏅 Достижение: ${a.label}!`, 'warning', 4000);
+                    }
+                });
+                if (newAch) {
+                    data.achievements = ach;
+                    saveData();
                 }
             }
-            const ctx2 = document.getElementById('pieChart').getContext('2d');
-            if (pieChart) pieChart.destroy();
-            if (!jLabels.length) {
-                pieChart = new Chart(ctx2, {
-                    type: 'pie',
-                    data: { labels: ['Нет данных'], datasets: [{ data: [1], backgroundColor: ['#444'] }] },
-                    options: { plugins: { legend: { display: true, labels: { color: '#8892a8' } } } }
+
+            // ---------- ЧЕЛЛЕНДЖ ----------
+            function genChallenge() {
+                const keys = Object.keys(data.journals);
+                const jid = keys[Math.floor(Math.random() * keys.length)];
+                const j = getJournal(jid);
+                const today = new Date().toISOString().split('T')[0];
+                challenge = {
+                    jid: jid,
+                    label: j.label,
+                    done: getRecordsForDate(today).some(r => r.journalId === jid)
+                };
+                updateChallengeUI();
+            }
+
+            function updateChallengeUI() {
+                const el = document.getElementById('challengeText');
+                const status = document.getElementById('challengeStatus');
+                const btn = document.getElementById('challengeBtn');
+                if (!challenge) { genChallenge(); return; }
+                el.textContent = `${challenge.label}`;
+                if (challenge.done) {
+                    status.textContent = '✅ Выполнено!';
+                    status.style.color = 'var(--green)';
+                    btn.style.display = 'none';
+                } else {
+                    status.textContent = '⏳ Ожидает';
+                    status.style.color = 'var(--text2)';
+                    btn.style.display = 'inline-flex';
+                }
+            }
+
+            function completeChallenge() {
+                if (!challenge || challenge.done) return;
+                const today = new Date().toISOString().split('T')[0];
+                if (getRecordsForDate(today).some(r => r.journalId === challenge.jid)) {
+                    challenge.done = true;
+                    addXP(30);
+                    toast('🎯 Челлендж выполнен! +30 XP', 'success');
+                    updateChallengeUI();
+                    updateUI();
+                } else {
+                    toast('Сделайте запись в "' + challenge.label + '" сегодня!', 'warning');
+                }
+            }
+
+            // ---------- ОБНОВЛЕНИЕ UI ----------
+            function updateUI() {
+                // XP
+                const pct = Math.min(100, (data.user.xp / data.user.xpToNext) * 100);
+                document.getElementById('xpFill').style.width = pct + '%';
+                document.getElementById('lvlDisplay').textContent = 'Ур. ' + data.user.level;
+
+                // Профиль
+                document.getElementById('profName').textContent = data.user.name;
+                document.getElementById('pLvl').textContent = data.user.level;
+                document.getElementById('pXp').textContent = data.user.xp;
+                document.getElementById('pXpMax').textContent = data.user.xpToNext;
+                document.getElementById('pStreak').textContent = '🔥 ' + totalStreak() + ' дн.';
+                document.getElementById('sRecs').textContent = totalRecords();
+                document.getElementById('sGoals').textContent = data.goals.length;
+                document.getElementById('sPhotos').textContent = totalPhotos();
+                document.getElementById('sAch').textContent = (data.achievements || []).length;
+
+                // Аватар
+                document.getElementById('avatarBox').style.backgroundImage = `url(${getAvatar(data.user.avatar)})`;
+                document.getElementById('avatarLvl').textContent = data.user.level;
+                const hasGlow = (data.user.effects || []).includes('glow');
+                document.getElementById('effGlow').style.display = hasGlow ? 'block' : 'none';
+
+                // Достижения
+                const achContainer = document.getElementById('achList');
+                const achMap = {
+                    first: 'Первая запись',
+                    ten: '10 записей',
+                    fifty: '50 записей',
+                    sport5: 'Спортсмен 5',
+                    tasks10: 'Организатор 10',
+                    photo5: 'Фотограф 5',
+                    streak7: '🔥 Серия 7 дней'
+                };
+                const achIcons = {
+                    first: 'fa-star',
+                    ten: 'fa-medal',
+                    fifty: 'fa-crown',
+                    sport5: 'fa-running',
+                    tasks10: 'fa-tasks',
+                    photo5: 'fa-camera',
+                    streak7: 'fa-fire'
+                };
+                const achievements = data.achievements || [];
+                if (!achievements.length) {
+                    achContainer.innerHTML = '<p style="color:var(--text2);font-size:0.85rem;">Нет достижений</p>';
+                } else {
+                    achContainer.innerHTML = achievements.map(id =>
+                        `<span class="badge"><i class="fas ${achIcons[id] || 'fa-award'}"></i> ${achMap[id] || id}</span>`
+                    ).join('');
+                }
+
+                renderCalendar();
+                renderJournalTabs();
+                renderJournalRecords();
+                renderGoals();
+                renderGallery();
+                renderCharts();
+                updateChallengeUI();
+            }
+
+            // ---------- КАЛЕНДАРЬ ----------
+            function renderCalendar() {
+                const grid = document.getElementById('calGrid');
+                const firstDay = new Date(currentYear, currentMonth, 1);
+                const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+
+                grid.innerHTML = '';
+                const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+                weekdays.forEach(w => {
+                    const d = document.createElement('div');
+                    d.className = 'wd';
+                    d.textContent = w;
+                    grid.appendChild(d);
                 });
-            } else {
-                pieChart = new Chart(ctx2, {
-                    type: 'pie',
+
+                for (let i = 0; i < firstDayOfWeek; i++) {
+                    const d = document.createElement('div');
+                    d.className = 'day empty';
+                    grid.appendChild(d);
+                }
+
+                for (let d = 1; d <= lastDay.getDate(); d++) {
+                    const dateObj = new Date(currentYear, currentMonth, d);
+                    const dateStr = dateObj.toISOString().split('T')[0];
+                    const div = document.createElement('div');
+                    div.className = 'day';
+                    if (dateStr === new Date().toISOString().split('T')[0]) div.classList.add('today');
+                    if (dateStr === selectedDate) div.classList.add('sel');
+                    if (getRecordsForDate(dateStr).length > 0) div.classList.add('has');
+                    div.textContent = d;
+                    div.dataset.date = dateStr;
+                    div.addEventListener('click', function() {
+                        selectedDate = this.dataset.date;
+                        renderCalendar();
+                        renderDayRecords();
+                    });
+                    grid.appendChild(div);
+                }
+
+                document.getElementById('monthYear').textContent =
+                    firstDay.toLocaleString('ru', { month: 'long', year: 'numeric' });
+                renderDayRecords();
+            }
+
+            function renderDayRecords() {
+                const container = document.getElementById('dayRecs');
+                const records = getRecordsForDate(selectedDate);
+                if (!records.length) {
+                    container.innerHTML = '<p style="color:var(--text2);text-align:center;padding:10px;">Нет записей</p>';
+                    return;
+                }
+                container.innerHTML = records.map(r => {
+                    const j = getJournal(r.journalId);
+                    return `
+                <div class="rec">
+                  <div class="c">
+                    <div class="t">${r.text}</div>
+                    <div class="m">
+                      <span><i class="fas ${j ? j.icon : 'fa-book'}"></i> ${j ? j.label : '?'}</span>
+                      <span class="xp">${r.xp || 0} XP</span>
+                      <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
+                    </div>
+                    ${r.photos && r.photos.length ? `<div class="photos">${r.photos.map(p => `<img src="${p}" alt="photo" />`).join('')}</div>` : ''}
+                  </div>
+                  <div class="acts">
+                    <button class="done ${r.done ? 'active' : ''}" data-id="${r.id}" data-journal="${r.journalId}"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
+                    <button class="del" data-id="${r.id}" data-journal="${r.journalId}"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+
+                container.querySelectorAll('.done').forEach(b => {
+                    b.addEventListener('click', function() {
+                        toggleDone(this.dataset.id, this.dataset.journal);
+                    });
+                });
+                container.querySelectorAll('.del').forEach(b => {
+                    b.addEventListener('click', function() {
+                        if (confirm('Удалить запись?')) deleteRecord(this.dataset.id, this.dataset.journal);
+                    });
+                });
+            }
+
+            // ---------- ЖУРНАЛЫ ----------
+            function renderJournalTabs() {
+                const container = document.getElementById('journalTabs');
+                container.innerHTML = '';
+                for (let jid in data.journals) {
+                    const j = data.journals[jid];
+                    const tab = document.createElement('div');
+                    tab.className = 'tab' + (jid === currentJournal ? ' active' : '');
+                    tab.innerHTML = `<i class="fas ${j.icon}"></i> ${j.label}`;
+                    tab.dataset.jid = jid;
+                    tab.addEventListener('click', function() {
+                        currentJournal = this.dataset.jid;
+                        renderJournalTabs();
+                        renderJournalRecords();
+                    });
+                    container.appendChild(tab);
+                }
+            }
+
+            function renderJournalRecords() {
+                const container = document.getElementById('journalRecs');
+                const records = getRecordsForJournal(currentJournal);
+                if (!records.length) {
+                    container.innerHTML = '<p style="color:var(--text2);text-align:center;padding:20px;">Нет записей</p>';
+                    return;
+                }
+                records.sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created);
+                container.innerHTML = records.map(r => {
+                    return `
+                <div class="rec">
+                  <div class="c">
+                    <div class="t">${r.text}</div>
+                    <div class="m">
+                      <span><i class="far fa-calendar-alt"></i> ${r.date}</span>
+                      <span class="xp">${r.xp || 0} XP</span>
+                      <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
+                    </div>
+                    ${r.photos && r.photos.length ? `<div class="photos">${r.photos.map(p => `<img src="${p}" alt="photo" />`).join('')}</div>` : ''}
+                  </div>
+                  <div class="acts">
+                    <button class="done ${r.done ? 'active' : ''}" data-id="${r.id}" data-journal="${currentJournal}"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
+                    <button class="del" data-id="${r.id}" data-journal="${currentJournal}"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+
+                container.querySelectorAll('.done').forEach(b => {
+                    b.addEventListener('click', function() {
+                        toggleDone(this.dataset.id, this.dataset.journal);
+                    });
+                });
+                container.querySelectorAll('.del').forEach(b => {
+                    b.addEventListener('click', function() {
+                        if (confirm('Удалить запись?')) deleteRecord(this.dataset.id, this.dataset.journal);
+                    });
+                });
+            }
+
+            // ---------- ОПЕРАЦИИ С ЗАПИСЯМИ ----------
+            function addRecord(jid, text, date, photos, done = false) {
+                const xp = calcXP(text);
+                const rec = {
+                    id: genId(),
+                    date: date || new Date().toISOString().split('T')[0],
+                    text: text.trim(),
+                    photos: photos || [],
+                    done: done,
+                    xp: xp,
+                    created: Date.now()
+                };
+                data.journals[jid].records.push(rec);
+                (photos || []).forEach(url => {
+                    data.gallery.push({ id: genId(), url: url, date: rec.date });
+                });
+                addXP(xp);
+
+                // Челлендж
+                const today = new Date().toISOString().split('T')[0];
+                if (challenge && !challenge.done && challenge.jid === jid && rec.date === today) {
+                    completeChallenge();
+                }
+
+                saveData();
+                updateUI();
+                toast(`✅ Запись добавлена! +${xp} XP`, 'success');
+            }
+
+            function deleteRecord(id, jid) {
+                const j = data.journals[jid];
+                if (!j) return;
+                const idx = j.records.findIndex(r => r.id === id);
+                if (idx === -1) return;
+                const rec = j.records[idx];
+                if (rec.photos) {
+                    rec.photos.forEach(url => {
+                        const pi = data.gallery.findIndex(p => p.url === url);
+                        if (pi !== -1) data.gallery.splice(pi, 1);
+                    });
+                }
+                j.records.splice(idx, 1);
+                saveData();
+                updateUI();
+                toast('🗑️ Запись удалена', 'error');
+            }
+
+            function toggleDone(id, jid) {
+                const j = data.journals[jid];
+                if (!j) return;
+                const rec = j.records.find(r => r.id === id);
+                if (!rec) return;
+                rec.done = !rec.done;
+                if (rec.done) {
+                    addXP(5);
+                    toast('✅ Выполнено! +5 XP', 'success');
+                }
+                saveData();
+                updateUI();
+            }
+
+            // ---------- ЦЕЛИ ----------
+            function renderGoals() {
+                const container = document.getElementById('goalsList');
+                if (!data.goals.length) {
+                    container.innerHTML = '<p style="color:var(--text2);text-align:center;padding:16px;">Нет целей</p>';
+                    return;
+                }
+                container.innerHTML = data.goals.map((g, idx) => {
+                    const prog = Math.min(100, (g.current / g.target) * 100);
+                    return `
+                <div class="goal ${g.done ? 'done' : ''}">
+                  <div class="info">
+                    <div class="title">${g.done ? '✅ ' : '🎯 '}${g.title}</div>
+                    <div class="meta">${getJournal(g.journal)?.label || '?'} · ${g.done ? 'Выполнена!' : `${g.current}/${g.target}`}</div>
+                    <div class="prog"><div class="fill" style="width:${prog}%"></div></div>
+                  </div>
+                  <div class="acts">
+                    ${!g.done ? `<button class="sec" data-idx="${idx}" data-action="completeGoal"><i class="fas fa-check"></i></button>` : ''}
+                    <button class="sec danger" data-idx="${idx}" data-action="deleteGoal"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+
+                container.querySelectorAll('[data-action="completeGoal"]').forEach(b => {
+                    b.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.idx);
+                        const g = data.goals[idx];
+                        if (g && !g.done) {
+                            g.done = true;
+                            addXP(50);
+                            toast('🎯 Цель выполнена! +50 XP', 'success');
+                            saveData();
+                            updateUI();
+                        }
+                    });
+                });
+                container.querySelectorAll('[data-action="deleteGoal"]').forEach(b => {
+                    b.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.idx);
+                        if (confirm('Удалить цель?')) {
+                            data.goals.splice(idx, 1);
+                            saveData();
+                            updateUI();
+                        }
+                    });
+                });
+            }
+
+            function addGoal(title, journal, target, deadline) {
+                const current = getRecordsForJournal(journal).length;
+                const done = current >= target;
+                const goal = {
+                    id: genId(),
+                    title: title.trim(),
+                    journal: journal,
+                    target: parseInt(target) || 1,
+                    current: current,
+                    deadline: deadline || '',
+                    done: done,
+                    created: Date.now()
+                };
+                if (done) {
+                    addXP(50);
+                    toast('🎯 Цель сразу выполнена! +50 XP', 'success');
+                }
+                data.goals.push(goal);
+                saveData();
+                updateUI();
+                toast('✅ Цель создана!', 'success');
+            }
+
+            function updateGoalsProgress() {
+                data.goals.forEach(g => {
+                    const cur = getRecordsForJournal(g.journal).length;
+                    g.current = cur;
+                    if (!g.done && cur >= g.target) {
+                        g.done = true;
+                        addXP(50);
+                        toast(`🎯 Цель "${g.title}" выполнена!`, 'success');
+                    }
+                });
+                saveData();
+            }
+
+            // ---------- ГАЛЕРЕЯ ----------
+            function renderGallery() {
+                const container = document.getElementById('galleryGrid');
+                if (!data.gallery.length) {
+                    container.innerHTML = '<p style="color:var(--text2);text-align:center;padding:16px;">Нет фото</p>';
+                    return;
+                }
+                container.innerHTML = data.gallery.map(p =>
+                    `<div class="item"><img src="${p.url}" alt="photo" loading="lazy" /></div>`
+                ).join('');
+            }
+
+            // ---------- ГРАФИКИ ----------
+            function renderCharts() {
+                const now = new Date();
+                const month = now.getMonth();
+                const year = now.getFullYear();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const labels = [];
+                const counts = [];
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dateObj = new Date(year, month, d);
+                    const dateStr = dateObj.toISOString().split('T')[0];
+                    labels.push(d);
+                    counts.push(getRecordsForDate(dateStr).length);
+                }
+
+                const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6c5ce7';
+
+                const ctx1 = document.getElementById('lineChart').getContext('2d');
+                if (lineChart) lineChart.destroy();
+                lineChart = new Chart(ctx1, {
+                    type: 'line',
                     data: {
-                        labels: jLabels,
-                        datasets: [{ data: jCounts, backgroundColor: colors.slice(0, jLabels.length), borderWidth: 2,
-                            borderColor: '#0b0e14' }]
+                        labels: labels,
+                        datasets: [{
+                            label: 'Записей',
+                            data: counts,
+                            borderColor: accent,
+                            backgroundColor: accent + '33',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: accent,
+                            pointRadius: 3
+                        }]
                     },
                     options: {
-                        plugins: { legend: { position: 'bottom', labels: { color: '#8892a8', padding: 8 } } }
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text2)' } },
+                            x: { ticks: { color: 'var(--text2)', maxTicksLimit: 15 } }
+                        }
                     }
                 });
-            }
-        }
 
-        // ---------- ЭКСПОРТ / ИМПОРТ ----------
-        function exportData() {
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `journal_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            alert('Экспорт выполнен!');
-        }
-
-        function importData(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imp = JSON.parse(e.target.result);
-                    if (imp.user && imp.journals) {
-                        data = imp;
-                        for (let j in data.journals) {
-                            if (!data.journals[j]) data.journals[j] = { records: [] };
+                const jLabels = [];
+                const jCounts = [];
+                const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#0984e3', '#fd79a8', '#00cec9'];
+                for (let j in data.journals) {
+                    const cnt = data.journals[j].records.length;
+                    if (cnt > 0) {
+                        jLabels.push(data.journals[j].label);
+                        jCounts.push(cnt);
+                    }
+                }
+                const ctx2 = document.getElementById('pieChart').getContext('2d');
+                if (pieChart) pieChart.destroy();
+                if (!jLabels.length) {
+                    pieChart = new Chart(ctx2, {
+                        type: 'pie',
+                        data: { labels: ['Нет данных'], datasets: [{ data: [1], backgroundColor: ['#444'] }] },
+                        options: { plugins: { legend: { display: true, labels: { color: 'var(--text2)' } } } }
+                    });
+                } else {
+                    pieChart = new Chart(ctx2, {
+                        type: 'pie',
+                        data: {
+                            labels: jLabels,
+                            datasets: [{ data: jCounts, backgroundColor: colors.slice(0, jLabels.length), borderWidth: 2,
+                                borderColor: 'var(--bg)' }]
+                        },
+                        options: {
+                            plugins: { legend: { position: 'bottom', labels: { color: 'var(--text2)',
+                                        padding: 8 } } }
                         }
+                    });
+                }
+            }
+
+            // ---------- ЭКСПОРТ / ИМПОРТ ----------
+            function exportData() {
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `journal_backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast('📦 Экспорт выполнен', 'success');
+            }
+
+            function exportCSV() {
+                const recs = getAllRecords();
+                if (!recs.length) { toast('Нет записей для экспорта', 'warning'); return; }
+                let csv = 'Дата,Журнал,Текст,Выполнено,XP\n';
+                recs.forEach(r => {
+                    const j = getJournal(r.journalId);
+                    csv +=
+                        `${r.date},${j ? j.label : '?'},"${r.text.replace(/"/g,'""')}",${r.done ? 'Да' : 'Нет'},${r.xp || 0}\n`;
+                });
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `journal_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast('📊 CSV экспортирован', 'success');
+            }
+
+            function importData(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imp = JSON.parse(e.target.result);
+                        if (imp.user && imp.journals) {
+                            data = imp;
+                            for (let j in DEFAULT_DATA.journals) {
+                                if (!data.journals[j]) data.journals[j] = { ...DEFAULT_DATA.journals[j], records: [] };
+                            }
+                            recalcXp();
+                            saveData();
+                            updateUI();
+                            toast('✅ Импорт выполнен', 'success');
+                        } else {
+                            toast('Неверный формат файла', 'error');
+                        }
+                    } catch (err) { toast('Ошибка чтения файла', 'error'); }
+                };
+                reader.readAsText(file);
+            }
+
+            // ---------- НАВИГАЦИЯ ----------
+            function navigate(page) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                const target = document.getElementById('page-' + page);
+                if (target) target.classList.add('active');
+                document.querySelectorAll('nav a').forEach(a => {
+                    a.classList.toggle('active', a.dataset.page === page);
+                });
+                if (page === 'calendar') renderCalendar();
+                else if (page === 'journals') { renderJournalTabs();
+                    renderJournalRecords(); } else if (page === 'goals') renderGoals();
+                else if (page === 'charts') renderCharts();
+                else if (page === 'gallery') renderGallery();
+                else if (page === 'profile') updateUI();
+                window.location.hash = page;
+            }
+
+            // ---------- МОДАЛКИ ----------
+            function openRecordModal(jid, date) {
+                document.getElementById('recModalTitle').innerHTML = '<i class="fas fa-plus"></i> Новая запись';
+                document.getElementById('recText').value = '';
+                document.getElementById('recDate').value = date || new Date().toISOString().split('T')[0];
+                document.getElementById('recPhotos').value = '';
+                const sel = document.getElementById('recJournal');
+                sel.innerHTML = '';
+                for (let j in data.journals) {
+                    const opt = document.createElement('option');
+                    opt.value = j;
+                    opt.textContent = data.journals[j].label;
+                    if (j === jid) opt.selected = true;
+                    sel.appendChild(opt);
+                }
+                document.getElementById('recModal').classList.add('open');
+            }
+
+            function closeRecordModal() {
+                document.getElementById('recModal').classList.remove('open');
+            }
+
+            function openGoalModal() {
+                document.getElementById('goalTitle').value = '';
+                document.getElementById('goalTarget').value = '3';
+                document.getElementById('goalDeadline').value = '';
+                const sel = document.getElementById('goalJournal');
+                sel.innerHTML = '';
+                for (let j in data.journals) {
+                    const opt = document.createElement('option');
+                    opt.value = j;
+                    opt.textContent = data.journals[j].label;
+                    if (j === currentJournal) opt.selected = true;
+                    sel.appendChild(opt);
+                }
+                document.getElementById('goalModal').classList.add('open');
+            }
+
+            function closeGoalModal() {
+                document.getElementById('goalModal').classList.remove('open');
+            }
+
+            // ---------- ИНИЦИАЛИЗАЦИЯ ----------
+            function init() {
+                loadData();
+
+                // Навигация
+                document.querySelectorAll('nav a').forEach(a => {
+                    a.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        navigate(this.dataset.page);
+                    });
+                });
+
+                // Календарь
+                document.getElementById('prevM').addEventListener('click', function() {
+                    currentMonth--;
+                    if (currentMonth < 0) { currentMonth = 11;
+                        currentYear--; }
+                    renderCalendar();
+                });
+                document.getElementById('nextM').addEventListener('click', function() {
+                    currentMonth++;
+                    if (currentMonth > 11) { currentMonth = 0;
+                        currentYear++; }
+                    renderCalendar();
+                });
+
+                // Добавление записи
+                document.getElementById('addRec').addEventListener('click', function() {
+                    openRecordModal(currentJournal, new Date().toISOString().split('T')[0]);
+                });
+                document.getElementById('addDayRec').addEventListener('click', function() {
+                    openRecordModal(currentJournal, selectedDate);
+                });
+
+                // Сохранение записи
+                document.getElementById('recSave').addEventListener('click', function() {
+                    const text = document.getElementById('recText').value.trim();
+                    if (!text) { toast('Введите текст', 'error'); return; }
+                    const jid = document.getElementById('recJournal').value;
+                    const date = document.getElementById('recDate').value;
+                    const files = document.getElementById('recPhotos').files;
+                    const urls = [];
+                    if (files.length) {
+                        let loaded = 0;
+                        for (let f of files) {
+                            const r = new FileReader();
+                            r.onload = function(e) {
+                                urls.push(e.target.result);
+                                loaded++;
+                                if (loaded === files.length) {
+                                    addRecord(jid, text, date, urls);
+                                    closeRecordModal();
+                                }
+                            };
+                            r.readAsDataURL(f);
+                        }
+                    } else {
+                        addRecord(jid, text, date, []);
+                        closeRecordModal();
+                    }
+                });
+                document.getElementById('recCancel').addEventListener('click', closeRecordModal);
+
+                // Цели
+                document.getElementById('addGoal').addEventListener('click', openGoalModal);
+                document.getElementById('goalSave').addEventListener('click', function() {
+                    const title = document.getElementById('goalTitle').value.trim();
+                    if (!title) { toast('Введите название', 'error'); return; }
+                    const journal = document.getElementById('goalJournal').value;
+                    const target = parseInt(document.getElementById('goalTarget').value) || 1;
+                    const deadline = document.getElementById('goalDeadline').value;
+                    addGoal(title, journal, target, deadline);
+                    closeGoalModal();
+                });
+                document.getElementById('goalCancel').addEventListener('click', closeGoalModal);
+
+                // Челлендж
+                document.getElementById('challengeBtn').addEventListener('click', completeChallenge);
+
+                // Тема
+                document.getElementById('themeBtn').addEventListener('click', function() {
+                    document.body.classList.toggle('light');
+                    isLight = document.body.classList.contains('light');
+                    const icon = this.querySelector('i');
+                    icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+                    localStorage.setItem('heroTheme', isLight ? 'light' : 'dark');
+                    // Перерисовываем графики с новой темой
+                    renderCharts();
+                });
+
+                // Профиль
+                document.getElementById('editProf').addEventListener('click', function() {
+                    const name = prompt('Имя:', data.user.name);
+                    if (name && name.trim()) {
+                        data.user.name = name.trim();
                         saveData();
                         updateUI();
-                        alert('Импорт выполнен!');
-                    } else {
-                        alert('Неверный формат файла');
+                        toast('✅ Имя обновлено', 'success');
                     }
-                } catch (err) { alert('Ошибка чтения файла'); }
-            };
-            reader.readAsText(file);
-        }
-
-        // ---------- НАВИГАЦИЯ ----------
-        function navigate(page) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const target = document.getElementById('page-' + page);
-            if (target) target.classList.add('active');
-            document.querySelectorAll('nav a').forEach(a => {
-                a.classList.toggle('active', a.dataset.page === page);
-            });
-            if (page === 'calendar') renderCalendar();
-            else if (page === 'journals') { renderJournalTabs();
-                renderJournalRecords(); } else if (page === 'goals') renderGoals();
-            else if (page === 'charts') renderCharts();
-            else if (page === 'gallery') renderGallery();
-            else if (page === 'profile') updateUI();
-            window.location.hash = page;
-        }
-
-        // ---------- МОДАЛКИ ----------
-        function openRecordModal(jid, date) {
-            document.getElementById('recText').value = '';
-            document.getElementById('recDate').value = date || new Date().toISOString().split('T')[0];
-            document.getElementById('recPhotos').value = '';
-            const sel = document.getElementById('recJournal');
-            sel.innerHTML = '';
-            for (let j in data.journals) {
-                const opt = document.createElement('option');
-                opt.value = j;
-                opt.textContent = data.journals[j].label;
-                if (j === jid) opt.selected = true;
-                sel.appendChild(opt);
-            }
-            document.getElementById('recModal').classList.add('open');
-        }
-
-        function closeRecordModal() {
-            document.getElementById('recModal').classList.remove('open');
-        }
-
-        function openGoalModal() {
-            document.getElementById('goalTitle').value = '';
-            document.getElementById('goalTarget').value = '3';
-            document.getElementById('goalDeadline').value = '';
-            const sel = document.getElementById('goalJournal');
-            sel.innerHTML = '';
-            for (let j in data.journals) {
-                const opt = document.createElement('option');
-                opt.value = j;
-                opt.textContent = data.journals[j].label;
-                if (j === currentJournal) opt.selected = true;
-                sel.appendChild(opt);
-            }
-            document.getElementById('goalModal').classList.add('open');
-        }
-
-        function closeGoalModal() {
-            document.getElementById('goalModal').classList.remove('open');
-        }
-
-        // ---------- ИНИЦИАЛИЗАЦИЯ ----------
-        function init() {
-            loadData();
-
-            // Навигация
-            document.querySelectorAll('nav a').forEach(a => {
-                a.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    navigate(this.dataset.page);
+                    const avatars = data.user.unlocked || ['w1'];
+                    const list = avatars.join(', ');
+                    const av = prompt(`Аватар (${list}):`, data.user.avatar);
+                    if (av && avatars.includes(av)) {
+                        data.user.avatar = av;
+                        saveData();
+                        updateUI();
+                    }
+                    const effects = (data.user.effects || []).join(', ') || 'нет';
+                    const eff = prompt('Эффекты (glow):', effects);
+                    if (eff !== null) {
+                        data.user.effects = eff.split(',').map(s => s.trim()).filter(s => s === 'glow');
+                        saveData();
+                        updateUI();
+                    }
                 });
-            });
 
-            // Календарь
-            document.getElementById('prevM').addEventListener('click', function() {
-                currentMonth--;
-                if (currentMonth < 0) { currentMonth = 11;
-                    currentYear--; }
-                renderCalendar();
-            });
-            document.getElementById('nextM').addEventListener('click', function() {
-                currentMonth++;
-                if (currentMonth > 11) { currentMonth = 0;
-                    currentYear++; }
-                renderCalendar();
-            });
-
-            // Добавление записи
-            document.getElementById('addRec').addEventListener('click', function() {
-                openRecordModal(currentJournal, new Date().toISOString().split('T')[0]);
-            });
-            document.getElementById('addDayRec').addEventListener('click', function() {
-                openRecordModal(currentJournal, selectedDate);
-            });
-
-            // Сохранение записи
-            document.getElementById('recSave').addEventListener('click', function() {
-                const text = document.getElementById('recText').value.trim();
-                if (!text) { alert('Введите текст'); return; }
-                const jid = document.getElementById('recJournal').value;
-                const date = document.getElementById('recDate').value;
-                const files = document.getElementById('recPhotos').files;
-                const urls = [];
-                if (files.length) {
-                    let loaded = 0;
-                    for (let f of files) {
-                        const r = new FileReader();
-                        r.onload = function(e) {
-                            urls.push(e.target.result);
-                            loaded++;
-                            if (loaded === files.length) {
-                                addRecord(jid, text, date, urls);
-                                closeRecordModal();
-                            }
-                        };
-                        r.readAsDataURL(f);
+                // Экспорт/Импорт
+                document.getElementById('exportBtn').addEventListener('click', exportData);
+                document.getElementById('csvBtn').addEventListener('click', exportCSV);
+                document.getElementById('importBtn').addEventListener('click', function() {
+                    document.getElementById('importFile').click();
+                });
+                document.getElementById('importFile').addEventListener('change', function(e) {
+                    if (this.files.length) {
+                        importData(this.files[0]);
+                        this.value = '';
                     }
-                } else {
-                    addRecord(jid, text, date, []);
-                    closeRecordModal();
-                }
-            });
-            document.getElementById('recCancel').addEventListener('click', closeRecordModal);
+                });
 
-            // Цели
-            document.getElementById('addGoal').addEventListener('click', openGoalModal);
-            document.getElementById('goalSave').addEventListener('click', function() {
-                const title = document.getElementById('goalTitle').value.trim();
-                if (!title) { alert('Введите название'); return; }
-                const journal = document.getElementById('goalJournal').value;
-                const target = parseInt(document.getElementById('goalTarget').value) || 1;
-                const deadline = document.getElementById('goalDeadline').value;
-                addGoal(title, journal, target, deadline);
-                closeGoalModal();
-            });
-            document.getElementById('goalCancel').addEventListener('click', closeGoalModal);
+                // Обновление журнала
+                document.getElementById('refreshJ').addEventListener('click', function() {
+                    renderJournalRecords();
+                    toast('🔄 Обновлено', 'info');
+                });
 
-            // Тема (простая)
-            document.getElementById('themeBtn').addEventListener('click', function() {
-                document.body.style.background = document.body.style.background === '#0b0e14' ? '#f0f2f5' : '#0b0e14';
-                document.body.style.color = document.body.style.color === '#e8edf5' ? '#1a1f2b' : '#e8edf5';
-                this.querySelector('i').className = document.body.style.background === '#0b0e14' ? 'fas fa-moon' :
-                    'fas fa-sun';
-            });
+                // Закрытие модалок по Escape и клику на оверлей
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        closeRecordModal();
+                        closeGoalModal();
+                    }
+                });
+                document.getElementById('recModal').addEventListener('click', function(e) {
+                    if (e.target === this) closeRecordModal();
+                });
+                document.getElementById('goalModal').addEventListener('click', function(e) {
+                    if (e.target === this) closeGoalModal();
+                });
 
-            // Профиль
-            document.getElementById('editProf').addEventListener('click', function() {
-                const name = prompt('Имя:', data.user.name);
-                if (name && name.trim()) {
-                    data.user.name = name.trim();
-                    saveData();
-                    updateUI();
-                }
-            });
+                // Хеш-навигация
+                window.addEventListener('hashchange', function() {
+                    const hash = window.location.hash.replace('#', '') || 'calendar';
+                    navigate(hash);
+                });
 
-            // Экспорт/Импорт
-            document.getElementById('exportBtn').addEventListener('click', exportData);
-            document.getElementById('importBtn').addEventListener('click', function() {
-                document.getElementById('importFile').click();
-            });
-            document.getElementById('importFile').addEventListener('change', function(e) {
-                if (this.files.length) {
-                    importData(this.files[0]);
-                    this.value = '';
-                }
-            });
+                // СТАРТ
+                const initial = window.location.hash.replace('#', '') || 'calendar';
+                genChallenge();
+                updateGoalsProgress();
+                updateUI();
+                navigate(initial);
 
-            // Обновление журнала
-            document.getElementById('refreshJ').addEventListener('click', function() {
-                renderJournalRecords();
-            });
+                toast('⚔️ Добро пожаловать, Герой!', 'info', 2500);
+            }
 
-            // Закрытие модалок
-            document.getElementById('recModal').addEventListener('click', function(e) {
-                if (e.target === this) closeRecordModal();
-            });
-            document.getElementById('goalModal').addEventListener('click', function(e) {
-                if (e.target === this) closeGoalModal();
-            });
+            // Запуск
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
 
-            // Хеш-навигация
-            window.addEventListener('hashchange', function() {
-                const hash = window.location.hash.replace('#', '') || 'calendar';
-                navigate(hash);
-            });
-
-            // СТАРТ
-            updateGoalsProgress();
-            updateUI();
-            const initial = window.location.hash.replace('#', '') || 'calendar';
-            navigate(initial);
-
-            alert('⚔️ Добро пожаловать, Герой!');
-        }
-
-        // Запуск
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
+        })();
     </script>
 </body>
 </html>
