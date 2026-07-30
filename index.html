@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -12,24 +11,22 @@
       padding: 0;
       box-sizing: border-box;
       font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-      transition: background 0.3s, color 0.25s, border 0.25s, box-shadow 0.3s;
+      transition: background 0.4s, color 0.3s, border 0.3s, box-shadow 0.3s, transform 0.2s;
     }
 
     body {
       min-height: 100vh;
-      background: #f5f1eb;
-      color: #1e1e2a;
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 12px;
-      transition: background 0.4s;
+      transition: background 0.5s, backdrop-filter 0.5s;
+      background: #e8e4de;
     }
 
     .app {
       max-width: 480px;
       width: 100%;
-      background: #ffffffdd;
       backdrop-filter: blur(2px);
       border-radius: 36px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 6px 12px rgba(0,0,0,0.05);
@@ -37,7 +34,7 @@
       padding: 20px 18px 12px;
       border: 1px solid rgba(255,255,255,0.4);
       position: relative;
-      transition: background 0.4s, border 0.4s;
+      transition: background 0.5s, border 0.5s, box-shadow 0.5s;
     }
 
     /* ===== ВЕРХНИЙ БАР ===== */
@@ -45,33 +42,32 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
-      gap: 10px;
+      margin-bottom: 14px;
+      gap: 8px;
     }
 
     .menu-btn {
       font-size: 1.6rem;
       background: none;
       border: none;
-      color: #3d3d4e;
       cursor: pointer;
       padding: 4px 6px;
       border-radius: 20px;
       transition: 0.15s;
+      position: relative;
     }
-    .menu-btn:hover { background: #eae6df; }
+    .menu-btn:hover { transform: scale(1.1); }
 
     .profile-card {
       display: flex;
       align-items: center;
       gap: 10px;
-      background: #f0ede8;
       padding: 4px 14px 4px 6px;
       border-radius: 60px;
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
       flex: 1;
       max-width: 210px;
-      transition: background 0.3s;
+      transition: background 0.4s;
     }
 
     .avatar {
@@ -82,7 +78,6 @@
       align-items: center;
       justify-content: center;
       font-size: 1.4rem;
-      background: linear-gradient(145deg, #b8a48b, #8f7b66);
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       flex-shrink: 0;
       transition: 0.3s;
@@ -103,11 +98,9 @@
       text-overflow: ellipsis;
     }
     .profile-level {
-      font-size: 0.65rem;
-      background: #d9cec0;
+      font-size: 0.6rem;
       padding: 0 10px;
       border-radius: 20px;
-      color: #2c2c3a;
       font-weight: 500;
       display: inline-block;
       width: fit-content;
@@ -116,7 +109,6 @@
     .xp-bar-wrap {
       width: 100%;
       height: 4px;
-      background: #ddd6cc;
       border-radius: 10px;
       margin-top: 3px;
       overflow: hidden;
@@ -124,14 +116,13 @@
     }
     .xp-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #f7b731, #f5a623);
       border-radius: 10px;
-      transition: width 0.5s ease;
+      transition: width 0.6s ease;
       width: 0%;
+      background: linear-gradient(90deg, #f7b731, #f5a623);
     }
 
     .theme-toggle {
-      background: #eae5de;
       border: none;
       font-size: 1.3rem;
       width: 40px;
@@ -141,31 +132,95 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: #3d3d4e;
       transition: 0.15s;
       flex-shrink: 0;
     }
-    .theme-toggle:hover { background: #d5cec4; }
+    .theme-toggle:hover { transform: scale(1.05); }
 
-    /* ===== ЦВЕТОВЫЕ СХЕМЫ ===== */
-    .scheme-selector {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      margin: 6px 0 10px;
-      flex-wrap: wrap;
+    /* ===== МЕНЮ (выпадающее) ===== */
+    .menu-dropdown {
+      display: none;
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(10px);
+      border-radius: 28px;
+      padding: 20px 18px;
+      z-index: 100;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      max-height: 70vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255,255,255,0.3);
+      transition: all 0.3s;
     }
-    .scheme-dot {
-      width: 28px;
-      height: 28px;
-      border-radius: 30px;
+    .menu-dropdown.open { display: block; animation: slideDown 0.25s ease; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .menu-dropdown h4 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.5;
+      margin: 14px 0 8px;
+      font-weight: 600;
+    }
+    .menu-dropdown h4:first-child { margin-top: 0; }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: 0.15s;
+      font-weight: 500;
+      font-size: 0.9rem;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .menu-item:hover { background: rgba(0,0,0,0.05); transform: translateX(4px); }
+    .menu-item i { width: 24px; font-size: 1.1rem; }
+
+    .scheme-options {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 8px 0 4px;
+    }
+    .scheme-opt {
+      padding: 8px 4px;
+      border-radius: 16px;
       border: 2px solid transparent;
+      text-align: center;
+      font-size: 0.55rem;
+      font-weight: 600;
       cursor: pointer;
       transition: 0.2s;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      color: white;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
-    .scheme-dot:hover { transform: scale(1.15); }
-    .scheme-dot.active { border-color: #1e1e2a; transform: scale(1.1); }
+    .scheme-opt:hover { transform: scale(1.05); }
+    .scheme-opt.active { border-color: #1e1e2a; box-shadow: 0 0 20px rgba(0,0,0,0.15); }
+
+    .menu-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      opacity: 0.5;
+    }
+    .menu-close:hover { opacity: 1; }
 
     /* ===== КАЛЕНДАРЬ ===== */
     .calendar-header {
@@ -176,7 +231,7 @@
       padding: 0 4px;
     }
     .calendar-header h2 {
-      font-weight: 600;
+      font-weight: 700;
       font-size: 1.2rem;
       letter-spacing: -0.3px;
     }
@@ -187,17 +242,19 @@
       font-size: 1.1rem;
       cursor: pointer;
       padding: 0 6px;
+      transition: 0.15s;
     }
+    .month-nav button:hover { transform: scale(1.2); }
 
     .weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       text-align: center;
-      font-weight: 500;
-      font-size: 0.65rem;
+      font-weight: 600;
+      font-size: 0.6rem;
       margin-bottom: 4px;
-      letter-spacing: 0.3px;
-      opacity: 0.7;
+      letter-spacing: 0.5px;
+      opacity: 0.6;
     }
 
     .days-grid {
@@ -208,7 +265,6 @@
 
     .day-cell {
       aspect-ratio: 1 / 1;
-      background: #faf8f5;
       border-radius: 18px;
       display: flex;
       flex-direction: column;
@@ -224,7 +280,8 @@
       cursor: pointer;
     }
     .day-cell:hover { transform: scale(1.04); z-index: 2; }
-    .day-cell.other-month { opacity: 0.4; }
+    .day-cell.other-month { opacity: 0.35; }
+    .day-cell.today { border-color: currentColor; border-width: 2px; }
     .day-cell .day-number { font-weight: 500; font-size: 0.85rem; }
     .day-cell .task-indicators {
       display: flex;
@@ -241,17 +298,46 @@
       border: 1px solid rgba(255,255,255,0.3);
       transition: 0.2s;
     }
-    .task-dot.done { opacity: 0.3; text-decoration: line-through; }
-    .task-dot.important { box-shadow: 0 0 6px gold; }
+    .task-dot.done { opacity: 0.25; }
+    .task-dot.important { box-shadow: 0 0 8px gold; }
+    .task-dot.high { box-shadow: 0 0 6px #ff6b6b; }
+
+    /* ===== ДНЕВНОЙ ПРОГРЕСС ===== */
+    .daily-progress {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0 4px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .daily-progress .progress-bar {
+      flex: 1;
+      height: 4px;
+      border-radius: 10px;
+      margin: 0 10px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.1);
+    }
+    .daily-progress .progress-bar .fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s;
+      width: 0%;
+    }
 
     /* ===== НИЖНИЙ БАР ===== */
     .bottom-bar {
       display: flex;
       justify-content: space-around;
       align-items: center;
-      margin-top: 20px;
+      margin-top: 16px;
       padding: 6px 0 4px;
-      border-top: 1px solid #e3ddd5;
+      border-top: 1px solid;
+      border-color: rgba(0,0,0,0.08);
     }
     .bottom-bar button {
       background: none;
@@ -263,12 +349,11 @@
       transition: 0.15s;
       position: relative;
     }
-    .bottom-bar button:hover { background: #e3ddd5; transform: translateY(-2px); }
+    .bottom-bar button:hover { transform: translateY(-3px); }
     .bottom-bar .badge {
       position: absolute;
-      top: 0;
-      right: 0;
-      background: #e74c3c;
+      top: -2px;
+      right: -2px;
       color: white;
       font-size: 0.5rem;
       border-radius: 20px;
@@ -282,11 +367,11 @@
     .category-legend {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 12px;
+      gap: 6px 10px;
       justify-content: center;
-      margin: 10px 0 0;
-      font-size: 0.6rem;
-      font-weight: 500;
+      margin: 8px 0 0;
+      font-size: 0.55rem;
+      font-weight: 600;
     }
     .legend-item {
       display: flex;
@@ -296,13 +381,13 @@
       padding: 2px 8px;
       border-radius: 20px;
       transition: 0.15s;
-      opacity: 0.8;
+      opacity: 0.7;
     }
     .legend-item:hover { opacity: 1; transform: scale(1.05); }
-    .legend-item.active-filter { opacity: 1; background: rgba(0,0,0,0.05); }
+    .legend-item.active-filter { opacity: 1; background: rgba(0,0,0,0.06); }
     .color-swatch {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 30px;
       display: inline-block;
     }
@@ -324,7 +409,6 @@
     }
     .modal-overlay.active { display: flex; }
     .modal {
-      background: #fff;
       border-radius: 32px;
       padding: 24px 22px;
       max-width: 400px;
@@ -336,7 +420,7 @@
     }
     .modal h3 {
       margin-bottom: 16px;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 1.2rem;
     }
     .modal label {
@@ -349,8 +433,8 @@
       width: 100%;
       padding: 10px 14px;
       border-radius: 16px;
-      border: 1px solid #ddd;
-      background: #f8f6f2;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(0,0,0,0.03);
       font-size: 0.9rem;
       transition: 0.2s;
     }
@@ -391,16 +475,16 @@
       font-size: 0.85rem;
       transition: 0.15s;
     }
-    .modal .btn-save { background: #2d2d3f; color: white; }
-    .modal .btn-save:hover { transform: scale(1.03); }
-    .modal .btn-cancel { background: #eae5de; color: #3d3d4e; }
+    .modal .modal-actions button:hover { transform: scale(1.03); }
+    .modal .btn-save { color: white; }
+    .modal .btn-cancel { background: rgba(0,0,0,0.06); }
 
     .day-tasks-modal .task-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 8px 4px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
       transition: 0.2s;
       animation: fadeIn 0.2s ease;
     }
@@ -416,9 +500,12 @@
       flex: 1;
       font-size: 0.85rem;
     }
-    .day-tasks-modal .task-item .task-important {
-      color: gold;
-      margin-right: 6px;
+    .day-tasks-modal .task-item .task-priority {
+      font-size: 0.6rem;
+      padding: 0 6px;
+      border-radius: 10px;
+      margin-right: 4px;
+      font-weight: 700;
     }
     .day-tasks-modal .task-item .task-actions {
       display: flex;
@@ -445,69 +532,121 @@
     .daily-quest-badge {
       background: linear-gradient(135deg, #f7b731, #f5a623);
       color: white;
-      padding: 2px 12px;
+      padding: 1px 10px;
       border-radius: 20px;
-      font-size: 0.6rem;
+      font-size: 0.55rem;
       font-weight: 700;
-      margin-left: 6px;
+      margin-left: 4px;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-8px); }
+      from { opacity: 0; transform: translateY(-6px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+
+    /* ===== ТАЙМЕР ===== */
+    .timer-display {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 12px 0;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
     }
-    .pulse { animation: pulse 0.3s ease; }
+    .timer-controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 8px 0;
+    }
+    .timer-controls button {
+      padding: 8px 20px;
+      border-radius: 40px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .timer-controls button:hover { transform: scale(1.05); }
 
-    /* ===== ЦВЕТОВЫЕ СХЕМЫ (динамические) ===== */
+    /* ===== ЦВЕТОВЫЕ СХЕМЫ (расширенное влияние) ===== */
 
-    /* Схема 1: Moss & Clay */
+    /* 1. Moss & Clay */
+    .scheme-moss body { background: #d6cdc0; }
     .scheme-moss .app { background: #f0ebe3; border-color: #c4b5a0; }
     .scheme-moss .profile-card { background: #e6ddd2; }
     .scheme-moss .day-cell { background: #f5f0e9; }
+    .scheme-moss .day-cell:hover { background: #ece4da; }
     .scheme-moss .bottom-bar { border-color: #d6cbbc; }
+    .scheme-moss .menu-dropdown { background: rgba(240,235,227,0.97); }
+    .scheme-moss .modal { background: #f5f0e9; }
+    .scheme-moss .avatar { background: linear-gradient(145deg, #b8a48b, #8f7b66); }
+    .scheme-moss .xp-bar-fill { background: linear-gradient(90deg, #8b9a7a, #6b8a5a); }
 
-    /* Схема 2: Aqua Dream */
+    /* 2. Aqua Dream */
+    .scheme-aqua body { background: #b5d9de; }
     .scheme-aqua .app { background: #e8f4f8; border-color: #7fc1c5; }
     .scheme-aqua .profile-card { background: #d4e9ed; }
     .scheme-aqua .day-cell { background: #eef7fa; }
+    .scheme-aqua .day-cell:hover { background: #dceef3; }
     .scheme-aqua .bottom-bar { border-color: #b5d9de; }
+    .scheme-aqua .menu-dropdown { background: rgba(232,244,248,0.97); }
+    .scheme-aqua .modal { background: #eef7fa; }
+    .scheme-aqua .avatar { background: linear-gradient(145deg, #7fc1c5, #4fa3a8); }
+    .scheme-aqua .xp-bar-fill { background: linear-gradient(90deg, #4fa3a8, #2d8287); }
 
-    /* Схема 3: Berry Bliss */
+    /* 3. Berry Bliss */
+    .scheme-berry body { background: #dcc0dc; }
     .scheme-berry .app { background: #f5eef5; border-color: #c9a0c9; }
     .scheme-berry .profile-card { background: #eedcee; }
     .scheme-berry .day-cell { background: #f8f0f8; }
+    .scheme-berry .day-cell:hover { background: #f0e2f0; }
     .scheme-berry .bottom-bar { border-color: #dcc0dc; }
+    .scheme-berry .menu-dropdown { background: rgba(245,238,245,0.97); }
+    .scheme-berry .modal { background: #f8f0f8; }
+    .scheme-berry .avatar { background: linear-gradient(145deg, #c9a0c9, #b07cb0); }
+    .scheme-berry .xp-bar-fill { background: linear-gradient(90deg, #b07cb0, #8f5a8f); }
 
-    /* Схема 4: Sunset Glow */
+    /* 4. Sunset Glow */
+    .scheme-sunset body { background: #f5d0bd; }
     .scheme-sunset .app { background: #fdf0e8; border-color: #f7b89a; }
     .scheme-sunset .profile-card { background: #fce6d9; }
     .scheme-sunset .day-cell { background: #fef5ed; }
+    .scheme-sunset .day-cell:hover { background: #fceade; }
     .scheme-sunset .bottom-bar { border-color: #f5d0bd; }
+    .scheme-sunset .menu-dropdown { background: rgba(253,240,232,0.97); }
+    .scheme-sunset .modal { background: #fef5ed; }
+    .scheme-sunset .avatar { background: linear-gradient(145deg, #f7b89a, #e8936b); }
+    .scheme-sunset .xp-bar-fill { background: linear-gradient(90deg, #e8936b, #d47045); }
 
-    /* Схема 5: Minimal Mono */
+    /* 5. Minimal Mono */
+    .scheme-mono body { background: #d5d5d5; }
     .scheme-mono .app { background: #f5f5f5; border-color: #cccccc; }
     .scheme-mono .profile-card { background: #e8e8e8; }
     .scheme-mono .day-cell { background: #fafafa; }
+    .scheme-mono .day-cell:hover { background: #f0f0f0; }
     .scheme-mono .bottom-bar { border-color: #d5d5d5; }
+    .scheme-mono .menu-dropdown { background: rgba(245,245,245,0.97); }
+    .scheme-mono .modal { background: #fafafa; }
+    .scheme-mono .avatar { background: linear-gradient(145deg, #aaaaaa, #888888); }
+    .scheme-mono .xp-bar-fill { background: linear-gradient(90deg, #888888, #555555); }
 
     /* ===== ТЁМНАЯ ТЕМА (адаптируется под схему) ===== */
-    body.dark-mode .app { background: #262633dd; border-color: #3f3f55; }
+    body.dark-mode .app { background: rgba(38,38,51,0.92); border-color: #3f3f55; }
     body.dark-mode .profile-card { background: #343344; }
     body.dark-mode .day-cell { background: #2f2f40; border-color: #3f3f55; color: #eae6f0; }
     body.dark-mode .day-cell:hover { background: #3a3a4e; }
     body.dark-mode .day-cell.other-month { background: #252533; color: #6b6b88; }
     body.dark-mode .bottom-bar { border-color: #3d3d50; }
+    body.dark-mode .menu-dropdown { background: rgba(38,38,51,0.96); color: #eae6f0; border-color: #3f3f55; }
     body.dark-mode .modal { background: #2f2f40; color: #eae6f0; }
     body.dark-mode .modal input { background: #3f3f55; border-color: #55556b; color: #eae6f0; }
     body.dark-mode .modal .btn-cancel { background: #44445a; color: #ddd; }
     body.dark-mode .modal .btn-save { background: #6b6b8a; }
     body.dark-mode .day-tasks-modal .task-item { border-color: #44445a; }
-    body.dark-mode .scheme-dot.active { border-color: #fff; }
+    body.dark-mode .scheme-opt.active { border-color: #fff; }
+    body.dark-mode .menu-item:hover { background: rgba(255,255,255,0.06); }
+    body.dark-mode .daily-progress .progress-bar { background: rgba(255,255,255,0.1); }
 
     @media (max-width: 420px) {
       .app { padding: 14px 12px 8px; }
@@ -515,6 +654,8 @@
       .avatar { width: 34px; height: 34px; font-size: 1.1rem; }
       .profile-name { font-size: 0.8rem; }
       .day-cell { font-size: 0.7rem; border-radius: 14px; }
+      .scheme-options { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+      .scheme-opt { font-size: 0.45rem; padding: 6px 2px; }
     }
   </style>
 </head>
@@ -527,7 +668,7 @@
         <div class="avatar" id="avatarEmoji">🧙</div>
         <div class="profile-info">
           <span class="profile-name" id="profileName">Эльдар</span>
-          <div style="display:flex; align-items:center; gap:4px;">
+          <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
             <span class="profile-level" id="profileLevel"><i class="fas fa-star" style="font-size:0.5rem;"></i> Lv.1</span>
             <span id="dailyQuestBadge" class="daily-quest-badge" style="display:none;">⚡ квест</span>
           </div>
@@ -537,13 +678,31 @@
       <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
     </div>
 
-    <!-- Выбор цветовой схемы -->
-    <div class="scheme-selector" id="schemeSelector">
-      <div class="scheme-dot active" data-scheme="moss" style="background:linear-gradient(135deg,#8b9a7a,#c4b5a0);" title="Moss & Clay"></div>
-      <div class="scheme-dot" data-scheme="aqua" style="background:linear-gradient(135deg,#7fc1c5,#b5d9de);" title="Aqua Dream"></div>
-      <div class="scheme-dot" data-scheme="berry" style="background:linear-gradient(135deg,#c9a0c9,#dcc0dc);" title="Berry Bliss"></div>
-      <div class="scheme-dot" data-scheme="sunset" style="background:linear-gradient(135deg,#f7b89a,#f5d0bd);" title="Sunset Glow"></div>
-      <div class="scheme-dot" data-scheme="mono" style="background:linear-gradient(135deg,#aaaaaa,#cccccc);" title="Minimal Mono"></div>
+    <!-- МЕНЮ (выпадающее) -->
+    <div class="menu-dropdown" id="menuDropdown">
+      <button class="menu-close" id="menuClose"><i class="fas fa-times"></i></button>
+
+      <h4>👤 Профиль</h4>
+      <button class="menu-item" id="menuProfile"><i class="fas fa-user"></i> Сменить имя</button>
+
+      <h4>🎨 Цветовые схемы</h4>
+      <div class="scheme-options" id="schemeOptions">
+        <div class="scheme-opt active" data-scheme="moss" style="background:linear-gradient(135deg,#8b9a7a,#c4b5a0);">Moss</div>
+        <div class="scheme-opt" data-scheme="aqua" style="background:linear-gradient(135deg,#7fc1c5,#b5d9de);">Aqua</div>
+        <div class="scheme-opt" data-scheme="berry" style="background:linear-gradient(135deg,#c9a0c9,#dcc0dc);">Berry</div>
+        <div class="scheme-opt" data-scheme="sunset" style="background:linear-gradient(135deg,#f7b89a,#f5d0bd);">Sunset</div>
+        <div class="scheme-opt" data-scheme="mono" style="background:linear-gradient(135deg,#aaaaaa,#cccccc);">Mono</div>
+      </div>
+
+      <h4>🏅 Достижения</h4>
+      <button class="menu-item" id="menuAchievements"><i class="fas fa-trophy"></i> Мои достижения (<span id="achCount">0</span>)</button>
+
+      <h4>📊 Данные</h4>
+      <button class="menu-item" id="menuStats"><i class="fas fa-chart-simple"></i> Статистика</button>
+      <button class="menu-item" id="menuExport"><i class="fas fa-download"></i> Экспорт данных</button>
+
+      <h4>⚙️ Настройки</h4>
+      <button class="menu-item" id="menuReset"><i class="fas fa-trash"></i> Сбросить все данные</button>
     </div>
 
     <!-- Календарь -->
@@ -558,7 +717,14 @@
     <div class="weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
     <div class="days-grid" id="daysGrid"></div>
 
-    <!-- Легенда (кликабельна для фильтрации) -->
+    <!-- Дневной прогресс -->
+    <div class="daily-progress" id="dailyProgress">
+      <span>📅 Сегодня</span>
+      <div class="progress-bar"><div class="fill" id="dailyProgressFill"></div></div>
+      <span id="dailyProgressText">0/0</span>
+    </div>
+
+    <!-- Легенда -->
     <div class="category-legend" id="legendContainer"></div>
 
     <!-- Нижний бар -->
@@ -583,8 +749,15 @@
       <label>Категория</label>
       <div class="category-selector" id="categorySelector"></div>
 
+      <label>Приоритет</label>
+      <select id="taskPriority">
+        <option value="low">🟢 Низкий</option>
+        <option value="medium" selected>🟡 Средний</option>
+        <option value="high">🔴 Высокий</option>
+      </select>
+
       <label style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-        <input type="checkbox" id="taskImportant"> <span>⭐ Важная задача (+5 XP бонус)</span>
+        <input type="checkbox" id="taskImportant"> <span>⭐ Важная задача (+5 XP)</span>
       </label>
 
       <div class="modal-actions">
@@ -601,6 +774,23 @@
       <div id="dayTasksList"></div>
       <div class="modal-actions">
         <button class="btn-cancel" id="closeDayTasksBtn">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка таймера -->
+  <div class="modal-overlay" id="timerModal">
+    <div class="modal">
+      <h3>⏱️ Таймер задачи</h3>
+      <div class="timer-display" id="timerDisplay">25:00</div>
+      <div style="text-align:center; font-size:0.8rem; opacity:0.6; margin-bottom:8px;" id="timerTaskName">—</div>
+      <div class="timer-controls">
+        <button id="timerStartBtn" style="background:#2ecc71; color:white;">▶ Старт</button>
+        <button id="timerPauseBtn" style="background:#f39c12; color:white;">⏸ Пауза</button>
+        <button id="timerResetBtn" style="background:#e74c3c; color:white;">⏹ Стоп</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="closeTimerBtn">Закрыть</button>
       </div>
     </div>
   </div>
@@ -622,33 +812,42 @@
       let currentDate = new Date(); currentDate.setHours(0,0,0,0);
       let darkMode = false;
       let currentScheme = 'moss';
-      let filterCategory = null; // null = все
+      let filterCategory = null;
 
       let tasks = [];
       let nextTaskId = 1;
-
       let player = { name: 'Эльдар', level: 1, xp: 0, xpToNext: 100 };
       let achievements = [];
+
+      // Таймер
+      let timerInterval = null;
+      let timerSeconds = 25 * 60;
+      let timerRunning = false;
+      let timerTaskId = null;
 
       // ===== ЗАГРУЗКА / СОХРАНЕНИЕ =====
       function loadData() {
         try {
-          const saved = localStorage.getItem('rpgCalendarData_v2');
+          const saved = localStorage.getItem('rpgCalendarData_v3');
           if (saved) {
             const data = JSON.parse(saved);
             tasks = data.tasks || [];
             nextTaskId = data.nextTaskId || 1;
             if (data.player) player = data.player;
             if (data.achievements) achievements = data.achievements;
-            tasks = tasks.map(t => ({ ...t, done: t.done || false, important: t.important || false }));
+            tasks = tasks.map(t => ({
+              ...t,
+              done: t.done || false,
+              important: t.important || false,
+              priority: t.priority || 'medium'
+            }));
           } else {
-            // тестовые задачи
             const today = getDateStr(0);
             tasks = [
-              { id: nextTaskId++, title: '🏃 Утренняя пробежка', date: today, category: 'sport', done: false, important: true },
-              { id: nextTaskId++, title: '🥗 Здоровый завтрак', date: today, category: 'food', done: false, important: false },
-              { id: nextTaskId++, title: '📚 Почитать 30 мин', date: getDateStr(1), category: 'hobby', done: false, important: false },
-              { id: nextTaskId++, title: '🧹 Уборка', date: getDateStr(2), category: 'tasks', done: false, important: false },
+              { id: nextTaskId++, title: '🏃 Утренняя пробежка', date: today, category: 'sport', done: false, important: true, priority: 'high' },
+              { id: nextTaskId++, title: '🥗 Здоровый завтрак', date: today, category: 'food', done: false, important: false, priority: 'medium' },
+              { id: nextTaskId++, title: '📚 Почитать 30 мин', date: getDateStr(1), category: 'hobby', done: false, important: false, priority: 'low' },
+              { id: nextTaskId++, title: '🧹 Уборка', date: getDateStr(2), category: 'tasks', done: false, important: false, priority: 'medium' },
             ];
           }
         } catch(e) { tasks = []; }
@@ -656,11 +855,12 @@
         updateProfile();
         checkAchievements();
         checkDailyQuest();
+        updateDailyProgress();
       }
 
       function saveData() {
         try {
-          localStorage.setItem('rpgCalendarData_v2', JSON.stringify({
+          localStorage.setItem('rpgCalendarData_v3', JSON.stringify({
             tasks, nextTaskId, player, achievements
           }));
         } catch(e) {}
@@ -674,26 +874,21 @@
       // ===== RPG =====
       function addXP(amount) {
         player.xp += amount;
-        let leveled = false;
         while (player.xp >= player.xpToNext) {
           player.xp -= player.xpToNext;
           player.level++;
           player.xpToNext = Math.floor(player.xpToNext * 1.4) + 30;
-          leveled = true;
         }
         updateProfile();
         checkAchievements();
         saveData();
-        if (leveled) {
-          setTimeout(() => alert(`🎉 УРОВЕНЬ ${player.level}! Вы достигли нового уровня!`), 100);
-        }
       }
 
       function updateProfile() {
         document.getElementById('profileLevel').innerHTML = `<i class="fas fa-star" style="font-size:0.5rem;"></i> Lv.${player.level}`;
         const pct = Math.min(100, (player.xp / player.xpToNext) * 100);
         document.getElementById('xpBarFill').style.width = pct + '%';
-        const emojis = ['🧙','⚔️','🛡️','🧝','🐉','👑','🌟'];
+        const emojis = ['🧙','⚔️','🛡️','🧝','🐉','👑','🌟','💫'];
         const idx = Math.min(Math.floor(player.level / 2), emojis.length-1);
         document.getElementById('avatarEmoji').textContent = emojis[idx] || '🧙';
       }
@@ -703,33 +898,42 @@
         const done = tasks.filter(t => t.done).length;
         const total = tasks.length;
         const list = [];
-        if (total >= 1 && !achievements.includes('first_task')) { achievements.push('first_task'); list.push('🎯 Первая задача!'); }
-        if (done >= 5 && !achievements.includes('done_5')) { achievements.push('done_5'); list.push('🏅 5 задач выполнено!'); }
-        if (done >= 10 && !achievements.includes('done_10')) { achievements.push('done_10'); list.push('🏆 10 задач выполнено!'); }
-        if (player.level >= 5 && !achievements.includes('level_5')) { achievements.push('level_5'); list.push('⭐ Уровень 5!'); }
-        if (player.level >= 10 && !achievements.includes('level_10')) { achievements.push('level_10'); list.push('👑 Уровень 10!'); }
+        if (total >= 1 && !achievements.includes('first')) { achievements.push('first'); list.push('🎯 Первая задача!'); }
+        if (done >= 5 && !achievements.includes('done5')) { achievements.push('done5'); list.push('🏅 5 задач выполнено!'); }
+        if (done >= 10 && !achievements.includes('done10')) { achievements.push('done10'); list.push('🏆 10 задач выполнено!'); }
+        if (done >= 25 && !achievements.includes('done25')) { achievements.push('done25'); list.push('👑 25 задач выполнено!'); }
+        if (player.level >= 5 && !achievements.includes('lv5')) { achievements.push('lv5'); list.push('⭐ Уровень 5!'); }
+        if (player.level >= 10 && !achievements.includes('lv10')) { achievements.push('lv10'); list.push('🌟 Уровень 10!'); }
         if (list.length) {
           saveData();
+          document.getElementById('achCount').textContent = achievements.length;
           setTimeout(() => alert('🏅 ДОСТИЖЕНИЯ:\n' + list.join('\n')), 200);
         }
+        document.getElementById('achCount').textContent = achievements.length;
       }
 
       // ===== ЕЖЕДНЕВНЫЙ КВЕСТ =====
-      let dailyQuestDate = '';
       function checkDailyQuest() {
         const today = getDateStr(0);
+        const todayTasks = tasks.filter(t => t.date === today && !t.done);
         const badge = document.getElementById('dailyQuestBadge');
-        if (dailyQuestDate !== today) {
-          // проверим, есть ли задача на сегодня
-          const todayTasks = tasks.filter(t => t.date === today && !t.done);
-          if (todayTasks.length > 0) {
-            badge.style.display = 'inline';
-            badge.textContent = '⚡ квест';
-            dailyQuestDate = today;
-          } else {
-            badge.style.display = 'none';
-          }
+        if (todayTasks.length > 0) {
+          badge.style.display = 'inline';
+          badge.textContent = `⚡ ${todayTasks.length} задач`;
+        } else {
+          badge.style.display = 'none';
         }
+      }
+
+      // ===== ДНЕВНОЙ ПРОГРЕСС =====
+      function updateDailyProgress() {
+        const today = getDateStr(0);
+        const todayTasks = tasks.filter(t => t.date === today);
+        const done = todayTasks.filter(t => t.done).length;
+        const total = todayTasks.length;
+        document.getElementById('dailyProgressText').textContent = `${done}/${total}`;
+        const pct = total > 0 ? (done / total) * 100 : 0;
+        document.getElementById('dailyProgressFill').style.width = pct + '%';
       }
 
       // ===== РАБОТА С ЗАДАЧАМИ =====
@@ -739,7 +943,7 @@
         return filtered;
       }
 
-      function addTask(title, date, category, important = false) {
+      function addTask(title, date, category, important = false, priority = 'medium') {
         if (!title.trim()) return false;
         const newTask = {
           id: nextTaskId++,
@@ -747,13 +951,15 @@
           date: date,
           category: category,
           done: false,
-          important: important
+          important: important,
+          priority: priority
         };
         tasks.push(newTask);
         saveData();
         updateBadge();
         renderCalendar();
         checkDailyQuest();
+        updateDailyProgress();
         return true;
       }
 
@@ -763,6 +969,7 @@
           if (!task.done) {
             let bonus = 10;
             if (task.important) bonus += 5;
+            if (task.priority === 'high') bonus += 3;
             addXP(bonus);
           }
           task.done = !task.done;
@@ -771,6 +978,7 @@
           renderCalendar();
           checkAchievements();
           checkDailyQuest();
+          updateDailyProgress();
           const modal = document.getElementById('dayTasksModal');
           if (modal.classList.contains('active')) {
             const date = document.getElementById('dayTasksTitle').dataset.date;
@@ -784,6 +992,7 @@
         saveData();
         updateBadge();
         renderCalendar();
+        updateDailyProgress();
         const modal = document.getElementById('dayTasksModal');
         if (modal.classList.contains('active')) {
           const date = document.getElementById('dayTasksTitle').dataset.date;
@@ -794,6 +1003,62 @@
       function updateBadge() {
         const undone = tasks.filter(t => !t.done).length;
         document.getElementById('tasksBadge').textContent = undone;
+      }
+
+      // ===== ТАЙМЕР =====
+      function startTimer(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+        timerTaskId = taskId;
+        document.getElementById('timerTaskName').textContent = `⏳ ${task.title}`;
+        timerSeconds = 25 * 60;
+        updateTimerDisplay();
+        document.getElementById('timerModal').classList.add('active');
+        if (timerInterval) clearInterval(timerInterval);
+        timerRunning = false;
+      }
+
+      function updateTimerDisplay() {
+        const mins = Math.floor(timerSeconds / 60);
+        const secs = timerSeconds % 60;
+        document.getElementById('timerDisplay').textContent =
+          `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+      }
+
+      function toggleTimer() {
+        if (timerRunning) {
+          clearInterval(timerInterval);
+          timerRunning = false;
+          document.getElementById('timerStartBtn').textContent = '▶ Старт';
+        } else {
+          timerRunning = true;
+          document.getElementById('timerStartBtn').textContent = '⏸ Пауза';
+          timerInterval = setInterval(() => {
+            if (timerSeconds <= 0) {
+              clearInterval(timerInterval);
+              timerRunning = false;
+              document.getElementById('timerStartBtn').textContent = '▶ Старт';
+              alert('⏰ Время вышло! Отличная работа!');
+              if (timerTaskId) {
+                toggleTaskDone(timerTaskId);
+                timerTaskId = null;
+              }
+              return;
+            }
+            timerSeconds--;
+            updateTimerDisplay();
+          }, 1000);
+        }
+      }
+
+      function resetTimer() {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        timerSeconds = 25 * 60;
+        updateTimerDisplay();
+        document.getElementById('timerStartBtn').textContent = '▶ Старт';
+        timerTaskId = null;
+        document.getElementById('timerTaskName').textContent = '—';
       }
 
       // ===== КАЛЕНДАРЬ =====
@@ -807,6 +1072,7 @@
         const startDay = (firstDay.getDay() + 6) % 7;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const daysInPrev = new Date(year, month, 0).getDate();
+        const todayStr = getDateStr(0);
 
         let html = '';
         for (let i = startDay - 1; i >= 0; i--) {
@@ -815,12 +1081,12 @@
           const y = month === 0 ? year - 1 : year;
           const ds = formatDateKey(y, m, day);
           const dayTasks = getTasksForDate(ds);
-          html += createDayCell(day, true, dayTasks, ds);
+          html += createDayCell(day, true, dayTasks, ds, todayStr);
         }
         for (let day = 1; day <= daysInMonth; day++) {
           const ds = formatDateKey(year, month, day);
           const dayTasks = getTasksForDate(ds);
-          html += createDayCell(day, false, dayTasks, ds);
+          html += createDayCell(day, false, dayTasks, ds, todayStr);
         }
         const total = startDay + daysInMonth;
         const rem = (7 - (total % 7)) % 7;
@@ -829,7 +1095,7 @@
           const y = month === 11 ? year + 1 : year;
           const ds = formatDateKey(y, m, day);
           const dayTasks = getTasksForDate(ds);
-          html += createDayCell(day, true, dayTasks, ds);
+          html += createDayCell(day, true, dayTasks, ds, todayStr);
         }
         document.getElementById('daysGrid').innerHTML = html;
         document.querySelectorAll('.day-cell').forEach(el => {
@@ -844,7 +1110,7 @@
         return `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
       }
 
-      function createDayCell(day, isOther, dayTasks, dateStr) {
+      function createDayCell(day, isOther, dayTasks, dateStr, todayStr) {
         const maxDots = 5;
         let dots = '';
         const showTasks = dayTasks.slice(0, maxDots);
@@ -852,12 +1118,14 @@
           const cat = categories.find(c => c.id === t.category);
           const doneClass = t.done ? 'done' : '';
           const importantClass = t.important ? 'important' : '';
-          dots += cat ? `<span class="task-dot ${doneClass} ${importantClass}" style="background:${cat.color};"></span>` : '';
+          const priorityClass = t.priority === 'high' ? 'high' : '';
+          dots += cat ? `<span class="task-dot ${doneClass} ${importantClass} ${priorityClass}" style="background:${cat.color};"></span>` : '';
         });
         let extra = '';
         if (dayTasks.length > maxDots) extra = `<span style="font-size:0.5rem; opacity:0.6;">+${dayTasks.length - maxDots}</span>`;
 
-        const cls = `day-cell ${isOther ? 'other-month' : ''}`;
+        const isToday = dateStr === todayStr;
+        const cls = `day-cell ${isOther ? 'other-month' : ''} ${isToday ? 'today' : ''}`;
         return `<div class="${cls}" data-date="${dateStr}">
           <span class="day-number">${day}</span>
           <div class="task-indicators">${dots}${extra}</div>
@@ -878,10 +1146,14 @@
 
       function renderDayTasks(dateStr) {
         const container = document.getElementById('dayTasksList');
-        const dayTasks = tasks.filter(t => t.date === dateStr);
+        let dayTasks = tasks.filter(t => t.date === dateStr);
         if (filterCategory) {
           dayTasks = dayTasks.filter(t => t.category === filterCategory);
         }
+        // сортировка по приоритету
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        dayTasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
         if (dayTasks.length === 0) {
           container.innerHTML = `<div class="no-tasks">✨ Нет задач на этот день</div>`;
           return;
@@ -891,12 +1163,16 @@
           const cat = categories.find(c => c.id === task.category);
           const doneClass = task.done ? 'done' : '';
           const doneIcon = task.done ? 'fa-circle-check' : 'fa-circle';
-          const importantStar = task.important ? '<span class="task-important">⭐</span>' : '';
+          const importantStar = task.important ? '⭐' : '';
+          const priorityLabels = { low: '🟢', medium: '🟡', high: '🔴' };
+          const priorityLabel = priorityLabels[task.priority] || '';
+
           html += `
             <div class="task-item ${doneClass}">
               <span class="task-cat" style="background:${cat ? cat.color : '#999'};"></span>
-              <span class="task-name">${importantStar}${task.title}</span>
+              <span class="task-name">${importantStar} ${priorityLabel} ${task.title}</span>
               <div class="task-actions">
+                <button class="task-timer-btn" data-id="${task.id}" title="Таймер"><i class="fas fa-clock"></i></button>
                 <button class="task-done-btn" data-id="${task.id}" title="Выполнить"><i class="fas ${doneIcon}"></i></button>
                 <button class="task-done-btn" data-id="${task.id}" data-delete="true" title="Удалить" style="color:#e74c3c;"><i class="fas fa-trash"></i></button>
               </div>
@@ -904,6 +1180,7 @@
           `;
         });
         container.innerHTML = html;
+
         container.querySelectorAll('.task-done-btn').forEach(btn => {
           btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -915,6 +1192,14 @@
             }
           });
         });
+
+        container.querySelectorAll('.task-timer-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const id = parseInt(this.dataset.id);
+            startTimer(id);
+          });
+        });
       }
 
       // ===== МОДАЛКА ДОБАВЛЕНИЯ =====
@@ -924,6 +1209,7 @@
         document.getElementById('taskDateInput').value = getDateStr(0);
         document.getElementById('taskTitleInput').value = '';
         document.getElementById('taskImportant').checked = false;
+        document.getElementById('taskPriority').value = 'medium';
 
         const container = document.getElementById('categorySelector');
         container.innerHTML = '';
@@ -947,13 +1233,15 @@
           const activeBtn = document.querySelector('#categorySelector .cat-btn.active');
           const category = activeBtn ? activeBtn.dataset.cat : categories[0].id;
           const important = document.getElementById('taskImportant').checked;
+          const priority = document.getElementById('taskPriority').value;
           if (!title) { alert('Введите название задачи'); return; }
           if (!date) { alert('Выберите дату'); return; }
-          if (addTask(title, date, category, important)) {
+          if (addTask(title, date, category, important, priority)) {
             modal.classList.remove('active');
             renderCalendar();
             updateBadge();
             checkDailyQuest();
+            updateDailyProgress();
           }
         };
         document.getElementById('cancelTaskBtn').onclick = () => modal.classList.remove('active');
@@ -965,11 +1253,12 @@
         const done = tasks.filter(t => t.done).length;
         const undone = total - done;
         const important = tasks.filter(t => t.important).length;
+        const high = tasks.filter(t => t.priority === 'high').length;
         let byCat = {}; categories.forEach(c => byCat[c.id] = 0);
         tasks.forEach(t => { if (byCat[t.category] !== undefined) byCat[t.category]++; });
 
         let msg = `📊 СТАТИСТИКА\n━━━━━━━━━━━━━━\n`;
-        msg += `📌 Всего: ${total}\n✅ Выполнено: ${done}\n⏳ Осталось: ${undone}\n⭐ Важных: ${important}\n`;
+        msg += `📌 Всего: ${total}\n✅ Выполнено: ${done}\n⏳ Осталось: ${undone}\n⭐ Важных: ${important}\n🔴 Высокий приоритет: ${high}\n`;
         msg += `━━━━━━━━━━━━━━\n📂 По категориям:\n`;
         categories.forEach(c => {
           const count = byCat[c.id] || 0;
@@ -979,16 +1268,45 @@
         alert(msg);
       }
 
-      // ===== НАСТРОЙКИ =====
-      function showSettings() {
-        const newName = prompt('👤 Введите новое имя:', player.name);
-        if (newName && newName.trim()) {
-          player.name = newName.trim();
-          document.getElementById('profileName').textContent = player.name;
-          saveData();
+      // ===== МЕНЮ =====
+      function toggleMenu() {
+        document.getElementById('menuDropdown').classList.toggle('open');
+      }
+
+      function closeMenu() {
+        document.getElementById('menuDropdown').classList.remove('open');
+      }
+
+      // ===== ЭКСПОРТ =====
+      function exportData() {
+        const data = { tasks, player, achievements, exported: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `rpg_calendar_backup_${getDateStr(0)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // ===== СБРОС =====
+      function resetAll() {
+        if (confirm('⚠️ Удалить все задачи, прогресс и достижения?')) {
+          if (confirm('Точно? Это нельзя отменить!')) {
+            tasks = [];
+            nextTaskId = 1;
+            player = { name: 'Эльдар', level: 1, xp: 0, xpToNext: 100 };
+            achievements = [];
+            saveData();
+            updateProfile();
+            updateBadge();
+            renderCalendar();
+            updateDailyProgress();
+            checkDailyQuest();
+            document.getElementById('achCount').textContent = '0';
+            alert('✅ Данные сброшены');
+          }
         }
-        const reset = confirm('Сбросить все достижения?');
-        if (reset) { achievements = []; saveData(); alert('Достижения сброшены'); }
       }
 
       // ===== ЦВЕТОВЫЕ СХЕМЫ =====
@@ -997,8 +1315,8 @@
         const app = document.getElementById('appContainer');
         app.className = `app scheme-${scheme}`;
         if (darkMode) app.classList.add('dark-mode');
-        document.querySelectorAll('.scheme-dot').forEach(d => d.classList.remove('active'));
-        document.querySelector(`.scheme-dot[data-scheme="${scheme}"]`).classList.add('active');
+        document.querySelectorAll('.scheme-opt').forEach(d => d.classList.remove('active'));
+        document.querySelector(`.scheme-opt[data-scheme="${scheme}"]`).classList.add('active');
         localStorage.setItem('rpgScheme', scheme);
       }
 
@@ -1011,7 +1329,7 @@
         localStorage.setItem('rpgDarkMode', darkMode ? '1' : '0');
       }
 
-      // ===== ФИЛЬТР ПО КАТЕГОРИИ =====
+      // ===== ФИЛЬТР =====
       function toggleFilter(categoryId) {
         if (filterCategory === categoryId) {
           filterCategory = null;
@@ -1022,11 +1340,11 @@
           el.classList.toggle('active-filter', el.dataset.cat === filterCategory);
         });
         renderCalendar();
+        updateDailyProgress();
       }
 
       // ===== ИНИЦИАЛИЗАЦИЯ =====
       function init() {
-        // загрузка сохранённой темы и схемы
         const savedScheme = localStorage.getItem('rpgScheme') || 'moss';
         applyScheme(savedScheme);
         if (localStorage.getItem('rpgDarkMode') === '1') {
@@ -1042,35 +1360,94 @@
         updateProfile();
         updateBadge();
         checkDailyQuest();
+        updateDailyProgress();
 
-        document.getElementById('prevMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); });
-        document.getElementById('nextMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); });
+        // Навигация
+        document.getElementById('prevMonth').addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth()-1);
+          renderCalendar();
+        });
+        document.getElementById('nextMonth').addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth()+1);
+          renderCalendar();
+        });
+
         document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
+        // Нижний бар
         document.getElementById('addTaskBtn').addEventListener('click', openAddTaskModal);
         document.getElementById('tasksListBtn').addEventListener('click', () => openDayTasks(getDateStr(0)));
         document.getElementById('statsBtn').addEventListener('click', showStats);
-        document.getElementById('settingsBtn').addEventListener('click', showSettings);
-        document.getElementById('closeDayTasksBtn').addEventListener('click', () => {
-          document.getElementById('dayTasksModal').classList.remove('active');
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+          const newName = prompt('👤 Введите новое имя:', player.name);
+          if (newName && newName.trim()) {
+            player.name = newName.trim();
+            document.getElementById('profileName').textContent = player.name;
+            saveData();
+          }
         });
 
+        // Меню
+        document.getElementById('menuBtn').addEventListener('click', toggleMenu);
+        document.getElementById('menuClose').addEventListener('click', closeMenu);
+        document.addEventListener('click', function(e) {
+          const menu = document.getElementById('menuDropdown');
+          if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== document.getElementById('menuBtn')) {
+            closeMenu();
+          }
+        });
+
+        // Пункты меню
+        document.getElementById('menuProfile').addEventListener('click', () => {
+          closeMenu();
+          const newName = prompt('👤 Введите новое имя:', player.name);
+          if (newName && newName.trim()) {
+            player.name = newName.trim();
+            document.getElementById('profileName').textContent = player.name;
+            saveData();
+          }
+        });
+
+        document.getElementById('menuAchievements').addEventListener('click', () => {
+          closeMenu();
+          const list = achievements.length > 0 ? achievements.map((a, i) => `${i+1}. ${a}`).join('\n') : 'Пока нет достижений';
+          alert(`🏅 ДОСТИЖЕНИЯ (${achievements.length})\n━━━━━━━━━━━━\n${list}`);
+        });
+
+        document.getElementById('menuStats').addEventListener('click', () => { closeMenu(); showStats(); });
+        document.getElementById('menuExport').addEventListener('click', () => { closeMenu(); exportData(); });
+        document.getElementById('menuReset').addEventListener('click', () => { closeMenu(); resetAll(); });
+
+        // Схемы в меню
+        document.querySelectorAll('.scheme-opt').forEach(opt => {
+          opt.addEventListener('click', function() {
+            applyScheme(this.dataset.scheme);
+            closeMenu();
+          });
+        });
+
+        // Модалки
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
           overlay.addEventListener('click', function(e) {
             if (e.target === this) this.classList.remove('active');
           });
         });
 
-        document.getElementById('menuBtn').addEventListener('click', () => {
-          alert('📋 МЕНЮ\n━━━━━━━━━━\n📅 Календарь\n🏅 Достижения: ' + achievements.length + '\n🎯 Фильтры по категориям\n📊 Статистика');
+        document.getElementById('closeDayTasksBtn').addEventListener('click', () => {
+          document.getElementById('dayTasksModal').classList.remove('active');
         });
 
-        // выбор схемы
-        document.querySelectorAll('.scheme-dot').forEach(dot => {
-          dot.addEventListener('click', function() {
-            applyScheme(this.dataset.scheme);
-          });
+        document.getElementById('closeTimerBtn').addEventListener('click', () => {
+          clearInterval(timerInterval);
+          timerRunning = false;
+          document.getElementById('timerModal').classList.remove('active');
+          resetTimer();
         });
+
+        // Таймер
+        document.getElementById('timerStartBtn').addEventListener('click', toggleTimer);
+        document.getElementById('timerPauseBtn').addEventListener('click', toggleTimer);
+        document.getElementById('timerResetBtn').addEventListener('click', resetTimer);
       }
 
       function renderLegend() {
