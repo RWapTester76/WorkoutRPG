@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -21,46 +22,8 @@
 
     <style>
         /* ============================================================
-           ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И СБРОС
+           БАЗОВЫЙ СБРОС И ПЕРЕМЕННЫЕ (будут переопределены схемами)
            ============================================================ */
-        :root {
-            --bg: #0b0e14;
-            --surface: #1a1f2b;
-            --surface2: #262d3d;
-            --surface3: #313a4f;
-            --text: #e8edf5;
-            --text-muted: #8892a8;
-            --text-dim: #5a6478;
-            --accent: #6c5ce7;
-            --accent2: #a29bfe;
-            --accent-glow: #6c5ce766;
-            --success: #00b894;
-            --warning: #fdcb6e;
-            --danger: #e17055;
-            --info: #0984e3;
-            --border: #2d3548;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-
-        /* Светлая тема */
-        .light-theme {
-            --bg: #eef0f3;
-            --surface: #ffffff;
-            --surface2: #e9ecf2;
-            --surface3: #d5dae3;
-            --text: #1a1f2b;
-            --text-muted: #4a5268;
-            --text-dim: #7a8498;
-            --border: #c8ced8;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.05);
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -74,12 +37,10 @@
         }
 
         body {
-            font-family: var(--font);
-            background: var(--bg);
-            color: var(--text);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             min-height: 100dvh;
-            transition: background var(--transition), color var(--transition);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             padding-bottom: 80px;
             overflow-x: hidden;
             line-height: 1.6;
@@ -102,6 +63,7 @@
             color: var(--accent);
             text-decoration: none;
         }
+
         button {
             cursor: pointer;
             border: none;
@@ -111,7 +73,7 @@
             border-radius: 30px;
             font-weight: 600;
             font-size: 0.95rem;
-            transition: all var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 16px var(--accent-glow);
             display: inline-flex;
             align-items: center;
@@ -120,10 +82,19 @@
             min-height: 44px;
             min-width: 44px;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
-        button:hover {
-            transform: scale(1.04);
-            filter: brightness(1.1);
+        button::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        button:hover::after {
+            opacity: 1;
         }
         button:active {
             transform: scale(0.96);
@@ -131,10 +102,11 @@
         button.secondary {
             background: var(--surface2);
             color: var(--text);
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 2px 8px var(--shadow-color);
         }
         button.secondary:hover {
             background: var(--surface3);
+            transform: translateY(-2px);
         }
         button.success {
             background: var(--success);
@@ -144,7 +116,7 @@
         }
         button.warning {
             background: var(--warning);
-            color: #1a1f2b;
+            color: var(--text);
         }
 
         input,
@@ -157,8 +129,8 @@
             border-radius: var(--radius-sm);
             width: 100%;
             font-size: 1rem;
-            transition: border var(--transition);
-            font-family: var(--font);
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
         input:focus,
         textarea:focus,
@@ -166,6 +138,7 @@
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 4px var(--accent-glow);
+            transform: translateY(-1px);
         }
         textarea {
             min-height: 100px;
@@ -201,7 +174,7 @@
             z-index: 100;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            transition: background var(--transition);
+            transition: all 0.4s ease;
             gap: 12px;
             flex-wrap: wrap;
         }
@@ -228,6 +201,7 @@
             background: var(--surface2);
             border-radius: 20px;
             overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
         }
         .xp-bar-fill {
             height: 100%;
@@ -250,6 +224,9 @@
             transform: rotate(20deg);
             filter: none;
         }
+        .theme-toggle::after {
+            display: none;
+        }
 
         /* ============================================================
            НАВИГАЦИЯ
@@ -267,7 +244,7 @@
             z-index: 200;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            transition: background var(--transition);
+            transition: all 0.4s ease;
         }
         nav#mainNav a {
             display: flex;
@@ -277,7 +254,7 @@
             color: var(--text-muted);
             padding: 4px clamp(6px, 1vw, 14px);
             border-radius: 30px;
-            transition: all var(--transition);
+            transition: all 0.3s ease;
             gap: 2px;
             min-height: 44px;
             justify-content: center;
@@ -303,9 +280,11 @@
             height: 3px;
             background: var(--accent);
             border-radius: 0 0 4px 4px;
+            box-shadow: 0 0 12px var(--accent-glow);
         }
         nav#mainNav a:hover {
             color: var(--text);
+            transform: translateY(-2px);
         }
 
         /* ============================================================
@@ -362,6 +341,7 @@
             font-size: clamp(1.1rem, 2.5vw, 1.5rem);
             min-width: 140px;
             text-align: center;
+            color: var(--text);
         }
         .calendar-header .nav-buttons {
             display: flex;
@@ -380,7 +360,7 @@
             background: var(--surface);
             padding: clamp(8px, 1.5vw, 20px);
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            box-shadow: 0 8px 32px var(--shadow-color);
             touch-action: pan-y;
         }
         .calendar-grid .weekday {
@@ -398,13 +378,14 @@
             border-radius: clamp(8px, 1.5vw, 14px);
             font-weight: 500;
             background: var(--surface2);
-            transition: all var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
             font-size: clamp(0.75rem, 1.2vw, 1rem);
             touch-action: manipulation;
             min-height: 36px;
             user-select: none;
+            color: var(--text);
         }
         .calendar-grid .day:hover {
             background: var(--surface3);
@@ -435,7 +416,7 @@
             background: #fff;
         }
         .calendar-grid .day.today {
-            border: 2px solid var(--text);
+            border: 2px solid var(--accent2);
         }
         .calendar-grid .day.selected {
             outline: 3px solid var(--accent2);
@@ -457,7 +438,7 @@
             background: var(--surface);
             border-radius: var(--radius);
             padding: clamp(12px, 2vw, 24px);
-            box-shadow: var(--shadow);
+            box-shadow: 0 8px 32px var(--shadow-color);
         }
         .records-list .list-header {
             display: flex;
@@ -470,6 +451,7 @@
         .records-list .list-header h4 {
             font-weight: 400;
             font-size: 1.1rem;
+            color: var(--text);
         }
         .records-list .record-item {
             display: flex;
@@ -478,7 +460,7 @@
             border-bottom: 1px solid var(--border);
             padding: clamp(10px, 1.5vw, 16px) 0;
             gap: clamp(8px, 1.5vw, 16px);
-            transition: background var(--transition);
+            transition: all 0.3s ease;
         }
         .records-list .record-item:last-child {
             border-bottom: none;
@@ -498,6 +480,7 @@
             margin-bottom: 6px;
             word-break: break-word;
             font-size: clamp(0.9rem, 1.1vw, 1rem);
+            color: var(--text);
         }
         .record-item .record-content .record-meta {
             font-size: clamp(0.7rem, 0.9vw, 0.8rem);
@@ -527,7 +510,7 @@
             object-fit: cover;
             border-radius: 8px;
             cursor: pointer;
-            transition: transform var(--transition);
+            transition: transform 0.3s ease;
         }
         .record-item .record-photos img:hover {
             transform: scale(1.08);
@@ -553,6 +536,9 @@
             background: var(--surface3);
             color: var(--text);
             transform: none;
+        }
+        .record-item .record-actions button::after {
+            display: none;
         }
         .record-item .record-actions .done-btn {
             color: var(--success);
@@ -581,7 +567,7 @@
             padding: clamp(6px, 1vw, 10px) clamp(12px, 2vw, 20px);
             border-radius: 30px;
             cursor: pointer;
-            transition: all var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -590,6 +576,7 @@
             touch-action: manipulation;
             min-height: 40px;
             border: 2px solid transparent;
+            color: var(--text);
         }
         .journal-tabs .tab i {
             font-size: clamp(0.8rem, 1.2vw, 1.1rem);
@@ -606,7 +593,7 @@
         }
         .journal-tabs .tab .streak-badge {
             background: var(--warning);
-            color: #1a1f2b;
+            color: var(--text);
             border-radius: 20px;
             padding: 0 8px;
             font-size: 0.65rem;
@@ -634,7 +621,7 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 12px;
-            box-shadow: 0 0 30px rgba(253, 203, 110, 0.1);
+            box-shadow: 0 0 30px var(--warning-glow);
         }
         .challenge-bar .challenge-text {
             display: flex;
@@ -642,6 +629,7 @@
             gap: 12px;
             flex: 1;
             min-width: 200px;
+            color: var(--text);
         }
         .challenge-bar .challenge-text i {
             font-size: 1.8rem;
@@ -668,6 +656,48 @@
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        /* ============================================================
+           НАСТРОЙКИ (ЦВЕТОВЫЕ СХЕМЫ)
+           ============================================================ */
+        .theme-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 16px 0;
+        }
+        .theme-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: var(--surface2);
+            min-width: 60px;
+        }
+        .theme-option:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+        .theme-option.active {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .theme-option .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+        }
+        .theme-option .theme-name {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
         }
 
         /* ============================================================
@@ -703,7 +733,7 @@
             width: 100%;
             padding: clamp(20px, 4vw, 36px);
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            box-shadow: 0 8px 48px var(--shadow-color);
             max-height: 95vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease;
@@ -724,6 +754,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            color: var(--text);
         }
         .modal .form-group {
             margin-bottom: 18px;
@@ -795,8 +826,8 @@
             animation: pulseGlow 2.5s infinite;
         }
         .avatar-container .effect.glow {
-            border-color: #f9ca24;
-            box-shadow: 0 0 50px #f9ca2480;
+            border-color: var(--warning);
+            box-shadow: 0 0 50px var(--warning-glow);
         }
         .avatar-container .effect.cape {
             border-color: var(--accent2);
@@ -837,6 +868,7 @@
         }
         .profile-info h2 {
             font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+            color: var(--text);
         }
         .profile-info .profile-sub {
             color: var(--text-muted);
@@ -853,10 +885,11 @@
             padding: clamp(10px, 1.5vw, 16px);
             border-radius: var(--radius-sm);
             text-align: center;
-            transition: transform var(--transition);
+            transition: all 0.3s ease;
         }
         .profile-info .stat-card:hover {
             transform: translateY(-4px);
+            box-shadow: 0 4px 16px var(--shadow-color);
         }
         .profile-info .stat-card .number {
             font-size: clamp(1.4rem, 2.5vw, 2rem);
@@ -888,10 +921,11 @@
             margin: 4px 6px 4px 0;
             font-size: clamp(0.75rem, 0.9vw, 0.85rem);
             border: 1px solid var(--border);
-            transition: all var(--transition);
+            transition: all 0.3s ease;
+            color: var(--text);
         }
         .profile-achievements .achieve-item i {
-            color: #f9ca24;
+            color: var(--warning);
         }
         .profile-achievements .achieve-item:hover {
             transform: scale(1.05);
@@ -910,13 +944,13 @@
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            box-shadow: var(--shadow-sm);
-            transition: all var(--transition);
+            box-shadow: 0 4px 16px var(--shadow-color);
+            transition: all 0.3s ease;
             gap: 12px;
         }
         .goal-item:hover {
             transform: translateX(4px);
-            box-shadow: var(--shadow);
+            box-shadow: 0 8px 32px var(--shadow-color);
         }
         .goal-item.completed {
             border-left: 4px solid var(--success);
@@ -928,6 +962,7 @@
         .goal-item .goal-info .goal-title {
             font-weight: 600;
             font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+            color: var(--text);
         }
         .goal-item .goal-info .goal-meta {
             font-size: 0.8rem;
@@ -968,14 +1003,14 @@
             background: var(--surface2);
             aspect-ratio: 1/1;
             cursor: pointer;
-            transition: all var(--transition);
+            transition: all 0.3s ease;
             position: relative;
         }
         .gallery-grid .gallery-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform var(--transition);
+            transition: transform 0.3s ease;
         }
         .gallery-grid .gallery-item:hover img {
             transform: scale(1.06);
@@ -985,7 +1020,7 @@
             inset: 0;
             background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
             opacity: 0;
-            transition: opacity var(--transition);
+            transition: opacity 0.3s ease;
             display: flex;
             align-items: flex-end;
             padding: 12px;
@@ -1010,7 +1045,7 @@
             background: var(--surface);
             padding: clamp(14px, 2vw, 24px);
             border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 4px 16px var(--shadow-color);
             min-height: 220px;
         }
         .chart-box h4 {
@@ -1063,7 +1098,7 @@
             color: var(--text);
             padding: 14px 20px;
             border-radius: var(--radius-sm);
-            box-shadow: var(--shadow);
+            box-shadow: 0 8px 32px var(--shadow-color);
             border-left: 4px solid var(--accent);
             animation: toastIn 0.4s ease, toastOut 0.4s ease 3.5s forwards;
             pointer-events: auto;
@@ -1100,6 +1135,9 @@
             min-width: 30px;
             box-shadow: none;
             margin-left: auto;
+        }
+        .toast .toast-close::after {
+            display: none;
         }
         @keyframes toastIn {
             from {
@@ -1178,6 +1216,9 @@
                 text-align: center;
             }
             .challenge-bar .challenge-text {
+                justify-content: center;
+            }
+            .theme-selector {
                 justify-content: center;
             }
         }
@@ -1368,12 +1409,19 @@
                         <button class="secondary" id="exportDataBtn"><i class="fas fa-download"></i> Экспорт</button>
                         <button class="secondary" id="importDataBtn"><i class="fas fa-upload"></i> Импорт</button>
                         <button class="secondary" id="exportCsvBtn"><i class="fas fa-file-csv"></i> CSV</button>
+                        <button class="secondary" id="settingsBtn"><i class="fas fa-palette"></i> Схемы</button>
                     </div>
                 </div>
             </div>
             <div class="profile-achievements" id="achievementsList">
                 <h4 style="margin-bottom:12px;">🏅 Достижения</h4>
                 <div id="achievementsContainer"></div>
+            </div>
+
+            <!-- Настройки цветовых схем -->
+            <div id="settingsPanel" style="display:none; margin-top:30px; background:var(--surface); padding:clamp(16px,2vw,24px); border-radius:var(--radius); box-shadow:0 8px 32px var(--shadow-color);">
+                <h4 style="margin-bottom:16px;"><i class="fas fa-palette"></i> Цветовые схемы</h4>
+                <div class="theme-selector" id="themeSelector"></div>
             </div>
         </section>
     </main>
@@ -1484,11 +1532,184 @@
             'use strict';
 
             // ---------- БИБЛИОТЕКИ ----------
-            const { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday,
-                    parseISO, formatISO, differenceInDays, subDays, isAfter, isBefore, isWithinInterval
-                } = window.dateFns;
+            const { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isToday, subDays } = window
+                .dateFns;
 
-            // ---------- ЗВУКИ (Web Audio API) ----------
+            // ---------- 7 ЦВЕТОВЫХ СХЕМ ----------
+            const THEMES = {
+                cosmic: {
+                    name: '🌌 Cosmic',
+                    css: `
+                --bg: #0a0a1a;
+                --surface: #14142e;
+                --surface2: #1e1e3f;
+                --surface3: #2a2a55;
+                --text: #e8e8ff;
+                --text-muted: #8a8ac0;
+                --text-dim: #5a5a8a;
+                --accent: #7c3aed;
+                --accent2: #a78bfa;
+                --accent-glow: #7c3aed55;
+                --success: #34d399;
+                --warning: #fbbf24;
+                --danger: #f87171;
+                --info: #60a5fa;
+                --border: #2a2a55;
+                --shadow-color: rgba(124, 58, 237, 0.2);
+                --warning-glow: rgba(251, 191, 36, 0.2);
+                --radius: 16px;
+                --radius-sm: 10px;
+              `
+                },
+                forest: {
+                    name: '🌿 Forest',
+                    css: `
+                --bg: #0f1a12;
+                --surface: #1a2a1f;
+                --surface2: #253a2b;
+                --surface3: #304a37;
+                --text: #e8f5e9;
+                --text-muted: #8aaa8f;
+                --text-dim: #5a7a5f;
+                --accent: #2e7d32;
+                --accent2: #66bb6a;
+                --accent-glow: #2e7d3255;
+                --success: #4caf50;
+                --warning: #ffd54f;
+                --danger: #ef5350;
+                --info: #42a5f5;
+                --border: #2a3a2f;
+                --shadow-color: rgba(46, 125, 50, 0.2);
+                --warning-glow: rgba(255, 213, 79, 0.2);
+                --radius: 16px;
+                --radius-sm: 10px;
+              `
+                },
+                ocean: {
+                    name: '🌊 Ocean',
+                    css: `
+                --bg: #0a1628;
+                --surface: #0f2440;
+                --surface2: #15305a;
+                --surface3: #1a3d70;
+                --text: #e0f2fe;
+                --text-muted: #7ab8d4;
+                --text-dim: #4a8aaa;
+                --accent: #0284c7;
+                --accent2: #38bdf8;
+                --accent-glow: #0284c755;
+                --success: #2dd4bf;
+                --warning: #fcd34d;
+                --danger: #f87171;
+                --info: #60a5fa;
+                --border: #1a3d70;
+                --shadow-color: rgba(2, 132, 199, 0.2);
+                --warning-glow: rgba(252, 211, 77, 0.2);
+                --radius: 16px;
+                --radius-sm: 10px;
+              `
+                },
+                sunset: {
+                    name: '🌅 Sunset',
+                    css: `
+                --bg: #1a0a0a;
+                --surface: #2a1414;
+                --surface2: #3a1e1e;
+                --surface3: #4a2828;
+                --text: #fef3e8;
+                --text-muted: #d4a08a;
+                --text-dim: #a0705a;
+                --accent: #e85d3a;
+                --accent2: #f58a6a;
+                --accent-glow: #e85d3a55;
+                --success: #34d399;
+                --warning: #fbbf24;
+                --danger: #f87171;
+                --info: #60a5fa;
+                --border: #3a2828;
+                --shadow-color: rgba(232, 93, 58, 0.2);
+                --warning-glow: rgba(251, 191, 36, 0.2);
+                --radius: 16px;
+                --radius-sm: 10px;
+              `
+                },
+                sakura: {
+                    name: '🌸 Sakura',
+                    css: `
+                --bg: #faf0f5;
+                --surface: #ffffff;
+                --surface2: #f5e8ee;
+                --surface3: #eddce6;
+                --text: #2d1b2a;
+                --text-muted: #8a6a7a;
+                --text-dim: #6a4a5a;
+                --accent: #e84393;
+                --accent2: #f06292;
+                --accent-glow: #e8439344;
+                --success: #2ecc71;
+                --warning: #fdcb6e;
+                --danger: #e17055;
+                --info: #74b9ff;
+                --border: #eddce6;
+                --shadow-color: rgba(232, 67, 147, 0.1);
+                --warning-glow: rgba(253, 203, 110, 0.2);
+                --radius: 20px;
+                --radius-sm: 12px;
+              `
+                },
+                cyber: {
+                    name: '🤖 Cyber',
+                    css: `
+                --bg: #0a0a0a;
+                --surface: #141414;
+                --surface2: #1e1e1e;
+                --surface3: #2a2a2a;
+                --text: #00ff41;
+                --text-muted: #00cc33;
+                --text-dim: #008822;
+                --accent: #ff00ff;
+                --accent2: #ff66ff;
+                --accent-glow: #ff00ff55;
+                --success: #00ff41;
+                --warning: #ffff00;
+                --danger: #ff0044;
+                --info: #00ccff;
+                --border: #2a2a2a;
+                --shadow-color: rgba(255, 0, 255, 0.2);
+                --warning-glow: rgba(255, 255, 0, 0.2);
+                --radius: 8px;
+                --radius-sm: 4px;
+              `
+                },
+                coffee: {
+                    name: '☕ Coffee',
+                    css: `
+                --bg: #1a1410;
+                --surface: #2a201a;
+                --surface2: #3a2a22;
+                --surface3: #4a352a;
+                --text: #f5e6d3;
+                --text-muted: #c4a88a;
+                --text-dim: #8a705a;
+                --accent: #c47a4a;
+                --accent2: #d49a6a;
+                --accent-glow: #c47a4a55;
+                --success: #6b8c5c;
+                --warning: #d4a050;
+                --danger: #c45a4a;
+                --info: #5a8aaa;
+                --border: #3a2a22;
+                --shadow-color: rgba(196, 122, 74, 0.2);
+                --warning-glow: rgba(212, 160, 80, 0.2);
+                --radius: 16px;
+                --radius-sm: 10px;
+              `
+                }
+            };
+
+            let currentTheme = 'cosmic';
+
+            // ---------- ЗВУКИ ----------
             class SoundFX {
                 constructor() {
                     this.ctx = null;
@@ -1505,30 +1726,30 @@
                         const gain = this.ctx.createGain();
                         osc.connect(gain);
                         gain.connect(this.ctx.destination);
-                        gain.gain.value = 0.1;
+                        gain.gain.value = 0.08;
 
                         switch (type) {
                             case 'xp':
                                 osc.frequency.value = 600;
                                 osc.type = 'sine';
-                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
                                 osc.start(this.ctx.currentTime);
-                                osc.stop(this.ctx.currentTime + 0.2);
+                                osc.stop(this.ctx.currentTime + 0.15);
                                 break;
                             case 'levelup':
                                 osc.frequency.setValueAtTime(523, this.ctx.currentTime);
                                 osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.1);
                                 osc.frequency.setValueAtTime(784, this.ctx.currentTime + 0.2);
                                 osc.type = 'sine';
-                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
                                 osc.start(this.ctx.currentTime);
-                                osc.stop(this.ctx.currentTime + 0.4);
+                                osc.stop(this.ctx.currentTime + 0.35);
                                 break;
                             case 'achievement':
                                 osc.frequency.setValueAtTime(440, this.ctx.currentTime);
-                                osc.frequency.setValueAtTime(554, this.ctx.currentTime + 0.1);
-                                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.2);
-                                osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.3);
+                                osc.frequency.setValueAtTime(554, this.ctx.currentTime + 0.12);
+                                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.24);
+                                osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.36);
                                 osc.type = 'square';
                                 gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
                                 osc.start(this.ctx.currentTime);
@@ -1568,12 +1789,65 @@
             `;
                 container.appendChild(toast);
                 const closeBtn = toast.querySelector('.toast-close');
-                closeBtn.addEventListener('click', () => {
-                    toast.remove();
-                });
+                closeBtn.addEventListener('click', () => { toast.remove(); });
                 setTimeout(() => {
                     if (toast.parentNode) toast.remove();
                 }, duration);
+            }
+
+            // ---------- ПРИМЕНЕНИЕ ТЕМЫ ----------
+            function applyTheme(themeId) {
+                currentTheme = themeId;
+                const theme = THEMES[themeId];
+                if (!theme) return;
+
+                const style = document.createElement('style');
+                style.id = 'theme-styles';
+                style.textContent = `:root { ${theme.css} }`;
+
+                const oldStyle = document.getElementById('theme-styles');
+                if (oldStyle) oldStyle.remove();
+                document.head.appendChild(style);
+
+                // Обновляем активный элемент в селекторе
+                document.querySelectorAll('.theme-option').forEach(el => {
+                    el.classList.toggle('active', el.dataset.theme === themeId);
+                });
+
+                // Сохраняем в localStorage
+                try {
+                    localStorage.setItem('heroTheme', themeId);
+                } catch (e) {}
+
+                // Обновляем графики (они перерисовываются с новыми цветами)
+                renderCharts();
+            }
+
+            // ---------- ИНИЦИАЛИЗАЦИЯ СЕЛЕКТОРА ТЕМ ----------
+            function initThemeSelector() {
+                const container = document.getElementById('themeSelector');
+                container.innerHTML = '';
+                Object.entries(THEMES).forEach(([id, theme]) => {
+                    const div = document.createElement('div');
+                    div.className = 'theme-option' + (id === currentTheme ? ' active' : '');
+                    div.dataset.theme = id;
+
+                    // Извлекаем цвет акцента из CSS
+                    const accentMatch = theme.css.match(/--accent: ([^;]+)/);
+                    const accentColor = accentMatch ? accentMatch[1].trim() : '#6c5ce7';
+
+                    div.innerHTML = `
+                <div class="color-preview" style="background:${accentColor};"></div>
+                <span class="theme-name">${theme.name}</span>
+              `;
+                    div.addEventListener('click', () => {
+                        applyTheme(id);
+                        showToast(`🎨 Схема "${theme.name}" применена`, 'success');
+                        // Обновляем UI
+                        updateUI();
+                    });
+                    container.appendChild(div);
+                });
             }
 
             // ---------- СОСТОЯНИЕ / ХРАНИЛИЩЕ ----------
@@ -1598,7 +1872,7 @@
                 goals: [],
                 gallery: { photos: [] },
                 achievements: [],
-                settings: { theme: 'dark' }
+                settings: { theme: 'cosmic' }
             };
 
             let data = null;
@@ -1612,7 +1886,6 @@
                 }
                 if (!data) {
                     data = JSON.parse(JSON.stringify(DEFAULT_DATA));
-                    // Тестовые данные
                     const today = format(new Date(), 'yyyy-MM-dd');
                     const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
                     const twoDaysAgo = format(subDays(new Date(), 2), 'yyyy-MM-dd');
@@ -1622,7 +1895,8 @@
                         text: '🏃 Пробежка 5 км за 30 минут',
                         photos: [],
                         done: true,
-                        xpEarned: 18
+                        xpEarned: 18,
+                        createdAt: new Date().toISOString()
                     });
                     data.journals.tasks.records.push({
                         id: 'rec2',
@@ -1630,7 +1904,8 @@
                         text: '✅ Завершил проект по работе',
                         photos: [],
                         done: true,
-                        xpEarned: 22
+                        xpEarned: 22,
+                        createdAt: new Date().toISOString()
                     });
                     data.journals.hobby.records.push({
                         id: 'rec3',
@@ -1638,7 +1913,8 @@
                         text: '🎨 Нарисовал эскиз нового персонажа',
                         photos: [],
                         done: false,
-                        xpEarned: 14
+                        xpEarned: 14,
+                        createdAt: new Date().toISOString()
                     });
                     data.journals.food.records.push({
                         id: 'rec4',
@@ -1646,23 +1922,25 @@
                         text: '🥗 Приготовил здоровый ужин',
                         photos: [],
                         done: true,
-                        xpEarned: 12
+                        xpEarned: 12,
+                        createdAt: new Date().toISOString()
                     });
                     saveData();
                 }
-                // Применяем тему
-                if (data.settings && data.settings.theme === 'light') {
-                    document.body.classList.add('light-theme');
-                    document.querySelector('#themeToggle i').className = 'fas fa-sun';
-                }
+
+                // Восстанавливаем тему
+                const savedTheme = localStorage.getItem('heroTheme') || data.settings?.theme || 'cosmic';
+                currentTheme = savedTheme;
+                applyTheme(currentTheme);
+
                 recalcXpToNext();
                 saveData();
                 return data;
             }
 
             function saveData() {
-                data.settings = data.settings || { theme: 'dark' };
-                data.settings.theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+                data.settings = data.settings || {};
+                data.settings.theme = currentTheme;
                 localStorage.setItem('heroJournalData', JSON.stringify(data));
             }
 
@@ -1673,8 +1951,6 @@
 
             // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
             function generateId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
-
-            function getJournalIds() { return Object.keys(data.journals); }
 
             function getJournal(id) { return data.journals[id]; }
 
@@ -1698,8 +1974,6 @@
 
             function getTotalPhotos() { return data.gallery.photos.length; }
 
-            function getCompletedGoals() { return data.goals.filter(g => g.completed).length; }
-
             // ---------- СЕРИИ (STREAK) ----------
             function calculateStreak(journalId) {
                 const records = getRecordsForJournal(journalId);
@@ -1707,7 +1981,6 @@
                 const dates = [...new Set(records.map(r => r.date))].sort();
                 let streak = 0;
                 let current = new Date();
-                // Проверяем от сегодня назад
                 for (let i = 0; i < 365; i++) {
                     const dateStr = format(subDays(current, i), 'yyyy-MM-dd');
                     if (dates.includes(dateStr)) {
@@ -1732,7 +2005,7 @@
             let currentChallenge = null;
 
             function generateChallenge() {
-                const journalIds = getJournalIds();
+                const journalIds = Object.keys(data.journals);
                 const jid = journalIds[Math.floor(Math.random() * journalIds.length)];
                 const journal = getJournal(jid);
                 const actions = ['запись', 'выполнение задачи', 'добавление фото', 'прогресс по цели'];
@@ -1744,7 +2017,6 @@
                     date: format(new Date(), 'yyyy-MM-dd'),
                     completed: false
                 };
-                // Проверяем, не выполнен ли уже сегодня
                 const todayRecords = getRecordsForDate(format(new Date(), 'yyyy-MM-dd'));
                 if (todayRecords.some(r => r.journalId === jid)) {
                     currentChallenge.completed = true;
@@ -1775,12 +2047,10 @@
 
             function completeChallenge() {
                 if (!currentChallenge || currentChallenge.completed) return;
-                // Проверяем, есть ли запись в этом журнале сегодня
                 const todayRecords = getRecordsForDate(format(new Date(), 'yyyy-MM-dd'));
                 const hasRecord = todayRecords.some(r => r.journalId === currentChallenge.journalId);
                 if (hasRecord) {
                     currentChallenge.completed = true;
-                    // Бонус XP (двойной)
                     const bonus = 30;
                     addXP(bonus);
                     sound.play('challenge');
@@ -1795,7 +2065,6 @@
             // ---------- RPG: XP и УРОВНИ ----------
             function calculateXP(text) {
                 let base = 10 + Math.min(25, Math.floor(text.length / 8));
-                // Бонус за длину текста
                 if (text.length > 50) base += 5;
                 if (text.length > 100) base += 10;
                 return Math.min(60, base);
@@ -1809,7 +2078,6 @@
                     data.user.level += 1;
                     recalcXpToNext();
                     leveledUp = true;
-                    // Открываем новый аватар каждые 2 уровня
                     const avatars = ['warrior_1', 'warrior_2', 'mage_1', 'mage_2', 'elf_1', 'elf_2', 'dragon_1', 'dragon_2',
                         'knight_1', 'knight_2'
                     ];
@@ -1820,11 +2088,9 @@
                             data.user.avatar.base = newAvatar;
                         }
                     }
-                    // Проверяем достижения
                     checkAchievements();
                     sound.play('levelup');
                     showToast(`🎉 УРОВЕНЬ ${data.user.level}! Вы стали сильнее!`, 'success', 4000);
-                    // Анимация аватара
                     const avatarEl = document.getElementById('avatarContainer');
                     avatarEl.classList.remove('level-up');
                     void avatarEl.offsetWidth;
@@ -1855,15 +2121,16 @@
                     { id: 'hundred_records', check: () => total >= 100, label: '100 записей!', icon: 'fa-gem' },
                     { id: 'sport_5', check: () => journalCounts.sport >= 5, label: 'Спортсмен (5)', icon: 'fa-running' },
                     { id: 'sport_20', check: () => journalCounts.sport >= 20, label: 'Марафонец (20)', icon: 'fa-bolt' },
-                    { id: 'tasks_10', check: () => journalCounts.tasks >= 10, label: 'Организатор (10)', icon: 'fa-tasks' },
+                    { id: 'tasks_10', check: () => journalCounts.tasks >= 10, label: 'Организатор (10)',
+                    icon: 'fa-tasks' },
                     { id: 'photo_5', check: () => data.gallery.photos.length >= 5, label: 'Фотограф (5)',
-                    icon: 'fa-camera' },
+                        icon: 'fa-camera' },
                     { id: 'photo_20', check: () => data.gallery.photos.length >= 20, label: 'Фотохудожник (20)',
                         icon: 'fa-images' },
                     { id: 'streak_7', check: () => streak >= 7, label: '🔥 Серия 7 дней', icon: 'fa-fire' },
                     { id: 'streak_30', check: () => streak >= 30, label: '🔥🔥 Серия 30 дней!', icon: 'fa-fire-alt' },
-                    { id: 'goals_3', check: () => data.goals.filter(g => g.completed).length >= 3, label: 'Целеустремлённый (3 цели)',
-                        icon: 'fa-bullseye' },
+                    { id: 'goals_3', check: () => data.goals.filter(g => g.completed).length >= 3,
+                        label: 'Целеустремлённый (3 цели)', icon: 'fa-bullseye' },
                 ];
 
                 let newAchievement = false;
@@ -1902,13 +2169,11 @@
 
             // ---------- ОБНОВЛЕНИЕ UI ----------
             function updateUI() {
-                // XP бар
                 const xpFill = document.getElementById('xpBarFill');
                 const pct = Math.min(100, (data.user.xp / data.user.xpToNext) * 100);
                 xpFill.style.width = pct + '%';
                 document.getElementById('userLevelDisplay').textContent = 'Ур. ' + data.user.level;
 
-                // Профиль
                 document.getElementById('profileName').textContent = data.user.name;
                 document.getElementById('profileLevel').textContent = data.user.level;
                 document.getElementById('profileXp').textContent = data.user.xp;
@@ -1921,18 +2186,15 @@
                 const streak = getTotalStreak();
                 document.getElementById('profileStreak').textContent = `🔥 ${streak} дней`;
 
-                // Аватар
                 const avatarUrl = getAvatarUrl(data.user.avatar.base);
                 const container = document.getElementById('avatarContainer');
                 container.style.backgroundImage = `url(${avatarUrl})`;
                 document.getElementById('avatarLevelBadge').textContent = data.user.level;
 
-                // Эффекты
                 const effects = data.user.avatar.effects || [];
                 document.getElementById('effectGlow').style.display = effects.includes('glow') ? 'block' : 'none';
                 document.getElementById('effectCape').style.display = effects.includes('cape') ? 'block' : 'none';
 
-                // Достижения
                 const achContainer = document.getElementById('achievementsContainer');
                 const achievementsMap = {
                     first_record: 'Первая запись',
@@ -1970,7 +2232,6 @@
                     ).join('');
                 }
 
-                // Обновить календарь, журналы и т.д.
                 renderCalendar(currentMonth, currentYear);
                 renderJournalTabs();
                 renderCurrentJournal();
@@ -2008,12 +2269,6 @@
                     grid.appendChild(empty);
                 }
 
-                // Собираем данные о сериях для отображения
-                const streakData = {};
-                for (let jid in data.journals) {
-                    streakData[jid] = calculateStreak(jid);
-                }
-
                 days.forEach(day => {
                     const dateStr = format(day, 'yyyy-MM-dd');
                     const div = document.createElement('div');
@@ -2023,7 +2278,6 @@
                     const records = getRecordsForDate(dateStr);
                     if (records.length > 0) div.classList.add('has-record');
 
-                    // Показываем иконку серии если есть
                     let maxStreak = 0;
                     for (let jid in data.journals) {
                         const s = calculateStreak(jid);
@@ -2043,10 +2297,6 @@
                         renderCalendar(month, year);
                         renderDayRecords(dateStr);
                     });
-                    // Свайп поддержка
-                    div.addEventListener('touchstart', (e) => {
-                        // Не мешаем скроллу
-                    }, { passive: true });
                     grid.appendChild(div);
                 });
 
@@ -2061,7 +2311,6 @@
                     container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">📭 Нет записей за этот день</p>';
                     return;
                 }
-                // Сортировка по времени добавления (новые сверху)
                 records.sort((a, b) => (b.createdAt || b.id).localeCompare(a.createdAt || a.id));
                 container.innerHTML = records.map(r => {
                     const journal = getJournal(r.journalId);
@@ -2086,7 +2335,6 @@
               `;
                 }).join('');
 
-                // Обработчики
                 container.querySelectorAll('.done-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         const id = btn.dataset.id;
@@ -2144,7 +2392,7 @@
                 const records = getRecordsForJournal(currentJournalId);
                 if (records.length === 0) {
                     container.innerHTML =
-                    '<p style="color:var(--text-muted); text-align:center; padding:30px;">📭 В этом журнале пока нет записей</p>';
+                        '<p style="color:var(--text-muted); text-align:center; padding:30px;">📭 В этом журнале пока нет записей</p>';
                     return;
                 }
                 records.sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || b.id).localeCompare(a.createdAt || a
@@ -2220,7 +2468,6 @@
                 });
                 addXP(xp);
 
-                // Проверяем челлендж
                 if (currentChallenge && !currentChallenge.completed &&
                     currentChallenge.journalId === journalId &&
                     record.date === format(new Date(), 'yyyy-MM-dd')) {
@@ -2242,7 +2489,6 @@
                 if (!journal) return;
                 const record = journal.records.find(r => r.id === recordId);
                 if (!record) return;
-                // Удаляем старые фото из галереи
                 if (record.photos) {
                     record.photos.forEach(url => {
                         const pidx = data.gallery.photos.findIndex(p => p.url === url && p.recordId === recordId);
@@ -2252,7 +2498,6 @@
                 record.text = text.trim();
                 record.date = date || format(new Date(), 'yyyy-MM-dd');
                 record.photos = photos || [];
-                // Добавляем новые фото в галерею
                 (photos || []).forEach(url => {
                     data.gallery.photos.push({
                         id: generateId(),
@@ -2325,7 +2570,6 @@
                 document.getElementById('modalText').value = record.text;
                 document.getElementById('modalDate').value = record.date;
 
-                // Заполняем список журналов
                 const select = document.getElementById('modalJournal');
                 select.innerHTML = '';
                 for (let jid in data.journals) {
@@ -2335,22 +2579,21 @@
                     if (jid === journalId) opt.selected = true;
                     select.appendChild(opt);
                 }
-                select.disabled = true; // Не даём менять журнал при редактировании
+                select.disabled = true;
 
-                // Показываем существующие фото
                 const photosGroup = document.getElementById('modalExistingPhotosGroup');
                 const photosContainer = document.getElementById('modalExistingPhotos');
                 if (record.photos && record.photos.length) {
                     photosGroup.style.display = 'block';
-                    photosContainer.innerHTML = record.photos.map(p =>
+                    photosContainer.innerHTML = record.photos.map((p, idx) =>
                         `<div style="position:relative; display:inline-block;">
                     <img src="${p}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" />
-                    <button type="button" class="remove-photo-btn" style="position:absolute; top:-6px; right:-6px; background:var(--danger); border-radius:50%; width:20px; height:20px; padding:0; font-size:10px; min-height:20px; min-width:20px; box-shadow:none;">×</button>
+                    <button type="button" class="remove-photo-btn" data-idx="${idx}" style="position:absolute; top:-6px; right:-6px; background:var(--danger); border-radius:50%; width:22px; height:22px; padding:0; font-size:12px; min-height:22px; min-width:22px; box-shadow:none; color:#fff; border:2px solid var(--bg);">×</button>
                   </div>`
                     ).join('');
-                    // Обработчики удаления фото
-                    photosContainer.querySelectorAll('.remove-photo-btn').forEach((btn, idx) => {
+                    photosContainer.querySelectorAll('.remove-photo-btn').forEach(btn => {
                         btn.addEventListener('click', () => {
+                            const idx = parseInt(btn.dataset.idx);
                             record.photos.splice(idx, 1);
                             openEditRecordModal(journalId, recordId);
                         });
@@ -2360,7 +2603,6 @@
                 }
 
                 document.getElementById('modalPhotos').value = '';
-
                 overlay.classList.add('open');
 
                 const saveBtn = document.getElementById('modalSave');
@@ -2570,7 +2812,7 @@
                 const photos = data.gallery.photos;
                 if (photos.length === 0) {
                     container.innerHTML =
-                    '<p style="color:var(--text-muted); text-align:center; padding:30px;">🖼 Нет загруженных фото</p>';
+                        '<p style="color:var(--text-muted); text-align:center; padding:30px;">🖼 Нет загруженных фото</p>';
                     return;
                 }
                 container.innerHTML = photos.map(p => `
@@ -2606,7 +2848,12 @@
                 });
                 const totalThisMonth = counts.reduce((a, b) => a + b, 0);
 
-                // Линейный график
+                // Получаем актуальный цвет из CSS
+                const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() ||
+                    '#6c5ce7';
+                const accentColor2 = getComputedStyle(document.documentElement).getPropertyValue('--accent2').trim() ||
+                    '#a29bfe';
+
                 const ctxLine = document.getElementById('lineChart').getContext('2d');
                 if (lineChartInstance) lineChartInstance.destroy();
                 lineChartInstance = new Chart(ctxLine, {
@@ -2616,11 +2863,11 @@
                         datasets: [{
                             label: 'Записей',
                             data: counts,
-                            borderColor: '#6c5ce7',
-                            backgroundColor: 'rgba(108,92,231,0.15)',
+                            borderColor: accentColor,
+                            backgroundColor: accentColor + '33',
                             tension: 0.4,
                             fill: true,
-                            pointBackgroundColor: '#6c5ce7',
+                            pointBackgroundColor: accentColor,
                             pointBorderColor: '#fff',
                             pointBorderWidth: 2,
                             pointRadius: 4
@@ -2648,7 +2895,7 @@
                 // Круговая диаграмма
                 const journalLabels = [];
                 const journalCounts = [];
-                const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#0984e3', '#fd79a8', '#00cec9'];
+                const colors = [accentColor, '#34d399', '#fbbf24', '#f87171', '#60a5fa', '#f472b6', '#2dd4bf'];
                 for (let jid in data.journals) {
                     const cnt = data.journals[jid].records.length;
                     if (cnt > 0) {
@@ -2695,7 +2942,6 @@
                             maintainAspectRatio: true
                         }
                     });
-                    // Находим лучший журнал
                     const maxIdx = journalCounts.indexOf(Math.max(...journalCounts));
                     document.getElementById('pieStats').innerHTML = `
                 <div class="stat-item"><div class="num">🏆 ${journalLabels[maxIdx] || ''}</div><div class="lbl">самый активный</div></div>
@@ -2746,7 +2992,6 @@
                         const imported = JSON.parse(e.target.result);
                         if (imported.user && imported.journals) {
                             data = imported;
-                            // Восстанавливаем структуру
                             for (let jid in DEFAULT_DATA.journals) {
                                 if (!data.journals[jid]) {
                                     data.journals[jid] = { ...DEFAULT_DATA.journals[jid], records: [] };
@@ -2774,6 +3019,20 @@
                 document.querySelectorAll('nav#mainNav a').forEach(a => {
                     a.classList.toggle('active', a.dataset.page === pageId);
                 });
+
+                // Показываем/скрываем панель настроек
+                const settingsPanel = document.getElementById('settingsPanel');
+                if (pageId === 'profile') {
+                    // Настройки показываем только если есть хеш #settings
+                    if (window.location.hash === '#settings') {
+                        settingsPanel.style.display = 'block';
+                    } else {
+                        settingsPanel.style.display = 'none';
+                    }
+                } else {
+                    settingsPanel.style.display = 'none';
+                }
+
                 if (pageId === 'calendar') {
                     renderCalendar(currentMonth, currentYear);
                 } else if (pageId === 'journals') {
@@ -2787,8 +3046,8 @@
                     renderGallery();
                 } else if (pageId === 'profile') {
                     updateUI();
+                    initThemeSelector();
                 }
-                // Обновляем челлендж при любой навигации
                 updateChallengeUI();
             }
 
@@ -2801,7 +3060,6 @@
                     updateUI();
                     showToast('👤 Имя обновлено', 'info');
                 }
-                // Смена аватара
                 const avatars = data.user.unlockedAvatars || ['warrior_1'];
                 const avatarList = avatars.map(a => a).join(', ');
                 const newAvatar = prompt(`Выберите аватар (доступны: ${avatarList}):`, data.user.avatar.base);
@@ -2811,7 +3069,6 @@
                     updateUI();
                     showToast('🔄 Аватар изменён', 'info');
                 }
-                // Эффекты
                 const effects = data.user.avatar.effects || [];
                 const effectStr = effects.length ? effects.join(', ') : 'нет';
                 const newEffect = prompt(`Введите эффекты через запятую (доступны: glow, cape):`, effectStr);
@@ -2865,14 +3122,8 @@
             // ---------- ИНИЦИАЛИЗАЦИЯ ----------
             function init() {
                 loadData();
-
-                // Установить начальную дату
                 selectedDate = format(new Date(), 'yyyy-MM-dd');
-
-                // Генерация челленджа
                 generateChallenge();
-
-                // Обновить прогресс целей
                 updateGoalsProgress();
 
                 // Навигация по хешу
@@ -2881,7 +3132,6 @@
                     navigateTo(hash);
                 });
 
-                // Обработчики кнопок навигации
                 document.querySelectorAll('nav#mainNav a').forEach(a => {
                     a.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -2891,7 +3141,6 @@
                     });
                 });
 
-                // Кнопки переключения месяца
                 document.getElementById('prevMonth').addEventListener('click', () => {
                     const d = new Date(currentYear, currentMonth, 1);
                     const newD = subMonths(d, 1);
@@ -2914,7 +3163,6 @@
                     renderCalendar(currentMonth, currentYear);
                 });
 
-                // Добавление записи
                 document.getElementById('addRecordBtn').addEventListener('click', () => {
                     openRecordModal(currentJournalId, format(new Date(), 'yyyy-MM-dd'));
                 });
@@ -2922,25 +3170,18 @@
                     openRecordModal(currentJournalId, selectedDate);
                 });
 
-                // Добавление цели
                 document.getElementById('addGoalBtn').addEventListener('click', openGoalModal);
-
-                // Челлендж
                 document.getElementById('challengeCompleteBtn').addEventListener('click', completeChallenge);
 
-                // Тема
                 document.getElementById('themeToggle').addEventListener('click', () => {
-                    document.body.classList.toggle('light-theme');
-                    const icon = document.getElementById('themeToggle').querySelector('i');
-                    if (document.body.classList.contains('light-theme')) {
-                        icon.className = 'fas fa-sun';
-                    } else {
-                        icon.className = 'fas fa-moon';
-                    }
+                    const themes = Object.keys(THEMES);
+                    const currentIdx = themes.indexOf(currentTheme);
+                    const nextIdx = (currentIdx + 1) % themes.length;
+                    applyTheme(themes[nextIdx]);
+                    showToast(`🎨 Схема "${THEMES[themes[nextIdx]].name}" применена`, 'success');
                     saveData();
                 });
 
-                // Профиль
                 document.getElementById('editProfileBtn').addEventListener('click', editProfile);
                 document.getElementById('exportDataBtn').addEventListener('click', exportData);
                 document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
@@ -2954,13 +3195,24 @@
                     }
                 });
 
-                // Обновить журнал
                 document.getElementById('refreshJournal').addEventListener('click', () => {
                     renderCurrentJournal();
                     showToast('🔄 Обновлено', 'info');
                 });
 
-                // Запись нажатия клавиш в модалке
+                // Кнопка настроек в профиле
+                document.getElementById('settingsBtn').addEventListener('click', () => {
+                    const panel = document.getElementById('settingsPanel');
+                    if (panel.style.display === 'none') {
+                        panel.style.display = 'block';
+                        initThemeSelector();
+                        window.location.hash = 'settings';
+                    } else {
+                        panel.style.display = 'none';
+                        window.location.hash = 'profile';
+                    }
+                });
+
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         closeModal();
@@ -2968,16 +3220,10 @@
                     }
                 });
 
-                // Первоначальная загрузка
                 const initialPage = window.location.hash.replace('#', '') || 'calendar';
                 navigateTo(initialPage);
                 updateUI();
-
-                // Сохраняем тему при загрузке
-                if (data.settings && data.settings.theme === 'light') {
-                    document.body.classList.add('light-theme');
-                    document.querySelector('#themeToggle i').className = 'fas fa-sun';
-                }
+                initThemeSelector();
 
                 showToast('⚔️ Добро пожаловать, Герой!', 'info', 3000);
             }
