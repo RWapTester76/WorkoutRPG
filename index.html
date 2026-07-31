@@ -1,2321 +1,1580 @@
 
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>RPG Календарь · Журнал активности</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Roboto,system-ui,sans-serif; }
-    body { min-height:100vh; display:flex; justify-content:center; align-items:center; padding:12px; background:#e8e4de; }
-    .app { max-width:480px; width:100%; background:rgba(255,255,255,0.92); backdrop-filter:blur(8px); border-radius:36px; padding:20px 18px 12px; border:1px solid rgba(255,255,255,0.3); position:relative; box-shadow:0 20px 40px rgba(0,0,0,0.08); }
-    .top-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:8px; }
-    .menu-btn { font-size:1.8rem; background:rgba(0,0,0,0.04); border:none; cursor:pointer; padding:8px 12px; border-radius:20px; color:#4a4a5a; min-width:48px; min-height:48px; }
-    .profile-card { display:flex; align-items:center; gap:10px; padding:4px 14px 4px 6px; border-radius:60px; background:rgba(0,0,0,0.04); flex:1; max-width:210px; cursor:pointer; }
-    .avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; background:linear-gradient(145deg,#b8a48b,#8f7b66); flex-shrink:0; overflow:hidden; }
-    .avatar img { width:100%; height:100%; object-fit:cover; }
-    .profile-info { display:flex; flex-direction:column; line-height:1.2; min-width:0; flex:1; }
-    .profile-name { font-weight:600; font-size:0.9rem; color:#2a2a3a; }
-    .profile-level { font-size:0.6rem; padding:0 10px; border-radius:20px; font-weight:600; background:rgba(0,0,0,0.06); color:#4a4a5a; display:inline-block; width:fit-content; }
-    .xp-bar-wrap { width:100%; height:4px; border-radius:10px; margin-top:3px; overflow:hidden; background:rgba(0,0,0,0.06); }
-    .xp-bar-fill { height:100%; border-radius:10px; transition:width 0.6s ease; width:0%; background:linear-gradient(90deg,#8b9a7a,#6b8a5a); }
-    .theme-toggle { border:none; font-size:1.3rem; width:42px; height:42px; border-radius:50%; cursor:pointer; background:rgba(0,0,0,0.04); color:#4a4a5a; flex-shrink:0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Хроники Героя · RPG Календарь</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ===== БАЗА ===== */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg-primary: #0f0e17;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --text-primary: #fffffe;
+            --text-secondary: #a7a9be;
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --accent-glow: rgba(108, 92, 231, 0.3);
+            --success: #00d2d3;
+            --warning: #fdcb6e;
+            --danger: #ff6b6b;
+            --radius: 20px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 16px;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(108,92,231,0.08) 0%, transparent 60%);
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
-    .menu-dropdown { display:none; position:absolute; top:75px; left:10px; right:10px; background:rgba(255,255,255,0.96); backdrop-filter:blur(12px); border-radius:28px; padding:20px 18px; z-index:100; box-shadow:0 20px 60px rgba(0,0,0,0.15); max-height:70vh; overflow-y:auto; }
-    .menu-dropdown.open { display:block; animation:slideDown 0.25s ease; }
-    @keyframes slideDown { from { opacity:0; transform:translateY(-15px); } to { opacity:1; transform:translateY(0); } }
-    .menu-section { font-size:0.65rem; text-transform:uppercase; letter-spacing:1px; opacity:0.4; margin:16px 0 8px; font-weight:700; color:#4a4a5a; border-bottom:1px solid rgba(0,0,0,0.04); padding-bottom:6px; }
-    .menu-section:first-child { margin-top:0; }
-    .menu-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:14px; cursor:pointer; font-weight:500; font-size:0.9rem; border:none; background:none; width:100%; text-align:left; color:#2a2a3a; }
-    .menu-item:hover { background:rgba(0,0,0,0.04); }
-    .menu-item i { width:22px; font-size:1rem; opacity:0.7; }
-    .menu-close { position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.3rem; cursor:pointer; opacity:0.4; color:#2a2a3a; }
-    .scheme-options { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:6px 0 2px; }
-    .scheme-opt { padding:8px 4px; border-radius:14px; border:2px solid transparent; text-align:center; font-size:0.55rem; font-weight:600; cursor:pointer; color:white; text-shadow:0 1px 4px rgba(0,0,0,0.15); }
-    .scheme-opt:hover { transform:scale(1.05); }
-    .scheme-opt.active { border-color:#2a2a3a; box-shadow:0 0 20px rgba(0,0,0,0.08); }
+        /* ===== КОНТЕЙНЕР ===== */
+        .app {
+            max-width: 420px;
+            width: 100%;
+            position: relative;
+        }
 
-    .calendar-wrapper { position:relative; margin-top:10px; min-height:380px; }
-    .view-toggle { position:absolute; right:-10px; top:0; display:flex; flex-direction:column; gap:6px; z-index:5; }
-    .view-toggle button { width:36px; height:36px; border-radius:50%; border:1px solid rgba(0,0,0,0.08); background:rgba(255,255,255,0.8); cursor:pointer; font-size:0.65rem; font-weight:600; color:#4a4a5a; display:flex; align-items:center; justify-content:center; }
-    .view-toggle button:hover { background:#6c5ce7; color:white; }
-    .view-toggle button.active { background:#6c5ce7; color:white; border-color:#6c5ce7; }
+        /* ===== ХЕДЕР ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0 16px;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .menu-btn {
+            background: var(--bg-card);
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .menu-btn:hover { background: var(--accent); transform: scale(1.05); }
 
-    .view-container { display:none; min-height:380px; }
-    .view-container.active { display:block; }
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            padding: 4px 14px 4px 4px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .user-badge:hover { border-color: var(--accent); }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .user-info .name { font-size: 0.8rem; font-weight: 600; }
+        .user-info .level { font-size: 0.6rem; color: var(--text-secondary); }
 
-    .month-view .calendar-header { display:flex; justify-content:space-between; align-items:center; margin:4px 0 12px; padding:0 4px; }
-    .month-view .calendar-header h2 { font-weight:700; font-size:1.2rem; color:#2a2a3a; }
-    .month-view .month-nav { display:flex; gap:12px; }
-    .month-view .month-nav button { background:none; border:none; font-size:1rem; cursor:pointer; padding:0 6px; color:#5a5a6a; }
-    .month-view .weekdays { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-weight:600; font-size:0.6rem; margin-bottom:4px; color:#7a7a8a; }
-    .month-view .days-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-    .month-view .day-cell { aspect-ratio:1/1; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:0.85rem; font-weight:500; border:1px solid rgba(0,0,0,0.04); background:rgba(255,255,255,0.5); cursor:pointer; color:#2a2a3a; padding:2px; }
-    .month-view .day-cell:hover { transform:scale(1.04); background:rgba(255,255,255,0.8); }
-    .month-view .day-cell.other-month { opacity:0.3; }
-    .month-view .day-cell.today { border-color:rgba(0,0,0,0.2); border-width:2px; }
-    .month-view .day-cell .day-number { font-weight:500; font-size:0.85rem; display:flex; align-items:center; gap:4px; }
-    .month-view .day-cell .task-indicators { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; margin-top:1px; }
-    .month-view .day-cell .task-dot { width:6px; height:6px; border-radius:50%; display:inline-block; border:1px solid rgba(255,255,255,0.2); }
-    .month-view .day-cell .task-dot.done { opacity:0.2; }
-    .month-view .day-cell .task-dot.important { box-shadow:0 0 8px rgba(255,215,0,0.4); }
-    .month-view .day-cell .task-dot.period { border-style:dashed; border-width:1.5px; }
-    .month-view .day-cell .task-dot.goal { border-color:#9b59b6; }
-    .month-view .day-cell .task-count { font-size:0.6rem; font-weight:700; color:white; background:#6c5ce7; padding:0 5px; border-radius:10px; min-width:18px; text-align:center; }
+        .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .icon-btn {
+            background: var(--bg-card);
+            border: none;
+            color: var(--text-secondary);
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon-btn:hover { background: var(--accent); color: white; transform: scale(1.05); }
+        .icon-btn .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.5rem;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .icon-btn { position: relative; }
 
-    .day-view .calendar-header { display:flex; justify-content:space-between; align-items:center; margin:4px 0 12px; padding:0 4px; }
-    .day-view .calendar-header h2 { font-weight:700; font-size:1.1rem; color:#2a2a3a; }
-    .day-view .month-nav { display:flex; gap:12px; }
-    .day-view .month-nav button { background:none; border:none; font-size:1rem; cursor:pointer; padding:0 6px; color:#5a5a6a; }
-    .day-view .day-timeline { padding:8px 0; max-height:350px; overflow-y:auto; }
-    .day-view .hour-block { display:flex; border-bottom:1px solid rgba(0,0,0,0.04); padding:4px 0; min-height:36px; align-items:center; }
-    .day-view .hour-label { width:50px; font-size:0.6rem; color:#7a7a8a; flex-shrink:0; }
-    .day-view .hour-tasks { flex:1; display:flex; flex-wrap:wrap; gap:4px; }
-    .day-view .hour-task { background:rgba(108,92,231,0.1); border-radius:12px; padding:2px 10px; font-size:0.7rem; cursor:pointer; border-left:3px solid #6c5ce7; }
-    .day-view .hour-task:hover { background:rgba(108,92,231,0.2); }
+        /* ===== XP БАР ===== */
+        .xp-bar-container {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .xp-bar-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .xp-bar-header span:last-child { color: var(--accent-light); font-weight: 600; }
+        .xp-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            border-radius: 10px;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 0%;
+            position: relative;
+        }
+        .xp-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2));
+            border-radius: 10px;
+        }
 
-    .week-view .week-nav { display:flex; justify-content:center; gap:16px; margin:8px 0; }
-    .week-view .week-nav button { background:none; border:none; font-size:0.9rem; cursor:pointer; color:#5a5a6a; }
-    .week-view .week-nav span { font-weight:600; font-size:0.85rem; }
-    .week-view .week-grid { display:grid; grid-template-columns:45px repeat(7,1fr); gap:2px; margin-top:8px; font-size:0.55rem; max-height:350px; overflow-y:auto; }
-    .week-view .week-grid .hour-label { color:#7a7a8a; text-align:right; padding-right:4px; font-size:0.5rem; }
-    .week-view .week-grid .day-header { font-weight:600; text-align:center; padding:4px 0; font-size:0.55rem; }
-    .week-view .week-grid .day-cell { border:1px solid rgba(0,0,0,0.04); border-radius:4px; min-height:28px; padding:2px; font-size:0.5rem; cursor:pointer; overflow:hidden; }
-    .week-view .week-grid .day-cell:hover { background:rgba(0,0,0,0.02); }
-    .week-view .week-grid .task-in-cell { font-size:0.5rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-left:2px solid #6c5ce7; padding-left:3px; margin:1px 0; }
+        /* ===== ДАШБОРД ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+        .stat-card .icon { font-size: 1.2rem; margin-bottom: 4px; }
+        .stat-card .value { font-size: 1.2rem; font-weight: 700; }
+        .stat-card .label { font-size: 0.55rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .year-view .calendar-header { display:flex; justify-content:space-between; align-items:center; margin:4px 0 12px; padding:0 4px; }
-    .year-view .calendar-header h2 { font-weight:700; font-size:1.2rem; color:#2a2a3a; }
-    .year-view .month-nav { display:flex; gap:12px; }
-    .year-view .month-nav button { background:none; border:none; font-size:1rem; cursor:pointer; padding:0 6px; color:#5a5a6a; }
-    .year-view .year-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:8px; max-height:350px; overflow-y:auto; }
-    .year-view .month-card { background:rgba(0,0,0,0.02); border-radius:16px; padding:10px 8px; text-align:center; }
-    .year-view .month-card .month-name { font-weight:600; font-size:0.75rem; margin-bottom:4px; }
-    .year-view .month-card .stat { font-size:0.5rem; color:#5a5a6a; display:flex; justify-content:space-around; flex-wrap:wrap; gap:2px; }
-    .year-view .month-card .stat span { padding:1px 4px; border-radius:4px; }
-    .year-view .month-card .stat .done { background:#d4edda; color:#155724; }
-    .year-view .month-card .stat .planned { background:#cce5ff; color:#004085; }
-    .year-view .month-card .stat .missed { background:#f8d7da; color:#721c24; }
-    .year-view .month-card .stat .xp { background:#e8daef; color:#6c3483; }
+        /* ===== ЕЖЕДНЕВНЫЙ КВЕСТ ===== */
+        .daily-quest {
+            background: linear-gradient(135deg, var(--bg-card), rgba(108,92,231,0.1));
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(108,92,231,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .daily-quest::before {
+            content: '⚡';
+            position: absolute;
+            right: -10px;
+            top: -10px;
+            font-size: 4rem;
+            opacity: 0.06;
+        }
+        .daily-quest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .daily-quest-header h3 { font-size: 0.85rem; font-weight: 600; }
+        .daily-quest-header .reward { font-size: 0.7rem; color: var(--warning); }
+        .quest-progress {
+            display: flex;
+            gap: 6px;
+        }
+        .quest-slot {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .quest-slot .fill {
+            height: 100%;
+            background: var(--accent-light);
+            border-radius: 10px;
+            transition: width 0.5s;
+            width: 0%;
+        }
+        .quest-slot.done .fill { background: var(--success); width: 100% !important; }
 
-    .daily-progress { display:flex; align-items:center; margin:10px 0 4px; padding:6px 12px; border-radius:16px; font-size:0.7rem; font-weight:500; color:#4a4a5a; background:rgba(0,0,0,0.03); }
-    .daily-progress .progress-bar { flex:1; height:3px; border-radius:10px; margin:0 10px; overflow:hidden; background:rgba(0,0,0,0.06); }
-    .daily-progress .progress-bar .fill { height:100%; border-radius:10px; transition:width 0.5s; width:0%; background:linear-gradient(90deg,#8b9a7a,#6b8a5a); }
+        /* ===== КАЛЕНДАРЬ-ВИДЖЕТ ===== */
+        .calendar-widget {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .calendar-nav h4 { font-size: 0.9rem; font-weight: 600; }
+        .calendar-nav .nav-btns { display: flex; gap: 6px; }
+        .calendar-nav .nav-btns button {
+            background: rgba(255,255,255,0.04);
+            border: none;
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+        .calendar-nav .nav-btns button:hover { background: var(--accent); color: white; }
 
-    .bottom-bar { display:flex; justify-content:space-around; align-items:center; margin-top:16px; padding:6px 0 4px; border-top:1px solid rgba(0,0,0,0.06); }
-    .bottom-bar button { background:none; border:none; font-size:1.4rem; cursor:pointer; padding:8px 12px; border-radius:40px; position:relative; color:#4a4a5a; }
-    .bottom-bar button:hover { transform:translateY(-2px); background:rgba(0,0,0,0.04); }
-    .bottom-bar .badge { position:absolute; top:-2px; right:-2px; background:#e74c3c; color:white; font-size:0.5rem; border-radius:20px; padding:0 6px; font-weight:700; min-width:18px; text-align:center; }
-    .bottom-bar .stats-btn { background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:white; border-radius:40px; padding:8px 16px; font-weight:600; font-size:0.9rem; box-shadow:0 4px 15px rgba(108,92,231,0.3); }
+        .cal-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 0.55rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .cal-day {
+            aspect-ratio: 1/1;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(255,255,255,0.02);
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            border: 1px solid transparent;
+        }
+        .cal-day:hover { background: rgba(108,92,231,0.15); transform: scale(1.05); }
+        .cal-day.other-month { opacity: 0.2; }
+        .cal-day.today { border-color: var(--accent); background: rgba(108,92,231,0.1); }
+        .cal-day .dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            margin-top: 2px;
+        }
+        .cal-day .dot.has-task { background: var(--accent-light); }
+        .cal-day .dot.done { background: var(--success); }
+        .cal-day .count-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.45rem;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
 
-    .category-legend { display:flex; flex-wrap:wrap; gap:6px 8px; justify-content:center; margin:8px 0 0; font-size:0.55rem; font-weight:600; color:#5a5a6a; }
-    .legend-item { display:flex; align-items:center; gap:4px; cursor:pointer; padding:3px 8px; border-radius:20px; opacity:0.6; border:2px solid transparent; transition:0.2s; }
-    .legend-item:hover { opacity:1; transform:scale(1.05); }
-    .legend-item.active-filter { opacity:1; background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); }
-    .legend-item.all-filter { opacity:1; background:rgba(108,92,231,0.1); border-color:#6c5ce7; }
-    .color-swatch { width:10px; height:10px; border-radius:50%; display:inline-block; }
+        /* ===== ЗАДАЧИ ===== */
+        .tasks-section {
+            margin-bottom: 16px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .section-header h4 { font-size: 0.9rem; font-weight: 600; }
+        .section-header .see-all {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .section-header .see-all:hover { color: var(--accent-light); }
 
-    /* МОДАЛКИ */
-    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); backdrop-filter:blur(6px); justify-content:center; align-items:center; z-index:1000; padding:20px; }
-    .modal-overlay.active { display:flex; }
-    .modal { border-radius:28px; padding:24px 22px; max-width:400px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 30px 60px rgba(0,0,0,0.12); background:rgba(255,255,255,0.96); }
-    .modal h3 { margin-bottom:16px; font-weight:700; font-size:1.2rem; color:#2a2a3a; }
-    .modal label { font-weight:500; font-size:0.8rem; display:block; margin:10px 0 4px; color:#4a4a5a; }
-    .modal input, .modal select, .modal textarea { width:100%; padding:10px 14px; border-radius:14px; border:1px solid rgba(0,0,0,0.08); background:rgba(0,0,0,0.03); font-size:0.9rem; color:#2a2a3a; }
-    .modal .category-selector { display:flex; flex-wrap:wrap; gap:5px; margin:6px 0 10px; }
-    .modal .cat-btn { padding:5px 12px; border-radius:30px; border:2px solid transparent; font-size:0.7rem; font-weight:600; cursor:pointer; color:white; }
-    .modal .cat-btn.active { border-color:#2a2a3a; transform:scale(1.04); box-shadow:0 2px 8px rgba(0,0,0,0.08); }
-    .modal .period-inputs { display:flex; gap:10px; align-items:center; }
-    .modal .period-inputs input { flex:1; }
-    .modal .modal-actions { display:flex; gap:10px; margin-top:16px; justify-content:flex-end; }
-    .modal .modal-actions button { padding:10px 22px; border-radius:40px; border:none; font-weight:600; cursor:pointer; font-size:0.85rem; }
-    .modal .modal-actions button:hover { transform:scale(1.03); }
-    .modal .btn-save { background:#2a2a3a; color:white; }
-    .modal .btn-cancel { background:rgba(0,0,0,0.05); color:#4a4a5a; }
-    .modal .btn-danger { background:#e74c3c; color:white; }
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 10px 14px;
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .task-item:hover { border-color: rgba(108,92,231,0.2); transform: translateX(4px); }
+        .task-item .color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .task-item .info { flex: 1; min-width: 0; }
+        .task-item .info .title {
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .task-item .info .meta {
+            font-size: 0.55rem;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .task-item .info .meta .tag {
+            background: rgba(108,92,231,0.15);
+            color: var(--accent-light);
+            padding: 0 8px;
+            border-radius: 10px;
+            font-size: 0.5rem;
+        }
+        .task-item .status {
+            font-size: 1.2rem;
+            opacity: 0.2;
+            transition: 0.2s;
+        }
+        .task-item.done .status { opacity: 1; color: var(--success); }
+        .task-item.done .info .title { opacity: 0.4; text-decoration: line-through; }
+        .task-item .xp-badge {
+            background: rgba(253,203,110,0.1);
+            color: var(--warning);
+            font-size: 0.55rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
 
-    .day-tasks-modal .task-list-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px; flex-wrap:wrap; }
-    .day-tasks-modal .task-search { flex:1; min-width:120px; padding:6px 12px; border-radius:20px; border:1px solid rgba(0,0,0,0.06); background:rgba(0,0,0,0.02); font-size:0.8rem; color:#2a2a3a; }
-    .day-tasks-modal .task-list-actions { display:flex; gap:6px; }
-    .day-tasks-modal .task-list-actions button { background:none; border:none; font-size:1rem; cursor:pointer; padding:4px 8px; border-radius:20px; color:#5a5a6a; }
-    .day-tasks-modal .task-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:14px; margin-bottom:4px; background:rgba(255,255,255,0.5); border:1px solid rgba(0,0,0,0.03); }
-    .day-tasks-modal .task-item .task-cat { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-    .day-tasks-modal .task-item .task-name { flex:1; font-size:0.85rem; color:#2a2a3a; font-weight:500; }
-    .day-tasks-modal .task-item .task-meta { display:flex; gap:4px; align-items:center; font-size:0.55rem; color:#7a7a8a; flex-wrap:wrap; }
-    .day-tasks-modal .task-item .task-goal-badge { background:#9b59b6; color:white; padding:1px 8px; border-radius:10px; font-size:0.5rem; font-weight:600; }
-    .day-tasks-modal .task-item .task-actions { display:flex; gap:2px; }
-    .day-tasks-modal .task-item .task-actions button { background:none; border:none; font-size:0.9rem; cursor:pointer; padding:4px 6px; border-radius:20px; color:#5a5a6a; }
-    .day-tasks-modal .task-item .task-actions button:hover { background:rgba(0,0,0,0.04); transform:scale(1.1); }
-    .day-tasks-modal .task-item.done { opacity:0.5; background:rgba(0,0,0,0.02); }
-    .day-tasks-modal .task-item.done .task-name { text-decoration:line-through; }
-    .day-tasks-modal .no-tasks { text-align:center; color:#8a8a9a; padding:30px 0; font-size:0.9rem; }
+        /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 8px 4px;
+            border: 1px solid rgba(255,255,255,0.04);
+            position: sticky;
+            bottom: 0;
+            margin-top: 8px;
+        }
+        .bottom-nav button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            padding: 8px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            font-size: 0.6rem;
+        }
+        .bottom-nav button i { font-size: 1.2rem; }
+        .bottom-nav button:hover { color: var(--text-primary); }
+        .bottom-nav button.active {
+            color: var(--accent-light);
+            background: rgba(108,92,231,0.1);
+        }
+        .bottom-nav button .nav-label { font-size: 0.5rem; opacity: 0.6; }
 
-    .daily-quest-badge { background:linear-gradient(135deg,#f7b731,#f5a623); color:white; padding:1px 10px; border-radius:20px; font-size:0.5rem; font-weight:700; margin-left:4px; }
+        /* ===== МЕНЮ ===== */
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .menu-overlay.open { display: flex; }
+        .menu-panel {
+            background: var(--bg-secondary);
+            border-radius: 28px;
+            padding: 24px;
+            max-width: 380px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.06);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .menu-panel .close-btn {
+            float: right;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+        .menu-panel .close-btn:hover { color: var(--text-primary); }
+        .menu-panel h3 { margin-bottom: 20px; font-size: 1.2rem; }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-secondary);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        .menu-item:hover { background: rgba(108,92,231,0.1); color: var(--text-primary); }
+        .menu-item i { width: 24px; font-size: 1.1rem; }
+        .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.04);
+            margin: 8px 0;
+        }
+        .menu-item.danger { color: var(--danger); }
+        .menu-item.danger:hover { background: rgba(255,107,107,0.1); }
 
-    .goal-item { padding:14px 16px; border-radius:16px; background:rgba(255,255,255,0.5); border:1px solid rgba(0,0,0,0.04); margin-bottom:10px; }
-    .goal-item .goal-header { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-    .goal-item .goal-title { font-weight:600; font-size:1rem; color:#2a2a3a; }
-    .goal-item .goal-status { font-size:0.65rem; padding:2px 10px; border-radius:20px; font-weight:600; white-space:nowrap; }
-    .goal-item .goal-status.active { background:#d4edda; color:#155724; }
-    .goal-item .goal-status.done { background:#cce5ff; color:#004085; }
-    .goal-item .goal-progress { display:flex; align-items:center; gap:10px; margin:6px 0; }
-    .goal-item .goal-progress .bar { flex:1; height:4px; border-radius:10px; background:rgba(0,0,0,0.06); overflow:hidden; }
-    .goal-item .goal-progress .bar .fill { height:100%; border-radius:10px; transition:width 0.5s; background:#9b59b6; }
-    .goal-item .goal-tasks { display:flex; flex-wrap:wrap; gap:4px; margin:6px 0; }
-    .goal-item .goal-tasks .tag { font-size:0.55rem; padding:2px 8px; border-radius:10px; background:rgba(0,0,0,0.04); color:#4a4a5a; }
-    .goal-item .goal-tasks .tag.done { opacity:0.4; text-decoration:line-through; }
-    .goal-item .goal-photo { margin-top:8px; border-radius:12px; overflow:hidden; max-width:100%; }
-    .goal-item .goal-photo img { width:100%; height:auto; max-height:200px; object-fit:cover; border-radius:12px; }
-    .goal-item .goal-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
-    .goal-item .goal-actions button { padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; font-weight:600; cursor:pointer; background:rgba(0,0,0,0.04); color:#4a4a5a; }
+        /* ===== МОДАЛКИ ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 28px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.06);
+            animation: slideUp 0.3s ease;
+        }
+        .modal h3 { margin-bottom: 16px; font-size: 1.1rem; }
+        .modal label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: block;
+            margin: 12px 0 4px;
+        }
+        .modal input, .modal select, .modal textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .modal input:focus, .modal select:focus, .modal textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .modal textarea { min-height: 60px; resize: vertical; }
+        .modal .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            justify-content: flex-end;
+        }
+        .modal .modal-actions button {
+            padding: 10px 22px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .modal .btn-primary { background: var(--accent); color: white; }
+        .modal .btn-primary:hover { transform: scale(1.03); box-shadow: 0 4px 20px var(--accent-glow); }
+        .modal .btn-secondary { background: rgba(255,255,255,0.04); color: var(--text-secondary); }
+        .modal .btn-secondary:hover { background: rgba(255,255,255,0.08); }
+        .modal .btn-danger { background: var(--danger); color: white; }
 
-    .profile-header-photo { width:100%; height:120px; border-radius:16px; overflow:hidden; margin-bottom:12px; background:linear-gradient(135deg,#d5c8b8,#b8a48b); cursor:pointer; display:flex; align-items:center; justify-content:center; }
-    .profile-header-photo img { width:100%; height:100%; object-fit:cover; }
-    .profile-header-photo .placeholder { color:rgba(255,255,255,0.7); font-size:0.8rem; display:flex; flex-direction:column; align-items:center; gap:4px; }
-    .profile-header-photo .placeholder i { font-size:2rem; }
-    .profile-avatar { width:80px; height:80px; border-radius:50%; overflow:hidden; margin:-40px auto 8px; border:4px solid white; box-shadow:0 4px 15px rgba(0,0,0,0.1); cursor:pointer; background:linear-gradient(145deg,#b8a48b,#8f7b66); display:flex; align-items:center; justify-content:center; position:relative; }
-    .profile-avatar img { width:100%; height:100%; object-fit:cover; }
-    .profile-avatar .placeholder { font-size:2.5rem; color:rgba(255,255,255,0.8); }
-    .profile-avatar .upload-badge { position:absolute; bottom:0; right:0; background:#6c5ce7; color:white; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; border:2px solid white; }
-    .profile-field { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.04); }
-    .profile-field .label { color:#7a7a8a; font-size:0.8rem; }
-    .profile-field .value { font-weight:500; font-size:0.9rem; color:#2a2a3a; }
-    .bmi-indicator { display:inline-block; padding:2px 12px; border-radius:20px; font-size:0.7rem; font-weight:600; }
-    .bmi-underweight { background:#f39c12; color:white; }
-    .bmi-normal { background:#2ecc71; color:white; }
-    .bmi-overweight { background:#f1c40f; color:#2a2a3a; }
-    .bmi-obese { background:#e74c3c; color:white; }
-    .measurements-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0; }
-    .measurements-grid .meas-item { background:rgba(0,0,0,0.03); padding:8px 12px; border-radius:12px; text-align:center; }
-    .measurements-grid .meas-item .meas-label { font-size:0.6rem; color:#7a7a8a; text-transform:uppercase; }
-    .measurements-grid .meas-item .meas-value { font-weight:600; font-size:1rem; }
-    .profile-tabs { display:flex; gap:6px; margin:12px 0; flex-wrap:wrap; }
-    .profile-tabs button { padding:6px 14px; border-radius:20px; border:none; font-size:0.7rem; font-weight:600; cursor:pointer; background:rgba(0,0,0,0.04); color:#4a4a5a; }
-    .profile-tabs button.active { background:#6c5ce7; color:white; }
-    .tab-content { display:none; }
-    .tab-content.active { display:block; }
-    .chart-container { width:100%; height:200px; margin:10px 0; background:rgba(0,0,0,0.02); border-radius:12px; overflow:hidden; }
-    .chart-container canvas { width:100%; height:100%; }
-    .reminder-set { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:8px 0; }
-    .reminder-set select { padding:6px 12px; border-radius:12px; border:1px solid rgba(0,0,0,0.08); background:rgba(0,0,0,0.02); }
-    .rpg-avatar-box { text-align:center; padding:16px; background:rgba(0,0,0,0.03); border-radius:20px; margin:12px 0; }
-    .rpg-avatar-box .avatar-big { font-size:5rem; line-height:1; }
-    .rpg-avatar-box .level-badge { display:inline-block; background:#6c5ce7; color:white; padding:2px 16px; border-radius:20px; font-weight:700; font-size:0.9rem; margin:6px 0; }
-    .rpg-avatar-box .xp-bar { height:8px; border-radius:10px; background:rgba(0,0,0,0.06); overflow:hidden; margin:8px 0; }
-    .rpg-avatar-box .xp-bar .fill { height:100%; border-radius:10px; background:linear-gradient(90deg,#6c5ce7,#a29bfe); transition:width 0.5s; }
-    .rpg-avatar-box .achievements-list { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:8px 0; }
-    .rpg-avatar-box .achievement-icon { font-size:1.8rem; opacity:0.6; }
-    .rpg-avatar-box .achievement-icon.unlocked { opacity:1; }
+        .category-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 6px 0;
+        }
+        .category-selector .cat-opt {
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+        }
+        .category-selector .cat-opt.active { border-color: white; transform: scale(1.05); }
 
-    .timer-display { font-size:2.2rem; font-weight:700; text-align:center; padding:12px 0; letter-spacing:2px; color:#2a2a3a; }
-    .timer-controls { display:flex; gap:10px; justify-content:center; margin:8px 0; }
-    .timer-controls button { padding:8px 18px; border-radius:40px; border:none; font-weight:600; cursor:pointer; font-size:0.85rem; }
+        /* ===== ПРОФИЛЬ ===== */
+        .profile-header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .profile-header .big-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            border: 3px solid rgba(255,255,255,0.06);
+        }
+        .profile-header .name { font-size: 1.1rem; font-weight: 600; }
+        .profile-header .rank {
+            font-size: 0.7rem;
+            color: var(--accent-light);
+            background: rgba(108,92,231,0.1);
+            padding: 2px 14px;
+            border-radius: 20px;
+            display: inline-block;
+        }
 
-    .scheme-moss body { background:#dad3c8; }
-    .scheme-moss .app { background:rgba(240,235,227,0.92); border-color:rgba(196,181,160,0.3); }
-    .scheme-aqua body { background:#c8dde0; }
-    .scheme-aqua .app { background:rgba(232,244,248,0.92); border-color:rgba(127,193,197,0.3); }
-    .scheme-berry body { background:#dcc8dc; }
-    .scheme-berry .app { background:rgba(245,238,245,0.92); border-color:rgba(201,160,201,0.3); }
-    .scheme-sunset body { background:#f0d6c8; }
-    .scheme-sunset .app { background:rgba(253,240,232,0.92); border-color:rgba(247,184,154,0.3); }
-    .scheme-mono body { background:#d5d5d5; }
-    .scheme-mono .app { background:rgba(245,245,245,0.92); border-color:rgba(200,200,200,0.3); }
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .profile-stats .p-stat {
+            background: rgba(255,255,255,0.02);
+            padding: 10px;
+            border-radius: 14px;
+            text-align: center;
+        }
+        .profile-stats .p-stat .val { font-size: 1.1rem; font-weight: 700; }
+        .profile-stats .p-stat .lbl { font-size: 0.55rem; color: var(--text-secondary); text-transform: uppercase; }
 
-    body.dark-mode .app { background:rgba(38,38,51,0.92); border-color:rgba(63,63,85,0.3); }
-    body.dark-mode .day-cell { background:rgba(255,255,255,0.04); color:#d0d0e0; border-color:rgba(255,255,255,0.04); }
-    body.dark-mode .day-cell:hover { background:rgba(255,255,255,0.08); }
-    body.dark-mode .modal { background:rgba(38,38,51,0.96); color:#d0d0e0; }
-    body.dark-mode .modal input, body.dark-mode .modal select { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); color:#d0d0e0; }
-    body.dark-mode .modal .btn-cancel { background:rgba(255,255,255,0.06); color:#aaaac0; }
-    body.dark-mode .modal .btn-save { background:#5a5a7a; color:white; }
-    body.dark-mode .bottom-bar { border-color:rgba(255,255,255,0.06); }
-    body.dark-mode .menu-dropdown { background:rgba(38,38,51,0.96); color:#d0d0e0; border-color:rgba(63,63,85,0.3); }
-    body.dark-mode .menu-item { color:#d0d0e0; }
-    body.dark-mode .menu-item:hover { background:rgba(255,255,255,0.04); }
-    body.dark-mode .menu-section { color:#8a8aaa; border-color:rgba(255,255,255,0.06); }
-    body.dark-mode .view-toggle button { background:rgba(255,255,255,0.06); color:#b0b0c8; border-color:rgba(255,255,255,0.08); }
-    body.dark-mode .view-toggle button:hover { background:#6c5ce7; color:white; }
-    body.dark-mode .view-toggle button.active { background:#6c5ce7; color:white; }
-    body.dark-mode .profile-card { background:rgba(255,255,255,0.04); }
-    body.dark-mode .profile-name { color:#d0d0e0; }
-    body.dark-mode .profile-level { background:rgba(255,255,255,0.06); color:#b0b0c8; }
-    body.dark-mode .calendar-header h2 { color:#d0d0e0; }
-    body.dark-mode .weekdays { color:#6a6a8a; }
-    body.dark-mode .daily-progress { color:#8a8aaa; }
-    body.dark-mode .daily-progress .progress-bar { background:rgba(255,255,255,0.06); }
-    body.dark-mode .category-legend { color:#8a8aaa; }
-    body.dark-mode .year-view .month-card { background:rgba(255,255,255,0.04); }
-    body.dark-mode .year-view .month-card .stat .done { background:#1e3a2a; color:#7dcea0; }
-    body.dark-mode .year-view .month-card .stat .planned { background:#1a2a3a; color:#7db8d0; }
-    body.dark-mode .year-view .month-card .stat .missed { background:#3a1a1a; color:#e88383; }
-    body.dark-mode .year-view .month-card .stat .xp { background:#2a1a3a; color:#c08ad0; }
-    body.dark-mode .day-view .hour-task { background:rgba(108,92,231,0.2); color:#d0d0e0; }
-    body.dark-mode .week-view .week-grid .day-cell { border-color:rgba(255,255,255,0.04); color:#d0d0e0; }
-    body.dark-mode .goal-item { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.04); }
-    body.dark-mode .goal-item .goal-title { color:#d0d0e0; }
-    body.dark-mode .rpg-avatar-box { background:rgba(255,255,255,0.04); }
-    body.dark-mode .chart-container { background:rgba(255,255,255,0.04); }
-    body.dark-mode .profile-field { border-color:rgba(255,255,255,0.04); }
-    body.dark-mode .profile-field .label { color:#8a8aaa; }
-    body.dark-mode .profile-field .value { color:#d0d0e0; }
-    body.dark-mode .measurements-grid .meas-item { background:rgba(255,255,255,0.04); }
-    body.dark-mode .measurements-grid .meas-item .meas-label { color:#8a8aaa; }
-    body.dark-mode .measurements-grid .meas-item .meas-value { color:#d0d0e0; }
-
-    @media (max-width:420px){ .app { padding:14px 12px 8px; } .profile-card { padding:2px 10px 2px 4px; } .avatar { width:34px; height:34px; font-size:1.1rem; } .profile-name { font-size:0.8rem; } .day-cell { font-size:0.7rem; border-radius:14px; } .view-toggle { right:-6px; } .view-toggle button { width:30px; height:30px; font-size:0.55rem; } .year-view .year-grid { grid-template-columns:repeat(2,1fr); } .bottom-bar .stats-btn { font-size:0.7rem; padding:6px 12px; } .profile-header-photo { height:80px; } .profile-avatar { width:60px; height:60px; margin-top:-30px; } .profile-tabs button { font-size:0.6rem; padding:4px 8px; } .week-view .week-grid { font-size:0.45rem; } .week-view .week-grid .day-cell { min-height:22px; } .day-view .hour-label { width:40px; font-size:0.55rem; } }
-  </style>
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 420px) {
+            .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+            .stat-card { padding: 8px 4px; }
+            .stat-card .value { font-size: 1rem; }
+            .bottom-nav button { padding: 6px 10px; font-size: 0.5rem; }
+            .bottom-nav button i { font-size: 1rem; }
+        }
+    </style>
 </head>
 <body>
-  <div class="app scheme-moss" id="appContainer">
-    <!-- Верхний бар -->
-    <div class="top-bar">
-      <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
-      <div class="profile-card" id="profileCard">
-        <div class="avatar" id="avatarPreview"><span id="avatarPlaceholder">🧙</span></div>
-        <div class="profile-info">
-          <span class="profile-name" id="profileNameDisplay">Эльдар</span>
-          <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
-            <span class="profile-level" id="profileLevel">Lv.1</span>
-            <span id="dailyQuestBadge" class="daily-quest-badge" style="display:none;">⚡ квест</span>
-          </div>
-          <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xpBarFill"></div></div>
+    <div class="app" id="app">
+        <!-- ===== ХЕДЕР ===== -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+                <div class="user-badge" id="profileBtn">
+                    <div class="user-avatar" id="avatarDisplay">🧙</div>
+                    <div class="user-info">
+                        <div class="name" id="userName">Эльдар</div>
+                        <div class="level" id="userLevel">Ур. 1</div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="icon-btn" id="addTaskBtn"><i class="fas fa-plus"></i></button>
+                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </div>
+        </header>
+
+        <!-- ===== XP БАР ===== -->
+        <div class="xp-bar-container">
+            <div class="xp-bar-header">
+                <span>Опыт</span>
+                <span id="xpText">0 / 1 XP</span>
+            </div>
+            <div class="xp-track">
+                <div class="xp-fill" id="xpFill" style="width:0%;"></div>
+            </div>
         </div>
-      </div>
-      <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
-    </div>
 
-    <!-- Меню -->
-    <div class="menu-dropdown" id="menuDropdown">
-      <button class="menu-close" id="menuClose"><i class="fas fa-times"></i></button>
-      <div class="menu-section">👤 Профиль</div>
-      <button class="menu-item" id="menuProfile"><i class="fas fa-user-circle"></i> Мой профиль</button>
-      <button class="menu-item" id="menuGoals"><i class="fas fa-bullseye"></i> Цели (<span id="goalsCount">0</span>)</button>
-      <div class="menu-section">🎨 Оформление</div>
-      <div class="scheme-options" id="schemeOptions">
-        <div class="scheme-opt active" data-scheme="moss" style="background:linear-gradient(135deg,#8b9a7a,#c4b5a0);">Moss</div>
-        <div class="scheme-opt" data-scheme="aqua" style="background:linear-gradient(135deg,#7fc1c5,#b5d9de);">Aqua</div>
-        <div class="scheme-opt" data-scheme="berry" style="background:linear-gradient(135deg,#c9a0c9,#dcc0dc);">Berry</div>
-        <div class="scheme-opt" data-scheme="sunset" style="background:linear-gradient(135deg,#f7b89a,#f5d0bd);">Sunset</div>
-        <div class="scheme-opt" data-scheme="mono" style="background:linear-gradient(135deg,#aaaaaa,#cccccc);">Mono</div>
-      </div>
-      <button class="menu-item" id="menuThemeToggle"><i class="fas fa-moon"></i> Тёмная тема</button>
-      <div class="menu-section">🏅 Достижения</div>
-      <button class="menu-item" id="menuAchievements"><i class="fas fa-trophy"></i> Мои достижения (<span id="achCount">0</span>)</button>
-      <div class="menu-section">💾 Данные</div>
-      <button class="menu-item" id="menuStats"><i class="fas fa-chart-simple"></i> Статистика</button>
-      <button class="menu-item" id="menuExport"><i class="fas fa-download"></i> Экспорт данных</button>
-      <button class="menu-item" id="menuReset" style="color:#e74c3c;"><i class="fas fa-trash"></i> Сбросить всё</button>
-    </div>
-
-    <!-- Календарь -->
-    <div class="calendar-wrapper">
-      <div class="view-toggle">
-        <button class="active" data-view="month">М</button>
-        <button data-view="week">Н</button>
-        <button data-view="day">Д</button>
-        <button data-view="year">Г</button>
-      </div>
-
-      <div class="view-container month-view active" id="monthView">
-        <div class="calendar-header">
-          <h2 id="monthYearLabel">Июль 2026</h2>
-          <div class="month-nav">
-            <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
-            <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
-          </div>
+        <!-- ===== СТАТИСТИКА ===== -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">📋</div>
+                <div class="value" id="statTotal">0</div>
+                <div class="label">Всего задач</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">✅</div>
+                <div class="value" id="statDone">0</div>
+                <div class="label">Выполнено</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🔥</div>
+                <div class="value" id="statStreak">0</div>
+                <div class="label">Дней стрик</div>
+            </div>
         </div>
-        <div class="weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
-        <div class="days-grid" id="daysGrid"></div>
-      </div>
 
-      <div class="view-container week-view" id="weekView">
-        <div class="week-nav">
-          <button id="weekPrev"><i class="fas fa-chevron-left"></i></button>
-          <span id="weekLabel">Неделя</span>
-          <button id="weekNext"><i class="fas fa-chevron-right"></i></button>
+        <!-- ===== ЕЖЕДНЕВНЫЙ КВЕСТ ===== -->
+        <div class="daily-quest" id="dailyQuest">
+            <div class="daily-quest-header">
+                <h3>⚡ Ежедневный квест</h3>
+                <span class="reward">+15 XP</span>
+            </div>
+            <div class="quest-progress" id="questProgress">
+                <div class="quest-slot"><div class="fill" style="width:0%;"></div></div>
+                <div class="quest-slot"><div class="fill" style="width:0%;"></div></div>
+                <div class="quest-slot"><div class="fill" style="width:0%;"></div></div>
+            </div>
+            <div style="font-size:0.65rem; color:var(--text-secondary); margin-top:6px;" id="questText">Выполните 3 задачи сегодня</div>
         </div>
-        <div class="week-grid" id="weekGrid"></div>
-      </div>
 
-      <div class="view-container day-view" id="dayView">
-        <div class="calendar-header">
-          <h2 id="dayLabel">Сегодня</h2>
-          <div class="month-nav">
-            <button id="dayPrev"><i class="fas fa-chevron-left"></i></button>
-            <button id="dayNext"><i class="fas fa-chevron-right"></i></button>
-          </div>
+        <!-- ===== КАЛЕНДАРЬ ===== -->
+        <div class="calendar-widget">
+            <div class="calendar-nav">
+                <h4 id="calMonth">Июль 2026</h4>
+                <div class="nav-btns">
+                    <button id="calPrev"><i class="fas fa-chevron-left"></i></button>
+                    <button id="calNext"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="cal-weekdays">
+                <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
         </div>
-        <div class="day-timeline" id="dayTimeline"></div>
-      </div>
 
-      <div class="view-container year-view" id="yearView">
-        <div class="calendar-header">
-          <h2 id="yearLabel">2026</h2>
-          <div class="month-nav">
-            <button id="yearPrev"><i class="fas fa-chevron-left"></i></button>
-            <button id="yearNext"><i class="fas fa-chevron-right"></i></button>
-          </div>
+        <!-- ===== ЗАДАЧИ ===== -->
+        <div class="tasks-section">
+            <div class="section-header">
+                <h4>📌 Сегодня</h4>
+                <span class="see-all" id="seeAllTasks">Все задачи →</span>
+            </div>
+            <div class="task-list" id="todayTasks"></div>
         </div>
-        <div class="year-grid" id="yearGrid"></div>
-      </div>
+
+        <!-- ===== НИЖНЯЯ НАВИГАЦИЯ ===== -->
+        <nav class="bottom-nav">
+            <button class="active" data-view="dashboard"><i class="fas fa-home"></i><span class="nav-label">Главная</span></button>
+            <button data-view="calendar"><i class="fas fa-calendar-alt"></i><span class="nav-label">Календарь</span></button>
+            <button data-view="goals"><i class="fas fa-bullseye"></i><span class="nav-label">Цели</span></button>
+            <button data-view="stats"><i class="fas fa-chart-line"></i><span class="nav-label">Статистика</span></button>
+        </nav>
     </div>
 
-    <div class="daily-progress">
-      <span>📅 Сегодня</span>
-      <div class="progress-bar"><div class="fill" id="dailyProgressFill"></div></div>
-      <span id="dailyProgressText">0/0</span>
-    </div>
-
-    <!-- ЛЕГЕНДА С ФИЛЬТРАМИ -->
-    <div class="category-legend" id="legendContainer"></div>
-
-    <div class="bottom-bar">
-      <button id="addTaskBtn"><i class="fas fa-calendar-plus"></i></button>
-      <button id="tasksListBtn"><i class="fas fa-tasks"></i><span class="badge" id="tasksBadge">0</span></button>
-      <button id="goalsBtn"><i class="fas fa-bullseye"></i></button>
-      <button class="stats-btn" id="statsBtn"><i class="fas fa-chart-simple"></i> Статистика</button>
-      <button id="settingsBtn"><i class="fas fa-user-gear"></i></button>
-    </div>
-  </div>
-
-  <!-- МОДАЛКА ПРОФИЛЯ -->
-  <div class="modal-overlay" id="profileModal">
-    <div class="modal">
-      <h3><i class="fas fa-user-circle"></i> Мой профиль</h3>
-      <div class="profile-header-photo" id="headerPhoto"><div class="placeholder"><i class="fas fa-camera"></i><span>Загрузить обложку</span></div></div>
-      <div class="profile-avatar" id="profileAvatar"><span class="placeholder" id="profileAvatarPlaceholder">🧙</span><div class="upload-badge"><i class="fas fa-camera"></i></div></div>
-      <div class="profile-tabs">
-        <button class="active" data-tab="tab-main">Основное</button>
-        <button data-tab="tab-weight">Вес</button>
-        <button data-tab="tab-measurements">Мерки</button>
-        <button data-tab="tab-reminders">Напоминания</button>
-        <button data-tab="tab-rpg">RPG</button>
-        <button data-tab="tab-productivity">Продуктивность</button>
-      </div>
-      <div class="tab-content active" id="tab-main">
-        <div class="profile-field"><span class="label">Имя</span><span class="value" id="profileNameValue">—</span></div>
-        <div class="profile-field"><span class="label">Возраст</span><span class="value" id="profileAgeValue">—</span></div>
-        <div class="profile-field"><span class="label">Пол</span><span class="value" id="profileGenderValue">—</span></div>
-        <div class="profile-field"><span class="label">Рост (см)</span><span class="value" id="profileHeightValue">—</span></div>
-        <div class="profile-field"><span class="label">Вес (кг)</span><span class="value" id="profileWeightValue">—</span></div>
-        <div class="profile-field"><span class="label">ИМТ</span><span class="value"><span id="bmiValue">—</span> <span id="bmiLabel" class="bmi-indicator"></span></span></div>
-      </div>
-      <div class="tab-content" id="tab-weight">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-weight:600;">📊 График веса</span>
-          <button id="addWeightBtn" style="background:none; border:none; font-size:0.8rem; color:#6c5ce7; cursor:pointer;">+ Добавить</button>
+    <!-- ===== МЕНЮ ===== -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-panel">
+            <button class="close-btn" id="menuClose"><i class="fas fa-times"></i></button>
+            <h3>⚔️ Меню</h3>
+            <button class="menu-item" id="menuProfile"><i class="fas fa-user-circle"></i> Мой профиль</button>
+            <button class="menu-item" id="menuGoals"><i class="fas fa-bullseye"></i> Цели</button>
+            <div class="menu-divider"></div>
+            <button class="menu-item" id="menuAchievements"><i class="fas fa-trophy"></i> Достижения</button>
+            <button class="menu-item" id="menuStats"><i class="fas fa-chart-simple"></i> Статистика</button>
+            <div class="menu-divider"></div>
+            <button class="menu-item" id="menuExport"><i class="fas fa-download"></i> Экспорт данных</button>
+            <button class="menu-item danger" id="menuReset"><i class="fas fa-trash"></i> Сбросить всё</button>
         </div>
-        <div class="chart-container"><canvas id="weightChart"></canvas></div>
-      </div>
-      <div class="tab-content" id="tab-measurements">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-weight:600;">📏 График мерок</span>
-          <button id="addMeasurementBtn" style="background:none; border:none; font-size:0.8rem; color:#6c5ce7; cursor:pointer;">+ Добавить</button>
+    </div>
+
+    <!-- ===== МОДАЛКА ПРОФИЛЯ ===== -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal">
+            <h3>👤 Профиль</h3>
+            <div class="profile-header">
+                <div class="big-avatar" id="profileAvatar">🧙</div>
+                <div class="name" id="profileName">Эльдар</div>
+                <div class="rank" id="profileRank">Новичок</div>
+            </div>
+            <div class="profile-stats">
+                <div class="p-stat"><div class="val" id="pLevel">1</div><div class="lbl">Уровень</div></div>
+                <div class="p-stat"><div class="val" id="pXP">0</div><div class="lbl">Всего XP</div></div>
+                <div class="p-stat"><div class="val" id="pTasks">0</div><div class="lbl">Задач</div></div>
+                <div class="p-stat"><div class="val" id="pStreak">0</div><div class="lbl">Стрик</div></div>
+            </div>
+            <div style="margin-top:12px;">
+                <label>Имя</label>
+                <input type="text" id="editName" value="Эльдар">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="closeProfile">Закрыть</button>
+                <button class="btn-primary" id="saveProfile">Сохранить</button>
+            </div>
         </div>
-        <div class="chart-container"><canvas id="measurementsChart"></canvas></div>
-        <div class="measurements-grid">
-          <div class="meas-item"><div class="meas-label">Бицепс</div><div class="meas-value" id="measBiceps">—</div></div>
-          <div class="meas-item"><div class="meas-label">Грудь</div><div class="meas-value" id="measChest">—</div></div>
-          <div class="meas-item"><div class="meas-label">Бедро</div><div class="meas-value" id="measThigh">—</div></div>
-          <div class="meas-item"><div class="meas-label">Талия</div><div class="meas-value" id="measWaist">—</div></div>
+    </div>
+
+    <!-- ===== МОДАЛКА ДОБАВЛЕНИЯ ЗАДАЧИ ===== -->
+    <div class="modal-overlay" id="addTaskModal">
+        <div class="modal">
+            <h3>➕ Новая задача</h3>
+            <label>Название</label>
+            <input type="text" id="taskTitle" placeholder="Что нужно сделать?">
+            <label>Категория</label>
+            <div class="category-selector" id="taskCategorySelector"></div>
+            <label>Продолжительность (мин)</label>
+            <input type="number" id="taskDuration" value="30" min="0">
+            <label>Дата</label>
+            <input type="date" id="taskDate">
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancelTask">Отмена</button>
+                <button class="btn-primary" id="saveTask">Сохранить</button>
+            </div>
         </div>
-      </div>
-      <div class="tab-content" id="tab-reminders">
-        <div style="margin:8px 0;">
-          <span style="font-weight:600;">📅 Напоминание о замерах</span>
-          <div class="reminder-set">
-            <select id="reminderPeriod">
-              <option value="0">Отключено</option>
-              <option value="1">Каждый месяц</option>
-              <option value="2">Раз в 2 месяца</option>
-              <option value="3">Раз в 3 месяца</option>
-              <option value="6">Раз в 6 месяцев</option>
-              <option value="12">Раз в год</option>
-            </select>
-            <button id="saveReminderBtn" class="btn-save" style="padding:4px 16px; border:none; border-radius:20px; color:white; background:#6c5ce7; cursor:pointer;">Сохранить</button>
-          </div>
-          <div id="reminderStatus" style="font-size:0.8rem; margin-top:4px; color:#7a7a8a;"></div>
+    </div>
+
+    <!-- ===== МОДАЛКА ЦЕЛЕЙ ===== -->
+    <div class="modal-overlay" id="goalsModal">
+        <div class="modal">
+            <h3>🎯 Цели</h3>
+            <div id="goalsList"></div>
+            <div style="margin-top:12px;">
+                <label>Новая цель</label>
+                <input type="text" id="newGoalInput" placeholder="Название цели">
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="closeGoals">Закрыть</button>
+                    <button class="btn-primary" id="addGoalBtn">Добавить цель</button>
+                </div>
+            </div>
         </div>
-        <div style="margin-top:12px;">
-          <span style="font-weight:600;">📋 История замеров</span>
-          <div id="measurementHistory" style="max-height:150px; overflow-y:auto; font-size:0.8rem; margin-top:6px;"></div>
-        </div>
-      </div>
-      <div class="tab-content" id="tab-rpg">
-        <div class="rpg-avatar-box">
-          <div class="avatar-big" id="rpgAvatarBig">🧙</div>
-          <div class="level-badge" id="rpgLevelBadge">Уровень 1</div>
-          <div class="xp-bar"><div class="fill" id="rpgXpBar" style="width:0%;"></div></div>
-          <div style="font-size:0.8rem; color:#7a7a8a;" id="rpgXpText">0 / 1 XP</div>
-          <div class="achievements-list" id="rpgAchievementsList"></div>
-          <div style="margin-top:12px; display:flex; justify-content:space-around; font-size:0.8rem;">
-            <span>🔥 Текущий стрик: <strong id="currentStreak">0</strong> дн.</span>
-            <span>🏆 Макс. стрик: <strong id="maxStreak">0</strong> дн.</span>
-          </div>
-        </div>
-      </div>
-      <div class="tab-content" id="tab-productivity">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0;">
-          <div class="meas-item"><div class="meas-label">Неделя</div><div class="meas-value" id="prodWeek">0 XP</div></div>
-          <div class="meas-item"><div class="meas-label">Месяц</div><div class="meas-value" id="prodMonth">0 XP</div></div>
-          <div class="meas-item"><div class="meas-label">Квартал</div><div class="meas-value" id="prodQuarter">0 XP</div></div>
-          <div class="meas-item"><div class="meas-label">Год</div><div class="meas-value" id="prodYear">0 XP</div></div>
-        </div>
-        <div style="margin:8px 0; text-align:center;">
-          <span style="font-weight:600;">🎯 Амбициозность: </span>
-          <span id="ambitionScore">0%</span> (целей достигнуто)
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn-cancel" id="closeProfileBtn">Закрыть</button>
-        <button class="btn-save" id="editProfileBtn">Редактировать</button>
-      </div>
     </div>
-  </div>
 
-  <!-- МОДАЛКА РЕДАКТИРОВАНИЯ ПРОФИЛЯ -->
-  <div class="modal-overlay" id="editProfileModal">
-    <div class="modal">
-      <h3><i class="fas fa-edit"></i> Редактировать профиль</h3>
-      <label>Имя</label><input type="text" id="editProfileName" placeholder="Ваше имя">
-      <label>Возраст</label><input type="number" id="editProfileAge" placeholder="Возраст">
-      <label>Пол</label><select id="editProfileGender"><option value="">Не указан</option><option value="Мужской">Мужской</option><option value="Женский">Женский</option></select>
-      <label>Рост (см)</label><input type="number" id="editProfileHeight" placeholder="Рост в см" step="0.1">
-      <label>Вес (кг)</label><input type="number" id="editProfileWeight" placeholder="Вес в кг" step="0.1">
-      <div class="modal-actions"><button class="btn-cancel" id="cancelEditProfileBtn">Отмена</button><button class="btn-save" id="saveEditProfileBtn">Сохранить</button></div>
-    </div>
-  </div>
+    <script>
+        // ============================================================
+        //  ПОЛНАЯ ЛОГИКА ПРИЛОЖЕНИЯ
+        // ============================================================
 
-  <!-- МОДАЛКА ДОБАВЛЕНИЯ ВЕСА -->
-  <div class="modal-overlay" id="addWeightModal">
-    <div class="modal">
-      <h3><i class="fas fa-weight-scale"></i> Добавить вес</h3>
-      <label>Дата</label><input type="date" id="weightDate">
-      <label>Вес (кг)</label><input type="number" id="weightValue" step="0.1" placeholder="Вес в кг">
-      <div class="modal-actions"><button class="btn-cancel" id="cancelWeightBtn">Отмена</button><button class="btn-save" id="saveWeightBtn">Сохранить</button></div>
-    </div>
-  </div>
-
-  <!-- МОДАЛКА ДОБАВЛЕНИЯ МЕРОК -->
-  <div class="modal-overlay" id="addMeasurementModal">
-    <div class="modal">
-      <h3><i class="fas fa-ruler"></i> Добавить мерки</h3>
-      <label>Бицепс (см)</label><input type="number" id="measBicepsInput" step="0.1" placeholder="Бицепс">
-      <label>Грудь (см)</label><input type="number" id="measChestInput" step="0.1" placeholder="Грудь">
-      <label>Бедро (см)</label><input type="number" id="measThighInput" step="0.1" placeholder="Бедро">
-      <label>Талия (см)</label><input type="number" id="measWaistInput" step="0.1" placeholder="Талия">
-      <div class="modal-actions"><button class="btn-cancel" id="cancelMeasurementBtn">Отмена</button><button class="btn-save" id="saveMeasurementBtn">Сохранить</button></div>
-    </div>
-  </div>
-
-  <!-- МОДАЛКА ДОБАВЛЕНИЯ ЗАДАЧИ -->
-  <div class="modal-overlay" id="addTaskModal">
-    <div class="modal">
-      <h3><i class="fas fa-plus-circle"></i> Новая задача</h3>
-      <label>Название</label><input type="text" id="taskTitleInput" placeholder="Что нужно сделать?">
-      <label>Период</label>
-      <div class="period-inputs"><input type="date" id="taskDateFrom" /><span>→</span><input type="date" id="taskDateTo" /></div>
-      <label>Время начала</label><input type="time" id="taskStartTime" value="09:00">
-      <label>Продолжительность (минут)</label><input type="number" id="taskDuration" placeholder="30" value="30" min="0" step="1">
-      <label>Категория</label>
-      <div class="category-selector" id="categorySelector"></div>
-      <label style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-        <input type="checkbox" id="taskImportant"> <span>⭐ Важная</span>
-      </label>
-      <label>Привязать к цели</label>
-      <select id="taskGoalSelect"><option value="">Без цели</option></select>
-      <div class="modal-actions"><button class="btn-cancel" id="cancelTaskBtn">Отмена</button><button class="btn-save" id="saveTaskBtn">Сохранить</button></div>
-    </div>
-  </div>
-
-  <!-- МОДАЛКА СПИСКА ЗАДАЧ -->
-  <div class="modal-overlay" id="dayTasksModal">
-    <div class="modal day-tasks-modal">
-      <h3 id="dayTasksTitle">Задачи</h3>
-      <div class="task-list-header">
-        <input class="task-search" id="taskSearch" placeholder="🔍 Поиск..." />
-        <div class="task-list-actions">
-          <button id="toggleDoneBtn" title="Скрыть выполненные"><i class="fas fa-eye-slash"></i></button>
-          <button id="completeAllBtn" title="Выполнить все"><i class="fas fa-check-double"></i></button>
-        </div>
-      </div>
-      <div id="dayTasksList"></div>
-      <div class="modal-actions"><button class="btn-cancel" id="closeDayTasksBtn">Закрыть</button></div>
-    </div>
-  </div>
-
-  <!-- МОДАЛКА ЦЕЛЕЙ -->
-  <div class="modal-overlay" id="goalsModal">
-    <div class="modal">
-      <h3><i class="fas fa-bullseye"></i> Мои цели</h3>
-      <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;">
-        <button id="goalsFilterAll" class="btn-cancel" style="padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; cursor:pointer;">Все</button>
-        <button id="goalsFilterActive" class="btn-cancel" style="padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; cursor:pointer;">Активные</button>
-        <button id="goalsFilterDone" class="btn-cancel" style="padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; cursor:pointer;">Выполненные</button>
-        <button id="goalsAddBtn" class="btn-save" style="padding:4px 12px; border-radius:20px; border:none; font-size:0.7rem; cursor:pointer; margin-left:auto;">+ Новая</button>
-      </div>
-      <div id="goalsList"></div>
-      <div class="modal-actions"><button class="btn-cancel" id="closeGoalsBtn">Закрыть</button></div>
-    </div>
-  </div>
-
-  <!-- МОДАЛКА ФОРМЫ ЦЕЛИ -->
-  <div class="modal-overlay" id="goalFormModal">
-    <div class="modal">
-      <h3 id="goalFormTitle"><i class="fas fa-plus-circle"></i> Новая цель</h3>
-      <label>Название</label><input type="text" id="goalFormTitleInput" placeholder="Название цели">
-      <label>Описание</label><textarea id="goalFormDesc" placeholder="Что хотите достичь?"></textarea>
-      <label>Срок</label><input type="date" id="goalFormDeadline">
-      <label>Фото при достижении</label><input type="file" id="goalFormPhoto" accept="image/*">
-      <div class="modal-actions">
-        <button class="btn-cancel" id="cancelGoalFormBtn">Отмена</button>
-        <button class="btn-save" id="saveGoalFormBtn">Сохранить</button>
-        <button class="btn-danger" id="deleteGoalBtn" style="display:none;">Удалить</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- МОДАЛКА ПРИКРЕПЛЕНИЯ К ЦЕЛИ -->
-  <div class="modal-overlay" id="attachGoalModal">
-    <div class="modal">
-      <h3><i class="fas fa-link"></i> Прикрепить к цели</h3>
-      <label>Выберите цель</label>
-      <select id="attachGoalSelect"><option value="">Новая цель</option></select>
-      <label>Название новой цели</label>
-      <input type="text" id="attachGoalNewName" placeholder="Название цели">
-      <div class="modal-actions"><button class="btn-cancel" id="cancelAttachBtn">Отмена</button><button class="btn-save" id="saveAttachBtn">Прикрепить</button></div>
-    </div>
-  </div>
-
-  <!-- МОДАЛКА РЕДАКТИРОВАНИЯ ЗАДАЧИ -->
-  <div class="modal-overlay" id="editTaskModal">
-    <div class="modal">
-      <h3><i class="fas fa-edit"></i> Редактировать задачу</h3>
-      <label>Название</label><input type="text" id="editTaskTitle">
-      <label>Категория</label><div class="category-selector" id="editCategorySelector"></div>
-      <label>Период</label>
-      <div class="period-inputs"><input type="date" id="editTaskDateFrom" /><span>→</span><input type="date" id="editTaskDateTo" /></div>
-      <label style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-        <input type="checkbox" id="editTaskImportant"> <span>⭐ Важная</span>
-      </label>
-      <div class="modal-actions"><button class="btn-cancel" id="cancelEditBtn">Отмена</button><button class="btn-save" id="saveEditBtn">Сохранить</button></div>
-    </div>
-  </div>
-
-  <!-- МОДАЛКА ТАЙМЕРА -->
-  <div class="modal-overlay" id="timerModal">
-    <div class="modal">
-      <h3>⏱️ Таймер</h3>
-      <div class="timer-display" id="timerDisplay">25:00</div>
-      <div style="text-align:center; font-size:0.8rem; opacity:0.6; margin-bottom:8px;" id="timerTaskName">—</div>
-      <div class="timer-controls">
-        <button id="timerStartBtn" style="background:#2ecc71; color:white;">▶ Старт</button>
-        <button id="timerPauseBtn" style="background:#f39c12; color:white;">⏸ Пауза</button>
-        <button id="timerResetBtn" style="background:#e74c3c; color:white;">⏹ Стоп</button>
-      </div>
-      <div class="modal-actions"><button class="btn-cancel" id="closeTimerBtn">Закрыть</button></div>
-    </div>
-  </div>
-
-  <script>
-    (function() {
-      // КАТЕГОРИИ
-      const categories = [
-        { id: 'sport', label: 'Спорт', color: '#e67e22' },
-        { id: 'food', label: 'Питание', color: '#2ecc71' },
-        { id: 'tasks', label: 'Дела', color: '#3498db' },
-        { id: 'hobby', label: 'Хобби', color: '#9b59b6' },
-        { id: 'travel', label: 'Путешествия', color: '#1abc9c' },
-        { id: 'debt', label: 'Долги', color: '#e74c3c' },
-        { id: 'other', label: 'Другое', color: '#f39c12' }
-      ];
-
-      // СОСТОЯНИЕ
-      let currentDate = new Date(); currentDate.setHours(0,0,0,0);
-      let darkMode = false;
-      let currentScheme = 'moss';
-      let filterCategory = null;
-      let hideDone = false;
-      let searchQuery = '';
-      let goalsFilter = 'all';
-      let currentView = 'month';
-      let currentWeekStart = new Date();
-      currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1);
-      let currentDay = new Date();
-      let currentYear = new Date().getFullYear();
-
-      let tasks = [];
-      let goals = [];
-      let nextTaskId = 1;
-      let nextGoalId = 1;
-      let player = { name: 'Эльдар', totalXP: 0, level: 1 };
-      let achievements = [];
-
-      let profile = {
-        name: 'Эльдар', age: '', gender: '', height: '', weight: '',
-        headerPhoto: null, avatarPhoto: null,
-        weightLog: [],
-        measurements: { biceps: '', chest: '', thigh: '', waist: '' },
-        measurementLog: [],
-        reminderPeriod: 0,
-        lastMeasurementDate: null
-      };
-
-      let editTaskId = null, editGoalId = null, attachTaskId = null;
-      let timerInterval = null, timerSeconds = 25 * 60, timerRunning = false, timerTaskId = null;
-
-      // ВСПОМОГАТЕЛЬНЫЕ
-      function getDateStr(offset) { const d = new Date(); d.setDate(d.getDate() + (offset||0)); return d.toISOString().split('T')[0]; }
-      function formatDateKey(y,m,d) { return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
-      function isDateInRange(ds, from, to) { return ds >= from && ds <= to; }
-
-      function calculateLevel(totalXP) { let l=1; while(l*(l+1)/2 <= totalXP) l++; return l-1; }
-      function getXPToNext(totalXP, level) { return (level+1)*(level+2)/2 - totalXP; }
-      function getProgress(totalXP, level) {
-        const cur = level*(level+1)/2, next = (level+1)*(level+2)/2;
-        return Math.min(1, Math.max(0, (totalXP - cur) / (next - cur)));
-      }
-
-      function addXP(amount) {
-        if (amount <= 0) return;
-        player.totalXP += amount;
-        const newLevel = calculateLevel(player.totalXP);
-        if (newLevel > player.level) {
-          player.level = newLevel;
-          checkAchievements();
-          setTimeout(() => alert('🎉 ПОВЫШЕНИЕ УРОВНЯ! Уровень '+player.level+'!'), 200);
-        } else { player.level = newLevel; }
-        updateAll();
-        saveData();
-      }
-
-      // ЗАГРУЗКА/СОХРАНЕНИЕ
-      function loadData() {
-        try {
-          const saved = localStorage.getItem('rpgCalendarData_v17');
-          if (saved) {
-            const data = JSON.parse(saved);
-            tasks = data.tasks || [];
-            goals = data.goals || [];
-            nextTaskId = data.nextTaskId || 1;
-            nextGoalId = data.nextGoalId || 1;
-            if (data.player) {
-              player.totalXP = data.player.totalXP || 0;
-              player.name = data.player.name || 'Эльдар';
-              player.level = calculateLevel(player.totalXP);
-            }
-            if (data.achievements) achievements = data.achievements;
-            if (data.profile) {
-              profile = data.profile;
-              if (!profile.measurementLog) profile.measurementLog = [];
-              if (!profile.reminderPeriod) profile.reminderPeriod = 0;
-              if (!profile.lastMeasurementDate) profile.lastMeasurementDate = null;
-            }
-            tasks = tasks.map(t => ({
-              ...t,
-              done: t.done || false,
-              important: t.important || false,
-              dateFrom: t.dateFrom || t.date,
-              dateTo: t.dateTo || t.date,
-              goalId: t.goalId || null,
-              duration: t.duration || 0,
-              startTime: t.startTime || '09:00'
-            }));
-            goals = goals.map(g => ({ ...g, done: g.done || false, photo: g.photo || null, taskIds: g.taskIds || [] }));
-          } else {
-            const today = getDateStr(0);
-            tasks = [
-              { id: nextTaskId++, title: '🏃 Утренняя пробежка', date: today, dateFrom: today, dateTo: today, category: 'sport', done: false, important: true, duration: 30, startTime: '07:00' },
-              { id: nextTaskId++, title: '🥗 Здоровый завтрак', date: today, dateFrom: today, dateTo: today, category: 'food', done: false, important: false, duration: 15, startTime: '08:30' }
-            ];
-            goals = [];
-          }
-        } catch(e) { tasks = []; goals = []; }
-        player.level = calculateLevel(player.totalXP);
-        updateAll();
-        updateProfileDisplay();
-        updateStreakAndProductivity();
-        checkReminder();
-      }
-
-      function saveData() {
-        try {
-          localStorage.setItem('rpgCalendarData_v17', JSON.stringify({
-            tasks, goals, nextTaskId, nextGoalId, player, achievements, profile
-          }));
-        } catch(e) {}
-      }
-
-      function updateAll() {
-        updateProfile();
-        updateBadge();
-        updateDailyProgress();
-        updateGoalsCount();
-        renderAllViews();
-        renderLegend();
-        checkDailyQuest();
-        checkAchievements();
-        updateProfileDisplay();
-        updateStreakAndProductivity();
-      }
-
-      function updateProfile() {
-        document.getElementById('profileLevel').textContent = 'Lv.'+player.level;
-        const progress = getProgress(player.totalXP, player.level);
-        document.getElementById('xpBarFill').style.width = (progress*100)+'%';
-        if (!profile.avatarPhoto) {
-          const emojis = ['🧙','⚔️','🛡️','🧝','🐉','👑','🌟','💫','🔥','⚡'];
-          const idx = Math.min(player.level-1, emojis.length-1);
-          document.getElementById('avatarPreview').innerHTML = '<span id="avatarPlaceholder">'+(emojis[idx]||'🧙')+'</span>';
-        }
-      }
-
-      function updateBadge() { document.getElementById('tasksBadge').textContent = tasks.filter(t => !t.done).length; }
-      function updateDailyProgress() {
-        const today = getDateStr(0);
-        const todayTasks = tasks.filter(t => isDateInRange(today, t.dateFrom, t.dateTo));
-        const done = todayTasks.filter(t => t.done).length;
-        const total = todayTasks.length;
-        document.getElementById('dailyProgressText').textContent = done+'/'+total;
-        document.getElementById('dailyProgressFill').style.width = total>0 ? (done/total*100)+'%' : '0%';
-      }
-      function updateGoalsCount() { document.getElementById('goalsCount').textContent = goals.length; }
-
-      function checkDailyQuest() {
-        const today = getDateStr(0);
-        const count = tasks.filter(t => isDateInRange(today, t.dateFrom, t.dateTo) && !t.done).length;
-        const badge = document.getElementById('dailyQuestBadge');
-        if (count > 0) { badge.style.display = 'inline'; badge.textContent = '⚡ '+count; }
-        else { badge.style.display = 'none'; }
-      }
-
-      function checkAchievements() {
-        const done = tasks.filter(t => t.done).length;
-        const total = tasks.length;
-        const doneGoals = goals.filter(g => g.done).length;
-        const list = [];
-        if (total >= 1 && !achievements.includes('first')) { achievements.push('first'); list.push('🎯 Первая задача!'); }
-        if (done >= 5 && !achievements.includes('done5')) { achievements.push('done5'); list.push('🏅 5 задач выполнено!'); }
-        if (done >= 10 && !achievements.includes('done10')) { achievements.push('done10'); list.push('🏆 10 задач выполнено!'); }
-        if (done >= 25 && !achievements.includes('done25')) { achievements.push('done25'); list.push('👑 25 задач выполнено!'); }
-        if (player.level >= 5 && !achievements.includes('lv5')) { achievements.push('lv5'); list.push('⭐ Уровень 5!'); }
-        if (player.level >= 10 && !achievements.includes('lv10')) { achievements.push('lv10'); list.push('🌟 Уровень 10!'); }
-        if (doneGoals >= 1 && !achievements.includes('first_goal')) { achievements.push('first_goal'); list.push('🎯 Первая цель достигнута!'); }
-        if (list.length) {
-          saveData();
-          document.getElementById('achCount').textContent = achievements.length;
-          setTimeout(() => alert('🏅 ДОСТИЖЕНИЯ:\n'+list.join('\n')), 200);
-        }
-        document.getElementById('achCount').textContent = achievements.length;
-      }
-
-      function updateStreakAndProductivity() {
-        const doneDates = tasks.filter(t => t.done).map(t => t.date).sort();
-        if (doneDates.length === 0) {
-          ['currentStreak','maxStreak'].forEach(id => document.getElementById(id).textContent = '0');
-          ['prodWeek','prodMonth','prodQuarter','prodYear'].forEach(id => document.getElementById(id).textContent = '0 XP');
-          document.getElementById('ambitionScore').textContent = '0%';
-          return;
-        }
-        const uniqueDates = [...new Set(doneDates)].sort();
-        let currentStreak = 0, maxStreak = 0;
-        let streak = 0, checkDate = new Date(); checkDate.setHours(0,0,0,0);
-        while (true) {
-          const ds = checkDate.toISOString().split('T')[0];
-          if (uniqueDates.includes(ds)) { streak++; checkDate.setDate(checkDate.getDate()-1); }
-          else { currentStreak = streak; break; }
-        }
-        let cur = 0, prev = null;
-        uniqueDates.forEach(d => {
-          const dObj = new Date(d+'T00:00:00');
-          if (prev === null) cur = 1;
-          else { const diff = Math.floor((dObj - prev)/(1000*60*60*24)); cur = diff===1 ? cur+1 : 1; }
-          if (cur > maxStreak) maxStreak = cur;
-          prev = dObj;
-        });
-        document.getElementById('currentStreak').textContent = currentStreak;
-        document.getElementById('maxStreak').textContent = maxStreak;
-
-        const now = new Date();
-        const periods = [
-          { id: 'prodWeek', d: new Date(now) },
-          { id: 'prodMonth', d: new Date(now) },
-          { id: 'prodQuarter', d: new Date(now) },
-          { id: 'prodYear', d: new Date(now) }
+        // ----- КАТЕГОРИИ -----
+        const CATEGORIES = [
+            { id: 'sport', label: 'Спорт', color: '#e67e22' },
+            { id: 'food', label: 'Питание', color: '#2ecc71' },
+            { id: 'tasks', label: 'Дела', color: '#3498db' },
+            { id: 'hobby', label: 'Хобби', color: '#9b59b6' },
+            { id: 'travel', label: 'Путешествия', color: '#1abc9c' },
+            { id: 'debt', label: 'Долги', color: '#e74c3c' },
+            { id: 'other', label: 'Другое', color: '#f39c12' }
         ];
-        periods[0].d.setDate(periods[0].d.getDate()-7);
-        periods[1].d.setMonth(periods[1].d.getMonth()-1);
-        periods[2].d.setMonth(periods[2].d.getMonth()-3);
-        periods[3].d.setFullYear(periods[3].d.getFullYear()-1);
-        periods.forEach(p => {
-          let xp = 0;
-          tasks.forEach(t => {
-            if (t.done) {
-              const d = new Date(t.date+'T00:00:00');
-              if (d >= p.d && d <= now) xp += (t.duration||0)*0.01 + (t.important ? 5 : 0);
-            }
-          });
-          document.getElementById(p.id).textContent = Math.round(xp*100)/100 + ' XP';
-        });
-        const ambition = goals.length > 0 ? Math.round((goals.filter(g => g.done).length / goals.length)*100) : 0;
-        document.getElementById('ambitionScore').textContent = ambition+'%';
-      }
 
-      // ПРОФИЛЬ
-      function updateProfileDisplay() {
-        document.getElementById('profileNameDisplay').textContent = profile.name;
-        document.getElementById('profileNameValue').textContent = profile.name || '—';
-        document.getElementById('profileAgeValue').textContent = profile.age || '—';
-        document.getElementById('profileGenderValue').textContent = profile.gender || '—';
-        document.getElementById('profileHeightValue').textContent = profile.height ? profile.height+' см' : '—';
-        document.getElementById('profileWeightValue').textContent = profile.weight ? profile.weight+' кг' : '—';
-        if (profile.height && profile.weight) {
-          const h = parseFloat(profile.height)/100, w = parseFloat(profile.weight);
-          const bmi = w/(h*h);
-          document.getElementById('bmiValue').textContent = bmi.toFixed(1);
-          const label = document.getElementById('bmiLabel');
-          if (bmi < 18.5) { label.textContent = 'Недостаток веса'; label.className = 'bmi-indicator bmi-underweight'; }
-          else if (bmi < 25) { label.textContent = 'Норма'; label.className = 'bmi-indicator bmi-normal'; }
-          else if (bmi < 30) { label.textContent = 'Избыток веса'; label.className = 'bmi-indicator bmi-overweight'; }
-          else { label.textContent = 'Ожирение'; label.className = 'bmi-indicator bmi-obese'; }
-        } else { document.getElementById('bmiValue').textContent = '—'; document.getElementById('bmiLabel').textContent = ''; }
-        if (profile.avatarPhoto) {
-          document.getElementById('avatarPreview').innerHTML = '<img src="'+profile.avatarPhoto+'" alt="Аватар" style="width:100%;height:100%;object-fit:cover;">';
-          document.getElementById('profileAvatar').innerHTML = '<img src="'+profile.avatarPhoto+'" alt="Аватар" style="width:100%;height:100%;object-fit:cover;"><div class="upload-badge"><i class="fas fa-camera"></i></div>';
-        } else {
-          document.getElementById('avatarPreview').innerHTML = '<span id="avatarPlaceholder">🧙</span>';
-          document.getElementById('profileAvatar').innerHTML = '<span class="placeholder" id="profileAvatarPlaceholder">🧙</span><div class="upload-badge"><i class="fas fa-camera"></i></div>';
-        }
-        if (profile.headerPhoto) {
-          document.getElementById('headerPhoto').innerHTML = '<img src="'+profile.headerPhoto+'" alt="Обложка">';
-        } else {
-          document.getElementById('headerPhoto').innerHTML = '<div class="placeholder"><i class="fas fa-camera"></i><span>Загрузить обложку</span></div>';
-        }
-        document.getElementById('measBiceps').textContent = profile.measurements.biceps || '—';
-        document.getElementById('measChest').textContent = profile.measurements.chest || '—';
-        document.getElementById('measThigh').textContent = profile.measurements.thigh || '—';
-        document.getElementById('measWaist').textContent = profile.measurements.waist || '—';
-        document.getElementById('reminderPeriod').value = profile.reminderPeriod || 0;
-        updateReminderStatus();
-        renderMeasurementHistory();
-        drawWeightChart();
-        drawMeasurementsChart();
-      }
-
-      function updateReminderStatus() {
-        const status = document.getElementById('reminderStatus');
-        const period = profile.reminderPeriod || 0;
-        if (period === 0) { status.textContent = 'Напоминания отключены'; return; }
-        const lastDate = profile.lastMeasurementDate ? new Date(profile.lastMeasurementDate) : null;
-        if (lastDate) {
-          const nextDate = new Date(lastDate);
-          nextDate.setMonth(nextDate.getMonth()+period);
-          const today = new Date();
-          if (today >= nextDate) {
-            status.innerHTML = '<span style="color:#e74c3c;">⚠️ Пора делать замеры! (последний замер был '+lastDate.toLocaleDateString()+')</span>';
-          } else {
-            status.textContent = 'Следующий замер: '+nextDate.toLocaleDateString()+' (период: '+period+' мес.)';
-          }
-        } else {
-          status.textContent = 'Нет данных о последнем замере. Сделайте замер, чтобы запустить напоминания.';
-        }
-      }
-
-      function renderMeasurementHistory() {
-        const container = document.getElementById('measurementHistory');
-        const allEntries = [];
-        if (profile.weightLog) profile.weightLog.forEach(w => allEntries.push({ date: w.date, type: 'Вес', value: w.weight+' кг' }));
-        if (profile.measurementLog) {
-          profile.measurementLog.forEach(m => {
-            const parts = [];
-            if (m.biceps) parts.push('Б:'+m.biceps);
-            if (m.chest) parts.push('Г:'+m.chest);
-            if (m.thigh) parts.push('Бед:'+m.thigh);
-            if (m.waist) parts.push('Т:'+m.waist);
-            allEntries.push({ date: m.date, type: 'Мерки', value: parts.join(' ') });
-          });
-        }
-        allEntries.sort((a,b) => b.date.localeCompare(a.date));
-        if (allEntries.length === 0) {
-          container.innerHTML = '<div style="color:#8a8a9a; text-align:center; padding:8px;">Нет записей</div>';
-          return;
-        }
-        container.innerHTML = allEntries.slice(0,20).map(e =>
-          '<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(0,0,0,0.04);">'+
-            '<span>'+e.date+'</span><span>'+e.type+': '+e.value+'</span>'+
-          '</div>'
-        ).join('');
-      }
-
-      function drawWeightChart() {
-        const canvas = document.getElementById('weightChart');
-        if (!canvas) return;
-        const rect = canvas.parentElement.getBoundingClientRect();
-        canvas.width = rect.width || 300;
-        canvas.height = 200;
-        const ctx = canvas.getContext('2d');
-        const data = profile.weightLog || [];
-        if (data.length < 2) {
-          ctx.clearRect(0,0,canvas.width,canvas.height);
-          ctx.fillStyle = '#aaa'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center';
-          ctx.fillText('Недостаточно данных', canvas.width/2, canvas.height/2);
-          return;
-        }
-        const sorted = data.slice().sort((a,b) => a.date.localeCompare(b.date));
-        const values = sorted.map(d => parseFloat(d.weight));
-        const min = Math.min(...values)-1, max = Math.max(...values)+1, range = max-min || 1;
-        const pad = { top:20, bottom:20, left:30, right:10 };
-        const cw = canvas.width-pad.left-pad.right, ch = canvas.height-pad.top-pad.bottom;
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(pad.left,pad.top); ctx.lineTo(pad.left,pad.top+ch); ctx.lineTo(pad.left+cw,pad.top+ch); ctx.stroke();
-        ctx.beginPath(); ctx.strokeStyle = '#6c5ce7'; ctx.lineWidth = 2;
-        values.forEach((v,i) => {
-          const x = pad.left + (i/(values.length-1))*cw;
-          const y = pad.top + ch - ((v-min)/range)*ch;
-          if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-        });
-        ctx.stroke();
-        values.forEach((v,i) => {
-          const x = pad.left + (i/(values.length-1))*cw;
-          const y = pad.top + ch - ((v-min)/range)*ch;
-          ctx.beginPath(); ctx.arc(x,y,4,0,2*Math.PI); ctx.fillStyle = '#6c5ce7'; ctx.fill();
-          ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-          ctx.fillText(v.toFixed(1), x, y-8);
-        });
-        ctx.fillStyle = '#888'; ctx.font = '8px sans-serif';
-        values.forEach((v,i) => {
-          if (i%2===0 || i===values.length-1) {
-            const x = pad.left + (i/(values.length-1))*cw;
-            ctx.fillText(sorted[i].date.slice(5), x, pad.top+ch+14);
-          }
-        });
-      }
-
-      function drawMeasurementsChart() {
-        const canvas = document.getElementById('measurementsChart');
-        if (!canvas) return;
-        const rect = canvas.parentElement.getBoundingClientRect();
-        canvas.width = rect.width || 300;
-        canvas.height = 200;
-        const ctx = canvas.getContext('2d');
-        const data = profile.measurementLog || [];
-        if (data.length < 2) {
-          ctx.clearRect(0,0,canvas.width,canvas.height);
-          ctx.fillStyle = '#aaa'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center';
-          ctx.fillText('Недостаточно данных', canvas.width/2, canvas.height/2);
-          return;
-        }
-        const sorted = data.slice().sort((a,b) => a.date.localeCompare(b.date));
-        const keys = ['biceps','chest','thigh','waist'], colors = ['#e74c3c','#3498db','#2ecc71','#f39c12'], labels = ['Бицепс','Грудь','Бедро','Талия'];
-        let allValues = [];
-        sorted.forEach(d => keys.forEach(k => { if (d[k]) allValues.push(parseFloat(d[k])); }));
-        if (allValues.length === 0) { ctx.fillText('Нет данных', canvas.width/2, canvas.height/2); return; }
-        const min = Math.min(...allValues)-1, max = Math.max(...allValues)+1, range = max-min || 1;
-        const pad = { top:20, bottom:20, left:30, right:10 };
-        const cw = canvas.width-pad.left-pad.right, ch = canvas.height-pad.top-pad.bottom;
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(pad.left,pad.top); ctx.lineTo(pad.left,pad.top+ch); ctx.lineTo(pad.left+cw,pad.top+ch); ctx.stroke();
-        keys.forEach((key, idx) => {
-          const values = sorted.map(d => d[key] ? parseFloat(d[key]) : null);
-          const valid = values.filter(v => v !== null);
-          if (valid.length < 2) return;
-          ctx.beginPath(); ctx.strokeStyle = colors[idx]; ctx.lineWidth = 2;
-          let started = false;
-          values.forEach((v,i) => {
-            if (v === null) { started = false; return; }
-            const x = pad.left + (i/(values.length-1))*cw;
-            const y = pad.top + ch - ((v-min)/range)*ch;
-            if (!started) { ctx.moveTo(x,y); started = true; }
-            else ctx.lineTo(x,y);
-          });
-          ctx.stroke();
-          for (let i=values.length-1; i>=0; i--) {
-            if (values[i] !== null) {
-              const x = pad.left + (i/(values.length-1))*cw;
-              const y = pad.top + ch - ((values[i]-min)/range)*ch;
-              ctx.beginPath(); ctx.arc(x,y,4,0,2*Math.PI); ctx.fillStyle = colors[idx]; ctx.fill();
-              break;
-            }
-          }
-        });
-        ctx.font = '9px sans-serif'; ctx.textAlign = 'left';
-        keys.forEach((k,idx) => {
-          const x = pad.left+10+idx*70, y = pad.top+10;
-          ctx.fillStyle = colors[idx]; ctx.fillRect(x,y-6,12,4);
-          ctx.fillStyle = '#333'; ctx.fillText(labels[idx], x+16, y);
-        });
-        ctx.fillStyle = '#888'; ctx.font = '8px sans-serif';
-        sorted.forEach((d,i) => {
-          if (i%2===0 || i===sorted.length-1) {
-            const x = pad.left + (i/(sorted.length-1))*cw;
-            ctx.fillText(d.date.slice(5), x, pad.top+ch+14);
-          }
-        });
-      }
-
-      function checkReminder() {
-        const period = profile.reminderPeriod || 0;
-        if (period === 0) return;
-        const lastDate = profile.lastMeasurementDate ? new Date(profile.lastMeasurementDate) : null;
-        if (!lastDate) return;
-        const nextDate = new Date(lastDate);
-        nextDate.setMonth(nextDate.getMonth()+period);
-        if (new Date() >= nextDate) {
-          setTimeout(() => alert('📢 Напоминание: пора делать замеры! (вес и мерки)'), 1000);
-        }
-      }
-
-      function addWeightEntry(date, weight) {
-        if (!profile.weightLog) profile.weightLog = [];
-        profile.weightLog.push({ date, weight: parseFloat(weight) });
-        profile.weight = parseFloat(weight);
-        profile.lastMeasurementDate = date;
-        addXP(0.05);
-        saveData();
-        updateAll();
-        updateProfileDisplay();
-        drawWeightChart();
-        renderMeasurementHistory();
-      }
-
-      function addMeasurementEntry(date, biceps, chest, thigh, waist) {
-        if (!profile.measurementLog) profile.measurementLog = [];
-        const entry = { date };
-        if (biceps) entry.biceps = parseFloat(biceps);
-        if (chest) entry.chest = parseFloat(chest);
-        if (thigh) entry.thigh = parseFloat(thigh);
-        if (waist) entry.waist = parseFloat(waist);
-        profile.measurementLog.push(entry);
-        if (biceps) profile.measurements.biceps = parseFloat(biceps);
-        if (chest) profile.measurements.chest = parseFloat(chest);
-        if (thigh) profile.measurements.thigh = parseFloat(thigh);
-        if (waist) profile.measurements.waist = parseFloat(waist);
-        profile.lastMeasurementDate = date;
-        addXP(0.05);
-        saveData();
-        updateAll();
-        updateProfileDisplay();
-        drawMeasurementsChart();
-        renderMeasurementHistory();
-      }
-
-      // ЗАДАЧИ
-      function getTasksForDate(dateStr) {
-        let filtered = tasks.filter(t => isDateInRange(dateStr, t.dateFrom, t.dateTo));
-        if (filterCategory) filtered = filtered.filter(t => t.category === filterCategory);
-        return filtered;
-      }
-
-      function addTask(title, dateFrom, dateTo, category, important, goalId, duration, startTime) {
-        if (!title.trim()) return false;
-        if (!dateFrom) return false;
-        if (!dateTo) dateTo = dateFrom;
-        const newTask = {
-          id: nextTaskId++,
-          title: title.trim(),
-          date: dateFrom,
-          dateFrom, dateTo,
-          category,
-          done: false,
-          important: !!important,
-          goalId: goalId || null,
-          duration: parseFloat(duration) || 0,
-          startTime: startTime || '09:00'
+        // ----- СОСТОЯНИЕ -----
+        let state = {
+            tasks: [],
+            goals: [],
+            player: { name: 'Эльдар', totalXP: 0, level: 1 },
+            achievements: [],
+            currentDate: new Date(),
+            filterCategory: null,
+            darkMode: true,
+            view: 'dashboard'
         };
-        tasks.push(newTask);
-        if (goalId) {
-          const goal = goals.find(g => g.id === goalId);
-          if (goal && !goal.taskIds.includes(newTask.id)) goal.taskIds.push(newTask.id);
-        }
-        saveData();
-        updateAll();
-        return true;
-      }
 
-      function toggleTaskDone(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
-        if (!task.done) {
-          const xp = (task.duration || 0) * 0.01;
-          if (xp > 0) addXP(xp);
-          if (task.important) addXP(5);
-        }
-        task.done = !task.done;
-        if (task.goalId) {
-          const goal = goals.find(g => g.id === task.goalId);
-          if (goal) {
-            const goalTasks = tasks.filter(t => t.goalId === task.goalId);
-            const doneTasks = goalTasks.filter(t => t.done).length;
-            if (doneTasks === goalTasks.length && goalTasks.length > 0 && !goal.done) {
-              setTimeout(() => {
-                if (confirm('🎯 Все задачи цели "'+goal.title+'" выполнены! Отметить цель как достигнутую?')) {
-                  toggleGoalDone(goal.id);
-                }
-              }, 300);
-            }
-          }
-        }
-        saveData();
-        updateAll();
-        refreshCurrentView();
-      }
+        let nextTaskId = 1;
+        let nextGoalId = 1;
 
-      function deleteTask(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (task && task.goalId) {
-          const goal = goals.find(g => g.id === task.goalId);
-          if (goal) goal.taskIds = goal.taskIds.filter(id => id !== taskId);
+        // ----- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ -----
+        function getDateStr(d) {
+            const date = d || new Date();
+            return date.toISOString().split('T')[0];
         }
-        tasks = tasks.filter(t => t.id !== taskId);
-        saveData();
-        updateAll();
-        refreshCurrentView();
-      }
 
-      function duplicateTask(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
-        const newTask = {
-          id: nextTaskId++,
-          title: task.title + ' (копия)',
-          date: task.dateFrom,
-          dateFrom: task.dateFrom,
-          dateTo: task.dateTo,
-          category: task.category,
-          done: false,
-          important: task.important,
-          goalId: task.goalId,
-          duration: task.duration,
-          startTime: task.startTime
-        };
-        tasks.push(newTask);
-        if (newTask.goalId) {
-          const goal = goals.find(g => g.id === newTask.goalId);
-          if (goal) goal.taskIds.push(newTask.id);
+        function getToday() { return getDateStr(new Date()); }
+
+        function formatDateKey(year, month, day) {
+            return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         }
-        saveData();
-        updateAll();
-        refreshCurrentView();
-      }
 
-      function attachTaskToGoal(taskId, goalId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return false;
-        if (task.goalId) {
-          const oldGoal = goals.find(g => g.id === task.goalId);
-          if (oldGoal) oldGoal.taskIds = oldGoal.taskIds.filter(id => id !== taskId);
+        function isDateInRange(dateStr, fromStr, toStr) {
+            return dateStr >= fromStr && dateStr <= toStr;
         }
-        task.goalId = goalId;
-        if (goalId) {
-          const goal = goals.find(g => g.id === goalId);
-          if (goal && !goal.taskIds.includes(taskId)) goal.taskIds.push(taskId);
-        }
-        saveData();
-        updateAll();
-        refreshCurrentView();
-        return true;
-      }
 
-      function editTaskData(taskId, title, category, important, dateFrom, dateTo) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return false;
-        task.title = title;
-        task.category = category;
-        task.important = important;
-        task.dateFrom = dateFrom;
-        task.dateTo = dateTo;
-        task.date = dateFrom;
-        saveData();
-        updateAll();
-        refreshCurrentView();
-        return true;
-      }
-
-      // ЦЕЛИ
-      function addGoal(title, desc, deadline, photo) {
-        if (!title.trim()) return false;
-        const newGoal = {
-          id: nextGoalId++,
-          title: title.trim(),
-          description: desc || '',
-          deadline: deadline || '',
-          done: false,
-          photo: photo || null,
-          taskIds: []
-        };
-        goals.push(newGoal);
-        saveData();
-        updateAll();
-        return true;
-      }
-
-      function toggleGoalDone(goalId, photoData) {
-        const goal = goals.find(g => g.id === goalId);
-        if (!goal) return;
-        goal.done = !goal.done;
-        if (goal.done && photoData) goal.photo = photoData;
-        else if (goal.done && !photoData) {
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.accept = 'image/*';
-          input.onchange = function(e) {
-            const file = e.target.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = function(ev) {
-                goal.photo = ev.target.result;
-                saveData();
-                if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
-              };
-              reader.readAsDataURL(file);
-            }
-          };
-          input.click();
-          return;
-        }
-        if (goal.done) {
-          const goalTasks = tasks.filter(t => t.goalId === goalId);
-          if (goalTasks.filter(t => !t.done).length === 0) addXP(25);
-        }
-        saveData();
-        updateAll();
-        if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
-      }
-
-      function deleteGoal(goalId) {
-        tasks.forEach(t => { if (t.goalId === goalId) t.goalId = null; });
-        goals = goals.filter(g => g.id !== goalId);
-        saveData();
-        updateAll();
-        if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
-      }
-
-      function editGoalData(goalId, title, desc, deadline, photo) {
-        const goal = goals.find(g => g.id === goalId);
-        if (!goal) return;
-        goal.title = title;
-        goal.description = desc;
-        goal.deadline = deadline;
-        if (photo) goal.photo = photo;
-        saveData();
-        updateAll();
-        if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
-      }
-
-      // ОТОБРАЖЕНИЕ ВИДОВ
-      function renderAllViews() {
-        renderMonthView();
-        renderWeekView();
-        renderDayView();
-        renderYearView();
-        updateDailyProgress();
-        updateStreakAndProductivity();
-      }
-
-      function renderMonthView() {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        document.getElementById('monthYearLabel').textContent =
-          new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(currentDate);
-        const firstDay = new Date(year, month, 1);
-        const startDay = (firstDay.getDay() + 6) % 7;
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const daysInPrev = new Date(year, month, 0).getDate();
-        const todayStr = getDateStr(0);
-        let html = '';
-        for (let i = startDay - 1; i >= 0; i--) {
-          const day = daysInPrev - i;
-          const m = month === 0 ? 11 : month - 1;
-          const y = month === 0 ? year - 1 : year;
-          const ds = formatDateKey(y, m, day);
-          const dayTasks = getTasksForDate(ds);
-          html += createDayCell(day, true, dayTasks, ds, todayStr);
-        }
-        for (let day = 1; day <= daysInMonth; day++) {
-          const ds = formatDateKey(year, month, day);
-          const dayTasks = getTasksForDate(ds);
-          html += createDayCell(day, false, dayTasks, ds, todayStr);
-        }
-        const total = startDay + daysInMonth;
-        const rem = (7 - (total % 7)) % 7;
-        for (let day = 1; day <= rem; day++) {
-          const m = month === 11 ? 0 : month + 1;
-          const y = month === 11 ? year + 1 : year;
-          const ds = formatDateKey(y, m, day);
-          const dayTasks = getTasksForDate(ds);
-          html += createDayCell(day, true, dayTasks, ds, todayStr);
-        }
-        document.getElementById('daysGrid').innerHTML = html;
-        document.querySelectorAll('#daysGrid .day-cell').forEach(el => {
-          el.addEventListener('click', function() {
-            const date = this.dataset.date;
-            if (date) openDayTasks(date);
-          });
-        });
-      }
-
-      function createDayCell(day, isOther, dayTasks, dateStr, todayStr) {
-        const maxDots = 4;
-        let dots = '';
-        const count = dayTasks.length;
-        const showTasks = dayTasks.slice(0, maxDots);
-        showTasks.forEach(t => {
-          const cat = categories.find(c => c.id === t.category);
-          const doneClass = t.done ? 'done' : '';
-          const importantClass = t.important ? 'important' : '';
-          const periodClass = t.dateFrom !== t.dateTo ? 'period' : '';
-          const goalClass = t.goalId ? 'goal' : '';
-          dots += cat ? '<span class="task-dot '+doneClass+' '+importantClass+' '+periodClass+' '+goalClass+'" style="background:'+cat.color+';"></span>' : '';
-        });
-        let extra = '';
-        let countBadge = '';
-        if (count > maxDots) extra = '<span style="font-size:0.5rem; opacity:0.5;">+'+(count - maxDots)+'</span>';
-        if (count > 0) {
-          countBadge = '<span class="task-count">'+count+'</span>';
-        }
-        const isToday = dateStr === todayStr;
-        const cls = 'day-cell '+(isOther ? 'other-month' : '')+(isToday ? ' today' : '');
-        return '<div class="'+cls+'" data-date="'+dateStr+'">'+
-          '<span class="day-number">'+day+countBadge+'</span>'+
-          '<div class="task-indicators">'+dots+extra+'</div>'+
-        '</div>';
-      }
-
-      function renderWeekView() {
-        const start = new Date(currentWeekStart);
-        start.setDate(start.getDate() - start.getDay() + 1);
-        const end = new Date(start);
-        end.setDate(end.getDate() + 6);
-        document.getElementById('weekLabel').textContent =
-          start.toLocaleDateString('ru-RU', {day:'numeric', month:'short'})+' - '+end.toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
-        const hours = Array.from({length: 24}, (_,i) => i);
-        let html = '<div class="hour-label">Час</div>';
-        for (let i = 0; i < 7; i++) {
-          const d = new Date(start);
-          d.setDate(d.getDate() + i);
-          const dateStr = d.toISOString().split('T')[0];
-          const count = getTasksForDate(dateStr).length;
-          html += '<div class="day-header">'+d.toLocaleDateString('ru-RU', {weekday:'short'})+'<br>'+d.getDate()+
-            (count > 0 ? ' <span style="background:#6c5ce7;color:white;padding:0 4px;border-radius:8px;font-size:0.5rem;">'+count+'</span>' : '')+
-          '</div>';
-        }
-        hours.forEach(h => {
-          html += '<div class="hour-label">'+String(h).padStart(2,'0')+':00</div>';
-          for (let i = 0; i < 7; i++) {
-            const d = new Date(start);
-            d.setDate(d.getDate() + i);
-            const dateStr = d.toISOString().split('T')[0];
-            const dayTasks = getTasksForDate(dateStr).filter(t => parseInt(t.startTime.split(':')[0]) === h);
-            html += '<div class="day-cell">';
-            dayTasks.forEach(t => {
-              const cat = categories.find(c => c.id === t.category);
-              html += '<div class="task-in-cell" style="border-left-color:'+(cat?cat.color:'#999')+';" data-task-id="'+t.id+'">'+t.title+'</div>';
+        function getTasksForDate(dateStr) {
+            return state.tasks.filter(t => {
+                const from = t.dateFrom || t.date;
+                const to = t.dateTo || t.date;
+                return isDateInRange(dateStr, from, to);
             });
-            html += '</div>';
-          }
-        });
-        document.getElementById('weekGrid').innerHTML = html;
-        document.querySelectorAll('#weekGrid .task-in-cell').forEach(el => {
-          el.addEventListener('click', function() {
-            const id = parseInt(this.dataset.taskId);
-            const task = tasks.find(t => t.id === id);
-            if (task) openDayTasks(task.date);
-          });
-        });
-      }
-
-      function renderDayView() {
-        const dateStr = currentDay.toISOString().split('T')[0];
-        document.getElementById('dayLabel').textContent = currentDay.toLocaleDateString('ru-RU', {weekday:'long', day:'numeric', month:'long'});
-        const dayTasks = getTasksForDate(dateStr);
-        const hours = Array.from({length: 24}, (_,i) => i);
-        let html = '';
-        hours.forEach(h => {
-          const tasksAtHour = dayTasks.filter(t => parseInt(t.startTime.split(':')[0]) === h);
-          html += '<div class="hour-block">'+
-            '<div class="hour-label">'+String(h).padStart(2,'0')+':00</div>'+
-            '<div class="hour-tasks">'+
-            tasksAtHour.map(t => {
-              const cat = categories.find(c => c.id === t.category);
-              return '<div class="hour-task" style="border-left-color:'+(cat?cat.color:'#999')+';" data-task-id="'+t.id+'">'+
-                t.title+(t.duration ? ' ('+t.duration+'мин)' : '')+
-              '</div>';
-            }).join('')+
-          '</div></div>';
-        });
-        document.getElementById('dayTimeline').innerHTML = html;
-        document.querySelectorAll('#dayTimeline .hour-task').forEach(el => {
-          el.addEventListener('click', function() {
-            const id = parseInt(this.dataset.taskId);
-            const task = tasks.find(t => t.id === id);
-            if (task) openDayTasks(task.date);
-          });
-        });
-      }
-
-      function renderYearView() {
-        document.getElementById('yearLabel').textContent = currentYear;
-        const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-        let html = '';
-        for (let m = 0; m < 12; m++) {
-          const startDate = new Date(currentYear, m, 1);
-          const endDate = new Date(currentYear, m + 1, 0);
-          const monthTasks = tasks.filter(t => {
-            const tDate = new Date(t.date + 'T00:00:00');
-            return tDate >= startDate && tDate <= endDate;
-          });
-          const done = monthTasks.filter(t => t.done).length;
-          const planned = monthTasks.length;
-          const missed = monthTasks.filter(t => !t.done && new Date(t.date + 'T00:00:00') < new Date()).length;
-          const xp = monthTasks.reduce((sum, t) => sum + (t.done ? (t.duration||0)*0.01 + (t.important ? 5 : 0) : 0), 0);
-          html += '<div class="month-card">'+
-            '<div class="month-name">'+months[m]+'</div>'+
-            '<div class="stat">'+
-              '<span class="done">✅ '+done+'</span>'+
-              '<span class="planned">📋 '+planned+'</span>'+
-              '<span class="missed">❌ '+missed+'</span>'+
-              '<span class="xp">💡 '+Math.round(xp)+' XP</span>'+
-            '</div>'+
-          '</div>';
         }
-        document.getElementById('yearGrid').innerHTML = html;
-      }
 
-      function switchView(view) {
-        currentView = view;
-        document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-        document.getElementById(view+'View').classList.add('active');
-        document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
-        document.querySelector('.view-toggle button[data-view="'+view+'"]').classList.add('active');
-        if (view === 'month') renderMonthView();
-        else if (view === 'week') renderWeekView();
-        else if (view === 'day') renderDayView();
-        else if (view === 'year') renderYearView();
-      }
-
-      function navigateMonth(delta) { currentDate.setMonth(currentDate.getMonth()+delta); renderMonthView(); renderWeekView(); }
-      function navigateWeek(delta) { currentWeekStart.setDate(currentWeekStart.getDate()+delta*7); renderWeekView(); }
-      function navigateDay(delta) { currentDay.setDate(currentDay.getDate()+delta); renderDayView(); }
-      function navigateYear(delta) { currentYear += delta; renderYearView(); }
-
-      // СПИСОК ЗАДАЧ
-      function openDayTasks(dateStr) {
-        const modal = document.getElementById('dayTasksModal');
-        const title = document.getElementById('dayTasksTitle');
-        const parts = dateStr.split('-');
-        const d = new Date(parts[0], parts[1]-1, parts[2]);
-        title.textContent = '📅 '+d.toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
-        title.dataset.date = dateStr;
-        searchQuery = '';
-        document.getElementById('taskSearch').value = '';
-        modal.classList.add('active');
-        renderDayTasks(dateStr);
-      }
-
-      function renderDayTasks(dateStr) {
-        const container = document.getElementById('dayTasksList');
-        let dayTasks = tasks.filter(t => isDateInRange(dateStr, t.dateFrom, t.dateTo));
-        if (filterCategory) dayTasks = dayTasks.filter(t => t.category === filterCategory);
-        if (hideDone) dayTasks = dayTasks.filter(t => !t.done);
-        if (searchQuery.trim()) {
-          const q = searchQuery.trim().toLowerCase();
-          dayTasks = dayTasks.filter(t => t.title.toLowerCase().includes(q));
+        function getTodayTasks() {
+            return getTasksForDate(getToday());
         }
-        if (dayTasks.length === 0) {
-          container.innerHTML = '<div class="no-tasks">✨ Нет задач на этот день</div>';
-          return;
+
+        function calculateLevel(totalXP) {
+            let l = 1;
+            while (l * (l + 1) / 2 <= totalXP) l++;
+            return l - 1;
         }
-        let html = '';
-        dayTasks.forEach(task => {
-          const cat = categories.find(c => c.id === task.category);
-          const doneClass = task.done ? 'done' : '';
-          const doneIcon = task.done ? 'fa-circle-check' : 'fa-circle';
-          const importantStar = task.important ? '⭐' : '';
-          const goal = goals.find(g => g.id === task.goalId);
-          const goalBadge = goal ? '<span class="task-goal-badge">🎯 '+goal.title+'</span>' : '';
-          const periodText = task.dateFrom !== task.dateTo ? '📅 '+task.dateFrom+' → '+task.dateTo : '';
-          const durationText = task.duration ? '⏱ '+task.duration+' мин' : '';
-          const timeText = task.startTime ? '🕐 '+task.startTime : '';
-          html += '<div class="task-item '+doneClass+'">'+
-            '<span class="task-cat" style="background:'+(cat?cat.color:'#999')+';"></span>'+
-            '<span class="task-name">'+importantStar+' '+task.title+'</span>'+
-            '<div class="task-meta">'+
-              goalBadge+
-              (timeText ? '<span>'+timeText+'</span>' : '')+
-              (durationText ? '<span>'+durationText+'</span>' : '')+
-              (periodText ? '<span>'+periodText+'</span>' : '')+
-            '</div>'+
-            '<div class="task-actions">'+
-              '<button class="task-attach-btn" data-id="'+task.id+'" title="Прикрепить к цели"><i class="fas fa-link"></i></button>'+
-              '<button class="task-edit-btn" data-id="'+task.id+'" title="Редактировать"><i class="fas fa-edit"></i></button>'+
-              '<button class="task-duplicate-btn" data-id="'+task.id+'" title="Дублировать"><i class="fas fa-copy"></i></button>'+
-              '<button class="task-timer-btn" data-id="'+task.id+'" title="Таймер"><i class="fas fa-clock"></i></button>'+
-              '<button class="task-done-btn" data-id="'+task.id+'" title="Выполнить"><i class="fas '+doneIcon+'"></i></button>'+
-              '<button class="task-done-btn" data-id="'+task.id+'" data-delete="true" title="Удалить" style="color:#e74c3c;"><i class="fas fa-trash"></i></button>'+
-            '</div>'+
-          '</div>';
-        });
-        container.innerHTML = html;
-        container.querySelectorAll('.task-done-btn').forEach(btn => {
-          btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const id = parseInt(this.dataset.id);
-            if (this.dataset.delete) { if (confirm('Удалить задачу?')) deleteTask(id); }
-            else toggleTaskDone(id);
-          });
-        });
-        container.querySelectorAll('.task-edit-btn').forEach(btn => {
-          btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const id = parseInt(this.dataset.id);
-            openEditTask(id);
-          });
-        });
-        container.querySelectorAll('.task-duplicate-btn').forEach(btn => {
-          btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const id = parseInt(this.dataset.id);
-            duplicateTask(id);
-            const date = document.getElementById('dayTasksTitle').dataset.date;
-            if (date) renderDayTasks(date);
-          });
-        });
-        container.querySelectorAll('.task-timer-btn').forEach(btn => {
-          btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const id = parseInt(this.dataset.id);
-            startTimer(id);
-          });
-        });
-        container.querySelectorAll('.task-attach-btn').forEach(btn => {
-          btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const id = parseInt(this.dataset.id);
-            openAttachGoal(id);
-          });
-        });
-      }
 
-      function refreshCurrentView() {
-        if (document.getElementById('dayTasksModal').classList.contains('active')) {
-          const date = document.getElementById('dayTasksTitle').dataset.date;
-          if (date) renderDayTasks(date);
+        function getXPToNext(totalXP, level) {
+            return (level + 1) * (level + 2) / 2 - totalXP;
         }
-        if (document.getElementById('goalsModal').classList.contains('active')) renderGoals();
-      }
 
-      // РЕДАКТИРОВАНИЕ ЗАДАЧИ
-      function openEditTask(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
-        editTaskId = taskId;
-        document.getElementById('editTaskTitle').value = task.title;
-        document.getElementById('editTaskDateFrom').value = task.dateFrom;
-        document.getElementById('editTaskDateTo').value = task.dateTo;
-        document.getElementById('editTaskImportant').checked = task.important;
-        const container = document.getElementById('editCategorySelector');
-        container.innerHTML = '';
-        categories.forEach(cat => {
-          const btn = document.createElement('button');
-          btn.className = 'cat-btn'+(cat.id === task.category ? ' active' : '');
-          btn.style.background = cat.color;
-          btn.textContent = cat.label;
-          btn.dataset.cat = cat.id;
-          btn.addEventListener('click', function() {
-            container.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-          });
-          container.appendChild(btn);
-        });
-        document.getElementById('editTaskModal').classList.add('active');
-      }
-
-      // ПРИКРЕПЛЕНИЕ К ЦЕЛИ
-      function openAttachGoal(taskId) {
-        attachTaskId = taskId;
-        const select = document.getElementById('attachGoalSelect');
-        select.innerHTML = '<option value="">Новая цель</option>';
-        goals.forEach(g => {
-          const opt = document.createElement('option');
-          opt.value = g.id;
-          opt.textContent = g.title + (g.done ? ' ✅' : '');
-          select.appendChild(opt);
-        });
-        document.getElementById('attachGoalNewName').value = '';
-        document.getElementById('attachGoalModal').classList.add('active');
-      }
-
-      // ЦЕЛИ ОТОБРАЖЕНИЕ
-      function renderGoals() {
-        const container = document.getElementById('goalsList');
-        let filtered = goals;
-        if (goalsFilter === 'active') filtered = goals.filter(g => !g.done);
-        if (goalsFilter === 'done') filtered = goals.filter(g => g.done);
-        if (filtered.length === 0) {
-          container.innerHTML = '<div style="text-align:center; color:#8a8a9a; padding:20px 0;">🎯 Нет целей</div>';
-          return;
+        function getProgress(totalXP, level) {
+            const cur = level * (level + 1) / 2;
+            const next = (level + 1) * (level + 2) / 2;
+            return Math.min(1, Math.max(0, (totalXP - cur) / (next - cur)));
         }
-        let html = '';
-        filtered.forEach(goal => {
-          const goalTasks = tasks.filter(t => t.goalId === goal.id);
-          const doneTasks = goalTasks.filter(t => t.done).length;
-          const totalTasks = goalTasks.length;
-          const progress = totalTasks > 0 ? Math.round((doneTasks/totalTasks)*100) : 0;
-          const statusClass = goal.done ? 'done' : 'active';
-          const statusText = goal.done ? '✅ Выполнена' : '🔄 В процессе';
-          const deadlineText = goal.deadline ? '⏰ '+goal.deadline : '';
-          let tasksHtml = '';
-          goalTasks.forEach(t => {
-            const cat = categories.find(c => c.id === t.category);
-            tasksHtml += '<span class="tag '+(t.done ? 'done' : '')+'" style="'+(cat ? 'background:'+cat.color+'20;' : '')+'">'+t.title+'</span>';
-          });
-          let photoHtml = '';
-          if (goal.photo) photoHtml = '<div class="goal-photo"><img src="'+goal.photo+'" alt="Фото цели" /></div>';
-          html += '<div class="goal-item">'+
-            '<div class="goal-header">'+
-              '<span class="goal-title">'+goal.title+'</span>'+
-              '<span class="goal-status '+statusClass+'">'+statusText+'</span>'+
-            '</div>'+
-            (goal.description ? '<div class="goal-desc">'+goal.description+'</div>' : '')+
-            '<div class="goal-progress">'+
-              '<span style="font-size:0.65rem;">'+doneTasks+'/'+totalTasks+'</span>'+
-              '<div class="bar"><div class="fill" style="width:'+progress+'%;"></div></div>'+
-              '<span class="text">'+progress+'%</span>'+
-            '</div>'+
-            (deadlineText ? '<div style="font-size:0.7rem; opacity:0.6;">'+deadlineText+'</div>' : '')+
-            (tasksHtml ? '<div class="goal-tasks">'+tasksHtml+'</div>' : '<div style="font-size:0.7rem; opacity:0.5;">Нет прикреплённых задач</div>')+
-            photoHtml+
-            '<div class="goal-actions">'+
-              (!goal.done ? '<button class="goal-done-btn" data-id="'+goal.id+'">✅ Отметить выполненной</button>' : '')+
-              '<button class="goal-edit-btn" data-id="'+goal.id+'">✏️ Редактировать</button>'+
-              '<button class="goal-delete-btn" data-id="'+goal.id+'" style="color:#e74c3c;">🗑️ Удалить</button>'+
-            '</div>'+
-          '</div>';
-        });
-        container.innerHTML = html;
-        container.querySelectorAll('.goal-done-btn').forEach(btn => {
-          btn.addEventListener('click', function() {
-            const id = parseInt(this.dataset.id);
-            toggleGoalDone(id);
-          });
-        });
-        container.querySelectorAll('.goal-edit-btn').forEach(btn => {
-          btn.addEventListener('click', function() {
-            const id = parseInt(this.dataset.id);
-            openGoalForm(id);
-          });
-        });
-        container.querySelectorAll('.goal-delete-btn').forEach(btn => {
-          btn.addEventListener('click', function() {
-            const id = parseInt(this.dataset.id);
-            if (confirm('Удалить цель?')) deleteGoal(id);
-          });
-        });
-      }
 
-      function openGoalForm(goalId) {
-        const modal = document.getElementById('goalFormModal');
-        const title = document.getElementById('goalFormTitle');
-        const deleteBtn = document.getElementById('deleteGoalBtn');
-        if (goalId) {
-          const goal = goals.find(g => g.id === goalId);
-          if (!goal) return;
-          editGoalId = goalId;
-          title.innerHTML = '<i class="fas fa-edit"></i> Редактировать цель';
-          document.getElementById('goalFormTitleInput').value = goal.title;
-          document.getElementById('goalFormDesc').value = goal.description || '';
-          document.getElementById('goalFormDeadline').value = goal.deadline || '';
-          deleteBtn.style.display = 'inline-block';
-        } else {
-          editGoalId = null;
-          title.innerHTML = '<i class="fas fa-plus-circle"></i> Новая цель';
-          document.getElementById('goalFormTitleInput').value = '';
-          document.getElementById('goalFormDesc').value = '';
-          document.getElementById('goalFormDeadline').value = '';
-          deleteBtn.style.display = 'none';
+        function getRank(level) {
+            const ranks = ['Новичок', 'Искатель', 'Странник', 'Ветеран', 'Герой', 'Легенда'];
+            const idx = Math.min(Math.floor(level / 3), ranks.length - 1);
+            return ranks[idx] || 'Легенда';
         }
-        document.getElementById('goalFormPhoto').value = '';
-        modal.classList.add('active');
-      }
 
-      // ДОБАВЛЕНИЕ ЗАДАЧИ
-      function openAddTaskModal() {
-        const modal = document.getElementById('addTaskModal');
-        modal.classList.add('active');
-        const today = getDateStr(0);
-        document.getElementById('taskDateFrom').value = today;
-        document.getElementById('taskDateTo').value = today;
-        document.getElementById('taskTitleInput').value = '';
-        document.getElementById('taskImportant').checked = false;
-        document.getElementById('taskDuration').value = 30;
-        document.getElementById('taskStartTime').value = '09:00';
-        const select = document.getElementById('taskGoalSelect');
-        select.innerHTML = '<option value="">Без цели</option>';
-        goals.forEach(g => {
-          const opt = document.createElement('option');
-          opt.value = g.id;
-          opt.textContent = g.title + (g.done ? ' ✅' : '');
-          select.appendChild(opt);
-        });
-        const container = document.getElementById('categorySelector');
-        container.innerHTML = '';
-        let selectedCat = categories[0].id;
-        categories.forEach(cat => {
-          const btn = document.createElement('button');
-          btn.className = 'cat-btn'+(cat.id === selectedCat ? ' active' : '');
-          btn.style.background = cat.color;
-          btn.textContent = cat.label;
-          btn.dataset.cat = cat.id;
-          btn.addEventListener('click', function() {
-            container.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-          });
-          container.appendChild(btn);
-        });
-      }
+        function getAvatar(level) {
+            const avatars = ['🧙', '⚔️', '🛡️', '🧝', '🐉', '👑', '🌟', '💫'];
+            return avatars[Math.min(level - 1, avatars.length - 1)] || '🧙';
+        }
 
-      // ТАЙМЕР
-      function startTimer(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
-        timerTaskId = taskId;
-        document.getElementById('timerTaskName').textContent = '⏳ '+task.title;
-        timerSeconds = 25 * 60;
-        updateTimerDisplay();
-        document.getElementById('timerModal').classList.add('active');
-        if (timerInterval) clearInterval(timerInterval);
-        timerRunning = false;
-        document.getElementById('timerStartBtn').textContent = '▶ Старт';
-      }
-
-      function updateTimerDisplay() {
-        const mins = Math.floor(timerSeconds/60);
-        const secs = timerSeconds%60;
-        document.getElementById('timerDisplay').textContent =
-          String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
-      }
-
-      function toggleTimer() {
-        if (timerRunning) {
-          clearInterval(timerInterval);
-          timerRunning = false;
-          document.getElementById('timerStartBtn').textContent = '▶ Старт';
-        } else {
-          timerRunning = true;
-          document.getElementById('timerStartBtn').textContent = '⏸ Пауза';
-          timerInterval = setInterval(() => {
-            if (timerSeconds <= 0) {
-              clearInterval(timerInterval);
-              timerRunning = false;
-              document.getElementById('timerStartBtn').textContent = '▶ Старт';
-              alert('⏰ Время вышло! Отличная работа!');
-              if (timerTaskId) { toggleTaskDone(timerTaskId); timerTaskId = null; }
-              return;
+        // ----- ЗАГРУЗКА / СОХРАНЕНИЕ -----
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('hero_chronicles_v1');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.tasks = data.tasks || [];
+                    state.goals = data.goals || [];
+                    state.player = data.player || { name: 'Эльдар', totalXP: 0, level: 1 };
+                    state.achievements = data.achievements || [];
+                    nextTaskId = data.nextTaskId || 1;
+                    nextGoalId = data.nextGoalId || 1;
+                    state.player.level = calculateLevel(state.player.totalXP);
+                } else {
+                    // Тестовые данные
+                    const today = getToday();
+                    state.tasks = [
+                        { id: nextTaskId++, title: '🏃 Утренняя пробежка', date: today, dateFrom: today, dateTo: today, category: 'sport', done: false, important: true, duration: 30 },
+                        { id: nextTaskId++, title: '🥗 Здоровый завтрак', date: today, dateFrom: today, dateTo: today, category: 'food', done: false, important: false, duration: 15 },
+                        { id: nextTaskId++, title: '📚 Почитать книгу', date: getDateStr(new Date(Date.now() + 86400000)), dateFrom: getDateStr(new Date(Date.now() + 86400000)), dateTo: getDateStr(new Date(Date.now() + 86400000)), category: 'hobby', done: false, important: false, duration: 45 },
+                    ];
+                    state.goals = [
+                        { id: nextGoalId++, title: 'Фитнес-трансформация', description: 'Сбросить вес и подтянуть тело', done: false, taskIds: [1] }
+                    ];
+                    state.player = { name: 'Эльдар', totalXP: 15, level: 1 };
+                }
+            } catch (e) {
+                state.tasks = [];
+                state.goals = [];
+                state.player = { name: 'Эльдар', totalXP: 0, level: 1 };
             }
-            timerSeconds--;
-            updateTimerDisplay();
-          }, 1000);
+            state.player.level = calculateLevel(state.player.totalXP);
+            renderAll();
         }
-      }
 
-      function resetTimer() {
-        clearInterval(timerInterval);
-        timerRunning = false;
-        timerSeconds = 25 * 60;
-        updateTimerDisplay();
-        document.getElementById('timerStartBtn').textContent = '▶ Старт';
-        timerTaskId = null;
-        document.getElementById('timerTaskName').textContent = '—';
-      }
+        function saveData() {
+            try {
+                localStorage.setItem('hero_chronicles_v1', JSON.stringify({
+                    tasks: state.tasks,
+                    goals: state.goals,
+                    player: state.player,
+                    achievements: state.achievements,
+                    nextTaskId,
+                    nextGoalId
+                }));
+            } catch (e) {}
+        }
 
-      // СТАТИСТИКА
-      function showStats() {
-        const total = tasks.length;
-        const done = tasks.filter(t => t.done).length;
-        const undone = total - done;
-        const important = tasks.filter(t => t.important).length;
-        const withGoal = tasks.filter(t => t.goalId).length;
-        const totalGoals = goals.length;
-        const doneGoals = goals.filter(g => g.done).length;
-        const totalXP = player.totalXP;
-        let byCat = {};
-        categories.forEach(c => byCat[c.id] = 0);
-        tasks.forEach(t => { if (byCat[t.category] !== undefined) byCat[t.category]++; });
-        let msg = '📊 СТАТИСТИКА\n━━━━━━━━━━━━━━\n';
-        msg += '📌 Задач: '+total+'\n✅ Выполнено: '+done+'\n⏳ Осталось: '+undone+'\n⭐ Важных: '+important+'\n🎯 Привязано к целям: '+withGoal+'\n';
-        msg += '━━━━━━━━━━━━━━\n🎯 Целей: '+totalGoals+'\n✅ Достигнуто: '+doneGoals+'\n';
-        msg += '━━━━━━━━━━━━━━\n⚡ Всего XP: '+totalXP+'\n👤 Уровень: '+player.level+'\n';
-        if (profile.weight) msg += '⚖️ Вес: '+profile.weight+' кг\n';
-        if (profile.height) msg += '📏 Рост: '+profile.height+' см\n';
-        msg += '━━━━━━━━━━━━━━\n📂 По категориям:\n';
-        categories.forEach(c => { const count = byCat[c.id] || 0; if (count > 0) msg += '  '+c.label+': '+count+'\n'; });
-        msg += '━━━━━━━━━━━━━━\n🏅 Достижений: '+achievements.length;
-        alert(msg);
-      }
-
-      // ЛЕГЕНДА С ФИЛЬТРОМ "ВСЕ"
-      function renderLegend() {
-        const container = document.getElementById('legendContainer');
-        let html = '<span class="legend-item all-filter'+(filterCategory === null ? ' active-filter' : '')+'" onclick="window._toggleFilter(null)">'+
-          '<span class="color-swatch" style="background:#6c5ce7;"></span> Все'+
-        '</span>';
-        categories.forEach(cat => {
-          html += '<span class="legend-item'+(filterCategory === cat.id ? ' active-filter' : '')+'" data-cat="'+cat.id+'" onclick="window._toggleFilter(\''+cat.id+'\')">'+
-            '<span class="color-swatch" style="background:'+cat.color+';"></span>'+cat.label+
-          '</span>';
-        });
-        container.innerHTML = html;
-      }
-
-      function toggleFilter(categoryId) {
-        filterCategory = categoryId;
-        document.querySelectorAll('.legend-item').forEach(el => {
-          el.classList.remove('active-filter');
-          if (el.dataset.cat === filterCategory) el.classList.add('active-filter');
-          if (filterCategory === null && el.classList.contains('all-filter')) el.classList.add('active-filter');
-        });
-        renderAllViews();
-      }
-      window._toggleFilter = toggleFilter;
-
-      // ТЕМА И СХЕМЫ
-      function applyScheme(scheme) {
-        currentScheme = scheme;
-        const app = document.getElementById('appContainer');
-        app.className = 'app scheme-'+scheme;
-        if (darkMode) app.classList.add('dark-mode');
-        document.querySelectorAll('.scheme-opt').forEach(d => d.classList.remove('active'));
-        document.querySelector('.scheme-opt[data-scheme="'+scheme+'"]').classList.add('active');
-        localStorage.setItem('rpgScheme', scheme);
-      }
-
-      function toggleTheme() {
-        darkMode = !darkMode;
-        document.body.classList.toggle('dark-mode', darkMode);
-        document.getElementById('appContainer').classList.toggle('dark-mode', darkMode);
-        document.getElementById('themeToggle').innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        document.getElementById('menuThemeToggle').innerHTML = darkMode ? '<i class="fas fa-sun"></i> Светлая тема' : '<i class="fas fa-moon"></i> Тёмная тема';
-        localStorage.setItem('rpgDarkMode', darkMode ? '1' : '0');
-      }
-
-      function exportData() {
-        const data = { tasks, goals, player, achievements, profile, exported: new Date().toISOString() };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'rpg_calendar_backup_'+getDateStr(0)+'.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-
-      function resetAll() {
-        if (confirm('⚠️ Удалить все задачи, цели, прогресс и достижения?')) {
-          if (confirm('Точно? Это нельзя отменить!')) {
-            tasks = []; goals = []; nextTaskId = 1; nextGoalId = 1;
-            player = { name: 'Эльдар', totalXP: 0, level: 1 };
-            achievements = [];
-            profile = {
-              name: 'Эльдар', age: '', gender: '', height: '', weight: '',
-              headerPhoto: null, avatarPhoto: null, weightLog: [],
-              measurements: { biceps: '', chest: '', thigh: '', waist: '' },
-              measurementLog: [], reminderPeriod: 0, lastMeasurementDate: null
-            };
+        // ----- XP СИСТЕМА -----
+        function addXP(amount) {
+            if (amount <= 0) return;
+            state.player.totalXP += amount;
+            const newLevel = calculateLevel(state.player.totalXP);
+            if (newLevel > state.player.level) {
+                state.player.level = newLevel;
+                checkAchievements();
+                setTimeout(() => {
+                    alert(`🎉 ПОВЫШЕНИЕ УРОВНЯ! Теперь вы уровень ${state.player.level}!`);
+                }, 200);
+            } else {
+                state.player.level = newLevel;
+            }
             saveData();
-            updateAll();
-            document.getElementById('achCount').textContent = '0';
-            alert('✅ Данные сброшены');
-          }
+            renderAll();
         }
-      }
 
-      function toggleMenu() { document.getElementById('menuDropdown').classList.toggle('open'); }
-      function closeMenu() { document.getElementById('menuDropdown').classList.remove('open'); }
-
-      // ИНИЦИАЛИЗАЦИЯ
-      function init() {
-        const savedScheme = localStorage.getItem('rpgScheme') || 'moss';
-        applyScheme(savedScheme);
-        if (localStorage.getItem('rpgDarkMode') === '1') {
-          darkMode = true;
-          document.body.classList.add('dark-mode');
-          document.getElementById('appContainer').classList.add('dark-mode');
-          document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
-          document.getElementById('menuThemeToggle').innerHTML = '<i class="fas fa-sun"></i> Светлая тема';
+        // ----- ДОСТИЖЕНИЯ -----
+        function checkAchievements() {
+            const done = state.tasks.filter(t => t.done).length;
+            const total = state.tasks.length;
+            const doneGoals = state.goals.filter(g => g.done).length;
+            const list = [];
+            if (total >= 1 && !state.achievements.includes('first')) { state.achievements.push('first');
+                list.push('🎯 Первая задача!'); }
+            if (done >= 5 && !state.achievements.includes('done5')) { state.achievements.push('done5');
+                list.push('🏅 5 задач выполнено!'); }
+            if (done >= 10 && !state.achievements.includes('done10')) { state.achievements.push('done10');
+                list.push('🏆 10 задач выполнено!'); }
+            if (done >= 25 && !state.achievements.includes('done25')) { state.achievements.push('done25');
+                list.push('👑 25 задач выполнено!'); }
+            if (state.player.level >= 5 && !state.achievements.includes('lv5')) { state.achievements.push('lv5');
+                list.push('⭐ Уровень 5!'); }
+            if (state.player.level >= 10 && !state.achievements.includes('lv10')) { state.achievements.push('lv10');
+                list.push('🌟 Уровень 10!'); }
+            if (doneGoals >= 1 && !state.achievements.includes('first_goal')) { state.achievements.push('first_goal');
+                list.push('🎯 Первая цель достигнута!'); }
+            if (list.length) {
+                saveData();
+                setTimeout(() => alert('🏅 ДОСТИЖЕНИЯ:\n' + list.join('\n')), 300);
+            }
         }
-        loadData();
 
-        // МЕНЮ
-        document.getElementById('menuBtn').addEventListener('click', function(e) { e.stopPropagation(); toggleMenu(); });
-        document.getElementById('menuClose').addEventListener('click', closeMenu);
-        document.addEventListener('click', function(e) {
-          const menu = document.getElementById('menuDropdown');
-          if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== document.getElementById('menuBtn')) closeMenu();
-        });
-        document.getElementById('menuThemeToggle').addEventListener('click', function() { closeMenu(); toggleTheme(); });
-
-        // ПРОФИЛЬ
-        document.getElementById('profileCard').addEventListener('click', function() {
-          document.getElementById('profileModal').classList.add('active');
-          updateProfileDisplay();
-        });
-        document.getElementById('menuProfile').addEventListener('click', function() {
-          closeMenu();
-          document.getElementById('profileModal').classList.add('active');
-          updateProfileDisplay();
-        });
-        document.getElementById('closeProfileBtn').addEventListener('click', function() {
-          document.getElementById('profileModal').classList.remove('active');
-        });
-        document.getElementById('editProfileBtn').addEventListener('click', function() {
-          document.getElementById('profileModal').classList.remove('active');
-          document.getElementById('editProfileName').value = profile.name || '';
-          document.getElementById('editProfileAge').value = profile.age || '';
-          document.getElementById('editProfileGender').value = profile.gender || '';
-          document.getElementById('editProfileHeight').value = profile.height || '';
-          document.getElementById('editProfileWeight').value = profile.weight || '';
-          document.getElementById('editProfileModal').classList.add('active');
-        });
-        document.getElementById('cancelEditProfileBtn').addEventListener('click', function() {
-          document.getElementById('editProfileModal').classList.remove('active');
-        });
-        document.getElementById('saveEditProfileBtn').addEventListener('click', function() {
-          profile.name = document.getElementById('editProfileName').value.trim() || 'Эльдар';
-          profile.age = document.getElementById('editProfileAge').value;
-          profile.gender = document.getElementById('editProfileGender').value;
-          profile.height = document.getElementById('editProfileHeight').value;
-          profile.weight = document.getElementById('editProfileWeight').value;
-          saveData();
-          updateAll();
-          document.getElementById('editProfileModal').classList.remove('active');
-          document.getElementById('profileModal').classList.add('active');
-          updateProfileDisplay();
-        });
-
-        // ЗАГРУЗКА ФОТО
-        document.getElementById('headerPhoto').addEventListener('click', function() {
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.accept = 'image/*';
-          input.onchange = function() {
-            const file = this.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = function(e) {
-                profile.headerPhoto = e.target.result;
-                saveData();
-                updateProfileDisplay();
-              };
-              reader.readAsDataURL(file);
+        // ----- СТРИК -----
+        function getStreak() {
+            const doneDates = state.tasks.filter(t => t.done).map(t => t.date).sort();
+            if (doneDates.length === 0) return 0;
+            const unique = [...new Set(doneDates)].sort();
+            let streak = 0;
+            let checkDate = new Date();
+            checkDate.setHours(0, 0, 0, 0);
+            while (true) {
+                const ds = checkDate.toISOString().split('T')[0];
+                if (unique.includes(ds)) {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else break;
             }
-          };
-          input.click();
-        });
-        document.getElementById('profileAvatar').addEventListener('click', function() {
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.accept = 'image/*';
-          input.onchange = function() {
-            const file = this.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = function(e) {
-                profile.avatarPhoto = e.target.result;
-                saveData();
-                updateAll();
-              };
-              reader.readAsDataURL(file);
-            }
-          };
-          input.click();
-        });
+            return streak;
+        }
 
-        // ВЕС
-        document.getElementById('addWeightBtn').addEventListener('click', function() {
-          document.getElementById('weightDate').value = getDateStr(0);
-          document.getElementById('weightValue').value = profile.weight || '';
-          document.getElementById('addWeightModal').classList.add('active');
-        });
-        document.getElementById('cancelWeightBtn').addEventListener('click', function() {
-          document.getElementById('addWeightModal').classList.remove('active');
-        });
-        document.getElementById('saveWeightBtn').addEventListener('click', function() {
-          const date = document.getElementById('weightDate').value;
-          const weight = document.getElementById('weightValue').value;
-          if (!date || !weight) { alert('Заполните все поля'); return; }
-          addWeightEntry(date, weight);
-          document.getElementById('addWeightModal').classList.remove('active');
-        });
+        // ----- ЗАДАЧИ -----
+        function addTask(title, date, category, duration, important) {
+            if (!title.trim()) return false;
+            const newTask = {
+                id: nextTaskId++,
+                title: title.trim(),
+                date: date,
+                dateFrom: date,
+                dateTo: date,
+                category: category || 'other',
+                done: false,
+                important: important || false,
+                duration: parseInt(duration) || 0
+            };
+            state.tasks.push(newTask);
+            saveData();
+            renderAll();
+            return true;
+        }
 
-        // МЕРКИ
-        document.getElementById('addMeasurementBtn').addEventListener('click', function() {
-          document.getElementById('measBicepsInput').value = profile.measurements.biceps || '';
-          document.getElementById('measChestInput').value = profile.measurements.chest || '';
-          document.getElementById('measThighInput').value = profile.measurements.thigh || '';
-          document.getElementById('measWaistInput').value = profile.measurements.waist || '';
-          document.getElementById('addMeasurementModal').classList.add('active');
-        });
-        document.getElementById('cancelMeasurementBtn').addEventListener('click', function() {
-          document.getElementById('addMeasurementModal').classList.remove('active');
-        });
-        document.getElementById('saveMeasurementBtn').addEventListener('click', function() {
-          const date = getDateStr(0);
-          const biceps = document.getElementById('measBicepsInput').value;
-          const chest = document.getElementById('measChestInput').value;
-          const thigh = document.getElementById('measThighInput').value;
-          const waist = document.getElementById('measWaistInput').value;
-          if (!biceps && !chest && !thigh && !waist) { alert('Введите хотя бы одну мерку'); return; }
-          addMeasurementEntry(date, biceps, chest, thigh, waist);
-          document.getElementById('addMeasurementModal').classList.remove('active');
-        });
-
-        // НАПОМИНАНИЯ
-        document.getElementById('saveReminderBtn').addEventListener('click', function() {
-          const period = document.getElementById('reminderPeriod').value;
-          profile.reminderPeriod = parseInt(period);
-          if (!profile.lastMeasurementDate) profile.lastMeasurementDate = getDateStr(0);
-          saveData();
-          updateProfileDisplay();
-        });
-
-        // ТАБЫ ПРОФИЛЯ
-        document.querySelectorAll('.profile-tabs button').forEach(btn => {
-          btn.addEventListener('click', function() {
-            document.querySelectorAll('.profile-tabs button').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            const tabId = this.dataset.tab;
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            if (tabId === 'tab-weight') drawWeightChart();
-            if (tabId === 'tab-measurements') drawMeasurementsChart();
-            if (tabId === 'tab-reminders') updateReminderStatus();
-            if (tabId === 'tab-rpg') updateStreakAndProductivity();
-            if (tabId === 'tab-productivity') updateStreakAndProductivity();
-          });
-        });
-
-        // МЕНЮ ПУНКТЫ
-        document.getElementById('menuGoals').addEventListener('click', function() {
-          closeMenu();
-          document.getElementById('goalsModal').classList.add('active');
-          renderGoals();
-        });
-        document.getElementById('menuAchievements').addEventListener('click', function() {
-          closeMenu();
-          const list = achievements.length ? achievements.map((a,i) => (i+1)+'. '+a).join('\n') : 'Пока нет достижений';
-          alert('🏅 ДОСТИЖЕНИЯ ('+achievements.length+')\n━━━━━━━━━━━━\n'+list);
-        });
-        document.getElementById('menuStats').addEventListener('click', function() { closeMenu(); showStats(); });
-        document.getElementById('menuExport').addEventListener('click', function() { closeMenu(); exportData(); });
-        document.getElementById('menuReset').addEventListener('click', function() { closeMenu(); resetAll(); });
-
-        // СХЕМЫ
-        document.querySelectorAll('.scheme-opt').forEach(opt => {
-          opt.addEventListener('click', function() {
-            applyScheme(this.dataset.scheme);
-            closeMenu();
-          });
-        });
-
-        // ПЕРЕКЛЮЧАТЕЛИ ВИДОВ
-        document.querySelectorAll('.view-toggle button').forEach(btn => {
-          btn.addEventListener('click', function() { switchView(this.dataset.view); });
-        });
-
-        // НАВИГАЦИЯ
-        document.getElementById('prevMonth').addEventListener('click', function() { navigateMonth(-1); });
-        document.getElementById('nextMonth').addEventListener('click', function() { navigateMonth(1); });
-        document.getElementById('weekPrev').addEventListener('click', function() { navigateWeek(-1); });
-        document.getElementById('weekNext').addEventListener('click', function() { navigateWeek(1); });
-        document.getElementById('dayPrev').addEventListener('click', function() { navigateDay(-1); });
-        document.getElementById('dayNext').addEventListener('click', function() { navigateDay(1); });
-        document.getElementById('yearPrev').addEventListener('click', function() { navigateYear(-1); });
-        document.getElementById('yearNext').addEventListener('click', function() { navigateYear(1); });
-
-        // НИЖНИЙ БАР
-        document.getElementById('addTaskBtn').addEventListener('click', openAddTaskModal);
-        document.getElementById('tasksListBtn').addEventListener('click', function() { openDayTasks(getDateStr(0)); });
-        document.getElementById('goalsBtn').addEventListener('click', function() {
-          document.getElementById('goalsModal').classList.add('active');
-          renderGoals();
-        });
-        document.getElementById('statsBtn').addEventListener('click', showStats);
-        document.getElementById('settingsBtn').addEventListener('click', function() {
-          document.getElementById('profileModal').classList.add('active');
-          updateProfileDisplay();
-        });
-
-        // ЗАКРЫТИЕ МОДАЛОК ПО ОВЕРЛЕЮ
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-          overlay.addEventListener('click', function(e) {
-            if (e.target === this) this.classList.remove('active');
-          });
-        });
-
-        // ЗАКРЫТИЕ КОНКРЕТНЫХ МОДАЛОК
-        document.getElementById('closeDayTasksBtn').addEventListener('click', function() {
-          document.getElementById('dayTasksModal').classList.remove('active');
-        });
-        document.getElementById('closeGoalsBtn').addEventListener('click', function() {
-          document.getElementById('goalsModal').classList.remove('active');
-        });
-        document.getElementById('closeTimerBtn').addEventListener('click', function() {
-          clearInterval(timerInterval);
-          timerRunning = false;
-          document.getElementById('timerModal').classList.remove('active');
-          resetTimer();
-        });
-
-        // ТАЙМЕР
-        document.getElementById('timerStartBtn').addEventListener('click', toggleTimer);
-        document.getElementById('timerPauseBtn').addEventListener('click', toggleTimer);
-        document.getElementById('timerResetBtn').addEventListener('click', resetTimer);
-
-        // СПИСОК ЗАДАЧ
-        document.getElementById('taskSearch').addEventListener('input', function() {
-          searchQuery = this.value;
-          const date = document.getElementById('dayTasksTitle').dataset.date;
-          if (date) renderDayTasks(date);
-        });
-        document.getElementById('toggleDoneBtn').addEventListener('click', function() {
-          hideDone = !hideDone;
-          this.innerHTML = hideDone ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-          const date = document.getElementById('dayTasksTitle').dataset.date;
-          if (date) renderDayTasks(date);
-        });
-        document.getElementById('completeAllBtn').addEventListener('click', function() {
-          const date = document.getElementById('dayTasksTitle').dataset.date;
-          if (date) {
-            const undone = tasks.filter(t => isDateInRange(date, t.dateFrom, t.dateTo) && !t.done).length;
-            if (undone === 0) { alert('Все задачи уже выполнены!'); return; }
-            if (confirm('Выполнить все '+undone+' задач за этот день?')) {
-              tasks.filter(t => isDateInRange(date, t.dateFrom, t.dateTo) && !t.done).forEach(t => {
-                const xp = (t.duration || 0) * 0.01;
+        function toggleTaskDone(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (!task) return;
+            if (!task.done) {
+                const xp = (task.duration || 0) * 0.01 + (task.important ? 5 : 0);
                 if (xp > 0) addXP(xp);
-                if (t.important) addXP(5);
-                t.done = true;
-              });
-              saveData();
-              updateAll();
-              renderDayTasks(date);
             }
-          }
-        });
-
-        // ДОБАВЛЕНИЕ ЗАДАЧИ
-        document.getElementById('saveTaskBtn').addEventListener('click', function() {
-          const title = document.getElementById('taskTitleInput').value.trim();
-          const dateFrom = document.getElementById('taskDateFrom').value;
-          let dateTo = document.getElementById('taskDateTo').value;
-          if (!dateTo) dateTo = dateFrom;
-          const activeBtn = document.querySelector('#categorySelector .cat-btn.active');
-          const category = activeBtn ? activeBtn.dataset.cat : categories[0].id;
-          const important = document.getElementById('taskImportant').checked;
-          const goalId = document.getElementById('taskGoalSelect').value;
-          const duration = document.getElementById('taskDuration').value || 0;
-          const startTime = document.getElementById('taskStartTime').value || '09:00';
-          if (!title) { alert('Введите название задачи'); return; }
-          if (!dateFrom) { alert('Выберите дату начала'); return; }
-          if (addTask(title, dateFrom, dateTo, category, important, goalId || null, duration, startTime)) {
-            document.getElementById('addTaskModal').classList.remove('active');
-          }
-        });
-        document.getElementById('cancelTaskBtn').addEventListener('click', function() {
-          document.getElementById('addTaskModal').classList.remove('active');
-        });
-
-        // РЕДАКТИРОВАНИЕ ЗАДАЧИ
-        document.getElementById('cancelEditBtn').addEventListener('click', function() {
-          document.getElementById('editTaskModal').classList.remove('active');
-        });
-        document.getElementById('saveEditBtn').addEventListener('click', function() {
-          const title = document.getElementById('editTaskTitle').value.trim();
-          const dateFrom = document.getElementById('editTaskDateFrom').value;
-          const dateTo = document.getElementById('editTaskDateTo').value || dateFrom;
-          const activeBtn = document.querySelector('#editCategorySelector .cat-btn.active');
-          const category = activeBtn ? activeBtn.dataset.cat : categories[0].id;
-          const important = document.getElementById('editTaskImportant').checked;
-          if (!title) { alert('Введите название'); return; }
-          if (!dateFrom) { alert('Выберите дату начала'); return; }
-          if (editTaskData(editTaskId, title, category, important, dateFrom, dateTo)) {
-            document.getElementById('editTaskModal').classList.remove('active');
-          }
-        });
-
-        // ЦЕЛИ
-        document.getElementById('goalsFilterAll').addEventListener('click', function() { goalsFilter = 'all'; renderGoals(); });
-        document.getElementById('goalsFilterActive').addEventListener('click', function() { goalsFilter = 'active'; renderGoals(); });
-        document.getElementById('goalsFilterDone').addEventListener('click', function() { goalsFilter = 'done'; renderGoals(); });
-        document.getElementById('goalsAddBtn').addEventListener('click', function() { openGoalForm(null); });
-
-        document.getElementById('cancelGoalFormBtn').addEventListener('click', function() {
-          document.getElementById('goalFormModal').classList.remove('active');
-        });
-        document.getElementById('saveGoalFormBtn').addEventListener('click', function() {
-          const title = document.getElementById('goalFormTitleInput').value.trim();
-          const desc = document.getElementById('goalFormDesc').value.trim();
-          const deadline = document.getElementById('goalFormDeadline').value;
-          if (!title) { alert('Введите название цели'); return; }
-          const photoInput = document.getElementById('goalFormPhoto');
-          if (photoInput.files && photoInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-              if (editGoalId) editGoalData(editGoalId, title, desc, deadline, ev.target.result);
-              else addGoal(title, desc, deadline, ev.target.result);
-              document.getElementById('goalFormModal').classList.remove('active');
-            };
-            reader.readAsDataURL(photoInput.files[0]);
-          } else {
-            if (editGoalId) editGoalData(editGoalId, title, desc, deadline, null);
-            else addGoal(title, desc, deadline, null);
-            document.getElementById('goalFormModal').classList.remove('active');
-          }
-        });
-        document.getElementById('deleteGoalBtn').addEventListener('click', function() {
-          if (editGoalId && confirm('Удалить цель?')) {
-            deleteGoal(editGoalId);
-            document.getElementById('goalFormModal').classList.remove('active');
-          }
-        });
-
-        // ПРИКРЕПЛЕНИЕ К ЦЕЛИ
-        document.getElementById('cancelAttachBtn').addEventListener('click', function() {
-          document.getElementById('attachGoalModal').classList.remove('active');
-        });
-        document.getElementById('saveAttachBtn').addEventListener('click', function() {
-          const select = document.getElementById('attachGoalSelect');
-          const goalId = select.value;
-          const newName = document.getElementById('attachGoalNewName').value.trim();
-          if (goalId === '' && !newName) { alert('Выберите цель или введите название новой'); return; }
-          let targetGoalId = goalId;
-          if (goalId === '' && newName) {
-            const newGoal = { id: nextGoalId++, title: newName, description: '', deadline: '', done: false, photo: null, taskIds: [] };
-            goals.push(newGoal);
-            targetGoalId = newGoal.id;
+            task.done = !task.done;
             saveData();
-            updateAll();
-          }
-          if (attachTaskId && targetGoalId) {
-            attachTaskToGoal(attachTaskId, targetGoalId);
-            document.getElementById('attachGoalModal').classList.remove('active');
-          }
-        });
+            renderAll();
+        }
 
-        // ТЕМА
-        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveData();
+            renderAll();
+        }
 
-        // ЗАПУСК
-        switchView('month');
-      }
+        // ----- ЦЕЛИ -----
+        function addGoal(title) {
+            if (!title.trim()) return false;
+            const newGoal = {
+                id: nextGoalId++,
+                title: title.trim(),
+                description: '',
+                done: false,
+                taskIds: []
+            };
+            state.goals.push(newGoal);
+            saveData();
+            renderAll();
+            return true;
+        }
 
-      document.addEventListener('DOMContentLoaded', init);
-    })();
-  </script>
+        function toggleGoalDone(id) {
+            const goal = state.goals.find(g => g.id === id);
+            if (!goal) return;
+            goal.done = !goal.done;
+            if (goal.done) {
+                const goalTasks = state.tasks.filter(t => t.goalId === id);
+                if (goalTasks.filter(t => !t.done).length === 0) addXP(25);
+            }
+            saveData();
+            renderAll();
+        }
+
+        function deleteGoal(id) {
+            state.goals = state.goals.filter(g => g.id !== id);
+            state.tasks.forEach(t => { if (t.goalId === id) t.goalId = null; });
+            saveData();
+            renderAll();
+        }
+
+        // ----- ОТРИСОВКА -----
+        function renderAll() {
+            renderXP();
+            renderStats();
+            renderDailyQuest();
+            renderCalendar();
+            renderTodayTasks();
+            renderProfile();
+            renderGoalsList();
+            renderUserBadge();
+        }
+
+        function renderXP() {
+            const total = state.player.totalXP;
+            const level = state.player.level;
+            const progress = getProgress(total, level);
+            const xpToNext = getXPToNext(total, level);
+            document.getElementById('xpFill').style.width = (progress * 100) + '%';
+            document.getElementById('xpText').textContent = `${total - level*(level+1)/2} / ${xpToNext} XP`;
+        }
+
+        function renderStats() {
+            const total = state.tasks.length;
+            const done = state.tasks.filter(t => t.done).length;
+            const streak = getStreak();
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statDone').textContent = done;
+            document.getElementById('statStreak').textContent = streak;
+        }
+
+        function renderDailyQuest() {
+            const todayTasks = getTodayTasks();
+            const done = todayTasks.filter(t => t.done).length;
+            const total = todayTasks.length;
+            const slots = document.querySelectorAll('#questProgress .quest-slot');
+            slots.forEach((slot, i) => {
+                const fill = slot.querySelector('.fill');
+                if (i < total) {
+                    slot.style.display = 'block';
+                    fill.style.width = (i < done) ? '100%' : '0%';
+                    slot.classList.toggle('done', i < done);
+                } else {
+                    slot.style.display = 'none';
+                }
+            });
+            document.getElementById('questText').textContent =
+                total > 0 ? `Выполнено ${done} из ${total} задач сегодня` : 'Нет задач на сегодня';
+        }
+
+        function renderCalendar() {
+            const year = state.currentDate.getFullYear();
+            const month = state.currentDate.getMonth();
+            document.getElementById('calMonth').textContent =
+                new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(state.currentDate);
+
+            const firstDay = new Date(year, month, 1);
+            const startDay = (firstDay.getDay() + 6) % 7;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrev = new Date(year, month, 0).getDate();
+            const today = getToday();
+
+            let html = '';
+            for (let i = startDay - 1; i >= 0; i--) {
+                const day = daysInPrev - i;
+                const m = month === 0 ? 11 : month - 1;
+                const y = month === 0 ? year - 1 : year;
+                const ds = formatDateKey(y, m, day);
+                const tasks = getTasksForDate(ds);
+                html += createDayCell(day, true, tasks, ds, today);
+            }
+            for (let day = 1; day <= daysInMonth; day++) {
+                const ds = formatDateKey(year, month, day);
+                const tasks = getTasksForDate(ds);
+                html += createDayCell(day, false, tasks, ds, today);
+            }
+            const total = startDay + daysInMonth;
+            const rem = (7 - (total % 7)) % 7;
+            for (let day = 1; day <= rem; day++) {
+                const m = month === 11 ? 0 : month + 1;
+                const y = month === 11 ? year + 1 : year;
+                const ds = formatDateKey(y, m, day);
+                const tasks = getTasksForDate(ds);
+                html += createDayCell(day, true, tasks, ds, today);
+            }
+            document.getElementById('calGrid').innerHTML = html;
+
+            document.querySelectorAll('.cal-day').forEach(el => {
+                el.addEventListener('click', function() {
+                    const date = this.dataset.date;
+                    if (date) {
+                        // Фильтруем задачи по дате
+                        const tasks = getTasksForDate(date);
+                        if (tasks.length > 0) {
+                            alert('📋 Задачи на ' + date + ':\n' + tasks.map(t => (t.done ? '✅ ' : '⬜ ') + t.title).join(
+                            '\n'));
+                        } else {
+                            alert('📋 На ' + date + ' нет задач');
+                        }
+                    }
+                });
+            });
+        }
+
+        function createDayCell(day, isOther, tasks, dateStr, today) {
+            const count = tasks.length;
+            const done = tasks.filter(t => t.done).length;
+            let dots = '';
+            if (count > 0) dots = '<div class="dot ' + (done === count ? 'done' : 'has-task') + '"></div>';
+            let badge = '';
+            if (count > 1) badge = '<span class="count-badge">' + count + '</span>';
+            const isToday = dateStr === today;
+            const cls = 'cal-day' +
+                (isOther ? ' other-month' : '') +
+                (isToday ? ' today' : '');
+            return `<div class="${cls}" data-date="${dateStr}">
+                <span>${day}</span>${badge}
+                ${dots}
+            </div>`;
+        }
+
+        function renderTodayTasks() {
+            const container = document.getElementById('todayTasks');
+            const tasks = getTodayTasks();
+            if (tasks.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:0.8rem;">
+                        ✨ Нет задач на сегодня
+                    </div>
+                `;
+                return;
+            }
+            let html = '';
+            tasks.slice(0, 5).forEach(task => {
+                const cat = CATEGORIES.find(c => c.id === task.category);
+                const doneClass = task.done ? 'done' : '';
+                const statusIcon = task.done ? 'fa-check-circle' : 'fa-circle';
+                const xp = (task.duration || 0) * 0.01 + (task.important ? 5 : 0);
+                html += `
+                    <div class="task-item ${doneClass}" data-id="${task.id}">
+                        <div class="color-dot" style="background:${cat ? cat.color : '#999'};"></div>
+                        <div class="info">
+                            <div class="title">${task.title}</div>
+                            <div class="meta">
+                                ${cat ? `<span class="tag">${cat.label}</span>` : ''}
+                                ${task.duration ? `<span>⏱ ${task.duration} мин</span>` : ''}
+                                ${xp > 0 ? `<span class="xp-badge">+${xp.toFixed(1)} XP</span>` : ''}
+                            </div>
+                        </div>
+                        <button class="status" data-action="toggle">
+                            <i class="fas ${statusIcon}"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            if (tasks.length > 5) {
+                html += `<div style="text-align:center; padding:8px; color:var(--text-secondary); font-size:0.7rem;">и ещё ${tasks.length - 5} задач...</div>`;
+            }
+            container.innerHTML = html;
+
+            container.querySelectorAll('.task-item').forEach(el => {
+                const id = parseInt(el.dataset.id);
+                el.querySelector('[data-action="toggle"]')?.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleTaskDone(id);
+                });
+                el.addEventListener('dblclick', function() {
+                    if (confirm('Удалить задачу?')) deleteTask(id);
+                });
+            });
+        }
+
+        function renderUserBadge() {
+            const level = state.player.level;
+            document.getElementById('userName').textContent = state.player.name;
+            document.getElementById('userLevel').textContent = 'Ур. ' + level;
+            document.getElementById('avatarDisplay').textContent = getAvatar(level);
+        }
+
+        function renderProfile() {
+            const level = state.player.level;
+            document.getElementById('profileAvatar').textContent = getAvatar(level);
+            document.getElementById('profileName').textContent = state.player.name;
+            document.getElementById('profileRank').textContent = getRank(level);
+            document.getElementById('pLevel').textContent = level;
+            document.getElementById('pXP').textContent = Math.round(state.player.totalXP);
+            document.getElementById('pTasks').textContent = state.tasks.length;
+            document.getElementById('pStreak').textContent = getStreak();
+            document.getElementById('editName').value = state.player.name;
+        }
+
+        function renderGoalsList() {
+            const container = document.getElementById('goalsList');
+            if (state.goals.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding:12px; font-size:0.8rem;">Нет целей. Создайте первую!</div>';
+                return;
+            }
+            let html = '';
+            state.goals.forEach(goal => {
+                const taskIds = goal.taskIds || [];
+                const goalTasks = state.tasks.filter(t => taskIds.includes(t.id));
+                const done = goalTasks.filter(t => t.done).length;
+                const total = goalTasks.length;
+                const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+                html += `
+                    <div class="task-item" style="margin-bottom:6px;">
+                        <div class="color-dot" style="background:${goal.done ? '#00d2d3' : '#6c5ce7'};"></div>
+                        <div class="info">
+                            <div class="title">${goal.done ? '✅ ' : '🎯 '}${goal.title}</div>
+                            <div class="meta">
+                                <span>${done}/${total} задач</span>
+                                <span style="color:var(--accent-light);">${progress}%</span>
+                            </div>
+                        </div>
+                        <button class="status" data-action="toggle-goal" style="font-size:0.8rem; opacity:0.6;">
+                            <i class="fas ${goal.done ? 'fa-undo' : 'fa-check'}"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            container.querySelectorAll('[data-action="toggle-goal"]').forEach(btn => {
+                const item = btn.closest('.task-item');
+                const idx = Array.from(container.children).indexOf(item);
+                const goal = state.goals[idx];
+                if (goal) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        toggleGoalDone(goal.id);
+                    });
+                }
+            });
+        }
+
+        // ----- НАВИГАЦИЯ -----
+        function switchView(view) {
+            state.view = view;
+            document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.bottom-nav button[data-view="${view}"]`)?.classList.add('active');
+            // Показываем/скрываем секции
+            const sections = ['dashboard', 'calendar', 'goals', 'stats'];
+            sections.forEach(s => {
+                const el = document.querySelector(`[data-section="${s}"]`);
+                if (el) el.style.display = s === view ? 'block' : 'none';
+            });
+            // Для упрощения — показываем всё, но скрываем ненужное
+            if (view === 'goals') {
+                document.getElementById('goalsModal').classList.add('open');
+            } else {
+                document.getElementById('goalsModal').classList.remove('open');
+            }
+        }
+
+        // ============================================================
+        //  ИНИЦИАЛИЗАЦИЯ
+        // ============================================================
+        function init() {
+            loadData();
+
+            // ---- КАЛЕНДАРЬ ----
+            document.getElementById('calPrev').addEventListener('click', () => {
+                state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+            document.getElementById('calNext').addEventListener('click', () => {
+                state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            // ---- МЕНЮ ----
+            document.getElementById('menuBtn').addEventListener('click', () => {
+                document.getElementById('menuOverlay').classList.add('open');
+            });
+            document.getElementById('menuClose').addEventListener('click', () => {
+                document.getElementById('menuOverlay').classList.remove('open');
+            });
+            document.getElementById('menuOverlay').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('open');
+            });
+
+            // ---- ПРОФИЛЬ ----
+            document.getElementById('profileBtn').addEventListener('click', () => {
+                document.getElementById('profileModal').classList.add('open');
+                renderProfile();
+            });
+            document.getElementById('menuProfile').addEventListener('click', () => {
+                document.getElementById('menuOverlay').classList.remove('open');
+                document.getElementById('profileModal').classList.add('open');
+                renderProfile();
+            });
+            document.getElementById('closeProfile').addEventListener('click', () => {
+                document.getElementById('profileModal').classList.remove('open');
+            });
+            document.getElementById('saveProfile').addEventListener('click', () => {
+                const name = document.getElementById('editName').value.trim();
+                if (name) {
+                    state.player.name = name;
+                    saveData();
+                    renderAll();
+                }
+                document.getElementById('profileModal').classList.remove('open');
+            });
+
+            // ---- ЗАДАЧИ ----
+            document.getElementById('addTaskBtn').addEventListener('click', () => {
+                document.getElementById('addTaskModal').classList.add('open');
+                document.getElementById('taskDate').value = getToday();
+                // Категории
+                const container = document.getElementById('taskCategorySelector');
+                container.innerHTML = '';
+                CATEGORIES.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'cat-opt' + (cat.id === 'tasks' ? ' active' : '');
+                    btn.style.background = cat.color;
+                    btn.textContent = cat.label;
+                    btn.dataset.cat = cat.id;
+                    btn.addEventListener('click', function() {
+                        container.querySelectorAll('.cat-opt').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                    container.appendChild(btn);
+                });
+            });
+            document.getElementById('cancelTask').addEventListener('click', () => {
+                document.getElementById('addTaskModal').classList.remove('open');
+            });
+            document.getElementById('saveTask').addEventListener('click', () => {
+                const title = document.getElementById('taskTitle').value.trim();
+                const date = document.getElementById('taskDate').value;
+                const duration = document.getElementById('taskDuration').value || 0;
+                const activeCat = document.querySelector('#taskCategorySelector .cat-opt.active');
+                const category = activeCat ? activeCat.dataset.cat : 'tasks';
+                if (!title) { alert('Введите название задачи'); return; }
+                if (!date) { alert('Выберите дату'); return; }
+                if (addTask(title, date, category, duration, false)) {
+                    document.getElementById('addTaskModal').classList.remove('active');
+                    document.getElementById('taskTitle').value = '';
+                }
+            });
+
+            // ---- ЦЕЛИ ----
+            document.getElementById('menuGoals').addEventListener('click', () => {
+                document.getElementById('menuOverlay').classList.remove('open');
+                document.getElementById('goalsModal').classList.add('open');
+                renderGoalsList();
+            });
+            document.getElementById('closeGoals').addEventListener('click', () => {
+                document.getElementById('goalsModal').classList.remove('open');
+            });
+            document.getElementById('addGoalBtn').addEventListener('click', () => {
+                const title = document.getElementById('newGoalInput').value.trim();
+                if (title) {
+                    addGoal(title);
+                    document.getElementById('newGoalInput').value = '';
+                }
+            });
+
+            // ---- СТАТИСТИКА ----
+            document.getElementById('menuStats').addEventListener('click', () => {
+                document.getElementById('menuOverlay').classList.remove('open');
+                const done = state.tasks.filter(t => t.done).length;
+                const total = state.tasks.length;
+                const goalsDone = state.goals.filter(g => g.done).length;
+                alert(`📊 СТАТИСТИКА\n━━━━━━━━━━━━━━\n📌 Задач: ${total}\n✅ Выполнено: ${done}\n🎯 Целей: ${state.goals.length}\n✅ Целей достигнуто: ${goalsDone}\n🔥 Стрик: ${getStreak()} дн.\n⚡ Всего XP: ${Math.round(state.player.totalXP)}\n👤 Уровень: ${state.player.level}`);
+            });
+
+            // ---- ДОСТИЖЕНИЯ ----
+            document.getElementById('menuAchievements').addEventListener('click', () => {
+                document.getElementById('menuOverlay').classList.remove('open');
+                const list = state.achievements.length ? state.achievements.map((a, i) => `${i+1}. ${a}`).join('\n') :
+                    'Пока нет достижений';
+                alert(`🏅 ДОСТИЖЕНИЯ (${state.achievements.length})\n━━━━━━━━━━━━\n${list}`);
+            });
+
+            // ---- ЭКСПОРТ ----
+            document.getElementById('menuExport').addEventListener('click', () => {
+                document.getElementById('menuOverlay').classList.remove('open');
+                const data = {
+                    tasks: state.tasks,
+                    goals: state.goals,
+                    player: state.player,
+                    achievements: state.achievements,
+                    exported: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `hero_chronicles_${getToday()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            // ---- СБРОС ----
+            document.getElementById('menuReset').addEventListener('click', () => {
+                document.getElementById('menuOverlay').classList.remove('open');
+                if (confirm('⚠️ Удалить все данные?')) {
+                    if (confirm('Точно? Это нельзя отменить!')) {
+                        state.tasks = [];
+                        state.goals = [];
+                        state.player = { name: 'Эльдар', totalXP: 0, level: 1 };
+                        state.achievements = [];
+                        nextTaskId = 1;
+                        nextGoalId = 1;
+                        saveData();
+                        renderAll();
+                        alert('✅ Данные сброшены');
+                    }
+                }
+            });
+
+            // ---- НИЖНЯЯ НАВИГАЦИЯ ----
+            document.querySelectorAll('.bottom-nav button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const view = this.dataset.view;
+                    if (view === 'goals') {
+                        document.getElementById('goalsModal').classList.add('open');
+                        renderGoalsList();
+                    } else if (view === 'stats') {
+                        const done = state.tasks.filter(t => t.done).length;
+                        const total = state.tasks.length;
+                        alert(`📊 СТАТИСТИКА\n━━━━━━━━━━━━━━\n📌 Задач: ${total}\n✅ Выполнено: ${done}\n🔥 Стрик: ${getStreak()} дн.\n⚡ Всего XP: ${Math.round(state.player.totalXP)}\n👤 Уровень: ${state.player.level}`);
+                    } else {
+                        document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        // Прокрутка к нужной секции
+                        if (view === 'dashboard') {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    }
+                });
+            });
+
+            // ---- СЕЕ ВСЕ ЗАДАЧИ ----
+            document.getElementById('seeAllTasks').addEventListener('click', () => {
+                const tasks = getTodayTasks();
+                if (tasks.length === 0) {
+                    alert('✨ На сегодня нет задач');
+                    return;
+                }
+                const msg = tasks.map((t, i) =>
+                    `${i+1}. ${t.done ? '✅' : '⬜'} ${t.title}${t.duration ? ` (${t.duration} мин)` : ''}`
+                ).join('\n');
+                alert(`📋 Задачи на сегодня (${tasks.length}):\n━━━━━━━━━━━━━━\n${msg}`);
+            });
+
+            // ---- ТЕМА ----
+            document.getElementById('themeToggle').addEventListener('click', function() {
+                state.darkMode = !state.darkMode;
+                document.body.style.background = state.darkMode ? '#0f0e17' : '#f0ece4';
+                document.body.style.color = state.darkMode ? '#fffffe' : '#1a1a2e';
+                this.innerHTML = state.darkMode ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+                // Меняем переменные
+                document.documentElement.style.setProperty('--bg-primary', state.darkMode ? '#0f0e17' : '#f0ece4');
+                document.documentElement.style.setProperty('--bg-secondary', state.darkMode ? '#1a1a2e' : '#ffffff');
+                document.documentElement.style.setProperty('--bg-card', state.darkMode ? '#16213e' : '#f5f0eb');
+                document.documentElement.style.setProperty('--text-primary', state.darkMode ? '#fffffe' : '#1a1a2e');
+                document.documentElement.style.setProperty('--text-secondary', state.darkMode ? '#a7a9be' : '#5a5a6a');
+            });
+
+            // ---- ЗАКРЫТИЕ МОДАЛОК ПО ОВЕРЛЕЮ ----
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === this) this.classList.remove('open');
+                });
+            });
+
+            // ---- ПРОФИЛЬ В МЕНЮ ----
+            document.getElementById('menuProfile').addEventListener('click', function() {
+                document.getElementById('menuOverlay').classList.remove('open');
+                document.getElementById('profileModal').classList.add('open');
+                renderProfile();
+            });
+
+            renderAll();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
