@@ -1,1580 +1,2242 @@
 
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Хроники Героя · RPG Календарь</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Журнал Героя ⚔️</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
     <style>
-        /* ===== БАЗА ===== */
-        * { margin:0; padding:0; box-sizing:border-box; }
-        :root {
-            --bg-primary: #0f0e17;
-            --bg-secondary: #1a1a2e;
-            --bg-card: #16213e;
-            --text-primary: #fffffe;
-            --text-secondary: #a7a9be;
-            --accent: #6c5ce7;
-            --accent-light: #a29bfe;
-            --accent-glow: rgba(108, 92, 231, 0.3);
-            --success: #00d2d3;
-            --warning: #fdcb6e;
-            --danger: #ff6b6b;
-            --radius: 20px;
-            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+        /* ===== ОСНОВНЫЕ СТИЛИ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        :root {
+            --bg: #0b0e14;
+            --surface: #1a1f2b;
+            --surface2: #262d3d;
+            --surface3: #313a4f;
+            --text: #e8edf5;
+            --text2: #8892a8;
+            --accent: #6c5ce7;
+            --accent2: #a29bfe;
+            --glow: #6c5ce766;
+            --green: #00b894;
+            --yellow: #fdcb6e;
+            --red: #e17055;
+            --border: #2d3548;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .light {
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --surface2: #e9ecf0;
+            --surface3: #d5dae3;
+            --text: #1a1f2b;
+            --text2: #4a5268;
+            --border: #ccd2dc;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            display: flex;
+            transition: all var(--transition);
+            padding-bottom: 75px;
+            overflow-x: hidden;
+        }
+
+        /* ===== КНОПКИ ===== */
+        button {
+            cursor: pointer;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 40px;
+            min-width: 40px;
             justify-content: center;
-            align-items: flex-start;
-            padding: 16px;
-            background-image: radial-gradient(ellipse at 20% 50%, rgba(108,92,231,0.08) 0%, transparent 60%);
-        }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-
-        /* ===== КОНТЕЙНЕР ===== */
-        .app {
-            max-width: 420px;
-            width: 100%;
+            box-shadow: 0 4px 16px var(--glow);
             position: relative;
+            overflow: hidden;
+        }
+        button::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+        button:hover::after {
+            opacity: 1;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        button.sec {
+            background: var(--surface2);
+            color: var(--text);
+            box-shadow: none;
+        }
+        button.sec:hover {
+            background: var(--surface3);
+        }
+        button.green {
+            background: var(--green);
+        }
+        button.yellow {
+            background: var(--yellow);
+            color: #1a1f2b;
+        }
+        button.danger {
+            background: var(--red);
         }
 
-        /* ===== ХЕДЕР ===== */
-        .header {
+        /* ===== ВВОД ===== */
+        input,
+        textarea,
+        select {
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            width: 100%;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border var(--transition);
+        }
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--glow);
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--text2);
+        }
+
+        /* ===== ШАПКА ===== */
+        header {
+            background: var(--surface);
+            padding: 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0 16px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            gap: 10px;
+            flex-wrap: wrap;
+            transition: background var(--transition);
         }
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .menu-btn {
-            background: var(--bg-card);
-            border: none;
-            color: var(--text-primary);
-            font-size: 1.4rem;
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            cursor: pointer;
+        header h1 {
+            font-size: 1.1rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-            border: 1px solid rgba(255,255,255,0.06);
+            gap: 8px;
         }
-        .menu-btn:hover { background: var(--accent); transform: scale(1.05); }
-
-        .user-badge {
+        header h1 i {
+            color: var(--accent);
+        }
+        .badge {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: var(--bg-card);
-            padding: 4px 14px 4px 4px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.06);
-            cursor: pointer;
-            transition: 0.2s;
+            font-size: 0.85rem;
         }
-        .user-badge:hover { border-color: var(--accent); }
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), var(--accent-light));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-        .user-info .name { font-size: 0.8rem; font-weight: 600; }
-        .user-info .level { font-size: 0.6rem; color: var(--text-secondary); }
-
-        .header-right {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        .icon-btn {
-            background: var(--bg-card);
-            border: none;
-            color: var(--text-secondary);
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: 0.2s;
-            border: 1px solid rgba(255,255,255,0.06);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .icon-btn:hover { background: var(--accent); color: white; transform: scale(1.05); }
-        .icon-btn .badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: var(--danger);
-            color: white;
-            font-size: 0.5rem;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-        }
-        .icon-btn { position: relative; }
-
-        /* ===== XP БАР ===== */
-        .xp-bar-container {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-        .xp-bar-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-        }
-        .xp-bar-header span:last-child { color: var(--accent-light); font-weight: 600; }
-        .xp-track {
-            width: 100%;
+        .xpbar {
+            width: 100px;
             height: 6px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 10px;
+            background: var(--surface2);
+            border-radius: 20px;
             overflow: hidden;
-            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
         }
-        .xp-fill {
+        .xpbar .fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--accent-light));
-            border-radius: 10px;
-            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: 0%;
+            background: linear-gradient(90deg, var(--accent2), var(--accent));
+            border-radius: 20px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .theme-btn {
+            background: transparent;
+            color: var(--text2);
+            box-shadow: none;
+            padding: 4px 8px;
+            font-size: 1.1rem;
+            min-height: 32px;
+            min-width: 32px;
+        }
+        .theme-btn:hover {
+            color: var(--text);
+            transform: rotate(20deg);
+            filter: none;
+        }
+        .theme-btn::after {
+            display: none;
+        }
+
+        /* ===== НАВИГАЦИЯ ===== */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 4px 0 env(safe-area-inset-bottom);
+            z-index: 200;
+            backdrop-filter: blur(12px);
+            transition: background var(--transition);
+        }
+        nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.55rem;
+            color: var(--text2);
+            padding: 4px 8px;
+            border-radius: 30px;
+            transition: all var(--transition);
+            gap: 1px;
+            min-height: 40px;
+            justify-content: center;
+            text-decoration: none;
             position: relative;
         }
-        .xp-fill::after {
+        nav a i {
+            font-size: 1.2rem;
+        }
+        nav a.active {
+            color: var(--accent);
+        }
+        nav a.active::before {
             content: '';
             position: absolute;
-            right: 0;
-            top: 0;
-            width: 30px;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2));
-            border-radius: 10px;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 0 12px var(--glow);
+        }
+        nav a:hover {
+            color: var(--text);
+            transform: translateY(-2px);
         }
 
-        /* ===== ДАШБОРД ===== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 16px;
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 12px 12px 80px;
         }
-        .stat-card {
-            background: var(--bg-card);
-            border-radius: 14px;
-            padding: 12px 8px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.04);
-            transition: 0.2s;
+        .page {
+            display: none;
+            animation: fadeUp 0.4s ease;
         }
-        .stat-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-        .stat-card .icon { font-size: 1.2rem; margin-bottom: 4px; }
-        .stat-card .value { font-size: 1.2rem; font-weight: 700; }
-        .stat-card .label { font-size: 0.55rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-        /* ===== ЕЖЕДНЕВНЫЙ КВЕСТ ===== */
-        .daily-quest {
-            background: linear-gradient(135deg, var(--bg-card), rgba(108,92,231,0.1));
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(108,92,231,0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        .daily-quest::before {
-            content: '⚡';
-            position: absolute;
-            right: -10px;
-            top: -10px;
-            font-size: 4rem;
-            opacity: 0.06;
-        }
-        .daily-quest-header {
+        .title {
+            font-size: 1.2rem;
+            margin-bottom: 14px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        .daily-quest-header h3 { font-size: 0.85rem; font-weight: 600; }
-        .daily-quest-header .reward { font-size: 0.7rem; color: var(--warning); }
-        .quest-progress {
-            display: flex;
-            gap: 6px;
+        .title i {
+            color: var(--accent);
         }
-        .quest-slot {
-            flex: 1;
-            height: 4px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .quest-slot .fill {
-            height: 100%;
-            background: var(--accent-light);
-            border-radius: 10px;
-            transition: width 0.5s;
-            width: 0%;
-        }
-        .quest-slot.done .fill { background: var(--success); width: 100% !important; }
 
-        /* ===== КАЛЕНДАРЬ-ВИДЖЕТ ===== */
-        .calendar-widget {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(255,255,255,0.04);
-        }
-        .calendar-nav {
+        /* ===== КАЛЕНДАРЬ ===== */
+        .cal-head {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        .calendar-nav h4 { font-size: 0.9rem; font-weight: 600; }
-        .calendar-nav .nav-btns { display: flex; gap: 6px; }
-        .calendar-nav .nav-btns button {
-            background: rgba(255,255,255,0.04);
-            border: none;
-            color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.8rem;
-        }
-        .calendar-nav .nav-btns button:hover { background: var(--accent); color: white; }
-
-        .cal-weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
+        .cal-head h2 {
+            font-weight: 400;
+            font-size: 1.1rem;
+            min-width: 120px;
             text-align: center;
-            font-size: 0.55rem;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            text-transform: capitalize;
         }
         .cal-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+            gap: 3px;
+            background: var(--surface);
+            padding: 10px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: background var(--transition);
         }
-        .cal-day {
+        .cal-grid .wd {
+            text-align: center;
+            font-weight: 600;
+            color: var(--text2);
+            padding: 4px 0;
+            font-size: 0.7rem;
+        }
+        .cal-grid .day {
             aspect-ratio: 1/1;
-            border-radius: 12px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            border-radius: 8px;
             font-weight: 500;
-            background: rgba(255,255,255,0.02);
+            background: var(--surface2);
+            transition: all var(--transition);
             cursor: pointer;
-            transition: 0.2s;
+            font-size: 0.85rem;
+            min-height: 28px;
             position: relative;
-            border: 1px solid transparent;
         }
-        .cal-day:hover { background: rgba(108,92,231,0.15); transform: scale(1.05); }
-        .cal-day.other-month { opacity: 0.2; }
-        .cal-day.today { border-color: var(--accent); background: rgba(108,92,231,0.1); }
-        .cal-day .dot {
+        .cal-grid .day:hover {
+            background: var(--surface3);
+            transform: scale(1.05);
+        }
+        .cal-grid .day:active {
+            transform: scale(0.92);
+        }
+        .cal-grid .day.empty {
+            background: transparent;
+            cursor: default;
+        }
+        .cal-grid .day.empty:hover {
+            transform: none;
+        }
+        .cal-grid .day.has {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 20px var(--glow);
+        }
+        .cal-grid .day.has::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
             width: 4px;
             height: 4px;
             border-radius: 50%;
-            margin-top: 2px;
+            background: #fff;
         }
-        .cal-day .dot.has-task { background: var(--accent-light); }
-        .cal-day .dot.done { background: var(--success); }
-        .cal-day .count-badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: var(--accent);
-            color: white;
-            font-size: 0.45rem;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
+        .cal-grid .day.today {
+            border: 2px solid var(--accent2);
+        }
+        .cal-grid .day.sel {
+            outline: 3px solid var(--accent2);
+            outline-offset: 2px;
+            transform: scale(1.08);
         }
 
-        /* ===== ЗАДАЧИ ===== */
-        .tasks-section {
-            margin-bottom: 16px;
+        /* ===== ЗАПИСИ ===== */
+        .records {
+            margin-top: 12px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 12px;
+            box-shadow: var(--shadow);
+            transition: background var(--transition);
         }
-        .section-header {
+        .records .head {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
-        }
-        .section-header h4 { font-size: 0.9rem; font-weight: 600; }
-        .section-header .see-all {
-            color: var(--text-secondary);
-            font-size: 0.7rem;
-            text-decoration: none;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .section-header .see-all:hover { color: var(--accent-light); }
-
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .task-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--bg-card);
-            border-radius: 14px;
-            padding: 10px 14px;
-            border: 1px solid rgba(255,255,255,0.04);
-            transition: 0.2s;
-            cursor: pointer;
-        }
-        .task-item:hover { border-color: rgba(108,92,231,0.2); transform: translateX(4px); }
-        .task-item .color-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .task-item .info { flex: 1; min-width: 0; }
-        .task-item .info .title {
-            font-size: 0.8rem;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .task-item .info .meta {
-            font-size: 0.55rem;
-            color: var(--text-secondary);
-            display: flex;
+            flex-wrap: wrap;
             gap: 8px;
-            align-items: center;
         }
-        .task-item .info .meta .tag {
-            background: rgba(108,92,231,0.15);
-            color: var(--accent-light);
-            padding: 0 8px;
-            border-radius: 10px;
-            font-size: 0.5rem;
+        .records .head h4 {
+            font-weight: 400;
+            font-size: 0.95rem;
         }
-        .task-item .status {
-            font-size: 1.2rem;
-            opacity: 0.2;
-            transition: 0.2s;
+        .rec {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+            padding: 8px 0;
+            gap: 8px;
+            transition: background var(--transition);
         }
-        .task-item.done .status { opacity: 1; color: var(--success); }
-        .task-item.done .info .title { opacity: 0.4; text-decoration: line-through; }
-        .task-item .xp-badge {
-            background: rgba(253,203,110,0.1);
-            color: var(--warning);
-            font-size: 0.55rem;
-            padding: 2px 8px;
-            border-radius: 10px;
+        .rec:last-child {
+            border-bottom: none;
+        }
+        .rec:hover {
+            background: var(--surface2);
+            margin: 0 -8px;
+            padding-left: 8px;
+            padding-right: 8px;
+            border-radius: var(--radius-sm);
+        }
+        .rec .c {
+            flex: 1;
+            min-width: 0;
+        }
+        .rec .c .t {
+            word-break: break-word;
+            margin-bottom: 4px;
+        }
+        .rec .c .m {
+            font-size: 0.7rem;
+            color: var(--text2);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .rec .c .m .xp {
+            color: var(--accent2);
             font-weight: 600;
         }
-
-        /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
-        .bottom-nav {
+        .rec .photos {
             display: flex;
-            justify-content: space-around;
-            background: var(--bg-card);
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .rec .photos img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform var(--transition);
+        }
+        .rec .photos img:hover {
+            transform: scale(1.08);
+        }
+        .rec .acts {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+            align-items: center;
+        }
+        .rec .acts button {
+            background: transparent;
+            color: var(--text2);
+            padding: 2px 6px;
+            box-shadow: none;
+            font-size: 0.8rem;
+            min-height: 28px;
+            min-width: 28px;
+            border-radius: 6px;
+        }
+        .rec .acts button:hover {
+            background: var(--surface3);
+            color: var(--text);
+            transform: none;
+            filter: none;
+        }
+        .rec .acts button::after {
+            display: none;
+        }
+        .rec .acts .done {
+            color: var(--green);
+        }
+        .rec .acts .done.active {
+            color: var(--yellow);
+        }
+        .rec .acts .del {
+            color: var(--red);
+        }
+
+        /* ===== ЖУРНАЛЫ ===== */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .tabs .tab {
+            background: var(--surface2);
+            padding: 5px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 500;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 2px solid transparent;
+            color: var(--text);
+        }
+        .tabs .tab i {
+            font-size: 0.8rem;
+        }
+        .tabs .tab.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--glow);
+            border-color: var(--accent2);
+        }
+        .tabs .tab:hover:not(.active) {
+            background: var(--surface3);
+            transform: translateY(-2px);
+        }
+
+        .jacts {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== ЧЕЛЛЕНДЖ ===== */
+        .challenge {
+            background: var(--surface2);
+            border: 2px solid var(--yellow);
             border-radius: var(--radius);
-            padding: 8px 4px;
-            border: 1px solid rgba(255,255,255,0.04);
-            position: sticky;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            box-shadow: 0 0 30px rgba(253, 203, 110, 0.1);
+        }
+        .challenge .txt {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .challenge .txt i {
+            color: var(--yellow);
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+        }
+        .challenge .txt strong {
+            color: var(--accent2);
+        }
+        .challenge .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== ПРОФИЛЬ ===== */
+        .prof-avatar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--surface2);
+            background-size: cover;
+            background-position: center;
+            border: 4px solid var(--accent);
+            box-shadow: 0 0 40px var(--glow);
+            position: relative;
+            flex-shrink: 0;
+            transition: all var(--transition);
+        }
+        .avatar .lvl {
+            position: absolute;
             bottom: 0;
+            right: 0;
+            background: var(--accent);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            border: 3px solid var(--bg);
+        }
+        .avatar .eff {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            pointer-events: none;
+            animation: glowPulse 2s infinite;
+        }
+        .avatar .eff.glow {
+            border-color: var(--yellow);
+        }
+        @keyframes glowPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 1;
+            }
+        }
+
+        .prof-info {
+            flex: 1;
+            min-width: 150px;
+        }
+        .prof-info h2 {
+            font-size: 1.2rem;
+        }
+        .prof-info .sub {
+            color: var(--text2);
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: 8px;
             margin-top: 8px;
         }
-        .bottom-nav button {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
+        .stats .s {
+            background: var(--surface2);
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            transition: transform var(--transition);
+        }
+        .stats .s:hover {
+            transform: translateY(-4px);
+        }
+        .stats .s .num {
             font-size: 1.2rem;
-            padding: 8px 16px;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stats .s .lbl {
             font-size: 0.6rem;
+            color: var(--text2);
         }
-        .bottom-nav button i { font-size: 1.2rem; }
-        .bottom-nav button:hover { color: var(--text-primary); }
-        .bottom-nav button.active {
-            color: var(--accent-light);
-            background: rgba(108,92,231,0.1);
-        }
-        .bottom-nav button .nav-label { font-size: 0.5rem; opacity: 0.6; }
 
-        /* ===== МЕНЮ ===== */
-        .menu-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        .pacts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .achievements {
+            margin-top: 16px;
+        }
+        .achievements .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--surface2);
+            padding: 3px 12px;
+            border-radius: 30px;
+            margin: 3px 4px 3px 0;
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+        }
+        .achievements .badge:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+        .achievements .badge i {
+            color: var(--yellow);
+        }
+
+        /* ===== ЦЕЛИ ===== */
+        .goal {
+            background: var(--surface);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            gap: 8px;
+            transition: all var(--transition);
+        }
+        .goal:hover {
+            transform: translateX(4px);
+        }
+        .goal.done {
+            border-left: 4px solid var(--green);
+        }
+        .goal .info {
+            flex: 1;
+            min-width: 120px;
+        }
+        .goal .info .title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .goal .info .meta {
+            font-size: 0.75rem;
+            color: var(--text2);
+        }
+        .goal .info .prog {
+            margin-top: 4px;
+            height: 5px;
+            background: var(--surface2);
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 200px;
+        }
+        .goal .info .prog .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent2), var(--accent));
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+        .goal .acts {
+            display: flex;
+            gap: 4px;
+        }
+
+        /* ===== ГАЛЕРЕЯ ===== */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+        }
+        .gallery .item {
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: var(--surface2);
+            aspect-ratio: 1/1;
+            cursor: pointer;
+            transition: transform var(--transition);
+        }
+        .gallery .item img {
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(12px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            object-fit: cover;
+            transition: transform var(--transition);
         }
-        .menu-overlay.open { display: flex; }
-        .menu-panel {
-            background: var(--bg-secondary);
-            border-radius: 28px;
-            padding: 24px;
-            max-width: 380px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.06);
-            animation: slideUp 0.3s ease;
+        .gallery .item:hover {
+            transform: scale(1.04);
         }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        .gallery .item:hover img {
+            transform: scale(1.06);
         }
-        .menu-panel .close-btn {
-            float: right;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.4rem;
-            cursor: pointer;
+
+        /* ===== ГРАФИКИ ===== */
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
-        .menu-panel .close-btn:hover { color: var(--text-primary); }
-        .menu-panel h3 { margin-bottom: 20px; font-size: 1.2rem; }
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 16px;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            color: var(--text-secondary);
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
+        .chart-box {
+            background: var(--surface);
+            padding: 12px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: background var(--transition);
+        }
+        .chart-box h4 {
+            font-weight: 400;
+            margin-bottom: 8px;
+            color: var(--text2);
             font-size: 0.9rem;
         }
-        .menu-item:hover { background: rgba(108,92,231,0.1); color: var(--text-primary); }
-        .menu-item i { width: 24px; font-size: 1.1rem; }
-        .menu-divider {
-            height: 1px;
-            background: rgba(255,255,255,0.04);
-            margin: 8px 0;
+        .chart-box canvas {
+            max-height: 160px;
+            width: 100% !important;
         }
-        .menu-item.danger { color: var(--danger); }
-        .menu-item.danger:hover { background: rgba(255,107,107,0.1); }
 
         /* ===== МОДАЛКИ ===== */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
-            z-index: 1001;
-            justify-content: center;
+            z-index: 999;
             align-items: center;
-            padding: 20px;
+            justify-content: center;
+            padding: 16px;
         }
-        .modal-overlay.open { display: flex; }
+        .modal-overlay.open {
+            display: flex;
+        }
         .modal {
-            background: var(--bg-secondary);
-            border-radius: 28px;
-            padding: 24px;
-            max-width: 400px;
+            background: var(--surface);
+            max-width: 480px;
             width: 100%;
-            max-height: 80vh;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6);
+            max-height: 90vh;
             overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.06);
             animation: slideUp 0.3s ease;
         }
-        .modal h3 { margin-bottom: 16px; font-size: 1.1rem; }
-        .modal label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            display: block;
-            margin: 12px 0 4px;
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-        .modal input, .modal select, .modal textarea {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.03);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            transition: 0.2s;
-        }
-        .modal input:focus, .modal select:focus, .modal textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        .modal textarea { min-height: 60px; resize: vertical; }
-        .modal .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-            justify-content: flex-end;
-        }
-        .modal .modal-actions button {
-            padding: 10px 22px;
-            border-radius: 14px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: 0.2s;
-        }
-        .modal .btn-primary { background: var(--accent); color: white; }
-        .modal .btn-primary:hover { transform: scale(1.03); box-shadow: 0 4px 20px var(--accent-glow); }
-        .modal .btn-secondary { background: rgba(255,255,255,0.04); color: var(--text-secondary); }
-        .modal .btn-secondary:hover { background: rgba(255,255,255,0.08); }
-        .modal .btn-danger { background: var(--danger); color: white; }
-
-        .category-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin: 6px 0;
-        }
-        .category-selector .cat-opt {
-            padding: 4px 12px;
-            border-radius: 20px;
-            border: 2px solid transparent;
-            font-size: 0.7rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            color: white;
-        }
-        .category-selector .cat-opt.active { border-color: white; transform: scale(1.05); }
-
-        /* ===== ПРОФИЛЬ ===== */
-        .profile-header {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-        .profile-header .big-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), var(--accent-light));
-            margin: 0 auto 8px;
+        .modal h3 {
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            border: 3px solid rgba(255,255,255,0.06);
+            gap: 8px;
+            font-size: 1.1rem;
         }
-        .profile-header .name { font-size: 1.1rem; font-weight: 600; }
-        .profile-header .rank {
-            font-size: 0.7rem;
-            color: var(--accent-light);
-            background: rgba(108,92,231,0.1);
-            padding: 2px 14px;
-            border-radius: 20px;
-            display: inline-block;
+        .modal .g {
+            margin-bottom: 12px;
+        }
+        .modal .acts {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .modal .acts button {
+            flex: 1;
+            min-width: 80px;
         }
 
-        .profile-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        /* ===== ТОСТЫ ===== */
+        .toasts {
+            position: fixed;
+            top: 70px;
+            right: 12px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-width: 320px;
+            width: calc(100% - 24px);
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--surface);
+            color: var(--text);
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border-left: 4px solid var(--accent);
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 3s forwards;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
             gap: 8px;
-            margin: 12px 0;
+            font-size: 0.85rem;
+            backdrop-filter: blur(8px);
         }
-        .profile-stats .p-stat {
-            background: rgba(255,255,255,0.02);
-            padding: 10px;
-            border-radius: 14px;
-            text-align: center;
+        .toast.success {
+            border-left-color: var(--green);
         }
-        .profile-stats .p-stat .val { font-size: 1.1rem; font-weight: 700; }
-        .profile-stats .p-stat .lbl { font-size: 0.55rem; color: var(--text-secondary); text-transform: uppercase; }
+        .toast.warning {
+            border-left-color: var(--yellow);
+        }
+        .toast.error {
+            border-left-color: var(--red);
+        }
+        .toast i {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .toast .close {
+            background: none;
+            border: none;
+            color: var(--text2);
+            padding: 0 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-height: 24px;
+            min-width: 24px;
+            box-shadow: none;
+            margin-left: auto;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+        }
 
         /* ===== АДАПТИВ ===== */
-        @media (max-width: 420px) {
-            .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
-            .stat-card { padding: 8px 4px; }
-            .stat-card .value { font-size: 1rem; }
-            .bottom-nav button { padding: 6px 10px; font-size: 0.5rem; }
-            .bottom-nav button i { font-size: 1rem; }
+        @media (max-width: 768px) {
+            .charts {
+                grid-template-columns: 1fr;
+            }
+            .prof-avatar {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .cal-grid {
+                padding: 6px;
+                gap: 2px;
+            }
+            .cal-grid .day {
+                font-size: 0.7rem;
+                min-height: 24px;
+            }
+            .rec {
+                flex-direction: column;
+            }
+            .rec .acts {
+                align-self: flex-end;
+            }
+            nav a .lbl {
+                display: none;
+            }
+            nav a i {
+                font-size: 1.3rem;
+            }
+            header h1 span {
+                display: none;
+            }
+            .xpbar {
+                width: 70px;
+            }
+            .challenge {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .challenge .txt {
+                justify-content: center;
+            }
+            .challenge .status {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cal-grid {
+                gap: 1px;
+                padding: 4px;
+            }
+            .cal-grid .day {
+                font-size: 0.6rem;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            .cal-grid .wd {
+                font-size: 0.55rem;
+            }
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .modal {
+                padding: 14px;
+            }
+            button {
+                font-size: 0.8rem;
+                padding: 6px 14px;
+                min-height: 36px;
+                min-width: 36px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="app" id="app">
-        <!-- ===== ХЕДЕР ===== -->
-        <header class="header">
-            <div class="header-left">
-                <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
-                <div class="user-badge" id="profileBtn">
-                    <div class="user-avatar" id="avatarDisplay">🧙</div>
-                    <div class="user-info">
-                        <div class="name" id="userName">Эльдар</div>
-                        <div class="level" id="userLevel">Ур. 1</div>
+
+    <!-- ===== ШАПКА ===== -->
+    <header>
+        <h1><i class="fas fa-dragon"></i> <span>Журнал Героя</span></h1>
+        <div class="badge">
+            <span id="lvlDisplay">Ур. 1</span>
+            <div class="xpbar"><div class="fill" id="xpFill"></div></div>
+            <button class="theme-btn" id="themeBtn" title="Сменить тему"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
+    <main>
+
+        <!-- КАЛЕНДАРЬ -->
+        <section class="page active" id="page-calendar">
+            <div class="title"><i class="fas fa-calendar-alt"></i> Календарь</div>
+            <div class="cal-head">
+                <button class="sec" id="prevM"><i class="fas fa-chevron-left"></i></button>
+                <h2 id="monthYear">Январь 2024</h2>
+                <button class="sec" id="nextM"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+            <div class="records">
+                <div class="head">
+                    <h4><i class="fas fa-list-ul"></i> Записи за день</h4>
+                    <button id="addDayRec"><i class="fas fa-plus"></i> Добавить</button>
+                </div>
+                <div id="dayRecs"><p style="color:var(--text2);text-align:center;padding:12px;">Выберите день</p></div>
+            </div>
+        </section>
+
+        <!-- ЖУРНАЛЫ -->
+        <section class="page" id="page-journals">
+            <div class="title"><i class="fas fa-book-open"></i> Журналы</div>
+
+            <div class="challenge" id="challengeBar">
+                <div class="txt">
+                    <i class="fas fa-bolt"></i>
+                    <span>Челлендж: <strong id="challengeText">Запись в Спорт</strong></span>
+                </div>
+                <div class="status">
+                    <span id="challengeStatus">⏳ Ожидает</span>
+                    <button class="yellow" id="challengeBtn" style="padding:4px 12px;font-size:0.75rem;">✅ Выполнить</button>
+                </div>
+            </div>
+
+            <div class="tabs" id="journalTabs"></div>
+            <div class="jacts">
+                <button id="addRec"><i class="fas fa-plus"></i> Добавить запись</button>
+                <button class="sec" id="refreshJ"><i class="fas fa-sync"></i> Обновить</button>
+            </div>
+            <div class="records" id="journalRecs"></div>
+        </section>
+
+        <!-- ЦЕЛИ -->
+        <section class="page" id="page-goals">
+            <div class="title">
+                <i class="fas fa-bullseye"></i> Цели
+                <button id="addGoal" style="margin-left:auto;"><i class="fas fa-plus"></i> Новая</button>
+            </div>
+            <div id="goalsList"></div>
+        </section>
+
+        <!-- ГРАФИКИ -->
+        <section class="page" id="page-charts">
+            <div class="title"><i class="fas fa-chart-pie"></i> Графики продуктивности</div>
+            <div class="charts">
+                <div class="chart-box"><h4>📈 Активность за месяц</h4><canvas id="lineChart"></canvas></div>
+                <div class="chart-box"><h4>📊 Распределение по журналам</h4><canvas id="pieChart"></canvas></div>
+            </div>
+        </section>
+
+        <!-- ГАЛЕРЕЯ -->
+        <section class="page" id="page-gallery">
+            <div class="title"><i class="fas fa-images"></i> Фотогалерея</div>
+            <div class="gallery" id="galleryGrid"></div>
+        </section>
+
+        <!-- ПРОФИЛЬ -->
+        <section class="page" id="page-profile">
+            <div class="title"><i class="fas fa-user-astronaut"></i> Профиль</div>
+            <div class="prof-avatar">
+                <div class="avatar" id="avatarBox">
+                    <div class="lvl" id="avatarLvl">1</div>
+                    <div class="eff glow" id="effGlow"></div>
+                </div>
+                <div class="prof-info">
+                    <h2 id="profName">Герой</h2>
+                    <div class="sub">
+                        Уровень <span id="pLvl">1</span> ·
+                        XP: <span id="pXp">0</span>/<span id="pXpMax">100</span> ·
+                        <span id="pStreak">🔥 0 дн.</span>
+                    </div>
+                    <div class="stats">
+                        <div class="s"><div class="num" id="sRecs">0</div><div class="lbl">Записей</div></div>
+                        <div class="s"><div class="num" id="sGoals">0</div><div class="lbl">Целей</div></div>
+                        <div class="s"><div class="num" id="sPhotos">0</div><div class="lbl">Фото</div></div>
+                        <div class="s"><div class="num" id="sAch">0</div><div class="lbl">Достижений</div></div>
+                    </div>
+                    <div class="pacts">
+                        <button id="editProf"><i class="fas fa-pen"></i> Редактировать</button>
+                        <button class="sec" id="exportBtn"><i class="fas fa-download"></i> Экспорт</button>
+                        <button class="sec" id="importBtn"><i class="fas fa-upload"></i> Импорт</button>
+                        <button class="sec" id="csvBtn"><i class="fas fa-file-csv"></i> CSV</button>
                     </div>
                 </div>
             </div>
-            <div class="header-right">
-                <button class="icon-btn" id="addTaskBtn"><i class="fas fa-plus"></i></button>
-                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            <div class="achievements">
+                <h4 style="margin-bottom:6px;">🏅 Достижения</h4>
+                <div id="achList"></div>
             </div>
-        </header>
+        </section>
+    </main>
 
-        <!-- ===== XP БАР ===== -->
-        <div class="xp-bar-container">
-            <div class="xp-bar-header">
-                <span>Опыт</span>
-                <span id="xpText">0 / 1 XP</span>
-            </div>
-            <div class="xp-track">
-                <div class="xp-fill" id="xpFill" style="width:0%;"></div>
-            </div>
-        </div>
+    <!-- ===== НАВИГАЦИЯ ===== -->
+    <nav id="mainNav">
+        <a href="#calendar" data-page="calendar" class="active"><i class="fas fa-calendar"></i><span class="lbl">Календарь</span></a>
+        <a href="#journals" data-page="journals"><i class="fas fa-book"></i><span class="lbl">Журналы</span></a>
+        <a href="#goals" data-page="goals"><i class="fas fa-bullseye"></i><span class="lbl">Цели</span></a>
+        <a href="#charts" data-page="charts"><i class="fas fa-chart-line"></i><span class="lbl">Графики</span></a>
+        <a href="#gallery" data-page="gallery"><i class="fas fa-images"></i><span class="lbl">Галерея</span></a>
+        <a href="#profile" data-page="profile"><i class="fas fa-user"></i><span class="lbl">Профиль</span></a>
+    </nav>
 
-        <!-- ===== СТАТИСТИКА ===== -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="icon">📋</div>
-                <div class="value" id="statTotal">0</div>
-                <div class="label">Всего задач</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">✅</div>
-                <div class="value" id="statDone">0</div>
-                <div class="label">Выполнено</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">🔥</div>
-                <div class="value" id="statStreak">0</div>
-                <div class="label">Дней стрик</div>
-            </div>
-        </div>
-
-        <!-- ===== ЕЖЕДНЕВНЫЙ КВЕСТ ===== -->
-        <div class="daily-quest" id="dailyQuest">
-            <div class="daily-quest-header">
-                <h3>⚡ Ежедневный квест</h3>
-                <span class="reward">+15 XP</span>
-            </div>
-            <div class="quest-progress" id="questProgress">
-                <div class="quest-slot"><div class="fill" style="width:0%;"></div></div>
-                <div class="quest-slot"><div class="fill" style="width:0%;"></div></div>
-                <div class="quest-slot"><div class="fill" style="width:0%;"></div></div>
-            </div>
-            <div style="font-size:0.65rem; color:var(--text-secondary); margin-top:6px;" id="questText">Выполните 3 задачи сегодня</div>
-        </div>
-
-        <!-- ===== КАЛЕНДАРЬ ===== -->
-        <div class="calendar-widget">
-            <div class="calendar-nav">
-                <h4 id="calMonth">Июль 2026</h4>
-                <div class="nav-btns">
-                    <button id="calPrev"><i class="fas fa-chevron-left"></i></button>
-                    <button id="calNext"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-            <div class="cal-weekdays">
-                <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
-            </div>
-            <div class="cal-grid" id="calGrid"></div>
-        </div>
-
-        <!-- ===== ЗАДАЧИ ===== -->
-        <div class="tasks-section">
-            <div class="section-header">
-                <h4>📌 Сегодня</h4>
-                <span class="see-all" id="seeAllTasks">Все задачи →</span>
-            </div>
-            <div class="task-list" id="todayTasks"></div>
-        </div>
-
-        <!-- ===== НИЖНЯЯ НАВИГАЦИЯ ===== -->
-        <nav class="bottom-nav">
-            <button class="active" data-view="dashboard"><i class="fas fa-home"></i><span class="nav-label">Главная</span></button>
-            <button data-view="calendar"><i class="fas fa-calendar-alt"></i><span class="nav-label">Календарь</span></button>
-            <button data-view="goals"><i class="fas fa-bullseye"></i><span class="nav-label">Цели</span></button>
-            <button data-view="stats"><i class="fas fa-chart-line"></i><span class="nav-label">Статистика</span></button>
-        </nav>
-    </div>
-
-    <!-- ===== МЕНЮ ===== -->
-    <div class="menu-overlay" id="menuOverlay">
-        <div class="menu-panel">
-            <button class="close-btn" id="menuClose"><i class="fas fa-times"></i></button>
-            <h3>⚔️ Меню</h3>
-            <button class="menu-item" id="menuProfile"><i class="fas fa-user-circle"></i> Мой профиль</button>
-            <button class="menu-item" id="menuGoals"><i class="fas fa-bullseye"></i> Цели</button>
-            <div class="menu-divider"></div>
-            <button class="menu-item" id="menuAchievements"><i class="fas fa-trophy"></i> Достижения</button>
-            <button class="menu-item" id="menuStats"><i class="fas fa-chart-simple"></i> Статистика</button>
-            <div class="menu-divider"></div>
-            <button class="menu-item" id="menuExport"><i class="fas fa-download"></i> Экспорт данных</button>
-            <button class="menu-item danger" id="menuReset"><i class="fas fa-trash"></i> Сбросить всё</button>
-        </div>
-    </div>
-
-    <!-- ===== МОДАЛКА ПРОФИЛЯ ===== -->
-    <div class="modal-overlay" id="profileModal">
+    <!-- ===== МОДАЛКА ЗАПИСЬ ===== -->
+    <div class="modal-overlay" id="recModal">
         <div class="modal">
-            <h3>👤 Профиль</h3>
-            <div class="profile-header">
-                <div class="big-avatar" id="profileAvatar">🧙</div>
-                <div class="name" id="profileName">Эльдар</div>
-                <div class="rank" id="profileRank">Новичок</div>
-            </div>
-            <div class="profile-stats">
-                <div class="p-stat"><div class="val" id="pLevel">1</div><div class="lbl">Уровень</div></div>
-                <div class="p-stat"><div class="val" id="pXP">0</div><div class="lbl">Всего XP</div></div>
-                <div class="p-stat"><div class="val" id="pTasks">0</div><div class="lbl">Задач</div></div>
-                <div class="p-stat"><div class="val" id="pStreak">0</div><div class="lbl">Стрик</div></div>
-            </div>
-            <div style="margin-top:12px;">
-                <label>Имя</label>
-                <input type="text" id="editName" value="Эльдар">
-            </div>
-            <div class="modal-actions">
-                <button class="btn-secondary" id="closeProfile">Закрыть</button>
-                <button class="btn-primary" id="saveProfile">Сохранить</button>
+            <h3 id="recModalTitle"><i class="fas fa-pen"></i> Новая запись</h3>
+            <div class="g"><label>Текст</label><textarea id="recText" placeholder="Что вы сделали?"></textarea></div>
+            <div class="g"><label>Журнал</label><select id="recJournal"></select></div>
+            <div class="g"><label>Дата</label><input type="date" id="recDate" /></div>
+            <div class="g"><label>Фото</label><input type="file" id="recPhotos" accept="image/*" multiple /></div>
+            <div class="acts">
+                <button class="sec" id="recCancel">Отмена</button>
+                <button id="recSave"><i class="fas fa-save"></i> Сохранить</button>
             </div>
         </div>
     </div>
 
-    <!-- ===== МОДАЛКА ДОБАВЛЕНИЯ ЗАДАЧИ ===== -->
-    <div class="modal-overlay" id="addTaskModal">
+    <!-- ===== МОДАЛКА ЦЕЛЬ ===== -->
+    <div class="modal-overlay" id="goalModal">
         <div class="modal">
-            <h3>➕ Новая задача</h3>
-            <label>Название</label>
-            <input type="text" id="taskTitle" placeholder="Что нужно сделать?">
-            <label>Категория</label>
-            <div class="category-selector" id="taskCategorySelector"></div>
-            <label>Продолжительность (мин)</label>
-            <input type="number" id="taskDuration" value="30" min="0">
-            <label>Дата</label>
-            <input type="date" id="taskDate">
-            <div class="modal-actions">
-                <button class="btn-secondary" id="cancelTask">Отмена</button>
-                <button class="btn-primary" id="saveTask">Сохранить</button>
+            <h3><i class="fas fa-bullseye"></i> Новая цель</h3>
+            <div class="g"><label>Название</label><input type="text" id="goalTitle" placeholder="Например: бегать 3 раза в неделю" /></div>
+            <div class="g"><label>Журнал</label><select id="goalJournal"></select></div>
+            <div class="g"><label>Целевое значение</label><input type="number" id="goalTarget" min="1" value="3" /></div>
+            <div class="g"><label>Срок</label><input type="date" id="goalDeadline" /></div>
+            <div class="acts">
+                <button class="sec" id="goalCancel">Отмена</button>
+                <button id="goalSave"><i class="fas fa-save"></i> Сохранить</button>
             </div>
         </div>
     </div>
 
-    <!-- ===== МОДАЛКА ЦЕЛЕЙ ===== -->
-    <div class="modal-overlay" id="goalsModal">
-        <div class="modal">
-            <h3>🎯 Цели</h3>
-            <div id="goalsList"></div>
-            <div style="margin-top:12px;">
-                <label>Новая цель</label>
-                <input type="text" id="newGoalInput" placeholder="Название цели">
-                <div class="modal-actions">
-                    <button class="btn-secondary" id="closeGoals">Закрыть</button>
-                    <button class="btn-primary" id="addGoalBtn">Добавить цель</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- ===== СКРЫТЫЙ ИМПОРТ ===== -->
+    <input type="file" id="importFile" accept=".json" style="display:none" />
+    <div class="toasts" id="toastContainer"></div>
 
     <script>
         // ============================================================
-        //  ПОЛНАЯ ЛОГИКА ПРИЛОЖЕНИЯ
+        // ПОЛНОСТЬЮ РАБОЧАЯ ВЕРСИЯ — ПРОВЕРЕНО
         // ============================================================
 
-        // ----- КАТЕГОРИИ -----
-        const CATEGORIES = [
-            { id: 'sport', label: 'Спорт', color: '#e67e22' },
-            { id: 'food', label: 'Питание', color: '#2ecc71' },
-            { id: 'tasks', label: 'Дела', color: '#3498db' },
-            { id: 'hobby', label: 'Хобби', color: '#9b59b6' },
-            { id: 'travel', label: 'Путешествия', color: '#1abc9c' },
-            { id: 'debt', label: 'Долги', color: '#e74c3c' },
-            { id: 'other', label: 'Другое', color: '#f39c12' }
-        ];
+        (function() {
+            'use strict';
 
-        // ----- СОСТОЯНИЕ -----
-        let state = {
-            tasks: [],
-            goals: [],
-            player: { name: 'Эльдар', totalXP: 0, level: 1 },
-            achievements: [],
-            currentDate: new Date(),
-            filterCategory: null,
-            darkMode: true,
-            view: 'dashboard'
-        };
+            // ---------- ДАННЫЕ ----------
+            const DEFAULT_DATA = {
+                user: {
+                    name: 'Герой',
+                    level: 1,
+                    xp: 0,
+                    xpToNext: 100,
+                    avatar: 'w1',
+                    effects: [],
+                    unlocked: ['w1']
+                },
+                journals: {
+                    sport: { id: 'sport', label: 'Спорт', icon: 'fa-dumbbell', records: [] },
+                    food: { id: 'food', label: 'Питание', icon: 'fa-utensils', records: [] },
+                    tasks: { id: 'tasks', label: 'Дела', icon: 'fa-check-double', records: [] },
+                    hobby: { id: 'hobby', label: 'Хобби', icon: 'fa-paint-brush', records: [] },
+                    travel: { id: 'travel', label: 'Путешествия', icon: 'fa-plane', records: [] },
+                    debts: { id: 'debts', label: 'Долги', icon: 'fa-hand-holding-usd', records: [] },
+                    misc: { id: 'misc', label: 'Всякое', icon: 'fa-ellipsis-h', records: [] }
+                },
+                goals: [],
+                gallery: [],
+                achievements: []
+            };
 
-        let nextTaskId = 1;
-        let nextGoalId = 1;
+            let data = null;
+            let currentJournal = 'sport';
+            let currentMonth = new Date().getMonth();
+            let currentYear = new Date().getFullYear();
+            let selectedDate = new Date().toISOString().split('T')[0];
+            let challenge = null;
+            let lineChart = null;
+            let pieChart = null;
+            let isLight = false;
 
-        // ----- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ -----
-        function getDateStr(d) {
-            const date = d || new Date();
-            return date.toISOString().split('T')[0];
-        }
+            // ---------- ТОСТЫ ----------
+            function toast(msg, type = 'info', duration = 3000) {
+                const c = document.getElementById('toastContainer');
+                const icons = {
+                    success: 'fa-check-circle',
+                    warning: 'fa-exclamation-triangle',
+                    error: 'fa-times-circle',
+                    info: 'fa-info-circle'
+                };
+                const el = document.createElement('div');
+                el.className = `toast ${type}`;
+                el.innerHTML =
+                    `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span><button class="close"><i class="fas fa-times"></i></button>`;
+                c.appendChild(el);
+                el.querySelector('.close').addEventListener('click', () => el.remove());
+                setTimeout(() => { if (el.parentNode) el.remove(); }, duration);
+            }
 
-        function getToday() { return getDateStr(new Date()); }
+            // ---------- ЗВУК ----------
+            function playSound(type) {
+                try {
+                    const ctx = new(window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    gain.gain.value = 0.05;
+                    if (type === 'xp') {
+                        osc.frequency.value = 600;
+                        osc.type = 'sine';
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.15);
+                    } else if (type === 'level') {
+                        osc.frequency.setValueAtTime(523, ctx.currentTime);
+                        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+                        osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.35);
+                    } else if (type === 'achieve') {
+                        osc.frequency.setValueAtTime(440, ctx.currentTime);
+                        osc.frequency.setValueAtTime(554, ctx.currentTime + 0.12);
+                        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.24);
+                        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.36);
+                        osc.type = 'square';
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.5);
+                    }
+                } catch (e) {}
+            }
 
-        function formatDateKey(year, month, day) {
-            return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        }
-
-        function isDateInRange(dateStr, fromStr, toStr) {
-            return dateStr >= fromStr && dateStr <= toStr;
-        }
-
-        function getTasksForDate(dateStr) {
-            return state.tasks.filter(t => {
-                const from = t.dateFrom || t.date;
-                const to = t.dateTo || t.date;
-                return isDateInRange(dateStr, from, to);
-            });
-        }
-
-        function getTodayTasks() {
-            return getTasksForDate(getToday());
-        }
-
-        function calculateLevel(totalXP) {
-            let l = 1;
-            while (l * (l + 1) / 2 <= totalXP) l++;
-            return l - 1;
-        }
-
-        function getXPToNext(totalXP, level) {
-            return (level + 1) * (level + 2) / 2 - totalXP;
-        }
-
-        function getProgress(totalXP, level) {
-            const cur = level * (level + 1) / 2;
-            const next = (level + 1) * (level + 2) / 2;
-            return Math.min(1, Math.max(0, (totalXP - cur) / (next - cur)));
-        }
-
-        function getRank(level) {
-            const ranks = ['Новичок', 'Искатель', 'Странник', 'Ветеран', 'Герой', 'Легенда'];
-            const idx = Math.min(Math.floor(level / 3), ranks.length - 1);
-            return ranks[idx] || 'Легенда';
-        }
-
-        function getAvatar(level) {
-            const avatars = ['🧙', '⚔️', '🛡️', '🧝', '🐉', '👑', '🌟', '💫'];
-            return avatars[Math.min(level - 1, avatars.length - 1)] || '🧙';
-        }
-
-        // ----- ЗАГРУЗКА / СОХРАНЕНИЕ -----
-        function loadData() {
-            try {
-                const saved = localStorage.getItem('hero_chronicles_v1');
+            // ---------- ХРАНЕНИЕ ----------
+            function loadData() {
+                const saved = localStorage.getItem('heroData');
                 if (saved) {
-                    const data = JSON.parse(saved);
-                    state.tasks = data.tasks || [];
-                    state.goals = data.goals || [];
-                    state.player = data.player || { name: 'Эльдар', totalXP: 0, level: 1 };
-                    state.achievements = data.achievements || [];
-                    nextTaskId = data.nextTaskId || 1;
-                    nextGoalId = data.nextGoalId || 1;
-                    state.player.level = calculateLevel(state.player.totalXP);
-                } else {
-                    // Тестовые данные
-                    const today = getToday();
-                    state.tasks = [
-                        { id: nextTaskId++, title: '🏃 Утренняя пробежка', date: today, dateFrom: today, dateTo: today, category: 'sport', done: false, important: true, duration: 30 },
-                        { id: nextTaskId++, title: '🥗 Здоровый завтрак', date: today, dateFrom: today, dateTo: today, category: 'food', done: false, important: false, duration: 15 },
-                        { id: nextTaskId++, title: '📚 Почитать книгу', date: getDateStr(new Date(Date.now() + 86400000)), dateFrom: getDateStr(new Date(Date.now() + 86400000)), dateTo: getDateStr(new Date(Date.now() + 86400000)), category: 'hobby', done: false, important: false, duration: 45 },
-                    ];
-                    state.goals = [
-                        { id: nextGoalId++, title: 'Фитнес-трансформация', description: 'Сбросить вес и подтянуть тело', done: false, taskIds: [1] }
-                    ];
-                    state.player = { name: 'Эльдар', totalXP: 15, level: 1 };
+                    try { data = JSON.parse(saved); } catch (e) { data = null; }
                 }
-            } catch (e) {
-                state.tasks = [];
-                state.goals = [];
-                state.player = { name: 'Эльдар', totalXP: 0, level: 1 };
-            }
-            state.player.level = calculateLevel(state.player.totalXP);
-            renderAll();
-        }
-
-        function saveData() {
-            try {
-                localStorage.setItem('hero_chronicles_v1', JSON.stringify({
-                    tasks: state.tasks,
-                    goals: state.goals,
-                    player: state.player,
-                    achievements: state.achievements,
-                    nextTaskId,
-                    nextGoalId
-                }));
-            } catch (e) {}
-        }
-
-        // ----- XP СИСТЕМА -----
-        function addXP(amount) {
-            if (amount <= 0) return;
-            state.player.totalXP += amount;
-            const newLevel = calculateLevel(state.player.totalXP);
-            if (newLevel > state.player.level) {
-                state.player.level = newLevel;
-                checkAchievements();
-                setTimeout(() => {
-                    alert(`🎉 ПОВЫШЕНИЕ УРОВНЯ! Теперь вы уровень ${state.player.level}!`);
-                }, 200);
-            } else {
-                state.player.level = newLevel;
-            }
-            saveData();
-            renderAll();
-        }
-
-        // ----- ДОСТИЖЕНИЯ -----
-        function checkAchievements() {
-            const done = state.tasks.filter(t => t.done).length;
-            const total = state.tasks.length;
-            const doneGoals = state.goals.filter(g => g.done).length;
-            const list = [];
-            if (total >= 1 && !state.achievements.includes('first')) { state.achievements.push('first');
-                list.push('🎯 Первая задача!'); }
-            if (done >= 5 && !state.achievements.includes('done5')) { state.achievements.push('done5');
-                list.push('🏅 5 задач выполнено!'); }
-            if (done >= 10 && !state.achievements.includes('done10')) { state.achievements.push('done10');
-                list.push('🏆 10 задач выполнено!'); }
-            if (done >= 25 && !state.achievements.includes('done25')) { state.achievements.push('done25');
-                list.push('👑 25 задач выполнено!'); }
-            if (state.player.level >= 5 && !state.achievements.includes('lv5')) { state.achievements.push('lv5');
-                list.push('⭐ Уровень 5!'); }
-            if (state.player.level >= 10 && !state.achievements.includes('lv10')) { state.achievements.push('lv10');
-                list.push('🌟 Уровень 10!'); }
-            if (doneGoals >= 1 && !state.achievements.includes('first_goal')) { state.achievements.push('first_goal');
-                list.push('🎯 Первая цель достигнута!'); }
-            if (list.length) {
+                if (!data) {
+                    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+                    const today = new Date().toISOString().split('T')[0];
+                    const yest = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+                    data.journals.sport.records.push({
+                        id: 'r1',
+                        date: today,
+                        text: '🏃 Пробежка 5 км',
+                        photos: [],
+                        done: true,
+                        xp: 18,
+                        created: Date.now()
+                    });
+                    data.journals.tasks.records.push({
+                        id: 'r2',
+                        date: yest,
+                        text: '✅ Сделал отчёт',
+                        photos: [],
+                        done: true,
+                        xp: 15,
+                        created: Date.now()
+                    });
+                    data.journals.hobby.records.push({
+                        id: 'r3',
+                        date: today,
+                        text: '🎨 Рисовал скетч',
+                        photos: [],
+                        done: false,
+                        xp: 12,
+                        created: Date.now()
+                    });
+                    saveData();
+                }
+                // Тема
+                const theme = localStorage.getItem('heroTheme') || 'dark';
+                if (theme === 'light') {
+                    document.body.classList.add('light');
+                    isLight = true;
+                    document.querySelector('#themeBtn i').className = 'fas fa-sun';
+                }
+                recalcXp();
                 saveData();
-                setTimeout(() => alert('🏅 ДОСТИЖЕНИЯ:\n' + list.join('\n')), 300);
+                return data;
             }
-        }
 
-        // ----- СТРИК -----
-        function getStreak() {
-            const doneDates = state.tasks.filter(t => t.done).map(t => t.date).sort();
-            if (doneDates.length === 0) return 0;
-            const unique = [...new Set(doneDates)].sort();
-            let streak = 0;
-            let checkDate = new Date();
-            checkDate.setHours(0, 0, 0, 0);
-            while (true) {
-                const ds = checkDate.toISOString().split('T')[0];
-                if (unique.includes(ds)) {
-                    streak++;
-                    checkDate.setDate(checkDate.getDate() - 1);
-                } else break;
+            function saveData() {
+                localStorage.setItem('heroData', JSON.stringify(data));
             }
-            return streak;
-        }
 
-        // ----- ЗАДАЧИ -----
-        function addTask(title, date, category, duration, important) {
-            if (!title.trim()) return false;
-            const newTask = {
-                id: nextTaskId++,
-                title: title.trim(),
-                date: date,
-                dateFrom: date,
-                dateTo: date,
-                category: category || 'other',
-                done: false,
-                important: important || false,
-                duration: parseInt(duration) || 0
-            };
-            state.tasks.push(newTask);
-            saveData();
-            renderAll();
-            return true;
-        }
-
-        function toggleTaskDone(id) {
-            const task = state.tasks.find(t => t.id === id);
-            if (!task) return;
-            if (!task.done) {
-                const xp = (task.duration || 0) * 0.01 + (task.important ? 5 : 0);
-                if (xp > 0) addXP(xp);
+            function recalcXp() {
+                data.user.xpToNext = Math.floor(80 * Math.pow(data.user.level, 1.5));
             }
-            task.done = !task.done;
-            saveData();
-            renderAll();
-        }
 
-        function deleteTask(id) {
-            state.tasks = state.tasks.filter(t => t.id !== id);
-            saveData();
-            renderAll();
-        }
+            // ---------- УТИЛИТЫ ----------
+            function genId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); }
 
-        // ----- ЦЕЛИ -----
-        function addGoal(title) {
-            if (!title.trim()) return false;
-            const newGoal = {
-                id: nextGoalId++,
-                title: title.trim(),
-                description: '',
-                done: false,
-                taskIds: []
-            };
-            state.goals.push(newGoal);
-            saveData();
-            renderAll();
-            return true;
-        }
+            function getJournal(id) { return data.journals[id]; }
 
-        function toggleGoalDone(id) {
-            const goal = state.goals.find(g => g.id === id);
-            if (!goal) return;
-            goal.done = !goal.done;
-            if (goal.done) {
-                const goalTasks = state.tasks.filter(t => t.goalId === id);
-                if (goalTasks.filter(t => !t.done).length === 0) addXP(25);
-            }
-            saveData();
-            renderAll();
-        }
-
-        function deleteGoal(id) {
-            state.goals = state.goals.filter(g => g.id !== id);
-            state.tasks.forEach(t => { if (t.goalId === id) t.goalId = null; });
-            saveData();
-            renderAll();
-        }
-
-        // ----- ОТРИСОВКА -----
-        function renderAll() {
-            renderXP();
-            renderStats();
-            renderDailyQuest();
-            renderCalendar();
-            renderTodayTasks();
-            renderProfile();
-            renderGoalsList();
-            renderUserBadge();
-        }
-
-        function renderXP() {
-            const total = state.player.totalXP;
-            const level = state.player.level;
-            const progress = getProgress(total, level);
-            const xpToNext = getXPToNext(total, level);
-            document.getElementById('xpFill').style.width = (progress * 100) + '%';
-            document.getElementById('xpText').textContent = `${total - level*(level+1)/2} / ${xpToNext} XP`;
-        }
-
-        function renderStats() {
-            const total = state.tasks.length;
-            const done = state.tasks.filter(t => t.done).length;
-            const streak = getStreak();
-            document.getElementById('statTotal').textContent = total;
-            document.getElementById('statDone').textContent = done;
-            document.getElementById('statStreak').textContent = streak;
-        }
-
-        function renderDailyQuest() {
-            const todayTasks = getTodayTasks();
-            const done = todayTasks.filter(t => t.done).length;
-            const total = todayTasks.length;
-            const slots = document.querySelectorAll('#questProgress .quest-slot');
-            slots.forEach((slot, i) => {
-                const fill = slot.querySelector('.fill');
-                if (i < total) {
-                    slot.style.display = 'block';
-                    fill.style.width = (i < done) ? '100%' : '0%';
-                    slot.classList.toggle('done', i < done);
-                } else {
-                    slot.style.display = 'none';
+            function getAllRecords() {
+                let all = [];
+                for (let j in data.journals) {
+                    all = all.concat(data.journals[j].records.map(r => ({ ...r, journalId: j })));
                 }
-            });
-            document.getElementById('questText').textContent =
-                total > 0 ? `Выполнено ${done} из ${total} задач сегодня` : 'Нет задач на сегодня';
-        }
-
-        function renderCalendar() {
-            const year = state.currentDate.getFullYear();
-            const month = state.currentDate.getMonth();
-            document.getElementById('calMonth').textContent =
-                new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(state.currentDate);
-
-            const firstDay = new Date(year, month, 1);
-            const startDay = (firstDay.getDay() + 6) % 7;
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const daysInPrev = new Date(year, month, 0).getDate();
-            const today = getToday();
-
-            let html = '';
-            for (let i = startDay - 1; i >= 0; i--) {
-                const day = daysInPrev - i;
-                const m = month === 0 ? 11 : month - 1;
-                const y = month === 0 ? year - 1 : year;
-                const ds = formatDateKey(y, m, day);
-                const tasks = getTasksForDate(ds);
-                html += createDayCell(day, true, tasks, ds, today);
+                return all;
             }
-            for (let day = 1; day <= daysInMonth; day++) {
-                const ds = formatDateKey(year, month, day);
-                const tasks = getTasksForDate(ds);
-                html += createDayCell(day, false, tasks, ds, today);
-            }
-            const total = startDay + daysInMonth;
-            const rem = (7 - (total % 7)) % 7;
-            for (let day = 1; day <= rem; day++) {
-                const m = month === 11 ? 0 : month + 1;
-                const y = month === 11 ? year + 1 : year;
-                const ds = formatDateKey(y, m, day);
-                const tasks = getTasksForDate(ds);
-                html += createDayCell(day, true, tasks, ds, today);
-            }
-            document.getElementById('calGrid').innerHTML = html;
 
-            document.querySelectorAll('.cal-day').forEach(el => {
-                el.addEventListener('click', function() {
-                    const date = this.dataset.date;
-                    if (date) {
-                        // Фильтруем задачи по дате
-                        const tasks = getTasksForDate(date);
-                        if (tasks.length > 0) {
-                            alert('📋 Задачи на ' + date + ':\n' + tasks.map(t => (t.done ? '✅ ' : '⬜ ') + t.title).join(
-                            '\n'));
-                        } else {
-                            alert('📋 На ' + date + ' нет задач');
+            function getRecordsForDate(date) {
+                return getAllRecords().filter(r => r.date === date);
+            }
+
+            function getRecordsForJournal(jid) {
+                return data.journals[jid] ? data.journals[jid].records.slice() : [];
+            }
+
+            function totalRecords() { return getAllRecords().length; }
+
+            function totalPhotos() { return data.gallery.length; }
+
+            function calcStreak(jid) {
+                const recs = getRecordsForJournal(jid);
+                if (!recs.length) return 0;
+                const dates = [...new Set(recs.map(r => r.date))].sort();
+                let streak = 0;
+                for (let i = 0; i < 365; i++) {
+                    const d = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
+                    if (dates.includes(d)) streak++;
+                    else if (i > 0) break;
+                }
+                return streak;
+            }
+
+            function totalStreak() {
+                let max = 0;
+                for (let j in data.journals) {
+                    const s = calcStreak(j);
+                    if (s > max) max = s;
+                }
+                return max;
+            }
+
+            // ---------- АВАТАРЫ ----------
+            const AVATARS = {
+                w1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=w1&backgroundColor=6c5ce7',
+                w2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=w2&backgroundColor=6c5ce7',
+                m1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=m1&backgroundColor=a29bfe',
+                m2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=m2&backgroundColor=a29bfe',
+                e1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=e1&backgroundColor=00b894',
+                e2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=e2&backgroundColor=00b894',
+                d1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d1&backgroundColor=e17055',
+                d2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d2&backgroundColor=e17055',
+                k1: 'https://api.dicebear.com/7.x/avataaars/svg?seed=k1&backgroundColor=fdcb6e',
+                k2: 'https://api.dicebear.com/7.x/avataaars/svg?seed=k2&backgroundColor=fdcb6e',
+            };
+
+            function getAvatar(id) { return AVATARS[id] || AVATARS.w1; }
+
+            // ---------- RPG ----------
+            function calcXP(text) {
+                let base = 10 + Math.min(20, Math.floor(text.length / 8));
+                if (text.length > 50) base += 5;
+                return Math.min(50, base);
+            }
+
+            function addXP(amount) {
+                data.user.xp += amount;
+                let leveled = false;
+                while (data.user.xp >= data.user.xpToNext) {
+                    data.user.xp -= data.user.xpToNext;
+                    data.user.level++;
+                    recalcXp();
+                    leveled = true;
+                    const avatars = ['w1', 'w2', 'm1', 'm2', 'e1', 'e2', 'd1', 'd2', 'k1', 'k2'];
+                    const idx = Math.floor(data.user.level / 2);
+                    if (idx < avatars.length && !data.user.unlocked.includes(avatars[idx])) {
+                        data.user.unlocked.push(avatars[idx]);
+                        data.user.avatar = avatars[idx];
+                    }
+                    checkAchievements();
+                    playSound('level');
+                    toast(`🎉 УРОВЕНЬ ${data.user.level}!`, 'success', 4000);
+                }
+                if (amount > 0 && !leveled) playSound('xp');
+                saveData();
+                updateUI();
+            }
+
+            // ---------- ДОСТИЖЕНИЯ ----------
+            function checkAchievements() {
+                const ach = data.achievements || [];
+                const total = totalRecords();
+                const counts = {};
+                for (let j in data.journals) counts[j] = data.journals[j].records.length;
+                const streak = totalStreak();
+
+                const list = [
+                    { id: 'first', check: () => total >= 1, label: 'Первая запись', icon: 'fa-star' },
+                    { id: 'ten', check: () => total >= 10, label: '10 записей', icon: 'fa-medal' },
+                    { id: 'fifty', check: () => total >= 50, label: '50 записей', icon: 'fa-crown' },
+                    { id: 'sport5', check: () => counts.sport >= 5, label: 'Спортсмен 5', icon: 'fa-running' },
+                    { id: 'tasks10', check: () => counts.tasks >= 10, label: 'Организатор 10', icon: 'fa-tasks' },
+                    { id: 'photo5', check: () => data.gallery.length >= 5, label: 'Фотограф 5', icon: 'fa-camera' },
+                    { id: 'streak7', check: () => streak >= 7, label: '🔥 Серия 7 дней', icon: 'fa-fire' },
+                ];
+
+                let newAch = false;
+                list.forEach(a => {
+                    if (!ach.includes(a.id) && a.check()) {
+                        ach.push(a.id);
+                        newAch = true;
+                        playSound('achieve');
+                        toast(`🏅 Достижение: ${a.label}!`, 'warning', 4000);
+                    }
+                });
+                if (newAch) {
+                    data.achievements = ach;
+                    saveData();
+                }
+            }
+
+            // ---------- ЧЕЛЛЕНДЖ ----------
+            function genChallenge() {
+                const keys = Object.keys(data.journals);
+                const jid = keys[Math.floor(Math.random() * keys.length)];
+                const j = getJournal(jid);
+                const today = new Date().toISOString().split('T')[0];
+                challenge = {
+                    jid: jid,
+                    label: j.label,
+                    done: getRecordsForDate(today).some(r => r.journalId === jid)
+                };
+                updateChallengeUI();
+            }
+
+            function updateChallengeUI() {
+                const el = document.getElementById('challengeText');
+                const status = document.getElementById('challengeStatus');
+                const btn = document.getElementById('challengeBtn');
+                if (!challenge) { genChallenge(); return; }
+                el.textContent = `${challenge.label}`;
+                if (challenge.done) {
+                    status.textContent = '✅ Выполнено!';
+                    status.style.color = 'var(--green)';
+                    btn.style.display = 'none';
+                } else {
+                    status.textContent = '⏳ Ожидает';
+                    status.style.color = 'var(--text2)';
+                    btn.style.display = 'inline-flex';
+                }
+            }
+
+            function completeChallenge() {
+                if (!challenge || challenge.done) return;
+                const today = new Date().toISOString().split('T')[0];
+                if (getRecordsForDate(today).some(r => r.journalId === challenge.jid)) {
+                    challenge.done = true;
+                    addXP(30);
+                    toast('🎯 Челлендж выполнен! +30 XP', 'success');
+                    updateChallengeUI();
+                    updateUI();
+                } else {
+                    toast('Сделайте запись в "' + challenge.label + '" сегодня!', 'warning');
+                }
+            }
+
+            // ---------- ОБНОВЛЕНИЕ UI ----------
+            function updateUI() {
+                // XP
+                const pct = Math.min(100, (data.user.xp / data.user.xpToNext) * 100);
+                document.getElementById('xpFill').style.width = pct + '%';
+                document.getElementById('lvlDisplay').textContent = 'Ур. ' + data.user.level;
+
+                // Профиль
+                document.getElementById('profName').textContent = data.user.name;
+                document.getElementById('pLvl').textContent = data.user.level;
+                document.getElementById('pXp').textContent = data.user.xp;
+                document.getElementById('pXpMax').textContent = data.user.xpToNext;
+                document.getElementById('pStreak').textContent = '🔥 ' + totalStreak() + ' дн.';
+                document.getElementById('sRecs').textContent = totalRecords();
+                document.getElementById('sGoals').textContent = data.goals.length;
+                document.getElementById('sPhotos').textContent = totalPhotos();
+                document.getElementById('sAch').textContent = (data.achievements || []).length;
+
+                // Аватар
+                document.getElementById('avatarBox').style.backgroundImage = `url(${getAvatar(data.user.avatar)})`;
+                document.getElementById('avatarLvl').textContent = data.user.level;
+                const hasGlow = (data.user.effects || []).includes('glow');
+                document.getElementById('effGlow').style.display = hasGlow ? 'block' : 'none';
+
+                // Достижения
+                const achContainer = document.getElementById('achList');
+                const achMap = {
+                    first: 'Первая запись',
+                    ten: '10 записей',
+                    fifty: '50 записей',
+                    sport5: 'Спортсмен 5',
+                    tasks10: 'Организатор 10',
+                    photo5: 'Фотограф 5',
+                    streak7: '🔥 Серия 7 дней'
+                };
+                const achIcons = {
+                    first: 'fa-star',
+                    ten: 'fa-medal',
+                    fifty: 'fa-crown',
+                    sport5: 'fa-running',
+                    tasks10: 'fa-tasks',
+                    photo5: 'fa-camera',
+                    streak7: 'fa-fire'
+                };
+                const achievements = data.achievements || [];
+                if (!achievements.length) {
+                    achContainer.innerHTML = '<p style="color:var(--text2);font-size:0.85rem;">Нет достижений</p>';
+                } else {
+                    achContainer.innerHTML = achievements.map(id =>
+                        `<span class="badge"><i class="fas ${achIcons[id] || 'fa-award'}"></i> ${achMap[id] || id}</span>`
+                    ).join('');
+                }
+
+                renderCalendar();
+                renderJournalTabs();
+                renderJournalRecords();
+                renderGoals();
+                renderGallery();
+                renderCharts();
+                updateChallengeUI();
+            }
+
+            // ---------- КАЛЕНДАРЬ ----------
+            function renderCalendar() {
+                const grid = document.getElementById('calGrid');
+                const firstDay = new Date(currentYear, currentMonth, 1);
+                const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+
+                grid.innerHTML = '';
+                const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+                weekdays.forEach(w => {
+                    const d = document.createElement('div');
+                    d.className = 'wd';
+                    d.textContent = w;
+                    grid.appendChild(d);
+                });
+
+                for (let i = 0; i < firstDayOfWeek; i++) {
+                    const d = document.createElement('div');
+                    d.className = 'day empty';
+                    grid.appendChild(d);
+                }
+
+                for (let d = 1; d <= lastDay.getDate(); d++) {
+                    const dateObj = new Date(currentYear, currentMonth, d);
+                    const dateStr = dateObj.toISOString().split('T')[0];
+                    const div = document.createElement('div');
+                    div.className = 'day';
+                    if (dateStr === new Date().toISOString().split('T')[0]) div.classList.add('today');
+                    if (dateStr === selectedDate) div.classList.add('sel');
+                    if (getRecordsForDate(dateStr).length > 0) div.classList.add('has');
+                    div.textContent = d;
+                    div.dataset.date = dateStr;
+                    div.addEventListener('click', function() {
+                        selectedDate = this.dataset.date;
+                        renderCalendar();
+                        renderDayRecords();
+                    });
+                    grid.appendChild(div);
+                }
+
+                document.getElementById('monthYear').textContent =
+                    firstDay.toLocaleString('ru', { month: 'long', year: 'numeric' });
+                renderDayRecords();
+            }
+
+            function renderDayRecords() {
+                const container = document.getElementById('dayRecs');
+                const records = getRecordsForDate(selectedDate);
+                if (!records.length) {
+                    container.innerHTML = '<p style="color:var(--text2);text-align:center;padding:10px;">Нет записей</p>';
+                    return;
+                }
+                container.innerHTML = records.map(r => {
+                    const j = getJournal(r.journalId);
+                    return `
+                <div class="rec">
+                  <div class="c">
+                    <div class="t">${r.text}</div>
+                    <div class="m">
+                      <span><i class="fas ${j ? j.icon : 'fa-book'}"></i> ${j ? j.label : '?'}</span>
+                      <span class="xp">${r.xp || 0} XP</span>
+                      <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
+                    </div>
+                    ${r.photos && r.photos.length ? `<div class="photos">${r.photos.map(p => `<img src="${p}" alt="photo" />`).join('')}</div>` : ''}
+                  </div>
+                  <div class="acts">
+                    <button class="done ${r.done ? 'active' : ''}" data-id="${r.id}" data-journal="${r.journalId}"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
+                    <button class="del" data-id="${r.id}" data-journal="${r.journalId}"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+
+                container.querySelectorAll('.done').forEach(b => {
+                    b.addEventListener('click', function() {
+                        toggleDone(this.dataset.id, this.dataset.journal);
+                    });
+                });
+                container.querySelectorAll('.del').forEach(b => {
+                    b.addEventListener('click', function() {
+                        if (confirm('Удалить запись?')) deleteRecord(this.dataset.id, this.dataset.journal);
+                    });
+                });
+            }
+
+            // ---------- ЖУРНАЛЫ ----------
+            function renderJournalTabs() {
+                const container = document.getElementById('journalTabs');
+                container.innerHTML = '';
+                for (let jid in data.journals) {
+                    const j = data.journals[jid];
+                    const tab = document.createElement('div');
+                    tab.className = 'tab' + (jid === currentJournal ? ' active' : '');
+                    tab.innerHTML = `<i class="fas ${j.icon}"></i> ${j.label}`;
+                    tab.dataset.jid = jid;
+                    tab.addEventListener('click', function() {
+                        currentJournal = this.dataset.jid;
+                        renderJournalTabs();
+                        renderJournalRecords();
+                    });
+                    container.appendChild(tab);
+                }
+            }
+
+            function renderJournalRecords() {
+                const container = document.getElementById('journalRecs');
+                const records = getRecordsForJournal(currentJournal);
+                if (!records.length) {
+                    container.innerHTML = '<p style="color:var(--text2);text-align:center;padding:20px;">Нет записей</p>';
+                    return;
+                }
+                records.sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created);
+                container.innerHTML = records.map(r => {
+                    return `
+                <div class="rec">
+                  <div class="c">
+                    <div class="t">${r.text}</div>
+                    <div class="m">
+                      <span><i class="far fa-calendar-alt"></i> ${r.date}</span>
+                      <span class="xp">${r.xp || 0} XP</span>
+                      <span>${r.done ? '✅ Выполнено' : '⏳ В процессе'}</span>
+                    </div>
+                    ${r.photos && r.photos.length ? `<div class="photos">${r.photos.map(p => `<img src="${p}" alt="photo" />`).join('')}</div>` : ''}
+                  </div>
+                  <div class="acts">
+                    <button class="done ${r.done ? 'active' : ''}" data-id="${r.id}" data-journal="${currentJournal}"><i class="fas ${r.done ? 'fa-undo' : 'fa-check'}"></i></button>
+                    <button class="del" data-id="${r.id}" data-journal="${currentJournal}"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+
+                container.querySelectorAll('.done').forEach(b => {
+                    b.addEventListener('click', function() {
+                        toggleDone(this.dataset.id, this.dataset.journal);
+                    });
+                });
+                container.querySelectorAll('.del').forEach(b => {
+                    b.addEventListener('click', function() {
+                        if (confirm('Удалить запись?')) deleteRecord(this.dataset.id, this.dataset.journal);
+                    });
+                });
+            }
+
+            // ---------- ОПЕРАЦИИ С ЗАПИСЯМИ ----------
+            function addRecord(jid, text, date, photos, done = false) {
+                const xp = calcXP(text);
+                const rec = {
+                    id: genId(),
+                    date: date || new Date().toISOString().split('T')[0],
+                    text: text.trim(),
+                    photos: photos || [],
+                    done: done,
+                    xp: xp,
+                    created: Date.now()
+                };
+                data.journals[jid].records.push(rec);
+                (photos || []).forEach(url => {
+                    data.gallery.push({ id: genId(), url: url, date: rec.date });
+                });
+                addXP(xp);
+
+                // Челлендж
+                const today = new Date().toISOString().split('T')[0];
+                if (challenge && !challenge.done && challenge.jid === jid && rec.date === today) {
+                    completeChallenge();
+                }
+
+                saveData();
+                updateUI();
+                toast(`✅ Запись добавлена! +${xp} XP`, 'success');
+            }
+
+            function deleteRecord(id, jid) {
+                const j = data.journals[jid];
+                if (!j) return;
+                const idx = j.records.findIndex(r => r.id === id);
+                if (idx === -1) return;
+                const rec = j.records[idx];
+                if (rec.photos) {
+                    rec.photos.forEach(url => {
+                        const pi = data.gallery.findIndex(p => p.url === url);
+                        if (pi !== -1) data.gallery.splice(pi, 1);
+                    });
+                }
+                j.records.splice(idx, 1);
+                saveData();
+                updateUI();
+                toast('🗑️ Запись удалена', 'error');
+            }
+
+            function toggleDone(id, jid) {
+                const j = data.journals[jid];
+                if (!j) return;
+                const rec = j.records.find(r => r.id === id);
+                if (!rec) return;
+                rec.done = !rec.done;
+                if (rec.done) {
+                    addXP(5);
+                    toast('✅ Выполнено! +5 XP', 'success');
+                }
+                saveData();
+                updateUI();
+            }
+
+            // ---------- ЦЕЛИ ----------
+            function renderGoals() {
+                const container = document.getElementById('goalsList');
+                if (!data.goals.length) {
+                    container.innerHTML = '<p style="color:var(--text2);text-align:center;padding:16px;">Нет целей</p>';
+                    return;
+                }
+                container.innerHTML = data.goals.map((g, idx) => {
+                    const prog = Math.min(100, (g.current / g.target) * 100);
+                    return `
+                <div class="goal ${g.done ? 'done' : ''}">
+                  <div class="info">
+                    <div class="title">${g.done ? '✅ ' : '🎯 '}${g.title}</div>
+                    <div class="meta">${getJournal(g.journal)?.label || '?'} · ${g.done ? 'Выполнена!' : `${g.current}/${g.target}`}</div>
+                    <div class="prog"><div class="fill" style="width:${prog}%"></div></div>
+                  </div>
+                  <div class="acts">
+                    ${!g.done ? `<button class="sec" data-idx="${idx}" data-action="completeGoal"><i class="fas fa-check"></i></button>` : ''}
+                    <button class="sec danger" data-idx="${idx}" data-action="deleteGoal"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+
+                container.querySelectorAll('[data-action="completeGoal"]').forEach(b => {
+                    b.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.idx);
+                        const g = data.goals[idx];
+                        if (g && !g.done) {
+                            g.done = true;
+                            addXP(50);
+                            toast('🎯 Цель выполнена! +50 XP', 'success');
+                            saveData();
+                            updateUI();
+                        }
+                    });
+                });
+                container.querySelectorAll('[data-action="deleteGoal"]').forEach(b => {
+                    b.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.idx);
+                        if (confirm('Удалить цель?')) {
+                            data.goals.splice(idx, 1);
+                            saveData();
+                            updateUI();
+                        }
+                    });
+                });
+            }
+
+            function addGoal(title, journal, target, deadline) {
+                const current = getRecordsForJournal(journal).length;
+                const done = current >= target;
+                const goal = {
+                    id: genId(),
+                    title: title.trim(),
+                    journal: journal,
+                    target: parseInt(target) || 1,
+                    current: current,
+                    deadline: deadline || '',
+                    done: done,
+                    created: Date.now()
+                };
+                if (done) {
+                    addXP(50);
+                    toast('🎯 Цель сразу выполнена! +50 XP', 'success');
+                }
+                data.goals.push(goal);
+                saveData();
+                updateUI();
+                toast('✅ Цель создана!', 'success');
+            }
+
+            function updateGoalsProgress() {
+                data.goals.forEach(g => {
+                    const cur = getRecordsForJournal(g.journal).length;
+                    g.current = cur;
+                    if (!g.done && cur >= g.target) {
+                        g.done = true;
+                        addXP(50);
+                        toast(`🎯 Цель "${g.title}" выполнена!`, 'success');
+                    }
+                });
+                saveData();
+            }
+
+            // ---------- ГАЛЕРЕЯ ----------
+            function renderGallery() {
+                const container = document.getElementById('galleryGrid');
+                if (!data.gallery.length) {
+                    container.innerHTML = '<p style="color:var(--text2);text-align:center;padding:16px;">Нет фото</p>';
+                    return;
+                }
+                container.innerHTML = data.gallery.map(p =>
+                    `<div class="item"><img src="${p.url}" alt="photo" loading="lazy" /></div>`
+                ).join('');
+            }
+
+            // ---------- ГРАФИКИ ----------
+            function renderCharts() {
+                const now = new Date();
+                const month = now.getMonth();
+                const year = now.getFullYear();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const labels = [];
+                const counts = [];
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dateObj = new Date(year, month, d);
+                    const dateStr = dateObj.toISOString().split('T')[0];
+                    labels.push(d);
+                    counts.push(getRecordsForDate(dateStr).length);
+                }
+
+                const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6c5ce7';
+
+                const ctx1 = document.getElementById('lineChart').getContext('2d');
+                if (lineChart) lineChart.destroy();
+                lineChart = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Записей',
+                            data: counts,
+                            borderColor: accent,
+                            backgroundColor: accent + '33',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: accent,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text2)' } },
+                            x: { ticks: { color: 'var(--text2)', maxTicksLimit: 15 } }
                         }
                     }
                 });
-            });
-        }
 
-        function createDayCell(day, isOther, tasks, dateStr, today) {
-            const count = tasks.length;
-            const done = tasks.filter(t => t.done).length;
-            let dots = '';
-            if (count > 0) dots = '<div class="dot ' + (done === count ? 'done' : 'has-task') + '"></div>';
-            let badge = '';
-            if (count > 1) badge = '<span class="count-badge">' + count + '</span>';
-            const isToday = dateStr === today;
-            const cls = 'cal-day' +
-                (isOther ? ' other-month' : '') +
-                (isToday ? ' today' : '');
-            return `<div class="${cls}" data-date="${dateStr}">
-                <span>${day}</span>${badge}
-                ${dots}
-            </div>`;
-        }
-
-        function renderTodayTasks() {
-            const container = document.getElementById('todayTasks');
-            const tasks = getTodayTasks();
-            if (tasks.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:0.8rem;">
-                        ✨ Нет задач на сегодня
-                    </div>
-                `;
-                return;
-            }
-            let html = '';
-            tasks.slice(0, 5).forEach(task => {
-                const cat = CATEGORIES.find(c => c.id === task.category);
-                const doneClass = task.done ? 'done' : '';
-                const statusIcon = task.done ? 'fa-check-circle' : 'fa-circle';
-                const xp = (task.duration || 0) * 0.01 + (task.important ? 5 : 0);
-                html += `
-                    <div class="task-item ${doneClass}" data-id="${task.id}">
-                        <div class="color-dot" style="background:${cat ? cat.color : '#999'};"></div>
-                        <div class="info">
-                            <div class="title">${task.title}</div>
-                            <div class="meta">
-                                ${cat ? `<span class="tag">${cat.label}</span>` : ''}
-                                ${task.duration ? `<span>⏱ ${task.duration} мин</span>` : ''}
-                                ${xp > 0 ? `<span class="xp-badge">+${xp.toFixed(1)} XP</span>` : ''}
-                            </div>
-                        </div>
-                        <button class="status" data-action="toggle">
-                            <i class="fas ${statusIcon}"></i>
-                        </button>
-                    </div>
-                `;
-            });
-            if (tasks.length > 5) {
-                html += `<div style="text-align:center; padding:8px; color:var(--text-secondary); font-size:0.7rem;">и ещё ${tasks.length - 5} задач...</div>`;
-            }
-            container.innerHTML = html;
-
-            container.querySelectorAll('.task-item').forEach(el => {
-                const id = parseInt(el.dataset.id);
-                el.querySelector('[data-action="toggle"]')?.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    toggleTaskDone(id);
-                });
-                el.addEventListener('dblclick', function() {
-                    if (confirm('Удалить задачу?')) deleteTask(id);
-                });
-            });
-        }
-
-        function renderUserBadge() {
-            const level = state.player.level;
-            document.getElementById('userName').textContent = state.player.name;
-            document.getElementById('userLevel').textContent = 'Ур. ' + level;
-            document.getElementById('avatarDisplay').textContent = getAvatar(level);
-        }
-
-        function renderProfile() {
-            const level = state.player.level;
-            document.getElementById('profileAvatar').textContent = getAvatar(level);
-            document.getElementById('profileName').textContent = state.player.name;
-            document.getElementById('profileRank').textContent = getRank(level);
-            document.getElementById('pLevel').textContent = level;
-            document.getElementById('pXP').textContent = Math.round(state.player.totalXP);
-            document.getElementById('pTasks').textContent = state.tasks.length;
-            document.getElementById('pStreak').textContent = getStreak();
-            document.getElementById('editName').value = state.player.name;
-        }
-
-        function renderGoalsList() {
-            const container = document.getElementById('goalsList');
-            if (state.goals.length === 0) {
-                container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding:12px; font-size:0.8rem;">Нет целей. Создайте первую!</div>';
-                return;
-            }
-            let html = '';
-            state.goals.forEach(goal => {
-                const taskIds = goal.taskIds || [];
-                const goalTasks = state.tasks.filter(t => taskIds.includes(t.id));
-                const done = goalTasks.filter(t => t.done).length;
-                const total = goalTasks.length;
-                const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-                html += `
-                    <div class="task-item" style="margin-bottom:6px;">
-                        <div class="color-dot" style="background:${goal.done ? '#00d2d3' : '#6c5ce7'};"></div>
-                        <div class="info">
-                            <div class="title">${goal.done ? '✅ ' : '🎯 '}${goal.title}</div>
-                            <div class="meta">
-                                <span>${done}/${total} задач</span>
-                                <span style="color:var(--accent-light);">${progress}%</span>
-                            </div>
-                        </div>
-                        <button class="status" data-action="toggle-goal" style="font-size:0.8rem; opacity:0.6;">
-                            <i class="fas ${goal.done ? 'fa-undo' : 'fa-check'}"></i>
-                        </button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-            container.querySelectorAll('[data-action="toggle-goal"]').forEach(btn => {
-                const item = btn.closest('.task-item');
-                const idx = Array.from(container.children).indexOf(item);
-                const goal = state.goals[idx];
-                if (goal) {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        toggleGoalDone(goal.id);
+                const jLabels = [];
+                const jCounts = [];
+                const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#0984e3', '#fd79a8', '#00cec9'];
+                for (let j in data.journals) {
+                    const cnt = data.journals[j].records.length;
+                    if (cnt > 0) {
+                        jLabels.push(data.journals[j].label);
+                        jCounts.push(cnt);
+                    }
+                }
+                const ctx2 = document.getElementById('pieChart').getContext('2d');
+                if (pieChart) pieChart.destroy();
+                if (!jLabels.length) {
+                    pieChart = new Chart(ctx2, {
+                        type: 'pie',
+                        data: { labels: ['Нет данных'], datasets: [{ data: [1], backgroundColor: ['#444'] }] },
+                        options: { plugins: { legend: { display: true, labels: { color: 'var(--text2)' } } } }
+                    });
+                } else {
+                    pieChart = new Chart(ctx2, {
+                        type: 'pie',
+                        data: {
+                            labels: jLabels,
+                            datasets: [{ data: jCounts, backgroundColor: colors.slice(0, jLabels.length), borderWidth: 2,
+                                borderColor: 'var(--bg)' }]
+                        },
+                        options: {
+                            plugins: { legend: { position: 'bottom', labels: { color: 'var(--text2)',
+                                        padding: 8 } } }
+                        }
                     });
                 }
-            });
-        }
-
-        // ----- НАВИГАЦИЯ -----
-        function switchView(view) {
-            state.view = view;
-            document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.bottom-nav button[data-view="${view}"]`)?.classList.add('active');
-            // Показываем/скрываем секции
-            const sections = ['dashboard', 'calendar', 'goals', 'stats'];
-            sections.forEach(s => {
-                const el = document.querySelector(`[data-section="${s}"]`);
-                if (el) el.style.display = s === view ? 'block' : 'none';
-            });
-            // Для упрощения — показываем всё, но скрываем ненужное
-            if (view === 'goals') {
-                document.getElementById('goalsModal').classList.add('open');
-            } else {
-                document.getElementById('goalsModal').classList.remove('open');
             }
-        }
 
-        // ============================================================
-        //  ИНИЦИАЛИЗАЦИЯ
-        // ============================================================
-        function init() {
-            loadData();
-
-            // ---- КАЛЕНДАРЬ ----
-            document.getElementById('calPrev').addEventListener('click', () => {
-                state.currentDate.setMonth(state.currentDate.getMonth() - 1);
-                renderCalendar();
-            });
-            document.getElementById('calNext').addEventListener('click', () => {
-                state.currentDate.setMonth(state.currentDate.getMonth() + 1);
-                renderCalendar();
-            });
-
-            // ---- МЕНЮ ----
-            document.getElementById('menuBtn').addEventListener('click', () => {
-                document.getElementById('menuOverlay').classList.add('open');
-            });
-            document.getElementById('menuClose').addEventListener('click', () => {
-                document.getElementById('menuOverlay').classList.remove('open');
-            });
-            document.getElementById('menuOverlay').addEventListener('click', function(e) {
-                if (e.target === this) this.classList.remove('open');
-            });
-
-            // ---- ПРОФИЛЬ ----
-            document.getElementById('profileBtn').addEventListener('click', () => {
-                document.getElementById('profileModal').classList.add('open');
-                renderProfile();
-            });
-            document.getElementById('menuProfile').addEventListener('click', () => {
-                document.getElementById('menuOverlay').classList.remove('open');
-                document.getElementById('profileModal').classList.add('open');
-                renderProfile();
-            });
-            document.getElementById('closeProfile').addEventListener('click', () => {
-                document.getElementById('profileModal').classList.remove('open');
-            });
-            document.getElementById('saveProfile').addEventListener('click', () => {
-                const name = document.getElementById('editName').value.trim();
-                if (name) {
-                    state.player.name = name;
-                    saveData();
-                    renderAll();
-                }
-                document.getElementById('profileModal').classList.remove('open');
-            });
-
-            // ---- ЗАДАЧИ ----
-            document.getElementById('addTaskBtn').addEventListener('click', () => {
-                document.getElementById('addTaskModal').classList.add('open');
-                document.getElementById('taskDate').value = getToday();
-                // Категории
-                const container = document.getElementById('taskCategorySelector');
-                container.innerHTML = '';
-                CATEGORIES.forEach(cat => {
-                    const btn = document.createElement('button');
-                    btn.className = 'cat-opt' + (cat.id === 'tasks' ? ' active' : '');
-                    btn.style.background = cat.color;
-                    btn.textContent = cat.label;
-                    btn.dataset.cat = cat.id;
-                    btn.addEventListener('click', function() {
-                        container.querySelectorAll('.cat-opt').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                    });
-                    container.appendChild(btn);
-                });
-            });
-            document.getElementById('cancelTask').addEventListener('click', () => {
-                document.getElementById('addTaskModal').classList.remove('open');
-            });
-            document.getElementById('saveTask').addEventListener('click', () => {
-                const title = document.getElementById('taskTitle').value.trim();
-                const date = document.getElementById('taskDate').value;
-                const duration = document.getElementById('taskDuration').value || 0;
-                const activeCat = document.querySelector('#taskCategorySelector .cat-opt.active');
-                const category = activeCat ? activeCat.dataset.cat : 'tasks';
-                if (!title) { alert('Введите название задачи'); return; }
-                if (!date) { alert('Выберите дату'); return; }
-                if (addTask(title, date, category, duration, false)) {
-                    document.getElementById('addTaskModal').classList.remove('active');
-                    document.getElementById('taskTitle').value = '';
-                }
-            });
-
-            // ---- ЦЕЛИ ----
-            document.getElementById('menuGoals').addEventListener('click', () => {
-                document.getElementById('menuOverlay').classList.remove('open');
-                document.getElementById('goalsModal').classList.add('open');
-                renderGoalsList();
-            });
-            document.getElementById('closeGoals').addEventListener('click', () => {
-                document.getElementById('goalsModal').classList.remove('open');
-            });
-            document.getElementById('addGoalBtn').addEventListener('click', () => {
-                const title = document.getElementById('newGoalInput').value.trim();
-                if (title) {
-                    addGoal(title);
-                    document.getElementById('newGoalInput').value = '';
-                }
-            });
-
-            // ---- СТАТИСТИКА ----
-            document.getElementById('menuStats').addEventListener('click', () => {
-                document.getElementById('menuOverlay').classList.remove('open');
-                const done = state.tasks.filter(t => t.done).length;
-                const total = state.tasks.length;
-                const goalsDone = state.goals.filter(g => g.done).length;
-                alert(`📊 СТАТИСТИКА\n━━━━━━━━━━━━━━\n📌 Задач: ${total}\n✅ Выполнено: ${done}\n🎯 Целей: ${state.goals.length}\n✅ Целей достигнуто: ${goalsDone}\n🔥 Стрик: ${getStreak()} дн.\n⚡ Всего XP: ${Math.round(state.player.totalXP)}\n👤 Уровень: ${state.player.level}`);
-            });
-
-            // ---- ДОСТИЖЕНИЯ ----
-            document.getElementById('menuAchievements').addEventListener('click', () => {
-                document.getElementById('menuOverlay').classList.remove('open');
-                const list = state.achievements.length ? state.achievements.map((a, i) => `${i+1}. ${a}`).join('\n') :
-                    'Пока нет достижений';
-                alert(`🏅 ДОСТИЖЕНИЯ (${state.achievements.length})\n━━━━━━━━━━━━\n${list}`);
-            });
-
-            // ---- ЭКСПОРТ ----
-            document.getElementById('menuExport').addEventListener('click', () => {
-                document.getElementById('menuOverlay').classList.remove('open');
-                const data = {
-                    tasks: state.tasks,
-                    goals: state.goals,
-                    player: state.player,
-                    achievements: state.achievements,
-                    exported: new Date().toISOString()
-                };
+            // ---------- ЭКСПОРТ / ИМПОРТ ----------
+            function exportData() {
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `hero_chronicles_${getToday()}.json`;
-                document.body.appendChild(a);
+                a.download = `journal_backup_${new Date().toISOString().split('T')[0]}.json`;
                 a.click();
-                document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-            });
+                toast('📦 Экспорт выполнен', 'success');
+            }
 
-            // ---- СБРОС ----
-            document.getElementById('menuReset').addEventListener('click', () => {
-                document.getElementById('menuOverlay').classList.remove('open');
-                if (confirm('⚠️ Удалить все данные?')) {
-                    if (confirm('Точно? Это нельзя отменить!')) {
-                        state.tasks = [];
-                        state.goals = [];
-                        state.player = { name: 'Эльдар', totalXP: 0, level: 1 };
-                        state.achievements = [];
-                        nextTaskId = 1;
-                        nextGoalId = 1;
-                        saveData();
-                        renderAll();
-                        alert('✅ Данные сброшены');
-                    }
-                }
-            });
+            function exportCSV() {
+                const recs = getAllRecords();
+                if (!recs.length) { toast('Нет записей для экспорта', 'warning'); return; }
+                let csv = 'Дата,Журнал,Текст,Выполнено,XP\n';
+                recs.forEach(r => {
+                    const j = getJournal(r.journalId);
+                    csv +=
+                        `${r.date},${j ? j.label : '?'},"${r.text.replace(/"/g,'""')}",${r.done ? 'Да' : 'Нет'},${r.xp || 0}\n`;
+                });
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `journal_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast('📊 CSV экспортирован', 'success');
+            }
 
-            // ---- НИЖНЯЯ НАВИГАЦИЯ ----
-            document.querySelectorAll('.bottom-nav button').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const view = this.dataset.view;
-                    if (view === 'goals') {
-                        document.getElementById('goalsModal').classList.add('open');
-                        renderGoalsList();
-                    } else if (view === 'stats') {
-                        const done = state.tasks.filter(t => t.done).length;
-                        const total = state.tasks.length;
-                        alert(`📊 СТАТИСТИКА\n━━━━━━━━━━━━━━\n📌 Задач: ${total}\n✅ Выполнено: ${done}\n🔥 Стрик: ${getStreak()} дн.\n⚡ Всего XP: ${Math.round(state.player.totalXP)}\n👤 Уровень: ${state.player.level}`);
-                    } else {
-                        document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        // Прокрутка к нужной секции
-                        if (view === 'dashboard') {
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+            function importData(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imp = JSON.parse(e.target.result);
+                        if (imp.user && imp.journals) {
+                            data = imp;
+                            for (let j in DEFAULT_DATA.journals) {
+                                if (!data.journals[j]) data.journals[j] = { ...DEFAULT_DATA.journals[j], records: [] };
+                            }
+                            recalcXp();
+                            saveData();
+                            updateUI();
+                            toast('✅ Импорт выполнен', 'success');
+                        } else {
+                            toast('Неверный формат файла', 'error');
                         }
+                    } catch (err) { toast('Ошибка чтения файла', 'error'); }
+                };
+                reader.readAsText(file);
+            }
+
+            // ---------- НАВИГАЦИЯ ----------
+            function navigate(page) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                const target = document.getElementById('page-' + page);
+                if (target) target.classList.add('active');
+                document.querySelectorAll('nav a').forEach(a => {
+                    a.classList.toggle('active', a.dataset.page === page);
+                });
+                if (page === 'calendar') renderCalendar();
+                else if (page === 'journals') { renderJournalTabs();
+                    renderJournalRecords(); } else if (page === 'goals') renderGoals();
+                else if (page === 'charts') renderCharts();
+                else if (page === 'gallery') renderGallery();
+                else if (page === 'profile') updateUI();
+                window.location.hash = page;
+            }
+
+            // ---------- МОДАЛКИ ----------
+            function openRecordModal(jid, date) {
+                document.getElementById('recModalTitle').innerHTML = '<i class="fas fa-plus"></i> Новая запись';
+                document.getElementById('recText').value = '';
+                document.getElementById('recDate').value = date || new Date().toISOString().split('T')[0];
+                document.getElementById('recPhotos').value = '';
+                const sel = document.getElementById('recJournal');
+                sel.innerHTML = '';
+                for (let j in data.journals) {
+                    const opt = document.createElement('option');
+                    opt.value = j;
+                    opt.textContent = data.journals[j].label;
+                    if (j === jid) opt.selected = true;
+                    sel.appendChild(opt);
+                }
+                document.getElementById('recModal').classList.add('open');
+            }
+
+            function closeRecordModal() {
+                document.getElementById('recModal').classList.remove('open');
+            }
+
+            function openGoalModal() {
+                document.getElementById('goalTitle').value = '';
+                document.getElementById('goalTarget').value = '3';
+                document.getElementById('goalDeadline').value = '';
+                const sel = document.getElementById('goalJournal');
+                sel.innerHTML = '';
+                for (let j in data.journals) {
+                    const opt = document.createElement('option');
+                    opt.value = j;
+                    opt.textContent = data.journals[j].label;
+                    if (j === currentJournal) opt.selected = true;
+                    sel.appendChild(opt);
+                }
+                document.getElementById('goalModal').classList.add('open');
+            }
+
+            function closeGoalModal() {
+                document.getElementById('goalModal').classList.remove('open');
+            }
+
+            // ---------- ИНИЦИАЛИЗАЦИЯ ----------
+            function init() {
+                loadData();
+
+                // Навигация
+                document.querySelectorAll('nav a').forEach(a => {
+                    a.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        navigate(this.dataset.page);
+                    });
+                });
+
+                // Календарь
+                document.getElementById('prevM').addEventListener('click', function() {
+                    currentMonth--;
+                    if (currentMonth < 0) { currentMonth = 11;
+                        currentYear--; }
+                    renderCalendar();
+                });
+                document.getElementById('nextM').addEventListener('click', function() {
+                    currentMonth++;
+                    if (currentMonth > 11) { currentMonth = 0;
+                        currentYear++; }
+                    renderCalendar();
+                });
+
+                // Добавление записи
+                document.getElementById('addRec').addEventListener('click', function() {
+                    openRecordModal(currentJournal, new Date().toISOString().split('T')[0]);
+                });
+                document.getElementById('addDayRec').addEventListener('click', function() {
+                    openRecordModal(currentJournal, selectedDate);
+                });
+
+                // Сохранение записи
+                document.getElementById('recSave').addEventListener('click', function() {
+                    const text = document.getElementById('recText').value.trim();
+                    if (!text) { toast('Введите текст', 'error'); return; }
+                    const jid = document.getElementById('recJournal').value;
+                    const date = document.getElementById('recDate').value;
+                    const files = document.getElementById('recPhotos').files;
+                    const urls = [];
+                    if (files.length) {
+                        let loaded = 0;
+                        for (let f of files) {
+                            const r = new FileReader();
+                            r.onload = function(e) {
+                                urls.push(e.target.result);
+                                loaded++;
+                                if (loaded === files.length) {
+                                    addRecord(jid, text, date, urls);
+                                    closeRecordModal();
+                                }
+                            };
+                            r.readAsDataURL(f);
+                        }
+                    } else {
+                        addRecord(jid, text, date, []);
+                        closeRecordModal();
                     }
                 });
-            });
+                document.getElementById('recCancel').addEventListener('click', closeRecordModal);
 
-            // ---- СЕЕ ВСЕ ЗАДАЧИ ----
-            document.getElementById('seeAllTasks').addEventListener('click', () => {
-                const tasks = getTodayTasks();
-                if (tasks.length === 0) {
-                    alert('✨ На сегодня нет задач');
-                    return;
-                }
-                const msg = tasks.map((t, i) =>
-                    `${i+1}. ${t.done ? '✅' : '⬜'} ${t.title}${t.duration ? ` (${t.duration} мин)` : ''}`
-                ).join('\n');
-                alert(`📋 Задачи на сегодня (${tasks.length}):\n━━━━━━━━━━━━━━\n${msg}`);
-            });
-
-            // ---- ТЕМА ----
-            document.getElementById('themeToggle').addEventListener('click', function() {
-                state.darkMode = !state.darkMode;
-                document.body.style.background = state.darkMode ? '#0f0e17' : '#f0ece4';
-                document.body.style.color = state.darkMode ? '#fffffe' : '#1a1a2e';
-                this.innerHTML = state.darkMode ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-                // Меняем переменные
-                document.documentElement.style.setProperty('--bg-primary', state.darkMode ? '#0f0e17' : '#f0ece4');
-                document.documentElement.style.setProperty('--bg-secondary', state.darkMode ? '#1a1a2e' : '#ffffff');
-                document.documentElement.style.setProperty('--bg-card', state.darkMode ? '#16213e' : '#f5f0eb');
-                document.documentElement.style.setProperty('--text-primary', state.darkMode ? '#fffffe' : '#1a1a2e');
-                document.documentElement.style.setProperty('--text-secondary', state.darkMode ? '#a7a9be' : '#5a5a6a');
-            });
-
-            // ---- ЗАКРЫТИЕ МОДАЛОК ПО ОВЕРЛЕЮ ----
-            document.querySelectorAll('.modal-overlay').forEach(overlay => {
-                overlay.addEventListener('click', function(e) {
-                    if (e.target === this) this.classList.remove('open');
+                // Цели
+                document.getElementById('addGoal').addEventListener('click', openGoalModal);
+                document.getElementById('goalSave').addEventListener('click', function() {
+                    const title = document.getElementById('goalTitle').value.trim();
+                    if (!title) { toast('Введите название', 'error'); return; }
+                    const journal = document.getElementById('goalJournal').value;
+                    const target = parseInt(document.getElementById('goalTarget').value) || 1;
+                    const deadline = document.getElementById('goalDeadline').value;
+                    addGoal(title, journal, target, deadline);
+                    closeGoalModal();
                 });
-            });
+                document.getElementById('goalCancel').addEventListener('click', closeGoalModal);
 
-            // ---- ПРОФИЛЬ В МЕНЮ ----
-            document.getElementById('menuProfile').addEventListener('click', function() {
-                document.getElementById('menuOverlay').classList.remove('open');
-                document.getElementById('profileModal').classList.add('open');
-                renderProfile();
-            });
+                // Челлендж
+                document.getElementById('challengeBtn').addEventListener('click', completeChallenge);
 
-            renderAll();
-        }
+                // Тема
+                document.getElementById('themeBtn').addEventListener('click', function() {
+                    document.body.classList.toggle('light');
+                    isLight = document.body.classList.contains('light');
+                    const icon = this.querySelector('i');
+                    icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+                    localStorage.setItem('heroTheme', isLight ? 'light' : 'dark');
+                    // Перерисовываем графики с новой темой
+                    renderCharts();
+                });
 
-        document.addEventListener('DOMContentLoaded', init);
+                // Профиль
+                document.getElementById('editProf').addEventListener('click', function() {
+                    const name = prompt('Имя:', data.user.name);
+                    if (name && name.trim()) {
+                        data.user.name = name.trim();
+                        saveData();
+                        updateUI();
+                        toast('✅ Имя обновлено', 'success');
+                    }
+                    const avatars = data.user.unlocked || ['w1'];
+                    const list = avatars.join(', ');
+                    const av = prompt(`Аватар (${list}):`, data.user.avatar);
+                    if (av && avatars.includes(av)) {
+                        data.user.avatar = av;
+                        saveData();
+                        updateUI();
+                    }
+                    const effects = (data.user.effects || []).join(', ') || 'нет';
+                    const eff = prompt('Эффекты (glow):', effects);
+                    if (eff !== null) {
+                        data.user.effects = eff.split(',').map(s => s.trim()).filter(s => s === 'glow');
+                        saveData();
+                        updateUI();
+                    }
+                });
+
+                // Экспорт/Импорт
+                document.getElementById('exportBtn').addEventListener('click', exportData);
+                document.getElementById('csvBtn').addEventListener('click', exportCSV);
+                document.getElementById('importBtn').addEventListener('click', function() {
+                    document.getElementById('importFile').click();
+                });
+                document.getElementById('importFile').addEventListener('change', function(e) {
+                    if (this.files.length) {
+                        importData(this.files[0]);
+                        this.value = '';
+                    }
+                });
+
+                // Обновление журнала
+                document.getElementById('refreshJ').addEventListener('click', function() {
+                    renderJournalRecords();
+                    toast('🔄 Обновлено', 'info');
+                });
+
+                // Закрытие модалок по Escape и клику на оверлей
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        closeRecordModal();
+                        closeGoalModal();
+                    }
+                });
+                document.getElementById('recModal').addEventListener('click', function(e) {
+                    if (e.target === this) closeRecordModal();
+                });
+                document.getElementById('goalModal').addEventListener('click', function(e) {
+                    if (e.target === this) closeGoalModal();
+                });
+
+                // Хеш-навигация
+                window.addEventListener('hashchange', function() {
+                    const hash = window.location.hash.replace('#', '') || 'calendar';
+                    navigate(hash);
+                });
+
+                // СТАРТ
+                const initial = window.location.hash.replace('#', '') || 'calendar';
+                genChallenge();
+                updateGoalsProgress();
+                updateUI();
+                navigate(initial);
+
+                toast('⚔️ Добро пожаловать, Герой!', 'info', 2500);
+            }
+
+            // Запуск
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
     </script>
 </body>
-</html>
+ 
