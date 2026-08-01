@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest — Журнал прогресса</title>
     <style>
-        /* ====== ВСЕ СТИЛИ (без изменений) ====== */
+        /* ====== ВСЕ СТИЛИ ====== */
         :root {
             --color-primary: #6C5CE7;
             --color-primary-dark: #5A4BD1;
@@ -256,25 +256,41 @@
         .modal .btn-group { display:flex; gap:var(--spacing-md); margin-top:var(--spacing-lg); justify-content:flex-end; }
         .modal .task-detail-item { padding:var(--spacing-sm) 0; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; }
         .modal .task-detail-item .label { color:var(--color-text-secondary); font-weight:var(--font-weight-medium); }
-        /* ====== BOTTOM NAV ====== */
-        .bottom-nav {
+        /* ====== BOTTOM NAV (прокручиваемая) ====== */
+        .bottom-nav-wrapper {
             position:fixed; bottom:0; left:0; right:0;
             height:calc(var(--bottom-nav-height) + var(--safe-area-bottom));
             padding-bottom:var(--safe-area-bottom);
-            background:var(--color-surface); border-top:1px solid var(--color-border);
-            display:flex; align-items:stretch; z-index:var(--z-sticky);
-            backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+            background:var(--color-surface);
+            border-top:1px solid var(--color-border);
+            z-index:var(--z-sticky);
+            backdrop-filter:blur(12px);
+            -webkit-backdrop-filter:blur(12px);
             background:rgba(255,255,255,0.92);
+            overflow-x:auto;
+            overflow-y:hidden;
+            white-space:nowrap;
+            -webkit-overflow-scrolling:touch;
+            scrollbar-width:none;
         }
-        body.dark .bottom-nav { background:rgba(26,26,26,0.92); }
+        .bottom-nav-wrapper::-webkit-scrollbar { display:none; }
+        body.dark .bottom-nav-wrapper { background:rgba(26,26,26,0.92); }
+        .bottom-nav {
+            display:flex;
+            align-items:stretch;
+            height:100%;
+            padding:0 var(--spacing-sm);
+            min-width:max-content;
+        }
         .bottom-nav-item {
-            flex:1; display:flex; flex-direction:column; align-items:center;
-            justify-content:center; gap:2px; padding:var(--spacing-sm) 0;
+            flex:0 0 auto;
+            display:flex; flex-direction:column; align-items:center;
+            justify-content:center; gap:2px; padding:var(--spacing-sm) var(--spacing-md);
             color:var(--color-text-tertiary); transition:all var(--transition-base);
             cursor:pointer; position:relative; min-height:56px;
         }
         .bottom-nav-item .icon { font-size:var(--font-size-xl); transition:all var(--transition-spring); }
-        .bottom-nav-item .label { font-size:10px; font-weight:var(--font-weight-medium); }
+        .bottom-nav-item .label { font-size:10px; font-weight:var(--font-weight-medium); white-space:nowrap; }
         .bottom-nav-item.active { color:var(--color-primary); }
         .bottom-nav-item.active .icon { transform:scale(1.1); }
         .bottom-nav-item .badge {
@@ -452,6 +468,79 @@
         .year-grid .month-card .month-dots { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; margin-top:var(--spacing-xs); }
         .year-grid .month-card .dot { width:6px; height:6px; border-radius:var(--radius-full); background:var(--color-border); }
         .year-grid .month-card .dot.has-task { background:var(--color-primary); }
+        /* ====== НОВЫЕ СТИЛИ ДЛЯ ЗАМЕТОК, ГАЛЕРЕИ, ВСЕХ ЗАДАЧ ====== */
+        .note-item, .photo-item, .all-task-item {
+            background:var(--color-surface);
+            border-radius:var(--radius-md);
+            padding:var(--spacing-md);
+            border:1px solid var(--color-border-light);
+            margin-bottom:var(--spacing-sm);
+            transition:all var(--transition-base);
+            display:flex; justify-content:space-between; align-items:center;
+        }
+        .note-item:hover, .photo-item:hover, .all-task-item:hover {
+            transform:translateX(4px);
+            box-shadow:var(--shadow-sm);
+        }
+        .note-item .note-text, .all-task-item .task-info-text {
+            flex:1;
+            margin-right:var(--spacing-md);
+        }
+        .note-item .note-date, .all-task-item .task-meta-text {
+            font-size:var(--font-size-xs);
+            color:var(--color-text-secondary);
+        }
+        .photo-grid {
+            display:grid;
+            grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+            gap:var(--spacing-md);
+        }
+        .photo-item {
+            flex-direction:column;
+            align-items:stretch;
+            padding:0;
+            overflow:hidden;
+            cursor:pointer;
+        }
+        .photo-item img {
+            width:100%;
+            aspect-ratio:1;
+            object-fit:cover;
+            display:block;
+        }
+        .photo-item .photo-meta {
+            padding:var(--spacing-sm);
+            font-size:var(--font-size-xs);
+            color:var(--color-text-secondary);
+        }
+        .photo-item .photo-delete {
+            position:absolute;
+            top:8px;
+            right:8px;
+            background:rgba(0,0,0,0.5);
+            color:#fff;
+            border:none;
+            border-radius:var(--radius-full);
+            width:28px;
+            height:28px;
+            font-size:var(--font-size-md);
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .photo-item .photo-delete:hover {
+            background:var(--color-error);
+        }
+        .all-task-filters {
+            display:flex;
+            gap:var(--spacing-sm);
+            flex-wrap:wrap;
+            margin-bottom:var(--spacing-md);
+        }
+        .all-task-filters .chip {
+            font-size:var(--font-size-xs);
+        }
         /* ====== RESPONSIVE ====== */
         @media (max-width:768px) {
             .stats-grid.grid-3 { grid-template-columns:repeat(3,1fr); gap:var(--spacing-sm); }
@@ -465,6 +554,8 @@
             .year-grid { grid-template-columns:repeat(3,1fr); }
             .modal { padding:var(--spacing-lg); }
             .goal-card .goal-header { flex-direction:column; gap:var(--spacing-sm); }
+            .bottom-nav-item { padding:var(--spacing-sm) var(--spacing-sm); }
+            .bottom-nav-item .label { font-size:8px; }
         }
         @media (max-width:480px) {
             .stats-grid.grid-3 { grid-template-columns:1fr 1fr; gap:var(--spacing-sm); }
@@ -476,6 +567,7 @@
             .calendar-cell .badge { font-size:7px; padding:0 2px; }
             .year-grid { grid-template-columns:repeat(2,1fr); }
             .modal .form-row { flex-direction:column; }
+            .photo-grid { grid-template-columns:repeat(auto-fill, minmax(120px,1fr)); }
         }
     </style>
 </head>
@@ -491,35 +583,50 @@
             </div>
         </header>
         <main class="main-content" id="mainContent"></main>
-        <nav class="bottom-nav">
-            <div class="bottom-nav-item active" data-page="home">
-                <span class="icon">🏠</span>
-                <span class="label">Главная</span>
-            </div>
-            <div class="bottom-nav-item" data-page="calendar">
-                <span class="icon">📅</span>
-                <span class="label">Календарь</span>
-            </div>
-            <div class="bottom-nav-item" data-page="journals">
-                <span class="icon">📚</span>
-                <span class="label">Журналы</span>
-            </div>
-            <div class="bottom-nav-item" data-page="goals">
-                <span class="icon">🎯</span>
-                <span class="label">Цели</span>
-                <span class="badge" id="goalsBadge">0</span>
-            </div>
-            <div class="bottom-nav-item" data-page="profile">
-                <span class="icon">👤</span>
-                <span class="label">Профиль</span>
-            </div>
-        </nav>
+        <!-- Нижняя навигация с прокруткой -->
+        <div class="bottom-nav-wrapper">
+            <nav class="bottom-nav" id="bottomNav">
+                <div class="bottom-nav-item active" data-page="home">
+                    <span class="icon">🏠</span>
+                    <span class="label">Главная</span>
+                </div>
+                <div class="bottom-nav-item" data-page="calendar">
+                    <span class="icon">📅</span>
+                    <span class="label">Календарь</span>
+                </div>
+                <div class="bottom-nav-item" data-page="journals">
+                    <span class="icon">📚</span>
+                    <span class="label">Журналы</span>
+                </div>
+                <div class="bottom-nav-item" data-page="goals">
+                    <span class="icon">🎯</span>
+                    <span class="label">Цели</span>
+                    <span class="badge" id="goalsBadge">0</span>
+                </div>
+                <div class="bottom-nav-item" data-page="profile">
+                    <span class="icon">👤</span>
+                    <span class="label">Профиль</span>
+                </div>
+                <div class="bottom-nav-item" data-page="notes">
+                    <span class="icon">📝</span>
+                    <span class="label">Заметки</span>
+                </div>
+                <div class="bottom-nav-item" data-page="gallery">
+                    <span class="icon">🖼</span>
+                    <span class="label">Галерея</span>
+                </div>
+                <div class="bottom-nav-item" data-page="alltasks">
+                    <span class="icon">📋</span>
+                    <span class="label">Все задачи</span>
+                </div>
+            </nav>
+        </div>
         <button class="fab" id="fabAddTask" aria-label="Создать задачу">
             <span>+</span>
         </button>
     </div>
 
-    <!-- Модальное окно для создания/редактирования задачи -->
+    <!-- Модальное окно для создания/редактирования задачи (существующее) -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal">
             <button class="modal-close" id="modalClose">&times;</button>
@@ -611,7 +718,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно для создания/редактирования цели -->
+    <!-- Модальное окно для целей -->
     <div class="modal-overlay" id="goalModal">
         <div class="modal">
             <button class="modal-close" id="goalModalClose">&times;</button>
@@ -637,6 +744,30 @@
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" id="goalModalCancel">Отмена</button>
                     <button type="submit" class="btn btn-primary" id="goalSubmitBtn">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для заметок -->
+    <div class="modal-overlay" id="noteModal">
+        <div class="modal">
+            <button class="modal-close" id="noteModalClose">&times;</button>
+            <h3 class="title-2" id="noteModalTitle">📝 Новая заметка</h3>
+            <form id="noteForm">
+                <div class="form-group">
+                    <label class="input-label">Текст заметки</label>
+                    <textarea class="input" id="noteText" rows="4" placeholder="Введите заметку..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="input-label">Привязать к задаче (необязательно)</label>
+                    <select class="input" id="noteTask">
+                        <option value="">— нет —</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" id="noteModalCancel">Отмена</button>
+                    <button type="submit" class="btn btn-primary" id="noteSubmitBtn">Сохранить</button>
                 </div>
             </form>
         </div>
@@ -697,15 +828,20 @@
                     tasks: [],
                     goals: [],
                     weightLog: [],
+                    notes: [],
+                    photos: [],
                 };
             },
             get profile() { return this._data.profile; },
             get journals() { return this._data.journals; },
             get tasks() { return this._data.tasks; },
             get goals() { return this._data.goals; },
+            get notes() { return this._data.notes; },
+            get photos() { return this._data.photos; },
             getJournalByName(name) {
                 return this._data.journals.find(j => j.name === name);
             },
+            // --- Задачи ---
             addTask(task) {
                 const newTask = {
                     id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
@@ -713,6 +849,7 @@
                     completedDates: [],
                     missedDates: [],
                     createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
                 };
                 this._data.tasks.push(newTask);
                 this.save();
@@ -721,7 +858,7 @@
             updateTask(id, updates) {
                 const idx = this._data.tasks.findIndex(t => t.id === id);
                 if (idx !== -1) {
-                    this._data.tasks[idx] = { ...this._data.tasks[idx], ...updates };
+                    this._data.tasks[idx] = { ...this._data.tasks[idx], ...updates, updatedAt: new Date().toISOString() };
                     this.save();
                     return this._data.tasks[idx];
                 }
@@ -731,6 +868,7 @@
                 this._data.tasks = this._data.tasks.filter(t => t.id !== id);
                 this.save();
             },
+            // --- Цели ---
             addGoal(goal) {
                 const newGoal = {
                     id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
@@ -755,6 +893,49 @@
                 this._data.goals = this._data.goals.filter(g => g.id !== id);
                 this.save();
             },
+            // --- Заметки ---
+            addNote(note) {
+                const newNote = {
+                    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                    text: note.text,
+                    taskId: note.taskId || null,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                };
+                this._data.notes.push(newNote);
+                this.save();
+                return newNote;
+            },
+            updateNote(id, updates) {
+                const idx = this._data.notes.findIndex(n => n.id === id);
+                if (idx !== -1) {
+                    this._data.notes[idx] = { ...this._data.notes[idx], ...updates, updatedAt: new Date().toISOString() };
+                    this.save();
+                    return this._data.notes[idx];
+                }
+                return null;
+            },
+            deleteNote(id) {
+                this._data.notes = this._data.notes.filter(n => n.id !== id);
+                this.save();
+            },
+            // --- Фото (base64) ---
+            addPhoto(photoData) {
+                const newPhoto = {
+                    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                    data: photoData.data,
+                    note: photoData.note || '',
+                    date: photoData.date || new Date().toISOString(),
+                };
+                this._data.photos.push(newPhoto);
+                this.save();
+                return newPhoto;
+            },
+            deletePhoto(id) {
+                this._data.photos = this._data.photos.filter(p => p.id !== id);
+                this.save();
+            },
+            // --- Вспомогательные ---
             getTasksForDate(date) {
                 const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
                 return this._data.tasks.filter(task => {
@@ -916,6 +1097,7 @@
                 if (format === 'short') return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
                 if (format === 'long') return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
                 if (format === 'weekday') return d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+                if (format === 'datetime') return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 return d.toLocaleDateString('ru-RU');
             },
             getGreeting() {
@@ -937,7 +1119,6 @@
                 document.body.classList.toggle('dark');
                 this.toast('🌓 ' + (document.body.classList.contains('dark') ? 'Темный' : 'Светлый') + ' режим', 'info', 1500);
             },
-
             // ---- Модалка задачи ----
             openTaskModal(taskId) {
                 const modal = document.getElementById('taskModal');
@@ -986,7 +1167,6 @@
                 });
 
                 modal.classList.add('open');
-
                 form.onsubmit = function(e) {
                     e.preventDefault();
                     const title = document.getElementById('taskTitle').value.trim();
@@ -1021,7 +1201,6 @@
                 document.getElementById('taskModal').classList.remove('open');
                 document.getElementById('taskForm').reset();
             },
-
             // ---- Детали задачи ----
             openTaskDetail(taskId) {
                 const task = Data.tasks.find(t => t.id === taskId);
@@ -1060,7 +1239,6 @@
                     App.renderCurrentPage();
                 }
             },
-
             // ---- Модалка целей ----
             openGoalModal: function(goalId) {
                 const modal = document.getElementById('goalModal');
@@ -1085,8 +1263,6 @@
                 }
 
                 modal.classList.add('open');
-
-                form.onsubmit = null;
                 form.onsubmit = function(e) {
                     e.preventDefault();
                     const title = document.getElementById('goalTitle').value.trim();
@@ -1111,12 +1287,10 @@
                     App.renderCurrentPage();
                 };
             },
-
             closeGoalModal: function() {
                 document.getElementById('goalModal').classList.remove('open');
                 document.getElementById('goalForm').reset();
             },
-
             deleteGoal(goalId) {
                 if (confirm('Удалить цель? Все связанные задачи останутся без привязки.')) {
                     Data.tasks.forEach(task => {
@@ -1126,6 +1300,94 @@
                     });
                     Data.deleteGoal(goalId);
                     UI.toast('🗑 Цель удалена', 'info');
+                    App.renderCurrentPage();
+                }
+            },
+            // ---- Заметки ----
+            openNoteModal: function(noteId) {
+                const modal = document.getElementById('noteModal');
+                const form = document.getElementById('noteForm');
+                const isEdit = !!noteId;
+                const note = isEdit ? Data.notes.find(n => n.id === noteId) : null;
+
+                // Заполняем список задач для привязки
+                const taskSelect = document.getElementById('noteTask');
+                taskSelect.innerHTML = '<option value="">— нет —</option>';
+                Data.tasks.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.textContent = t.title + ' (' + t.journal + ')';
+                    if (isEdit && note && note.taskId === t.id) opt.selected = true;
+                    taskSelect.appendChild(opt);
+                });
+
+                if (isEdit && note) {
+                    document.getElementById('noteModalTitle').textContent = '✏️ Редактировать заметку';
+                    document.getElementById('noteSubmitBtn').textContent = 'Сохранить';
+                    document.getElementById('noteText').value = note.text;
+                    if (note.taskId) {
+                        document.getElementById('noteTask').value = note.taskId;
+                    }
+                } else {
+                    document.getElementById('noteModalTitle').textContent = '📝 Новая заметка';
+                    document.getElementById('noteSubmitBtn').textContent = 'Создать';
+                    form.reset();
+                }
+                modal.classList.add('open');
+
+                form.onsubmit = function(e) {
+                    e.preventDefault();
+                    const text = document.getElementById('noteText').value.trim();
+                    const taskId = document.getElementById('noteTask').value || null;
+                    if (!text) {
+                        UI.toast('⚠️ Введите текст заметки', 'error');
+                        return;
+                    }
+                    if (isEdit && note) {
+                        Data.updateNote(noteId, { text, taskId });
+                        UI.toast('✅ Заметка обновлена', 'success');
+                    } else {
+                        Data.addNote({ text, taskId });
+                        UI.toast('✅ Заметка создана', 'success');
+                    }
+                    UI.closeNoteModal();
+                    App.renderCurrentPage();
+                };
+            },
+            closeNoteModal: function() {
+                document.getElementById('noteModal').classList.remove('open');
+                document.getElementById('noteForm').reset();
+            },
+            deleteNote: function(noteId) {
+                if (confirm('Удалить заметку?')) {
+                    Data.deleteNote(noteId);
+                    UI.toast('🗑 Заметка удалена', 'info');
+                    App.renderCurrentPage();
+                }
+            },
+            // ---- Фото ----
+            addPhoto: function() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        const note = prompt('Введите описание фото (необязательно):') || '';
+                        Data.addPhoto({ data: ev.target.result, note });
+                        UI.toast('✅ Фото добавлено', 'success');
+                        App.renderCurrentPage();
+                    };
+                    reader.readAsDataURL(file);
+                };
+                input.click();
+            },
+            deletePhoto: function(photoId) {
+                if (confirm('Удалить фото?')) {
+                    Data.deletePhoto(photoId);
+                    UI.toast('🗑 Фото удалено', 'info');
                     App.renderCurrentPage();
                 }
             }
@@ -1232,30 +1494,31 @@
 
             init() {
                 this._unsubscribe = Data.subscribe(() => { this.renderCurrentPage(); });
+
+                // Навигация
                 document.querySelectorAll('.bottom-nav-item').forEach(item => {
                     item.addEventListener('click', () => {
                         this.navigateTo(item.dataset.page);
                     });
                 });
+
                 const fab = document.getElementById('fabAddTask');
                 if (fab) fab.addEventListener('click', () => { UI.openTaskModal(null); });
 
                 const avatar = document.getElementById('avatarPreview');
                 if (avatar) avatar.addEventListener('click', () => { this.navigateTo('profile'); });
 
-                // Закрытие модалки задачи
+                // Закрытие модалок
                 const taskModal = document.getElementById('taskModal');
                 document.getElementById('modalClose').addEventListener('click', () => { UI.closeTaskModal(); });
                 document.getElementById('modalCancel').addEventListener('click', () => { UI.closeTaskModal(); });
                 taskModal.addEventListener('click', function(e) { if (e.target === this) UI.closeTaskModal(); });
 
-                // Закрытие модалки деталей
                 const detailModal = document.getElementById('detailModal');
                 document.getElementById('detailClose').addEventListener('click', () => { UI.closeTaskDetail(); });
                 document.getElementById('detailCloseBtn').addEventListener('click', () => { UI.closeTaskDetail(); });
                 detailModal.addEventListener('click', function(e) { if (e.target === this) UI.closeTaskDetail(); });
 
-                // Кнопки в деталях
                 document.getElementById('detailDelete').addEventListener('click', function() {
                     UI.deleteTask(this.dataset.taskId);
                 });
@@ -1265,11 +1528,16 @@
                     setTimeout(() => { UI.openTaskModal(taskId); }, 300);
                 });
 
-                // Закрытие модалки цели
                 const goalModal = document.getElementById('goalModal');
                 document.getElementById('goalModalClose').addEventListener('click', () => { UI.closeGoalModal(); });
                 document.getElementById('goalModalCancel').addEventListener('click', () => { UI.closeGoalModal(); });
                 goalModal.addEventListener('click', function(e) { if (e.target === this) UI.closeGoalModal(); });
+
+                // Модалка заметок
+                const noteModal = document.getElementById('noteModal');
+                document.getElementById('noteModalClose').addEventListener('click', () => { UI.closeNoteModal(); });
+                document.getElementById('noteModalCancel').addEventListener('click', () => { UI.closeNoteModal(); });
+                noteModal.addEventListener('click', function(e) { if (e.target === this) UI.closeNoteModal(); });
 
                 // Демо-переключение тем
                 let tapCount = 0;
@@ -1310,7 +1578,16 @@
                     item.classList.toggle('active', item.dataset.page === page);
                 });
                 this.renderCurrentPage();
-                const titles = { home: 'Главная', calendar: 'Календарь', journals: 'Журналы', goals: 'Цели', profile: 'Профиль' };
+                const titles = {
+                    home: 'Главная',
+                    calendar: 'Календарь',
+                    journals: 'Журналы',
+                    goals: 'Цели',
+                    profile: 'Профиль',
+                    notes: 'Заметки',
+                    gallery: 'Галерея',
+                    alltasks: 'Все задачи'
+                };
                 const titleEl = document.querySelector('.header .title-1');
                 if (titleEl) titleEl.textContent = titles[page] || 'SkillQuest';
             },
@@ -1324,10 +1601,14 @@
                     case 'journals': this.renderJournals(container); break;
                     case 'goals': this.renderGoals(container); break;
                     case 'profile': this.renderProfile(container); break;
+                    case 'notes': this.renderNotes(container); break;
+                    case 'gallery': this.renderGallery(container); break;
+                    case 'alltasks': this.renderAllTasks(container); break;
                     default: container.innerHTML = '<div class="card"><p class="body-1">Страница в разработке</p></div>';
                 }
             },
 
+            // ================== HOME ==================
             renderHome(container) {
                 const data = Data._data;
                 const profile = data.profile;
@@ -1442,7 +1723,6 @@
                 container.querySelectorAll('[data-nav]').forEach(btn => {
                     btn.addEventListener('click', () => { this.navigateTo(btn.dataset.nav); });
                 });
-
                 container.querySelectorAll('.task-item').forEach(el => {
                     el.addEventListener('click', function(e) {
                         if (e.target.closest('.complete-btn')) return;
@@ -1450,7 +1730,6 @@
                         if (taskId) UI.openTaskDetail(taskId);
                     });
                 });
-
                 container.querySelectorAll('.complete-btn').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
@@ -1464,7 +1743,6 @@
                         }
                     });
                 });
-
                 container.querySelectorAll('.goal-card').forEach(el => {
                     el.addEventListener('click', function() {
                         const id = this.dataset.goalId;
@@ -1472,7 +1750,6 @@
                         if (goal) UI.toast(`🎯 ${goal.title} — ${goal.achieved ? 'Достигнута' : 'В процессе'}`, 'info');
                     });
                 });
-
                 container.querySelectorAll('.journal-card-mini').forEach(el => {
                     el.addEventListener('click', function() {
                         UI.toast('📚 Журнал "' + this.dataset.journal + '"', 'info');
@@ -1487,7 +1764,11 @@
                 }
             },
 
+            // ================== CALENDAR ==================
             renderCalendar(container) {
+                // (без изменений, как в предыдущей версии)
+                // Для краткости оставлю ссылку на предыдущую реализацию.
+                // Но здесь она будет полностью рабочей.
                 const view = Calendar.getView();
                 const baseDate = Calendar.getBaseDate();
                 const selectedDate = Calendar.getSelectedDate();
@@ -1662,6 +1943,7 @@
                 }).join('');
             },
 
+            // ================== ЖУРНАЛЫ ==================
             renderJournals(container) {
                 const journals = Data.journals;
                 container.innerHTML = `<div class="home-content"><div class="section-header"><h2 class="title-1">Все журналы</h2><p class="body-2 text-secondary">${journals.length} журналов</p></div><div class="journals-grid grid grid-4">${journals.map(j => {
@@ -1676,6 +1958,7 @@
                 });
             },
 
+            // ================== ЦЕЛИ ==================
             renderGoals(container) {
                 const goals = Data.goals;
                 container.innerHTML = `<div class="home-content"><div class="section-header flex-between"><h2 class="title-1">Цели</h2><button class="btn btn-primary btn-sm" id="addGoalBtn">+ Новая цель</button></div>`;
@@ -1737,6 +2020,7 @@
                 });
             },
 
+            // ================== ПРОФИЛЬ ==================
             renderProfile(container) {
                 const profile = Data.profile;
                 const isDark = document.body.classList.contains('dark');
@@ -1807,13 +2091,9 @@
                     <button class="btn btn-primary" id="saveProfileBtn" style="width:100%; margin-top:var(--spacing-md);">💾 Сохранить профиль</button>
                 </div>`;
 
-                // Обработчик сохранения профиля
                 const saveBtn = container.querySelector('#saveProfileBtn');
                 if (saveBtn) {
                     saveBtn.addEventListener('click', function() {
-                        const name = document.getElementById('userName').textContent; // имя из шапки, но можно сделать поле
-                        // Можно добавить поле для имени, но пока оставим как есть
-                        // Обновляем данные из полей
                         const age = parseInt(document.getElementById('pAge').value) || 0;
                         const weight = parseFloat(document.getElementById('pWeight').value) || 0;
                         const height = parseFloat(document.getElementById('pHeight').value) || 0;
@@ -1822,7 +2102,6 @@
                         const hips = parseFloat(document.getElementById('pHips').value) || 0;
                         const biceps = parseFloat(document.getElementById('pBiceps').value) || 0;
 
-                        // Обновляем профиль
                         const profile = Data.profile;
                         profile.age = age;
                         profile.weight = weight;
@@ -1834,21 +2113,17 @@
 
                         Data.save();
                         UI.toast('✅ Профиль сохранён!', 'success');
-                        // Обновляем отображение в шапке
                         const userNameEl = document.getElementById('userName');
                         if (userNameEl) userNameEl.textContent = profile.name;
                         const initialsEl = document.getElementById('avatarInitials');
                         if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
-                        // Перерисовываем профиль, чтобы обновить значения
                         App.renderProfile(container);
                     });
                 }
 
-                // Переключение тёмного режима
                 const darkSwitch = container.querySelector('#darkModeSwitch');
                 if (darkSwitch) darkSwitch.addEventListener('change', () => { UI.toggleDarkMode(); });
 
-                // Выбор темы
                 container.querySelectorAll('[data-theme]').forEach(chip => {
                     chip.addEventListener('click', function() {
                         const theme = this.dataset.theme;
@@ -1856,6 +2131,181 @@
                         if (theme !== 'default') document.body.classList.add('theme-' + theme);
                         UI.toast('🎨 Тема: ' + theme, 'info', 1500);
                         App.renderProfile(container);
+                    });
+                });
+            },
+
+            // ================== ЗАМЕТКИ ==================
+            renderNotes(container) {
+                const notes = Data.notes;
+                container.innerHTML = `
+                <div class="home-content">
+                    <div class="section-header flex-between">
+                        <h2 class="title-1">Заметки</h2>
+                        <button class="btn btn-primary btn-sm" id="addNoteBtn">+ Новая заметка</button>
+                    </div>
+                    ${notes.length === 0 ? `
+                        <div class="tasks-empty"><div class="empty-icon">📝</div><p class="body-1">Заметок пока нет</p><p class="caption-1 text-secondary">Создайте первую заметку</p></div>
+                    ` : notes.slice().reverse().map(note => {
+                        const task = Data.tasks.find(t => t.id === note.taskId);
+                        return `
+                            <div class="note-item" data-note-id="${note.id}">
+                                <div class="note-text">
+                                    <div class="body-1">${note.text}</div>
+                                    <div class="note-date">${UI.formatDate(note.createdAt, 'datetime')} ${task ? '→ ' + task.title : ''}</div>
+                                </div>
+                                <div style="display:flex; gap:var(--spacing-sm);">
+                                    <button class="btn btn-sm btn-secondary edit-note-btn" data-note-id="${note.id}">✏️</button>
+                                    <button class="btn btn-sm btn-danger delete-note-btn" data-note-id="${note.id}">🗑</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>`;
+
+                document.getElementById('addNoteBtn').addEventListener('click', () => { UI.openNoteModal(null); });
+                container.querySelectorAll('.edit-note-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        UI.openNoteModal(this.dataset.noteId);
+                    });
+                });
+                container.querySelectorAll('.delete-note-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        UI.deleteNote(this.dataset.noteId);
+                    });
+                });
+            },
+
+            // ================== ГАЛЕРЕЯ ==================
+            renderGallery(container) {
+                const photos = Data.photos;
+                container.innerHTML = `
+                <div class="home-content">
+                    <div class="section-header flex-between">
+                        <h2 class="title-1">Галерея</h2>
+                        <button class="btn btn-primary btn-sm" id="addPhotoBtn">+ Добавить фото</button>
+                    </div>
+                    ${photos.length === 0 ? `
+                        <div class="tasks-empty"><div class="empty-icon">🖼</div><p class="body-1">Фото пока нет</p><p class="caption-1 text-secondary">Добавьте первое фото</p></div>
+                    ` : `
+                        <div class="photo-grid">
+                            ${photos.slice().reverse().map(photo => `
+                                <div class="photo-item" data-photo-id="${photo.id}">
+                                    <img src="${photo.data}" alt="Фото">
+                                    <div class="photo-meta">${photo.note ? photo.note : ''} ${UI.formatDate(photo.date, 'short')}</div>
+                                    <button class="photo-delete" data-photo-id="${photo.id}">✕</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `}
+                </div>`;
+
+                document.getElementById('addPhotoBtn').addEventListener('click', () => { UI.addPhoto(); });
+                container.querySelectorAll('.photo-delete').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        UI.deletePhoto(this.dataset.photoId);
+                    });
+                });
+                container.querySelectorAll('.photo-item').forEach(el => {
+                    el.addEventListener('click', function(e) {
+                        if (e.target.closest('.photo-delete')) return;
+                        const id = this.dataset.photoId;
+                        const photo = Data.photos.find(p => p.id === id);
+                        if (photo) {
+                            // Показываем фото в модалке (можно сделать увеличение)
+                            UI.toast('Фото: ' + (photo.note || 'без описания'), 'info', 2000);
+                        }
+                    });
+                });
+            },
+
+            // ================== ВСЕ ЗАДАЧИ ==================
+            renderAllTasks(container) {
+                const tasks = Data.tasks;
+                const journals = Data.journals;
+
+                // Фильтры по журналам и статусу
+                let filterJournal = 'all';
+                let filterStatus = 'all';
+
+                container.innerHTML = `
+                <div class="home-content">
+                    <div class="section-header">
+                        <h2 class="title-1">Все задачи</h2>
+                    </div>
+                    <div class="all-task-filters">
+                        <span class="chip active" data-filter-journal="all">Все журналы</span>
+                        ${journals.map(j => `<span class="chip" data-filter-journal="${j.name}">${j.icon} ${j.name}</span>`).join('')}
+                    </div>
+                    <div class="all-task-filters">
+                        <span class="chip active" data-filter-status="all">Все статусы</span>
+                        <span class="chip" data-filter-status="pending">⏳ Ожидает</span>
+                        <span class="chip" data-filter-status="done">✅ Выполнено</span>
+                        <span class="chip" data-filter-status="missed">❌ Пропущено</span>
+                    </div>
+                    <div id="allTasksList">
+                        ${tasks.length === 0 ? `
+                            <div class="tasks-empty"><div class="empty-icon">📋</div><p class="body-1">Задач пока нет</p></div>
+                        ` : tasks.slice().sort((a,b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)).map(task => {
+                            // Определяем общий статус задачи (средний по всем датам)
+                            // Для простоты возьмем статус на сегодня
+                            const today = new Date().toISOString().split('T')[0];
+                            const status = Data.getTaskStatus(task, today);
+                            const journal = Data.getJournalByName(task.journal);
+                            const icon = journal ? journal.icon : '📌';
+                            const statusLabels = { done:'✅ Выполнено', pending:'⏳ Ожидает', missed:'❌ Пропущено' };
+                            return `
+                                <div class="all-task-item" data-task-id="${task.id}" data-journal="${task.journal}" data-status="${status}">
+                                    <div class="task-info-text">
+                                        <div class="body-1">${icon} ${task.title}</div>
+                                        <div class="task-meta-text">${task.journal} · ${task.time || '—'} · ${task.duration || 0} мин · Обновлено: ${UI.formatDate(task.updatedAt || task.createdAt, 'datetime')}</div>
+                                    </div>
+                                    <span class="task-status ${status}">${statusLabels[status] || status}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>`;
+
+                // Обработчики фильтров
+                container.querySelectorAll('[data-filter-journal]').forEach(chip => {
+                    chip.addEventListener('click', function() {
+                        container.querySelectorAll('[data-filter-journal]').forEach(c => c.classList.remove('active'));
+                        this.classList.add('active');
+                        filterJournal = this.dataset.filterJournal;
+                        applyAllTasksFilter();
+                    });
+                });
+
+                container.querySelectorAll('[data-filter-status]').forEach(chip => {
+                    chip.addEventListener('click', function() {
+                        container.querySelectorAll('[data-filter-status]').forEach(c => c.classList.remove('active'));
+                        this.classList.add('active');
+                        filterStatus = this.dataset.filterStatus;
+                        applyAllTasksFilter();
+                    });
+                });
+
+                const applyAllTasksFilter = () => {
+                    const items = container.querySelectorAll('.all-task-item');
+                    items.forEach(item => {
+                        const journal = item.dataset.journal;
+                        const status = item.dataset.status;
+                        let show = true;
+                        if (filterJournal !== 'all' && journal !== filterJournal) show = false;
+                        if (filterStatus !== 'all' && status !== filterStatus) show = false;
+                        item.style.display = show ? 'flex' : 'none';
+                    });
+                };
+
+                // Клик по задаче – детали
+                container.querySelectorAll('.all-task-item').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const taskId = this.dataset.taskId;
+                        if (taskId) UI.openTaskDetail(taskId);
                     });
                 });
             }
