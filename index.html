@@ -207,6 +207,17 @@
             border-color: var(--primary);
         }
 
+        .day-chips .chip-day.all-days {
+            background: var(--primary-bg);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .day-chips .chip-day.all-days.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
         /* ===== Шапка ===== */
         .header {
             display: flex;
@@ -649,6 +660,11 @@
             transition: width 0.6s ease;
         }
 
+        /* Список задач по журналу */
+        .journal-tasks-list {
+            margin-top: 16px;
+        }
+
         /* ===== Цели ===== */
         .goal-card {
             background: var(--card);
@@ -714,6 +730,20 @@
         .goal-card .goal-photo img {
             width: 100%;
             object-fit: cover;
+        }
+
+        .goal-card .goal-tasks-list {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .goal-card .goal-tasks-list .goal-task-item {
+            font-size: 14px;
+            padding: 4px 0;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
         }
 
         /* ===== Заметки ===== */
@@ -942,7 +972,7 @@
             gap: 8px;
         }
 
-        /* ===== Модалки (новый стиль) ===== */
+        /* ===== Модалки ===== */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -1043,6 +1073,51 @@
         .settings-item .settings-action {
             display: flex;
             gap: 8px;
+        }
+
+        /* ===== Статистика ===== */
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stats-row .stat-box {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 16px;
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--card-border);
+        }
+
+        .stats-row .stat-box .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stats-row .stat-box .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .chart-container {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: auto !important;
         }
 
         /* ===== Toast ===== */
@@ -1155,6 +1230,11 @@
             .journals-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .stats-row .stat-box {
+                min-width: 80px;
+                padding: 12px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1220,6 +1300,10 @@
                     <span class="icon">📋</span>
                     <span class="label">Все задачи</span>
                 </div>
+                <div class="bottom-nav-item" data-page="stats">
+                    <span class="icon">📊</span>
+                    <span class="label">Статистика</span>
+                </div>
                 <div class="bottom-nav-item" data-page="settings">
                     <span class="icon">⚙️</span>
                     <span class="label">Настройки</span>
@@ -1276,6 +1360,7 @@
                         <span class="chip-day" data-day="4">Чт</span>
                         <span class="chip-day" data-day="5">Пт</span>
                         <span class="chip-day" data-day="6">Сб</span>
+                        <span class="chip-day all-days" id="allDaysBtn">Все дни</span>
                     </div>
                     <span class="caption-1 text-secondary" style="font-size:12px;">Если не выбрано – каждый день</span>
                 </div>
@@ -1420,7 +1505,6 @@
                 } else {
                     this._data = this.getDefaultData();
                 }
-                // Миграция: добавим поле goalId к фото, если его нет
                 if (this._data.photos) {
                     this._data.photos = this._data.photos.map(p => {
                         if (!p.goalId) p.goalId = null;
@@ -1685,7 +1769,6 @@
                     }
                 });
             },
-            // Экспорт/импорт
             exportData() {
                 return JSON.stringify(this._data, null, 2);
             },
@@ -1761,7 +1844,7 @@
                 const chips = container.querySelectorAll('.chip-day');
                 chips.forEach(chip => {
                     const day = parseInt(chip.dataset.day);
-                    if (selectedDays && selectedDays.includes(day)) {
+                    if (!isNaN(day) && selectedDays && selectedDays.includes(day)) {
                         chip.classList.add('active');
                     } else {
                         chip.classList.remove('active');
@@ -1770,11 +1853,26 @@
                         this.classList.toggle('active');
                     };
                 });
+                // Обработчик для кнопки "Все дни"
+                const allBtn = document.getElementById('allDaysBtn');
+                if (allBtn) {
+                    allBtn.onclick = function() {
+                        const allChips = container.querySelectorAll('.chip-day:not(.all-days)');
+                        const allActive = Array.from(allChips).every(chip => chip.classList.contains('active'));
+                        allChips.forEach(chip => {
+                            if (allActive) {
+                                chip.classList.remove('active');
+                            } else {
+                                chip.classList.add('active');
+                            }
+                        });
+                    };
+                }
             },
             getSelectedDays() {
                 const container = document.getElementById('dayChips');
                 if (!container) return [];
-                const chips = container.querySelectorAll('.chip-day.active');
+                const chips = container.querySelectorAll('.chip-day.active:not(.all-days)');
                 return Array.from(chips).map(chip => parseInt(chip.dataset.day));
             },
 
@@ -1792,7 +1890,6 @@
                     document.getElementById('taskJournal').value = task.journal;
                     document.getElementById('taskStart').value = task.startDate || task.date || '';
                     document.getElementById('taskEnd').value = task.endDate || task.date || '';
-                    // Устанавливаем дни недели
                     this.initDayChips(task.daysOfWeek || []);
                     document.getElementById('taskTime').value = task.time || '09:00';
                     document.getElementById('taskDuration').value = task.duration || 30;
@@ -1846,10 +1943,17 @@
                     if (isEdit && task) {
                         Data.updateTask(taskId, { title, journal, startDate, endDate, daysOfWeek, time, duration,
                             note, reminderMinutes: reminder, goalId });
+                        // Если заметка есть, добавляем её в общий список заметок
+                        if (note) {
+                            Data.addNote({ text: note, taskId: taskId });
+                        }
                         UI.toast('✅ Задача обновлена!', 'success');
                     } else {
-                        Data.addTask({ title, journal, startDate, endDate, daysOfWeek, time, duration, note,
-                            reminderMinutes: reminder, goalId });
+                        const newTask = Data.addTask({ title, journal, startDate, endDate, daysOfWeek, time, duration,
+                            note, reminderMinutes: reminder, goalId });
+                        if (note) {
+                            Data.addNote({ text: note, taskId: newTask.id });
+                        }
                         UI.toast('✅ Задача создана!', 'success');
                     }
                     modal.classList.remove('open');
@@ -2280,14 +2384,13 @@
                     notes: 'Заметки',
                     gallery: 'Галерея',
                     alltasks: 'Все задачи',
+                    stats: 'Статистика',
                     settings: 'Настройки'
                 };
                 const titleEl = document.querySelector('.header-title');
                 if (titleEl) titleEl.textContent = titles[page] || 'SkillQuest';
-                // Обновить приветствие
                 const greetingEl = document.getElementById('greetingText');
                 if (greetingEl) greetingEl.textContent = UI.getGreeting();
-                // Обновить имя и аватар
                 const profile = Data.profile;
                 const userNameEl = document.getElementById('userName');
                 if (userNameEl) userNameEl.textContent = profile.name;
@@ -2320,6 +2423,9 @@
                     case 'alltasks':
                         this.renderAllTasks(container);
                         break;
+                    case 'stats':
+                        this.renderStats(container);
+                        break;
                     case 'settings':
                         this.renderSettings(container);
                         break;
@@ -2330,6 +2436,7 @@
 
             // ================== КАЛЕНДАРЬ ==================
             renderCalendar(container) {
+                // (без изменений, как в предыдущей версии)
                 const view = Calendar.getView();
                 const baseDate = Calendar.getBaseDate();
                 const selectedDate = Calendar.getSelectedDate();
@@ -2529,9 +2636,31 @@
                         }).join('')}
                     </div>
                 `;
+                // Клик по журналу -> показать список задач этого журнала
                 container.querySelectorAll('.journal-card-mini').forEach(el => {
                     el.addEventListener('click', function() {
-                        UI.toast('📚 Журнал "' + this.dataset.journal + '"', 'info');
+                        const journalName = this.dataset.journal;
+                        const tasks = Data.tasks.filter(t => t.journal === journalName);
+                        if (tasks.length === 0) {
+                            UI.toast('В журнале "' + journalName + '" нет задач', 'info');
+                            return;
+                        }
+                        // Переключаемся на страницу "Все задачи" и фильтруем по этому журналу
+                        App.navigateTo('alltasks');
+                        // Устанавливаем фильтр
+                        setTimeout(() => {
+                            const filterChips = document.querySelectorAll('#journalFilters .chip');
+                            filterChips.forEach(chip => {
+                                chip.classList.toggle('active', chip.dataset.filterJournal === journalName);
+                            });
+                            // Триггерим событие для применения фильтра
+                            const activeChip = document.querySelector(
+                                '#journalFilters .chip.active');
+                            if (activeChip) {
+                                const event = new Event('click');
+                                activeChip.dispatchEvent(event);
+                            }
+                        }, 100);
                     });
                 });
             },
@@ -2556,12 +2685,22 @@
                         const progress = total > 0 ? Math.round((done / total) * 100) : 0;
                         const checkpoints = goal.checkpoints ? goal.checkpoints.map(d => UI.formatDate(d)).join(
                             ', ') : '—';
-                        // Фото, привязанные к цели
                         const goalPhotos = Data.photos.filter(p => p.goalId === goal.id);
                         let photoHTML = '';
                         if (goalPhotos.length > 0) {
                             photoHTML =
                                 `<div class="goal-photo"><img src="${goalPhotos[0].data}" alt="Фото к цели"></div>`;
+                        }
+                        // Список привязанных задач
+                        let tasksListHTML = '';
+                        if (tasks.length > 0) {
+                            tasksListHTML =
+                                `<div class="goal-tasks-list"><strong>Привязанные задачи:</strong>`;
+                            tasks.forEach(task => {
+                                tasksListHTML +=
+                                    `<div class="goal-task-item"><span>${task.title}</span><span class="task-status ${Data.getTaskStatus(task, new Date().toISOString().split('T')[0])}">${Data.getTaskStatus(task, new Date().toISOString().split('T')[0])}</span></div>`;
+                            });
+                            tasksListHTML += `</div>`;
                         }
                         container.innerHTML += `
                             <div class="goal-card" data-goal-id="${goal.id}">
@@ -2576,6 +2715,7 @@
                                 <div class="goal-meta"><span>📅 Дедлайн: ${UI.formatDate(goal.deadline)}</span><span>🎯 Контрольные точки: ${checkpoints}</span></div>
                                 <div class="goal-progress"><div class="progress"><div class="progress-bar" style="width:${progress}%;"></div></div></div>
                                 <div class="goal-meta"><span>${done}/${total} задач выполнено</span></div>
+                                ${tasksListHTML}
                                 <div class="goal-actions">
                                     <button class="btn btn-sm btn-secondary edit-goal-btn" data-goal-id="${goal.id}">✏️</button>
                                     <button class="btn btn-sm btn-danger delete-goal-btn" data-goal-id="${goal.id}">🗑</button>
@@ -2611,16 +2751,6 @@
             // ================== ПРОФИЛЬ ==================
             renderProfile(container) {
                 const profile = Data.profile;
-                const isDark = document.body.classList.contains('dark');
-                const themes = ['default', 'jade', 'ruby', 'sapphire', 'amber', 'coral', 'amethyst'];
-                let themeChips = '';
-                themes.forEach(t => {
-                    const isActive = document.body.classList.contains('theme-' + t);
-                    const bg = t !== 'default' ? 'var(--primary)' : 'var(--card-border)';
-                    themeChips +=
-                        `<span class="chip ${isActive ? 'active' : ''}" data-theme="${t}" style="width:32px;height:32px;padding:0;border-radius:60px;background:${bg};display:inline-block;cursor:pointer;border:2px solid transparent;transition:all var(--transition);${isActive ? 'border-color:var(--primary);' : ''}"></span>`;
-                });
-
                 container.innerHTML = `
                     <div class="card" style="text-align:center;">
                         <div class="avatar avatar-xl" style="margin:0 auto;width:88px;height:88px;font-size:36px;"><span>${profile.name.charAt(0).toUpperCase()}</span></div>
@@ -2632,7 +2762,6 @@
                             <div><span style="font-size:20px;font-weight:700;">${profile.weight} кг</span><br><span style="font-size:13px;color:var(--text-secondary);">Вес</span></div>
                         </div>
                     </div>
-
                     <div class="card" style="margin-top:16px;">
                         <h3 style="font-size:18px;font-weight:600;margin-bottom:12px;">Параметры тела</h3>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -2645,19 +2774,6 @@
                             <div style="grid-column:span 2;"><label class="input-label">Вес (кг)</label><input type="number" class="input" id="pWeight" value="${profile.weight}" step="0.1"></div>
                         </div>
                     </div>
-
-                    <div class="card" style="margin-top:16px;">
-                        <h3 style="font-size:18px;font-weight:600;margin-bottom:12px;">Настройки</h3>
-                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--card-border);">
-                            <span>Тёмный режим</span>
-                            <label class="switch"><input type="checkbox" id="darkModeSwitch" ${isDark ? 'checked' : ''}><span class="slider"></span></label>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;padding:8px 0;">
-                            <span>Тема</span>
-                            <div style="display:flex;gap:8px;">${themeChips}</div>
-                        </div>
-                    </div>
-
                     <button class="btn" id="saveProfileBtn" style="width:100%;margin-top:16px;">💾 Сохранить профиль</button>
                 `;
 
@@ -2690,20 +2806,6 @@
                         App.renderProfile(container);
                     });
                 }
-
-                const darkSwitch = container.querySelector('#darkModeSwitch');
-                if (darkSwitch) darkSwitch.addEventListener('change', () => { UI.toggleDarkMode(); });
-
-                container.querySelectorAll('[data-theme]').forEach(chip => {
-                    chip.addEventListener('click', function() {
-                        const theme = this.dataset.theme;
-                        document.body.className = document.body.className.split(' ').filter(c => !c.startsWith(
-                            'theme-')).join('');
-                        if (theme !== 'default') document.body.classList.add('theme-' + theme);
-                        UI.toast('🎨 Тема: ' + theme, 'info', 1500);
-                        App.renderProfile(container);
-                    });
-                });
             },
 
             // ================== ЗАМЕТКИ ==================
@@ -2869,6 +2971,106 @@
                 });
             },
 
+            // ================== СТАТИСТИКА ==================
+            renderStats(container) {
+                const tasks = Data.tasks;
+                const journals = Data.journals;
+                // Общая статистика
+                const totalTasks = tasks.length;
+                const doneTasks = tasks.reduce((acc, t) => acc + t.completedDates.length, 0);
+                const missedTasks = tasks.reduce((acc, t) => acc + t.missedDates.length, 0);
+                const pendingTasks = totalTasks > 0 ? totalTasks - doneTasks - missedTasks : 0;
+                // Распределение по журналам
+                const journalStats = journals.map(j => {
+                    const count = tasks.filter(t => t.journal === j.name).length;
+                    return { name: j.name, count, icon: j.icon || '📌' };
+                });
+
+                container.innerHTML = `
+                    <div class="section-header"><h2>Статистика</h2></div>
+                    <div class="stats-container">
+                        <div class="stats-row">
+                            <div class="stat-box"><div class="stat-number">${totalTasks}</div><div class="stat-label">Всего задач</div></div>
+                            <div class="stat-box"><div class="stat-number">${doneTasks}</div><div class="stat-label">Выполнено</div></div>
+                            <div class="stat-box"><div class="stat-number">${pendingTasks}</div><div class="stat-label">Ожидает</div></div>
+                            <div class="stat-box"><div class="stat-number">${missedTasks}</div><div class="stat-label">Пропущено</div></div>
+                        </div>
+                        <div class="card">
+                            <h3 style="font-size:18px;font-weight:600;margin-bottom:12px;">Распределение по журналам</h3>
+                            <div class="chart-container">
+                                <canvas id="statsChart" width="300" height="300"></canvas>
+                            </div>
+                            <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+                                ${journalStats.map(j => `
+                                    <span style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text-secondary);">
+                                        <span style="display:inline-block;width:12px;height:12px;border-radius:4px;background:${getColor(j.name)};"></span>
+                                        ${j.icon} ${j.name}: ${j.count}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                function getColor(name) {
+                    const colors = {
+                        'тело': '#ff6b6b',
+                        'питание': '#ffd93d',
+                        'дела': '#6bcb77',
+                        'учеба': '#4d96ff',
+                        'хобби': '#9b59b6',
+                        'путешествия': '#f39c12',
+                        'долги': '#e74c3c',
+                        'другое': '#95a5a6'
+                    };
+                    return colors[name] || '#6c5ce7';
+                }
+
+                // Рисуем круговую диаграмму
+                setTimeout(() => {
+                    const canvas = document.getElementById('statsChart');
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    const data = journalStats.filter(j => j.count > 0);
+                    if (data.length === 0) {
+                        ctx.fillStyle = '#ccc';
+                        ctx.font = '16px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('Нет данных', canvas.width / 2, canvas.height / 2);
+                        return;
+                    }
+                    const total = data.reduce((s, j) => s + j.count, 0);
+                    const colors = data.map(j => getColor(j.name));
+                    let startAngle = -Math.PI / 2;
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    const radius = Math.min(canvas.width, canvas.height) / 2 - 10;
+                    data.forEach((j, i) => {
+                        const sliceAngle = (j.count / total) * 2 * Math.PI;
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+                        ctx.closePath();
+                        ctx.fillStyle = colors[i];
+                        ctx.fill();
+                        // Легенда внутри
+                        const midAngle = startAngle + sliceAngle / 2;
+                        const labelRadius = radius * 0.65;
+                        const x = centerX + Math.cos(midAngle) * labelRadius;
+                        const y = centerY + Math.sin(midAngle) * labelRadius;
+                        if (j.count > 1) {
+                            ctx.fillStyle = '#fff';
+                            ctx.font = 'bold 12px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(j.count, x, y);
+                        }
+                        startAngle += sliceAngle;
+                    });
+                    // Легенда под графиком уже есть
+                }, 50);
+            },
+
             // ================== НАСТРОЙКИ ==================
             renderSettings(container) {
                 const isDark = document.body.classList.contains('dark');
@@ -2908,12 +3110,10 @@
                     </div>
                 `;
 
-                // Тёмный режим
                 document.getElementById('settingsDarkSwitch').addEventListener('change', function() {
                     UI.toggleDarkMode();
                 });
 
-                // Цветовые темы
                 container.querySelectorAll('[data-theme]').forEach(chip => {
                     chip.addEventListener('click', function() {
                         const theme = this.dataset.theme;
@@ -2925,20 +3125,18 @@
                     });
                 });
 
-                // Экспорт
                 document.getElementById('exportDataBtn').addEventListener('click', function() {
                     const json = Data.exportData();
                     const blob = new Blob([json], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'skillquest_data_' + new Date().toISOString().slice(0,10) + '.json';
+                    a.download = 'skillquest_data_' + new Date().toISOString().slice(0, 10) + '.json';
                     a.click();
                     URL.revokeObjectURL(url);
                     UI.toast('✅ Данные экспортированы', 'success');
                 });
 
-                // Импорт
                 document.getElementById('importDataBtn').addEventListener('click', function() {
                     document.getElementById('importFileInput').click();
                 });
@@ -2958,7 +3156,6 @@
                     this.value = '';
                 });
 
-                // Синхронизация (заглушка)
                 document.getElementById('syncDevicesBtn').addEventListener('click', function() {
                     UI.toast('🔗 Функция синхронизации будет доступна в будущих обновлениях.', 'info', 4000);
                 });
