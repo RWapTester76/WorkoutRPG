@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest</title>
     <style>
-        /* ===== ДИЗАЙН-СИСТЕМА (без изменений) ===== */
+        /* ===== ДИЗАЙН-СИСТЕМА ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
             --bg: #f5f7fb;
@@ -24,13 +24,15 @@
             --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
             --spring: 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            --bottom-nav-height: 72px;
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
         }
         body {
             font-family: var(--font);
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            padding: 0 16px 24px;
+            padding: 0 16px calc(var(--bottom-nav-height) + 24px + var(--safe-area-bottom));
             transition: background var(--transition);
         }
         body.dark {
@@ -144,101 +146,79 @@
         .page.active { display: block; }
         @keyframes fadeUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
 
-        /* ===== УГЛОВОЕ МЕНЮ (перевёрнутая Г) ===== */
-        .corner-menu {
+        /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
+        .bottom-nav {
             position: fixed;
-            bottom: 90px;
-            right: 20px;
-            z-index: 30;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: flex-end;
-            gap: 12px;
-            pointer-events: none;
-        }
-        .corner-menu.open { pointer-events: auto; }
-        .corner-menu .menu-item {
-            width: 56px; height: 56px;
-            border-radius: 60px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+            padding-bottom: var(--safe-area-bottom);
             background: var(--card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--card-border);
             display: flex;
+            align-items: stretch;
+            z-index: 20;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .bottom-nav::-webkit-scrollbar { display: none; }
+        .bottom-nav .nav-item {
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            color: var(--text);
+            gap: 2px;
+            padding: 8px 4px;
+            color: var(--text-tertiary);
+            font-size: 10px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all var(--spring);
-            transform: scale(0);
-            opacity: 0;
-            pointer-events: none;
+            transition: all var(--transition);
+            min-width: 56px;
             position: relative;
         }
-        .corner-menu.open .menu-item {
-            transform: scale(1);
-            opacity: 1;
-            pointer-events: auto;
+        .bottom-nav .nav-item .icon {
+            font-size: 22px;
+            transition: all var(--transition);
         }
-        .corner-menu .menu-item:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--primary);
-        }
-        .corner-menu .menu-item .tooltip {
-            position: absolute;
-            right: 64px;
-            background: var(--text);
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 40px;
-            font-size: 12px;
-            font-weight: 500;
+        .bottom-nav .nav-item .label {
+            font-size: 9px;
             white-space: nowrap;
-            opacity: 0;
-            transition: opacity var(--transition);
-            pointer-events: none;
         }
-        .corner-menu .menu-item:hover .tooltip { opacity: 1; }
-        .corner-menu .menu-item:nth-child(1) { transition-delay: 0.05s; }
-        .corner-menu .menu-item:nth-child(2) { transition-delay: 0.10s; }
-        .corner-menu .menu-item:nth-child(3) { transition-delay: 0.15s; }
-        .corner-menu .menu-item:nth-child(4) { transition-delay: 0.20s; }
-        .corner-menu .menu-item:nth-child(5) { transition-delay: 0.25s; }
-        .corner-menu .menu-item:nth-child(6) { transition-delay: 0.30s; }
-        .corner-menu .menu-item:nth-child(7) { transition-delay: 0.35s; }
-        .corner-menu .menu-item:nth-child(8) { transition-delay: 0.40s; }
-        .corner-menu .menu-item:nth-child(9) { transition-delay: 0.45s; }
-
-        /* Основная FAB для меню */
-        .fab-main {
-            position: fixed;
-            bottom: 24px;
-            right: 20px;
-            width: 64px;
-            height: 64px;
-            border-radius: 60px;
-            background: var(--primary);
+        .bottom-nav .nav-item.active {
+            color: var(--primary);
+        }
+        .bottom-nav .nav-item.active .icon {
+            transform: scale(1.1);
+        }
+        .bottom-nav .nav-item .badge {
+            position: absolute;
+            top: 4px;
+            right: 50%;
+            transform: translateX(50%);
+            background: #ff6b6b;
             color: #fff;
-            border: none;
-            font-size: 36px;
-            box-shadow: 0 8px 24px rgba(108,92,231,0.40);
-            cursor: pointer;
-            transition: all var(--spring);
-            z-index: 40;
-            display: flex;
+            font-size: 9px;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            border-radius: 40px;
+            display: none;
             align-items: center;
             justify-content: center;
+            line-height: 1;
         }
-        .fab-main:hover { transform: scale(1.05); box-shadow: 0 12px 32px rgba(108,92,231,0.50); }
-        .fab-main:active { transform: scale(0.92); }
-        .fab-main.open { transform: rotate(45deg); }
+        .bottom-nav .nav-item .badge.show { display: flex; }
 
-        /* Дополнительная FAB для новой задачи */
+        /* ===== FAB для новой задачи ===== */
         .fab-add {
             position: fixed;
-            bottom: 100px;
+            bottom: calc(var(--bottom-nav-height) + 16px + var(--safe-area-bottom));
             right: 20px;
             width: 56px;
             height: 56px;
@@ -247,23 +227,15 @@
             color: #fff;
             border: none;
             font-size: 28px;
-            box-shadow: 0 4px 16px rgba(108,92,231,0.30);
+            box-shadow: 0 4px 16px rgba(108,92,231,0.40);
             cursor: pointer;
             transition: all var(--spring);
-            z-index: 35;
+            z-index: 15;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0;
-            transform: scale(0.8);
-            pointer-events: none;
         }
-        .fab-add.visible {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: auto;
-        }
-        .fab-add:hover { transform: scale(1.05); box-shadow: 0 8px 24px rgba(108,92,231,0.40); }
+        .fab-add:hover { transform: scale(1.05); box-shadow: 0 8px 24px rgba(108,92,231,0.50); }
         .fab-add:active { transform: scale(0.92); }
 
         /* ===== КАРТОЧКИ, СПИСКИ, КАЛЕНДАРЬ ===== */
@@ -478,7 +450,7 @@
 
         /* ===== TOAST ===== */
         .toast {
-            position: fixed; bottom: 100px; left: 50%;
+            position: fixed; bottom: calc(var(--bottom-nav-height) + 80px + var(--safe-area-bottom)); left: 50%;
             transform: translateX(-50%) translateY(80px);
             padding: 12px 24px;
             background: var(--text);
@@ -499,11 +471,6 @@
 
         /* ===== АДАПТИВ ===== */
         @media (max-width: 640px) {
-            .corner-menu .menu-item { width: 48px; height: 48px; font-size: 20px; }
-            .corner-menu .menu-item .tooltip { display: none; }
-            .fab-main { width: 56px; height: 56px; font-size: 30px; bottom: 16px; right: 16px; }
-            .fab-add { width: 48px; height: 48px; font-size: 24px; bottom: 80px; right: 16px; }
-            .corner-menu { bottom: 80px; right: 16px; gap: 8px; }
             .stats-grid { grid-template-columns: repeat(3,1fr); gap: 8px; }
             .stat-card .stat-number { font-size: 22px; }
             .journals-grid { grid-template-columns: repeat(2,1fr); }
@@ -515,6 +482,8 @@
             .header-title { font-size: 20px; }
             .modal { padding: 16px; }
             .header-right .btn-help { width: 36px; height: 36px; font-size: 18px; }
+            .bottom-nav .nav-item { min-width: 44px; padding: 4px 2px; }
+            .bottom-nav .nav-item .label { font-size: 8px; }
         }
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -533,7 +502,6 @@
             <h1 class="header-title" id="userName">Герой</h1>
         </div>
         <div class="header-right">
-            <!-- Кнопка помощи (инфо) -->
             <button class="btn-help" id="helpBtn" aria-label="Помощь">?</button>
             <div class="avatar" id="avatarPreview">
                 <span id="avatarInitials">Г</span>
@@ -545,23 +513,48 @@
     <!-- Контент -->
     <main id="mainContent"></main>
 
-    <!-- Угловое меню -->
-    <div class="corner-menu" id="cornerMenu">
-        <div class="menu-item" data-page="home">🏠<span class="tooltip">Главная</span></div>
-        <div class="menu-item" data-page="calendar">📅<span class="tooltip">Календарь</span></div>
-        <div class="menu-item" data-page="journals">📚<span class="tooltip">Журналы</span></div>
-        <div class="menu-item" data-page="goals">🎯<span class="tooltip">Цели</span></div>
-        <div class="menu-item" data-page="profile">👤<span class="tooltip">Профиль</span></div>
-        <div class="menu-item" data-page="notes">📝<span class="tooltip">Заметки</span></div>
-        <div class="menu-item" data-page="gallery">🖼<span class="tooltip">Галерея</span></div>
-        <div class="menu-item" data-page="alltasks">📋<span class="tooltip">Все задачи</span></div>
-        <div class="menu-item" data-page="settings">⚙️<span class="tooltip">Настройки</span></div>
-    </div>
+    <!-- Нижняя навигация -->
+    <nav class="bottom-nav" id="bottomNav">
+        <div class="nav-item active" data-page="home">
+            <span class="icon">🏠</span>
+            <span class="label">Главная</span>
+        </div>
+        <div class="nav-item" data-page="calendar">
+            <span class="icon">📅</span>
+            <span class="label">Календарь</span>
+        </div>
+        <div class="nav-item" data-page="journals">
+            <span class="icon">📚</span>
+            <span class="label">Журналы</span>
+        </div>
+        <div class="nav-item" data-page="goals">
+            <span class="icon">🎯</span>
+            <span class="label">Цели</span>
+            <span class="badge" id="goalsBadge">0</span>
+        </div>
+        <div class="nav-item" data-page="profile">
+            <span class="icon">👤</span>
+            <span class="label">Профиль</span>
+        </div>
+        <div class="nav-item" data-page="notes">
+            <span class="icon">📝</span>
+            <span class="label">Заметки</span>
+        </div>
+        <div class="nav-item" data-page="gallery">
+            <span class="icon">🖼</span>
+            <span class="label">Галерея</span>
+        </div>
+        <div class="nav-item" data-page="alltasks">
+            <span class="icon">📋</span>
+            <span class="label">Все задачи</span>
+        </div>
+        <div class="nav-item" data-page="settings">
+            <span class="icon">⚙️</span>
+            <span class="label">Настройки</span>
+        </div>
+    </nav>
 
-    <!-- Основная FAB (меню) -->
-    <button class="fab-main" id="fabMain" aria-label="Меню">+</button>
-
-    <!-- Дополнительная FAB (новая задача) -->
+    <!-- FAB для новой задачи -->
     <button class="fab-add" id="fabAdd" aria-label="Новая задача">➕</button>
 
     <!-- ===== МОДАЛКИ ===== -->
@@ -713,7 +706,7 @@
         </div>
     </div>
 
-    <!-- Инфо-модалка (помощь) -->
+    <!-- Помощь -->
     <div class="modal-overlay" id="helpModal">
         <div class="modal">
             <button class="modal-close" id="helpModalClose">&times;</button>
@@ -728,7 +721,7 @@
                 <p><strong>🖼 Галерея</strong> – храните фото достижений с подписями.</p>
                 <p><strong>📋 Все задачи</strong> – полный список задач с фильтрами по журналу и статусу.</p>
                 <p><strong>⚙️ Настройки</strong> – тёмный режим, цветовые темы, экспорт/импорт данных.</p>
-                <p><strong>➕ Новая задача</strong> – кнопка рядом с меню создаёт задачу.</p>
+                <p><strong>➕ Новая задача</strong> – кнопка в правом нижнем углу создаёт задачу.</p>
                 <p><strong>💡 Опыт</strong> – каждая минута задачи даёт опыт: 0.01 в журнал и 0.005 в общий уровень. Уровень повышается каждые 100 XP.</p>
                 <p style="margin-top:12px;"><em>SkillQuest – твой путь к саморазвитию! 🚀</em></p>
             </div>
@@ -1106,7 +1099,7 @@
                     1500);
             },
 
-            // ---- Модалка задачи (с чекбоксами) ----
+            // ---- Модалка задачи ----
             openTaskModal(taskId) {
                 const modal = document.getElementById('taskModal');
                 const form = document.getElementById('taskForm');
@@ -1528,31 +1521,16 @@
             init() {
                 this._unsubscribe = Data.subscribe(() => { this.renderCurrentPage(); });
 
-                // Угловое меню
-                const fabMain = document.getElementById('fabMain');
-                const menu = document.getElementById('cornerMenu');
-                const fabAdd = document.getElementById('fabAdd');
-
-                fabMain.addEventListener('click', function() {
-                    this.classList.toggle('open');
-                    menu.classList.toggle('open');
-                    fabAdd.classList.toggle('visible');
-                });
-
-                // Пункты меню
-                document.querySelectorAll('.menu-item').forEach(item => {
+                // Навигация
+                document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
                     item.addEventListener('click', () => {
                         const page = item.dataset.page;
                         this.navigateTo(page);
-                        fabMain.classList.remove('open');
-                        menu.classList.remove('open');
-                        fabAdd.classList.remove('visible');
                     });
                 });
 
-                // Кнопка новой задачи
-                fabAdd.addEventListener('click', function(e) {
-                    e.stopPropagation();
+                // FAB
+                document.getElementById('fabAdd').addEventListener('click', function() {
                     UI.openTaskModal(null);
                 });
 
@@ -1575,7 +1553,7 @@
                     reader.readAsDataURL(file);
                 });
 
-                // Кнопка помощи (инфо)
+                // Помощь
                 document.getElementById('helpBtn').addEventListener('click', function() {
                     document.getElementById('helpModal').classList.add('open');
                 });
@@ -1638,6 +1616,9 @@
 
             navigateTo(page) {
                 this._currentPage = page;
+                document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.page === page);
+                });
                 this.renderCurrentPage();
                 const titles = {
                     home: 'Главная',
@@ -1705,7 +1686,7 @@
                 const initialsEl = document.getElementById('avatarInitials');
                 if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
 
-                // Аватар
+                // Обновляем аватар в шапке
                 const avatarEl = document.getElementById('avatarPreview');
                 if (avatarEl) {
                     if (profile.avatar) {
@@ -1812,6 +1793,7 @@
                     </div>
                 `;
 
+                // Обработчики
                 container.querySelectorAll('[data-nav]').forEach(btn => {
                     btn.addEventListener('click', () => { this.navigateTo(btn.dataset.nav); });
                 });
@@ -1848,13 +1830,18 @@
                         UI.toast('📚 Журнал "' + this.dataset.journal + '"', 'info');
                     });
                 });
+
+                // Бейдж целей
+                const badge = document.getElementById('goalsBadge');
+                if (badge) {
+                    const count = data.goals.filter(g => !g.achieved).length;
+                    badge.textContent = count;
+                    badge.className = 'badge' + (count > 0 ? ' show' : '');
+                }
             },
 
             // ================== CALENDAR ==================
             renderCalendar(container) {
-                // Полностью идентичен предыдущей версии, без изменений.
-                // Я оставлю его кратким, чтобы не раздувать код.
-                // Он полностью рабочий.
                 const view = Calendar.getView();
                 const baseDate = Calendar.getBaseDate();
                 const selectedDate = Calendar.getSelectedDate();
@@ -1939,6 +1926,7 @@
                     </div>
                 `;
 
+                // Обработчики
                 container.querySelectorAll('[data-view]').forEach(btn => {
                     btn.addEventListener('click', function() {
                         Calendar.setView(this.dataset.view);
@@ -2125,7 +2113,7 @@
                 });
             },
 
-            // ================== ПРОФИЛЬ (с полоской опыта) ==================
+            // ================== ПРОФИЛЬ ==================
             renderProfile(container) {
                 const profile = Data.profile;
                 const { level, exp, needed } = Data.recalcLevel();
@@ -2212,7 +2200,6 @@
 
                         Data.save();
                         UI.toast('✅ Профиль сохранён!', 'success');
-                        // Обновляем шапку
                         document.getElementById('userName').textContent = name;
                         document.getElementById('avatarInitials').textContent = name.charAt(0).toUpperCase();
                         App.renderProfile(container);
