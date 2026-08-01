@@ -1,7 +1,3 @@
-// ============================================================
-//  APP — Главный контроллер
-// ============================================================
-
 const App = {
     _unsubscribe: null,
     _currentPage: 'home',
@@ -86,7 +82,10 @@ const App = {
         this._currentPage = page;
 
         // Обновляем активный пункт в нижнем меню
-        document.querySelectorAll('.bottom-nav-item').forEach(item => {
+        const titleEl = document.querySelector('.header .title-1');
+if (titleEl) {
+    titleEl.textContent = titles[page] || 'SkillQuest';
+}
             item.classList.toggle('active', item.dataset.page === page);
         });
 
