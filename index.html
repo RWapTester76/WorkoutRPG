@@ -255,6 +255,8 @@
         .modal .form-row { display:flex; gap:var(--spacing-md); flex-wrap:wrap; }
         .modal .form-row .form-group { flex:1; min-width:120px; }
         .modal .btn-group { display:flex; gap:var(--spacing-md); margin-top:var(--spacing-lg); justify-content:flex-end; }
+        .modal .task-detail-item { padding:var(--spacing-sm) 0; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; }
+        .modal .task-detail-item .label { color:var(--color-text-secondary); font-weight:var(--font-weight-medium); }
         /* ====== BOTTOM NAV ====== */
         .bottom-nav {
             position:fixed; bottom:0; left:0; right:0;
@@ -374,7 +376,12 @@
         .section-header { margin-bottom:var(--spacing-md); }
         .section-header .title-2 { color:var(--color-text); }
         .tasks-list { display:flex; flex-direction:column; gap:var(--spacing-sm); }
-        .task-item { display:flex; align-items:center; gap:var(--spacing-md); padding:var(--spacing-md); background:var(--color-surface); border-radius:var(--radius-md); border:1px solid var(--color-border-light); transition:all var(--transition-base); cursor:pointer; }
+        .task-item {
+            display:flex; align-items:center; gap:var(--spacing-md); padding:var(--spacing-md);
+            background:var(--color-surface); border-radius:var(--radius-md);
+            border:1px solid var(--color-border-light); transition:all var(--transition-base);
+            cursor:pointer; position:relative;
+        }
         .task-item:hover { transform:translateX(4px); box-shadow:var(--shadow-sm); }
         .task-item .task-icon { font-size:var(--font-size-xl); width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:var(--color-background-secondary); border-radius:var(--radius-sm); flex-shrink:0; }
         .task-item .task-info { flex:1; min-width:0; }
@@ -384,6 +391,7 @@
         .task-item .task-status.done { background:var(--color-success); color:var(--color-text-inverse); }
         .task-item .task-status.pending { background:var(--color-warning); color:var(--color-text); }
         .task-item .task-status.missed { background:var(--color-error); color:var(--color-text-inverse); }
+        .task-item .task-actions { display:flex; gap:var(--spacing-xs); flex-shrink:0; }
         .tasks-empty { text-align:center; padding:var(--spacing-2xl); color:var(--color-text-secondary); background:var(--color-background-secondary); border-radius:var(--radius-md); border:2px dashed var(--color-border); }
         .tasks-empty .empty-icon { font-size:var(--font-size-4xl); margin-bottom:var(--spacing-md); }
         .journals-grid { gap:var(--spacing-md); }
@@ -497,11 +505,11 @@
         </button>
     </div>
 
-    <!-- Модальное окно для создания задачи -->
+    <!-- Модальное окно для создания/редактирования задачи -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal">
             <button class="modal-close" id="modalClose">&times;</button>
-            <h3 class="title-2">📝 Новая задача</h3>
+            <h3 class="title-2" id="modalTaskTitle">📝 Новая задача</h3>
             <form id="taskForm">
                 <div class="form-group">
                     <label class="input-label">Название</label>
@@ -569,9 +577,23 @@
                 </div>
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" id="modalCancel">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Создать</button>
+                    <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Создать</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для деталей задачи -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <button class="modal-close" id="detailClose">&times;</button>
+            <h3 class="title-2" id="detailTitle">📋 Детали задачи</h3>
+            <div id="detailContent"></div>
+            <div class="btn-group">
+                <button class="btn btn-danger" id="detailDelete">🗑 Удалить</button>
+                <button class="btn btn-primary" id="detailEdit">✏️ Редактировать</button>
+                <button class="btn btn-secondary" id="detailCloseBtn">Закрыть</button>
+            </div>
         </div>
     </div>
 
@@ -827,14 +849,45 @@
                 document.body.classList.toggle('dark');
                 this.toast('🌓 ' + (document.body.classList.contains('dark') ? 'Темный' : 'Светлый') + ' режим', 'info', 1500);
             },
-            // Открыть модалку создания задачи
-            openTaskModal() {
+
+            // ---- Модалка создания/редактирования задачи ----
+            openTaskModal(taskId) {
                 const modal = document.getElementById('taskModal');
                 const form = document.getElementById('taskForm');
-                // Установить сегодняшнюю дату по умолчанию
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('taskStart').value = today;
-                document.getElementById('taskEnd').value = today;
+                const isEdit = !!taskId;
+                const task = isEdit ? Data.tasks.find(t => t.id === taskId) : null;
+
+                // Заполняем поля
+                if (isEdit && task) {
+                    document.getElementById('modalTaskTitle').textContent = '✏️ Редактировать задачу';
+                    document.getElementById('modalSubmitBtn').textContent = 'Сохранить';
+                    document.getElementById('taskTitle').value = task.title;
+                    document.getElementById('taskJournal').value = task.journal;
+                    document.getElementById('taskStart').value = task.startDate || task.date || '';
+                    document.getElementById('taskEnd').value = task.endDate || task.date || '';
+                    const daysSelect = document.getElementById('taskDays');
+                    Array.from(daysSelect.options).forEach(opt => {
+                        opt.selected = task.daysOfWeek && task.daysOfWeek.includes(Number(opt.value));
+                    });
+                    document.getElementById('taskTime').value = task.time || '09:00';
+                    document.getElementById('taskDuration').value = task.duration || 30;
+                    document.getElementById('taskNote').value = task.note || '';
+                    document.getElementById('taskReminder').value = task.reminderMinutes || 0;
+                    document.getElementById('taskGoal').value = task.goalId || '';
+                } else {
+                    document.getElementById('modalTaskTitle').textContent = '📝 Новая задача';
+                    document.getElementById('modalSubmitBtn').textContent = 'Создать';
+                    form.reset();
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('taskStart').value = today;
+                    document.getElementById('taskEnd').value = today;
+                    document.getElementById('taskTime').value = '09:00';
+                    document.getElementById('taskDuration').value = 30;
+                    document.getElementById('taskNote').value = '';
+                    document.getElementById('taskReminder').value = 0;
+                    document.getElementById('taskGoal').value = '';
+                }
+
                 // Заполнить список целей
                 const goalSelect = document.getElementById('taskGoal');
                 goalSelect.innerHTML = '<option value="">— нет —</option>';
@@ -842,9 +895,12 @@
                     const opt = document.createElement('option');
                     opt.value = g.id;
                     opt.textContent = g.title;
+                    if (isEdit && task && task.goalId === g.id) opt.selected = true;
                     goalSelect.appendChild(opt);
                 });
+
                 modal.classList.add('open');
+
                 // Обработчик отправки формы
                 form.onsubmit = function(e) {
                     e.preventDefault();
@@ -858,32 +914,99 @@
                     const duration = Number(document.getElementById('taskDuration').value);
                     const note = document.getElementById('taskNote').value.trim();
                     const reminder = Number(document.getElementById('taskReminder').value);
-                    const goalId = document.getElementById('taskGoal').value ? document.getElementById('taskGoal').value : null;
+                    const goalId = document.getElementById('taskGoal').value || null;
+
                     if (!title || !startDate || !endDate || !time || duration <= 0) {
                         UI.toast('⚠️ Заполните все обязательные поля', 'error');
                         return;
                     }
-                    Data.addTask({
-                        title,
-                        journal,
-                        startDate,
-                        endDate,
-                        daysOfWeek,
-                        time,
-                        duration,
-                        note,
-                        reminderMinutes: reminder,
-                        goalId,
-                    });
-                    UI.toast('✅ Задача создана!', 'success');
+
+                    if (isEdit && task) {
+                        Data.updateTask(taskId, {
+                            title,
+                            journal,
+                            startDate,
+                            endDate,
+                            daysOfWeek,
+                            time,
+                            duration,
+                            note,
+                            reminderMinutes: reminder,
+                            goalId,
+                        });
+                        UI.toast('✅ Задача обновлена!', 'success');
+                    } else {
+                        Data.addTask({
+                            title,
+                            journal,
+                            startDate,
+                            endDate,
+                            daysOfWeek,
+                            time,
+                            duration,
+                            note,
+                            reminderMinutes: reminder,
+                            goalId,
+                        });
+                        UI.toast('✅ Задача создана!', 'success');
+                    }
                     modal.classList.remove('open');
-                    form.reset();
                     App.renderCurrentPage();
                 };
             },
+
             closeTaskModal() {
                 document.getElementById('taskModal').classList.remove('open');
                 document.getElementById('taskForm').reset();
+            },
+
+            // ---- Детали задачи ----
+            openTaskDetail(taskId) {
+                const task = Data.tasks.find(t => t.id === taskId);
+                if (!task) {
+                    UI.toast('Задача не найдена', 'error');
+                    return;
+                }
+                const modal = document.getElementById('detailModal');
+                const content = document.getElementById('detailContent');
+                const daysMap = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+                const daysStr = task.daysOfWeek && task.daysOfWeek.length > 0 ?
+                    task.daysOfWeek.map(d => daysMap[d]).join(', ') :
+                    'Каждый день';
+
+                const journal = Data.getJournalByName(task.journal);
+                const icon = journal ? journal.icon : '📌';
+
+                content.innerHTML = `
+                    <div class="task-detail-item"><span class="label">Название</span><span>${task.title}</span></div>
+                    <div class="task-detail-item"><span class="label">Журнал</span><span>${icon} ${task.journal}</span></div>
+                    <div class="task-detail-item"><span class="label">Период</span><span>${UI.formatDate(task.startDate)} – ${UI.formatDate(task.endDate)}</span></div>
+                    <div class="task-detail-item"><span class="label">Дни недели</span><span>${daysStr}</span></div>
+                    <div class="task-detail-item"><span class="label">Время</span><span>${task.time || '—'}</span></div>
+                    <div class="task-detail-item"><span class="label">Длительность</span><span>${task.duration || 0} мин</span></div>
+                    ${task.note ? `<div class="task-detail-item"><span class="label">Заметка</span><span>${task.note}</span></div>` : ''}
+                    ${task.reminderMinutes ? `<div class="task-detail-item"><span class="label">Напоминание</span><span>за ${task.reminderMinutes} мин</span></div>` : ''}
+                    ${task.goalId ? `<div class="task-detail-item"><span class="label">Цель</span><span>${Data.goals.find(g => g.id === task.goalId)?.title || '—'}</span></div>` : ''}
+                `;
+
+                // Сохраняем ID задачи в дата-атрибуте кнопок
+                document.getElementById('detailDelete').dataset.taskId = taskId;
+                document.getElementById('detailEdit').dataset.taskId = taskId;
+
+                modal.classList.add('open');
+            },
+
+            closeTaskDetail() {
+                document.getElementById('detailModal').classList.remove('open');
+            },
+
+            deleteTask(taskId) {
+                if (confirm('Удалить задачу?')) {
+                    Data.deleteTask(taskId);
+                    UI.toast('🗑 Задача удалена', 'info');
+                    this.closeTaskDetail();
+                    App.renderCurrentPage();
+                }
             }
         };
         window.UI = UI;
@@ -996,18 +1119,40 @@
                 const fab = document.getElementById('fabAddTask');
                 if (fab) {
                     fab.addEventListener('click', () => {
-                        UI.openTaskModal();
+                        UI.openTaskModal(null); // создание новой
                     });
                 }
                 const avatar = document.getElementById('avatarPreview');
                 if (avatar) avatar.addEventListener('click', () => { this.navigateTo('profile'); });
 
-                // Закрытие модалки
-                const modal = document.getElementById('taskModal');
+                // Закрытие модалки задачи
+                const taskModal = document.getElementById('taskModal');
                 document.getElementById('modalClose').addEventListener('click', () => { UI.closeTaskModal(); });
                 document.getElementById('modalCancel').addEventListener('click', () => { UI.closeTaskModal(); });
-                modal.addEventListener('click', function(e) {
+                taskModal.addEventListener('click', function(e) {
                     if (e.target === this) UI.closeTaskModal();
+                });
+
+                // Закрытие модалки деталей
+                const detailModal = document.getElementById('detailModal');
+                document.getElementById('detailClose').addEventListener('click', () => { UI.closeTaskDetail(); });
+                document.getElementById('detailCloseBtn').addEventListener('click', () => { UI.closeTaskDetail(); });
+                detailModal.addEventListener('click', function(e) {
+                    if (e.target === this) UI.closeTaskDetail();
+                });
+
+                // Кнопки в деталях
+                document.getElementById('detailDelete').addEventListener('click', function() {
+                    const taskId = this.dataset.taskId;
+                    UI.deleteTask(taskId);
+                });
+                document.getElementById('detailEdit').addEventListener('click', function() {
+                    const taskId = this.dataset.taskId;
+                    UI.closeTaskDetail();
+                    // Открываем модалку редактирования
+                    setTimeout(() => {
+                        UI.openTaskModal(taskId);
+                    }, 300);
                 });
 
                 let tapCount = 0;
@@ -1116,8 +1261,14 @@
                                 const icon = journal ? journal.icon : '📌';
                                 return `<div class="task-item" data-task-id="${task.id}">
                                     <div class="task-icon">${icon}</div>
-                                    <div class="task-info"><div class="task-title">${task.title}</div><div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div></div>
+                                    <div class="task-info">
+                                        <div class="task-title">${task.title}</div>
+                                        <div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div>
+                                    </div>
                                     <span class="task-status pending">Ожидает</span>
+                                    <div class="task-actions">
+                                        <button class="btn btn-sm btn-success complete-btn" data-task-id="${task.id}" data-date="${today}">Выполнить</button>
+                                    </div>
                                 </div>`;
                             }).join('')}
                         </div>
@@ -1138,20 +1289,44 @@
                     </section>
                 </div>`;
 
+                // Навигационные кнопки
                 container.querySelectorAll('[data-nav]').forEach(btn => {
                     btn.addEventListener('click', () => { this.navigateTo(btn.dataset.nav); });
                 });
+
+                // Клик по задаче — открыть детали
                 container.querySelectorAll('.task-item').forEach(el => {
-                    el.addEventListener('click', function() {
-                        const task = Data.tasks.find(t => t.id === this.dataset.taskId);
-                        if (task) UI.toast('📋 ' + task.title, 'info');
+                    el.addEventListener('click', function(e) {
+                        // Если клик на кнопке, не открываем детали
+                        if (e.target.closest('.complete-btn')) return;
+                        const taskId = this.dataset.taskId;
+                        if (taskId) UI.openTaskDetail(taskId);
                     });
                 });
+
+                // Кнопка "Выполнить" на главной
+                container.querySelectorAll('.complete-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const taskId = this.dataset.taskId;
+                        const dateStr = this.dataset.date;
+                        if (Data.completeTaskInstance(taskId, dateStr)) {
+                            UI.toast('✅ Задача выполнена!', 'success');
+                            App.renderCurrentPage();
+                        } else {
+                            UI.toast('⚠️ Не удалось выполнить задачу', 'error');
+                        }
+                    });
+                });
+
+                // Клик по журналу
                 container.querySelectorAll('.journal-card-mini').forEach(el => {
                     el.addEventListener('click', function() {
                         UI.toast('📚 Журнал "' + this.dataset.journal + '"', 'info');
                     });
                 });
+
+                // Бейдж целей
                 const goalsBadge = document.getElementById('goalsBadge');
                 if (goalsBadge) {
                     const activeGoals = data.goals.filter(g => !g.achieved).length;
@@ -1206,7 +1381,12 @@
                         const journal = Data.getJournalByName(task.journal);
                         const icon = journal ? journal.icon : '📌';
                         const statusLabels = { done:'✅ Выполнено', pending:'⏳ Ожидает', missed:'❌ Пропущено' };
-                        return `<div class="task-item"><div class="task-icon">${icon}</div><div class="task-info"><div class="task-title">${task.title}</div><div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div></div><span class="task-status ${status}">${statusLabels[status] || status}</span>${status === 'pending' ? `<button class="btn btn-sm btn-success" data-complete="${task.id}" data-date="${selectedStr}">Выполнить</button>` : ''}</div>`;
+                        return `<div class="task-item" data-task-id="${task.id}">
+                            <div class="task-icon">${icon}</div>
+                            <div class="task-info"><div class="task-title">${task.title}</div><div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div></div>
+                            <span class="task-status ${status}">${statusLabels[status] || status}</span>
+                            ${status === 'pending' ? `<div class="task-actions"><button class="btn btn-sm btn-success complete-btn" data-task-id="${task.id}" data-date="${selectedStr}">Выполнить</button></div>` : ''}
+                        </div>`;
                     }).join('')}</div></div>`;
                 }
 
@@ -1235,6 +1415,7 @@
                     ${dayDetailHTML}
                 </div>`;
 
+                // Обработчики
                 container.querySelectorAll('[data-view]').forEach(btn => {
                     btn.addEventListener('click', function() {
                         Calendar.setView(this.dataset.view);
@@ -1265,15 +1446,28 @@
                         App.renderCalendar(container);
                     });
                 });
-                container.querySelectorAll('[data-complete]').forEach(btn => {
+
+                // Кнопки "Выполнить" в календаре
+                container.querySelectorAll('.complete-btn').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        if (Data.completeTaskInstance(this.dataset.complete, this.dataset.date)) {
+                        if (Data.completeTaskInstance(this.dataset.taskId, this.dataset.date)) {
                             UI.toast('✅ Задача выполнена!', 'success');
                             App.renderCalendar(container);
                         }
                     });
                 });
+
+                // Клик по задаче — открыть детали
+                container.querySelectorAll('.task-item').forEach(el => {
+                    el.addEventListener('click', function(e) {
+                        if (e.target.closest('.complete-btn')) return;
+                        const taskId = this.dataset.taskId;
+                        if (taskId) UI.openTaskDetail(taskId);
+                    });
+                });
+
+                // Фильтры (пока визуально)
                 container.querySelectorAll('[data-filter]').forEach(chip => {
                     chip.addEventListener('click', function() {
                         this.classList.toggle('active');
@@ -1314,11 +1508,11 @@
                     const journal = Data.getJournalByName(task.journal);
                     const icon = journal ? journal.icon : '📌';
                     const statusLabels = { done:'✅', pending:'⏳', missed:'❌' };
-                    return `<div class="task-item" style="grid-column:span 7;">
+                    return `<div class="task-item" data-task-id="${task.id}" style="grid-column:span 7;">
                         <div class="task-icon">${icon}</div>
                         <div class="task-info"><div class="task-title">${task.title}</div><div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div></div>
                         <span class="task-status ${status}">${statusLabels[status] || status}</span>
-                        ${status === 'pending' ? `<button class="btn btn-sm btn-success" data-complete="${task.id}" data-date="${dateStr}">Выполнить</button>` : ''}
+                        ${status === 'pending' ? `<div class="task-actions"><button class="btn btn-sm btn-success complete-btn" data-task-id="${task.id}" data-date="${dateStr}">Выполнить</button></div>` : ''}
                     </div>`;
                 }).join('');
             },
