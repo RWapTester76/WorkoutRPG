@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest — Журнал прогресса</title>
     <style>
-        /* ====== ВСЕ СТИЛИ (те же, что были) ====== */
+        /* ====== ВСЕ СТИЛИ (без изменений) ====== */
         :root {
             --color-primary: #6C5CE7;
             --color-primary-dark: #5A4BD1;
@@ -1061,7 +1061,7 @@
                 }
             },
 
-            // ---- Модалка целей (исправленная) ----
+            // ---- Модалка целей ----
             openGoalModal: function(goalId) {
                 const modal = document.getElementById('goalModal');
                 const form = document.getElementById('goalForm');
@@ -1086,7 +1086,6 @@
 
                 modal.classList.add('open');
 
-                // Убираем предыдущие обработчики
                 form.onsubmit = null;
                 form.onsubmit = function(e) {
                     e.preventDefault();
@@ -1748,6 +1747,7 @@
                     const bg = t !== 'default' ? 'var(--color-primary)' : 'var(--color-border)';
                     themeChips += `<span class="chip ${isActive ? 'active' : ''}" data-theme="${t}" style="width:28px;height:28px;padding:0;border-radius:var(--radius-full);background:${bg};"></span>`;
                 });
+
                 container.innerHTML = `
                 <div class="home-content">
                     <div class="card" style="text-align:center;">
@@ -1763,11 +1763,34 @@
                     <div class="card">
                         <h3 class="title-2">Параметры тела</h3>
                         <div class="grid grid-2" style="margin-top:var(--spacing-md);">
-                            <div><span class="caption-1 text-secondary">Рост</span><br><span class="body-1">${profile.height} см</span></div>
-                            <div><span class="caption-1 text-secondary">Грудь</span><br><span class="body-1">${profile.chest} см</span></div>
-                            <div><span class="caption-1 text-secondary">Талия</span><br><span class="body-1">${profile.waist} см</span></div>
-                            <div><span class="caption-1 text-secondary">Бёдра</span><br><span class="body-1">${profile.hips} см</span></div>
-                            <div><span class="caption-1 text-secondary">Бицепс</span><br><span class="body-1">${profile.biceps} см</span></div>
+                            <div>
+                                <label class="input-label">Рост (см)</label>
+                                <input type="number" class="input" id="pHeight" value="${profile.height}" step="0.1">
+                            </div>
+                            <div>
+                                <label class="input-label">Грудь (см)</label>
+                                <input type="number" class="input" id="pChest" value="${profile.chest}" step="0.5">
+                            </div>
+                            <div>
+                                <label class="input-label">Талия (см)</label>
+                                <input type="number" class="input" id="pWaist" value="${profile.waist}" step="0.5">
+                            </div>
+                            <div>
+                                <label class="input-label">Бёдра (см)</label>
+                                <input type="number" class="input" id="pHips" value="${profile.hips}" step="0.5">
+                            </div>
+                            <div>
+                                <label class="input-label">Бицепс (см)</label>
+                                <input type="number" class="input" id="pBiceps" value="${profile.biceps}" step="0.5">
+                            </div>
+                            <div>
+                                <label class="input-label">Возраст</label>
+                                <input type="number" class="input" id="pAge" value="${profile.age}">
+                            </div>
+                            <div>
+                                <label class="input-label">Вес (кг)</label>
+                                <input type="number" class="input" id="pWeight" value="${profile.weight}" step="0.1">
+                            </div>
                         </div>
                     </div>
                     <div class="card">
@@ -1788,27 +1811,19 @@
                 const saveBtn = container.querySelector('#saveProfileBtn');
                 if (saveBtn) {
                     saveBtn.addEventListener('click', function() {
-                        // Обновляем поля из DOM
-                        const nameInput = container.querySelector('#pName');
-                        const ageInput = container.querySelector('#pAge');
-                        const weightInput = container.querySelector('#pWeight');
-                        const heightInput = container.querySelector('#pHeight');
-                        const chestInput = container.querySelector('#pChest');
-                        const waistInput = container.querySelector('#pWaist');
-                        const hipsInput = container.querySelector('#pHips');
-                        const bicepsInput = container.querySelector('#pBiceps');
+                        const name = document.getElementById('userName').textContent; // имя из шапки, но можно сделать поле
+                        // Можно добавить поле для имени, но пока оставим как есть
+                        // Обновляем данные из полей
+                        const age = parseInt(document.getElementById('pAge').value) || 0;
+                        const weight = parseFloat(document.getElementById('pWeight').value) || 0;
+                        const height = parseFloat(document.getElementById('pHeight').value) || 0;
+                        const chest = parseFloat(document.getElementById('pChest').value) || 0;
+                        const waist = parseFloat(document.getElementById('pWaist').value) || 0;
+                        const hips = parseFloat(document.getElementById('pHips').value) || 0;
+                        const biceps = parseFloat(document.getElementById('pBiceps').value) || 0;
 
-                        // Если поля существуют, берём их значения, иначе оставляем старые
-                        const name = nameInput ? nameInput.value : profile.name;
-                        const age = ageInput ? parseInt(ageInput.value) : profile.age;
-                        const weight = weightInput ? parseFloat(weightInput.value) : profile.weight;
-                        const height = heightInput ? parseFloat(heightInput.value) : profile.height;
-                        const chest = chestInput ? parseFloat(chestInput.value) : profile.chest;
-                        const waist = waistInput ? parseFloat(waistInput.value) : profile.waist;
-                        const hips = hipsInput ? parseFloat(hipsInput.value) : profile.hips;
-                        const biceps = bicepsInput ? parseFloat(bicepsInput.value) : profile.biceps;
-
-                        profile.name = name;
+                        // Обновляем профиль
+                        const profile = Data.profile;
                         profile.age = age;
                         profile.weight = weight;
                         profile.height = height;
@@ -1819,12 +1834,12 @@
 
                         Data.save();
                         UI.toast('✅ Профиль сохранён!', 'success');
-                        // Обновляем отображение имени в шапке
+                        // Обновляем отображение в шапке
                         const userNameEl = document.getElementById('userName');
                         if (userNameEl) userNameEl.textContent = profile.name;
                         const initialsEl = document.getElementById('avatarInitials');
                         if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
-                        // Перерисовываем профиль, чтобы обновить поля
+                        // Перерисовываем профиль, чтобы обновить значения
                         App.renderProfile(container);
                     });
                 }
