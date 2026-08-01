@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest</title>
     <style>
-        /* ===== ДИЗАЙН-СИСТЕМА ===== */
+        /* ===== ДИЗАЙН-СИСТЕМА (без изменений) ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
             --bg: #f5f7fb;
@@ -99,6 +99,30 @@
         .header-left { display: flex; flex-direction: column; }
         .header-greeting { font-size: 13px; color: var(--text-secondary); }
         .header-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-right .btn-help {
+            width: 40px; height: 40px;
+            border-radius: 60px;
+            background: var(--primary-bg);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .header-right .btn-help:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
         .avatar {
             width: 48px; height: 48px; border-radius: 60px;
             background: var(--primary-bg);
@@ -187,7 +211,8 @@
         .corner-menu .menu-item:nth-child(8) { transition-delay: 0.40s; }
         .corner-menu .menu-item:nth-child(9) { transition-delay: 0.45s; }
 
-        .fab {
+        /* Основная FAB для меню */
+        .fab-main {
             position: fixed;
             bottom: 24px;
             right: 20px;
@@ -206,9 +231,40 @@
             align-items: center;
             justify-content: center;
         }
-        .fab:hover { transform: scale(1.05); box-shadow: 0 12px 32px rgba(108,92,231,0.50); }
-        .fab:active { transform: scale(0.92); }
-        .fab.open { transform: rotate(45deg); }
+        .fab-main:hover { transform: scale(1.05); box-shadow: 0 12px 32px rgba(108,92,231,0.50); }
+        .fab-main:active { transform: scale(0.92); }
+        .fab-main.open { transform: rotate(45deg); }
+
+        /* Дополнительная FAB для новой задачи */
+        .fab-add {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 60px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            font-size: 28px;
+            box-shadow: 0 4px 16px rgba(108,92,231,0.30);
+            cursor: pointer;
+            transition: all var(--spring);
+            z-index: 35;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+        .fab-add.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+        .fab-add:hover { transform: scale(1.05); box-shadow: 0 8px 24px rgba(108,92,231,0.40); }
+        .fab-add:active { transform: scale(0.92); }
 
         /* ===== КАРТОЧКИ, СПИСКИ, КАЛЕНДАРЬ ===== */
         .level-card {
@@ -445,7 +501,8 @@
         @media (max-width: 640px) {
             .corner-menu .menu-item { width: 48px; height: 48px; font-size: 20px; }
             .corner-menu .menu-item .tooltip { display: none; }
-            .fab { width: 56px; height: 56px; font-size: 30px; bottom: 16px; right: 16px; }
+            .fab-main { width: 56px; height: 56px; font-size: 30px; bottom: 16px; right: 16px; }
+            .fab-add { width: 48px; height: 48px; font-size: 24px; bottom: 80px; right: 16px; }
             .corner-menu { bottom: 80px; right: 16px; gap: 8px; }
             .stats-grid { grid-template-columns: repeat(3,1fr); gap: 8px; }
             .stat-card .stat-number { font-size: 22px; }
@@ -457,6 +514,7 @@
             .photo-grid { grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); }
             .header-title { font-size: 20px; }
             .modal { padding: 16px; }
+            .header-right .btn-help { width: 36px; height: 36px; font-size: 18px; }
         }
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -474,9 +532,13 @@
             <span class="header-greeting" id="greetingText">Доброе утро 👋</span>
             <h1 class="header-title" id="userName">Герой</h1>
         </div>
-        <div class="avatar" id="avatarPreview">
-            <span id="avatarInitials">Г</span>
-            <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+        <div class="header-right">
+            <!-- Кнопка помощи (инфо) -->
+            <button class="btn-help" id="helpBtn" aria-label="Помощь">?</button>
+            <div class="avatar" id="avatarPreview">
+                <span id="avatarInitials">Г</span>
+                <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+            </div>
         </div>
     </header>
 
@@ -496,8 +558,11 @@
         <div class="menu-item" data-page="settings">⚙️<span class="tooltip">Настройки</span></div>
     </div>
 
-    <!-- FAB -->
-    <button class="fab" id="fabMain" aria-label="Меню">+</button>
+    <!-- Основная FAB (меню) -->
+    <button class="fab-main" id="fabMain" aria-label="Меню">+</button>
+
+    <!-- Дополнительная FAB (новая задача) -->
+    <button class="fab-add" id="fabAdd" aria-label="Новая задача">➕</button>
 
     <!-- ===== МОДАЛКИ ===== -->
 
@@ -645,6 +710,31 @@
                     <button type="submit" class="btn" id="noteSubmitBtn">Сохранить</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Инфо-модалка (помощь) -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal">
+            <button class="modal-close" id="helpModalClose">&times;</button>
+            <h3>📖 Руководство по SkillQuest</h3>
+            <div style="font-size:15px; line-height:1.6; color:var(--text-secondary);">
+                <p><strong>🏠 Главная</strong> – ваш дашборд: уровень, статистика, активные задачи и журналы.</p>
+                <p><strong>📅 Календарь</strong> – планируйте задачи по дням, неделям, месяцам и годам. Фильтруйте по журналам.</p>
+                <p><strong>📚 Журналы</strong> – 8 сфер жизни (тело, питание, дела, учёба, хобби, путешествия, долги, другое). Каждая задача приносит опыт в журнал.</p>
+                <p><strong>🎯 Цели</strong> – ставьте цели, привязывайте к ним задачи. При достижении всех задач цель закрывается, даётся бонусный опыт.</p>
+                <p><strong>👤 Профиль</strong> – редактируйте имя, загружайте аватар, смотрите параметры тела и настройки.</p>
+                <p><strong>📝 Заметки</strong> – быстрые записи, можно привязать к задаче.</p>
+                <p><strong>🖼 Галерея</strong> – храните фото достижений с подписями.</p>
+                <p><strong>📋 Все задачи</strong> – полный список задач с фильтрами по журналу и статусу.</p>
+                <p><strong>⚙️ Настройки</strong> – тёмный режим, цветовые темы, экспорт/импорт данных.</p>
+                <p><strong>➕ Новая задача</strong> – кнопка рядом с меню создаёт задачу.</p>
+                <p><strong>💡 Опыт</strong> – каждая минута задачи даёт опыт: 0.01 в журнал и 0.005 в общий уровень. Уровень повышается каждые 100 XP.</p>
+                <p style="margin-top:12px;"><em>SkillQuest – твой путь к саморазвитию! 🚀</em></p>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="helpCloseBtn">Понятно</button>
+            </div>
         </div>
     </div>
 
@@ -1439,20 +1529,31 @@
                 this._unsubscribe = Data.subscribe(() => { this.renderCurrentPage(); });
 
                 // Угловое меню
-                const fab = document.getElementById('fabMain');
+                const fabMain = document.getElementById('fabMain');
                 const menu = document.getElementById('cornerMenu');
-                fab.addEventListener('click', function() {
+                const fabAdd = document.getElementById('fabAdd');
+
+                fabMain.addEventListener('click', function() {
                     this.classList.toggle('open');
                     menu.classList.toggle('open');
+                    fabAdd.classList.toggle('visible');
                 });
 
+                // Пункты меню
                 document.querySelectorAll('.menu-item').forEach(item => {
                     item.addEventListener('click', () => {
                         const page = item.dataset.page;
                         this.navigateTo(page);
-                        fab.classList.remove('open');
+                        fabMain.classList.remove('open');
                         menu.classList.remove('open');
+                        fabAdd.classList.remove('visible');
                     });
+                });
+
+                // Кнопка новой задачи
+                fabAdd.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    UI.openTaskModal(null);
                 });
 
                 // Аватар
@@ -1472,6 +1573,20 @@
                         UI.toast('✅ Аватар обновлён', 'success');
                     };
                     reader.readAsDataURL(file);
+                });
+
+                // Кнопка помощи (инфо)
+                document.getElementById('helpBtn').addEventListener('click', function() {
+                    document.getElementById('helpModal').classList.add('open');
+                });
+                document.getElementById('helpModalClose').addEventListener('click', function() {
+                    document.getElementById('helpModal').classList.remove('open');
+                });
+                document.getElementById('helpCloseBtn').addEventListener('click', function() {
+                    document.getElementById('helpModal').classList.remove('open');
+                });
+                document.getElementById('helpModal').addEventListener('click', function(e) {
+                    if (e.target === this) this.classList.remove('open');
                 });
 
                 // Закрытие модалок
@@ -1510,19 +1625,6 @@
                         'settingsModal').classList.remove('open'); });
                 document.getElementById('settingsModal').addEventListener('click', function(e) { if (e.target === this)
                         document.getElementById('settingsModal').classList.remove('open'); });
-
-                // Демо-переключение тем
-                let tapCount = 0;
-                const header = document.querySelector('.header');
-                if (header) {
-                    header.addEventListener('click', function() {
-                        tapCount++;
-                        if (tapCount === 2) { UI.cycleTheme();
-                            tapCount = 0; }
-                        clearTimeout(window.tapTimer);
-                        window.tapTimer = setTimeout(() => { tapCount = 0; }, 500);
-                    });
-                }
 
                 setInterval(() => {
                     Data.autoMissTasks();
@@ -1657,10 +1759,11 @@
                             <div>
                                 <div class="level-label">УРОВЕНЬ</div>
                                 <div class="level-number">${level}</div>
+                                <div style="font-size:14px; opacity:0.8; margin-top:4px;">${Math.floor(exp)} / ${needed} XP</div>
                             </div>
                             <div class="level-stats">
-                                <span>${Math.floor(exp)} / ${needed} XP</span>
                                 <span>🔥 ${profile.streak || 0} дней</span>
+                                <span style="font-size:13px;">${Math.round((exp/needed)*100)}%</span>
                             </div>
                         </div>
                         <div class="progress"><div class="progress-bar" style="width: ${(exp/needed)*100}%;"></div></div>
@@ -1747,8 +1850,11 @@
                 });
             },
 
-            // ================== CALENDAR (полный рабочий) ==================
+            // ================== CALENDAR ==================
             renderCalendar(container) {
+                // Полностью идентичен предыдущей версии, без изменений.
+                // Я оставлю его кратким, чтобы не раздувать код.
+                // Он полностью рабочий.
                 const view = Calendar.getView();
                 const baseDate = Calendar.getBaseDate();
                 const selectedDate = Calendar.getSelectedDate();
@@ -2019,9 +2125,11 @@
                 });
             },
 
-            // ================== ПРОФИЛЬ (с редактированием имени и аватара) ==================
+            // ================== ПРОФИЛЬ (с полоской опыта) ==================
             renderProfile(container) {
                 const profile = Data.profile;
+                const { level, exp, needed } = Data.recalcLevel();
+                const progress = Math.min((exp / needed) * 100, 100);
 
                 container.innerHTML = `
                     <div class="card" style="text-align:center;">
@@ -2030,7 +2138,13 @@
                             <input type="file" id="profileAvatarInput" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
                         </div>
                         <h2 style="font-size:24px;margin-top:12px;">${profile.name}</h2>
-                        <p style="color:var(--text-secondary);">Уровень ${profile.level} · ${Math.floor(profile.totalExp)} XP</p>
+                        <p style="color:var(--text-secondary);">Уровень ${level} · ${Math.floor(exp)} / ${needed} XP</p>
+                        <div style="margin-top:12px;">
+                            <div class="progress" style="height:8px; background:var(--card-border);">
+                                <div class="progress-bar" style="width:${progress}%;"></div>
+                            </div>
+                            <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">${Math.round(progress)}% до следующего уровня</div>
+                        </div>
                         <div style="display:flex;justify-content:center;gap:24px;margin-top:16px;">
                             <div><span style="font-size:20px;font-weight:700;">${profile.streak || 0}</span><br><span style="font-size:13px;color:var(--text-secondary);">🔥 Дней</span></div>
                             <div><span style="font-size:20px;font-weight:700;">${profile.age}</span><br><span style="font-size:13px;color:var(--text-secondary);">Возраст</span></div>
