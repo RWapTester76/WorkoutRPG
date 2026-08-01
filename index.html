@@ -52,15 +52,7 @@
         body.theme-amethyst { --primary: #a29bfe; --primary-light: #c8c3ff; }
 
         /* ===== ОБЩИЕ КОМПОНЕНТЫ ===== */
-        .glass {
-            background: var(--card);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            box-shadow: var(--shadow);
-            border-radius: var(--radius);
-            transition: all var(--transition);
-        }
+        .glass { background: var(--card); backdrop-filter: blur(12px); border: 1px solid var(--card-border); box-shadow: var(--shadow); border-radius: var(--radius); transition: all var(--transition); }
         .glass:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
         .card { padding: 20px; border-radius: var(--radius); background: var(--card); backdrop-filter: blur(12px); border: 1px solid var(--card-border); box-shadow: var(--shadow); transition: all var(--transition); }
         .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
@@ -88,7 +80,6 @@
             border-radius: var(--radius-sm);
             background: rgba(255,255,255,0.40);
             backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
             font-size: 15px; color: var(--text);
             transition: all var(--transition);
             min-height: 48px;
@@ -657,9 +648,6 @@
         </div>
     </div>
 
-    <!-- Фото (загружается через отдельную кнопку в галерее) -->
-    <!-- Модалка для фото не нужна, она встроена в галерею -->
-
     <!-- Настройки -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal">
@@ -698,7 +686,8 @@
             </div>
         </div>
     </div>
-        <script>
+
+    <script>
         // ========================== DATA LAYER ==========================
         const Data = {
             _data: null,
@@ -751,6 +740,7 @@
             get notes() { return this._data.notes; },
             get photos() { return this._data.photos; },
             getJournalByName(name) { return this._data.journals.find(j => j.name === name); },
+
             // --- Задачи ---
             addTask(task) {
                 const newTask = {
@@ -778,6 +768,7 @@
                 this._data.tasks = this._data.tasks.filter(t => t.id !== id);
                 this.save();
             },
+
             // --- Цели ---
             addGoal(goal) {
                 const newGoal = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), ...goal,
@@ -799,6 +790,7 @@
                 this._data.goals = this._data.goals.filter(g => g.id !== id);
                 this.save();
             },
+
             // --- Заметки ---
             addNote(note) {
                 const newNote = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), text: note.text,
@@ -821,6 +813,7 @@
                 this._data.notes = this._data.notes.filter(n => n.id !== id);
                 this.save();
             },
+
             // --- Фото ---
             addPhoto(photoData) {
                 const newPhoto = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), data: photoData.data,
@@ -833,6 +826,7 @@
                 this._data.photos = this._data.photos.filter(p => p.id !== id);
                 this.save();
             },
+
             // --- Вспомогательные ---
             getTasksForDate(date) {
                 const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
@@ -1022,14 +1016,13 @@
                     1500);
             },
 
-            // ---- Модалка задачи (с чекбоксами дней) ----
+            // ---- Модалка задачи (с чекбоксами) ----
             openTaskModal(taskId) {
                 const modal = document.getElementById('taskModal');
                 const form = document.getElementById('taskForm');
                 const isEdit = !!taskId;
                 const task = isEdit ? Data.tasks.find(t => t.id === taskId) : null;
 
-                // Очищаем чекбоксы
                 document.querySelectorAll('#dayCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
 
                 if (isEdit && task) {
@@ -1304,7 +1297,7 @@
                 }
             },
 
-            // ---- Настройки (экспорт/импорт) ----
+            // ---- Экспорт/импорт ----
             exportData: function() {
                 const data = Data._data;
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1321,7 +1314,6 @@
                 reader.onload = function(e) {
                     try {
                         const imported = JSON.parse(e.target.result);
-                        // Проверяем базовую структуру
                         if (imported.profile && imported.journals && imported.tasks !== undefined) {
                             Data._data = imported;
                             Data.save();
@@ -1454,7 +1446,6 @@
                     menu.classList.toggle('open');
                 });
 
-                // Пункты меню
                 document.querySelectorAll('.menu-item').forEach(item => {
                     item.addEventListener('click', () => {
                         const page = item.dataset.page;
@@ -1464,13 +1455,11 @@
                     });
                 });
 
-                // Аватар и загрузка фото
+                // Аватар
                 const avatarPreview = document.getElementById('avatarPreview');
                 const avatarInput = document.getElementById('avatarInput');
                 avatarPreview.addEventListener('click', function(e) {
-                    if (e.target.tagName !== 'INPUT') {
-                        avatarInput.click();
-                    }
+                    if (e.target.tagName !== 'INPUT') avatarInput.click();
                 });
                 avatarInput.addEventListener('change', function(e) {
                     const file = e.target.files[0];
@@ -1515,7 +1504,6 @@
                 document.getElementById('noteModal').addEventListener('click', function(e) { if (e.target === this) UI
                         .closeNoteModal(); });
 
-                // Настройки
                 document.getElementById('settingsModalClose').addEventListener('click', () => { document.getElementById(
                         'settingsModal').classList.remove('open'); });
                 document.getElementById('settingsClose').addEventListener('click', () => { document.getElementById(
@@ -1523,7 +1511,7 @@
                 document.getElementById('settingsModal').addEventListener('click', function(e) { if (e.target === this)
                         document.getElementById('settingsModal').classList.remove('open'); });
 
-                // Демо-переключение тем (двойной тап по шапке)
+                // Демо-переключение тем
                 let tapCount = 0;
                 const header = document.querySelector('.header');
                 if (header) {
@@ -1568,16 +1556,35 @@
                 const container = document.getElementById('mainContent');
                 if (!container) return;
                 switch (this._currentPage) {
-                    case 'home': this.renderHome(container); break;
-                    case 'calendar': this.renderCalendar(container); break;
-                    case 'journals': this.renderJournals(container); break;
-                    case 'goals': this.renderGoals(container); break;
-                    case 'profile': this.renderProfile(container); break;
-                    case 'notes': this.renderNotes(container); break;
-                    case 'gallery': this.renderGallery(container); break;
-                    case 'alltasks': this.renderAllTasks(container); break;
-                    case 'settings': this.renderSettings(container); break;
-                    default: container.innerHTML = '<div class="card"><p>Страница в разработке</p></div>';
+                    case 'home':
+                        this.renderHome(container);
+                        break;
+                    case 'calendar':
+                        this.renderCalendar(container);
+                        break;
+                    case 'journals':
+                        this.renderJournals(container);
+                        break;
+                    case 'goals':
+                        this.renderGoals(container);
+                        break;
+                    case 'profile':
+                        this.renderProfile(container);
+                        break;
+                    case 'notes':
+                        this.renderNotes(container);
+                        break;
+                    case 'gallery':
+                        this.renderGallery(container);
+                        break;
+                    case 'alltasks':
+                        this.renderAllTasks(container);
+                        break;
+                    case 'settings':
+                        this.renderSettings(container);
+                        break;
+                    default:
+                        container.innerHTML = '<div class="card"><p>Страница в разработке</p></div>';
                 }
             },
 
@@ -1600,7 +1607,8 @@
                 const avatarEl = document.getElementById('avatarPreview');
                 if (avatarEl) {
                     if (profile.avatar) {
-                        avatarEl.innerHTML = `<img src="${profile.avatar}" alt="avatar"><input type="file" id="avatarInput" accept="image/*" style="display:none;">`;
+                        avatarEl.innerHTML =
+                            `<img src="${profile.avatar}" alt="avatar"><input type="file" id="avatarInput" accept="image/*" style="display:none;">`;
                     } else {
                         avatarEl.innerHTML =
                             `<span id="avatarInitials">${profile.name.charAt(0).toUpperCase()}</span><input type="file" id="avatarInput" accept="image/*" style="display:none;">`;
@@ -1737,12 +1745,9 @@
                         UI.toast('📚 Журнал "' + this.dataset.journal + '"', 'info');
                     });
                 });
-
-                const goalsBadge = document.querySelector('.menu-item[data-page="goals"] .badge');
-                // Бейдж для целей в меню (можно добавить, но пока пропустим)
             },
 
-            // ================== CALENDAR ==================
+            // ================== CALENDAR (полный рабочий) ==================
             renderCalendar(container) {
                 const view = Calendar.getView();
                 const baseDate = Calendar.getBaseDate();
@@ -2014,7 +2019,7 @@
                 });
             },
 
-            // ================== ПРОФИЛЬ ==================
+            // ================== ПРОФИЛЬ (с редактированием имени и аватара) ==================
             renderProfile(container) {
                 const profile = Data.profile;
 
@@ -2053,7 +2058,7 @@
                 `;
 
                 // Аватар в профиле
-                const profileAvatarInput = document.getElementById('profileAvatarInput');
+                const profileAvatarInput = container.querySelector('#profileAvatarInput');
                 if (profileAvatarInput) {
                     profileAvatarInput.addEventListener('change', function(e) {
                         const file = e.target.files[0];
@@ -2319,7 +2324,6 @@
                             'theme-')).join('');
                         if (theme !== 'default') document.body.classList.add('theme-' + theme);
                         UI.toast('🎨 Тема: ' + theme, 'info', 1500);
-                        // Обновляем страницу настроек, чтобы обновить активные чипы
                         App.renderSettings(container);
                     });
                 });
