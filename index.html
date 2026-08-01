@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest</title>
     <style>
-        /* ===== Дизайн-система ===== */
+        /* ===== Дизайн-система (обновлённая) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -14,10 +14,10 @@
 
         :root {
             --bg: #f5f7fb;
-            --card: rgba(255, 255, 255, 0.70);
-            --card-border: rgba(255, 255, 255, 0.30);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.14);
+            --card: rgba(255, 255, 255, 0.65);
+            --card-border: rgba(255, 255, 255, 0.25);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.10);
             --text: #1a1a2e;
             --text-secondary: #4a4a5a;
             --text-tertiary: #8a8a9a;
@@ -37,13 +37,12 @@
             color: var(--text);
             min-height: 100vh;
             padding: 0 16px 100px;
-            transition: background var(--transition);
+            transition: background var(--transition), color var(--transition);
         }
 
-        /* Тёмная тема */
         body.dark {
             --bg: #12121a;
-            --card: rgba(30, 30, 46, 0.80);
+            --card: rgba(30, 30, 46, 0.75);
             --card-border: rgba(255, 255, 255, 0.08);
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.6);
@@ -53,7 +52,6 @@
             --primary-bg: rgba(108, 92, 231, 0.20);
         }
 
-        /* Цветовые темы */
         body.theme-jade { --primary: #00b894; --primary-light: #55efc4; }
         body.theme-ruby { --primary: #e17055; --primary-light: #fd79a8; }
         body.theme-sapphire { --primary: #0984e3; --primary-light: #74b9ff; }
@@ -108,13 +106,13 @@
             color: #fff;
             cursor: pointer;
             transition: all var(--transition);
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.30);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25);
             min-height: 48px;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.40);
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.35);
         }
 
         .btn:active {
@@ -183,6 +181,32 @@
             margin-bottom: 6px;
         }
 
+        /* Чипы для дней недели */
+        .day-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .day-chips .chip-day {
+            padding: 6px 12px;
+            border-radius: 60px;
+            font-size: 13px;
+            font-weight: 500;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            user-select: none;
+        }
+
+        .day-chips .chip-day.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
         /* ===== Шапка ===== */
         .header {
             display: flex;
@@ -233,7 +257,7 @@
             transform: scale(1.05);
         }
 
-        /* ===== Нижняя навигация (прокручиваемая) ===== */
+        /* ===== Нижняя навигация ===== */
         .bottom-nav-wrapper {
             position: fixed;
             bottom: 0;
@@ -329,306 +353,6 @@
         @keyframes fadeUp {
             0% { opacity: 0; transform: translateY(12px); }
             100% { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ===== Главная ===== */
-        .level-card {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: #fff;
-            padding: 24px;
-            border-radius: var(--radius);
-            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.30);
-            margin-bottom: 20px;
-        }
-
-        .level-card .level-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-
-        .level-card .level-label {
-            font-size: 12px;
-            opacity: 0.8;
-            letter-spacing: 0.5px;
-        }
-
-        .level-card .level-number {
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .level-card .level-stats {
-            text-align: right;
-            font-size: 14px;
-        }
-
-        .level-card .level-stats span {
-            display: block;
-            opacity: 0.9;
-        }
-
-        .level-card .progress {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 40px;
-            overflow: hidden;
-        }
-
-        .level-card .progress-bar {
-            height: 100%;
-            background: #fff;
-            border-radius: 40px;
-            transition: width 0.6s ease;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 16px 8px;
-            border-radius: var(--radius-sm);
-            background: var(--card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            box-shadow: var(--shadow);
-        }
-
-        .stat-card .stat-number {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .stat-card .stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        /* Списки задач */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .section-header h2 {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .tasks-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 16px;
-            background: var(--card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow);
-            transition: all var(--transition);
-            cursor: pointer;
-        }
-
-        .task-item:hover {
-            transform: translateX(4px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .task-item .task-icon {
-            font-size: 24px;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--primary-bg);
-            border-radius: 12px;
-            flex-shrink: 0;
-        }
-
-        .task-item .task-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .task-item .task-title {
-            font-weight: 600;
-            font-size: 16px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .task-item .task-meta {
-            font-size: 13px;
-            color: var(--text-secondary);
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .task-item .task-status {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 40px;
-            background: var(--primary-bg);
-            color: var(--primary);
-        }
-
-        .task-item .task-status.done {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .task-item .task-status.missed {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .task-item .task-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .tasks-empty {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-            background: var(--card);
-            border-radius: var(--radius-sm);
-            border: 1px dashed var(--card-border);
-        }
-
-        .tasks-empty .empty-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-
-        /* Журналы */
-        .journals-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .journal-card-mini {
-            text-align: center;
-            padding: 16px 8px;
-            background: var(--card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow);
-            transition: all var(--transition);
-            cursor: pointer;
-        }
-
-        .journal-card-mini:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .journal-card-mini .journal-icon {
-            font-size: 32px;
-        }
-
-        .journal-card-mini .journal-name {
-            font-weight: 600;
-            margin-top: 6px;
-            font-size: 14px;
-        }
-
-        .journal-card-mini .journal-exp {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .journal-card-mini .journal-progress {
-            height: 4px;
-            background: var(--card-border);
-            border-radius: 40px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .journal-card-mini .journal-progress .fill {
-            height: 100%;
-            background: var(--primary);
-            border-radius: 40px;
-            transition: width 0.6s ease;
-        }
-
-        /* Цели */
-        .goal-card {
-            background: var(--card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-sm);
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
-            transition: all var(--transition);
-            cursor: pointer;
-        }
-
-        .goal-card:hover {
-            box-shadow: var(--shadow-hover);
-            transform: translateY(-2px);
-        }
-
-        .goal-card .goal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .goal-card .goal-title {
-            font-weight: 600;
-            font-size: 18px;
-        }
-
-        .goal-card .goal-desc {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-top: 4px;
-        }
-
-        .goal-card .goal-meta {
-            display: flex;
-            gap: 16px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-        }
-
-        .goal-card .goal-progress {
-            margin-top: 12px;
-        }
-
-        .goal-card .goal-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            justify-content: flex-end;
         }
 
         /* ===== Календарь ===== */
@@ -870,83 +594,126 @@
             background: var(--primary);
         }
 
-        /* ===== Модалки ===== */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.40);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            padding: 16px;
+        /* ===== Журналы ===== */
+        .journals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
-        .modal-overlay.open {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--bg);
-            border-radius: var(--radius);
-            padding: 24px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.20);
-            animation: fadeUp 0.3s ease;
-        }
-
-        .modal .modal-close {
-            float: right;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--text-secondary);
+        .journal-card-mini {
+            text-align: center;
+            padding: 16px 8px;
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
             cursor: pointer;
         }
 
-        .modal h3 {
-            font-size: 22px;
+        .journal-card-mini:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .journal-card-mini .journal-icon {
+            font-size: 32px;
+        }
+
+        .journal-card-mini .journal-name {
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-top: 6px;
+            font-size: 14px;
         }
 
-        .modal .form-group {
-            margin-bottom: 16px;
+        .journal-card-mini .journal-exp {
+            font-size: 13px;
+            color: var(--text-secondary);
         }
 
-        .modal .form-row {
+        .journal-card-mini .journal-progress {
+            height: 4px;
+            background: var(--card-border);
+            border-radius: 40px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .journal-card-mini .journal-progress .fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 40px;
+            transition: width 0.6s ease;
+        }
+
+        /* ===== Цели ===== */
+        .goal-card {
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+            cursor: pointer;
+        }
+
+        .goal-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .goal-card .goal-header {
             display: flex;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .goal-card .goal-title {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .goal-card .goal-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .goal-card .goal-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 8px;
             flex-wrap: wrap;
         }
 
-        .modal .form-row .form-group {
-            flex: 1;
-            min-width: 120px;
+        .goal-card .goal-progress {
+            margin-top: 12px;
         }
 
-        .modal .btn-group {
+        .goal-card .goal-actions {
             display: flex;
-            gap: 12px;
-            margin-top: 20px;
+            gap: 8px;
+            margin-top: 12px;
             justify-content: flex-end;
         }
 
-        .modal .task-detail-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--card-border);
+        .goal-card .goal-photo {
+            margin-top: 12px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            max-height: 150px;
         }
 
-        .modal .task-detail-item .label {
-            color: var(--text-secondary);
-            font-weight: 500;
+        .goal-card .goal-photo img {
+            width: 100%;
+            object-fit: cover;
         }
 
         /* ===== Заметки ===== */
@@ -1099,34 +866,183 @@
             color: var(--text-secondary);
         }
 
-        /* ===== FAB ===== */
-        .fab {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 60px;
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            font-size: 32px;
-            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.40);
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
             cursor: pointer;
-            transition: all var(--spring);
-            z-index: 15;
+        }
+
+        .task-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .task-item .task-icon {
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: var(--primary-bg);
+            border-radius: 12px;
+            flex-shrink: 0;
         }
 
-        .fab:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 32px rgba(108, 92, 231, 0.50);
+        .task-item .task-info {
+            flex: 1;
+            min-width: 0;
         }
 
-        .fab:active {
-            transform: scale(0.92);
+        .task-item .task-title {
+            font-weight: 600;
+            font-size: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-item .task-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .task-item .task-status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 40px;
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+
+        .task-item .task-status.done {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .task-item .task-status.missed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .task-item .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ===== Модалки (новый стиль) ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.30);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 16px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+            animation: fadeUp 0.3s ease;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+        }
+
+        .modal .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .modal h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .modal .form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal .form-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .modal .form-row .form-group {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .modal .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .modal .task-detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .modal .task-detail-item .label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ===== Настройки ===== */
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item .settings-label {
+            font-weight: 500;
+        }
+
+        .settings-item .settings-action {
+            display: flex;
+            gap: 8px;
         }
 
         /* ===== Toast ===== */
@@ -1158,21 +1074,38 @@
         .toast.error { background: #ff6b6b; }
         .toast.info { background: var(--text); }
 
+        /* ===== FAB ===== */
+        .fab {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 60px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            font-size: 32px;
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.40);
+            cursor: pointer;
+            transition: all var(--spring);
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 32px rgba(108, 92, 231, 0.50);
+        }
+
+        .fab:active {
+            transform: scale(0.92);
+        }
+
         /* ===== Адаптив ===== */
         @media (max-width: 640px) {
-            .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-            }
-
-            .stat-card .stat-number {
-                font-size: 22px;
-            }
-
-            .journals-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
             .calendar-grid.month {
                 gap: 2px;
             }
@@ -1218,17 +1151,13 @@
                 font-size: 28px;
                 bottom: 80px;
             }
+
+            .journals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .stat-card:last-child {
-                grid-column: span 2;
-            }
-
             .calendar-controls {
                 flex-direction: column;
                 align-items: stretch;
@@ -1262,11 +1191,7 @@
         <!-- Нижняя навигация -->
         <div class="bottom-nav-wrapper">
             <nav class="bottom-nav" id="bottomNav">
-                <div class="bottom-nav-item active" data-page="home">
-                    <span class="icon">🏠</span>
-                    <span class="label">Главная</span>
-                </div>
-                <div class="bottom-nav-item" data-page="calendar">
+                <div class="bottom-nav-item active" data-page="calendar">
                     <span class="icon">📅</span>
                     <span class="label">Календарь</span>
                 </div>
@@ -1295,14 +1220,18 @@
                     <span class="icon">📋</span>
                     <span class="label">Все задачи</span>
                 </div>
+                <div class="bottom-nav-item" data-page="settings">
+                    <span class="icon">⚙️</span>
+                    <span class="label">Настройки</span>
+                </div>
             </nav>
         </div>
 
-        <!-- FAB -->
+        <!-- FAB (создать задачу) -->
         <button class="fab" id="fabAddTask" aria-label="Создать задачу">+</button>
     </div>
 
-    <!-- Модалки (все) -->
+    <!-- ========== МОДАЛКИ ========== -->
 
     <!-- Задача -->
     <div class="modal-overlay" id="taskModal">
@@ -1338,17 +1267,17 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="input-label">Дни недели (зажмите Ctrl)</label>
-                    <select class="input" id="taskDays" multiple size="2">
-                        <option value="0">Вс</option>
-                        <option value="1">Пн</option>
-                        <option value="2">Вт</option>
-                        <option value="3">Ср</option>
-                        <option value="4">Чт</option>
-                        <option value="5">Пт</option>
-                        <option value="6">Сб</option>
-                    </select>
-                    <span class="caption-1 text-secondary">Если не выбрано – каждый день</span>
+                    <label class="input-label">Дни недели</label>
+                    <div class="day-chips" id="dayChips">
+                        <span class="chip-day" data-day="0">Вс</span>
+                        <span class="chip-day" data-day="1">Пн</span>
+                        <span class="chip-day" data-day="2">Вт</span>
+                        <span class="chip-day" data-day="3">Ср</span>
+                        <span class="chip-day" data-day="4">Чт</span>
+                        <span class="chip-day" data-day="5">Пт</span>
+                        <span class="chip-day" data-day="6">Сб</span>
+                    </div>
+                    <span class="caption-1 text-secondary" style="font-size:12px;">Если не выбрано – каждый день</span>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -1417,7 +1346,7 @@
                 <div class="form-group">
                     <label class="input-label">Контрольные точки (даты через запятую)</label>
                     <input type="text" class="input" id="goalCheckpoints" placeholder="2026-08-10, 2026-08-20">
-                    <span class="caption-1 text-secondary">Необязательно</span>
+                    <span class="caption-1 text-secondary" style="font-size:12px;">Необязательно</span>
                 </div>
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" id="goalModalCancel">Отмена</button>
@@ -1451,6 +1380,34 @@
         </div>
     </div>
 
+    <!-- Фото (добавление) -->
+    <div class="modal-overlay" id="photoModal">
+        <div class="modal">
+            <button class="modal-close" id="photoModalClose">&times;</button>
+            <h3>🖼 Добавить фото</h3>
+            <form id="photoForm">
+                <div class="form-group">
+                    <label class="input-label">Выберите фото</label>
+                    <input type="file" class="input" id="photoFile" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label class="input-label">Описание</label>
+                    <input type="text" class="input" id="photoNote" placeholder="Краткое описание...">
+                </div>
+                <div class="form-group">
+                    <label class="input-label">Привязать к цели (необязательно)</label>
+                    <select class="input" id="photoGoal">
+                        <option value="">— нет —</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" id="photoModalCancel">Отмена</button>
+                    <button type="submit" class="btn" id="photoSubmitBtn">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // ========================== DATA LAYER ==========================
         const Data = {
@@ -1462,6 +1419,13 @@
                     try { this._data = JSON.parse(raw); } catch (e) { this._data = this.getDefaultData(); }
                 } else {
                     this._data = this.getDefaultData();
+                }
+                // Миграция: добавим поле goalId к фото, если его нет
+                if (this._data.photos) {
+                    this._data.photos = this._data.photos.map(p => {
+                        if (!p.goalId) p.goalId = null;
+                        return p;
+                    });
                 }
                 return this._data;
             },
@@ -1577,7 +1541,8 @@
             // --- Фото ---
             addPhoto(photoData) {
                 const newPhoto = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), data: photoData.data,
-                    note: photoData.note || '', date: photoData.date || new Date().toISOString() };
+                    note: photoData.note || '', goalId: photoData.goalId || null, date: photoData.date || new Date()
+                        .toISOString() };
                 this._data.photos.push(newPhoto);
                 this.save();
                 return newPhoto;
@@ -1719,6 +1684,20 @@
                         UI.toast('🎉 Цель "' + goal.title + '" достигнута! +0.05 XP', 'success', 5000);
                     }
                 });
+            },
+            // Экспорт/импорт
+            exportData() {
+                return JSON.stringify(this._data, null, 2);
+            },
+            importData(json) {
+                try {
+                    const data = JSON.parse(json);
+                    this._data = data;
+                    this.save();
+                    return true;
+                } catch (e) {
+                    return false;
+                }
             }
         };
         Data.load();
@@ -1775,6 +1754,30 @@
                     1500);
             },
 
+            // ---- Дни недели (чипы) ----
+            initDayChips(selectedDays) {
+                const container = document.getElementById('dayChips');
+                if (!container) return;
+                const chips = container.querySelectorAll('.chip-day');
+                chips.forEach(chip => {
+                    const day = parseInt(chip.dataset.day);
+                    if (selectedDays && selectedDays.includes(day)) {
+                        chip.classList.add('active');
+                    } else {
+                        chip.classList.remove('active');
+                    }
+                    chip.onclick = function() {
+                        this.classList.toggle('active');
+                    };
+                });
+            },
+            getSelectedDays() {
+                const container = document.getElementById('dayChips');
+                if (!container) return [];
+                const chips = container.querySelectorAll('.chip-day.active');
+                return Array.from(chips).map(chip => parseInt(chip.dataset.day));
+            },
+
             // ---- Модалка задачи ----
             openTaskModal(taskId) {
                 const modal = document.getElementById('taskModal');
@@ -1789,10 +1792,8 @@
                     document.getElementById('taskJournal').value = task.journal;
                     document.getElementById('taskStart').value = task.startDate || task.date || '';
                     document.getElementById('taskEnd').value = task.endDate || task.date || '';
-                    const daysSelect = document.getElementById('taskDays');
-                    Array.from(daysSelect.options).forEach(opt => {
-                        opt.selected = task.daysOfWeek && task.daysOfWeek.includes(Number(opt.value));
-                    });
+                    // Устанавливаем дни недели
+                    this.initDayChips(task.daysOfWeek || []);
                     document.getElementById('taskTime').value = task.time || '09:00';
                     document.getElementById('taskDuration').value = task.duration || 30;
                     document.getElementById('taskNote').value = task.note || '';
@@ -1805,6 +1806,7 @@
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById('taskStart').value = today;
                     document.getElementById('taskEnd').value = today;
+                    this.initDayChips([]);
                     document.getElementById('taskTime').value = '09:00';
                     document.getElementById('taskDuration').value = 30;
                     document.getElementById('taskNote').value = '';
@@ -1829,8 +1831,7 @@
                     const journal = document.getElementById('taskJournal').value;
                     const startDate = document.getElementById('taskStart').value;
                     const endDate = document.getElementById('taskEnd').value;
-                    const daysSelect = document.getElementById('taskDays');
-                    const daysOfWeek = Array.from(daysSelect.selectedOptions).map(opt => Number(opt.value));
+                    const daysOfWeek = UI.getSelectedDays();
                     const time = document.getElementById('taskTime').value;
                     const duration = Number(document.getElementById('taskDuration').value);
                     const note = document.getElementById('taskNote').value.trim();
@@ -2026,23 +2027,45 @@
             },
 
             // ---- Фото ----
-            addPhoto: function() {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.onchange = function(e) {
-                    const file = e.target.files[0];
-                    if (!file) return;
+            openPhotoModal: function() {
+                const modal = document.getElementById('photoModal');
+                const form = document.getElementById('photoForm');
+                form.reset();
+
+                const goalSelect = document.getElementById('photoGoal');
+                goalSelect.innerHTML = '<option value="">— нет —</option>';
+                Data.goals.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.id;
+                    opt.textContent = g.title;
+                    goalSelect.appendChild(opt);
+                });
+
+                modal.classList.add('open');
+                form.onsubmit = function(e) {
+                    e.preventDefault();
+                    const fileInput = document.getElementById('photoFile');
+                    const file = fileInput.files[0];
+                    if (!file) {
+                        UI.toast('⚠️ Выберите фото', 'error');
+                        return;
+                    }
                     const reader = new FileReader();
                     reader.onload = function(ev) {
-                        const note = prompt('Введите описание фото (необязательно):') || '';
-                        Data.addPhoto({ data: ev.target.result, note });
+                        const data = ev.target.result;
+                        const note = document.getElementById('photoNote').value.trim();
+                        const goalId = document.getElementById('photoGoal').value || null;
+                        Data.addPhoto({ data, note, goalId });
                         UI.toast('✅ Фото добавлено', 'success');
+                        UI.closePhotoModal();
                         App.renderCurrentPage();
                     };
                     reader.readAsDataURL(file);
                 };
-                input.click();
+            },
+            closePhotoModal: function() {
+                document.getElementById('photoModal').classList.remove('open');
+                document.getElementById('photoForm').reset();
             },
             deletePhoto: function(photoId) {
                 if (confirm('Удалить фото?')) {
@@ -2156,7 +2179,7 @@
         // ========================== APP ==========================
         const App = {
             _unsubscribe: null,
-            _currentPage: 'home',
+            _currentPage: 'calendar',
 
             init() {
                 this._unsubscribe = Data.subscribe(() => { this.renderCurrentPage(); });
@@ -2203,6 +2226,11 @@
                 document.getElementById('noteModal').addEventListener('click', function(e) { if (e.target === this) UI
                         .closeNoteModal(); });
 
+                document.getElementById('photoModalClose').addEventListener('click', () => { UI.closePhotoModal(); });
+                document.getElementById('photoModalCancel').addEventListener('click', () => { UI.closePhotoModal(); });
+                document.getElementById('photoModal').addEventListener('click', function(e) { if (e.target === this) UI
+                        .closePhotoModal(); });
+
                 // Демо-переключение тем
                 let tapCount = 0;
                 const header = document.querySelector('.header');
@@ -2230,12 +2258,12 @@
 
                 setInterval(() => {
                     Data.autoMissTasks();
-                    if (App._currentPage === 'home' || App._currentPage === 'calendar') {
+                    if (App._currentPage === 'calendar' || App._currentPage === 'alltasks') {
                         App.renderCurrentPage();
                     }
                 }, 60000);
 
-                this.navigateTo('home');
+                this.navigateTo('calendar');
             },
 
             navigateTo(page) {
@@ -2245,26 +2273,32 @@
                 });
                 this.renderCurrentPage();
                 const titles = {
-                    home: 'Главная',
                     calendar: 'Календарь',
                     journals: 'Журналы',
                     goals: 'Цели',
                     profile: 'Профиль',
                     notes: 'Заметки',
                     gallery: 'Галерея',
-                    alltasks: 'Все задачи'
+                    alltasks: 'Все задачи',
+                    settings: 'Настройки'
                 };
                 const titleEl = document.querySelector('.header-title');
                 if (titleEl) titleEl.textContent = titles[page] || 'SkillQuest';
+                // Обновить приветствие
+                const greetingEl = document.getElementById('greetingText');
+                if (greetingEl) greetingEl.textContent = UI.getGreeting();
+                // Обновить имя и аватар
+                const profile = Data.profile;
+                const userNameEl = document.getElementById('userName');
+                if (userNameEl) userNameEl.textContent = profile.name;
+                const initialsEl = document.getElementById('avatarInitials');
+                if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
             },
 
             renderCurrentPage() {
                 const container = document.getElementById('mainContent');
                 if (!container) return;
                 switch (this._currentPage) {
-                    case 'home':
-                        this.renderHome(container);
-                        break;
                     case 'calendar':
                         this.renderCalendar(container);
                         break;
@@ -2286,166 +2320,15 @@
                     case 'alltasks':
                         this.renderAllTasks(container);
                         break;
+                    case 'settings':
+                        this.renderSettings(container);
+                        break;
                     default:
                         container.innerHTML = '<div class="card"><p class="body-1">Страница в разработке</p></div>';
                 }
             },
 
-            // ================== HOME ==================
-            renderHome(container) {
-                const data = Data._data;
-                const profile = data.profile;
-                const today = new Date().toISOString().split('T')[0];
-                const todayTasks = Data.getTodayTasks();
-                const activeGoals = data.goals.filter(g => !g.achieved).slice(0, 3);
-
-                const greetingEl = document.getElementById('greetingText');
-                if (greetingEl) greetingEl.textContent = UI.getGreeting();
-                const userNameEl = document.getElementById('userName');
-                if (userNameEl) userNameEl.textContent = profile.name;
-                const initialsEl = document.getElementById('avatarInitials');
-                if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
-
-                const { level, exp, needed } = Data.recalcLevel();
-                const doneCount = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'done').length;
-                const totalToday = todayTasks.length;
-                const productivity = totalToday > 0 ? Math.round((doneCount / totalToday) * 100) : 0;
-                const activeTasks = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'pending').slice(0, 3);
-                const topJournals = [...data.journals].sort((a, b) => b.exp - a.exp).slice(0, 4);
-
-                let goalsHTML = '';
-                if (activeGoals.length > 0) {
-                    goalsHTML =
-                    `<div class="section-header"><h2>Активные цели</h2><button class="btn btn-sm btn-secondary" data-nav="goals">Все →</button></div>`;
-                    activeGoals.forEach(goal => {
-                        const tasks = Data.tasks.filter(t => t.goalId === goal.id);
-                        const done = tasks.reduce((acc, t) => acc + t.completedDates.length, 0);
-                        const total = tasks.reduce((acc, t) => {
-                            const start = t.startDate || t.date;
-                            const end = t.endDate || t.date;
-                            return acc + Data.getDateRange(start, end).length;
-                        }, 0);
-                        const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-                        goalsHTML += `
-                            <div class="goal-card" data-goal-id="${goal.id}">
-                                <div class="goal-header">
-                                    <div>
-                                        <div class="goal-title">${goal.title}</div>
-                                        <div class="goal-desc">${goal.description || 'Без описания'}</div>
-                                    </div>
-                                    <span class="chip ${goal.achieved ? 'active' : ''}">${goal.achieved ? '✅' : 'В процессе'}</span>
-                                </div>
-                                <div class="goal-progress"><div class="progress"><div class="progress-bar" style="width:${progress}%;"></div></div></div>
-                                <div class="goal-meta"><span>${done}/${total} задач</span><span>📅 ${UI.formatDate(goal.deadline)}</span></div>
-                            </div>
-                        `;
-                    });
-                }
-
-                container.innerHTML = `
-                    <div class="level-card">
-                        <div class="level-header">
-                            <div>
-                                <div class="level-label">УРОВЕНЬ</div>
-                                <div class="level-number">${level}</div>
-                            </div>
-                            <div class="level-stats">
-                                <span>${Math.floor(exp)} / ${needed} XP</span>
-                                <span>🔥 ${profile.streak || 0} дней</span>
-                            </div>
-                        </div>
-                        <div class="progress"><div class="progress-bar" style="width: ${(exp/needed)*100}%;"></div></div>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-number">${totalToday}</div><div class="stat-label">Задач сегодня</div></div>
-                        <div class="stat-card"><div class="stat-number">${doneCount}</div><div class="stat-label">Выполнено</div></div>
-                        <div class="stat-card"><div class="stat-number">${productivity}%</div><div class="stat-label">Продуктивность</div></div>
-                    </div>
-
-                    <div class="section-header"><h2>Активные задачи</h2><button class="btn btn-sm btn-secondary" data-nav="calendar">Все →</button></div>
-                    <div class="tasks-list">
-                        ${activeTasks.length === 0 ? `
-                            <div class="tasks-empty"><div class="empty-icon">🎉</div><p>На сегодня задач нет</p><p style="color:var(--text-secondary)">Отличная работа!</p></div>
-                        ` : activeTasks.map(task => {
-                            const journal = Data.getJournalByName(task.journal);
-                            const icon = journal ? journal.icon : '📌';
-                            return `<div class="task-item" data-task-id="${task.id}">
-                                <div class="task-icon">${icon}</div>
-                                <div class="task-info">
-                                    <div class="task-title">${task.title}</div>
-                                    <div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div>
-                                </div>
-                                <span class="task-status pending">Ожидает</span>
-                                <div class="task-actions">
-                                    <button class="btn btn-sm btn-success complete-btn" data-task-id="${task.id}" data-date="${today}">Выполнить</button>
-                                </div>
-                            </div>`;
-                        }).join('')}
-                    </div>
-
-                    ${goalsHTML ? `<div class="goals-section">${goalsHTML}</div>` : ''}
-
-                    <div class="section-header"><h2>Журналы</h2><button class="btn btn-sm btn-secondary" data-nav="journals">Все →</button></div>
-                    <div class="journals-grid">
-                        ${topJournals.map(journal => {
-                            const progress = Math.min((journal.exp / 1000) * 100, 100);
-                            return `<div class="journal-card-mini" data-journal="${journal.name}">
-                                <div class="journal-icon">${journal.icon || '📌'}</div>
-                                <div class="journal-name">${journal.name.charAt(0).toUpperCase() + journal.name.slice(1)}</div>
-                                <div class="journal-exp">${Math.floor(journal.exp)} XP</div>
-                                <div class="journal-progress"><div class="fill" style="width: ${progress}%;"></div></div>
-                            </div>`;
-                        }).join('')}
-                    </div>
-                `;
-
-                container.querySelectorAll('[data-nav]').forEach(btn => {
-                    btn.addEventListener('click', () => { this.navigateTo(btn.dataset.nav); });
-                });
-                container.querySelectorAll('.task-item').forEach(el => {
-                    el.addEventListener('click', function(e) {
-                        if (e.target.closest('.complete-btn')) return;
-                        const taskId = this.dataset.taskId;
-                        if (taskId) UI.openTaskDetail(taskId);
-                    });
-                });
-                container.querySelectorAll('.complete-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const taskId = this.dataset.taskId;
-                        const dateStr = this.dataset.date;
-                        if (Data.completeTaskInstance(taskId, dateStr)) {
-                            UI.toast('✅ Задача выполнена!', 'success');
-                            App.renderCurrentPage();
-                        } else {
-                            UI.toast('⚠️ Не удалось выполнить задачу', 'error');
-                        }
-                    });
-                });
-                container.querySelectorAll('.goal-card').forEach(el => {
-                    el.addEventListener('click', function() {
-                        const id = this.dataset.goalId;
-                        const goal = Data.goals.find(g => g.id === id);
-                        if (goal) UI.toast(`🎯 ${goal.title} — ${goal.achieved ? 'Достигнута' : 'В процессе'}`,
-                            'info');
-                    });
-                });
-                container.querySelectorAll('.journal-card-mini').forEach(el => {
-                    el.addEventListener('click', function() {
-                        UI.toast('📚 Журнал "' + this.dataset.journal + '"', 'info');
-                    });
-                });
-
-                const goalsBadge = document.getElementById('goalsBadge');
-                if (goalsBadge) {
-                    const activeGoalsCount = data.goals.filter(g => !g.achieved).length;
-                    goalsBadge.textContent = activeGoalsCount;
-                    goalsBadge.className = 'badge' + (activeGoalsCount > 0 ? ' show' : '');
-                }
-            },
-
-            // ================== CALENDAR (полностью рабочий) ==================
+            // ================== КАЛЕНДАРЬ ==================
             renderCalendar(container) {
                 const view = Calendar.getView();
                 const baseDate = Calendar.getBaseDate();
@@ -2673,6 +2556,13 @@
                         const progress = total > 0 ? Math.round((done / total) * 100) : 0;
                         const checkpoints = goal.checkpoints ? goal.checkpoints.map(d => UI.formatDate(d)).join(
                             ', ') : '—';
+                        // Фото, привязанные к цели
+                        const goalPhotos = Data.photos.filter(p => p.goalId === goal.id);
+                        let photoHTML = '';
+                        if (goalPhotos.length > 0) {
+                            photoHTML =
+                                `<div class="goal-photo"><img src="${goalPhotos[0].data}" alt="Фото к цели"></div>`;
+                        }
                         container.innerHTML += `
                             <div class="goal-card" data-goal-id="${goal.id}">
                                 <div class="goal-header">
@@ -2682,6 +2572,7 @@
                                     </div>
                                     <span class="chip ${goal.achieved ? 'active' : ''}">${goal.achieved ? '✅ Достигнута' : 'В процессе'}</span>
                                 </div>
+                                ${photoHTML}
                                 <div class="goal-meta"><span>📅 Дедлайн: ${UI.formatDate(goal.deadline)}</span><span>🎯 Контрольные точки: ${checkpoints}</span></div>
                                 <div class="goal-progress"><div class="progress"><div class="progress-bar" style="width:${progress}%;"></div></div></div>
                                 <div class="goal-meta"><span>${done}/${total} задач выполнено</span></div>
@@ -2878,7 +2769,7 @@
                     container.innerHTML += `</div>`;
                 }
 
-                document.getElementById('addPhotoBtn').addEventListener('click', () => { UI.addPhoto(); });
+                document.getElementById('addPhotoBtn').addEventListener('click', () => { UI.openPhotoModal(); });
                 container.querySelectorAll('.photo-delete').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
@@ -2975,6 +2866,101 @@
                         const taskId = this.dataset.taskId;
                         if (taskId) UI.openTaskDetail(taskId);
                     });
+                });
+            },
+
+            // ================== НАСТРОЙКИ ==================
+            renderSettings(container) {
+                const isDark = document.body.classList.contains('dark');
+                const themes = ['default', 'jade', 'ruby', 'sapphire', 'amber', 'coral', 'amethyst'];
+                let themeChips = '';
+                themes.forEach(t => {
+                    const isActive = document.body.classList.contains('theme-' + t);
+                    const bg = t !== 'default' ? 'var(--primary)' : 'var(--card-border)';
+                    themeChips +=
+                        `<span class="chip ${isActive ? 'active' : ''}" data-theme="${t}" style="width:32px;height:32px;padding:0;border-radius:60px;background:${bg};display:inline-block;cursor:pointer;border:2px solid transparent;transition:all var(--transition);${isActive ? 'border-color:var(--primary);' : ''}"></span>`;
+                });
+
+                container.innerHTML = `
+                    <div class="section-header"><h2>Настройки</h2></div>
+                    <div class="card">
+                        <div class="settings-item">
+                            <span class="settings-label">Тёмный режим</span>
+                            <label class="switch"><input type="checkbox" id="settingsDarkSwitch" ${isDark ? 'checked' : ''}><span class="slider"></span></label>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">Цветовая тема</span>
+                            <div style="display:flex;gap:8px;">${themeChips}</div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">Экспорт данных</span>
+                            <button class="btn btn-sm btn-secondary" id="exportDataBtn">📥 Скачать JSON</button>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">Импорт данных</span>
+                            <button class="btn btn-sm btn-secondary" id="importDataBtn">📤 Загрузить JSON</button>
+                            <input type="file" id="importFileInput" accept=".json" style="display:none;">
+                        </div>
+                        <div class="settings-item" style="border-bottom: none;">
+                            <span class="settings-label">Синхронизация с девайсами</span>
+                            <button class="btn btn-sm btn-secondary" id="syncDevicesBtn">🔗 Подключить</button>
+                        </div>
+                    </div>
+                `;
+
+                // Тёмный режим
+                document.getElementById('settingsDarkSwitch').addEventListener('change', function() {
+                    UI.toggleDarkMode();
+                });
+
+                // Цветовые темы
+                container.querySelectorAll('[data-theme]').forEach(chip => {
+                    chip.addEventListener('click', function() {
+                        const theme = this.dataset.theme;
+                        document.body.className = document.body.className.split(' ').filter(c => !c.startsWith(
+                            'theme-')).join('');
+                        if (theme !== 'default') document.body.classList.add('theme-' + theme);
+                        UI.toast('🎨 Тема: ' + theme, 'info', 1500);
+                        App.renderSettings(container);
+                    });
+                });
+
+                // Экспорт
+                document.getElementById('exportDataBtn').addEventListener('click', function() {
+                    const json = Data.exportData();
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'skillquest_data_' + new Date().toISOString().slice(0,10) + '.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    UI.toast('✅ Данные экспортированы', 'success');
+                });
+
+                // Импорт
+                document.getElementById('importDataBtn').addEventListener('click', function() {
+                    document.getElementById('importFileInput').click();
+                });
+                document.getElementById('importFileInput').addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        if (Data.importData(ev.target.result)) {
+                            UI.toast('✅ Данные импортированы! Страница перезагрузится.', 'success');
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            UI.toast('❌ Ошибка импорта. Проверьте файл.', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                    this.value = '';
+                });
+
+                // Синхронизация (заглушка)
+                document.getElementById('syncDevicesBtn').addEventListener('click', function() {
+                    UI.toast('🔗 Функция синхронизации будет доступна в будущих обновлениях.', 'info', 4000);
                 });
             }
         };
