@@ -1,8 +1,13 @@
+// ============================================================
+//  APP — Главный контроллер
+// ============================================================
+
 const App = {
     _unsubscribe: null,
     _currentPage: 'home',
     _isDark: false,
 
+    // ===================== ИНИЦИАЛИЗАЦИЯ =====================
     init() {
         // Подписка на изменения данных
         this._unsubscribe = Data.subscribe(() => {
@@ -17,17 +22,17 @@ const App = {
             });
         });
 
-        // FAB
+        // FAB (плавающая кнопка)
         document.getElementById('fabAddTask')?.addEventListener('click', () => {
             UI.toast('📝 Создание задачи (в разработке)', 'info');
         });
 
-        // Аватар
+        // Аватар → профиль
         document.getElementById('avatarPreview')?.addEventListener('click', () => {
             this.navigateTo('profile');
         });
 
-        // Демо: двойной тап по header для смены темы
+        // ДЕМО: двойной тап по header → смена темы
         let tapCount = 0;
         document.querySelector('.header')?.addEventListener('click', () => {
             tapCount++;
@@ -36,10 +41,10 @@ const App = {
                 tapCount = 0;
             }
             clearTimeout(window.tapTimer);
-            window.tapTimer = setTimeout(() => tapCount = 0, 500);
+            window.tapTimer = setTimeout(() => { tapCount = 0; }, 500);
         });
 
-        // Демо: тройной тап для dark mode
+        // ДЕМО: тройной тап по аватару → тёмный режим
         let darkTapCount = 0;
         document.querySelector('.header .avatar')?.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -49,10 +54,10 @@ const App = {
                 darkTapCount = 0;
             }
             clearTimeout(window.darkTapTimer);
-            window.darkTapTimer = setTimeout(() => darkTapCount = 0, 500);
+            window.darkTapTimer = setTimeout(() => { darkTapCount = 0; }, 500);
         });
 
-        // Автоматическая проверка пропущенных задач
+        // Автоматическая проверка пропущенных задач (каждую минуту)
         setInterval(() => {
             Data.autoMissTasks();
             if (this._currentPage === 'home' || this._currentPage === 'calendar') {
@@ -60,22 +65,23 @@ const App = {
             }
         }, 60000);
 
-        // Первый рендер
+        // Стартовый рендер
         this.navigateTo('home');
     },
 
+    // ===================== НАВИГАЦИЯ =====================
     navigateTo(page) {
         this._currentPage = page;
 
-        // Обновляем навигацию
+        // Обновляем активный пункт в нижнем меню
         document.querySelectorAll('.bottom-nav-item').forEach(item => {
             item.classList.toggle('active', item.dataset.page === page);
         });
 
-        // Показываем страницу
+        // Рендерим страницу
         this.renderCurrentPage();
 
-        // Обновляем заголовок
+        // Обновляем заголовок (может использоваться в будущем)
         const titles = {
             home: 'Главная',
             calendar: 'Календарь',
@@ -83,9 +89,11 @@ const App = {
             goals: 'Цели',
             profile: 'Профиль'
         };
-        document.querySelector('.header .title-1')?.textContent = titles[page] || 'SkillQuest';
+        const titleEl = document.querySelector('.header .title-1');
+        if (titleEl) titleEl.textContent = titles[page] || 'SkillQuest';
     },
 
+    // ===================== РЕНДЕРИНГ ТЕКУЩЕЙ СТРАНИЦЫ =====================
     renderCurrentPage() {
         const container = document.getElementById('mainContent');
         if (!container) return;
@@ -111,36 +119,38 @@ const App = {
         }
     },
 
+    // ===================== HOME SCREEN =====================
     renderHome(container) {
         const data = Data._data;
         const profile = data.profile;
         const today = new Date().toISOString().split('T')[0];
         const todayTasks = Data.getTodayTasks();
 
-        // Greeting
+        // Приветствие
         document.getElementById('greetingText').textContent = UI.getGreeting();
         document.getElementById('userName').textContent = profile.name;
         document.getElementById('avatarInitials').textContent = profile.name.charAt(0).toUpperCase();
 
-        // Level
+        // Уровень и опыт
         const { level, exp, needed } = Data.recalcLevel();
 
-        // Stats
+        // Статистика
         const doneCount = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'done').length;
         const pendingCount = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'pending').length;
         const missedCount = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'missed').length;
         const totalToday = todayTasks.length;
         const productivity = totalToday > 0 ? Math.round((doneCount / totalToday) * 100) : 0;
 
-        // Активные задачи (только ожидающие)
+        // Активные задачи (только ожидающие, максимум 3)
         const activeTasks = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'pending').slice(0, 3);
 
-        // Журналы (топ 4 по XP)
+        // Топ-4 журнала по XP
         const topJournals = [...data.journals].sort((a, b) => b.exp - a.exp).slice(0, 4);
 
+        // Генерируем HTML
         container.innerHTML = `
             <div class="home-content">
-                <!-- Level Card -->
+                <!-- Карточка уровня -->
                 <section class="level-card card card-glow animate-slide-up">
                     <div class="level-card-header">
                         <div>
@@ -157,7 +167,7 @@ const App = {
                     </div>
                 </section>
 
-                <!-- Quick Stats -->
+                <!-- Быстрая статистика -->
                 <section class="stats-grid grid grid-3">
                     <div class="stat-card card">
                         <span class="stat-icon">📋</span>
@@ -176,7 +186,7 @@ const App = {
                     </div>
                 </section>
 
-                <!-- Active Tasks -->
+                <!-- Активные задачи -->
                 <section class="tasks-section">
                     <div class="section-header flex-between">
                         <h2 class="title-2">Активные задачи</h2>
@@ -210,7 +220,7 @@ const App = {
                     </div>
                 </section>
 
-                <!-- Quick Journals -->
+                <!-- Быстрый доступ к журналам -->
                 <section class="journals-section">
                     <div class="section-header flex-between">
                         <h2 class="title-2">Журналы</h2>
@@ -236,7 +246,7 @@ const App = {
             </div>
         `;
 
-        // Обработчики
+        // Обработчики событий
         container.querySelectorAll('[data-nav]').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.navigateTo(btn.dataset.nav);
@@ -260,13 +270,14 @@ const App = {
             });
         });
 
-        // Обновляем badge целей
+        // Бейдж целей
         const goalsBadge = document.getElementById('goalsBadge');
         const activeGoals = data.goals.filter(g => !g.achieved).length;
         goalsBadge.textContent = activeGoals;
         goalsBadge.className = 'badge' + (activeGoals > 0 ? ' show' : '');
     },
 
+    // ===================== КАЛЕНДАРЬ =====================
     renderCalendar(container) {
         const view = Calendar.getView();
         const baseDate = Calendar.getBaseDate();
@@ -278,7 +289,6 @@ const App = {
         const selectedStr = selectedDate.toISOString().split('T')[0];
         const dayTasks = Data.getTasksForDate(selectedStr);
 
-        // Формируем данные для календаря
         let calendarHTML = '';
         let dayDetailHTML = '';
 
@@ -338,7 +348,7 @@ const App = {
             `;
         }
 
-        // Детали дня
+        // Детали дня (если есть задачи)
         if (dayTasks.length > 0) {
             dayDetailHTML = `
                 <div class="calendar-day-detail">
@@ -376,9 +386,10 @@ const App = {
             `;
         }
 
+        // Собираем весь календарь
         container.innerHTML = `
             <div class="calendar-container">
-                <!-- Controls -->
+                <!-- Управление -->
                 <div class="calendar-controls">
                     <div class="btn-group">
                         <button class="btn btn-sm ${view === 'day' ? 'active' : ''}" data-view="day">День</button>
@@ -393,7 +404,7 @@ const App = {
                     </div>
                 </div>
 
-                <!-- Filters -->
+                <!-- Фильтры -->
                 <div class="calendar-filters">
                     ${journals.map(j => `
                         <span class="chip active" data-filter="${j.name}">${j.icon} ${j.name}</span>
@@ -401,17 +412,19 @@ const App = {
                     <span class="chip" data-filter="all" style="background:var(--color-primary);color:var(--color-text-inverse);">Все</span>
                 </div>
 
-                <!-- Calendar Grid -->
+                <!-- Сетка календаря -->
                 <div class="calendar-grid ${view === 'month' ? 'month' : view === 'week' ? 'week' : ''}">
                     ${calendarHTML}
                 </div>
 
-                <!-- Day Detail -->
+                <!-- Детали дня -->
                 ${dayDetailHTML}
             </div>
         `;
 
-        // Обработчики
+        // ===== Обработчики событий =====
+
+        // Переключение вида
         container.querySelectorAll('[data-view]').forEach(btn => {
             btn.addEventListener('click', () => {
                 Calendar.setView(btn.dataset.view);
@@ -419,6 +432,7 @@ const App = {
             });
         });
 
+        // Навигация вперёд/назад
         container.querySelectorAll('[data-nav]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const dir = btn.dataset.nav === 'prev' ? -1 : 1;
@@ -427,6 +441,7 @@ const App = {
             });
         });
 
+        // Клик по ячейке дня
         container.querySelectorAll('.calendar-cell:not(.other-month)').forEach(el => {
             el.addEventListener('click', () => {
                 const date = new Date(el.dataset.year, el.dataset.month, el.dataset.day);
@@ -438,6 +453,7 @@ const App = {
             });
         });
 
+        // Клик по месяцу (в годовом виде)
         container.querySelectorAll('.month-card').forEach(el => {
             el.addEventListener('click', () => {
                 const month = parseInt(el.dataset.month);
@@ -448,6 +464,7 @@ const App = {
             });
         });
 
+        // Кнопка "Выполнить" в деталях дня
         container.querySelectorAll('[data-complete]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -460,14 +477,16 @@ const App = {
             });
         });
 
+        // Фильтры (пока только визуально)
         container.querySelectorAll('[data-filter]').forEach(chip => {
             chip.addEventListener('click', () => {
                 chip.classList.toggle('active');
-                // TODO: реализовать фильтрацию
                 UI.toast(`Фильтр: ${chip.textContent}`, 'info');
             });
         });
     },
+
+    // ===== Вспомогательные методы для календаря =====
 
     _renderDayCell(date, tasks, journals, selectedDate, isOtherMonth = false) {
         const dateStr = date.toISOString().split('T')[0];
@@ -475,7 +494,7 @@ const App = {
         const isToday = Data.isSameDay(date, new Date());
         const isSelected = Data.isSameDay(date, selectedDate);
 
-        // Собираем беджи по журналам
+        // Собираем беджи по журналам (только не пропущенные)
         const badgeCounts = {};
         dayTasks.forEach(task => {
             const status = Data.getTaskStatus(task, dateStr);
@@ -535,6 +554,7 @@ const App = {
         }).join('');
     },
 
+    // ===================== ЖУРНАЛЫ =====================
     renderJournals(container) {
         const journals = Data.journals;
 
@@ -573,6 +593,7 @@ const App = {
         });
     },
 
+    // ===================== ЦЕЛИ =====================
     renderGoals(container) {
         const goals = Data.goals;
 
@@ -603,7 +624,9 @@ const App = {
                     const tasks = Data.tasks.filter(t => t.goalId === goal.id);
                     const done = tasks.reduce((acc, t) => acc + t.completedDates.length, 0);
                     const total = tasks.reduce((acc, t) => {
-                        const dates = Data.getDateRange(t.startDate || t.date, t.endDate || t.date);
+                        const start = t.startDate || t.date;
+                        const end = t.endDate || t.date;
+                        const dates = Data.getDateRange(start, end);
                         return acc + dates.length;
                     }, 0);
                     const progress = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -630,6 +653,7 @@ const App = {
         `;
     },
 
+    // ===================== ПРОФИЛЬ =====================
     renderProfile(container) {
         const profile = Data.profile;
 
@@ -680,12 +704,12 @@ const App = {
             </div>
         `;
 
-        // Dark mode switch
+        // Переключение тёмного режима
         container.querySelector('#darkModeSwitch')?.addEventListener('change', (e) => {
             UI.toggleDarkMode();
         });
 
-        // Theme chips
+        // Выбор цветовой темы
         container.querySelectorAll('[data-theme]').forEach(chip => {
             chip.addEventListener('click', () => {
                 const theme = chip.dataset.theme;
@@ -703,8 +727,10 @@ const App = {
     }
 };
 
+// ===================== СТАРТ =====================
 document.addEventListener('DOMContentLoaded', () => {
     App.init();
 });
 
+// Делаем доступным глобально
 window.App = App;
