@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest — Журнал прогресса</title>
     <style>
-        /* ====== ВСЕ СТИЛИ ====== */
+        /* ====== ВСЕ СТИЛИ (те же, что были) ====== */
         :root {
             --color-primary: #6C5CE7;
             --color-primary-dark: #5A4BD1;
@@ -1061,8 +1061,8 @@
                 }
             },
 
-            // ---- Модалка целей ----
-            openGoalModal(goalId) {
+            // ---- Модалка целей (исправленная) ----
+            openGoalModal: function(goalId) {
                 const modal = document.getElementById('goalModal');
                 const form = document.getElementById('goalForm');
                 const isEdit = !!goalId;
@@ -1086,6 +1086,8 @@
 
                 modal.classList.add('open');
 
+                // Убираем предыдущие обработчики
+                form.onsubmit = null;
                 form.onsubmit = function(e) {
                     e.preventDefault();
                     const title = document.getElementById('goalTitle').value.trim();
@@ -1106,14 +1108,16 @@
                         Data.addGoal({ title, description, deadline, checkpoints });
                         UI.toast('✅ Цель создана!', 'success');
                     }
-                    modal.classList.remove('open');
+                    UI.closeGoalModal();
                     App.renderCurrentPage();
                 };
             },
-            closeGoalModal() {
+
+            closeGoalModal: function() {
                 document.getElementById('goalModal').classList.remove('open');
                 document.getElementById('goalForm').reset();
             },
+
             deleteGoal(goalId) {
                 if (confirm('Удалить цель? Все связанные задачи останутся без привязки.')) {
                     Data.tasks.forEach(task => {
@@ -1777,9 +1781,59 @@
                             <div style="display:flex;gap:var(--spacing-xs);">${themeChips}</div>
                         </div>
                     </div>
+                    <button class="btn btn-primary" id="saveProfileBtn" style="width:100%; margin-top:var(--spacing-md);">💾 Сохранить профиль</button>
                 </div>`;
+
+                // Обработчик сохранения профиля
+                const saveBtn = container.querySelector('#saveProfileBtn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', function() {
+                        // Обновляем поля из DOM
+                        const nameInput = container.querySelector('#pName');
+                        const ageInput = container.querySelector('#pAge');
+                        const weightInput = container.querySelector('#pWeight');
+                        const heightInput = container.querySelector('#pHeight');
+                        const chestInput = container.querySelector('#pChest');
+                        const waistInput = container.querySelector('#pWaist');
+                        const hipsInput = container.querySelector('#pHips');
+                        const bicepsInput = container.querySelector('#pBiceps');
+
+                        // Если поля существуют, берём их значения, иначе оставляем старые
+                        const name = nameInput ? nameInput.value : profile.name;
+                        const age = ageInput ? parseInt(ageInput.value) : profile.age;
+                        const weight = weightInput ? parseFloat(weightInput.value) : profile.weight;
+                        const height = heightInput ? parseFloat(heightInput.value) : profile.height;
+                        const chest = chestInput ? parseFloat(chestInput.value) : profile.chest;
+                        const waist = waistInput ? parseFloat(waistInput.value) : profile.waist;
+                        const hips = hipsInput ? parseFloat(hipsInput.value) : profile.hips;
+                        const biceps = bicepsInput ? parseFloat(bicepsInput.value) : profile.biceps;
+
+                        profile.name = name;
+                        profile.age = age;
+                        profile.weight = weight;
+                        profile.height = height;
+                        profile.chest = chest;
+                        profile.waist = waist;
+                        profile.hips = hips;
+                        profile.biceps = biceps;
+
+                        Data.save();
+                        UI.toast('✅ Профиль сохранён!', 'success');
+                        // Обновляем отображение имени в шапке
+                        const userNameEl = document.getElementById('userName');
+                        if (userNameEl) userNameEl.textContent = profile.name;
+                        const initialsEl = document.getElementById('avatarInitials');
+                        if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
+                        // Перерисовываем профиль, чтобы обновить поля
+                        App.renderProfile(container);
+                    });
+                }
+
+                // Переключение тёмного режима
                 const darkSwitch = container.querySelector('#darkModeSwitch');
                 if (darkSwitch) darkSwitch.addEventListener('change', () => { UI.toggleDarkMode(); });
+
+                // Выбор темы
                 container.querySelectorAll('[data-theme]').forEach(chip => {
                     chip.addEventListener('click', function() {
                         const theme = this.dataset.theme;
