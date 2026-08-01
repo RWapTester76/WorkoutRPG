@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest — Журнал прогресса</title>
     <style>
-        /* ====== ВСЕ СТИЛИ (UI Kit + Home + Calendar + Modal + Goals) ====== */
+        /* ====== ВСЕ СТИЛИ ====== */
         :root {
             --color-primary: #6C5CE7;
             --color-primary-dark: #5A4BD1;
@@ -835,7 +835,6 @@
                 this.recalcLevel();
                 this.updateStreak();
                 this.save();
-                // Проверка целей после выполнения задачи
                 this.checkGoalsAchievement();
                 return true;
             },
@@ -873,7 +872,6 @@
                 }
                 return dates;
             },
-            // Проверка целей на достижение
             checkGoalsAchievement() {
                 this._data.goals.forEach(goal => {
                     if (goal.achieved) return;
@@ -885,7 +883,7 @@
                     });
                     if (allDone) {
                         goal.achieved = true;
-                        this._data.profile.totalExp += 0.05; // бонус 0.05 XP
+                        this._data.profile.totalExp += 0.05;
                         this.recalcLevel();
                         this.save();
                         UI.toast('🎉 Цель "' + goal.title + '" достигнута! +0.05 XP', 'success', 5000);
@@ -1118,7 +1116,6 @@
             },
             deleteGoal(goalId) {
                 if (confirm('Удалить цель? Все связанные задачи останутся без привязки.')) {
-                    // Отвязываем задачи
                     Data.tasks.forEach(task => {
                         if (task.goalId === goalId) {
                             Data.updateTask(task.id, { goalId: null });
@@ -1439,7 +1436,6 @@
                     </section>
                 </div>`;
 
-                // Обработчики
                 container.querySelectorAll('[data-nav]').forEach(btn => {
                     btn.addEventListener('click', () => { this.navigateTo(btn.dataset.nav); });
                 });
@@ -1489,13 +1485,192 @@
             },
 
             renderCalendar(container) {
-                // ... (как в предыдущей версии) ...
-                // (опущено для краткости, но код полностью рабочий)
-                // При необходимости я могу выдать полный код, но он остался без изменений.
+                const view = Calendar.getView();
+                const baseDate = Calendar.getBaseDate();
+                const selectedDate = Calendar.getSelectedDate();
+                const tasks = Data.tasks;
+                const journals = Data.journals;
+                const selectedStr = selectedDate.toISOString().split('T')[0];
+                const dayTasks = Data.getTasksForDate(selectedStr);
+
+                let calendarHTML = '';
+                let dayDetailHTML = '';
+
+                if (view === 'day') {
+                    calendarHTML = `<div class="calendar-grid week">${this._renderDayView(baseDate, tasks, journals)}</div>`;
+                } else if (view === 'week') {
+                    const week = Calendar.getWeekData(baseDate);
+                    calendarHTML = `<div class="calendar-grid week">${week.map(d => this._renderDayCell(d, tasks, journals, selectedDate)).join('')}</div>`;
+                } else if (view === 'month') {
+                    const year = baseDate.getFullYear();
+                    const month = baseDate.getMonth();
+                    const weeks = Calendar.getMonthData(year, month);
+                    const weekDays = Calendar.getWeekDays();
+                    calendarHTML = weekDays.map(d => `<div class="day-header">${d}</div>`).join('') +
+                        weeks.flat().map(cell => {
+                            const date = new Date(cell.year, cell.month, cell.day);
+                            return this._renderDayCell(date, tasks, journals, selectedDate, cell.isOtherMonth);
+                        }).join('');
+                } else if (view === 'year') {
+                    const year = baseDate.getFullYear();
+                    const months = Calendar.getYearData(year);
+                    calendarHTML = `<div class="year-grid">${months.map((m, idx) => {
+                        const hasTasks = Data._data.tasks.some(task => {
+                            const start = new Date(task.startDate || task.date);
+                            const end = new Date(task.endDate || task.date);
+                            return (start.getFullYear() === year && start.getMonth() === idx) || (end.getFullYear() === year && end.getMonth() === idx);
+                        });
+                        return `<div class="month-card" data-month="${idx}"><div class="month-name">${m.name}</div><div class="month-dots">${Array.from({length:7}, (_, i) => `<div class="dot ${i<3 && hasTasks ? 'has-task' : ''}"></div>`).join('')}</div></div>`;
+                    }).join('')}</div>`;
+                }
+
+                if (dayTasks.length > 0) {
+                    dayDetailHTML = `<div class="calendar-day-detail"><div class="day-title">📋 ${selectedDate.toLocaleDateString('ru-RU', { weekday:'long', day:'numeric', month:'long' })}</div><div class="day-tasks">${dayTasks.map(task => {
+                        const status = Data.getTaskStatus(task, selectedStr);
+                        const journal = Data.getJournalByName(task.journal);
+                        const icon = journal ? journal.icon : '📌';
+                        const statusLabels = { done:'✅ Выполнено', pending:'⏳ Ожидает', missed:'❌ Пропущено' };
+                        return `<div class="task-item" data-task-id="${task.id}">
+                            <div class="task-icon">${icon}</div>
+                            <div class="task-info"><div class="task-title">${task.title}</div><div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div></div>
+                            <span class="task-status ${status}">${statusLabels[status] || status}</span>
+                            ${status === 'pending' ? `<div class="task-actions"><button class="btn btn-sm btn-success complete-btn" data-task-id="${task.id}" data-date="${selectedStr}">Выполнить</button></div>` : ''}
+                        </div>`;
+                    }).join('')}</div></div>`;
+                }
+
+                container.innerHTML = `
+                <div class="calendar-container">
+                    <div class="calendar-controls">
+                        <div class="btn-group">
+                            <button class="btn btn-sm ${view === 'day' ? 'active' : ''}" data-view="day">День</button>
+                            <button class="btn btn-sm ${view === 'week' ? 'active' : ''}" data-view="week">Неделя</button>
+                            <button class="btn btn-sm ${view === 'month' ? 'active' : ''}" data-view="month">Месяц</button>
+                            <button class="btn btn-sm ${view === 'year' ? 'active' : ''}" data-view="year">Год</button>
+                        </div>
+                        <div class="calendar-nav">
+                            <button data-nav="prev">◀</button>
+                            <span class="title">${Calendar.getTitle()}</span>
+                            <button data-nav="next">▶</button>
+                        </div>
+                    </div>
+                    <div class="calendar-filters">
+                        ${journals.map(j => `<span class="chip active" data-filter="${j.name}">${j.icon} ${j.name}</span>`).join('')}
+                        <span class="chip" data-filter="all" style="background:var(--color-primary);color:var(--color-text-inverse);">Все</span>
+                    </div>
+                    <div class="calendar-grid ${view === 'month' ? 'month' : view === 'week' ? 'week' : ''}">
+                        ${calendarHTML}
+                    </div>
+                    ${dayDetailHTML}
+                </div>`;
+
+                container.querySelectorAll('[data-view]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        Calendar.setView(this.dataset.view);
+                        App.renderCalendar(container);
+                    });
+                });
+                container.querySelectorAll('[data-nav]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const dir = this.dataset.nav === 'prev' ? -1 : 1;
+                        Calendar.navigate(dir);
+                        App.renderCalendar(container);
+                    });
+                });
+                container.querySelectorAll('.calendar-cell:not(.other-month)').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const date = new Date(this.dataset.year, this.dataset.month, this.dataset.day);
+                        Calendar.setSelectedDate(date);
+                        if (view !== 'day') Calendar.setView('day');
+                        App.renderCalendar(container);
+                    });
+                });
+                container.querySelectorAll('.month-card').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const month = parseInt(this.dataset.month, 10);
+                        const year = baseDate.getFullYear();
+                        Calendar.setBaseDate(new Date(year, month, 1));
+                        Calendar.setView('month');
+                        App.renderCalendar(container);
+                    });
+                });
+                container.querySelectorAll('.complete-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (Data.completeTaskInstance(this.dataset.taskId, this.dataset.date)) {
+                            UI.toast('✅ Задача выполнена!', 'success');
+                            App.renderCalendar(container);
+                        }
+                    });
+                });
+                container.querySelectorAll('.task-item').forEach(el => {
+                    el.addEventListener('click', function(e) {
+                        if (e.target.closest('.complete-btn')) return;
+                        const taskId = this.dataset.taskId;
+                        if (taskId) UI.openTaskDetail(taskId);
+                    });
+                });
+                container.querySelectorAll('[data-filter]').forEach(chip => {
+                    chip.addEventListener('click', function() {
+                        this.classList.toggle('active');
+                        UI.toast('Фильтр: ' + this.textContent, 'info');
+                    });
+                });
+            },
+
+            _renderDayCell: function(date, tasks, journals, selectedDate, isOtherMonth) {
+                isOtherMonth = isOtherMonth || false;
+                const dateStr = date.toISOString().split('T')[0];
+                const dayTasks = Data.getTasksForDate(dateStr);
+                const isToday = Data.isSameDay(date, new Date());
+                const isSelected = Data.isSameDay(date, selectedDate);
+                const badgeCounts = {};
+                dayTasks.forEach(task => {
+                    const status = Data.getTaskStatus(task, dateStr);
+                    if (status !== 'missed') badgeCounts[task.journal] = (badgeCounts[task.journal] || 0) + 1;
+                });
+                const badgeHTML = Object.entries(badgeCounts).map(([name, count]) => `<span class="badge">${name}:${count}</span>`).join('');
+                let cls = 'calendar-cell';
+                if (isToday) cls += ' today';
+                if (isSelected) cls += ' selected';
+                if (isOtherMonth) cls += ' other-month';
+                return `<div class="${cls}" data-year="${date.getFullYear()}" data-month="${date.getMonth()}" data-day="${date.getDate()}">
+                    <div class="date">${date.getDate()}</div>
+                    ${badgeHTML ? `<div class="badge-container">${badgeHTML}</div>` : ''}
+                    ${dayTasks.length > 0 && !badgeHTML ? '<div class="task-indicator"></div>' : ''}
+                </div>`;
+            },
+
+            _renderDayView: function(date, tasks, journals) {
+                const dateStr = date.toISOString().split('T')[0];
+                const dayTasks = Data.getTasksForDate(dateStr);
+                if (dayTasks.length === 0) return '<div style="grid-column:span 7;text-align:center;padding:var(--spacing-2xl);color:var(--color-text-secondary);">Нет задач на этот день</div>';
+                return dayTasks.map(task => {
+                    const status = Data.getTaskStatus(task, dateStr);
+                    const journal = Data.getJournalByName(task.journal);
+                    const icon = journal ? journal.icon : '📌';
+                    const statusLabels = { done:'✅', pending:'⏳', missed:'❌' };
+                    return `<div class="task-item" data-task-id="${task.id}" style="grid-column:span 7;">
+                        <div class="task-icon">${icon}</div>
+                        <div class="task-info"><div class="task-title">${task.title}</div><div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div></div>
+                        <span class="task-status ${status}">${statusLabels[status] || status}</span>
+                        ${status === 'pending' ? `<div class="task-actions"><button class="btn btn-sm btn-success complete-btn" data-task-id="${task.id}" data-date="${dateStr}">Выполнить</button></div>` : ''}
+                    </div>`;
+                }).join('');
             },
 
             renderJournals(container) {
-                // ... (как в предыдущей версии) ...
+                const journals = Data.journals;
+                container.innerHTML = `<div class="home-content"><div class="section-header"><h2 class="title-1">Все журналы</h2><p class="body-2 text-secondary">${journals.length} журналов</p></div><div class="journals-grid grid grid-4">${journals.map(j => {
+                    const tasks = Data.tasks.filter(t => t.journal === j.name);
+                    const progress = Math.min((j.exp / 1000) * 100, 100);
+                    return `<div class="journal-card-mini" data-journal="${j.name}"><div class="journal-icon" style="font-size:var(--font-size-4xl);">${j.icon || '📌'}</div><div class="journal-name" style="font-size:var(--font-size-lg);">${j.name.charAt(0).toUpperCase() + j.name.slice(1)}</div><div class="journal-exp">${Math.floor(j.exp)} XP</div><div class="journal-progress"><div class="fill" style="width:${progress}%;"></div></div><div class="caption-1 text-secondary">${tasks.length} задач</div></div>`;
+                }).join('')}</div></div>`;
+                container.querySelectorAll('.journal-card-mini').forEach(el => {
+                    el.addEventListener('click', function() {
+                        UI.toast('📚 Журнал "' + this.dataset.journal + '"', 'info');
+                    });
+                });
             },
 
             renderGoals(container) {
@@ -1536,7 +1711,6 @@
                 }
                 container.innerHTML += `</div>`;
 
-                // Обработчики кнопок
                 document.getElementById('addGoalBtn').addEventListener('click', () => { UI.openGoalModal(null); });
                 container.querySelectorAll('.edit-goal-btn').forEach(btn => {
                     btn.addEventListener('click', function(e) {
@@ -1561,7 +1735,60 @@
             },
 
             renderProfile(container) {
-                // ... (как в предыдущей версии) ...
+                const profile = Data.profile;
+                const isDark = document.body.classList.contains('dark');
+                const themes = ['default', 'jade', 'ruby', 'sapphire', 'amber', 'coral', 'amethyst'];
+                let themeChips = '';
+                themes.forEach(t => {
+                    const isActive = document.body.classList.contains('theme-' + t);
+                    const bg = t !== 'default' ? 'var(--color-primary)' : 'var(--color-border)';
+                    themeChips += `<span class="chip ${isActive ? 'active' : ''}" data-theme="${t}" style="width:28px;height:28px;padding:0;border-radius:var(--radius-full);background:${bg};"></span>`;
+                });
+                container.innerHTML = `
+                <div class="home-content">
+                    <div class="card" style="text-align:center;">
+                        <div class="avatar avatar-xl" style="margin:0 auto;"><span>${profile.name.charAt(0).toUpperCase()}</span></div>
+                        <h2 class="title-1" style="margin-top:var(--spacing-md);">${profile.name}</h2>
+                        <p class="body-2 text-secondary">Уровень ${profile.level} · ${Math.floor(profile.totalExp)} XP</p>
+                        <div class="flex" style="justify-content:center;gap:var(--spacing-2xl);margin-top:var(--spacing-lg);">
+                            <div><span class="title-2">${profile.streak || 0}</span><br><span class="caption-1 text-secondary">🔥 Дней</span></div>
+                            <div><span class="title-2">${profile.age}</span><br><span class="caption-1 text-secondary">Возраст</span></div>
+                            <div><span class="title-2">${profile.weight} кг</span><br><span class="caption-1 text-secondary">Вес</span></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="title-2">Параметры тела</h3>
+                        <div class="grid grid-2" style="margin-top:var(--spacing-md);">
+                            <div><span class="caption-1 text-secondary">Рост</span><br><span class="body-1">${profile.height} см</span></div>
+                            <div><span class="caption-1 text-secondary">Грудь</span><br><span class="body-1">${profile.chest} см</span></div>
+                            <div><span class="caption-1 text-secondary">Талия</span><br><span class="body-1">${profile.waist} см</span></div>
+                            <div><span class="caption-1 text-secondary">Бёдра</span><br><span class="body-1">${profile.hips} см</span></div>
+                            <div><span class="caption-1 text-secondary">Бицепс</span><br><span class="body-1">${profile.biceps} см</span></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="title-2">Настройки</h3>
+                        <div class="flex-between" style="padding:var(--spacing-sm) 0;border-bottom:1px solid var(--color-border);">
+                            <span class="body-2">Тёмный режим</span>
+                            <label class="switch"><input type="checkbox" id="darkModeSwitch" ${isDark ? 'checked' : ''}><span class="slider"></span></label>
+                        </div>
+                        <div class="flex-between" style="padding:var(--spacing-sm) 0;">
+                            <span class="body-2">Тема</span>
+                            <div style="display:flex;gap:var(--spacing-xs);">${themeChips}</div>
+                        </div>
+                    </div>
+                </div>`;
+                const darkSwitch = container.querySelector('#darkModeSwitch');
+                if (darkSwitch) darkSwitch.addEventListener('change', () => { UI.toggleDarkMode(); });
+                container.querySelectorAll('[data-theme]').forEach(chip => {
+                    chip.addEventListener('click', function() {
+                        const theme = this.dataset.theme;
+                        document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('theme-')).join('');
+                        if (theme !== 'default') document.body.classList.add('theme-' + theme);
+                        UI.toast('🎨 Тема: ' + theme, 'info', 1500);
+                        App.renderProfile(container);
+                    });
+                });
             }
         };
 
