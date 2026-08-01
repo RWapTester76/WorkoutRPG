@@ -79,32 +79,28 @@ const App = {
 
     // ===================== НАВИГАЦИЯ =====================
     navigateTo(page) {
-        this._currentPage = page;
+    this._currentPage = page;
 
-        // Обновляем активный пункт в нижнем меню
-        const titleEl = document.querySelector('.header .title-1');
-if (titleEl) {
-    titleEl.textContent = titles[page] || 'SkillQuest';
+    // Обновляем активный пункт в нижнем меню
+    document.querySelectorAll('.bottom-nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.page === page);
+    });
+
+    this.renderCurrentPage();
+
+    // Обновляем заголовок (безопасно)
+    const titles = {
+        home: 'Главная',
+        calendar: 'Календарь',
+        journals: 'Журналы',
+        goals: 'Цели',
+        profile: 'Профиль'
+    };
+    const titleEl = document.querySelector('.header .title-1');
+    if (titleEl) {
+        titleEl.textContent = titles[page] || 'SkillQuest';
+    }
 }
-            item.classList.toggle('active', item.dataset.page === page);
-        });
-
-        // Рендерим страницу
-        this.renderCurrentPage();
-
-        // Обновляем заголовок (если есть)
-        const titles = {
-            home: 'Главная',
-            calendar: 'Календарь',
-            journals: 'Журналы',
-            goals: 'Цели',
-            profile: 'Профиль'
-        };
-        const titleEl = document.querySelector('.header .title-1');
-        if (titleEl) {
-            titleEl.textContent = titles[page] || 'SkillQuest';
-        }
-    },
 
     // ===================== РЕНДЕРИНГ ТЕКУЩЕЙ СТРАНИЦЫ =====================
     renderCurrentPage() {
