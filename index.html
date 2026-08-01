@@ -4,11 +4,445 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest — Журнал прогресса</title>
-    <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* ====== ВСЕ СТИЛИ (UI Kit + Home + Calendar) ====== */
+        :root {
+            --color-primary: #6C5CE7;
+            --color-primary-dark: #5A4BD1;
+            --color-primary-light: #A29BFE;
+            --color-primary-bg: rgba(108,92,231,0.10);
+            --color-secondary: #00B894;
+            --color-success: #00B894;
+            --color-warning: #FDCB6E;
+            --color-error: #FF7675;
+            --color-background: #F8F9FA;
+            --color-background-secondary: #F1F2F6;
+            --color-surface: #FFFFFF;
+            --color-text: #2D3436;
+            --color-text-secondary: #636E72;
+            --color-text-tertiary: #B2BEC3;
+            --color-text-inverse: #FFFFFF;
+            --color-border: #DFE6E9;
+            --color-border-light: #EDF2F7;
+            --color-divider: #E8ECF1;
+            --color-shadow: rgba(0,0,0,0.06);
+            --color-shadow-dark: rgba(0,0,0,0.12);
+            --color-shadow-primary: rgba(108,92,231,0.25);
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-size-xs: 12px;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            --font-size-lg: 18px;
+            --font-size-xl: 20px;
+            --font-size-2xl: 24px;
+            --font-size-3xl: 28px;
+            --font-size-4xl: 32px;
+            --font-size-5xl: 40px;
+            --line-height-tight: 1.2;
+            --line-height-normal: 1.5;
+            --font-weight-regular: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+            --spacing-3xl: 32px;
+            --spacing-4xl: 40px;
+            --spacing-5xl: 48px;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-2xl: 24px;
+            --radius-full: 9999px;
+            --shadow-xs: 0 1px 2px var(--color-shadow);
+            --shadow-sm: 0 2px 4px var(--color-shadow);
+            --shadow-md: 0 4px 12px var(--color-shadow);
+            --shadow-lg: 0 8px 24px var(--color-shadow-dark);
+            --shadow-xl: 0 16px 48px var(--color-shadow-dark);
+            --shadow-primary: 0 4px 16px var(--color-shadow-primary);
+            --transition-fast: 150ms cubic-bezier(0.4,0,0.2,1);
+            --transition-base: 250ms cubic-bezier(0.4,0,0.2,1);
+            --transition-slow: 350ms cubic-bezier(0.4,0,0.2,1);
+            --transition-spring: 400ms cubic-bezier(0.34,1.56,0.64,1);
+            --container-max-width: 1200px;
+            --container-padding: 16px;
+            --header-height: 68px;
+            --bottom-nav-height: 72px;
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --z-base: 1;
+            --z-sticky: 20;
+            --z-modal: 100;
+            --z-toast: 200;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent; scroll-behavior:smooth; }
+        body {
+            min-height:100vh; min-height:100dvh;
+            font-family:var(--font-family);
+            font-size:var(--font-size-md);
+            line-height:var(--line-height-normal);
+            color:var(--color-text);
+            background:var(--color-background);
+            -webkit-font-smoothing:antialiased;
+            overflow-x:hidden;
+        }
+        ::-webkit-scrollbar { width:4px; height:4px; }
+        ::-webkit-scrollbar-track { background:var(--color-background-secondary); }
+        ::-webkit-scrollbar-thumb { background:var(--color-text-tertiary); border-radius:var(--radius-full); }
+        .headline-1 { font-size:var(--font-size-5xl); font-weight:var(--font-weight-bold); line-height:var(--line-height-tight); letter-spacing:-0.02em; }
+        .headline-2 { font-size:var(--font-size-4xl); font-weight:var(--font-weight-bold); line-height:var(--line-height-tight); letter-spacing:-0.02em; }
+        .headline-3 { font-size:var(--font-size-3xl); font-weight:var(--font-weight-bold); line-height:var(--line-height-tight); }
+        .title-1 { font-size:var(--font-size-2xl); font-weight:var(--font-weight-semibold); line-height:var(--line-height-tight); }
+        .title-2 { font-size:var(--font-size-xl); font-weight:var(--font-weight-semibold); line-height:var(--line-height-tight); }
+        .title-3 { font-size:var(--font-size-lg); font-weight:var(--font-weight-semibold); line-height:var(--line-height-tight); }
+        .body-1 { font-size:var(--font-size-md); font-weight:var(--font-weight-regular); line-height:var(--line-height-normal); }
+        .body-2 { font-size:var(--font-size-sm); font-weight:var(--font-weight-regular); line-height:var(--line-height-normal); }
+        .body-3 { font-size:var(--font-size-xs); font-weight:var(--font-weight-regular); line-height:var(--line-height-normal); }
+        .caption-1 { font-size:var(--font-size-xs); font-weight:var(--font-weight-medium); line-height:var(--line-height-tight); }
+        .caption-2 { font-size:10px; font-weight:var(--font-weight-medium); text-transform:uppercase; letter-spacing:0.06em; }
+        .text-primary { color:var(--color-primary); }
+        .text-secondary { color:var(--color-text-secondary); }
+        .text-tertiary { color:var(--color-text-tertiary); }
+        .text-inverse { color:var(--color-text-inverse); }
+        .text-success { color:var(--color-success); }
+        .text-error { color:var(--color-error); }
+        .text-center { text-align:center; }
+        .flex { display:flex; }
+        .flex-col { flex-direction:column; }
+        .flex-center { display:flex; align-items:center; justify-content:center; }
+        .flex-between { display:flex; align-items:center; justify-content:space-between; }
+        .flex-wrap { flex-wrap:wrap; }
+        .gap-sm { gap:var(--spacing-sm); }
+        .gap-md { gap:var(--spacing-md); }
+        .gap-lg { gap:var(--spacing-lg); }
+        .grid { display:grid; gap:var(--spacing-md); }
+        .grid-2 { grid-template-columns:repeat(2,1fr); }
+        .grid-3 { grid-template-columns:repeat(3,1fr); }
+        .grid-4 { grid-template-columns:repeat(4,1fr); }
+        .grid-auto { grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
+        .mt-sm { margin-top:var(--spacing-sm); }
+        .mt-md { margin-top:var(--spacing-md); }
+        .mt-lg { margin-top:var(--spacing-lg); }
+        .mt-xl { margin-top:var(--spacing-xl); }
+        .mt-2xl { margin-top:var(--spacing-2xl); }
+        .mb-sm { margin-bottom:var(--spacing-sm); }
+        .mb-md { margin-bottom:var(--spacing-md); }
+        .mb-lg { margin-bottom:var(--spacing-lg); }
+        .mb-xl { margin-bottom:var(--spacing-xl); }
+        .mb-2xl { margin-bottom:var(--spacing-2xl); }
+        .p-sm { padding:var(--spacing-sm); }
+        .p-md { padding:var(--spacing-md); }
+        .p-lg { padding:var(--spacing-lg); }
+        .p-xl { padding:var(--spacing-xl); }
+        .p-2xl { padding:var(--spacing-2xl); }
+        .btn {
+            display:inline-flex; align-items:center; justify-content:center; gap:var(--spacing-sm);
+            padding:10px 20px; border-radius:var(--radius-md);
+            font-weight:var(--font-weight-semibold); font-size:var(--font-size-md);
+            line-height:1; transition:all var(--transition-base);
+            cursor:pointer; border:2px solid transparent;
+            min-height:44px; min-width:44px; user-select:none;
+        }
+        .btn:active { transform:scale(0.96); }
+        .btn:disabled { opacity:0.5; cursor:not-allowed; pointer-events:none; }
+        .btn-primary { background:var(--color-primary); color:var(--color-text-inverse); box-shadow:var(--shadow-primary); }
+        .btn-primary:hover { background:var(--color-primary-dark); transform:translateY(-2px); box-shadow:var(--shadow-lg); }
+        .btn-secondary { background:transparent; color:var(--color-primary); border-color:var(--color-primary); }
+        .btn-secondary:hover { background:var(--color-primary-bg); }
+        .btn-ghost { background:transparent; color:var(--color-text-secondary); }
+        .btn-ghost:hover { background:var(--color-background-secondary); color:var(--color-text); }
+        .btn-success { background:var(--color-success); color:var(--color-text-inverse); }
+        .btn-danger { background:var(--color-error); color:var(--color-text-inverse); }
+        .btn-sm { padding:6px 14px; font-size:var(--font-size-sm); min-height:36px; }
+        .btn-lg { padding:14px 28px; font-size:var(--font-size-lg); min-height:52px; }
+        .btn-icon { width:44px; height:44px; padding:0; border-radius:var(--radius-full); min-width:44px; }
+        .fab {
+            position:fixed; bottom:calc(var(--bottom-nav-height) + var(--spacing-2xl) + var(--safe-area-bottom));
+            right:var(--spacing-2xl); width:56px; height:56px; border-radius:var(--radius-full);
+            background:var(--color-primary); color:var(--color-text-inverse);
+            box-shadow:var(--shadow-lg); display:flex; align-items:center; justify-content:center;
+            font-size:var(--font-size-2xl); transition:all var(--transition-spring);
+            z-index:var(--z-sticky); border:none; cursor:pointer;
+        }
+        .fab:hover { transform:scale(1.05); box-shadow:var(--shadow-xl); }
+        .fab:active { transform:scale(0.92); }
+        .card {
+            background:var(--color-surface); border-radius:var(--radius-lg);
+            padding:var(--spacing-lg); box-shadow:var(--shadow-sm);
+            border:1px solid var(--color-border-light);
+            transition:all var(--transition-base);
+        }
+        .card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
+        .card-primary { background:var(--color-primary); color:var(--color-text-inverse); }
+        .card-glow { box-shadow:0 0 40px rgba(108,92,231,0.15); }
+        .progress { width:100%; height:8px; background:var(--color-background-secondary); border-radius:var(--radius-full); overflow:hidden; position:relative; }
+        .progress-bar { height:100%; background:var(--color-primary); border-radius:var(--radius-full); transition:width var(--transition-slow); min-width:4px; }
+        .progress-sm { height:4px; }
+        .progress-lg { height:12px; }
+        .input { width:100%; padding:10px 14px; border:2px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface); color:var(--color-text); font-size:var(--font-size-md); transition:all var(--transition-fast); min-height:44px; }
+        .input:focus { outline:none; border-color:var(--color-primary); box-shadow:0 0 0 4px var(--color-primary-bg); }
+        .input-label { display:block; font-weight:var(--font-weight-medium); font-size:var(--font-size-sm); color:var(--color-text-secondary); margin-bottom:var(--spacing-xs); }
+        .avatar {
+            width:64px; height:64px; border-radius:var(--radius-full);
+            background:var(--color-primary-bg);
+            display:flex; align-items:center; justify-content:center;
+            font-size:var(--font-size-2xl); font-weight:var(--font-weight-bold);
+            color:var(--color-primary); overflow:hidden; flex-shrink:0;
+        }
+        .avatar img { width:100%; height:100%; object-fit:cover; }
+        .avatar-sm { width:40px; height:40px; font-size:var(--font-size-md); }
+        .avatar-lg { width:88px; height:88px; font-size:var(--font-size-4xl); }
+        .avatar-xl { width:120px; height:120px; font-size:var(--font-size-5xl); }
+        .chip {
+            display:inline-flex; align-items:center; gap:var(--spacing-xs);
+            padding:4px 12px; border-radius:var(--radius-full);
+            background:var(--color-background-secondary);
+            font-size:var(--font-size-xs); font-weight:var(--font-weight-medium);
+            color:var(--color-text-secondary); transition:all var(--transition-fast);
+            cursor:pointer;
+        }
+        .chip:hover { background:var(--color-border); }
+        .chip.active { background:var(--color-primary); color:var(--color-text-inverse); }
+        .divider { height:1px; background:var(--color-divider); margin:var(--spacing-md) 0; }
+        .toast {
+            position:fixed; bottom:calc(var(--bottom-nav-height) + var(--spacing-2xl) + var(--safe-area-bottom));
+            left:50%; transform:translateX(-50%) translateY(120px);
+            padding:var(--spacing-md) var(--spacing-xl);
+            background:var(--color-text); color:var(--color-text-inverse);
+            border-radius:var(--radius-md); box-shadow:var(--shadow-lg);
+            font-size:var(--font-size-sm); font-weight:var(--font-weight-medium);
+            z-index:var(--z-toast); opacity:0;
+            transition:all var(--transition-spring);
+            max-width:90%; text-align:center;
+        }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+        .toast.success { background:var(--color-success); }
+        .toast.error { background:var(--color-error); }
+        .modal-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.5);
+            backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+            display:none; align-items:center; justify-content:center;
+            z-index:var(--z-modal); padding:var(--spacing-lg);
+        }
+        .modal-overlay.open { display:flex; }
+        .modal {
+            background:var(--color-surface); border-radius:var(--radius-2xl);
+            padding:var(--spacing-2xl); max-width:480px; width:100%;
+            max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-2xl);
+            animation:slideUp var(--transition-spring);
+        }
+        .bottom-nav {
+            position:fixed; bottom:0; left:0; right:0;
+            height:calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+            padding-bottom:var(--safe-area-bottom);
+            background:var(--color-surface); border-top:1px solid var(--color-border);
+            display:flex; align-items:stretch; z-index:var(--z-sticky);
+            backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+            background:rgba(255,255,255,0.92);
+        }
+        body.dark .bottom-nav { background:rgba(26,26,26,0.92); }
+        .bottom-nav-item {
+            flex:1; display:flex; flex-direction:column; align-items:center;
+            justify-content:center; gap:2px; padding:var(--spacing-sm) 0;
+            color:var(--color-text-tertiary); transition:all var(--transition-base);
+            cursor:pointer; position:relative; min-height:56px;
+        }
+        .bottom-nav-item .icon { font-size:var(--font-size-xl); transition:all var(--transition-spring); }
+        .bottom-nav-item .label { font-size:10px; font-weight:var(--font-weight-medium); }
+        .bottom-nav-item.active { color:var(--color-primary); }
+        .bottom-nav-item.active .icon { transform:scale(1.1); }
+        .bottom-nav-item .badge {
+            position:absolute; top:4px; right:50%;
+            transform:translateX(calc(50% + 16px));
+            background:var(--color-error); color:var(--color-text-inverse);
+            font-size:10px; font-weight:var(--font-weight-bold);
+            min-width:18px; height:18px; padding:0 4px;
+            border-radius:var(--radius-full);
+            display:none; align-items:center; justify-content:center; line-height:1;
+        }
+        .bottom-nav-item .badge.show { display:flex; }
+        .switch {
+            position:relative; width:48px; height:28px; flex-shrink:0; cursor:pointer;
+        }
+        .switch input { opacity:0; width:0; height:0; }
+        .switch .slider {
+            position:absolute; inset:0; background:var(--color-border);
+            border-radius:var(--radius-full); transition:all var(--transition-base);
+        }
+        .switch .slider::before {
+            content:''; position:absolute; width:22px; height:22px;
+            left:3px; bottom:3px; background:var(--color-surface);
+            border-radius:var(--radius-full); transition:all var(--transition-spring);
+        }
+        .switch input:checked + .slider { background:var(--color-primary); }
+        .switch input:checked + .slider::before { transform:translateX(20px); }
+
+        @keyframes slideUp {
+            from { transform:translateY(20px); opacity:0; }
+            to { transform:translateY(0); opacity:1; }
+        }
+        @keyframes fadeIn {
+            from { opacity:0; }
+            to { opacity:1; }
+        }
+        .animate-slide-up { animation:slideUp var(--transition-spring); }
+
+        /* dark mode */
+        body.dark {
+            --color-background: #1A1A1A;
+            --color-background-secondary: #242424;
+            --color-surface: #2A2A2A;
+            --color-text: #E8E6E3;
+            --color-text-secondary: #A8A4A0;
+            --color-text-tertiary: #6B6865;
+            --color-border: #3D3D3D;
+            --color-border-light: #353535;
+            --color-divider: #353535;
+            --color-shadow: rgba(0,0,0,0.3);
+            --color-shadow-dark: rgba(0,0,0,0.5);
+        }
+        /* color themes */
+        body.theme-jade { --color-primary: #00B894; --color-primary-dark: #00A381; --color-primary-light: #55EFC4; --color-primary-bg: rgba(0,184,148,0.12); --color-shadow-primary: rgba(0,184,148,0.25); }
+        body.theme-ruby { --color-primary: #E17055; --color-primary-dark: #D63031; --color-primary-light: #FD79A8; --color-primary-bg: rgba(225,112,85,0.12); --color-shadow-primary: rgba(225,112,85,0.25); }
+        body.theme-sapphire { --color-primary: #0984E3; --color-primary-dark: #0770C4; --color-primary-light: #74B9FF; --color-primary-bg: rgba(9,132,227,0.12); --color-shadow-primary: rgba(9,132,227,0.25); }
+        body.theme-amber { --color-primary: #FDCB6E; --color-primary-dark: #F9A825; --color-primary-light: #FFEAA7; --color-primary-bg: rgba(253,203,110,0.15); --color-shadow-primary: rgba(253,203,110,0.25); }
+        body.theme-coral { --color-primary: #E17055; --color-primary-dark: #C0392B; --color-primary-light: #FD9A8A; --color-primary-bg: rgba(225,112,85,0.12); --color-shadow-primary: rgba(225,112,85,0.25); }
+        body.theme-amethyst { --color-primary: #A29BFE; --color-primary-dark: #6C5CE7; --color-primary-light: #C8C3FF; --color-primary-bg: rgba(162,155,254,0.15); --color-shadow-primary: rgba(162,155,254,0.25); }
+
+        .app {
+            max-width:var(--container-max-width);
+            margin:0 auto;
+            padding:var(--header-height) 0 calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+        }
+        .main-content { padding:0 var(--container-padding); }
+        .header {
+            background:var(--color-surface);
+            border-bottom:1px solid var(--color-border);
+            padding:0 var(--container-padding);
+            height:var(--header-height);
+            display:flex; align-items:center; justify-content:space-between;
+            position:sticky; top:0; z-index:var(--z-sticky);
+            backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+            background:rgba(255,255,255,0.92);
+        }
+        body.dark .header { background:rgba(26,26,26,0.92); }
+        .header-left { display:flex; flex-direction:column; gap:0; }
+        .header-greeting { font-size:var(--font-size-xs); color:var(--color-text-secondary); }
+        .header .avatar { cursor:pointer; transition:all var(--transition-spring); }
+        .header .avatar:hover { transform:scale(1.05); }
+
+        .home-content { display:flex; flex-direction:column; gap:var(--spacing-2xl); padding:var(--spacing-lg) 0 var(--spacing-5xl); }
+        .level-card { background:var(--color-primary); color:var(--color-text-inverse); padding:var(--spacing-xl); border-radius:var(--radius-lg); box-shadow:var(--shadow-primary); position:relative; overflow:hidden; }
+        .level-card::before { content:''; position:absolute; top:-50%; right:-20%; width:200px; height:200px; background:rgba(255,255,255,0.08); border-radius:var(--radius-full); }
+        .level-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--spacing-md); position:relative; z-index:1; }
+        .level-stats { text-align:right; display:flex; flex-direction:column; gap:var(--spacing-2xs); }
+        .level-stats .caption-2 { color:rgba(255,255,255,0.7); }
+        .level-card .headline-2 { color:var(--color-text-inverse); }
+        .level-progress { background:rgba(255,255,255,0.2); height:8px; border-radius:var(--radius-full); overflow:hidden; position:relative; z-index:1; }
+        .level-progress .progress-bar { background:var(--color-text-inverse); height:100%; border-radius:var(--radius-full); transition:width var(--transition-slow); }
+
+        .stats-grid { gap:var(--spacing-md); }
+        .stat-card { text-align:center; padding:var(--spacing-md); display:flex; flex-direction:column; align-items:center; gap:var(--spacing-2xs); background:var(--color-surface); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--color-border-light); transition:all var(--transition-base); }
+        .stat-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+        .stat-icon { font-size:var(--font-size-xl); }
+        .stat-number { font-size:var(--font-size-2xl); font-weight:var(--font-weight-bold); color:var(--color-text); line-height:1.2; }
+        .stat-label { color:var(--color-text-secondary); font-size:var(--font-size-xs); }
+
+        .section-header { margin-bottom:var(--spacing-md); }
+        .section-header .title-2 { color:var(--color-text); }
+
+        .tasks-list { display:flex; flex-direction:column; gap:var(--spacing-sm); }
+        .task-item { display:flex; align-items:center; gap:var(--spacing-md); padding:var(--spacing-md); background:var(--color-surface); border-radius:var(--radius-md); border:1px solid var(--color-border-light); transition:all var(--transition-base); cursor:pointer; }
+        .task-item:hover { transform:translateX(4px); box-shadow:var(--shadow-sm); }
+        .task-item .task-icon { font-size:var(--font-size-xl); width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:var(--color-background-secondary); border-radius:var(--radius-sm); flex-shrink:0; }
+        .task-item .task-info { flex:1; min-width:0; }
+        .task-item .task-title { font-weight:var(--font-weight-medium); font-size:var(--font-size-md); color:var(--color-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .task-item .task-meta { display:flex; gap:var(--spacing-md); font-size:var(--font-size-xs); color:var(--color-text-secondary); }
+        .task-item .task-status { padding:2px 10px; border-radius:var(--radius-full); font-size:10px; font-weight:var(--font-weight-medium); background:var(--color-background-secondary); color:var(--color-text-secondary); }
+        .task-item .task-status.done { background:var(--color-success); color:var(--color-text-inverse); }
+        .task-item .task-status.pending { background:var(--color-warning); color:var(--color-text); }
+        .task-item .task-status.missed { background:var(--color-error); color:var(--color-text-inverse); }
+        .tasks-empty { text-align:center; padding:var(--spacing-2xl); color:var(--color-text-secondary); background:var(--color-background-secondary); border-radius:var(--radius-md); border:2px dashed var(--color-border); }
+        .tasks-empty .empty-icon { font-size:var(--font-size-4xl); margin-bottom:var(--spacing-md); }
+
+        .journals-grid { gap:var(--spacing-md); }
+        .journal-card-mini { background:var(--color-surface); border-radius:var(--radius-md); padding:var(--spacing-md); text-align:center; border:1px solid var(--color-border-light); transition:all var(--transition-base); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:var(--spacing-xs); }
+        .journal-card-mini:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); }
+        .journal-card-mini .journal-icon { font-size:var(--font-size-2xl); }
+        .journal-card-mini .journal-name { font-size:var(--font-size-sm); font-weight:var(--font-weight-medium); color:var(--color-text); }
+        .journal-card-mini .journal-exp { font-size:var(--font-size-xs); color:var(--color-text-secondary); }
+        .journal-card-mini .journal-progress { width:100%; height:4px; background:var(--color-background-secondary); border-radius:var(--radius-full); overflow:hidden; margin-top:var(--spacing-xs); }
+        .journal-card-mini .journal-progress .fill { height:100%; background:var(--color-primary); border-radius:var(--radius-full); transition:width var(--transition-slow); }
+
+        /* Calendar */
+        .calendar-container { display:flex; flex-direction:column; gap:var(--spacing-lg); }
+        .calendar-controls { display:flex; align-items:center; gap:var(--spacing-sm); flex-wrap:wrap; }
+        .calendar-controls .btn-group { display:flex; gap:var(--spacing-2xs); }
+        .calendar-controls .btn-group .btn { padding:6px 14px; font-size:var(--font-size-xs); min-height:32px; }
+        .calendar-controls .btn-group .btn.active { background:var(--color-primary); color:var(--color-text-inverse); }
+        .calendar-nav { display:flex; align-items:center; gap:var(--spacing-sm); margin-left:auto; }
+        .calendar-nav .title { font-weight:var(--font-weight-semibold); font-size:var(--font-size-lg); min-width:140px; text-align:center; }
+        .calendar-nav button { width:36px; height:36px; border-radius:var(--radius-full); background:var(--color-background-secondary); display:flex; align-items:center; justify-content:center; font-size:var(--font-size-lg); transition:all var(--transition-base); }
+        .calendar-nav button:hover { background:var(--color-border); }
+        .calendar-filters { display:flex; flex-wrap:wrap; gap:var(--spacing-xs); padding:var(--spacing-sm) 0; }
+        .calendar-filters .chip { font-size:10px; padding:2px 10px; }
+        .calendar-grid { display:grid; gap:2px; }
+        .calendar-grid.week { grid-template-columns:repeat(7,1fr); }
+        .calendar-grid.month { grid-template-columns:repeat(7,1fr); }
+        .calendar-grid .day-header { text-align:center; font-weight:var(--font-weight-medium); font-size:var(--font-size-xs); color:var(--color-text-secondary); padding:var(--spacing-xs) 0; }
+        .calendar-cell { background:var(--color-surface); border-radius:var(--radius-sm); padding:var(--spacing-sm); text-align:center; min-height:64px; cursor:pointer; transition:all var(--transition-fast); border:2px solid transparent; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        .calendar-cell:hover { background:var(--color-background-secondary); transform:scale(1.02); }
+        .calendar-cell.today { border-color:var(--color-primary); background:var(--color-primary-bg); }
+        .calendar-cell.selected { background:var(--color-primary); color:var(--color-text-inverse); }
+        .calendar-cell.selected .date { color:var(--color-text-inverse); }
+        .calendar-cell.other-month { opacity:0.4; }
+        .calendar-cell .date { font-weight:var(--font-weight-semibold); font-size:var(--font-size-md); }
+        .calendar-cell .badge-container { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; margin-top:2px; }
+        .calendar-cell .badge { font-size:9px; padding:0 4px; border-radius:var(--radius-2xs); background:var(--color-primary-bg); color:var(--color-primary); font-weight:var(--font-weight-semibold); line-height:1.6; }
+        .calendar-cell.selected .badge { background:rgba(255,255,255,0.2); color:var(--color-text-inverse); }
+        .calendar-cell .task-indicator { width:6px; height:6px; border-radius:var(--radius-full); background:var(--color-primary); margin-top:2px; }
+        .calendar-day-detail { margin-top:var(--spacing-lg); padding-top:var(--spacing-lg); border-top:1px solid var(--color-border); }
+        .calendar-day-detail .day-title { font-weight:var(--font-weight-semibold); font-size:var(--font-size-lg); margin-bottom:var(--spacing-md); }
+        .calendar-day-detail .day-tasks { display:flex; flex-direction:column; gap:var(--spacing-sm); }
+        .year-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--spacing-md); }
+        .year-grid .month-card { background:var(--color-surface); border-radius:var(--radius-md); padding:var(--spacing-md); text-align:center; cursor:pointer; transition:all var(--transition-base); border:1px solid var(--color-border-light); }
+        .year-grid .month-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+        .year-grid .month-card .month-name { font-weight:var(--font-weight-medium); font-size:var(--font-size-sm); }
+        .year-grid .month-card .month-dots { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; margin-top:var(--spacing-xs); }
+        .year-grid .month-card .dot { width:6px; height:6px; border-radius:var(--radius-full); background:var(--color-border); }
+        .year-grid .month-card .dot.has-task { background:var(--color-primary); }
+
+        @media (max-width:768px) {
+            .stats-grid.grid-3 { grid-template-columns:repeat(3,1fr); gap:var(--spacing-sm); }
+            .stat-card { padding:var(--spacing-sm); }
+            .stat-number { font-size:var(--font-size-xl); }
+            .journals-grid.grid-4 { grid-template-columns:repeat(2,1fr); }
+            .level-card { padding:var(--spacing-lg); }
+            .calendar-nav .title { font-size:var(--font-size-md); min-width:100px; }
+            .calendar-cell { min-height:48px; padding:var(--spacing-xs); }
+            .calendar-cell .date { font-size:var(--font-size-sm); }
+            .year-grid { grid-template-columns:repeat(3,1fr); }
+        }
+        @media (max-width:480px) {
+            .stats-grid.grid-3 { grid-template-columns:1fr 1fr; gap:var(--spacing-sm); }
+            .stat-card:last-child { grid-column:span 2; }
+            .calendar-controls { flex-direction:column; align-items:stretch; }
+            .calendar-nav { margin-left:0; justify-content:center; }
+            .calendar-cell { min-height:40px; padding:2px; }
+            .calendar-cell .date { font-size:var(--font-size-xs); }
+            .calendar-cell .badge { font-size:7px; padding:0 2px; }
+            .year-grid { grid-template-columns:repeat(2,1fr); }
+        }
+    </style>
 </head>
 <body>
     <div class="app" id="app">
-        <!-- Header -->
         <header class="header">
             <div class="header-left">
                 <span class="header-greeting body-2 text-secondary" id="greetingText">Доброе утро 👋</span>
@@ -18,13 +452,7 @@
                 <span id="avatarInitials">Г</span>
             </div>
         </header>
-
-        <!-- Main Content -->
-        <main class="main-content" id="mainContent">
-            <!-- Сюда рендерится активная страница -->
-        </main>
-
-        <!-- Bottom Navigation -->
+        <main class="main-content" id="mainContent"></main>
         <nav class="bottom-nav">
             <div class="bottom-nav-item active" data-page="home">
                 <span class="icon">🏠</span>
@@ -48,23 +476,791 @@
                 <span class="label">Профиль</span>
             </div>
         </nav>
-
-        <!-- FAB -->
         <button class="fab" id="fabAddTask" aria-label="Создать задачу">
             <span>+</span>
         </button>
     </div>
 
-    <!-- Подключаем JS -->
-    <script src="js/data.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/calendar.js"></script>
-    <script src="js/app.js"></script>
-
-    <!-- Eruda — консоль для мобильных устройств -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>
-        eruda.init();
+        // ========================== DATA LAYER ==========================
+        const Data = {
+            _data: null,
+            _listeners: [],
+            load() {
+                const raw = localStorage.getItem('skillquest_data');
+                if (raw) {
+                    try { this._data = JSON.parse(raw); } catch (e) { this._data = this.getDefaultData(); }
+                } else {
+                    this._data = this.getDefaultData();
+                }
+                return this._data;
+            },
+            save() {
+                localStorage.setItem('skillquest_data', JSON.stringify(this._data));
+                this._notifyListeners();
+            },
+            subscribe(callback) {
+                this._listeners.push(callback);
+                return () => { this._listeners = this._listeners.filter(cb => cb !== callback); };
+            },
+            _notifyListeners() {
+                this._listeners.forEach(cb => cb(this._data));
+            },
+            getDefaultData() {
+                return {
+                    profile: {
+                        name: 'Герой',
+                        age: 25,
+                        weight: 70,
+                        height: 175,
+                        chest: 100,
+                        waist: 80,
+                        hips: 100,
+                        biceps: 35,
+                        avatar: null,
+                        totalExp: 0,
+                        level: 1,
+                        streak: 0,
+                        lastActive: null,
+                    },
+                    journals: [
+                        { name: 'тело', exp: 0, icon: '💪' },
+                        { name: 'питание', exp: 0, icon: '🍎' },
+                        { name: 'дела', exp: 0, icon: '📋' },
+                        { name: 'учеба', exp: 0, icon: '📚' },
+                        { name: 'хобби', exp: 0, icon: '🎨' },
+                        { name: 'путешествия', exp: 0, icon: '✈️' },
+                        { name: 'долги', exp: 0, icon: '💰' },
+                        { name: 'другое', exp: 0, icon: '📌' },
+                    ],
+                    tasks: [],
+                    goals: [],
+                    weightLog: [],
+                };
+            },
+            get profile() { return this._data.profile; },
+            get journals() { return this._data.journals; },
+            get tasks() { return this._data.tasks; },
+            get goals() { return this._data.goals; },
+            getJournalByName(name) {
+                return this._data.journals.find(j => j.name === name);
+            },
+            addTask(task) {
+                const newTask = {
+                    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                    ...task,
+                    completedDates: [],
+                    missedDates: [],
+                    createdAt: new Date().toISOString(),
+                };
+                this._data.tasks.push(newTask);
+                this.save();
+                return newTask;
+            },
+            updateTask(id, updates) {
+                const idx = this._data.tasks.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    this._data.tasks[idx] = { ...this._data.tasks[idx], ...updates };
+                    this.save();
+                    return this._data.tasks[idx];
+                }
+                return null;
+            },
+            deleteTask(id) {
+                this._data.tasks = this._data.tasks.filter(t => t.id !== id);
+                this.save();
+            },
+            getTasksForDate(date) {
+                const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
+                return this._data.tasks.filter(task => {
+                    const start = task.startDate || task.date;
+                    const end = task.endDate || task.date;
+                    const days = task.daysOfWeek || [];
+                    const d = new Date(dateStr);
+                    const dayOfWeek = d.getDay();
+                    if (days.length === 0) {
+                        return dateStr >= start && dateStr <= end;
+                    }
+                    return days.includes(dayOfWeek) && dateStr >= start && dateStr <= end;
+                });
+            },
+            getTodayTasks() {
+                const today = new Date().toISOString().split('T')[0];
+                return this.getTasksForDate(today);
+            },
+            getTaskStatus(task, dateStr) {
+                if (task.completedDates.includes(dateStr)) return 'done';
+                if (task.missedDates.includes(dateStr)) return 'missed';
+                const taskDate = new Date(dateStr);
+                const now = new Date();
+                if (taskDate < now && !this.isSameDay(taskDate, now)) return 'missed';
+                return 'pending';
+            },
+            isSameDay(d1, d2) {
+                return d1.getFullYear() === d2.getFullYear() &&
+                    d1.getMonth() === d2.getMonth() &&
+                    d1.getDate() === d2.getDate();
+            },
+            recalcLevel() {
+                const exp = this._data.profile.totalExp;
+                let level = 1;
+                let needed = 100;
+                while (exp >= needed) {
+                    level++;
+                    needed = level * 100;
+                }
+                this._data.profile.level = level;
+                this.save();
+                return { level, exp, needed };
+            },
+            addExp(amount) {
+                this._data.profile.totalExp += amount;
+                this.recalcLevel();
+                this.save();
+            },
+            updateStreak() {
+                const today = new Date().toISOString().split('T')[0];
+                const last = this._data.profile.lastActive;
+                if (last === today) return;
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+                if (last === yesterdayStr) {
+                    this._data.profile.streak += 1;
+                } else {
+                    this._data.profile.streak = 1;
+                }
+                this._data.profile.lastActive = today;
+                this.save();
+            },
+            completeTaskInstance(taskId, dateStr) {
+                const task = this._data.tasks.find(t => t.id === taskId);
+                if (!task) return false;
+                if (task.completedDates.includes(dateStr)) return false;
+                const now = new Date();
+                const taskDate = new Date(dateStr);
+                const isLate = taskDate < now && !this.isSameDay(taskDate, now);
+                const expJournal = task.duration * 0.01;
+                const expTotal = task.duration * 0.005;
+                const multiplier = isLate ? 0.5 : 1;
+                const journal = this.getJournalByName(task.journal);
+                if (journal) journal.exp += expJournal * multiplier;
+                this._data.profile.totalExp += expTotal * multiplier;
+                task.completedDates.push(dateStr);
+                this.recalcLevel();
+                this.updateStreak();
+                this.save();
+                return true;
+            },
+            autoMissTasks() {
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0];
+                this._data.tasks.forEach(task => {
+                    const start = task.startDate || task.date;
+                    const end = task.endDate || task.date;
+                    const days = task.daysOfWeek || [];
+                    let current = new Date(start);
+                    const endDate = new Date(end);
+                    while (current <= endDate) {
+                        const dateStr = current.toISOString().split('T')[0];
+                        const d = new Date(dateStr);
+                        if (d < now && !this.isSameDay(d, now) &&
+                            !task.completedDates.includes(dateStr) &&
+                            !task.missedDates.includes(dateStr)) {
+                            if (days.length === 0 || days.includes(d.getDay())) {
+                                task.missedDates.push(dateStr);
+                            }
+                        }
+                        current.setDate(current.getDate() + 1);
+                    }
+                });
+                this.save();
+            },
+            getDateRange(startDate, endDate) {
+                const dates = [];
+                let current = new Date(startDate);
+                const end = new Date(endDate);
+                while (current <= end) {
+                    dates.push(current.toISOString().split('T')[0]);
+                    current.setDate(current.getDate() + 1);
+                }
+                return dates;
+            }
+        };
+        Data.load();
+        window.Data = Data;
+
+        // ========================== UI HELPERS ==========================
+        const UI = {
+            toast(message, type, duration) {
+                type = type || 'info';
+                duration = duration || 3000;
+                const existing = document.querySelector('.toast');
+                if (existing) existing.remove();
+                const toast = document.createElement('div');
+                toast.className = 'toast ' + type;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                requestAnimationFrame(() => { toast.classList.add('show'); });
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 400);
+                }, duration);
+            },
+            formatDate(date, format) {
+                const d = new Date(date);
+                if (format === 'short') return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                if (format === 'long') return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                if (format === 'weekday') return d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+                return d.toLocaleDateString('ru-RU');
+            },
+            getGreeting() {
+                const hour = new Date().getHours();
+                if (hour < 12) return 'Доброе утро 👋';
+                if (hour < 18) return 'Добрый день ☀️';
+                return 'Добрый вечер 🌙';
+            },
+            cycleTheme() {
+                const themes = ['default', 'jade', 'ruby', 'sapphire', 'amber', 'coral', 'amethyst'];
+                const current = document.body.className.match(/theme-(\w+)/)?.[1] || 'default';
+                const index = themes.indexOf(current);
+                const next = themes[(index + 1) % themes.length];
+                document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('theme-')).join(' ');
+                if (next !== 'default') document.body.classList.add('theme-' + next);
+                this.toast('🎨 Тема: ' + next, 'info', 1500);
+            },
+            toggleDarkMode() {
+                document.body.classList.toggle('dark');
+                this.toast('🌓 ' + (document.body.classList.contains('dark') ? 'Темный' : 'Светлый') + ' режим', 'info', 1500);
+            }
+        };
+        window.UI = UI;
+
+        // ========================== CALENDAR ==========================
+        const Calendar = {
+            _view: 'month',
+            _baseDate: new Date(),
+            _selectedDate: new Date(),
+            init() {
+                this._baseDate = new Date();
+                this._selectedDate = new Date();
+            },
+            getView() { return this._view; },
+            getBaseDate() { return this._baseDate; },
+            getSelectedDate() { return this._selectedDate; },
+            setView(view) { this._view = view; },
+            setBaseDate(date) { this._baseDate = new Date(date); },
+            setSelectedDate(date) { this._selectedDate = new Date(date); },
+            navigate(direction) {
+                const d = new Date(this._baseDate);
+                if (this._view === 'day') d.setDate(d.getDate() + direction);
+                else if (this._view === 'week') d.setDate(d.getDate() + direction * 7);
+                else if (this._view === 'month') d.setMonth(d.getMonth() + direction);
+                else if (this._view === 'year') d.setFullYear(d.getFullYear() + direction);
+                this._baseDate = d;
+                return d;
+            },
+            getWeekDays() { return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']; },
+            getMonthData(year, month) {
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const daysInPrevMonth = new Date(year, month, 0).getDate();
+                const today = new Date();
+                const weeks = [];
+                let week = [];
+                for (let i = firstDay - 1; i >= 0; i--) {
+                    const day = daysInPrevMonth - i;
+                    week.push({ day, month: month - 1, year: month === 0 ? year - 1 : year, isOtherMonth: true, isToday: false });
+                }
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const date = new Date(year, month, d);
+                    const isToday = date.getFullYear() === today.getFullYear() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getDate() === today.getDate();
+                    week.push({ day: d, month, year, isOtherMonth: false, isToday });
+                    if (week.length === 7) { weeks.push(week); week = []; }
+                }
+                if (week.length > 0) {
+                    let nextMonthDay = 1;
+                    while (week.length < 7) {
+                        week.push({ day: nextMonthDay, month: month + 1, year: month === 11 ? year + 1 : year, isOtherMonth: true, isToday: false });
+                        nextMonthDay++;
+                    }
+                    weeks.push(week);
+                }
+                return weeks;
+            },
+            getWeekData(baseDate) {
+                const start = new Date(baseDate);
+                start.setDate(start.getDate() - start.getDay());
+                const week = [];
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(start);
+                    d.setDate(d.getDate() + i);
+                    week.push(d);
+                }
+                return week;
+            },
+            getYearData(year) {
+                const months = [];
+                for (let m = 0; m < 12; m++) {
+                    const date = new Date(year, m, 1);
+                    months.push({ month: m, year, name: date.toLocaleString('ru-RU', { month: 'short' }) });
+                }
+                return months;
+            },
+            getTitle() {
+                const d = this._baseDate;
+                if (this._view === 'day') return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                if (this._view === 'week') {
+                    const start = new Date(d);
+                    start.setDate(start.getDate() - start.getDay());
+                    const end = new Date(start);
+                    end.setDate(end.getDate() + 6);
+                    if (start.getMonth() === end.getMonth()) {
+                        return start.getDate() + ' – ' + end.getDate() + ' ' + start.toLocaleString('ru-RU', { month: 'long' }) + ' ' + start.getFullYear();
+                    }
+                    return start.getDate() + ' ' + start.toLocaleString('ru-RU', { month: 'short' }) + ' – ' + end.getDate() + ' ' + end.toLocaleString('ru-RU', { month: 'short' }) + ' ' + start.getFullYear();
+                }
+                if (this._view === 'month') return d.toLocaleString('ru-RU', { month: 'long', year: 'numeric' });
+                return d.getFullYear().toString();
+            }
+        };
+        Calendar.init();
+        window.Calendar = Calendar;
+
+        // ========================== APP ==========================
+        const App = {
+            _unsubscribe: null,
+            _currentPage: 'home',
+
+            init() {
+                this._unsubscribe = Data.subscribe(() => { this.renderCurrentPage(); });
+                document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.navigateTo(item.dataset.page);
+                    });
+                });
+                const fab = document.getElementById('fabAddTask');
+                if (fab) fab.addEventListener('click', () => { UI.toast('📝 Создание задачи (в разработке)', 'info'); });
+                const avatar = document.getElementById('avatarPreview');
+                if (avatar) avatar.addEventListener('click', () => { this.navigateTo('profile'); });
+
+                let tapCount = 0;
+                const header = document.querySelector('.header');
+                if (header) {
+                    header.addEventListener('click', function() {
+                        tapCount++;
+                        if (tapCount === 2) { UI.cycleTheme(); tapCount = 0; }
+                        clearTimeout(window.tapTimer);
+                        window.tapTimer = setTimeout(() => { tapCount = 0; }, 500);
+                    });
+                }
+                let darkTapCount = 0;
+                const avatarEl = document.querySelector('.header .avatar');
+                if (avatarEl) {
+                    avatarEl.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        darkTapCount++;
+                        if (darkTapCount === 3) { UI.toggleDarkMode(); darkTapCount = 0; }
+                        clearTimeout(window.darkTapTimer);
+                        window.darkTapTimer = setTimeout(() => { darkTapCount = 0; }, 500);
+                    });
+                }
+                setInterval(() => {
+                    Data.autoMissTasks();
+                    if (App._currentPage === 'home' || App._currentPage === 'calendar') {
+                        App.renderCurrentPage();
+                    }
+                }, 60000);
+                this.navigateTo('home');
+            },
+
+            navigateTo(page) {
+                this._currentPage = page;
+                document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.page === page);
+                });
+                this.renderCurrentPage();
+                const titles = { home: 'Главная', calendar: 'Календарь', journals: 'Журналы', goals: 'Цели', profile: 'Профиль' };
+                const titleEl = document.querySelector('.header .title-1');
+                if (titleEl) titleEl.textContent = titles[page] || 'SkillQuest';
+            },
+
+            renderCurrentPage() {
+                const container = document.getElementById('mainContent');
+                if (!container) return;
+                switch (this._currentPage) {
+                    case 'home': this.renderHome(container); break;
+                    case 'calendar': this.renderCalendar(container); break;
+                    case 'journals': this.renderJournals(container); break;
+                    case 'goals': this.renderGoals(container); break;
+                    case 'profile': this.renderProfile(container); break;
+                    default: container.innerHTML = '<div class="card"><p class="body-1">Страница в разработке</p></div>';
+                }
+            },
+
+            renderHome(container) {
+                const data = Data._data;
+                const profile = data.profile;
+                const today = new Date().toISOString().split('T')[0];
+                const todayTasks = Data.getTodayTasks();
+
+                const greetingEl = document.getElementById('greetingText');
+                if (greetingEl) greetingEl.textContent = UI.getGreeting();
+                const userNameEl = document.getElementById('userName');
+                if (userNameEl) userNameEl.textContent = profile.name;
+                const initialsEl = document.getElementById('avatarInitials');
+                if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
+
+                const { level, exp, needed } = Data.recalcLevel();
+                const doneCount = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'done').length;
+                const totalToday = todayTasks.length;
+                const productivity = totalToday > 0 ? Math.round((doneCount / totalToday) * 100) : 0;
+                const activeTasks = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'pending').slice(0, 3);
+                const topJournals = [...data.journals].sort((a, b) => b.exp - a.exp).slice(0, 4);
+
+                container.innerHTML = `
+                <div class="home-content">
+                    <section class="level-card card card-glow animate-slide-up">
+                        <div class="level-card-header">
+                            <div>
+                                <span class="caption-2 text-secondary" style="color:rgba(255,255,255,0.7);">УРОВЕНЬ</span>
+                                <span class="headline-2" style="color:var(--color-text-inverse);">${level}</span>
+                            </div>
+                            <div class="level-stats">
+                                <span class="body-2" style="color:rgba(255,255,255,0.9);">${Math.floor(exp)} / ${needed} XP</span>
+                                <span class="caption-2" style="color:rgba(255,255,255,0.7);">🔥 ${profile.streak || 0} дней</span>
+                            </div>
+                        </div>
+                        <div class="progress level-progress">
+                            <div class="progress-bar" style="width: ${(exp / needed) * 100}%;"></div>
+                        </div>
+                    </section>
+                    <section class="stats-grid grid grid-3">
+                        <div class="stat-card card"><span class="stat-icon">📋</span><span class="stat-number">${totalToday}</span><span class="stat-label caption-1 text-secondary">Задач сегодня</span></div>
+                        <div class="stat-card card"><span class="stat-icon">✅</span><span class="stat-number">${doneCount}</span><span class="stat-label caption-1 text-secondary">Выполнено</span></div>
+                        <div class="stat-card card"><span class="stat-icon">📊</span><span class="stat-number">${productivity}%</span><span class="stat-label caption-1 text-secondary">Продуктивность</span></div>
+                    </section>
+                    <section class="tasks-section">
+                        <div class="section-header flex-between"><h2 class="title-2">Активные задачи</h2><button class="btn btn-ghost btn-sm" data-nav="calendar">Все →</button></div>
+                        <div class="tasks-list">
+                            ${activeTasks.length === 0 ? `
+                                <div class="tasks-empty"><div class="empty-icon">🎉</div><p class="body-1">На сегодня задач нет</p><p class="caption-1 text-secondary">Отличная работа!</p></div>
+                            ` : activeTasks.map(task => {
+                                const journal = Data.getJournalByName(task.journal);
+                                const icon = journal ? journal.icon : '📌';
+                                return `<div class="task-item" data-task-id="${task.id}">
+                                    <div class="task-icon">${icon}</div>
+                                    <div class="task-info"><div class="task-title">${task.title}</div><div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div></div>
+                                    <span class="task-status pending">Ожидает</span>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </section>
+                    <section class="journals-section">
+                        <div class="section-header flex-between"><h2 class="title-2">Журналы</h2><button class="btn btn-ghost btn-sm" data-nav="journals">Все →</button></div>
+                        <div class="journals-grid grid grid-4">
+                            ${topJournals.map(journal => {
+                                const progress = Math.min((journal.exp / 1000) * 100, 100);
+                                return `<div class="journal-card-mini" data-journal="${journal.name}">
+                                    <div class="journal-icon">${journal.icon || '📌'}</div>
+                                    <div class="journal-name">${journal.name.charAt(0).toUpperCase() + journal.name.slice(1)}</div>
+                                    <div class="journal-exp">${Math.floor(journal.exp)} XP</div>
+                                    <div class="journal-progress"><div class="fill" style="width: ${progress}%;"></div></div>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </section>
+                </div>`;
+
+                container.querySelectorAll('[data-nav]').forEach(btn => {
+                    btn.addEventListener('click', () => { this.navigateTo(btn.dataset.nav); });
+                });
+                container.querySelectorAll('.task-item').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const task = Data.tasks.find(t => t.id === this.dataset.taskId);
+                        if (task) UI.toast('📋 ' + task.title, 'info');
+                    });
+                });
+                container.querySelectorAll('.journal-card-mini').forEach(el => {
+                    el.addEventListener('click', function() {
+                        UI.toast('📚 Журнал "' + this.dataset.journal + '"', 'info');
+                    });
+                });
+                const goalsBadge = document.getElementById('goalsBadge');
+                if (goalsBadge) {
+                    const activeGoals = data.goals.filter(g => !g.achieved).length;
+                    goalsBadge.textContent = activeGoals;
+                    goalsBadge.className = 'badge' + (activeGoals > 0 ? ' show' : '');
+                }
+            },
+
+            renderCalendar(container) {
+                const view = Calendar.getView();
+                const baseDate = Calendar.getBaseDate();
+                const selectedDate = Calendar.getSelectedDate();
+                const tasks = Data.tasks;
+                const journals = Data.journals;
+                const selectedStr = selectedDate.toISOString().split('T')[0];
+                const dayTasks = Data.getTasksForDate(selectedStr);
+
+                let calendarHTML = '';
+                let dayDetailHTML = '';
+
+                if (view === 'day') {
+                    calendarHTML = `<div class="calendar-grid week">${this._renderDayView(baseDate, tasks, journals)}</div>`;
+                } else if (view === 'week') {
+                    const week = Calendar.getWeekData(baseDate);
+                    calendarHTML = `<div class="calendar-grid week">${week.map(d => this._renderDayCell(d, tasks, journals, selectedDate)).join('')}</div>`;
+                } else if (view === 'month') {
+                    const year = baseDate.getFullYear();
+                    const month = baseDate.getMonth();
+                    const weeks = Calendar.getMonthData(year, month);
+                    const weekDays = Calendar.getWeekDays();
+                    calendarHTML = weekDays.map(d => `<div class="day-header">${d}</div>`).join('') +
+                        weeks.flat().map(cell => {
+                            const date = new Date(cell.year, cell.month, cell.day);
+                            return this._renderDayCell(date, tasks, journals, selectedDate, cell.isOtherMonth);
+                        }).join('');
+                } else if (view === 'year') {
+                    const year = baseDate.getFullYear();
+                    const months = Calendar.getYearData(year);
+                    calendarHTML = `<div class="year-grid">${months.map((m, idx) => {
+                        const hasTasks = Data._data.tasks.some(task => {
+                            const start = new Date(task.startDate || task.date);
+                            const end = new Date(task.endDate || task.date);
+                            return (start.getFullYear() === year && start.getMonth() === idx) || (end.getFullYear() === year && end.getMonth() === idx);
+                        });
+                        return `<div class="month-card" data-month="${idx}"><div class="month-name">${m.name}</div><div class="month-dots">${Array.from({length:7}, (_, i) => `<div class="dot ${i<3 && hasTasks ? 'has-task' : ''}"></div>`).join('')}</div></div>`;
+                    }).join('')}</div>`;
+                }
+
+                if (dayTasks.length > 0) {
+                    dayDetailHTML = `<div class="calendar-day-detail"><div class="day-title">📋 ${selectedDate.toLocaleDateString('ru-RU', { weekday:'long', day:'numeric', month:'long' })}</div><div class="day-tasks">${dayTasks.map(task => {
+                        const status = Data.getTaskStatus(task, selectedStr);
+                        const journal = Data.getJournalByName(task.journal);
+                        const icon = journal ? journal.icon : '📌';
+                        const statusLabels = { done:'✅ Выполнено', pending:'⏳ Ожидает', missed:'❌ Пропущено' };
+                        return `<div class="task-item"><div class="task-icon">${icon}</div><div class="task-info"><div class="task-title">${task.title}</div><div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div></div><span class="task-status ${status}">${statusLabels[status] || status}</span>${status === 'pending' ? `<button class="btn btn-sm btn-success" data-complete="${task.id}" data-date="${selectedStr}">Выполнить</button>` : ''}</div>`;
+                    }).join('')}</div></div>`;
+                }
+
+                container.innerHTML = `
+                <div class="calendar-container">
+                    <div class="calendar-controls">
+                        <div class="btn-group">
+                            <button class="btn btn-sm ${view === 'day' ? 'active' : ''}" data-view="day">День</button>
+                            <button class="btn btn-sm ${view === 'week' ? 'active' : ''}" data-view="week">Неделя</button>
+                            <button class="btn btn-sm ${view === 'month' ? 'active' : ''}" data-view="month">Месяц</button>
+                            <button class="btn btn-sm ${view === 'year' ? 'active' : ''}" data-view="year">Год</button>
+                        </div>
+                        <div class="calendar-nav">
+                            <button data-nav="prev">◀</button>
+                            <span class="title">${Calendar.getTitle()}</span>
+                            <button data-nav="next">▶</button>
+                        </div>
+                    </div>
+                    <div class="calendar-filters">
+                        ${journals.map(j => `<span class="chip active" data-filter="${j.name}">${j.icon} ${j.name}</span>`).join('')}
+                        <span class="chip" data-filter="all" style="background:var(--color-primary);color:var(--color-text-inverse);">Все</span>
+                    </div>
+                    <div class="calendar-grid ${view === 'month' ? 'month' : view === 'week' ? 'week' : ''}">
+                        ${calendarHTML}
+                    </div>
+                    ${dayDetailHTML}
+                </div>`;
+
+                container.querySelectorAll('[data-view]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        Calendar.setView(this.dataset.view);
+                        App.renderCalendar(container);
+                    });
+                });
+                container.querySelectorAll('[data-nav]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const dir = this.dataset.nav === 'prev' ? -1 : 1;
+                        Calendar.navigate(dir);
+                        App.renderCalendar(container);
+                    });
+                });
+                container.querySelectorAll('.calendar-cell:not(.other-month)').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const date = new Date(this.dataset.year, this.dataset.month, this.dataset.day);
+                        Calendar.setSelectedDate(date);
+                        if (view !== 'day') Calendar.setView('day');
+                        App.renderCalendar(container);
+                    });
+                });
+                container.querySelectorAll('.month-card').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const month = parseInt(this.dataset.month, 10);
+                        const year = baseDate.getFullYear();
+                        Calendar.setBaseDate(new Date(year, month, 1));
+                        Calendar.setView('month');
+                        App.renderCalendar(container);
+                    });
+                });
+                container.querySelectorAll('[data-complete]').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (Data.completeTaskInstance(this.dataset.complete, this.dataset.date)) {
+                            UI.toast('✅ Задача выполнена!', 'success');
+                            App.renderCalendar(container);
+                        }
+                    });
+                });
+                container.querySelectorAll('[data-filter]').forEach(chip => {
+                    chip.addEventListener('click', function() {
+                        this.classList.toggle('active');
+                        UI.toast('Фильтр: ' + this.textContent, 'info');
+                    });
+                });
+            },
+
+            _renderDayCell: function(date, tasks, journals, selectedDate, isOtherMonth) {
+                isOtherMonth = isOtherMonth || false;
+                const dateStr = date.toISOString().split('T')[0];
+                const dayTasks = Data.getTasksForDate(dateStr);
+                const isToday = Data.isSameDay(date, new Date());
+                const isSelected = Data.isSameDay(date, selectedDate);
+                const badgeCounts = {};
+                dayTasks.forEach(task => {
+                    const status = Data.getTaskStatus(task, dateStr);
+                    if (status !== 'missed') badgeCounts[task.journal] = (badgeCounts[task.journal] || 0) + 1;
+                });
+                const badgeHTML = Object.entries(badgeCounts).map(([name, count]) => `<span class="badge">${name}:${count}</span>`).join('');
+                let cls = 'calendar-cell';
+                if (isToday) cls += ' today';
+                if (isSelected) cls += ' selected';
+                if (isOtherMonth) cls += ' other-month';
+                return `<div class="${cls}" data-year="${date.getFullYear()}" data-month="${date.getMonth()}" data-day="${date.getDate()}">
+                    <div class="date">${date.getDate()}</div>
+                    ${badgeHTML ? `<div class="badge-container">${badgeHTML}</div>` : ''}
+                    ${dayTasks.length > 0 && !badgeHTML ? '<div class="task-indicator"></div>' : ''}
+                </div>`;
+            },
+
+            _renderDayView: function(date, tasks, journals) {
+                const dateStr = date.toISOString().split('T')[0];
+                const dayTasks = Data.getTasksForDate(dateStr);
+                if (dayTasks.length === 0) return '<div style="grid-column:span 7;text-align:center;padding:var(--spacing-2xl);color:var(--color-text-secondary);">Нет задач на этот день</div>';
+                return dayTasks.map(task => {
+                    const status = Data.getTaskStatus(task, dateStr);
+                    const journal = Data.getJournalByName(task.journal);
+                    const icon = journal ? journal.icon : '📌';
+                    const statusLabels = { done:'✅', pending:'⏳', missed:'❌' };
+                    return `<div class="task-item" style="grid-column:span 7;">
+                        <div class="task-icon">${icon}</div>
+                        <div class="task-info"><div class="task-title">${task.title}</div><div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div></div>
+                        <span class="task-status ${status}">${statusLabels[status] || status}</span>
+                        ${status === 'pending' ? `<button class="btn btn-sm btn-success" data-complete="${task.id}" data-date="${dateStr}">Выполнить</button>` : ''}
+                    </div>`;
+                }).join('');
+            },
+
+            renderJournals(container) {
+                const journals = Data.journals;
+                container.innerHTML = `<div class="home-content"><div class="section-header"><h2 class="title-1">Все журналы</h2><p class="body-2 text-secondary">${journals.length} журналов</p></div><div class="journals-grid grid grid-4">${journals.map(j => {
+                    const tasks = Data.tasks.filter(t => t.journal === j.name);
+                    const progress = Math.min((j.exp / 1000) * 100, 100);
+                    return `<div class="journal-card-mini" data-journal="${j.name}"><div class="journal-icon" style="font-size:var(--font-size-4xl);">${j.icon || '📌'}</div><div class="journal-name" style="font-size:var(--font-size-lg);">${j.name.charAt(0).toUpperCase() + j.name.slice(1)}</div><div class="journal-exp">${Math.floor(j.exp)} XP</div><div class="journal-progress"><div class="fill" style="width:${progress}%;"></div></div><div class="caption-1 text-secondary">${tasks.length} задач</div></div>`;
+                }).join('')}</div></div>`;
+                container.querySelectorAll('.journal-card-mini').forEach(el => {
+                    el.addEventListener('click', function() {
+                        UI.toast('📚 Журнал "' + this.dataset.journal + '"', 'info');
+                    });
+                });
+            },
+
+            renderGoals(container) {
+                const goals = Data.goals;
+                if (goals.length === 0) {
+                    container.innerHTML = `<div class="home-content"><div class="section-header flex-between"><h2 class="title-1">Цели</h2><button class="btn btn-primary btn-sm">+ Новая цель</button></div><div class="tasks-empty"><div class="empty-icon">🎯</div><p class="body-1">У вас пока нет целей</p><p class="caption-1 text-secondary">Создайте первую цель и начните достигать!</p></div></div>`;
+                    return;
+                }
+                let html = `<div class="home-content"><div class="section-header flex-between"><h2 class="title-1">Цели</h2><button class="btn btn-primary btn-sm">+ Новая цель</button></div>`;
+                goals.forEach(goal => {
+                    const tasks = Data.tasks.filter(t => t.goalId === goal.id);
+                    const done = tasks.reduce((acc, t) => acc + t.completedDates.length, 0);
+                    const total = tasks.reduce((acc, t) => {
+                        const start = t.startDate || t.date;
+                        const end = t.endDate || t.date;
+                        return acc + Data.getDateRange(start, end).length;
+                    }, 0);
+                    const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+                    html += `<div class="card" style="margin-bottom:var(--spacing-md);">
+                        <div class="flex-between"><div><h3 class="title-2">${goal.title}</h3><p class="body-2 text-secondary">${goal.description || 'Без описания'}</p></div><span class="chip ${goal.achieved ? 'active' : ''}">${goal.achieved ? '✅ Достигнута' : 'В процессе'}</span></div>
+                        <div class="progress" style="margin-top:var(--spacing-md);"><div class="progress-bar" style="width:${progress}%;"></div></div>
+                        <div class="flex-between" style="margin-top:var(--spacing-sm);"><span class="caption-1 text-secondary">${done}/${total} задач</span><span class="caption-1 text-secondary">📅 ${UI.formatDate(goal.deadline)}</span></div>
+                    </div>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            },
+
+            renderProfile(container) {
+                const profile = Data.profile;
+                const isDark = document.body.classList.contains('dark');
+                const themes = ['default', 'jade', 'ruby', 'sapphire', 'amber', 'coral', 'amethyst'];
+                let themeChips = '';
+                themes.forEach(t => {
+                    const isActive = document.body.classList.contains('theme-' + t);
+                    const bg = t !== 'default' ? 'var(--color-primary)' : 'var(--color-border)';
+                    themeChips += `<span class="chip ${isActive ? 'active' : ''}" data-theme="${t}" style="width:28px;height:28px;padding:0;border-radius:var(--radius-full);background:${bg};"></span>`;
+                });
+                container.innerHTML = `
+                <div class="home-content">
+                    <div class="card" style="text-align:center;">
+                        <div class="avatar avatar-xl" style="margin:0 auto;"><span>${profile.name.charAt(0).toUpperCase()}</span></div>
+                        <h2 class="title-1" style="margin-top:var(--spacing-md);">${profile.name}</h2>
+                        <p class="body-2 text-secondary">Уровень ${profile.level} · ${Math.floor(profile.totalExp)} XP</p>
+                        <div class="flex" style="justify-content:center;gap:var(--spacing-2xl);margin-top:var(--spacing-lg);">
+                            <div><span class="title-2">${profile.streak || 0}</span><br><span class="caption-1 text-secondary">🔥 Дней</span></div>
+                            <div><span class="title-2">${profile.age}</span><br><span class="caption-1 text-secondary">Возраст</span></div>
+                            <div><span class="title-2">${profile.weight} кг</span><br><span class="caption-1 text-secondary">Вес</span></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="title-2">Параметры тела</h3>
+                        <div class="grid grid-2" style="margin-top:var(--spacing-md);">
+                            <div><span class="caption-1 text-secondary">Рост</span><br><span class="body-1">${profile.height} см</span></div>
+                            <div><span class="caption-1 text-secondary">Грудь</span><br><span class="body-1">${profile.chest} см</span></div>
+                            <div><span class="caption-1 text-secondary">Талия</span><br><span class="body-1">${profile.waist} см</span></div>
+                            <div><span class="caption-1 text-secondary">Бёдра</span><br><span class="body-1">${profile.hips} см</span></div>
+                            <div><span class="caption-1 text-secondary">Бицепс</span><br><span class="body-1">${profile.biceps} см</span></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="title-2">Настройки</h3>
+                        <div class="flex-between" style="padding:var(--spacing-sm) 0;border-bottom:1px solid var(--color-border);">
+                            <span class="body-2">Тёмный режим</span>
+                            <label class="switch"><input type="checkbox" id="darkModeSwitch" ${isDark ? 'checked' : ''}><span class="slider"></span></label>
+                        </div>
+                        <div class="flex-between" style="padding:var(--spacing-sm) 0;">
+                            <span class="body-2">Тема</span>
+                            <div style="display:flex;gap:var(--spacing-xs);">${themeChips}</div>
+                        </div>
+                    </div>
+                </div>`;
+                const darkSwitch = container.querySelector('#darkModeSwitch');
+                if (darkSwitch) darkSwitch.addEventListener('change', () => { UI.toggleDarkMode(); });
+                container.querySelectorAll('[data-theme]').forEach(chip => {
+                    chip.addEventListener('click', function() {
+                        const theme = this.dataset.theme;
+                        document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('theme-')).join('');
+                        if (theme !== 'default') document.body.classList.add('theme-' + theme);
+                        UI.toast('🎨 Тема: ' + theme, 'info', 1500);
+                        App.renderProfile(container);
+                    });
+                });
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            App.init();
+        });
+        window.App = App;
     </script>
 </body>
 </html>
