@@ -1,10 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="ru">
-    
 <head>
-    <img src="icon.svg" alt="SkillQuest" width="48" height="48" style="border-radius:12px;">
-    <link rel="icon" type="image/svg+xml" href="icon.svg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest</title>
@@ -102,7 +98,10 @@
             z-index: 10;
             transition: background var(--transition);
         }
-        .header-left { display: flex; flex-direction: column; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-left .app-icon { flex-shrink: 0; }
+        .header-left .app-icon svg { display: block; }
+        .header-left .header-text { display: flex; flex-direction: column; }
         .header-greeting { font-size: 13px; color: var(--text-secondary); }
         .header-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
         .header-right {
@@ -312,6 +311,7 @@
         .goal-card .goal-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
 
         /* ===== КАЛЕНДАРЬ ===== */
+        .calendar-container { display: flex; flex-direction: column; gap: var(--spacing-lg); }
         .calendar-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
         .calendar-controls .btn-group { display: flex; gap: 4px; }
         .calendar-controls .btn-group .btn { padding: 6px 14px; font-size: 13px; min-height: 36px; border-radius: 40px; background: transparent; color: var(--text-secondary); box-shadow: none; border: 1px solid transparent; }
@@ -321,8 +321,19 @@
         .calendar-nav button { width: 36px; height: 36px; border-radius: 40px; background: var(--card); border: 1px solid var(--card-border); font-size: 18px; cursor: pointer; transition: all var(--transition); }
         .calendar-nav button:hover { background: var(--primary-bg); }
         .calendar-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-        .calendar-filters .chip { padding: 4px 14px; border-radius: 40px; font-size: 12px; font-weight: 500; background: var(--card); border: 1px solid var(--card-border); color: var(--text-secondary); cursor: pointer; transition: all var(--transition); }
-        .calendar-filters .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .calendar-filters .chip {
+            padding: 4px 14px; border-radius: 40px;
+            font-size: 12px; font-weight: 500;
+            background: var(--card); border: 1px solid var(--card-border);
+            color: var(--text-secondary); cursor: pointer;
+            transition: all var(--transition);
+            user-select: none;
+        }
+        .calendar-filters .chip.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
         .calendar-grid { display: grid; gap: 4px; }
         .calendar-grid.week { grid-template-columns: repeat(7,1fr); }
         .calendar-grid.month { grid-template-columns: repeat(7,1fr); }
@@ -501,22 +512,81 @@
 
     <!-- Шапка -->
     <header class="header">
-        <div class="app-icon">
-    <svg width="40" height="40" viewBox="0 0 512 512" style="display:block;">
-        <!-- Скопируйте сюда содержимое тега <svg> из файла icon.html -->
-        <!-- (без внешних обёрток, только содержимое <svg>...</svg>) -->
-    </svg>
-</div>
         <div class="header-left">
-            <span class="header-greeting" id="greetingText">Доброе утро 👋</span>
-            <h1 class="header-title" id="userName">Герой</h1>
+            <!-- Иконка приложения (встроена SVG) -->
+            <div class="app-icon">
+                <svg width="40" height="40" viewBox="0 0 512 512" style="display:block;">
+                    <defs>
+                        <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#6C5CE7" stop-opacity="0.3"/>
+                            <stop offset="50%" stop-color="#00B894" stop-opacity="0.2"/>
+                            <stop offset="100%" stop-color="#6C5CE7" stop-opacity="0.4"/>
+                        </linearGradient>
+                        <linearGradient id="iconPrim" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#6C5CE7"/>
+                            <stop offset="100%" stop-color="#A29BFE"/>
+                        </linearGradient>
+                        <linearGradient id="iconSec" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00B894"/>
+                            <stop offset="100%" stop-color="#55EFC4"/>
+                        </linearGradient>
+                        <radialGradient id="iconGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#FDCB6E" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#FDCB6E" stop-opacity="0"/>
+                        </radialGradient>
+                        <filter id="iconShadow">
+                            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.3"/>
+                        </filter>
+                    </defs>
+                    <rect x="8" y="8" width="496" height="496" rx="100" fill="url(#iconBg)" stroke="rgba(255,255,255,0.15)" stroke-width="2" filter="url(#iconShadow)"/>
+                    <g transform="translate(256, 256)">
+                        <!-- Книга -->
+                        <g transform="translate(-80, -60)">
+                            <rect x="-20" y="-40" width="160" height="120" rx="12" fill="url(#iconPrim)" opacity="0.9"/>
+                            <rect x="-20" y="-40" width="16" height="120" rx="4" fill="#5A4BD1" opacity="0.8"/>
+                            <rect x="-4" y="-30" width="136" height="100" rx="4" fill="rgba(255,255,255,0.15)"/>
+                            <line x1="10" y1="-20" x2="120" y2="-20" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                            <line x1="10" y1="-8" x2="120" y2="-8" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                            <line x1="10" y1="4" x2="120" y2="4" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                            <line x1="10" y1="16" x2="100" y2="16" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                            <rect x="20" y="28" width="100" height="6" rx="3" fill="rgba(255,255,255,0.15)"/>
+                            <rect x="20" y="28" width="70" height="6" rx="3" fill="#FDCB6E"/>
+                        </g>
+                        <!-- Звезда -->
+                        <g transform="translate(60, -70)">
+                            <circle cx="0" cy="0" r="32" fill="url(#iconGlow)" opacity="0.6"/>
+                            <polygon points="0,-28 8,-10 27,-10 12,4 18,22 0,12 -18,22 -12,4 -27,-10 -8,-10" fill="#FDCB6E" stroke="#FFEAA7" stroke-width="2"/>
+                            <polygon points="0,-14 4,-6 12,-6 6,2 8,10 0,6 -8,10 -6,2 -12,-6 -4,-6" fill="#FFF" opacity="0.8"/>
+                        </g>
+                        <!-- Аватар героя -->
+                        <g transform="translate(-40, 60)">
+                            <circle cx="0" cy="-10" r="16" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                            <circle cx="0" cy="-10" r="8" fill="#FFF" opacity="0.6"/>
+                            <rect x="-12" y="6" width="24" height="24" rx="12" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                            <rect x="-6" y="14" width="12" height="12" rx="6" fill="#FFF" opacity="0.4"/>
+                        </g>
+                        <!-- Прогресс-бар -->
+                        <g transform="translate(-60, 100)">
+                            <rect x="-50" y="-6" width="100" height="12" rx="6" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                            <rect x="-50" y="-6" width="70" height="12" rx="6" fill="url(#iconSec)" opacity="0.9"/>
+                            <circle cx="20" cy="0" r="10" fill="#FFF" opacity="0.9"/>
+                            <circle cx="20" cy="0" r="5" fill="#00B894"/>
+                        </g>
+                    </g>
+                </svg>
+            </div>
+            <div class="header-text">
+                <span class="header-greeting" id="greetingText">Доброе утро 👋</span>
+                <h1 class="header-title" id="userName">Герой</h1>
+            </div>
         </div>
         <div class="header-right">
             <button class="btn-help" id="helpBtn" aria-label="Помощь">?</button>
-           <div class="avatar" id="avatarPreview">
-    <img src="icon.svg" alt="SkillQuest" style="width:100%; height:100%; object-fit:cover;">
-    <input type="file" id="avatarInput" accept="image/*" style="display:none;">
-</div>
+            <div class="avatar" id="avatarPreview">
+                <span id="avatarInitials">Г</span>
+                <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+            </div>
+        </div>
     </header>
 
     <!-- Контент -->
@@ -712,6 +782,22 @@
                     <button type="submit" class="btn" id="noteSubmitBtn">Сохранить</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Модалка для описания фото (добавлена) -->
+    <div class="modal-overlay" id="photoDescModal">
+        <div class="modal">
+            <button class="modal-close" id="photoDescClose">&times;</button>
+            <h3>🖼 Описание фото</h3>
+            <div class="form-group">
+                <label class="input-label">Введите описание (необязательно)</label>
+                <input type="text" class="input" id="photoDescInput" placeholder="Например: Мой прогресс">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="photoDescCancel">Пропустить</button>
+                <button class="btn btn-primary" id="photoDescSave">Сохранить</button>
+            </div>
         </div>
     </div>
 
@@ -1101,12 +1187,19 @@
                 ' ');
                 if (next !== 'default') document.body.classList.add('theme-' + next);
                 localStorage.setItem('skillquest_theme', next);
+                // Обновляем настройки, если открыты
+                if (document.getElementById('settingsModal').classList.contains('open')) {
+                    App.renderSettings(document.getElementById('mainContent'));
+                }
                 this.toast('🎨 Тема: ' + next, 'info', 1500);
             },
             toggleDarkMode() {
                 document.body.classList.toggle('dark');
                 const isDark = document.body.classList.contains('dark');
                 localStorage.setItem('skillquest_dark', isDark ? 'true' : 'false');
+                if (document.getElementById('settingsModal').classList.contains('open')) {
+                    App.renderSettings(document.getElementById('mainContent'));
+                }
                 this.toast('🌓 ' + (isDark ? 'Темный' : 'Светлый') + ' режим', 'info', 1500);
             },
             loadTheme() {
@@ -1119,6 +1212,25 @@
                     document.body.classList.add('dark');
                 }
             },
+            // Обновление аватара в шапке
+            updateHeaderAvatar() {
+                const avatarEl = document.getElementById('avatarPreview');
+                const profile = Data.profile;
+                if (avatarEl) {
+                    if (profile.avatar) {
+                        avatarEl.innerHTML =
+                            `<img src="${profile.avatar}" alt="avatar"><input type="file" id="avatarInput" accept="image/*" style="display:none;">`;
+                    } else {
+                        avatarEl.innerHTML =
+                            `<span id="avatarInitials">${profile.name.charAt(0).toUpperCase()}</span><input type="file" id="avatarInput" accept="image/*" style="display:none;">`;
+                    }
+                }
+                // Обновляем имя в шапке
+                const userNameEl = document.getElementById('userName');
+                if (userNameEl) userNameEl.textContent = profile.name;
+                const initialsEl = document.getElementById('avatarInitials');
+                if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
+            },
 
             // ---- Модалка задачи ----
             openTaskModal(taskId) {
@@ -1127,7 +1239,6 @@
                 const isEdit = !!taskId;
                 const task = isEdit ? Data.tasks.find(t => t.id === taskId) : null;
 
-                // Сброс чекбоксов
                 document.querySelectorAll('#dayCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
 
                 if (isEdit && task) {
@@ -1375,7 +1486,7 @@
                 }
             },
 
-            // ---- Фото ----
+            // ---- Фото (с модалкой для описания) ----
             addPhoto: function() {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -1385,10 +1496,46 @@
                     if (!file) return;
                     const reader = new FileReader();
                     reader.onload = function(ev) {
-                        const note = prompt('Введите описание фото (необязательно):') || '';
-                        Data.addPhoto({ data: ev.target.result, note });
-                        UI.toast('✅ Фото добавлено', 'success');
-                        App.renderCurrentPage();
+                        const data = ev.target.result;
+                        // Показываем модалку для описания
+                        const descModal = document.getElementById('photoDescModal');
+                        const descInput = document.getElementById('photoDescInput');
+                        descInput.value = '';
+                        descModal.classList.add('open');
+                        // Обработчики
+                        const saveBtn = document.getElementById('photoDescSave');
+                        const cancelBtn = document.getElementById('photoDescCancel');
+                        const closeBtn = document.getElementById('photoDescClose');
+                        const saveHandler = function() {
+                            const note = descInput.value.trim();
+                            Data.addPhoto({ data, note });
+                            UI.toast('✅ Фото добавлено', 'success');
+                            descModal.classList.remove('open');
+                            App.renderCurrentPage();
+                            // Удаляем обработчики, чтобы не накапливались
+                            saveBtn.removeEventListener('click', saveHandler);
+                            cancelBtn.removeEventListener('click', cancelHandler);
+                            closeBtn.removeEventListener('click', closeHandler);
+                        };
+                        const cancelHandler = function() {
+                            descModal.classList.remove('open');
+                            // Можно добавить фото без описания?
+                            // Но лучше не добавлять, чтобы пользователь явно подтвердил.
+                            // Поэтому просто закрываем без сохранения.
+                            saveBtn.removeEventListener('click', saveHandler);
+                            cancelBtn.removeEventListener('click', cancelHandler);
+                            closeBtn.removeEventListener('click', closeHandler);
+                        };
+                        const closeHandler = cancelHandler;
+                        saveBtn.addEventListener('click', saveHandler);
+                        cancelBtn.addEventListener('click', cancelHandler);
+                        closeBtn.addEventListener('click', closeHandler);
+                        // Также закрытие по клику на overlay
+                        descModal.addEventListener('click', function(e) {
+                            if (e.target === this) {
+                                cancelHandler();
+                            }
+                        }, { once: true });
                     };
                     reader.readAsDataURL(file);
                 };
@@ -1422,6 +1569,12 @@
                         if (imported.profile && imported.journals && imported.tasks !== undefined) {
                             Data._data = imported;
                             Data.save();
+                            UI.loadTheme(); // обновляем темы
+                            // Обновляем настройки, если открыты
+                            if (document.getElementById('settingsModal').classList.contains('open')) {
+                                App.renderSettings(document.getElementById('mainContent'));
+                            }
+                            UI.updateHeaderAvatar(); // обновляем аватар
                             UI.toast('📥 Данные импортированы!', 'success');
                             App.renderCurrentPage();
                         } else {
@@ -1441,22 +1594,38 @@
             _view: 'month',
             _baseDate: new Date(),
             _selectedDate: new Date(),
+            _activeFilters: [], // массив активных фильтров (журналы)
             init() {
                 this._baseDate = new Date();
                 this._selectedDate = new Date();
-                // Восстанавливаем сохранённый вид
                 const savedView = localStorage.getItem('skillquest_calendar_view');
                 if (savedView) this._view = savedView;
+                // По умолчанию все фильтры активны (все журналы)
+                this._activeFilters = Data.journals.map(j => j.name);
             },
             getView() { return this._view; },
             getBaseDate() { return this._baseDate; },
             getSelectedDate() { return this._selectedDate; },
+            getActiveFilters() { return this._activeFilters; },
             setView(view) {
                 this._view = view;
                 localStorage.setItem('skillquest_calendar_view', view);
             },
             setBaseDate(date) { this._baseDate = new Date(date); },
             setSelectedDate(date) { this._selectedDate = new Date(date); },
+            toggleFilter(journal) {
+                const idx = this._activeFilters.indexOf(journal);
+                if (idx > -1) {
+                    this._activeFilters.splice(idx, 1);
+                } else {
+                    this._activeFilters.push(journal);
+                }
+                // Если фильтров нет – показываем все
+                if (this._activeFilters.length === 0) {
+                    this._activeFilters = Data.journals.map(j => j.name);
+                }
+                return this._activeFilters;
+            },
             navigate(direction) {
                 const d = new Date(this._baseDate);
                 if (this._view === 'day') d.setDate(d.getDate() + direction);
@@ -1547,7 +1716,6 @@
             _currentPage: 'home',
 
             init() {
-                // Загружаем сохранённые темы
                 UI.loadTheme();
 
                 this._unsubscribe = Data.subscribe(() => { this.renderCurrentPage(); });
@@ -1578,6 +1746,7 @@
                     reader.onload = function(ev) {
                         Data.profile.avatar = ev.target.result;
                         Data.save();
+                        UI.updateHeaderAvatar();
                         App.renderCurrentPage();
                         UI.toast('✅ Аватар обновлён', 'success');
                     };
@@ -1628,6 +1797,17 @@
                 document.getElementById('noteModal').addEventListener('click', function(e) { if (e.target === this) UI
                         .closeNoteModal(); });
 
+                // Модалка описания фото
+                document.getElementById('photoDescClose').addEventListener('click', function() {
+                    document.getElementById('photoDescModal').classList.remove('open');
+                });
+                document.getElementById('photoDescCancel').addEventListener('click', function() {
+                    document.getElementById('photoDescModal').classList.remove('open');
+                });
+                document.getElementById('photoDescModal').addEventListener('click', function(e) {
+                    if (e.target === this) this.classList.remove('open');
+                });
+
                 document.getElementById('settingsModalClose').addEventListener('click', () => { document.getElementById(
                         'settingsModal').classList.remove('open'); });
                 document.getElementById('settingsClose').addEventListener('click', () => { document.getElementById(
@@ -1649,6 +1829,10 @@
                         if (theme !== 'default') document.body.classList.add('theme-' + theme);
                         localStorage.setItem('skillquest_theme', theme);
                         UI.toast('🎨 Тема: ' + theme, 'info', 1500);
+                        // Обновляем настройки, если открыты
+                        if (document.getElementById('settingsModal').classList.contains('open')) {
+                            App.renderSettings(document.getElementById('mainContent'));
+                        }
                     });
                 });
 
@@ -1745,24 +1929,11 @@
                 const todayTasks = Data.getTodayTasks();
                 const activeGoals = data.goals.filter(g => !g.achieved).slice(0, 3);
 
-                const greetingEl = document.getElementById('greetingText');
-                if (greetingEl) greetingEl.textContent = UI.getGreeting();
-                const userNameEl = document.getElementById('userName');
-                if (userNameEl) userNameEl.textContent = profile.name;
-                const initialsEl = document.getElementById('avatarInitials');
-                if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
-
-                // Обновляем аватар в шапке
-                const avatarEl = document.getElementById('avatarPreview');
-                if (avatarEl) {
-                    if (profile.avatar) {
-                        avatarEl.innerHTML =
-                            `<img src="${profile.avatar}" alt="avatar"><input type="file" id="avatarInput" accept="image/*" style="display:none;">`;
-                    } else {
-                        avatarEl.innerHTML =
-                            `<span id="avatarInitials">${profile.name.charAt(0).toUpperCase()}</span><input type="file" id="avatarInput" accept="image/*" style="display:none;">`;
-                    }
-                }
+                // Обновляем приветствие и имя
+                document.getElementById('greetingText').textContent = UI.getGreeting();
+                document.getElementById('userName').textContent = profile.name;
+                // Обновляем аватар
+                UI.updateHeaderAvatar();
 
                 const { level, exp, needed } = Data.recalcLevel();
                 const doneCount = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'done').length;
@@ -1906,26 +2077,35 @@
                 }
             },
 
-            // ================== CALENDAR ==================
+            // ================== CALENDAR (с фильтрацией) ==================
             renderCalendar(container) {
                 const view = Calendar.getView();
                 const baseDate = Calendar.getBaseDate();
                 const selectedDate = Calendar.getSelectedDate();
                 const tasks = Data.tasks;
                 const journals = Data.journals;
+                const activeFilters = Calendar.getActiveFilters();
                 const selectedStr = selectedDate.toISOString().split('T')[0];
-                const dayTasks = Data.getTasksForDate(selectedStr);
+
+                // Фильтруем задачи по активным журналам
+                const filteredTasks = tasks.filter(t => activeFilters.includes(t.journal));
+
+                const dayTasks = filteredTasks.filter(task => {
+                    const dates = Data.getDateRange(task.startDate || task.date, task.endDate || task.date);
+                    return dates.includes(selectedStr) && (task.daysOfWeek.length === 0 || task.daysOfWeek.includes(
+                        new Date(selectedStr).getDay()));
+                });
 
                 let calendarHTML = '';
                 let dayDetailHTML = '';
 
                 if (view === 'day') {
                     calendarHTML =
-                        `<div class="calendar-grid week">${this._renderDayView(baseDate, tasks, journals)}</div>`;
+                        `<div class="calendar-grid week">${this._renderDayView(baseDate, filteredTasks, journals)}</div>`;
                 } else if (view === 'week') {
                     const week = Calendar.getWeekData(baseDate);
                     calendarHTML =
-                        `<div class="calendar-grid week">${week.map(d => this._renderDayCell(d, tasks, journals, selectedDate)).join('')}</div>`;
+                        `<div class="calendar-grid week">${week.map(d => this._renderDayCell(d, filteredTasks, journals, selectedDate)).join('')}</div>`;
                 } else if (view === 'month') {
                     const year = baseDate.getFullYear();
                     const month = baseDate.getMonth();
@@ -1934,14 +2114,15 @@
                     calendarHTML = weekDays.map(d => `<div class="day-header">${d}</div>`).join('') +
                         weeks.flat().map(cell => {
                             const date = new Date(cell.year, cell.month, cell.day);
-                            return this._renderDayCell(date, tasks, journals, selectedDate, cell.isOtherMonth);
+                            return this._renderDayCell(date, filteredTasks, journals, selectedDate, cell
+                            .isOtherMonth);
                         }).join('');
                 } else if (view === 'year') {
                     const year = baseDate.getFullYear();
                     const months = Calendar.getYearData(year);
                     calendarHTML =
                     `<div class="year-grid">${months.map((m, idx) => {
-                        const hasTasks = Data._data.tasks.some(task => {
+                        const hasTasks = filteredTasks.some(task => {
                             const start = new Date(task.startDate || task.date);
                             const end = new Date(task.endDate || task.date);
                             return (start.getFullYear() === year && start.getMonth() === idx) || (end.getFullYear() === year && end.getMonth() === idx);
@@ -1981,8 +2162,11 @@
                                 <button data-nav="next">▶</button>
                             </div>
                         </div>
-                        <div class="calendar-filters">
-                            ${journals.map(j => `<span class="chip active" data-filter="${j.name}">${j.icon} ${j.name}</span>`).join('')}
+                        <div class="calendar-filters" id="calendarFilters">
+                            ${journals.map(j => {
+                                const isActive = activeFilters.includes(j.name);
+                                return `<span class="chip ${isActive ? 'active' : ''}" data-filter="${j.name}">${j.icon} ${j.name}</span>`;
+                            }).join('')}
                             <span class="chip" data-filter="all" style="background:var(--primary);color:#fff;">Все</span>
                         </div>
                         <div class="calendar-grid ${view === 'month' ? 'month' : view === 'week' ? 'week' : ''}">
@@ -2039,10 +2223,30 @@
                         if (taskId) UI.openTaskDetail(taskId);
                     });
                 });
-                container.querySelectorAll('[data-filter]').forEach(chip => {
+
+                // Фильтры (реальная фильтрация)
+                container.querySelectorAll('#calendarFilters .chip[data-filter]').forEach(chip => {
                     chip.addEventListener('click', function() {
-                        this.classList.toggle('active');
-                        UI.toast('Фильтр: ' + this.textContent, 'info');
+                        const filter = this.dataset.filter;
+                        if (filter === 'all') {
+                            // Сбросить все фильтры, показать все журналы
+                            Calendar._activeFilters = Data.journals.map(j => j.name);
+                        } else {
+                            Calendar.toggleFilter(filter);
+                        }
+                        // Обновляем активные классы
+                        container.querySelectorAll('#calendarFilters .chip[data-filter]').forEach(c => {
+                            const f = c.dataset.filter;
+                            if (f === 'all') {
+                                // Если все журналы активны, то "Все" не выделяем
+                                c.classList.toggle('active', Calendar._activeFilters.length === Data
+                                    .journals.length);
+                            } else {
+                                c.classList.toggle('active', Calendar._activeFilters.includes(f));
+                            }
+                        });
+                        // Перерисовываем календарь
+                        App.renderCalendar(container);
                     });
                 });
             },
@@ -2050,7 +2254,11 @@
             _renderDayCell: function(date, tasks, journals, selectedDate, isOtherMonth) {
                 isOtherMonth = isOtherMonth || false;
                 const dateStr = date.toISOString().split('T')[0];
-                const dayTasks = Data.getTasksForDate(dateStr);
+                const dayTasks = tasks.filter(task => {
+                    const dates = Data.getDateRange(task.startDate || task.date, task.endDate || task.date);
+                    return dates.includes(dateStr) && (task.daysOfWeek.length === 0 || task.daysOfWeek.includes(
+                        new Date(dateStr).getDay()));
+                });
                 const isToday = Data.isSameDay(date, new Date());
                 const isSelected = Data.isSameDay(date, selectedDate);
                 const badgeCounts = {};
@@ -2073,7 +2281,11 @@
 
             _renderDayView: function(date, tasks, journals) {
                 const dateStr = date.toISOString().split('T')[0];
-                const dayTasks = Data.getTasksForDate(dateStr);
+                const dayTasks = tasks.filter(task => {
+                    const dates = Data.getDateRange(task.startDate || task.date, task.endDate || task.date);
+                    return dates.includes(dateStr) && (task.daysOfWeek.length === 0 || task.daysOfWeek.includes(
+                        new Date(dateStr).getDay()));
+                });
                 if (dayTasks.length === 0) return '<div style="grid-column:span 7;text-align:center;padding:20px;color:var(--text-secondary);">Нет задач на этот день</div>';
                 return dayTasks.map(task => {
                     const status = Data.getTaskStatus(task, dateStr);
@@ -2235,6 +2447,7 @@
                         reader.onload = function(ev) {
                             Data.profile.avatar = ev.target.result;
                             Data.save();
+                            UI.updateHeaderAvatar();
                             App.renderProfile(container);
                             UI.toast('✅ Аватар обновлён', 'success');
                         };
@@ -2265,9 +2478,8 @@
                         profile.biceps = biceps;
 
                         Data.save();
+                        UI.updateHeaderAvatar();
                         UI.toast('✅ Профиль сохранён!', 'success');
-                        document.getElementById('userName').textContent = name;
-                        document.getElementById('avatarInitials').textContent = name.charAt(0).toUpperCase();
                         App.renderProfile(container);
                     });
                 }
