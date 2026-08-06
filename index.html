@@ -261,7 +261,7 @@
         .level-card .progress-bar { height: 100%; background: #fff; border-radius: 40px; transition: width 0.6s ease; }
 
         .stats-grid {
-            display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 24px;
+            display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px;
         }
         .stat-card { text-align: center; padding: 16px 8px; border-radius: var(--radius-sm); background: var(--card); backdrop-filter: blur(12px); border: 1px solid var(--card-border); box-shadow: var(--shadow); }
         .stat-card .stat-number { font-size: 28px; font-weight: 700; color: var(--primary); }
@@ -472,7 +472,7 @@
 
         /* ===== АДАПТИВ ===== */
         @media (max-width: 640px) {
-            .stats-grid { grid-template-columns: repeat(3,1fr); gap: 8px; }
+            .stats-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
             .stat-card .stat-number { font-size: 22px; }
             .journals-grid { grid-template-columns: repeat(2,1fr); }
             .calendar-grid.month { gap: 2px; }
@@ -571,7 +571,6 @@
 
     <main id="mainContent"></main>
 
-    <!-- Нижняя навигация (без "Все задачи") -->
     <nav class="bottom-nav" id="bottomNav">
         <div class="nav-item active" data-page="home"><span class="icon">🏠</span><span class="label">Главная</span></div>
         <div class="nav-item" data-page="calendar"><span class="icon">📅</span><span class="label">Календарь</span></div>
@@ -949,7 +948,6 @@
                 localStorage.removeItem('skillquest_calendar_view');
                 this._data = this.getDefaultData();
                 this.save();
-                // Перезагружаем страницу для полного сброса
                 location.reload();
             },
 
@@ -1377,7 +1375,7 @@
                 }
             },
 
-            // ---- Заметки (создание/редактирование) ----
+            // ---- Заметки ----
             openNoteModal: function(noteId) {
                 const modal = document.getElementById('noteModal');
                 const form = document.getElementById('noteForm');
@@ -1437,7 +1435,6 @@
                 document.getElementById('noteViewTitle').textContent = '📄 Заметка от ' + UI.formatDate(note.createdAt,
                     'datetime');
                 document.getElementById('noteViewModal').classList.add('open');
-                // Кнопка редактирования
                 document.getElementById('noteViewEditBtn').onclick = function() {
                     UI.closeNoteView();
                     setTimeout(() => UI.openNoteModal(noteId), 300);
@@ -1509,7 +1506,6 @@
                     App.renderCurrentPage();
                 }
             },
-            // Просмотр фото (увеличенное)
             openPhotoView: function(photoId) {
                 const photo = Data.photos.find(p => p.id === photoId);
                 if (!photo) { UI.toast('Фото не найдено', 'error'); return; }
@@ -1560,8 +1556,6 @@
                 };
                 reader.readAsText(file);
             },
-
-            // ---- Сброс данных ----
             resetData: function() {
                 if (confirm('Вы уверены, что хотите удалить ВСЕ данные? Это действие необратимо.')) {
                     if (confirm('Ещё раз подтвердите: удалить все данные?')) {
@@ -1695,7 +1689,7 @@
         const App = {
             _unsubscribe: null,
             _currentPage: 'home',
-            _journalTasksBack: false, // флаг для возврата к списку журналов
+            _journalTasksBack: false,
 
             init() {
                 UI.loadTheme();
@@ -1774,13 +1768,11 @@
                 document.getElementById('noteModal').addEventListener('click', function(e) { if (e.target === this) UI
                         .closeNoteModal(); });
 
-                // Модалка просмотра заметки
                 document.getElementById('noteViewClose').addEventListener('click', () => { UI.closeNoteView(); });
                 document.getElementById('noteViewCloseBtn').addEventListener('click', () => { UI.closeNoteView(); });
                 document.getElementById('noteViewModal').addEventListener('click', function(e) { if (e.target === this)
                         UI.closeNoteView(); });
 
-                // Модалка просмотра фото
                 document.getElementById('photoViewClose').addEventListener('click', () => { UI.closePhotoView(); });
                 document.getElementById('photoViewCloseBtn').addEventListener('click', () => { UI.closePhotoView(); });
                 document.getElementById('photoViewModal').addEventListener('click', function(e) { if (e.target === this)
@@ -1803,12 +1795,10 @@
                 document.getElementById('settingsModal').addEventListener('click', function(e) { if (e.target === this)
                         document.getElementById('settingsModal').classList.remove('open'); });
 
-                // Настройки: тёмный режим
                 document.getElementById('settingsDarkMode').addEventListener('change', function() {
                     UI.toggleDarkMode();
                 });
 
-                // Настройки: темы
                 document.querySelectorAll('#settingsModal [data-theme]').forEach(chip => {
                     chip.addEventListener('click', function() {
                         const theme = this.dataset.theme;
@@ -1823,12 +1813,10 @@
                     });
                 });
 
-                // Настройки: экспорт
                 document.getElementById('exportDataBtn').addEventListener('click', function() {
                     UI.exportData();
                 });
 
-                // Настройки: импорт
                 const importInput = document.getElementById('importDataInput');
                 document.getElementById('importDataBtn').addEventListener('click', function() {
                     importInput.click();
@@ -1841,7 +1829,6 @@
                     this.value = '';
                 });
 
-                // Настройки: сброс данных
                 document.getElementById('resetDataBtn').addEventListener('click', function() {
                     UI.resetData();
                 });
@@ -1858,7 +1845,7 @@
 
             navigateTo(page) {
                 this._currentPage = page;
-                this._journalTasksBack = false; // сбрасываем флаг
+                this._journalTasksBack = false;
                 document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
                     item.classList.toggle('active', item.dataset.page === page);
                 });
@@ -1917,6 +1904,27 @@
                 const today = new Date().toISOString().split('T')[0];
                 const todayTasks = Data.getTodayTasks();
                 const activeGoals = data.goals.filter(g => !g.achieved).slice(0, 3);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                const monthAgo = new Date();
+                monthAgo.setDate(monthAgo.getDate() - 30);
+
+                // Статистика по задачам
+                const totalTasks = data.tasks.length;
+                const completedTasks = data.tasks.reduce((acc, t) => acc + t.completedDates.length, 0);
+                const plannedToday = todayTasks.length;
+                const missedToday = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'missed').length;
+
+                // Опыт за неделю и месяц
+                let expWeek = 0,
+                    expMonth = 0;
+                data.tasks.forEach(task => {
+                    task.completedDates.forEach(dateStr => {
+                        const d = new Date(dateStr);
+                        if (d >= weekAgo) expWeek += task.duration * 0.005;
+                        if (d >= monthAgo) expMonth += task.duration * 0.005;
+                    });
+                });
 
                 document.getElementById('greetingText').textContent = UI.getGreeting();
                 document.getElementById('userName').textContent = profile.name;
@@ -1924,61 +1932,10 @@
 
                 const { level, exp, needed } = Data.recalcLevel();
                 const doneCount = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'done').length;
-                const totalToday = todayTasks.length;
-                const productivity = totalToday > 0 ? Math.round((doneCount / totalToday) * 100) : 0;
-                const activeTasks = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'pending').slice(0, 3);
-                const missedTasks = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'missed').slice(0, 3);
+                const productivity = totalTasks > 0 ? Math.round((completedTasks / (completedTasks + data.tasks.reduce((acc, t) => acc + t.missedDates.length, 0))) * 100) : 0;
+
+                // Топ-4 журнала
                 const topJournals = [...data.journals].sort((a, b) => b.exp - a.exp).slice(0, 4);
-
-                let goalsHTML = '';
-                if (activeGoals.length > 0) {
-                    goalsHTML =
-                    `<div class="section-header"><h2>Активные цели</h2><button class="btn btn-sm btn-secondary" data-nav="goals">Все →</button></div>`;
-                    activeGoals.forEach(goal => {
-                        const tasks = Data.tasks.filter(t => t.goalId === goal.id);
-                        const done = tasks.reduce((acc, t) => acc + t.completedDates.length, 0);
-                        const total = tasks.reduce((acc, t) => {
-                            const start = t.startDate || t.date;
-                            const end = t.endDate || t.date;
-                            return acc + Data.getDateRange(start, end).length;
-                        }, 0);
-                        const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-                        goalsHTML += `
-                            <div class="goal-card" data-goal-id="${goal.id}">
-                                <div class="goal-header">
-                                    <div>
-                                        <div class="goal-title">${goal.title}</div>
-                                        <div class="goal-desc">${goal.description || 'Без описания'}</div>
-                                    </div>
-                                    <span class="chip ${goal.achieved ? 'active' : ''}">${goal.achieved ? '✅' : 'В процессе'}</span>
-                                </div>
-                                <div class="goal-progress"><div class="progress"><div class="progress-bar" style="width:${progress}%;"></div></div></div>
-                                <div class="goal-meta"><span>${done}/${total} задач</span><span>📅 ${UI.formatDate(goal.deadline)}</span></div>
-                            </div>
-                        `;
-                    });
-                }
-
-                const renderTask = (task, dateStr, status) => {
-                    const journal = Data.getJournalByName(task.journal);
-                    const icon = journal ? journal.icon : '📌';
-                    const statusLabels = { done: '✅ Выполнено', pending: '⏳ Ожидает', missed: '❌ Пропущено' };
-                    let actions = '';
-                    if (status === 'pending' || status === 'missed') {
-                        const btnClass = status === 'missed' ? 'btn-warning' : 'btn-success';
-                        const btnText = status === 'missed' ? 'Восстановить' : 'Выполнить';
-                        actions = `<div class="task-actions"><button class="btn btn-sm ${btnClass} complete-btn" data-task-id="${task.id}" data-date="${dateStr}">${btnText}</button></div>`;
-                    }
-                    return `<div class="task-item" data-task-id="${task.id}">
-                        <div class="task-icon">${icon}</div>
-                        <div class="task-info">
-                            <div class="task-title">${task.title}</div>
-                            <div class="task-meta"><span>${task.time || '—'}</span><span>${task.duration || 0} мин</span><span>${task.journal}</span></div>
-                        </div>
-                        <span class="task-status ${status}">${statusLabels[status] || status}</span>
-                        ${actions}
-                    </div>`;
-                };
 
                 container.innerHTML = `
                     <div class="level-card">
@@ -1997,22 +1954,16 @@
                     </div>
 
                     <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-number">${totalToday}</div><div class="stat-label">Задач сегодня</div></div>
-                        <div class="stat-card"><div class="stat-number">${doneCount}</div><div class="stat-label">Выполнено</div></div>
-                        <div class="stat-card"><div class="stat-number">${productivity}%</div><div class="stat-label">Продуктивность</div></div>
+                        <div class="stat-card"><div class="stat-number">${totalTasks}</div><div class="stat-label">Всего задач</div></div>
+                        <div class="stat-card"><div class="stat-number">${completedTasks}</div><div class="stat-label">Выполнено</div></div>
+                        <div class="stat-card"><div class="stat-number">${plannedToday}</div><div class="stat-label">Запланировано сегодня</div></div>
+                        <div class="stat-card"><div class="stat-number">${missedToday}</div><div class="stat-label">Пропущено сегодня</div></div>
                     </div>
 
-                    <div class="section-header"><h2>Активные задачи</h2><button class="btn btn-sm btn-secondary" data-nav="calendar">Все →</button></div>
-                    <div class="tasks-list">
-                        ${activeTasks.length === 0 && missedTasks.length === 0 ? `
-                            <div class="tasks-empty"><div class="empty-icon">🎉</div><p>На сегодня задач нет</p><p style="color:var(--text-secondary)">Отличная работа!</p></div>
-                        ` : `
-                            ${activeTasks.map(task => renderTask(task, today, 'pending')).join('')}
-                            ${missedTasks.map(task => renderTask(task, today, 'missed')).join('')}
-                        `}
+                    <div class="stats-grid" style="grid-template-columns: repeat(2,1fr);">
+                        <div class="stat-card"><div class="stat-number">${expWeek.toFixed(1)} XP</div><div class="stat-label">Опыт за неделю</div></div>
+                        <div class="stat-card"><div class="stat-number">${expMonth.toFixed(1)} XP</div><div class="stat-label">Опыт за месяц</div></div>
                     </div>
-
-                    ${goalsHTML ? `<div class="goals-section">${goalsHTML}</div>` : ''}
 
                     <div class="section-header"><h2>Журналы</h2><button class="btn btn-sm btn-secondary" data-nav="journals">Все →</button></div>
                     <div class="journals-grid">
@@ -2031,36 +1982,8 @@
                 container.querySelectorAll('[data-nav]').forEach(btn => {
                     btn.addEventListener('click', () => { this.navigateTo(btn.dataset.nav); });
                 });
-                container.querySelectorAll('.task-item').forEach(el => {
-                    el.addEventListener('click', function(e) {
-                        if (e.target.closest('.complete-btn')) return;
-                        const taskId = this.dataset.taskId;
-                        if (taskId) UI.openTaskDetail(taskId);
-                    });
-                });
-                container.querySelectorAll('.complete-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const taskId = this.dataset.taskId;
-                        const dateStr = this.dataset.date;
-                        if (Data.completeTaskInstance(taskId, dateStr)) {
-                            App.renderCurrentPage();
-                        } else {
-                            UI.toast('⚠️ Не удалось выполнить задачу', 'error');
-                        }
-                    });
-                });
-                container.querySelectorAll('.goal-card').forEach(el => {
-                    el.addEventListener('click', function() {
-                        const id = this.dataset.goalId;
-                        const goal = Data.goals.find(g => g.id === id);
-                        if (goal) UI.toast(`🎯 ${goal.title} — ${goal.achieved ? 'Достигнута' : 'В процессе'}`,
-                            'info');
-                    });
-                });
                 container.querySelectorAll('.journal-card-mini').forEach(el => {
                     el.addEventListener('click', function() {
-                        // Открываем список задач этого журнала
                         const journalName = this.dataset.journal;
                         App.navigateToJournalTasks(journalName);
                     });
@@ -2076,7 +1999,6 @@
 
             // ================== ЖУРНАЛЫ ==================
             renderJournals(container) {
-                // Если включён режим просмотра задач журнала – показываем их
                 if (this._journalTasksBack && this._currentJournal) {
                     this.renderJournalTasks(container, this._currentJournal);
                     return;
@@ -2101,13 +2023,10 @@
                             </div>`;
                         }).join('')}
                     </div>
-                    <button class="btn btn-secondary btn-sm" id="backToJournals" style="display:none;">← Назад</button>
                 `;
-                // Обработчик для кнопки "Все задачи"
                 document.getElementById('showAllTasksFromJournals').addEventListener('click', function() {
                     App.showAllTasksInJournals();
                 });
-                // Клик по карточке журнала
                 container.querySelectorAll('.journal-card-mini').forEach(el => {
                     el.addEventListener('click', function() {
                         const journalName = this.dataset.journal;
@@ -2116,11 +2035,10 @@
                 });
             },
 
-            // Показ списка задач конкретного журнала (заменяет содержимое раздела)
             navigateToJournalTasks(journalName) {
                 this._currentJournal = journalName;
                 this._journalTasksBack = true;
-                this.renderCurrentPage(); // перерисовываем
+                this.renderCurrentPage();
             },
 
             renderJournalTasks(container, journalName) {
@@ -2161,13 +2079,11 @@
                         </div>
                     `}
                 `;
-                // Кнопка назад
                 document.getElementById('backToJournalsFromTasks').addEventListener('click', () => {
                     this._journalTasksBack = false;
                     this._currentJournal = null;
                     this.renderCurrentPage();
                 });
-                // Обработчики для задач
                 container.querySelectorAll('.task-item').forEach(el => {
                     el.addEventListener('click', function(e) {
                         if (e.target.closest('.complete-btn')) return;
@@ -2189,7 +2105,6 @@
                 });
             },
 
-            // Показать все задачи внутри раздела журналов
             showAllTasksInJournals() {
                 const container = document.getElementById('mainContent');
                 const tasks = Data.tasks;
@@ -2246,13 +2161,11 @@
                             }).join('')}
                         </div>
                     `;
-                    // Обработчик назад
                     document.getElementById('backToJournalsFromAll').addEventListener('click', () => {
                         this._journalTasksBack = false;
                         this._currentJournal = null;
                         this.renderCurrentPage();
                     });
-                    // Фильтры
                     const applyAllTasksFilter = () => {
                         const items = container.querySelectorAll('.all-task-item');
                         items.forEach(item => {
@@ -2282,7 +2195,6 @@
                             applyAllTasksFilter();
                         });
                     });
-                    // Обработчики задач
                     container.querySelectorAll('.all-task-item').forEach(el => {
                         el.addEventListener('click', function(e) {
                             if (e.target.closest('.complete-btn')) return;
@@ -2729,7 +2641,6 @@
                         UI.deleteNote(this.dataset.noteId);
                     });
                 });
-                // Клик по заметке для просмотра
                 container.querySelectorAll('.note-item').forEach(el => {
                     el.addEventListener('click', function(e) {
                         if (e.target.closest('button')) return;
@@ -2768,7 +2679,6 @@
                         UI.deletePhoto(this.dataset.photoId);
                     });
                 });
-                // Клик по фото для увеличения
                 container.querySelectorAll('.photo-item').forEach(el => {
                     el.addEventListener('click', function(e) {
                         if (e.target.closest('.photo-delete')) return;
