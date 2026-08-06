@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SkillQuest</title>
     <style>
-        /* ===== ДИЗАЙН-СИСТЕМА ===== */
+        /* ===== ДИЗАЙН-СИСТЕМА (без изменений, та же что ранее) ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
             --bg: #f5f7fb;
@@ -496,6 +496,7 @@
 </head>
 <body>
 
+    <!-- Шапка -->
     <header class="header">
         <div class="header-left">
             <div class="app-icon">
@@ -571,6 +572,7 @@
 
     <main id="mainContent"></main>
 
+    <!-- Нижняя навигация (без отдельной вкладки "Все задачи") -->
     <nav class="bottom-nav" id="bottomNav">
         <div class="nav-item active" data-page="home"><span class="icon">🏠</span><span class="label">Главная</span></div>
         <div class="nav-item" data-page="calendar"><span class="icon">📅</span><span class="label">Календарь</span></div>
@@ -692,7 +694,7 @@
                 <div class="form-group"><label class="input-label">Привязать к задаче (необязательно)</label><select class="input" id="noteTask"><option value="">— нет —</option></select></div>
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" id="noteModalCancel">Отмена</button>
-                    <button type="submit" class="btn" id="noteSubmitBtn">Сохранить</button>
+                    <button type="button" class="btn" id="noteSubmitBtn">Сохранить</button>
                 </div>
             </form>
         </div>
@@ -801,7 +803,7 @@
     </div>
 
     <script>
-        // ========================== DATA LAYER ==========================
+        // ========================== DATA LAYER (без изменений) ==========================
         const Data = {
             _data: null,
             _listeners: [],
@@ -1095,7 +1097,7 @@
         Data.load();
         window.Data = Data;
 
-        // ========================== UI HELPERS ==========================
+        // ========================== UI HELPERS (исправлен обработчик заметок) ==========================
         const UI = {
             toast(message, type, duration) {
                 type = type || 'info';
@@ -1181,7 +1183,7 @@
                 if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
             },
 
-            // ---- Модалка задачи ----
+            // ---- Модалка задачи (без изменений) ----
             openTaskModal(taskId) {
                 const modal = document.getElementById('taskModal');
                 const form = document.getElementById('taskForm');
@@ -1375,13 +1377,14 @@
                 }
             },
 
-            // ---- Заметки ----
+            // ---- Заметки (ИСПРАВЛЕНА) ----
             openNoteModal: function(noteId) {
                 const modal = document.getElementById('noteModal');
                 const form = document.getElementById('noteForm');
                 const isEdit = !!noteId;
                 const note = isEdit ? Data.notes.find(n => n.id === noteId) : null;
 
+                // Заполняем список задач для привязки
                 const taskSelect = document.getElementById('noteTask');
                 taskSelect.innerHTML = '<option value="">— нет —</option>';
                 Data.tasks.forEach(t => {
@@ -1399,12 +1402,15 @@
                     if (note.taskId) document.getElementById('noteTask').value = note.taskId;
                 } else {
                     document.getElementById('noteModalTitle').textContent = '📝 Новая заметка';
-                    document.getElementById('noteSubmitBtn').textContent = 'Создать';
+                    document.getElementById('noteSubmitBtn').textContent = 'Сохранить';
                     form.reset();
                 }
                 modal.classList.add('open');
 
-                form.onsubmit = function(e) {
+                // Убираем старые обработчики, используем только кнопку
+                const submitBtn = document.getElementById('noteSubmitBtn');
+                // Создаём новый обработчик, удаляем старые
+                const newHandler = function(e) {
                     e.preventDefault();
                     const text = document.getElementById('noteText').value.trim();
                     const taskId = document.getElementById('noteTask').value || null;
@@ -1422,12 +1428,18 @@
                     UI.closeNoteModal();
                     App.renderCurrentPage();
                 };
+                // Удаляем предыдущие обработчики, заменяем на новый
+                submitBtn.onclick = newHandler;
+                // Также обрабатываем отправку формы на случай, если пользователь нажмёт Enter в поле
+                form.onsubmit = function(e) {
+                    e.preventDefault();
+                    newHandler(e);
+                };
             },
             closeNoteModal: function() {
                 document.getElementById('noteModal').classList.remove('open');
                 document.getElementById('noteForm').reset();
             },
-            // Просмотр заметки (модалка)
             openNoteView: function(noteId) {
                 const note = Data.notes.find(n => n.id === noteId);
                 if (!note) { UI.toast('Заметка не найдена', 'error'); return; }
@@ -1451,7 +1463,7 @@
                 }
             },
 
-            // ---- Фото ----
+            // ---- Фото (без изменений) ----
             addPhoto: function() {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -1566,7 +1578,7 @@
         };
         window.UI = UI;
 
-        // ========================== CALENDAR ==========================
+        // ========================== CALENDAR (без изменений) ==========================
         const Calendar = {
             _view: 'month',
             _baseDate: new Date(),
@@ -1897,25 +1909,22 @@
                 }
             },
 
-            // ================== HOME ==================
+            // ================== HOME (обновлена) ==================
             renderHome(container) {
                 const data = Data._data;
                 const profile = data.profile;
                 const today = new Date().toISOString().split('T')[0];
                 const todayTasks = Data.getTodayTasks();
-                const activeGoals = data.goals.filter(g => !g.achieved).slice(0, 3);
                 const weekAgo = new Date();
                 weekAgo.setDate(weekAgo.getDate() - 7);
                 const monthAgo = new Date();
                 monthAgo.setDate(monthAgo.getDate() - 30);
 
-                // Статистика по задачам
                 const totalTasks = data.tasks.length;
                 const completedTasks = data.tasks.reduce((acc, t) => acc + t.completedDates.length, 0);
                 const plannedToday = todayTasks.length;
                 const missedToday = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'missed').length;
 
-                // Опыт за неделю и месяц
                 let expWeek = 0,
                     expMonth = 0;
                 data.tasks.forEach(task => {
@@ -1931,10 +1940,7 @@
                 UI.updateHeaderAvatar();
 
                 const { level, exp, needed } = Data.recalcLevel();
-                const doneCount = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'done').length;
-                const productivity = totalTasks > 0 ? Math.round((completedTasks / (completedTasks + data.tasks.reduce((acc, t) => acc + t.missedDates.length, 0))) * 100) : 0;
 
-                // Топ-4 журнала
                 const topJournals = [...data.journals].sort((a, b) => b.exp - a.exp).slice(0, 4);
 
                 container.innerHTML = `
@@ -1997,7 +2003,7 @@
                 }
             },
 
-            // ================== ЖУРНАЛЫ ==================
+            // ================== ЖУРНАЛЫ (без изменений) ==================
             renderJournals(container) {
                 if (this._journalTasksBack && this._currentJournal) {
                     this.renderJournalTasks(container, this._currentJournal);
@@ -2217,7 +2223,7 @@
                 }
             },
 
-            // ================== CALENDAR ==================
+            // ================== CALENDAR (без изменений) ==================
             renderCalendar(container) {
                 const view = Calendar.getView();
                 const baseDate = Calendar.getBaseDate();
@@ -2445,7 +2451,7 @@
                 }).join('');
             },
 
-            // ================== ЦЕЛИ ==================
+            // ================== ЦЕЛИ (без изменений) ==================
             renderGoals(container) {
                 const goals = Data.goals;
                 container.innerHTML =
@@ -2509,7 +2515,7 @@
                 });
             },
 
-            // ================== ПРОФИЛЬ ==================
+            // ================== ПРОФИЛЬ (без изменений) ==================
             renderProfile(container) {
                 const profile = Data.profile;
                 const { level, exp, needed } = Data.recalcLevel();
@@ -2602,7 +2608,7 @@
                 }
             },
 
-            // ================== ЗАМЕТКИ ==================
+            // ================== ЗАМЕТКИ (без изменений) ==================
             renderNotes(container) {
                 const notes = Data.notes;
                 container.innerHTML =
@@ -2650,7 +2656,7 @@
                 });
             },
 
-            // ================== ГАЛЕРЕЯ ==================
+            // ================== ГАЛЕРЕЯ (без изменений) ==================
             renderGallery(container) {
                 const photos = Data.photos;
                 container.innerHTML =
@@ -2688,7 +2694,7 @@
                 });
             },
 
-            // ================== НАСТРОЙКИ ==================
+            // ================== НАСТРОЙКИ (без изменений) ==================
             renderSettings(container) {
                 const isDark = document.body.classList.contains('dark');
                 const currentTheme = document.body.className.match(/theme-(\w+)/)?.[1] || 'default';
