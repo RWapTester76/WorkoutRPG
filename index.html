@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SkillQuest</title>
+    <title>SkillQuest - Полная версия</title>
     <style>
         /* ===== ДИЗАЙН-СИСТЕМА С РАСШИРЕННЫМИ ЦВЕТОВЫМИ СХЕМАМИ ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -183,6 +183,19 @@
         .btn-icon { width: 44px; height: 44px; padding: 0; border-radius: 60px; min-width: 44px; font-size: 20px; }
         .btn-warning { background: #fdcb6e; color: #1a1a2e; box-shadow: 0 4px 12px rgba(253,203,110,0.3); }
         .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(253,203,110,0.4); }
+        .btn-success { background: #00b894; color: #fff; box-shadow: 0 4px 12px rgba(0,184,148,0.3); }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,184,148,0.4); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: #fff;
+            transform: none;
+        }
 
         .input {
             width: 100%;
@@ -207,6 +220,20 @@
             font-weight: 500;
             color: var(--text-secondary);
             margin-bottom: 6px;
+        }
+        .input-error {
+            border-color: #ff6b6b !important;
+            box-shadow: 0 0 0 4px rgba(255,107,107,0.2) !important;
+        }
+        .input-success {
+            border-color: #00b894 !important;
+            box-shadow: 0 0 0 4px rgba(0,184,148,0.2) !important;
+        }
+        .caption-1 {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+            display: block;
         }
 
         .header {
@@ -871,6 +898,130 @@
         .toast.info { background: var(--text); }
         .toast.warning { background: #fdcb6e; color: #1a1a2e; }
 
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--card-border);
+            transition: var(--transition);
+            border-radius: 34px;
+        }
+        .switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+        .switch input:checked + .slider {
+            background: var(--primary);
+        }
+        .switch input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        .chip {
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            user-select: none;
+        }
+        .chip.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .chip:hover {
+            transform: scale(1.05);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-state .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            display: block;
+        }
+        .empty-state .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .empty-state .empty-desc {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .stat-row .stat-label {
+            color: var(--text-secondary);
+        }
+        .stat-row .stat-value {
+            font-weight: 600;
+        }
+
+        .progress-ring {
+            position: relative;
+            display: inline-block;
+        }
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+        .progress-ring .bg {
+            fill: none;
+            stroke: var(--card-border);
+            stroke-width: 8;
+        }
+        .progress-ring .fg {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.6s ease;
+        }
+        .progress-ring .label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
         @media (max-width: 640px) {
             .home-stats-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
             .home-stats-grid .stat-card .stat-number { font-size: 22px; }
@@ -897,7 +1048,7 @@
 </head>
 <body>
 
-    <!-- Шапка -->
+    <!-- ===== ШАПКА ===== -->
     <header class="header">
         <div class="header-left">
             <div class="app-icon">
@@ -971,9 +1122,10 @@
         </div>
     </header>
 
+    <!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
     <main id="mainContent"></main>
 
-    <!-- Нижняя навигация -->
+    <!-- ===== НИЖНЯЯ НАВИГАЦИЯ ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <div class="nav-item active" data-page="home"><span class="icon">🏠</span><span class="label">Главная</span></div>
         <div class="nav-item" data-page="calendar"><span class="icon">📅</span><span class="label">Календарь</span></div>
@@ -985,9 +1137,10 @@
         <div class="nav-item" data-page="settings"><span class="icon">⚙️</span><span class="label">Настройки</span></div>
     </nav>
 
+    <!-- ===== ПЛАВАЮЩАЯ КНОПКА ===== -->
     <button class="fab-add" id="fabAdd" aria-label="Новая задача">➕</button>
 
-    <!-- ===== МОДАЛКИ ===== -->
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ЗАДАЧА ===== -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal">
             <button class="modal-close" id="modalClose">&times;</button>
@@ -1025,7 +1178,7 @@
                         <label><input type="checkbox" value="5"> Пт</label>
                         <label><input type="checkbox" value="6"> Сб</label>
                     </div>
-                    <span class="caption-1 text-secondary">Если не выбрано – каждый день</span>
+                    <span class="caption-1">Если не выбрано – каждый день</span>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label class="input-label">Время</label><input type="time" class="input" id="taskTime" value="09:00"></div>
@@ -1051,6 +1204,7 @@
         </div>
     </div>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ДЕТАЛИ ЗАДАЧИ ===== -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal">
             <button class="modal-close" id="detailClose">&times;</button>
@@ -1064,6 +1218,7 @@
         </div>
     </div>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ЦЕЛЬ ===== -->
     <div class="modal-overlay" id="goalModal">
         <div class="modal">
             <button class="modal-close" id="goalModalClose">&times;</button>
@@ -1072,7 +1227,7 @@
                 <div class="form-group"><label class="input-label">Название</label><input type="text" class="input" id="goalTitle" placeholder="Что хотите достичь?" required></div>
                 <div class="form-group"><label class="input-label">Описание</label><textarea class="input" id="goalDesc" rows="2" placeholder="Подробности..."></textarea></div>
                 <div class="form-group"><label class="input-label">Дедлайн</label><input type="date" class="input" id="goalDeadline" required></div>
-                <div class="form-group"><label class="input-label">Контрольные точки (даты через запятую)</label><input type="text" class="input" id="goalCheckpoints" placeholder="2026-08-10, 2026-08-20"><span class="caption-1 text-secondary">Необязательно</span></div>
+                <div class="form-group"><label class="input-label">Контрольные точки (даты через запятую)</label><input type="text" class="input" id="goalCheckpoints" placeholder="2026-08-10, 2026-08-20"><span class="caption-1">Необязательно</span></div>
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" id="goalModalCancel">Отмена</button>
                     <button type="submit" class="btn" id="goalSubmitBtn">Создать</button>
@@ -1081,6 +1236,7 @@
         </div>
     </div>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ЗАМЕТКА ===== -->
     <div class="modal-overlay" id="noteModal">
         <div class="modal">
             <button class="modal-close" id="noteModalClose">&times;</button>
@@ -1096,6 +1252,7 @@
         </div>
     </div>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ПРОСМОТР ЗАМЕТКИ ===== -->
     <div class="modal-overlay" id="noteViewModal">
         <div class="modal">
             <button class="modal-close" id="noteViewClose">&times;</button>
@@ -1108,6 +1265,7 @@
         </div>
     </div>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ПРОСМОТР ФОТО ===== -->
     <div class="modal-overlay" id="photoViewModal">
         <div class="modal">
             <button class="modal-close" id="photoViewClose">&times;</button>
@@ -1118,6 +1276,7 @@
         </div>
     </div>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ОПИСАНИЕ ФОТО ===== -->
     <div class="modal-overlay" id="photoDescModal">
         <div class="modal">
             <button class="modal-close" id="photoDescClose">&times;</button>
@@ -1130,6 +1289,7 @@
         </div>
     </div>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ПОМОЩЬ ===== -->
     <div class="modal-overlay" id="helpModal">
         <div class="modal">
             <button class="modal-close" id="helpModalClose">&times;</button>
@@ -1152,7 +1312,56 @@
             </div>
         </div>
     </div>
-        <script>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО: НАСТРОЙКИ ===== -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <button class="modal-close" id="settingsModalClose">&times;</button>
+            <h3>⚙️ Настройки</h3>
+            <div style="display:grid; gap:20px;">
+                <div class="form-group">
+                    <label class="input-label">Тёмный режим</label>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <label class="switch"><input type="checkbox" id="settingsDarkMode"><span class="slider"></span></label>
+                        <span class="body-2" id="darkModeLabel">Выкл</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="input-label">Цветовая тема</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <span class="chip" data-theme="default" style="background:var(--card);">По умолчанию</span>
+                        <span class="chip" data-theme="jade" style="background:#00b894;color:#fff;">Изумруд</span>
+                        <span class="chip" data-theme="ruby" style="background:#e17055;color:#fff;">Рубин</span>
+                        <span class="chip" data-theme="sapphire" style="background:#0984e3;color:#fff;">Сапфир</span>
+                        <span class="chip" data-theme="amber" style="background:#fdcb6e;color:#1a1a2e;">Янтарь</span>
+                        <span class="chip" data-theme="coral" style="background:#e17055;color:#fff;">Коралл</span>
+                        <span class="chip" data-theme="amethyst" style="background:#a29bfe;color:#fff;">Аметист</span>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div class="form-group">
+                        <label class="input-label">Экспорт данных</label>
+                        <button class="btn btn-sm" id="exportDataBtn">📤 Скачать JSON</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Импорт данных</label>
+                        <input type="file" id="importDataInput" accept=".json" style="display:none;">
+                        <button class="btn btn-sm btn-secondary" id="importDataBtn">📥 Загрузить JSON</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="input-label">Сбросить все данные</label>
+                    <button class="btn btn-sm btn-danger" id="resetDataBtn">🗑 Сбросить всё</button>
+                    <span class="caption-1">Все данные будут удалены безвозвратно</span>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="settingsCloseBtn">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
         // ========================== DATA LAYER ==========================
         const Data = {
             _data: null,
