@@ -1669,6 +1669,41 @@
         window.Data = Data;
 
         // ========================== UI HELPERS ==========================
+// ===== ИНТЕРАКТИВНЫЙ АВАТАР =====
+renderInteractiveAvatar: function(container, profile, journals, level) {
+    const initials = profile.name.charAt(0).toUpperCase();
+    const avatarHtml = `
+        <div class="avatar-interactive" id="interactiveAvatar">
+            <div class="avatar-inner">
+                ${profile.avatar ? `<img src="${profile.avatar}" alt="${escapeHtml(profile.name)}">` : `<span>${escapeHtml(initials)}</span>`}
+            </div>
+            <div class="avatar-level-badge">${level}</div>
+            <div class="avatar-journals-ring">
+                <svg viewBox="0 0 120 120">
+                    ${journals.map((j, i) => {
+                        const progress = Math.min((j.exp / 1000) * 100, 100);
+                        const circumference = 2 * Math.PI * 52;
+                        const offset = circumference - (progress / 100) * circumference;
+                        const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#0984e3', '#fd79a8', '#00cec9', '#a29bfe'];
+                        const color = colors[i % colors.length];
+                        return `<circle cx="60" cy="60" r="52" fill="none" stroke="${color}" stroke-width="4" 
+                                stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" 
+                                class="ring-segment" opacity="0.8" style="transition-delay: ${i * 0.05}s"/>`;
+                    }).join('')}
+                </svg>
+            </div>
+        </div>
+    `;
+    container.innerHTML = avatarHtml;
+    
+    // Обработчик клика для будущей функциональности
+    const avatarEl = container.querySelector('#interactiveAvatar');
+    if (avatarEl) {
+        avatarEl.addEventListener('click', function() {
+            UI.toast('🌟 Здесь будет расширенная статистика по журналам!', 'info', 3000);
+        });
+    }
+}
         const UI = {
             toast(message, type, duration) {
                 type = type || 'info';
@@ -2419,95 +2454,166 @@
             },
 
             // ================== HOME ==================
-            renderHome(container) {
-                const data = Data._data;
-                const profile = data.profile;
-                const today = new Date().toISOString().split('T')[0];
-                const todayTasks = Data.getTodayTasks();
-                const weekAgo = new Date();
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                const monthAgo = new Date();
-                monthAgo.setDate(monthAgo.getDate() - 30);
+           renderHome(container) {
+    const data = Data._data;
+    const profile = data.profile;
+    const today = new Date().toISOString().split('T')[0];
+    const todayTasks = Data.getTodayTasks();
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date();
+    monthAgo.setDate(monthAgo.getDate() - 30);
 
-                const totalTasks = (data.tasks || []).length;
-                const completedTasks = (data.tasks || []).reduce((acc, t) => acc + t.completedDates.length, 0);
-                const plannedToday = todayTasks.length;
-                const missedToday = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'missed').length;
+    const totalTasks = (data.tasks || []).length;
+    const completedTasks = (data.tasks || []).reduce((acc, t) => acc + t.completedDates.length, 0);
+    const plannedToday = todayTasks.length;
+    const missedToday = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'missed').length;
 
-                let expWeek = 0, expMonth = 0;
-                (data.tasks || []).forEach(task => {
-                    task.completedDates.forEach(dateStr => {
-                        const d = new Date(dateStr);
-                        if (d >= weekAgo) expWeek += task.duration * 0.005;
-                        if (d >= monthAgo) expMonth += task.duration * 0.005;
-                    });
-                });
+    let expWeek = 0, expMonth = 0;
+    (data.tasks || []).forEach(task => {
+        task.completedDates.forEach(dateStr => {
+            const d = new Date(dateStr);
+            if (d >= weekAgo) expWeek += task.duration * 0.005;
+            if (d >= monthAgo) expMonth += task.duration * 0.005;
+        });
+    });
 
-                document.getElementById('greetingText').textContent = UI.getGreeting();
-                document.getElementById('userName').textContent = profile.name;
-                UI.updateHeaderAvatar();
+    document.getElementById('greetingText').textContent = UI.getGreeting();
+    document.getElementById('userName').textContent = profile.name;
+    UI.updateHeaderAvatar();
 
-                const { level, exp, needed } = Data.recalcLevel();
-                const topJournals = [...data.journals].sort((a, b) => b.exp - a.exp).slice(0, 4);
+    const { level, exp, needed } = Data.recalcLevel();
+    const topJournals = [...data.journals].sort((a, b) => b.exp - a.exp).slice(0, 4);
 
-                container.innerHTML = `
-                    <div class="level-card">
-                        <div class="level-header">
-                            <div>
-                                <div class="level-label">УРОВЕНЬ</div>
-                                <div class="level-number">${level}</div>
-                                <div style="font-size:14px; opacity:0.8; margin-top:4px;">${Math.floor(exp)} / ${needed} XP</div>
-                            </div>
-                            <div class="level-stats">
-                                <span>🔥 ${profile.streak || 0} дней</span>
-                                <span style="font-size:13px;">${Math.round((exp/needed)*100)}%</span>
-                            </div>
+    // Интерактивный аватар
+    const avatarHtml = `
+        <div class="avatar-interactive" id="interactiveAvatar" style="margin: 0 auto 20px;">
+            <div class="avatar-inner">
+                ${profile.avatar ? `<img src="${profile.avatar}" alt="${escapeHtml(profile.name)}">` : `<span>${escapeHtml(profile.name.charAt(0).toUpperCase())}</span>`}
+            </div>
+            <div class="avatar-level-badge">${level}</div>
+            <div class="avatar-journals-ring">
+                <svg viewBox="0 0 120 120">
+                    ${data.journals.map((j, i) => {
+                        const progress = Math.min((j.exp / 1000) * 100, 100);
+                        const circumference = 2 * Math.PI * 52;
+                        const offset = circumference - (progress / 100) * circumference;
+                        const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#0984e3', '#fd79a8', '#00cec9', '#a29bfe'];
+                        const color = colors[i % colors.length];
+                        return `<circle cx="60" cy="60" r="52" fill="none" stroke="${color}" stroke-width="4" 
+                                stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" 
+                                class="ring-segment" opacity="0.8" style="transition-delay: ${i * 0.05}s"/>`;
+                    }).join('')}
+                </svg>
+            </div>
+        </div>
+    `;
+
+    // СТАТИСТИКА ПО ЖУРНАЛАМ (все журналы с опытом)
+    const journalStatsHtml = `
+        <div class="section-header"><h2>📊 Статистика журналов</h2></div>
+        <div class="journal-stats-grid">
+            ${data.journals.map(j => {
+                const progress = Math.min((j.exp / 1000) * 100, 100);
+                const tasks = data.tasks.filter(t => t.journal === j.name);
+                const completed = tasks.reduce((acc, t) => acc + t.completedDates.length, 0);
+                const total = tasks.reduce((acc, t) => {
+                    const start = t.startDate || t.date;
+                    const end = t.endDate || t.date;
+                    return acc + Data.getDateRange(start, end).length;
+                }, 0);
+                return `
+                    <div class="journal-stat-item">
+                        <div class="stat-header">
+                            <span class="icon">${j.icon || '📌'}</span>
+                            <span class="name">${escapeHtml(j.name.charAt(0).toUpperCase() + j.name.slice(1))}</span>
+                            <span class="exp">${Math.floor(j.exp)} XP</span>
                         </div>
-                        <div class="progress"><div class="progress-bar" style="width: ${(exp/needed)*100}%;"></div></div>
-                    </div>
-
-                    <div class="home-stats-grid">
-                        <div class="stat-card"><div class="stat-number">${totalTasks}</div><div class="stat-label">Всего задач</div></div>
-                        <div class="stat-card"><div class="stat-number">${completedTasks}</div><div class="stat-label">Выполнено</div></div>
-                        <div class="stat-card"><div class="stat-number">${plannedToday}</div><div class="stat-label">Запланировано сегодня</div></div>
-                        <div class="stat-card"><div class="stat-number">${missedToday}</div><div class="stat-label">Пропущено сегодня</div></div>
-                    </div>
-
-                    <div class="home-exp-grid">
-                        <div class="stat-card"><div class="stat-number">${expWeek.toFixed(1)} XP</div><div class="stat-label">Опыт за неделю</div></div>
-                        <div class="stat-card"><div class="stat-number">${expMonth.toFixed(1)} XP</div><div class="stat-label">Опыт за месяц</div></div>
-                    </div>
-
-                    <div class="section-header"><h2>Журналы</h2><button class="btn btn-sm btn-secondary" data-nav="journals">Все →</button></div>
-                    <div class="journals-grid">
-                        ${topJournals.map(journal => {
-                            const progress = Math.min((journal.exp / 1000) * 100, 100);
-                            return `<div class="journal-card-mini" data-journal="${journal.name}">
-                                <div class="journal-icon">${journal.icon || '📌'}</div>
-                                <div class="journal-name">${escapeHtml(journal.name.charAt(0).toUpperCase() + journal.name.slice(1))}</div>
-                                <div class="journal-exp">${Math.floor(journal.exp)} XP</div>
-                                <div class="journal-progress"><div class="fill" style="width: ${progress}%;"></div></div>
-                            </div>`;
-                        }).join('')}
+                        <div class="stat-bar">
+                            <div class="fill" style="width: ${progress}%;"></div>
+                        </div>
+                        <div class="stat-details">
+                            <span>📋 ${tasks.length} задач</span>
+                            <span>✅ ${completed} выполнено</span>
+                            <span>${total > 0 ? Math.round((completed / total) * 100) : 0}%</span>
+                        </div>
                     </div>
                 `;
+            }).join('')}
+        </div>
+    `;
 
-                container.querySelectorAll('[data-nav]').forEach(btn => {
-                    btn.addEventListener('click', () => { this.navigateTo(btn.dataset.nav); });
-                });
-                container.querySelectorAll('.journal-card-mini').forEach(el => {
-                    el.addEventListener('click', function() {
-                        const journalName = this.dataset.journal;
-                        App.navigateToJournalTasks(journalName);
-                    });
-                });
+    container.innerHTML = `
+        ${avatarHtml}
+        
+        <div class="level-card">
+            <div class="level-header">
+                <div>
+                    <div class="level-label">УРОВЕНЬ</div>
+                    <div class="level-number">${level}</div>
+                    <div style="font-size:14px; opacity:0.8; margin-top:4px;">${Math.floor(exp)} / ${needed} XP</div>
+                </div>
+                <div class="level-stats">
+                    <span>🔥 ${profile.streak || 0} дней</span>
+                    <span style="font-size:13px;">${Math.round((exp/needed)*100)}%</span>
+                </div>
+            </div>
+            <div class="progress"><div class="progress-bar" style="width: ${(exp/needed)*100}%;"></div></div>
+        </div>
 
-                const badge = document.getElementById('goalsBadge');
-                if (badge) {
-                    const count = data.goals.filter(g => !g.achieved).length;
-                    badge.textContent = count;
-                    badge.className = 'badge' + (count > 0 ? ' show' : '');
-                }
+        <div class="home-stats-grid">
+            <div class="stat-card"><div class="stat-number">${totalTasks}</div><div class="stat-label">Всего задач</div></div>
+            <div class="stat-card"><div class="stat-number">${completedTasks}</div><div class="stat-label">Выполнено</div></div>
+            <div class="stat-card"><div class="stat-number">${plannedToday}</div><div class="stat-label">Запланировано сегодня</div></div>
+            <div class="stat-card"><div class="stat-number">${missedToday}</div><div class="stat-label">Пропущено сегодня</div></div>
+        </div>
+
+        <div class="home-exp-grid">
+            <div class="stat-card"><div class="stat-number">${expWeek.toFixed(1)} XP</div><div class="stat-label">Опыт за неделю</div></div>
+            <div class="stat-card"><div class="stat-number">${expMonth.toFixed(1)} XP</div><div class="stat-label">Опыт за месяц</div></div>
+        </div>
+
+        ${journalStatsHtml}
+
+        <div class="section-header"><h2>🏆 Топ журналы</h2><button class="btn btn-sm btn-secondary" data-nav="journals">Все →</button></div>
+        <div class="journals-grid">
+            ${topJournals.map(journal => {
+                const progress = Math.min((journal.exp / 1000) * 100, 100);
+                return `<div class="journal-card-mini" data-journal="${journal.name}">
+                    <div class="journal-icon">${journal.icon || '📌'}</div>
+                    <div class="journal-name">${escapeHtml(journal.name.charAt(0).toUpperCase() + journal.name.slice(1))}</div>
+                    <div class="journal-exp">${Math.floor(journal.exp)} XP</div>
+                    <div class="journal-progress"><div class="fill" style="width: ${progress}%;"></div></div>
+                </div>`;
+            }).join('')}
+        </div>
+    `;
+
+    // Обработчик клика по аватару
+    const avatarEl = container.querySelector('#interactiveAvatar');
+    if (avatarEl) {
+        avatarEl.addEventListener('click', function() {
+            UI.toast('🌟 Здесь будет расширенная статистика по журналам!', 'info', 3000);
+        });
+    }
+
+    container.querySelectorAll('[data-nav]').forEach(btn => {
+        btn.addEventListener('click', () => { this.navigateTo(btn.dataset.nav); });
+    });
+    container.querySelectorAll('.journal-card-mini').forEach(el => {
+        el.addEventListener('click', function() {
+            const journalName = this.dataset.journal;
+            App.navigateToJournalTasks(journalName);
+        });
+    });
+
+    const badge = document.getElementById('goalsBadge');
+    if (badge) {
+        const count = data.goals.filter(g => !g.achieved).length;
+        badge.textContent = count;
+        badge.className = 'badge' + (count > 0 ? ' show' : '');
+    }
+}
             },
 
             // ================== ЖУРНАЛЫ ==================
