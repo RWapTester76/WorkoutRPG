@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -43,7 +44,6 @@
             padding: 0 16px calc(var(--bottom-nav-height) + 24px + var(--safe-area-bottom));
             transition: background var(--transition), color var(--transition);
         }
-        /* ===== ТЁМНЫЙ РЕЖИМ ===== */
         body.dark {
             --bg: #12121a;
             --bg-secondary: #1e1e2a;
@@ -57,7 +57,6 @@
             --primary-bg: rgba(108,92,231,0.20);
             --primary-gradient: linear-gradient(135deg, #5a4bd1, #8a7bfe);
         }
-        /* ===== ЦВЕТОВЫЕ ТЕМЫ (меняют всё) ===== */
         body.theme-jade {
             --primary: #00b894;
             --primary-dark: #00a381;
@@ -116,7 +115,6 @@
             --accent: #fdcb6e;
         }
 
-        /* ===== ОБЩИЕ КОМПОНЕНТЫ ===== */
         .glass {
             background: var(--card);
             backdrop-filter: blur(12px);
@@ -889,7 +887,6 @@
 </head>
 <body>
 
-    <!-- Шапка (без изменений) -->
     <header class="header">
         <div class="header-left">
             <div class="app-icon">
@@ -965,7 +962,6 @@
 
     <main id="mainContent"></main>
 
-    <!-- Нижняя навигация -->
     <nav class="bottom-nav" id="bottomNav">
         <div class="nav-item active" data-page="home"><span class="icon">🏠</span><span class="label">Главная</span></div>
         <div class="nav-item" data-page="calendar"><span class="icon">📅</span><span class="label">Календарь</span></div>
@@ -979,7 +975,7 @@
 
     <button class="fab-add" id="fabAdd" aria-label="Новая задача">➕</button>
 
-    <!-- ===== МОДАЛКИ (все сохранены, без изменений) ===== -->
+    <!-- ===== МОДАЛКИ ===== -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal">
             <button class="modal-close" id="modalClose">&times;</button>
@@ -1145,7 +1141,6 @@
         </div>
     </div>
 
-    <!-- Настройки (переработаны визуально) -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal">
             <button class="modal-close" id="settingsModalClose">&times;</button>
@@ -1207,7 +1202,7 @@
             return String(str).replace(/[&<>"']/g, function(m) { return map[m]; });
         }
 
-        // ========================== DATA LAYER (БЕЗ ИЗМЕНЕНИЙ) ==========================
+        // ========================== DATA LAYER ==========================
         const Data = {
             _data: null,
             _listeners: [],
@@ -1233,22 +1228,7 @@
             },
             getDefaultData() {
                 return {
-                    profile: {
-                        name: 'Герой',
-                        age: 25,
-                        weight: 70,
-                        height: 175,
-                        neck: 0,
-                        chest: 100,
-                        waist: 80,
-                        hips: 100,
-                        biceps: 35,
-                        avatar: null,
-                        totalExp: 0,
-                        level: 1,
-                        streak: 0,
-                        lastActive: null,
-                    },
+                    profile: { name: 'Герой', age: 25, weight: 70, height: 175, neck: 0, chest: 100, waist: 80, hips: 100, biceps: 35, avatar: null, totalExp: 0, level: 1, streak: 0, lastActive: null },
                     journals: [
                         { name: 'тело', exp: 0, icon: '💪' },
                         { name: 'питание', exp: 0, icon: '🍎' },
@@ -1274,7 +1254,6 @@
             get photos() { return this._data.photos; },
             getJournalByName(name) { return this._data.journals.find(j => j.name === name); },
 
-            // --- Задачи ---
             addTask(task) {
                 const newTask = {
                     id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
@@ -1302,10 +1281,8 @@
                 this.save();
             },
 
-            // --- Цели ---
             addGoal(goal) {
-                const newGoal = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), ...goal,
-                    achieved: false, createdAt: new Date().toISOString() };
+                const newGoal = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), ...goal, achieved: false, createdAt: new Date().toISOString() };
                 this._data.goals.push(newGoal);
                 this.save();
                 return newGoal;
@@ -1324,11 +1301,8 @@
                 this.save();
             },
 
-            // --- Заметки ---
             addNote(note) {
-                const newNote = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), text: note.text,
-                    taskId: note.taskId || null, createdAt: new Date().toISOString(), updatedAt: new Date()
-                        .toISOString() };
+                const newNote = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), text: note.text, taskId: note.taskId || null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
                 this._data.notes.push(newNote);
                 this.save();
                 return newNote;
@@ -1347,10 +1321,8 @@
                 this.save();
             },
 
-            // --- Фото ---
             addPhoto(photoData) {
-                const newPhoto = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), data: photoData.data,
-                    note: photoData.note || '', date: photoData.date || new Date().toISOString() };
+                const newPhoto = { id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5), data: photoData.data, note: photoData.note || '', date: photoData.date || new Date().toISOString() };
                 this._data.photos.push(newPhoto);
                 this.save();
                 return newPhoto;
@@ -1360,7 +1332,6 @@
                 this.save();
             },
 
-            // --- Сброс ---
             resetAllData() {
                 localStorage.removeItem('skillquest_data');
                 localStorage.removeItem('skillquest_theme');
@@ -1371,7 +1342,6 @@
                 location.reload();
             },
 
-            // --- Вспомогательные ---
             getTasksForDate(date) {
                 const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
                 return this._data.tasks.filter(task => {
@@ -1397,16 +1367,12 @@
                 return 'pending';
             },
             isSameDay(d1, d2) {
-                return d1.getFullYear() === d2.getFullYear() &&
-                    d1.getMonth() === d2.getMonth() &&
-                    d1.getDate() === d2.getDate();
+                return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
             },
             recalcLevel() {
                 const exp = this._data.profile.totalExp;
-                let level = 1,
-                    needed = 100;
-                while (exp >= needed) { level++;
-                    needed = level * 100; }
+                let level = 1, needed = 100;
+                while (exp >= needed) { level++; needed = level * 100; }
                 this._data.profile.level = level;
                 return { level, exp, needed };
             },
@@ -1496,10 +1462,8 @@
                     const goalTasks = this._data.tasks.filter(t => t.goalId === goal.id);
                     if (goalTasks.length === 0) return;
                     const allDone = goalTasks.every(task => {
-                        const dates = this.getDateRange(task.startDate || task.date, task.endDate || task
-                        .date);
-                        return dates.every(d => task.completedDates.includes(d) || task.missedDates.includes(
-                        d));
+                        const dates = this.getDateRange(task.startDate || task.date, task.endDate || task.date);
+                        return dates.every(d => task.completedDates.includes(d) || task.missedDates.includes(d));
                     });
                     if (allDone) {
                         goal.achieved = true;
@@ -1533,14 +1497,10 @@
             },
             formatDate(date, format) {
                 const d = new Date(date);
-                if (format === 'short') return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit',
-                        year: 'numeric' });
-                if (format === 'long') return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long',
-                        year: 'numeric' });
-                if (format === 'weekday') return d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric',
-                        month: 'long' });
-                if (format === 'datetime') return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit',
-                        year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                if (format === 'short') return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                if (format === 'long') return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                if (format === 'weekday') return d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+                if (format === 'datetime') return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 return d.toLocaleDateString('ru-RU');
             },
             getGreeting() {
@@ -1554,8 +1514,7 @@
                 const current = document.body.className.match(/theme-(\w+)/)?.[1] || 'default';
                 const index = themes.indexOf(current);
                 const next = themes[(index + 1) % themes.length];
-                document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('theme-')).join(
-                ' ');
+                document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('theme-')).join('');
                 if (next !== 'default') document.body.classList.add('theme-' + next);
                 localStorage.setItem('skillquest_theme', next);
                 if (document.getElementById('settingsModal').classList.contains('open')) {
@@ -1587,11 +1546,9 @@
                 const profile = Data.profile;
                 if (avatarEl) {
                     if (profile.avatar) {
-                        avatarEl.innerHTML =
-                            '<img src="' + escapeHtml(profile.avatar) + '" alt="avatar"><input type="file" id="avatarInput" accept="image/*" style="display:none;">';
+                        avatarEl.innerHTML = '<img src="' + profile.avatar + '" alt="avatar"><input type="file" id="avatarInput" accept="image/*" style="display:none;">';
                     } else {
-                        avatarEl.innerHTML =
-                            '<span id="avatarInitials">' + escapeHtml(profile.name.charAt(0).toUpperCase()) + '</span><input type="file" id="avatarInput" accept="image/*" style="display:none;">';
+                        avatarEl.innerHTML = '<span id="avatarInitials">' + escapeHtml(profile.name.charAt(0).toUpperCase()) + '</span><input type="file" id="avatarInput" accept="image/*" style="display:none;">';
                     }
                 }
                 const userNameEl = document.getElementById('userName');
@@ -1600,7 +1557,6 @@
                 if (initialsEl) initialsEl.textContent = profile.name.charAt(0).toUpperCase();
             },
 
-            // ---- Задача ----
             openTaskModal(taskId, preSelectedJournal) {
                 const modal = document.getElementById('taskModal');
                 const form = document.getElementById('taskForm');
@@ -1649,7 +1605,7 @@
                 Data.goals.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = g.id;
-                    opt.textContent = escapeHtml(g.title);
+                    opt.textContent = g.title;
                     if (isEdit && task && task.goalId === g.id) opt.selected = true;
                     goalSelect.appendChild(opt);
                 });
@@ -1661,8 +1617,7 @@
                     const journal = document.getElementById('taskJournal').value;
                     const startDate = document.getElementById('taskStart').value;
                     const endDate = document.getElementById('taskEnd').value;
-                    const daysOfWeek = Array.from(document.querySelectorAll('#dayCheckboxes input:checked'))
-                        .map(cb => Number(cb.value));
+                    const daysOfWeek = Array.from(document.querySelectorAll('#dayCheckboxes input:checked')).map(cb => Number(cb.value));
                     const time = document.getElementById('taskTime').value;
                     const duration = Number(document.getElementById('taskDuration').value);
                     const note = document.getElementById('taskNote').value.trim();
@@ -1675,12 +1630,10 @@
                     }
 
                     if (isEdit && task) {
-                        Data.updateTask(taskId, { title, journal, startDate, endDate, daysOfWeek, time, duration,
-                            note, reminderMinutes: reminder, goalId });
+                        Data.updateTask(taskId, { title, journal, startDate, endDate, daysOfWeek, time, duration, note, reminderMinutes: reminder, goalId });
                         UI.toast('✅ Задача обновлена!', 'success');
                     } else {
-                        Data.addTask({ title, journal, startDate, endDate, daysOfWeek, time, duration, note,
-                            reminderMinutes: reminder, goalId });
+                        Data.addTask({ title, journal, startDate, endDate, daysOfWeek, time, duration, note, reminderMinutes: reminder, goalId });
                         UI.toast('✅ Задача создана!', 'success');
                     }
                     modal.classList.remove('open');
@@ -1692,16 +1645,13 @@
                 document.getElementById('taskForm').reset();
             },
 
-            // ---- Детали задачи ----
             openTaskDetail(taskId) {
                 const task = Data.tasks.find(t => t.id === taskId);
                 if (!task) { UI.toast('Задача не найдена', 'error'); return; }
                 const modal = document.getElementById('detailModal');
                 const content = document.getElementById('detailContent');
                 const daysMap = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-                const daysStr = task.daysOfWeek && task.daysOfWeek.length > 0 ?
-                    task.daysOfWeek.map(d => daysMap[d]).join(', ') :
-                    'Каждый день';
+                const daysStr = task.daysOfWeek && task.daysOfWeek.length > 0 ? task.daysOfWeek.map(d => daysMap[d]).join(', ') : 'Каждый день';
                 const journal = Data.getJournalByName(task.journal);
                 const icon = journal ? journal.icon : '📌';
                 content.innerHTML = `
@@ -1731,7 +1681,6 @@
                 }
             },
 
-            // ---- Цели ----
             openGoalModal: function(goalId) {
                 const modal = document.getElementById('goalModal');
                 const form = document.getElementById('goalForm');
@@ -1744,8 +1693,7 @@
                     document.getElementById('goalTitle').value = goal.title;
                     document.getElementById('goalDesc').value = goal.description || '';
                     document.getElementById('goalDeadline').value = goal.deadline || '';
-                    document.getElementById('goalCheckpoints').value = goal.checkpoints ? goal.checkpoints.join(', ') :
-                        '';
+                    document.getElementById('goalCheckpoints').value = goal.checkpoints ? goal.checkpoints.join(', ') : '';
                 } else {
                     document.getElementById('goalModalTitle').textContent = '🎯 Новая цель';
                     document.getElementById('goalSubmitBtn').textContent = 'Создать';
@@ -1798,7 +1746,6 @@
                 }
             },
 
-            // ---- Заметки ----
             openNoteModal: function(noteId) {
                 const modal = document.getElementById('noteModal');
                 const form = document.getElementById('noteForm');
@@ -1810,7 +1757,7 @@
                 Data.tasks.forEach(t => {
                     const opt = document.createElement('option');
                     opt.value = t.id;
-                    opt.textContent = escapeHtml(t.title + ' (' + t.journal + ')');
+                    opt.textContent = t.title + ' (' + t.journal + ')';
                     if (isEdit && note && note.taskId === t.id) opt.selected = true;
                     taskSelect.appendChild(opt);
                 });
@@ -1854,8 +1801,7 @@
                 const note = Data.notes.find(n => n.id === noteId);
                 if (!note) { UI.toast('Заметка не найдена', 'error'); return; }
                 document.getElementById('noteViewContent').textContent = note.text;
-                document.getElementById('noteViewTitle').textContent = '📄 Заметка от ' + UI.formatDate(note.createdAt,
-                    'datetime');
+                document.getElementById('noteViewTitle').textContent = '📄 Заметка от ' + UI.formatDate(note.createdAt, 'datetime');
                 document.getElementById('noteViewModal').classList.add('open');
                 document.getElementById('noteViewEditBtn').onclick = function() {
                     UI.closeNoteView();
@@ -1873,7 +1819,6 @@
                 }
             },
 
-            // ---- Фото ----
             addPhoto: function() {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -1933,7 +1878,7 @@
                 if (!photo) { UI.toast('Фото не найдено', 'error'); return; }
                 const content = document.getElementById('photoViewContent');
                 content.innerHTML = `
-                    <img src="${escapeHtml(photo.data)}" alt="Фото">
+                    <img src="${photo.data}" alt="Фото">
                     <div style="margin-top:8px; font-size:14px; color:var(--text-secondary);">${escapeHtml(photo.note ? photo.note : 'Без описания')} · ${UI.formatDate(photo.date, 'short')}</div>
                 `;
                 document.getElementById('photoViewModal').classList.add('open');
@@ -1942,7 +1887,6 @@
                 document.getElementById('photoViewModal').classList.remove('open');
             },
 
-            // ---- Экспорт/импорт ----
             exportData: function() {
                 const data = Data._data;
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -2042,23 +1986,18 @@
                 let week = [];
                 for (let i = firstDay - 1; i >= 0; i--) {
                     const day = daysInPrevMonth - i;
-                    week.push({ day, month: month - 1, year: month === 0 ? year - 1 : year, isOtherMonth: true,
-                        isToday: false });
+                    week.push({ day, month: month - 1, year: month === 0 ? year - 1 : year, isOtherMonth: true, isToday: false });
                 }
                 for (let d = 1; d <= daysInMonth; d++) {
                     const date = new Date(year, month, d);
-                    const isToday = date.getFullYear() === today.getFullYear() &&
-                        date.getMonth() === today.getMonth() &&
-                        date.getDate() === today.getDate();
+                    const isToday = date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate();
                     week.push({ day: d, month, year, isOtherMonth: false, isToday });
-                    if (week.length === 7) { weeks.push(week);
-                        week = []; }
+                    if (week.length === 7) { weeks.push(week); week = []; }
                 }
                 if (week.length > 0) {
                     let nextMonthDay = 1;
                     while (week.length < 7) {
-                        week.push({ day: nextMonthDay, month: month + 1, year: month === 11 ? year + 1 : year,
-                            isOtherMonth: true, isToday: false });
+                        week.push({ day: nextMonthDay, month: month + 1, year: month === 11 ? year + 1 : year, isOtherMonth: true, isToday: false });
                         nextMonthDay++;
                     }
                     weeks.push(week);
@@ -2086,19 +2025,16 @@
             },
             getTitle() {
                 const d = this._baseDate;
-                if (this._view === 'day') return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long',
-                        year: 'numeric' });
+                if (this._view === 'day') return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
                 if (this._view === 'week') {
                     const start = new Date(d);
                     start.setDate(start.getDate() - start.getDay());
                     const end = new Date(start);
                     end.setDate(end.getDate() + 6);
                     if (start.getMonth() === end.getMonth()) {
-                        return start.getDate() + ' – ' + end.getDate() + ' ' + start.toLocaleString('ru-RU', { month: 'long' }) +
-                            ' ' + start.getFullYear();
+                        return start.getDate() + ' – ' + end.getDate() + ' ' + start.toLocaleString('ru-RU', { month: 'long' }) + ' ' + start.getFullYear();
                     }
-                    return start.getDate() + ' ' + start.toLocaleString('ru-RU', { month: 'short' }) + ' – ' + end.getDate() +
-                        ' ' + end.toLocaleString('ru-RU', { month: 'short' }) + ' ' + start.getFullYear();
+                    return start.getDate() + ' ' + start.toLocaleString('ru-RU', { month: 'short' }) + ' – ' + end.getDate() + ' ' + end.toLocaleString('ru-RU', { month: 'short' }) + ' ' + start.getFullYear();
                 }
                 if (this._view === 'month') return d.toLocaleString('ru-RU', { month: 'long', year: 'numeric' });
                 return d.getFullYear().toString();
@@ -2112,10 +2048,10 @@
             _unsubscribe: null,
             _currentPage: 'home',
             _journalTasksBack: false,
+            _currentJournal: null,
 
             init() {
                 UI.loadTheme();
-
                 this._unsubscribe = Data.subscribe(() => { this.renderCurrentPage(); });
 
                 document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
@@ -2163,13 +2099,11 @@
 
                 document.getElementById('modalClose').addEventListener('click', () => { UI.closeTaskModal(); });
                 document.getElementById('modalCancel').addEventListener('click', () => { UI.closeTaskModal(); });
-                document.getElementById('taskModal').addEventListener('click', function(e) { if (e.target === this) UI
-                        .closeTaskModal(); });
+                document.getElementById('taskModal').addEventListener('click', function(e) { if (e.target === this) UI.closeTaskModal(); });
 
                 document.getElementById('detailClose').addEventListener('click', () => { UI.closeTaskDetail(); });
                 document.getElementById('detailCloseBtn').addEventListener('click', () => { UI.closeTaskDetail(); });
-                document.getElementById('detailModal').addEventListener('click', function(e) { if (e.target === this) UI
-                        .closeTaskDetail(); });
+                document.getElementById('detailModal').addEventListener('click', function(e) { if (e.target === this) UI.closeTaskDetail(); });
 
                 document.getElementById('detailDelete').addEventListener('click', function() {
                     UI.deleteTask(this.dataset.taskId);
@@ -2182,23 +2116,19 @@
 
                 document.getElementById('goalModalClose').addEventListener('click', () => { UI.closeGoalModal(); });
                 document.getElementById('goalModalCancel').addEventListener('click', () => { UI.closeGoalModal(); });
-                document.getElementById('goalModal').addEventListener('click', function(e) { if (e.target === this) UI
-                        .closeGoalModal(); });
+                document.getElementById('goalModal').addEventListener('click', function(e) { if (e.target === this) UI.closeGoalModal(); });
 
                 document.getElementById('noteModalClose').addEventListener('click', () => { UI.closeNoteModal(); });
                 document.getElementById('noteModalCancel').addEventListener('click', () => { UI.closeNoteModal(); });
-                document.getElementById('noteModal').addEventListener('click', function(e) { if (e.target === this) UI
-                        .closeNoteModal(); });
+                document.getElementById('noteModal').addEventListener('click', function(e) { if (e.target === this) UI.closeNoteModal(); });
 
                 document.getElementById('noteViewClose').addEventListener('click', () => { UI.closeNoteView(); });
                 document.getElementById('noteViewCloseBtn').addEventListener('click', () => { UI.closeNoteView(); });
-                document.getElementById('noteViewModal').addEventListener('click', function(e) { if (e.target === this)
-                        UI.closeNoteView(); });
+                document.getElementById('noteViewModal').addEventListener('click', function(e) { if (e.target === this) UI.closeNoteView(); });
 
                 document.getElementById('photoViewClose').addEventListener('click', () => { UI.closePhotoView(); });
                 document.getElementById('photoViewCloseBtn').addEventListener('click', () => { UI.closePhotoView(); });
-                document.getElementById('photoViewModal').addEventListener('click', function(e) { if (e.target === this)
-                        UI.closePhotoView(); });
+                document.getElementById('photoViewModal').addEventListener('click', function(e) { if (e.target === this) UI.closePhotoView(); });
 
                 document.getElementById('photoDescClose').addEventListener('click', function() {
                     document.getElementById('photoDescModal').classList.remove('open');
@@ -2210,12 +2140,9 @@
                     if (e.target === this) this.classList.remove('open');
                 });
 
-                document.getElementById('settingsModalClose').addEventListener('click', () => { document.getElementById(
-                        'settingsModal').classList.remove('open'); });
-                document.getElementById('settingsCloseBtn').addEventListener('click', () => { document.getElementById(
-                        'settingsModal').classList.remove('open'); });
-                document.getElementById('settingsModal').addEventListener('click', function(e) { if (e.target === this)
-                        document.getElementById('settingsModal').classList.remove('open'); });
+                document.getElementById('settingsModalClose').addEventListener('click', () => { document.getElementById('settingsModal').classList.remove('open'); });
+                document.getElementById('settingsCloseBtn').addEventListener('click', () => { document.getElementById('settingsModal').classList.remove('open'); });
+                document.getElementById('settingsModal').addEventListener('click', function(e) { if (e.target === this) document.getElementById('settingsModal').classList.remove('open'); });
 
                 document.getElementById('settingsDarkMode').addEventListener('change', function() {
                     UI.toggleDarkMode();
@@ -2224,8 +2151,7 @@
                 document.querySelectorAll('#settingsModal [data-theme]').forEach(chip => {
                     chip.addEventListener('click', function() {
                         const theme = this.dataset.theme;
-                        document.body.className = document.body.className.split(' ').filter(c => !c.startsWith(
-                            'theme-')).join('');
+                        document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('theme-')).join('');
                         if (theme !== 'default') document.body.classList.add('theme-' + theme);
                         localStorage.setItem('skillquest_theme', theme);
                         UI.toast('🎨 Тема: ' + theme, 'info', 1500);
@@ -2290,32 +2216,15 @@
                 const container = document.getElementById('mainContent');
                 if (!container) return;
                 switch (this._currentPage) {
-                    case 'home':
-                        this.renderHome(container);
-                        break;
-                    case 'calendar':
-                        this.renderCalendar(container);
-                        break;
-                    case 'journals':
-                        this.renderJournals(container);
-                        break;
-                    case 'goals':
-                        this.renderGoals(container);
-                        break;
-                    case 'profile':
-                        this.renderProfile(container);
-                        break;
-                    case 'notes':
-                        this.renderNotes(container);
-                        break;
-                    case 'gallery':
-                        this.renderGallery(container);
-                        break;
-                    case 'settings':
-                        this.renderSettings(container);
-                        break;
-                    default:
-                        container.innerHTML = '<div class="card"><p>Страница в разработке</p></div>';
+                    case 'home': this.renderHome(container); break;
+                    case 'calendar': this.renderCalendar(container); break;
+                    case 'journals': this.renderJournals(container); break;
+                    case 'goals': this.renderGoals(container); break;
+                    case 'profile': this.renderProfile(container); break;
+                    case 'notes': this.renderNotes(container); break;
+                    case 'gallery': this.renderGallery(container); break;
+                    case 'settings': this.renderSettings(container); break;
+                    default: container.innerHTML = '<div class="card"><p>Страница в разработке</p></div>';
                 }
             },
 
@@ -2335,8 +2244,7 @@
                 const plannedToday = todayTasks.length;
                 const missedToday = todayTasks.filter(t => Data.getTaskStatus(t, today) === 'missed').length;
 
-                let expWeek = 0,
-                    expMonth = 0;
+                let expWeek = 0, expMonth = 0;
                 (data.tasks || []).forEach(task => {
                     task.completedDates.forEach(dateStr => {
                         const d = new Date(dateStr);
@@ -2385,7 +2293,7 @@
                         ${topJournals.map(journal => {
                             const progress = Math.min((journal.exp / 1000) * 100, 100);
                             return `<div class="journal-card-mini" data-journal="${journal.name}">
-                                <div class="journal-icon">${escapeHtml(journal.icon || '📌')}</div>
+                                <div class="journal-icon">${journal.icon || '📌'}</div>
                                 <div class="journal-name">${escapeHtml(journal.name.charAt(0).toUpperCase() + journal.name.slice(1))}</div>
                                 <div class="journal-exp">${Math.floor(journal.exp)} XP</div>
                                 <div class="journal-progress"><div class="fill" style="width: ${progress}%;"></div></div>
@@ -2430,7 +2338,7 @@
                             const tasks = Data.tasks.filter(t => t.journal === j.name);
                             const progress = Math.min((j.exp / 1000) * 100, 100);
                             return `<div class="journal-card-mini" data-journal="${j.name}">
-                                <div class="journal-icon" style="font-size:40px;">${escapeHtml(j.icon || '📌')}</div>
+                                <div class="journal-icon" style="font-size:40px;">${j.icon || '📌'}</div>
                                 <div class="journal-name">${escapeHtml(j.name.charAt(0).toUpperCase() + j.name.slice(1))}</div>
                                 <div class="journal-exp">${Math.floor(j.exp)} XP</div>
                                 <div class="journal-progress"><div class="fill" style="width:${progress}%;"></div></div>
@@ -2458,8 +2366,7 @@
 
             renderJournalTasks(container, journalName) {
                 const journal = Data.getJournalByName(journalName);
-                if (!journal) { this._journalTasksBack = false;
-                    this.renderJournals(container); return; }
+                if (!journal) { this._journalTasksBack = false; this.renderJournals(container); return; }
                 const tasks = Data.tasks.filter(t => t.journal === journalName);
                 container.innerHTML = `
                     <div class="section-header">
@@ -2485,7 +2392,7 @@
                                     actions = `<div class="task-actions"><button class="btn btn-sm ${btnClass} complete-btn" data-task-id="${task.id}" data-date="${today}">${btnText}</button></div>`;
                                 }
                                 return `<div class="task-item" data-task-id="${task.id}">
-                                    <div class="task-icon">${escapeHtml(icon)}</div>
+                                    <div class="task-icon">${icon}</div>
                                     <div class="task-info">
                                         <div class="task-title">${escapeHtml(task.title)}</div>
                                         <div class="task-meta"><span>${escapeHtml(task.time || '—')}</span><span>${task.duration || 0} мин</span><span>${escapeHtml(task.journal)}</span></div>
@@ -2531,10 +2438,7 @@
                 const tasks = Data.tasks;
                 if (tasks.length === 0) {
                     container.innerHTML = `
-                        <div class="section-header">
-                            <h2>📋 Все задачи</h2>
-                            <button class="btn btn-sm btn-secondary" id="backToJournalsFromAll">← Назад</button>
-                        </div>
+                        <div class="section-header"><h2>📋 Все задачи</h2><button class="btn btn-sm btn-secondary" id="backToJournalsFromAll">← Назад</button></div>
                         <div class="tasks-empty"><div class="empty-icon">📭</div><p>Задач пока нет</p></div>
                     `;
                 } else {
@@ -2542,13 +2446,10 @@
                     let filterJournal = 'all';
                     let filterStatus = 'all';
                     container.innerHTML = `
-                        <div class="section-header">
-                            <h2>📋 Все задачи</h2>
-                            <button class="btn btn-sm btn-secondary" id="backToJournalsFromAll">← Назад</button>
-                        </div>
+                        <div class="section-header"><h2>📋 Все задачи</h2><button class="btn btn-sm btn-secondary" id="backToJournalsFromAll">← Назад</button></div>
                         <div class="all-task-filters" id="journalFiltersAll">
                             <span class="chip active" data-filter-journal="all">Все журналы</span>
-                            ${journals.map(j => `<span class="chip" data-filter-journal="${j.name}">${escapeHtml(j.icon)} ${escapeHtml(j.name)}</span>`).join('')}
+                            ${journals.map(j => `<span class="chip" data-filter-journal="${j.name}">${j.icon} ${j.name}</span>`).join('')}
                         </div>
                         <div class="all-task-filters" id="statusFiltersAll">
                             <span class="chip active" data-filter-status="all">Все статусы</span>
@@ -2572,7 +2473,7 @@
                                 return `
                                     <div class="all-task-item" data-task-id="${task.id}" data-journal="${task.journal}" data-status="${status}">
                                         <div class="task-info-text">
-                                            <div style="font-weight:500;">${escapeHtml(icon)} ${escapeHtml(task.title)}</div>
+                                            <div style="font-weight:500;">${icon} ${escapeHtml(task.title)}</div>
                                             <div class="task-meta-text">${escapeHtml(task.journal)} · ${escapeHtml(task.time || '—')} · ${task.duration || 0} мин · Обновлено: ${UI.formatDate(task.updatedAt || task.createdAt, 'datetime')}</div>
                                         </div>
                                         <span class="task-status ${status}">${statusLabels[status] || status}</span>
@@ -2600,8 +2501,7 @@
                     };
                     container.querySelectorAll('#journalFiltersAll .chip').forEach(chip => {
                         chip.addEventListener('click', function() {
-                            container.querySelectorAll('#journalFiltersAll .chip').forEach(c => c.classList
-                                .remove('active'));
+                            container.querySelectorAll('#journalFiltersAll .chip').forEach(c => c.classList.remove('active'));
                             this.classList.add('active');
                             filterJournal = this.dataset.filterJournal;
                             applyAllTasksFilter();
@@ -2609,8 +2509,7 @@
                     });
                     container.querySelectorAll('#statusFiltersAll .chip').forEach(chip => {
                         chip.addEventListener('click', function() {
-                            container.querySelectorAll('#statusFiltersAll .chip').forEach(c => c.classList
-                                .remove('active'));
+                            container.querySelectorAll('#statusFiltersAll .chip').forEach(c => c.classList.remove('active'));
                             this.classList.add('active');
                             filterStatus = this.dataset.filterStatus;
                             applyAllTasksFilter();
@@ -2652,20 +2551,17 @@
 
                 const dayTasks = filteredTasks.filter(task => {
                     const dates = Data.getDateRange(task.startDate || task.date, task.endDate || task.date);
-                    return dates.includes(selectedStr) && (task.daysOfWeek.length === 0 || task.daysOfWeek.includes(
-                        new Date(selectedStr).getDay()));
+                    return dates.includes(selectedStr) && (task.daysOfWeek.length === 0 || task.daysOfWeek.includes(new Date(selectedStr).getDay()));
                 });
 
                 let calendarHTML = '';
                 let dayDetailHTML = '';
 
                 if (view === 'day') {
-                    calendarHTML =
-                        `<div class="calendar-grid week">${this._renderDayView(baseDate, filteredTasks, journals)}</div>`;
+                    calendarHTML = `<div class="calendar-grid week">${this._renderDayView(baseDate, filteredTasks, journals)}</div>`;
                 } else if (view === 'week') {
                     const week = Calendar.getWeekData(baseDate);
-                    calendarHTML =
-                        `<div class="calendar-grid week">${week.map(d => this._renderDayCell(d, filteredTasks, journals, selectedDate)).join('')}</div>`;
+                    calendarHTML = `<div class="calendar-grid week">${week.map(d => this._renderDayCell(d, filteredTasks, journals, selectedDate)).join('')}</div>`;
                 } else if (view === 'month') {
                     const year = baseDate.getFullYear();
                     const month = baseDate.getMonth();
@@ -2674,14 +2570,12 @@
                     calendarHTML = weekDays.map(d => `<div class="day-header">${d}</div>`).join('') +
                         weeks.flat().map(cell => {
                             const date = new Date(cell.year, cell.month, cell.day);
-                            return this._renderDayCell(date, filteredTasks, journals, selectedDate, cell
-                            .isOtherMonth);
+                            return this._renderDayCell(date, filteredTasks, journals, selectedDate, cell.isOtherMonth);
                         }).join('');
                 } else if (view === 'year') {
                     const year = baseDate.getFullYear();
                     const months = Calendar.getYearData(year);
-                    calendarHTML =
-                    `<div class="year-grid">${months.map((m, idx) => {
+                    calendarHTML = `<div class="year-grid">${months.map((m, idx) => {
                         const hasTasks = filteredTasks.some(task => {
                             const start = new Date(task.startDate || task.date);
                             const end = new Date(task.endDate || task.date);
@@ -2692,8 +2586,7 @@
                 }
 
                 if (dayTasks.length > 0) {
-                    dayDetailHTML =
-                    `<div class="calendar-day-detail"><div class="day-title">📋 ${selectedDate.toLocaleDateString('ru-RU', { weekday:'long', day:'numeric', month:'long' })}</div><div class="day-tasks">${dayTasks.map(task => {
+                    dayDetailHTML = `<div class="calendar-day-detail"><div class="day-title">📋 ${selectedDate.toLocaleDateString('ru-RU', { weekday:'long', day:'numeric', month:'long' })}</div><div class="day-tasks">${dayTasks.map(task => {
                         const status = Data.getTaskStatus(task, selectedStr);
                         const journal = Data.getJournalByName(task.journal);
                         const icon = journal ? journal.icon : '📌';
@@ -2705,7 +2598,7 @@
                             actions = `<div class="task-actions"><button class="btn btn-sm ${btnClass} complete-btn" data-task-id="${task.id}" data-date="${selectedStr}">${btnText}</button></div>`;
                         }
                         return `<div class="task-item" data-task-id="${task.id}">
-                            <div class="task-icon">${escapeHtml(icon)}</div>
+                            <div class="task-icon">${icon}</div>
                             <div class="task-info"><div class="task-title">${escapeHtml(task.title)}</div><div class="task-meta"><span>${escapeHtml(task.time || '—')}</span><span>${task.duration || 0} мин</span><span>${escapeHtml(task.journal)}</span></div></div>
                             <span class="task-status ${status}">${statusLabels[status] || status}</span>
                             ${actions}
@@ -2731,7 +2624,7 @@
                         <div class="calendar-filters" id="calendarFilters">
                             ${journals.map(j => {
                                 const isActive = activeFilters.includes(j.name);
-                                return `<span class="chip ${isActive ? 'active' : ''}" data-filter="${j.name}">${escapeHtml(j.icon)} ${escapeHtml(j.name)}</span>`;
+                                return `<span class="chip ${isActive ? 'active' : ''}" data-filter="${j.name}">${j.icon} ${j.name}</span>`;
                             }).join('')}
                             <span class="chip" data-filter="all" style="background:var(--primary);color:#fff;">Все</span>
                         </div>
@@ -2799,8 +2692,7 @@
                         container.querySelectorAll('#calendarFilters .chip[data-filter]').forEach(c => {
                             const f = c.dataset.filter;
                             if (f === 'all') {
-                                c.classList.toggle('active', Calendar._activeFilters.length === Data
-                                    .journals.length);
+                                c.classList.toggle('active', Calendar._activeFilters.length === Data.journals.length);
                             } else {
                                 c.classList.toggle('active', Calendar._activeFilters.includes(f));
                             }
@@ -2815,8 +2707,7 @@
                 const dateStr = date.toISOString().split('T')[0];
                 const dayTasks = tasks.filter(task => {
                     const dates = Data.getDateRange(task.startDate || task.date, task.endDate || task.date);
-                    return dates.includes(dateStr) && (task.daysOfWeek.length === 0 || task.daysOfWeek.includes(
-                        new Date(dateStr).getDay()));
+                    return dates.includes(dateStr) && (task.daysOfWeek.length === 0 || task.daysOfWeek.includes(new Date(dateStr).getDay()));
                 });
                 const isToday = Data.isSameDay(date, new Date());
                 const isSelected = Data.isSameDay(date, selectedDate);
@@ -2826,7 +2717,7 @@
                     if (status !== 'missed') badgeCounts[task.journal] = (badgeCounts[task.journal] || 0) + 1;
                 });
                 const badgeHTML = Object.entries(badgeCounts).map(([name, count]) =>
-                    `<span class="badge">${escapeHtml(name)}:${count}</span>`).join('');
+                    `<span class="badge">${name}:${count}</span>`).join('');
                 let cls = 'calendar-cell';
                 if (isToday) cls += ' today';
                 if (isSelected) cls += ' selected';
@@ -2842,8 +2733,7 @@
                 const dateStr = date.toISOString().split('T')[0];
                 const dayTasks = tasks.filter(task => {
                     const dates = Data.getDateRange(task.startDate || task.date, task.endDate || task.date);
-                    return dates.includes(dateStr) && (task.daysOfWeek.length === 0 || task.daysOfWeek.includes(
-                        new Date(dateStr).getDay()));
+                    return dates.includes(dateStr) && (task.daysOfWeek.length === 0 || task.daysOfWeek.includes(new Date(dateStr).getDay()));
                 });
                 if (dayTasks.length === 0) return '<div style="grid-column:span 7;text-align:center;padding:20px;color:var(--text-secondary);">Нет задач на этот день</div>';
                 return dayTasks.map(task => {
@@ -2858,7 +2748,7 @@
                         actions = `<div class="task-actions"><button class="btn btn-sm ${btnClass} complete-btn" data-task-id="${task.id}" data-date="${dateStr}">${btnText}</button></div>`;
                     }
                     return `<div class="task-item" data-task-id="${task.id}" style="grid-column:span 7;">
-                        <div class="task-icon">${escapeHtml(icon)}</div>
+                        <div class="task-icon">${icon}</div>
                         <div class="task-info"><div class="task-title">${escapeHtml(task.title)}</div><div class="task-meta"><span>${escapeHtml(task.time || '—')}</span><span>${task.duration || 0} мин</span><span>${escapeHtml(task.journal)}</span></div></div>
                         <span class="task-status ${status}">${statusLabels[status] || status}</span>
                         ${actions}
@@ -2869,11 +2759,9 @@
             // ================== ЦЕЛИ ==================
             renderGoals(container) {
                 const goals = Data.goals;
-                container.innerHTML =
-                    `<div class="section-header"><h2>Цели</h2><button class="btn" id="addGoalBtn">+ Новая цель</button></div>`;
+                container.innerHTML = `<div class="section-header"><h2>Цели</h2><button class="btn" id="addGoalBtn">+ Новая цель</button></div>`;
                 if (goals.length === 0) {
-                    container.innerHTML +=
-                        `<div class="tasks-empty"><div class="empty-icon">🎯</div><p>У вас пока нет целей</p><p style="color:var(--text-secondary)">Создайте первую цель!</p></div>`;
+                    container.innerHTML += `<div class="tasks-empty"><div class="empty-icon">🎯</div><p>У вас пока нет целей</p><p style="color:var(--text-secondary)">Создайте первую цель!</p></div>`;
                 } else {
                     goals.forEach(goal => {
                         const tasks = Data.tasks.filter(t => t.goalId === goal.id);
@@ -2884,8 +2772,7 @@
                             return acc + Data.getDateRange(start, end).length;
                         }, 0);
                         const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-                        const checkpoints = goal.checkpoints ? goal.checkpoints.map(d => UI.formatDate(d)).join(
-                            ', ') : '—';
+                        const checkpoints = goal.checkpoints ? goal.checkpoints.map(d => UI.formatDate(d)).join(', ') : '—';
                         container.innerHTML += `
                             <div class="goal-card" data-goal-id="${goal.id}">
                                 <div class="goal-header">
@@ -2924,8 +2811,7 @@
                         if (e.target.closest('button')) return;
                         const id = this.dataset.goalId;
                         const goal = Data.goals.find(g => g.id === id);
-                        if (goal) UI.toast('🎯 ' + escapeHtml(goal.title) + ' — ' + (goal.achieved ? 'Достигнута' : 'В процессе'),
-                            'info');
+                        if (goal) UI.toast('🎯 ' + escapeHtml(goal.title) + ' — ' + (goal.achieved ? 'Достигнута' : 'В процессе'), 'info');
                     });
                 });
             },
@@ -2950,7 +2836,7 @@
                 container.innerHTML = `
                     <div class="card" style="text-align:center;">
                         <div class="avatar avatar-xl" style="margin:0 auto;width:88px;height:88px;font-size:36px;position:relative;">
-                            ${profile.avatar ? `<img src="${escapeHtml(profile.avatar)}" alt="avatar">` : `<span>${escapeHtml(profile.name.charAt(0).toUpperCase())}</span>`}
+                            ${profile.avatar ? `<img src="${profile.avatar}" alt="avatar">` : `<span>${escapeHtml(profile.name.charAt(0).toUpperCase())}</span>`}
                             <input type="file" id="profileAvatarInput" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
                         </div>
                         <h2 style="font-size:24px;margin-top:12px;">${escapeHtml(profile.name)}</h2>
@@ -2993,9 +2879,7 @@
                             <button class="btn btn-sm" id="addWeightBtn">+ Добавить</button>
                         </div>
                         <div style="max-height:200px;overflow-y:auto;">
-                            ${weightLog.length === 0 ? `
-                                <div style="text-align:center;padding:20px;color:var(--text-secondary);">Нет записей</div>
-                            ` : weightLog.slice(0, 7).map(w => `
+                            ${weightLog.length === 0 ? `<div style="text-align:center;padding:20px;color:var(--text-secondary);">Нет записей</div>` : weightLog.slice(0, 7).map(w => `
                                 <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--card-border);">
                                     <span>${UI.formatDate(w.date, 'short')}</span>
                                     <span><strong>${w.value} кг</strong></span>
@@ -3010,7 +2894,7 @@
                             ${stats.map(s => `
                                 <div style="background:var(--card-border);padding:8px;border-radius:var(--radius-sm);">
                                     <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:500;">
-                                        <span>${escapeHtml(s.icon)} ${escapeHtml(s.name.charAt(0).toUpperCase() + s.name.slice(1))}</span>
+                                        <span>${s.icon} ${escapeHtml(s.name.charAt(0).toUpperCase() + s.name.slice(1))}</span>
                                         <span>${s.total} задач</span>
                                     </div>
                                     <div style="display:flex;gap:8px;font-size:12px;color:var(--text-secondary);margin-top:4px;">
@@ -3099,11 +2983,9 @@
             // ================== ЗАМЕТКИ ==================
             renderNotes(container) {
                 const notes = Data.notes;
-                container.innerHTML =
-                    `<div class="section-header"><h2>Заметки</h2><button class="btn" id="addNoteBtn">+ Новая заметка</button></div>`;
+                container.innerHTML = `<div class="section-header"><h2>Заметки</h2><button class="btn" id="addNoteBtn">+ Новая заметка</button></div>`;
                 if (notes.length === 0) {
-                    container.innerHTML +=
-                        `<div class="tasks-empty"><div class="empty-icon">📝</div><p>Заметок пока нет</p><p style="color:var(--text-secondary)">Создайте первую заметку</p></div>`;
+                    container.innerHTML += `<div class="tasks-empty"><div class="empty-icon">📝</div><p>Заметок пока нет</p><p style="color:var(--text-secondary)">Создайте первую заметку</p></div>`;
                 } else {
                     notes.slice().reverse().forEach(note => {
                         const task = Data.tasks.find(t => t.id === note.taskId);
@@ -3147,17 +3029,15 @@
             // ================== ГАЛЕРЕЯ ==================
             renderGallery(container) {
                 const photos = Data.photos;
-                container.innerHTML =
-                    `<div class="section-header"><h2>Галерея</h2><button class="btn" id="addPhotoBtn">+ Добавить фото</button></div>`;
+                container.innerHTML = `<div class="section-header"><h2>Галерея</h2><button class="btn" id="addPhotoBtn">+ Добавить фото</button></div>`;
                 if (photos.length === 0) {
-                    container.innerHTML +=
-                        `<div class="tasks-empty"><div class="empty-icon">🖼</div><p>Фото пока нет</p><p style="color:var(--text-secondary)">Добавьте первое фото</p></div>`;
+                    container.innerHTML += `<div class="tasks-empty"><div class="empty-icon">🖼</div><p>Фото пока нет</p><p style="color:var(--text-secondary)">Добавьте первое фото</p></div>`;
                 } else {
                     container.innerHTML += `<div class="photo-grid">`;
                     photos.slice().reverse().forEach(photo => {
                         container.innerHTML += `
                             <div class="photo-item" data-photo-id="${photo.id}">
-                                <img src="${escapeHtml(photo.data)}" alt="Фото">
+                                <img src="${photo.data}" alt="Фото">
                                 <div class="photo-meta">${escapeHtml(photo.note || '')} ${UI.formatDate(photo.date, 'short')}</div>
                                 <button class="photo-delete" data-photo-id="${photo.id}">✕</button>
                             </div>
@@ -3202,15 +3082,7 @@
                                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                                     ${['default','jade','ruby','sapphire','amber','coral','amethyst'].map(t => {
                                         const isActive = currentTheme === t;
-                                        const colors = {
-                                            default: 'var(--card)',
-                                            jade: '#00b894',
-                                            ruby: '#e17055',
-                                            sapphire: '#0984e3',
-                                            amber: '#fdcb6e',
-                                            coral: '#e17055',
-                                            amethyst: '#a29bfe'
-                                        };
+                                        const colors = { default: 'var(--card)', jade: '#00b894', ruby: '#e17055', sapphire: '#0984e3', amber: '#fdcb6e', coral: '#e17055', amethyst: '#a29bfe' };
                                         const textColor = t === 'amber' ? '#1a1a2e' : '#fff';
                                         return `<span class="chip ${isActive ? 'active' : ''}" data-theme="${t}" style="background:${colors[t]}; color:${textColor}; border-color:${isActive ? 'var(--primary)' : 'transparent'};">${t.charAt(0).toUpperCase() + t.slice(1)}</span>`;
                                     }).join('')}
@@ -3251,8 +3123,7 @@
                 container.querySelectorAll('[data-theme]').forEach(chip => {
                     chip.addEventListener('click', function() {
                         const theme = this.dataset.theme;
-                        document.body.className = document.body.className.split(' ').filter(c => !c.startsWith(
-                            'theme-')).join('');
+                        document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('theme-')).join('');
                         if (theme !== 'default') document.body.classList.add('theme-' + theme);
                         localStorage.setItem('skillquest_theme', theme);
                         UI.toast('🎨 Тема: ' + theme, 'info', 1500);
