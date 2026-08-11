@@ -1847,6 +1847,123 @@ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
 })();
 </script>
 
+
+<style id="sq-final-hardening-ui">
+  .sq-task-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .sq-task-toolbar .input{flex:1 1 180px;min-width:140px}
+  .sq-gallery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .sq-gallery-card{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:var(--surface2)}
+  .sq-gallery-card img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+  .sq-gallery-card figcaption{padding:9px;font-size:11px;color:var(--muted)}
+  .sq-gallery-empty{padding:32px;text-align:center;color:var(--muted)}
+  @media(max-width:700px){.sq-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<script id="sq-final-hardening">
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const safe=window.SQ&&SQ.escapeAttr?SQ.escapeAttr:esc;
+
+  // Ensure every screen referenced by the UI actually exists.
+  function ensurePage(id){
+    if(!document.getElementById(id)){
+      const el=document.createElement("section");el.id=id;el.className="page";document.querySelector(".app").appendChild(el);
+    }
+  }
+  ["tasks","statistics","gallery","weight","profile"].forEach(ensurePage);
+
+  // Task manager: full CRUD + search/filtering, using the existing data model.
+  App.tasks=function(){
+    const f=this.taskFilters||(this.taskFilters={status:"all",journal:"",goal:"",search:""});
+    const journals=Data.journals.map(j=>`<option value="${safe(j.name)}" ${f.journal===j.name?"selected":""}>${j.icon} ${esc(j.name)}</option>`).join("");
+    const goals=Data.goals.map(g=>`<option value="${safe(g.id)}" ${f.goal===g.id?"selected":""}>${esc(g.title)}</option>`).join("");
+    document.getElementById("tasks").innerHTML=`
+      <div class="section-head"><div><h2>Задачи</h2><p>Поиск, фильтры, повторения, выполнение и редактирование</p></div><button class="btn" onclick="App.openTask()">+ Задача</button></div>
+      <div class="card">
+        <div class="sq-task-toolbar">
+          <input class="input" id="sqTaskSearch" placeholder="Поиск по задачам…" value="${esc(f.search||"")}">
+          <select class="input" id="sqTaskStatus"><option value="all">Все статусы</option><option value="pending">В плане</option><option value="done">Выполнено</option><option value="missed">Пропущено</option></select>
+          <select class="input" id="sqTaskJournal"><option value="">Все журналы</option>${journals}</select>
+          <select class="input" id="sqTaskGoal"><option value="">Все цели</option>${goals}</select>
+        </div>
+        <div id="sqTaskResults"></div>
+      </div>`;
+    $("#sqTaskStatus").value=f.status||"all";
+    $("#sqTaskSearch").oninput=()=>{f.search=$("#sqTaskSearch").value;this.renderTaskResults()};
+    $("#sqTaskStatus").onchange=()=>{f.status=$("#sqTaskStatus").value;this.renderTaskResults()};
+    $("#sqTaskJournal").onchange=()=>{f.journal=$("#sqTaskJournal").value;this.renderTaskResults()};
+    $("#sqTaskGoal").onchange=()=>{f.goal=$("#sqTaskGoal").value;this.renderTaskResults()};
+    this.renderTaskResults();
+  };
+  App.renderTaskResults=function(){
+    const f=this.taskFilters||{};
+    const today=SQ.today();
+    let rows=Data.tasks.slice();
+    if(f.search)rows=rows.filter(t=>(`${t.title} ${t.note||""} ${t.journal}`).toLowerCase().includes(f.search.toLowerCase()));
+    if(f.journal)rows=rows.filter(t=>t.journal===f.journal);
+    if(f.goal)rows=rows.filter(t=>t.goalId===f.goal);
+    if(f.status&&f.status!=="all")rows=rows.filter(t=>Data.status(t,Data.isScheduled(t,today)?today:(t.startDate||today))===f.status || Data.occurrences(t).some(d=>Data.status(t,d)===f.status));
+    rows.sort((a,b)=>(a.startDate||"").localeCompare(b.startDate||""));
+    const box=$("#sqTaskResults"); if(!box)return;
+    if(!rows.length){box.innerHTML='<div class="empty"><strong>Задач не найдено</strong>Измени фильтры или создай новую задачу.</div>';return}
+    box.innerHTML=rows.map(t=>this.taskHTML(t,Data.isScheduled(t,today)?today:(t.startDate||today))).join("");
+    this.bindDynamic();
+  };
+
+  // Statistics is a real route, not just an alias name.
+  App.statistics=function(){this.analytics();document.getElementById("statistics").innerHTML=document.getElementById("analytics").innerHTML};
+
+  // Gallery aggregates all achievement photos stored on goals.
+  App.gallery=function(){
+    const items=Data.goals.flatMap(g=>(g.photos||[]).map(ph=>({g,ph})));
+    document.getElementById("gallery").innerHTML=`<div class="section-head"><div><h2>Галерея</h2><p>Фото достижений из твоих целей</p></div><button class="btn secondary" onclick="App.go('goals')">Открыть цели</button></div>`+
+      (items.length?`<div class="sq-gallery-grid">${items.map(({g,ph})=>`<figure class="sq-gallery-card"><img src="${safe(ph.data)}" alt="${esc(ph.caption||g.title)}"><figcaption><b>${esc(g.title)}</b>${ph.caption?`<br>${esc(ph.caption)}`:""}</figcaption></figure>`).join("")}</div>`:'<div class="card sq-gallery-empty"><strong>Галерея пока пуста</strong><br>Добавь фото в разделе «Цели» — они появятся здесь автоматически.</div>');
+  };
+
+  // Make navigation resilient: unknown routes no longer produce a blank screen.
+  const originalGo=App.go.bind(App);
+  App.go=function(page){
+    ensurePage(page);
+    const allowed=["home","analytics","statistics","calendar","journals","goals","notes","settings","weight","profile","tasks","gallery"];
+    if(!allowed.includes(page))page="home";
+    originalGo(page);
+  };
+  const originalRenderPage=App.renderPage.bind(App);
+  App.renderPage=function(){
+    const fn={home:this.home,analytics:this.analytics,statistics:this.statistics,calendar:this.calendar,journals:this.journals,goals:this.goals,notes:this.notes,settings:this.settings,weight:this.weight,profile:this.profile,tasks:this.tasks,gallery:this.gallery}[this.page];
+    if(typeof fn==="function")fn.call(this);else this.page="home",this.home();
+    if(typeof this.bindDynamic==="function")this.bindDynamic();
+    if(typeof installBottomNav==="function")installBottomNav();
+  };
+
+  // Fix the weight preview bug: the model uses `weight`, not `value`.
+  const oldSettings=App.settings.bind(App);
+  App.settings=function(){
+    oldSettings();
+    const box=$("#settings");
+    if(!box)return;
+    box.querySelectorAll(".weight-profile-card").forEach(card=>{
+      const btn=card.querySelector("button");
+      const w=Data.weightLog.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
+      const stats=Data.weightStats("all");
+      const text=card.querySelector("strong");
+      const sub=card.querySelectorAll(".subtle")[1];
+      if(text)text.textContent=w?`${Number(w.weight).toFixed(1)} кг`:"Нет измерений";
+      if(sub)sub.textContent=`Изменение: ${stats.change==null?"—":(stats.change>0?"+":"")+Number(stats.change).toFixed(1)+" кг"}`;
+      if(btn)btn.onclick=()=>App.go("weight");
+    });
+  };
+
+  // Close modal when tapping the backdrop and support Escape.
+  document.addEventListener("click",e=>{if(e.target.classList&&e.target.classList.contains("modal-bg"))e.target.classList.remove("open");});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal-bg.open,.screen-sheet.open").forEach(x=>x.classList.remove("open"));});
+
+  // Reinstall the five-item navigation after every render, but keep all screens reachable via Profile/Quick Access.
+  if(typeof installBottomNav==="function")installBottomNav();
+  setTimeout(()=>{if(App.page)App.go(App.page);},0);
+})();
+</script>
+
 </body>
 </html>
 
