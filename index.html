@@ -1730,3 +1730,121 @@ App.setScheme=function(name){setScheme(name);this.renderPage()};
 </script>
 </body>
 </html>
+
+<!-- SkillQuest Pro — restoration / access / QA hardening layer -->
+<style id="sq-restoration-ui">
+  .access-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .access-card{min-height:92px;border:1px solid var(--border);border-radius:17px;background:var(--surface2);color:var(--text);padding:12px;text-align:left;cursor:pointer;font-weight:800;transition:.16s;touch-action:manipulation}
+  .access-card:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--primary) 35%,var(--border))}
+  .access-card:active{transform:scale(.985)}
+  .access-card b{display:block;font-size:24px;margin-bottom:5px}.access-card small{display:block;color:var(--muted);font-weight:500;font-size:11px;line-height:1.25}
+  .gallery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .gallery-card{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface2);cursor:pointer}
+  .gallery-card img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+  .gallery-card figcaption{padding:9px;font-size:11px;color:var(--muted)}
+  .task-manager-list{display:grid;gap:6px}
+  .qa-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:800}
+  @media(max-width:900px){.access-grid{grid-template-columns:repeat(3,1fr)}.gallery-grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:600px){.access-grid{grid-template-columns:repeat(2,1fr)}.gallery-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+<script id="sq-restoration-behavior">
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const safe=s=>esc(String(s??""));
+
+  // Restore every secondary screen without touching the existing five-item bottom nav.
+  ["tasks","statistics","gallery"].forEach(id=>{
+    if(!document.getElementById(id)){
+      const sec=document.createElement("section");sec.id=id;sec.className="page";document.querySelector(".app").appendChild(sec);
+    }
+  });
+
+  // Gallery aggregates all achievement photos stored inside goals. Nothing is copied or replaced.
+  App.gallery=function(){
+    const items=[];
+    Data.goals.forEach(g=>(g.photos||[]).forEach(ph=>items.push({ph,g})));
+    items.sort((a,b)=>String(b.ph.createdAt||"").localeCompare(String(a.ph.createdAt||"")));
+    document.getElementById("gallery").innerHTML=`
+      <div class="section-head"><div><h2>Галерея достижений</h2><p>Все фотографии из целей и прогресса</p></div><span class="qa-badge">📷 ${items.length} фото</span></div>
+      <div class="card" style="margin-bottom:12px"><div class="toolbar"><select class="input" id="galleryGoalFilter" onchange="App.renderGalleryFiltered()"><option value="">Все цели</option>${Data.goals.map(g=>`<option value="${safe(g.id)}">🎯 ${safe(g.title)}</option>`).join("")}</select><select class="input" id="galleryJournalFilter" onchange="App.renderGalleryFiltered()"><option value="">Все журналы</option>${Data.journals.map(j=>`<option value="${safe(j.name)}">${j.icon} ${safe(j.name)}</option>`).join("")}</select></div></div>
+      <div id="galleryResults"></div>`;
+    this.renderGalleryFiltered();
+  };
+  App.renderGalleryFiltered=function(){
+    const box=$("#galleryResults");if(!box)return;
+    const gid=$("#galleryGoalFilter")?.value||"",jn=$("#galleryJournalFilter")?.value||"";
+    const items=[];Data.goals.forEach(g=>(g.photos||[]).forEach(ph=>{if((!gid||g.id===gid)&&(!jn||g.journal===jn))items.push({ph,g})}));
+    items.sort((a,b)=>String(b.ph.createdAt||"").localeCompare(String(a.ph.createdAt||"")));
+    box.innerHTML=items.length?`<div class="gallery-grid">${items.map(({ph,g})=>{const j=g.journal?Data.journal(g.journal):null;return `<figure class="gallery-card" onclick="App.openGoalReader('${safe(g.id)}')"><img src="${safe(ph.data)}" alt="${safe(ph.caption||g.title)}"><figcaption><b>${safe(g.title)}</b><br>${j?j.icon+" "+safe(j.name):"Без журнала"}${ph.caption?`<br>${safe(ph.caption)}`:""}</figcaption></figure>`}).join("")}</div>`:`<div class="card empty"><strong>Галерея пока пуста</strong>Добавь фото в разделе «Цели» — они автоматически появятся здесь.</div>`;
+  };
+
+  // Restore a dedicated task manager with the existing CRUD/filter logic.
+  App.tasks=function(){
+    document.getElementById("tasks").innerHTML=`<div class="section-head"><div><h2>Задачи</h2><p>Поиск, фильтры, recurring, выполнение и редактирование</p></div><button class="btn" onclick="App.openTask()">+ Задача</button></div>${this.taskFiltersHTML()}<div class="card" id="taskFilterResults"></div>`;
+    this.renderTaskFiltered();
+  };
+
+  // Statistics is a stable access alias to the existing full analytics engine.
+  App.statistics=function(){this.analytics();document.getElementById("statistics").innerHTML=document.getElementById("analytics").innerHTML};
+
+  // Make navigation routes know about restored screens.
+  const oldRenderPage=App.renderPage;
+  App.renderPage=function(){
+    const fn={home:this.home,analytics:this.analytics,statistics:this.statistics,calendar:this.calendar,journals:this.journals,goals:this.goals,notes:this.notes,settings:this.settings,weight:this.weight,profile:this.profile,tasks:this.tasks,gallery:this.gallery}[this.page];
+    if(fn)fn.call(this);
+    this.bindDynamic();
+    if(typeof installBottomNav==="function")installBottomNav();
+  };
+
+  // Profile is the central launcher so no existing function becomes hidden again.
+  const oldProfile=App.profile;
+  App.profile=function(){
+    oldProfile.call(this);
+    const box=$("#profile");if(!box)return;
+    const old=box.querySelector(".sq-access-panel");if(old)old.remove();
+    const panel=document.createElement("div");panel.className="card sq-access-panel";panel.style.marginTop="12px";
+    panel.innerHTML=`<div class="section-head" style="margin-top:0"><div><h2>Все функции</h2><p>Все разделы SkillQuest доступны одним касанием</p></div></div><div class="access-grid">
+      <button class="access-card" onclick="App.go('tasks')"><b>✅</b>Задачи<small>CRUD, recurring, фильтры</small></button>
+      <button class="access-card" onclick="App.go('statistics')"><b>📊</b>Статистика<small>Аналитика и графики</small></button>
+      <button class="access-card" onclick="App.go('goals')"><b>🎯</b>Цели<small>Прогресс и достижения</small></button>
+      <button class="access-card" onclick="App.go('gallery')"><b>🖼️</b>Галерея<small>Фото достижений</small></button>
+      <button class="access-card" onclick="App.go('weight')"><b>⚖️</b>Вес<small>Журнал и график</small></button>
+      <button class="access-card" onclick="App.go('home')"><b>🏠</b>Главная<small>Сегодня и XP</small></button>
+      <button class="access-card" onclick="App.go('journals')"><b>📚</b>Журналы<small>Сферы и цвета</small></button>
+      <button class="access-card" onclick="App.go('notes')"><b>📝</b>Заметки<small>Поиск и reader</small></button>
+      <button class="access-card" onclick="App.go('calendar')"><b>📅</b>Календарь<small>День / Неделя / Месяц / Год</small></button>
+      <button class="access-card" onclick="App.go('settings')"><b>⚙️</b>Настройки<small>Темы, dark mode, данные</small></button>
+    </div>`;
+    box.appendChild(panel);
+  };
+
+  // The original goal form currently requires an already-created goal before adding a photo.
+  // Keep that behavior safe, but make the requirement explicit in the UI and preserve every photo.
+  const oldOpenGoal=App.openGoal;
+  App.openGoal=function(gid=null){
+    oldOpenGoal.call(this,gid);
+    const form=$("#goalForm");if(!form)return;
+    const hint=form.querySelector(".sq-photo-hint");if(hint)hint.remove();
+    const ph=form.querySelector("#gPhotoFile");
+    if(ph){
+      const h=document.createElement("div");h.className="subtle sq-photo-hint";h.textContent=gid?"Можно добавить несколько фото; подписи сохраняются вместе с целью.":"Сначала сохрани цель, затем открой её снова для добавления фотографий.";
+      ph.closest(".field")?.appendChild(h);
+      if(!gid)ph.disabled=true;
+    }
+  };
+
+  // Recalculate and validate legacy data once after all restoration hooks are installed.
+  try{
+    Data.migrate();
+    Data.recalcLevel();
+    Data.save();
+  }catch(e){console.warn("SkillQuest restoration migration skipped",e)}
+
+  // Keep the requested exact five bottom buttons and expose all secondary areas from Profile.
+  setTimeout(()=>{
+    if(typeof installBottomNav==="function")installBottomNav();
+    App.go(App.page||"profile");
+  },0);
+})();
+</script>
