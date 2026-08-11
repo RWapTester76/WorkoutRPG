@@ -965,5 +965,256 @@ App.render=function(){originalRenderHeader.call(this);const a=document.getElemen
 })();
 </script>
 
+
+<style id="sq-v3-style">
+:root{
+  --scheme-primary:#6d5dfc;--scheme-secondary:#8f83ff;
+  --journal-body:#22c55e;--journal-nutrition:#f59e0b;--journal-work:#64748b;--journal-study:#3b82f6;
+  --journal-hobby:#ec4899;--journal-travel:#06b6d4;--journal-money:#eab308;--journal-other:#8b5cf6;
+}
+html[data-scheme="ocean"]{--primary:#087ea4;--primary2:#18b6d9}
+html[data-scheme="forest"]{--primary:#16845a;--primary2:#43b581}
+html[data-scheme="sunset"]{--primary:#e15b35;--primary2:#f39b4a}
+html[data-scheme="rose"]{--primary:#c13b72;--primary2:#ef75a8}
+html[data-scheme="midnight"]{--primary:#4f8cff;--primary2:#7c5cff}
+html[data-scheme="gold"]{--primary:#a96f00;--primary2:#e0a92f}
+.scheme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.scheme-btn{padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);text-align:left;font-weight:800}
+.scheme-btn.active{outline:2px solid var(--primary);outline-offset:1px}
+.scheme-swatch{height:8px;border-radius:99px;margin-bottom:7px}
+.journal-card{border-left:5px solid var(--jcolor);background:linear-gradient(135deg,color-mix(in srgb,var(--jcolor) 9%,var(--surface)),var(--surface))}
+.journal-icon{background:color-mix(in srgb,var(--jcolor) 16%,var(--surface2))!important;color:var(--jcolor)}
+.journal .progress i{background:var(--jcolor)!important}
+.journal-chip{border:1px solid color-mix(in srgb,var(--jcolor) 35%,var(--border));background:color-mix(in srgb,var(--jcolor) 9%,var(--surface))}
+.note{cursor:pointer}
+.note-body{white-space:pre-wrap;line-height:1.7;font-size:14px;overflow-wrap:anywhere}
+.reader-title{font-size:24px;margin-bottom:7px}
+.reader-meta{color:var(--muted);font-size:12px;margin-bottom:18px}
+.goal-detail{display:grid;gap:16px}
+.goal-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.goal-photo{border:1px solid var(--border);border-radius:15px;overflow:hidden;background:var(--surface2)}
+.goal-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.goal-photo figcaption{padding:9px;font-size:12px;color:var(--muted)}
+.photo-editor{display:grid;grid-template-columns:120px 1fr auto;gap:8px;align-items:center}
+.photo-editor img{width:120px;height:80px;object-fit:cover;border-radius:10px}
+.cal-view-tabs{display:flex;gap:5px;padding:4px;background:var(--surface2);border-radius:13px;width:max-content}
+.cal-view-tabs button{padding:7px 11px;border-radius:9px;background:transparent;color:var(--muted);font-size:11px;font-weight:800}
+.cal-view-tabs button.active{background:var(--surface);color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.cal-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.cal-week-day{min-height:170px;border:1px solid var(--border);border-radius:14px;background:var(--surface2);padding:9px;cursor:pointer}
+.cal-week-day.today{outline:2px solid var(--primary)}
+.cal-task-mini{font-size:11px;padding:5px 6px;border-radius:8px;margin-top:5px;background:var(--surface);border-left:3px solid var(--jcolor);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-day-list{display:grid;gap:8px}
+.year-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.year-month{padding:12px;border:1px solid var(--border);border-radius:15px;background:var(--surface2);cursor:pointer}
+.year-month-head{display:flex;justify-content:space-between;font-weight:800;margin-bottom:8px}
+.mini-month{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.mini-month i{height:8px;border-radius:3px;background:var(--border)}
+.mini-month i.has{background:var(--primary)}
+.goal-filter-row,.note-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.avatar-btn img{display:block}
+@media(max-width:700px){.scheme-grid{grid-template-columns:repeat(2,1fr)}.goal-photo-grid{grid-template-columns:repeat(2,1fr)}.cal-week{overflow-x:auto;grid-template-columns:repeat(7,150px)}.year-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.year-grid{grid-template-columns:1fr}.photo-editor{grid-template-columns:80px 1fr}.photo-editor img{width:80px;height:65px}.cal-week-day{min-height:150px}}
+</style>
+<script id="sq-v3">
+(function(){
+"use strict";
+const SCHEMES=[
+  ["violet","Violet","#6d5dfc","#8f83ff"],["ocean","Ocean","#087ea4","#18b6d9"],
+  ["forest","Forest","#16845a","#43b581"],["sunset","Sunset","#e15b35","#f39b4a"],
+  ["rose","Rose","#c13b72","#ef75a8"],["midnight","Midnight","#4f8cff","#7c5cff"],["gold","Gold","#a96f00","#e0a92f"]
+];
+const JCOLORS={тело:"#22c55e",питание:"#f59e0b",дела:"#64748b",учеба:"#3b82f6",хобби:"#ec4899",путешествия:"#06b6d4",долги:"#eab308",другое:"#8b5cf6"};
+const JOURNAL_DEFAULTS={тело:"#22c55e",питание:"#f59e0b",дела:"#64748b",учеба:"#3b82f6",хобби:"#ec4899",путешествия:"#06b6d4",долги:"#eab308",другое:"#8b5cf6"};
+const jcolor=n=>(Data.journal(n)?.color||JCOLORS[n]||"#8b5cf6");
+const oldMigrate=Data.migrate.bind(Data);
+Data.migrate=function(){
+  oldMigrate();
+  this.state.journals=this.state.journals.map((j,i)=>({...j,color:j.color||JCOLORS[j.name]||["#22c55e","#f59e0b","#64748b","#3b82f6","#ec4899","#06b6d4","#eab308","#8b5cf6"][i%8]}));
+  this.state.goals=this.state.goals.map(g=>({...g,photos:Array.isArray(g.photos)?g.photos:[]}));
+};
+Data.load();
+
+function setScheme(name){
+  const allowed=SCHEMES.map(x=>x[0]); if(!allowed.includes(name))name="violet";
+  document.documentElement.dataset.scheme=name;
+  localStorage.setItem("skillquest_scheme",name);
+}
+setScheme(localStorage.getItem("skillquest_scheme")||"violet");
+
+App.calendarView=App.calendarView||"month";
+App.goalJournalFilter=App.goalJournalFilter||"";
+App.notesJournalFilter=App.notesJournalFilter||"";
+
+App.journalCard=function(j){
+  const max=Math.max(...Data.journals.map(x=>x.exp),1),pr=Math.min(100,j.exp/max*100),c=jcolor(j.name);
+  const count=Data.tasks.filter(t=>t.journal===j.name).length;
+  return `<div class="card journal journal-card" style="--jcolor:${c}">
+    <div class="journal-head"><div class="journal-icon">${j.icon}</div><div><h3>${esc(j.name[0].toUpperCase()+j.name.slice(1))}</h3><small>${count} задач · XP сферы</small></div><div class="xp">${j.exp.toFixed(2)}</div></div>
+    <div class="progress"><i style="width:${pr}%;background:${c}"></i></div>
+  </div>`;
+};
+
+App.taskHTML=function(t,date){
+  const st=Data.status(t,date),j=Data.journal(t.journal)||{icon:"📌"},c=jcolor(t.journal);
+  const action=st==="done"?`<button class="btn secondary sm undo-complete" data-id="${esc(t.id)}" data-date="${date}">Отменить</button>`:(date<=SQ.today()?`<button class="btn success sm complete" data-id="${esc(t.id)}" data-date="${date}">Выполнить</button>`:"");
+  return `<div class="task" style="--jcolor:${c}"><div class="task-icon journal-icon">${j.icon}</div><div class="task-main"><div class="task-title">${esc(t.title)}</div><div class="task-meta"><span class="journal-chip" style="--jcolor:${c}">${esc(t.journal)}</span> · ${t.duration} мин${t.time?" · "+esc(t.time):""}${t.goalId?" · 🎯":""}</div>${t.note?`<div class="subtle">${esc(t.note)}</div>`:""}</div><span class="task-status ${st}">${st==="done"?"Выполнено":st==="missed"?"Пропущено":"В плане"}</span><div class="task-actions">${action}<button class="btn secondary sm" onclick="App.editTask('${esc(t.id)}')">Изм.</button><button class="btn danger sm" onclick="App.deleteTask('${esc(t.id)}')">Удал.</button></div></div>`;
+};
+
+/* Notes reader */
+App.openNoteReader=function(nid){
+  const n=Data.state.notes.find(x=>x.id===nid);if(!n)return;
+  const j=n.journal?Data.journal(n.journal):null;
+  document.getElementById("noteReaderTitle").textContent=n.text.split(/\r?\n/)[0].slice(0,100)||"Заметка";
+  document.getElementById("noteReaderBody").innerHTML=`<div class="reader-meta">${esc(n.date||"")} · ${j?j.icon+" "+esc(j.name):"Без журнала"}</div><div class="note-body">${esc(n.text)}</div>`;
+  App.open("noteReaderModal");
+};
+App.notes=function(){
+  document.getElementById("notes").innerHTML=`<div class="section-head"><div><h2>Заметки</h2><p>Тренировки, литература, тексты, аккорды и личные записи</p></div><button class="btn" onclick="App.openNote()">+ Заметка</button></div>
+  <div class="card"><div class="note-toolbar"><input class="input" id="noteSearch" placeholder="Поиск по тексту…" oninput="App.filterNotes()"><select class="input" id="noteJournal" onchange="App.notesJournalFilter=this.value;App.filterNotes()"><option value="">Все журналы</option>${Data.journals.map(j=>`<option value="${esc(j.name)}" ${App.notesJournalFilter===j.name?"selected":""}>${j.icon} ${esc(j.name)}</option>`).join("")}</select></div></div>
+  <div class="list" id="noteResults" style="margin-top:12px"></div>`;
+  this.filterNotes();
+};
+App.filterNotes=function(){
+  const q=(document.getElementById("noteSearch")?.value||"").toLowerCase(),j=App.notesJournalFilter||"",box=document.getElementById("noteResults");if(!box)return;
+  const ns=Data.state.notes.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).filter(n=>(!j||n.journal===j)&&(!q||n.text.toLowerCase().includes(q)));
+  box.innerHTML=ns.length?ns.map(n=>{const jj=n.journal?Data.journal(n.journal):null;return `<div class="note card" onclick="App.openNoteReader('${n.id}')"><div style="display:flex;justify-content:space-between;gap:10px"><div><h3>${esc((n.text.split(/\r?\n/)[0]||"Заметка").slice(0,80))}</h3><div class="note-meta">${esc(n.date||"")} · ${jj?jj.icon+" "+esc(jj.name):"Без журнала"}</div></div><div class="data-actions" onclick="event.stopPropagation()"><button class="btn secondary sm" onclick="App.editNote('${n.id}')">Изм.</button><button class="btn danger sm" onclick="Data.deleteNote('${n.id}')">Удал.</button></div></div><p style="margin-top:8px;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(n.text)}</p></div>`}).join(""):`<div class="card empty"><strong>Заметок не найдено</strong>Попробуй другой запрос или журнал.</div>`;
+};
+App.openNote=function(nid=null){
+  const n=nid?Data.state.notes.find(x=>x.id===nid):null;
+  document.getElementById("noteModalTitle").textContent=n?"Изменить заметку":"Новая заметка";
+  document.getElementById("nId").value=n?.id||"";document.getElementById("nText").value=n?.text||"";
+  document.getElementById("nDate").value=n?.date||SQ.today();document.getElementById("nJournal").value=n?.journal||"";App.open("noteModal");
+};
+
+/* Goals with journal filter, reader and achievement photos */
+App.goals=function(){
+  const gs=Data.goals.filter(g=>!this.goalJournalFilter||g.journal===this.goalJournalFilter);
+  document.getElementById("goals").innerHTML=`<div class="section-head"><div><h2>Цели</h2><p>Открывай цель, читай условия и собирай достижения</p></div><button class="btn" onclick="App.openGoal()">+ Цель</button></div>
+  <div class="card goal-filter-row"><span class="subtle">Журнал</span><select class="input" onchange="App.goalJournalFilter=this.value;App.goals()"><option value="">Все журналы</option>${Data.journals.map(j=>`<option value="${esc(j.name)}" ${this.goalJournalFilter===j.name?"selected":""}>${j.icon} ${esc(j.name)}</option>`).join("")}</select></div>
+  <div class="list" style="margin-top:12px">${gs.length?gs.map(g=>{const x=Data.goalProgress(g),jj=g.journal?Data.journal(g.journal):null;return `<div class="goal card" style="--jcolor:${jcolor(g.journal||"другое")};border-left:5px solid var(--jcolor)"><div class="goal-top"><div><h3>${g.achieved?"🏆 ":"🎯 "}${esc(g.title)}</h3><p>${esc(g.desc||"")}</p><div class="note-meta">${jj?jj.icon+" "+esc(jj.name):"Без журнала"}${g.deadline?" · дедлайн "+esc(g.deadline):""}</div></div><b>${x.rate}%</b></div><div class="progress"><i style="width:${x.rate}%"></i></div><div class="goal-foot"><span>${x.done} / ${x.required} обязательных дней</span><span>${g.achieved?"Достигнута":"В процессе"} · +${SQ.safeNum(g.rewardXP,1)} XP</span></div><div class="data-actions" style="margin-top:10px"><button class="btn sm" onclick="App.openGoalReader('${g.id}')">Открыть</button><button class="btn secondary sm" onclick="App.openGoal('${g.id}')">Изменить</button><button class="btn danger sm" onclick="App.deleteGoal('${g.id}')">Удалить</button></div></div>`}).join(""):`<div class="card empty"><strong>Целей не найдено</strong>Создай цель или измени фильтр.</div>`}</div>`;
+};
+App.openGoal=function(gid=null){
+  const g=gid?Data.goals.find(x=>x.id===gid):null;
+  document.getElementById("goalModalTitle").textContent=g?"Изменить цель":"Новая цель";
+  document.getElementById("gId").value=g?.id||"";document.getElementById("gTitle").value=g?.title||"";
+  document.getElementById("gDesc").value=g?.desc||"";document.getElementById("gDeadline").value=g?.deadline||"";
+  document.getElementById("gReward").value=g?.rewardXP??1;document.getElementById("gJournal").value=g?.journal||"";
+  App.renderGoalPhotosEditor(g?.photos||[]);App.open("goalModal");
+};
+App.renderGoalPhotosEditor=function(photos){
+  const box=document.getElementById("goalPhotosEditor");if(!box)return;
+  box.innerHTML=photos.length?photos.map(ph=>`<div class="photo-editor"><img src="${SQ.escapeAttr(ph.data)}" alt=""><input class="input" value="${esc(ph.caption||"")}" data-photo-id="${ph.id}"><button type="button" class="btn danger sm" onclick="App.removeGoalPhoto('${ph.id}')">×</button></div>`).join(""):`<div class="empty" style="padding:12px">Фото достижений пока нет.</div>`;
+};
+App.removeGoalPhoto=function(pid){
+  const gid=document.getElementById("gId").value;if(!gid)return;
+  const g=Data.goals.find(x=>x.id===gid);if(!g)return;
+  g.photos=(g.photos||[]).filter(p=>p.id!==pid);App.renderGoalPhotosEditor(g.photos);
+};
+App.addGoalPhoto=function(){
+  const gid=document.getElementById("gId").value;if(!gid){Toast("Сначала сохрани цель","warning");return}
+  const input=document.getElementById("gPhotoFile");const f=input.files?.[0];if(!f)return;
+  if(f.size>4*1024*1024){Toast("Фото слишком большое (макс. 4 МБ)","error");return}
+  const r=new FileReader();r.onload=()=>{const g=Data.goals.find(x=>x.id===gid);g.photos=g.photos||[];g.photos.push({id:id(),data:r.result,caption:"",createdAt:SQ.dateTimeNow()});App.renderGoalPhotosEditor(g.photos);input.value=""};r.readAsDataURL(f);
+};
+App.openGoalReader=function(gid){
+  const g=Data.goals.find(x=>x.id===gid);if(!g)return;
+  const jj=g.journal?Data.journal(g.journal):null,x=Data.goalProgress(g);
+  document.getElementById("goalReaderTitle").textContent=`${g.achieved?"🏆 ":"🎯 "}${g.title}`;
+  document.getElementById("goalReaderBody").innerHTML=`<div class="goal-detail"><div class="reader-meta">${jj?jj.icon+" "+esc(jj.name):"Без журнала"}${g.deadline?" · дедлайн "+esc(g.deadline):""} · ${x.rate}%</div><p>${esc(g.desc||"Описание отсутствует.")}</p><div><b>Прогресс</b><div class="progress" style="margin-top:7px"><i style="width:${x.rate}%"></i></div><div class="note-meta">${x.done} / ${x.required} обязательных дней · награда ${SQ.safeNum(g.rewardXP,1)} XP</div></div><div><b>Привязанные задачи</b><div class="list" style="margin-top:8px">${x.tasks.length?x.tasks.map(t=>`<div class="task" style="--jcolor:${jcolor(t.journal)}"><div class="task-icon">${(Data.journal(t.journal)||{}).icon||"📌"}</div><div class="task-main"><div class="task-title">${esc(t.title)}</div><div class="task-meta">${esc(t.journal)} · ${t.completedDates.length} выполнений</div></div></div>`).join(""):`<div class="empty" style="padding:12px">Задачи пока не привязаны.</div>`}</div></div><div><b>Фото достижений</b><div class="goal-photo-grid" style="margin-top:8px">${(g.photos||[]).length?(g.photos||[]).map(ph=>`<figure class="goal-photo"><img src="${SQ.escapeAttr(ph.data)}" alt=""><figcaption>${esc(ph.caption||"Без подписи")}</figcaption></figure>`).join(""):`<div class="empty" style="padding:12px">Фото ещё нет.</div>`}</div></div></div>`;
+  App.open("goalReaderModal");
+};
+const oldSaveGoal=App.saveGoal;
+App.saveGoal=function(){
+  const gid=document.getElementById("gId").value,title=document.getElementById("gTitle").value.trim(),desc=document.getElementById("gDesc").value.trim(),deadline=document.getElementById("gDeadline").value,reward=Math.max(0,SQ.safeNum(document.getElementById("gReward").value,1)),journal=document.getElementById("gJournal").value;
+  if(!title){Toast("Введите название цели","error");return}
+  if(deadline&&deadline<SQ.today()){Toast("Дедлайн не должен быть в прошлом","error");return}
+  if(gid){const g=Data.goals.find(x=>x.id===gid);if(!g)return;g.title=title;g.desc=desc;g.deadline=deadline;g.rewardXP=reward;g.journal=journal;g.photos=g.photos||[];document.querySelectorAll("#goalPhotosEditor [data-photo-id]").forEach(inp=>{const ph=g.photos.find(x=>x.id===inp.dataset.photoId);if(ph)ph.caption=inp.value});}
+  else Data.goals.push({id:id(),title,desc,deadline,rewardXP:reward,journal,photos:[],achieved:false,achievedAt:null,createdAt:SQ.dateTimeNow()});
+  Data.save();App.close("goalModal");Toast("Цель сохранена","success");
+};
+
+/* Calendar day/week/month/year */
+App.calendar=function(){
+  const d=this.calMonth,year=d.getFullYear(),month=d.getMonth();
+  const heads=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
+  const filter=dte=>Data.tasksForDate(dte,this.calendarJournal);
+  const monthStart=`${year}-${Dates.pad(month+1)}-01`,monthEnd=`${year}-${Dates.pad(month+1)}-${Dates.pad(new Date(year,month+1,0).getDate())}`;
+  const header=`<div class="section-head"><div><h2>Календарь</h2><p>День · неделя · месяц · год</p></div><button class="btn" onclick="App.openTask()">+ Задача</button></div>
+  <div class="card"><div class="toolbar" style="justify-content:space-between"><div class="cal-view-tabs">${["day","week","month","year"].map(v=>`<button class="${this.calendarView===v?"active":""}" onclick="App.setCalendarView('${v}')">${v==="day"?"День":v==="week"?"Неделя":v==="month"?"Месяц":"Год"}</button>`).join("")}</div><select class="input" style="max-width:220px" onchange="App.calendarJournal=this.value;App.calendar()"><option value="">Все журналы</option>${Data.journals.map(j=>`<option value="${esc(j.name)}" ${this.calendarJournal===j.name?"selected":""}>${j.icon} ${esc(j.name)}</option>`).join("")}</select></div>
+  <div class="calendar-toolbar" style="margin-top:12px"><button class="btn secondary sm" onclick="App.calMove(-1)">←</button><div class="calendar-title">${this.calendarTitle()}</div><div style="display:flex;gap:6px"><button class="btn secondary sm" onclick="App.calToday()">Сегодня</button><button class="btn secondary sm" onclick="App.calMove(1)">→</button></div></div></div>`;
+  document.getElementById("calendar").innerHTML=header+this.calendarViewHTML();
+};
+App.calendarTitle=function(){
+  const d=this.calMonth;
+  if(this.calendarView==="year")return String(d.getFullYear());
+  if(this.calendarView==="day")return Dates.label(this.calDate,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  if(this.calendarView==="week"){const start=this.weekStart(this.calDate);return `${Dates.label(start,{day:"numeric",month:"short"})} — ${Dates.label(Dates.add(start,6),{day:"numeric",month:"short",year:"numeric"})}`;}
+  return d.toLocaleDateString("ru-RU",{month:"long",year:"numeric"});
+};
+App.weekStart=function(date){const d=Dates.parse(date),dow=d.getDay();return Dates.add(date,-dow)};
+App.setCalendarView=function(v){this.calendarView=v;this.renderPage()};
+App.calMove=function(n){
+  if(this.calendarView==="day")this.calDate=Dates.add(this.calDate,n);
+  else if(this.calendarView==="week")this.calDate=Dates.add(this.calDate,n*7);
+  else if(this.calendarView==="year")this.calMonth.setFullYear(this.calMonth.getFullYear()+n);
+  else this.calMonth.setMonth(this.calMonth.getMonth()+n);
+  this.calendar();
+};
+App.calToday=function(){this.calDate=SQ.today();this.calMonth=new Date();this.calendar()};
+App.calendarViewHTML=function(){
+  if(this.calendarView==="day"){
+    const ts=Data.tasksForDate(this.calDate,this.calendarJournal);
+    return `<div class="card"><div class="cal-day-list">${this.taskList(ts,this.calDate)}</div></div>`;
+  }
+  if(this.calendarView==="week"){
+    const start=this.weekStart(this.calDate);
+    return `<div class="card"><div class="cal-week">${Array.from({length:7},(_,i)=>{const date=Dates.add(start,i),ts=Data.tasksForDate(date,this.calendarJournal);return `<div class="cal-week-day ${date===SQ.today()?"today":""}" onclick="App.day('${date}')"><b>${headsLabel(date)}</b>${ts.length?ts.map(t=>`<div class="cal-task-mini" style="--jcolor:${jcolor(t.journal)}">${(Data.journal(t.journal)||{}).icon||"📌"} ${esc(t.title)}</div>`).join(""):`<div class="subtle" style="margin-top:10px">Нет задач</div>`}</div>`}).join("")}</div></div>`;
+  }
+  if(this.calendarView==="year"){
+    const y=this.calMonth.getFullYear();
+    return `<div class="card"><div class="year-grid">${Array.from({length:12},(_,m)=>{const total=new Date(y,m+1,0).getDate();let active=0;for(let d=1;d<=total;d++){const date=`${y}-${Dates.pad(m+1)}-${Dates.pad(d)}`;if(Data.tasksForDate(date,this.calendarJournal).length)active++}return `<div class="year-month" onclick="App.openMonth(${y},${m})"><div class="year-month-head"><span>${new Date(y,m,1).toLocaleDateString("ru-RU",{month:"long"})}</span><span>${active}</span></div><div class="mini-month">${Array.from({length:total},(_,d)=>{const date=`${y}-${Dates.pad(m+1)}-${Dates.pad(d+1)}`;return `<i class="${Data.tasksForDate(date,this.calendarJournal).length?"has":""}"></i>`}).join("")}</div></div>`}).join("")}</div></div>`;
+  }
+  const y=this.calMonth.getFullYear(),m=this.calMonth.getMonth(),first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),prev=new Date(y,m,0).getDate();let cells=[];
+  for(let i=first-1;i>=0;i--)cells.push({day:prev-i,other:1,date:Dates.localDate(new Date(y,m-1,prev-i))});
+  for(let x=1;x<=days;x++)cells.push({day:x,other:0,date:`${y}-${Dates.pad(m+1)}-${Dates.pad(x)}`});
+  while(cells.length%7){const n=cells.length-days-first+1;cells.push({day:n,other:1,date:`${y}-${Dates.pad(m+2)}-${Dates.pad(n)}`})}
+  return `<div class="card"><div class="cal-grid">${heads.map(h=>`<div class="cal-head">${h}</div>`).join("")}${cells.map(c=>{const ts=Data.tasksForDate(c.date,this.calendarJournal),today=c.date===SQ.today();return `<div class="cal-cell ${c.other?"other":""} ${today?"today":""}" onclick="App.day('${c.date}')"><div class="day">${c.day}</div><div class="cal-dots">${ts.slice(0,8).map(t=>`<i class="cal-dot ${Data.status(t,c.date)}" style="background:${jcolor(t.journal)}" title="${esc(t.title)}"></i>`).join("")}</div></div>`}).join("")}</div><div id="dayDetail"></div></div>`;
+};
+function headsLabel(date){return Dates.label(date,{weekday:"short",day:"numeric",month:"short"})}
+App.openMonth=function(y,m){this.calendarView="month";this.calMonth=new Date(y,m,1);this.calendar()};
+App.day=function(date){this.calDate=date;const ts=Data.tasksForDate(date,this.calendarJournal);const detail=document.getElementById("dayDetail");if(detail)detail.innerHTML=`<div class="section-head"><div><h2>${Dates.label(date,{weekday:"long",day:"numeric",month:"long"})}</h2><p>${ts.length} задач${this.calendarJournal?" · "+esc(this.calendarJournal):""}</p></div></div><div class="card">${this.taskList(ts,date)}</div>`;this.bindDynamic()};
+
+/* Theme palette in settings */
+const oldSettings=App.settings;
+App.settings=function(){
+  oldSettings.call(this);
+  const box=document.getElementById("settings");
+  const card=document.createElement("div");card.className="card";card.style.marginTop="16px";
+  card.innerHTML=`<h2 style="font-size:17px">Цветовая схема</h2><p class="subtle" style="margin-top:4px">Выбери настроение интерфейса. Выбор сохраняется локально.</p><div class="scheme-grid">${SCHEMES.map(x=>`<button class="scheme-btn ${document.documentElement.dataset.scheme===x[0]?"active":""}" onclick="App.setScheme('${x[0]}')"><div class="scheme-swatch" style="background:linear-gradient(90deg,${x[2]},${x[3]})"></div>${x[0][0].toUpperCase()+x[0].slice(1)}</button>`).join("")}</div>`;
+  box.appendChild(card);
+};
+App.setScheme=function(name){setScheme(name);this.renderPage()};
+
+/* Goal/Note modal additions */
+(function injectExtraModals(){
+  if(document.getElementById("noteReaderModal"))return;
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="modal-bg" id="noteReaderModal"><div class="modal"><div class="modal-head"><h2 id="noteReaderTitle" class="reader-title">Заметка</h2><button class="icon-btn" data-close="noteReaderModal">×</button></div><div id="noteReaderBody"></div></div></div>
+  <div class="modal-bg" id="goalReaderModal"><div class="modal"><div class="modal-head"><h2 id="goalReaderTitle" class="reader-title">Цель</h2><button class="icon-btn" data-close="goalReaderModal">×</button></div><div id="goalReaderBody"></div></div></div>`;
+  document.body.appendChild(wrap);
+  const gm=document.getElementById("goalModal");
+  const form=gm?.querySelector("form");
+  if(form&&!document.getElementById("gJournal")){
+    form.querySelector(".field.full:nth-of-type(3)")?.insertAdjacentHTML("afterend","");
+    const deadline=form.querySelector("#gDeadline").parentElement;
+    deadline.insertAdjacentHTML("afterend",`<div class="field"><label>Журнал</label><select class="input" id="gJournal"><option value="">Без журнала</option>${Data.journals.map(j=>`<option value="${esc(j.name)}">${j.icon} ${esc(j.name)}</option>`).join("")}</select></div>`);
+    form.insertAdjacentHTML("beforeend",`<div class="field full"><label>Фото достижения</label><div class="toolbar"><input class="input" id="gPhotoFile" type="file" accept="image/*"><button type="button" class="btn secondary" onclick="App.addGoalPhoto()">Добавить фото</button></div><div id="goalPhotosEditor" class="list" style="margin-top:10px"></div><div class="subtle">После добавления фото можно вписать подпись. Фото сохраняются внутри резервной копии.</div></div>`);
+  }
+  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>App.close(b.dataset.close));
+})();
+})();
+</script>
+
 </body>
 </html>
