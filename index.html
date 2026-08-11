@@ -82,14 +82,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <section id="settings" class="page"></section>
 </div>
 
-<nav class="bottom-nav"><div class="nav">
-  <button data-page="home" class="active"><b>⌂</b>Главная</button>
-  <button data-page="analytics"><b>◔</b>Аналитика</button>
-  <button data-page="calendar"><b>▦</b>Календарь</button>
-  <button data-page="journals"><b>◉</b>Журналы</button>
-  <button data-page="goals"><b>◇</b>Цели</button>
-  <button data-page="notes"><b>✎</b>Заметки</button>
-  <button data-page="settings"><b>⚙</b>Ещё</button>
+<nav class="bottom-nav" aria-label="Основная навигация"><div class="nav">
+  <button data-page="home" class="active"><b>⌂</b><span>Главная</span></button>
+  <button data-page="analytics"><b>◔</b><span>Аналитика</span></button>
+  <button data-page="calendar"><b>▦</b><span>Календарь</span></button>
+  <button data-page="journals"><b>◉</b><span>Журналы</span></button>
+  <button type="button" class="nav-more" id="navMore"><b>•••</b><span>Ещё</span></button>
 </div></nav>
 
 <div class="modal-bg" id="taskModal"><div class="modal">
@@ -1216,5 +1214,123 @@ App.setScheme=function(name){setScheme(name);this.renderPage()};
 })();
 </script>
 
+
+<style id="sq-mobile-polish">
+/* Touch-first navigation */
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:80;padding:8px max(12px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--surface) 94%,transparent);border-top:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.bottom-nav .nav{max-width:720px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;overflow:visible}
+.bottom-nav .nav button{min-width:0;border:0;background:transparent;color:var(--muted);border-radius:16px;padding:8px 4px 7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:600 10px/1.1 inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:.18s}
+.bottom-nav .nav button b{font-size:21px;line-height:20px;font-weight:700}
+.bottom-nav .nav button.active{color:var(--primary);background:color-mix(in srgb,var(--primary) 12%,transparent)}
+.bottom-nav .nav button:active{transform:scale(.94)}
+.app{padding-bottom:92px}
+.nav-more b{letter-spacing:2px;font-size:18px!important}
+.fab-task{position:fixed;right:18px;bottom:92px;z-index:75;width:56px;height:56px;border:0;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:27px;font-weight:800;box-shadow:0 12px 28px color-mix(in srgb,var(--primary) 35%,transparent);cursor:pointer}
+.fab-task:active{transform:scale(.94)}
+.screen-sheet{position:fixed;inset:0;z-index:110;display:none;align-items:flex-end;background:rgba(15,23,42,.38);backdrop-filter:blur(5px)}
+.screen-sheet.open{display:flex}
+.screen-sheet-panel{width:100%;max-height:78vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-bottom:0;border-radius:28px 28px 0 0;padding:16px 16px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -20px 60px rgba(0,0,0,.18)}
+.screen-sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.screen-sheet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.screen-link{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:18px;padding:16px;text-align:left;display:flex;align-items:center;gap:12px;font:700 14px inherit;cursor:pointer}
+.screen-link b{font-size:25px}.screen-link small{display:block;color:var(--muted);font-weight:500;margin-top:2px}
+.scheme-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.scheme-btn{min-height:72px!important;position:relative}
+.scheme-btn.active{outline:3px solid color-mix(in srgb,var(--primary) 35%,transparent);outline-offset:1px}
+.scheme-btn .scheme-dot{width:28px;height:28px;border-radius:50%;display:block;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.weight-profile-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px;border-radius:20px;background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 10%,var(--surface)),var(--surface2));border:1px solid var(--border)}
+.cal-view-tabs{display:flex;gap:5px;flex-wrap:wrap}
+.cal-view-tabs button{border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:12px;padding:8px 13px;font:700 12px inherit;cursor:pointer}
+.cal-view-tabs button.active{background:var(--primary);border-color:var(--primary);color:#fff}
+@media(max-width:560px){
+ .bottom-nav{padding-left:8px;padding-right:8px}
+ .bottom-nav .nav{gap:2px}
+ .bottom-nav .nav button{padding:7px 2px 6px;border-radius:14px}
+ .bottom-nav .nav button b{font-size:19px}
+ .bottom-nav .nav button span{font-size:9px}
+ .fab-task{right:14px;bottom:88px;width:52px;height:52px;border-radius:17px}
+ .scheme-grid{grid-template-columns:repeat(2,1fr)}
+ .screen-sheet-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const $$=s=>document.querySelectorAll(s);
+
+  // Touch-friendly "More" screen launcher: no horizontal scrolling on iPhone.
+  function openMore(){
+    let sheet=$("#screenSheet");
+    if(!sheet){
+      sheet=document.createElement("div");
+      sheet.id="screenSheet"; sheet.className="screen-sheet";
+      sheet.innerHTML=`<div class="screen-sheet-panel" role="dialog" aria-modal="true" aria-label="Экраны">
+        <div class="screen-sheet-head"><div><h2 style="margin:0;font-size:20px">Все экраны</h2><p class="subtle" style="margin:3px 0 0">Выбери раздел одним касанием</p></div><button class="icon-btn" id="closeScreenSheet">×</button></div>
+        <div class="screen-sheet-grid">
+          <button class="screen-link" data-screen="goals"><b>◇</b><span>Цели<small>Планы и достижения</small></span></button>
+          <button class="screen-link" data-screen="notes"><b>✎</b><span>Заметки<small>Тексты и материалы</small></span></button>
+          <button class="screen-link" data-screen="settings"><b>⚙</b><span>Профиль<small>Настройки и данные</small></span></button>
+          <button class="screen-link" data-screen="weight"><b>⚖</b><span>Вес<small>Журнал измерений</small></span></button>
+        </div>
+      </div>`;
+      document.body.appendChild(sheet);
+      sheet.addEventListener("click",e=>{
+        if(e.target===sheet) sheet.classList.remove("open");
+        const b=e.target.closest("[data-screen]");
+        if(b){sheet.classList.remove("open");App.go(b.dataset.screen)}
+      });
+      $("#closeScreenSheet").onclick=()=>sheet.classList.remove("open");
+    }
+    sheet.classList.add("open");
+  }
+
+  const more=$("#navMore"); if(more) more.onclick=openMore;
+
+  // Add a persistent, thumb-friendly task action.
+  if(!$("#sqFabTask")){
+    const fab=document.createElement("button");fab.id="sqFabTask";fab.className="fab-task";fab.title="Добавить задачу";fab.setAttribute("aria-label","Добавить задачу");fab.textContent="+";
+    fab.onclick=()=>App.openTask();document.body.appendChild(fab);
+  }
+
+  // Move weight into Profile: settings gets a dedicated, prominent entry point.
+  const oldSettings=App.settings;
+  App.settings=function(){
+    oldSettings.call(this);
+    const box=$("#settings"); if(!box || box.querySelector(".weight-profile-card")) return;
+    const w=Data.weightLog.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const stats=Data.weightStats?Data.weightStats():null;
+    const val=w?`${SQ.safeNum(w.value,0).toFixed(1)} кг`:"Нет измерений";
+    const change=stats&&stats.change!=null?`${stats.change>0?"+":""}${stats.change.toFixed(1)} кг`:"—";
+    const card=document.createElement("div");card.className="card";card.style.marginTop="16px";
+    card.innerHTML=`<div class="section-head" style="margin-bottom:12px"><div><h2 style="font-size:18px">Журнал веса</h2><p>История, график и динамика — теперь внутри профиля</p></div><span style="font-size:26px">⚖️</span></div>
+      <div class="weight-profile-card"><div><div class="subtle">Последнее измерение</div><strong style="font-size:25px">${val}</strong><div class="subtle">Изменение: ${change}</div></div>
+      <button class="btn" onclick="App.go('weight')">Открыть журнал</button></div>`;
+    box.appendChild(card);
+  };
+
+  // Ensure all seven schemes are always presented as real touch controls in Settings.
+  const oldSet=window.setScheme;
+  window.setScheme=function(name){ oldSet(name); $$(".scheme-btn").forEach(b=>b.classList.toggle("active",b.dataset.scheme===name)); };
+  function refreshSchemes(){
+    $$(".scheme-btn").forEach(b=>b.classList.toggle("active",b.dataset.scheme===document.documentElement.dataset.scheme));
+  }
+
+  // Improve profile/avatar visibility in the header.
+  function refreshAvatar(){
+    const a=$("#avatarBtn"),p=Data.profile&&Data.profile();
+    if(a&&p){
+      a.innerHTML=p.avatar?`<img src="${SQ.escapeAttr(p.avatar)}" alt="Аватар">`:`<span>${esc((p.name||"Г").charAt(0).toUpperCase())}</span>`;
+      a.title="Изменить аватар";
+    }
+  }
+
+  // Rebind navigation after the original app boot and keep More as a launcher.
+  setTimeout(()=>{
+    refreshAvatar(); refreshSchemes();
+    $$(".nav button[data-page]").forEach(b=>b.onclick=()=>App.go(b.dataset.page));
+    const theme=$("#themeBtn"); if(theme) theme.setAttribute("aria-label","Переключить светлую/тёмную тему");
+  },0);
+})();
+</script>
 </body>
 </html>
