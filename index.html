@@ -1591,9 +1591,15 @@
                 if (!task) return false;
                 if (task.completedDates.includes(dateStr)) return false;
                 const now = new Date();
-                const taskDate = new Date(dateStr);
-                const isLate = taskDate < now && !this.isSameDay(taskDate, now);
-                const multiplier = isLate ? 0.25 : 1;
+const taskDate = new Date(dateStr);
+
+if (taskDate > now && !this.isSameDay(taskDate, now)) {
+    UI.toast('⏳ Эту задачу ещё нельзя выполнить', 'warning', 3000);
+    return false;
+}
+
+const isLate = taskDate < now && !this.isSameDay(taskDate, now);
+const multiplier = isLate ? 0.25 : 1;
                 const expJournal = task.duration * 0.01;
                 const expTotal = task.duration * 0.005;
                 const journal = this.getJournalByName(task.journal);
