@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#6d5dfc">
-<title>SkillQuest — Personal Growth OS</title>
+<title>SkillQuest Pro — Personal Growth OS</title>
 <style>
 :root{
   --bg:#f5f7fb;--surface:#fff;--surface2:#f0f2f8;--text:#171827;--muted:#73768a;
@@ -386,5 +386,584 @@ const App={
   App.init();
 })();
 </script>
+
+<style>
+:root{--primary-bg:rgba(109,93,252,.11)}
+.bottom-nav{overflow-x:auto;justify-content:flex-start}
+.nav{min-width:720px}
+.nav button{min-width:86px}
+.icon-btn:focus-visible,.btn:focus-visible,.chip:focus-visible,.input:focus-visible{outline:3px solid rgba(109,93,252,.25);outline-offset:2px}
+.clickable{cursor:pointer}
+.subtle{color:var(--muted);font-size:12px}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar .input{width:auto;min-width:150px}
+.metric-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.metric{padding:15px;border:1px solid var(--border);border-radius:16px;background:var(--surface2)}
+.metric b{display:block;font-size:22px;margin-top:5px}
+.metric span{color:var(--muted);font-size:11px}
+.segmented{display:flex;gap:5px;padding:4px;background:var(--surface2);border-radius:13px;width:max-content}
+.segmented button{padding:7px 10px;border-radius:9px;background:transparent;color:var(--muted);font-size:11px;font-weight:800}
+.segmented button.active{background:var(--surface);color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.weight-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.weight-kpi{padding:13px;border-radius:15px;background:var(--surface2)}
+.weight-kpi b{display:block;font-size:20px}.weight-kpi span{font-size:11px;color:var(--muted)}
+.data-actions{display:flex;gap:7px;flex-wrap:wrap}
+.goal-actions,.task-actions{display:flex;gap:6px;margin-left:auto}
+.task{min-width:0}
+.task .btn{flex:none}
+.note-meta{color:var(--muted);font-size:11px;margin-top:4px}
+.chart-tooltip{font-size:11px;fill:var(--text)}
+@media(max-width:900px){.metric-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){
+  .metric-grid{grid-template-columns:repeat(2,1fr)}
+  .weight-kpis{grid-template-columns:repeat(2,1fr)}
+  .toolbar .input{min-width:130px;max-width:100%}
+  .bottom-nav{height:68px}.nav{min-width:720px}
+  .app{padding-bottom:4px}
+  .task{align-items:flex-start;flex-wrap:wrap}.task-main{min-width:calc(100% - 54px)}
+  .task-status{margin-left:52px}.task-actions{margin-left:0}
+}
+</style>
+
+<script>
+"use strict";
+
+/* SkillQuest Pro enhancement layer.
+   Keeps the original data model and UI, while adding migration-safe fields,
+   editing/deletion, weight journal, filters, calendar journal filtering,
+   richer analytics, goals, notes search, and defensive import/export. */
+
+const SQ = {
+  today(){return Dates.localDate()},
+  uniq(a){return [...new Set(a||[])]},
+  clamp(n,a,b){return Math.max(a,Math.min(b,n))},
+  daysFor(t){return Data.occurrences(t)},
+  scheduledCount(t){return Data.occurrences(t).length},
+  completedCount(t){return Data.uniq(t.completedDates).length},
+  missedCount(t){return Data.uniq(t.missedDates).length},
+  safeNum(v,d=0){const n=Number(v);return Number.isFinite(n)?n:d},
+  dateTimeNow(){return new Date().toISOString()},
+  periodStart(period){
+    const n={7:7,30:30,90:90}[period];
+    return n?Dates.add(this.today(),-(n-1)):"0000-01-01";
+  },
+  periodDates(period){
+    const end=this.today(), start=this.periodStart(period);
+    return Dates.days(start,end);
+  },
+  isFuture(date){return date>this.today()},
+  escapeAttr(s){return esc(String(s??"")).replace(/`/g,"&#096;")}
+};
+
+/* ---------- Migration / normalization ---------- */
+const originalMigrate = Data.migrate.bind(Data);
+Data.migrate = function(){
+  originalMigrate();
+  const s=this.state;
+  s.version=this.version;
+  s.profile={...this.defaults().profile,...(s.profile||{})};
+  s.profile.totalExp=Math.max(0,SQ.safeNum(s.profile.totalExp));
+  s.profile.streak=Math.max(0,Math.floor(SQ.safeNum(s.profile.streak)));
+  s.profile.lastActive=s.profile.lastActive||null;
+  s.journals=(Array.isArray(s.journals)?s.journals:[]).map(j=>({
+    name:String(j.name||"другое"),icon:String(j.icon||"📌"),exp:Math.max(0,SQ.safeNum(j.exp))
+  }));
+  const known=new Set(s.journals.map(j=>j.name));
+  if(!known.size){s.journals=JOURNALS.map(j=>({...j,exp:0}));}
+  s.tasks=(Array.isArray(s.tasks)?s.tasks:[]).map(t=>({
+    ...t,id:t.id||id(),title:String(t.title||"Без названия"),
+    journal:String(t.journal||"другое"),duration:Math.max(1,SQ.safeNum(t.duration,1)),
+    startDate:t.startDate||t.date||this.today(),endDate:t.endDate||t.date||t.startDate||this.today(),
+    daysOfWeek:Array.isArray(t.daysOfWeek)?this.uniq(t.daysOfWeek.map(Number).filter(x=>x>=0&&x<=6)):[],
+    completedDates:this.uniq(t.completedDates).filter(Boolean),
+    missedDates:this.uniq(t.missedDates).filter(Boolean),
+    note:String(t.note||""),time:String(t.time||""),goalId:t.goalId||null,
+    createdAt:t.createdAt||SQ.dateTimeNow()
+  }));
+  s.goals=(Array.isArray(s.goals)?s.goals:[]).map(g=>({
+    ...g,id:g.id||id(),title:String(g.title||"Цель"),desc:String(g.desc||""),
+    deadline:g.deadline||"",rewardXP:Math.max(0,SQ.safeNum(g.rewardXP,.05)),
+    achieved:Boolean(g.achieved),achievedAt:g.achievedAt||null
+  }));
+  s.notes=(Array.isArray(s.notes)?s.notes:[]).map(n=>({
+    ...n,id:n.id||id(),text:String(n.text||""),createdAt:n.createdAt||SQ.dateTimeNow(),
+    date:n.date||String(n.createdAt||SQ.dateTimeNow()).slice(0,10),journal:n.journal||""
+  }));
+  s.weightLog=(Array.isArray(s.weightLog)?s.weightLog:[]).map(w=>({
+    id:w.id||id(),date:w.date||this.today(),weight:SQ.safeNum(w.weight,0),
+    note:String(w.note||""),createdAt:w.createdAt||SQ.dateTimeNow()
+  })).filter(w=>w.weight>0).sort((a,b)=>a.date.localeCompare(b.date));
+  this.recalcLevel();
+};
+Data.load();
+
+/* ---------- Corrected task / XP / streak logic ---------- */
+Data.tasksForDate=function(date=SQ.today(),journal=""){
+  return this.tasks.filter(t=>this.isScheduled(t,date)&&(!journal||t.journal===journal));
+};
+Data.status=function(task,date){
+  if(task.completedDates.includes(date))return"done";
+  if(task.missedDates.includes(date))return"missed";
+  if(date>this.today())return"pending";
+  return"missed";
+};
+Data.rebuildStreak=function(){
+  const completed=new Set(this.tasks.flatMap(t=>t.completedDates).filter(d=>d<=this.today()));
+  let streak=0,d=this.today();
+  while(completed.has(d)){streak++;d=Dates.add(d,-1)}
+  this.state.profile.streak=streak;
+  this.state.profile.lastActive=streak?this.today():null;
+  return streak;
+};
+Data.complete=function(taskId,date=SQ.today()){
+  const t=this.tasks.find(x=>x.id===taskId);
+  if(!t||!this.isScheduled(t,date))return false;
+  if(date>this.today()){Toast("Будущую задачу выполнить нельзя","warning");return false}
+  if(t.completedDates.includes(date))return false;
+  const late=date<this.today(), mult=late?.25:1;
+  const earned=t.duration*.005*mult;
+  const j=this.journal(t.journal);
+  if(j)j.exp=Math.max(0,j.exp+t.duration*.01*mult);
+  this.state.profile.totalExp=Math.max(0,this.state.profile.totalExp+earned);
+  t.completedDates=this.uniq([...t.completedDates,date]);
+  t.missedDates=t.missedDates.filter(x=>x!==date);
+  this.rebuildStreak();
+  this.checkGoals();
+  this.recalcLevel();
+  this.save();
+  Toast(`Задача выполнена · +${earned.toFixed(2)} XP`,late?"warning":"success");
+  return true;
+};
+Data.uncomplete=function(taskId,date){
+  const t=this.tasks.find(x=>x.id===taskId);if(!t)return false;
+  if(!t.completedDates.includes(date))return false;
+  const mult=date<SQ.today()?.25:1,earned=t.duration*.005*mult;
+  t.completedDates=t.completedDates.filter(x=>x!==date);
+  const j=this.journal(t.journal);if(j)j.exp=Math.max(0,j.exp-t.duration*.01*mult);
+  this.state.profile.totalExp=Math.max(0,this.state.profile.totalExp-earned);
+  this.rebuildStreak();this.checkGoals();this.recalcLevel();this.save();
+  Toast("Выполнение отменено","info");return true;
+};
+Data.autoMiss=function(){
+  const today=this.today();let changed=false;
+  this.tasks.forEach(t=>this.occurrences(t).forEach(d=>{
+    if(d<today&&!t.completedDates.includes(d)&&!t.missedDates.includes(d)){t.missedDates.push(d);changed=true}
+  }));
+  if(changed)this.save();
+};
+Data.checkGoals=function(){
+  this.goals.forEach(g=>{
+    if(g.achieved)return;
+    const ts=this.tasks.filter(t=>t.goalId===g.id);
+    const required=SQ.uniq(ts.flatMap(t=>this.occurrences(t)));
+    const done=required.filter(d=>ts.some(t=>t.completedDates.includes(d)));
+    const eligible=required.length>0 && done.length===required.length;
+    if(eligible){
+      g.achieved=true;g.achievedAt=SQ.dateTimeNow();
+      const reward=Math.max(0,SQ.safeNum(g.rewardXP,.05));
+      this.state.profile.totalExp+=reward;
+      this.recalcLevel();
+      Toast(`🎉 Цель «${g.title}» достигнута · +${reward} XP`,"success");
+    }
+  });
+};
+Data.goalProgress=function(g){
+  const ts=this.tasks.filter(t=>t.goalId===g.id);
+  const required=SQ.uniq(ts.flatMap(t=>this.occurrences(t)));
+  const done=required.filter(d=>ts.some(t=>t.completedDates.includes(d))).length;
+  return {tasks:ts,required:required.length,done,rate:required.length?Math.round(done/required.length*100):0};
+};
+Data.recalcLevel=function(){
+  let xp=Math.max(0,SQ.safeNum(this.state.profile.totalExp)),level=1;
+  while(xp>=level*100){xp-=level*100;level++}
+  this.state.profile.level=level;
+  return {level,xp,total:SQ.safeNum(this.state.profile.totalExp),need:level*100};
+};
+Data.stats=function(){
+  const all=this.tasks, done=all.reduce((n,t)=>n+SQ.completedCount(t),0),
+    miss=all.reduce((n,t)=>n+SQ.missedCount(t),0),
+    scheduled=all.reduce((n,t)=>n+this.occurrences(t).length,0);
+  return {tasks:all.length,done,miss,scheduled,rate:scheduled?Math.round(done/scheduled*100):0};
+};
+
+/* ---------- Weight journal ---------- */
+Data.addWeight=function(weight,date,note=""){
+  weight=SQ.safeNum(weight);date=date||SQ.today();
+  if(weight<=0||!date||date>SQ.today()){Toast("Укажи корректный вес и дату","error");return false}
+  const existing=this.state.weightLog.find(w=>w.date===date);
+  if(existing){existing.weight=weight;existing.note=note||""}
+  else this.state.weightLog.push({id:id(),date,weight,note,createdAt:SQ.dateTimeNow()});
+  this.state.weightLog.sort((a,b)=>a.date.localeCompare(b.date));
+  this.state.profile.weight=weight;this.save();Toast("Измерение сохранено","success");return true;
+};
+Data.updateWeight=function(wid,weight,date,note=""){
+  const w=this.state.weightLog.find(x=>x.id===wid);if(!w)return false;
+  weight=SQ.safeNum(weight);if(weight<=0||date>SQ.today())return false;
+  w.weight=weight;w.date=date;w.note=note;this.state.weightLog.sort((a,b)=>a.date.localeCompare(b.date));
+  this.state.profile.weight=weight;this.save();return true;
+};
+Data.deleteWeight=function(wid){
+  const before=this.state.weightLog.length;
+  this.state.weightLog=this.state.weightLog.filter(w=>w.id!==wid);
+  if(before!==this.state.weightLog.length){
+    const last=this.state.weightLog[this.state.weightLog.length-1];
+    if(last)this.state.profile.weight=last.weight;
+    this.save();Toast("Измерение удалено","success");
+  }
+};
+Data.weightStats=function(period="all"){
+  const start=SQ.periodStart(period==="all"?null:Number(period));
+  const rows=this.state.weightLog.filter(w=>w.date>=start&&w.date<=SQ.today()).sort((a,b)=>a.date.localeCompare(b.date));
+  const all=this.state.weightLog.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const last=rows.at(-1)||null,prev=rows.at(-2)||null;
+  return {rows,last,prev,change:last&&prev?last.weight-prev.weight:null,
+    min:rows.length?Math.min(...rows.map(w=>w.weight)):null,
+    max:rows.length?Math.max(...rows.map(w=>w.weight)):null,
+    avg:rows.length?rows.reduce((s,w)=>s+w.weight,0)/rows.length:null,all};
+};
+
+/* ---------- Notes / goals CRUD ---------- */
+Data.updateNote=function(nid,text,date,journal){
+  const n=this.state.notes.find(x=>x.id===nid);if(!n)return;
+  n.text=text.trim();n.date=date||n.date||SQ.today();n.journal=journal||"";
+  this.save();Toast("Заметка обновлена","success");
+};
+Data.addNote=function(text,date=SQ.today(),journal=""){
+  this.state.notes.push({id:id(),text:text.trim(),date,journal,createdAt:SQ.dateTimeNow()});this.save();
+};
+Data.updateGoal=function(gid,payload){const g=this.goals.find(x=>x.id===gid);if(!g)return;Object.assign(g,payload);this.save()};
+Data.deleteGoal=function(gid){
+  this.state.tasks.forEach(t=>{if(t.goalId===gid)t.goalId=null});
+  this.state.goals=this.goals.filter(g=>g.id!==gid);this.save();Toast("Цель удалена","success");
+};
+
+/* ---------- Improved charts ---------- */
+function sqLineChart(values,labels,{color="var(--primary)",height=220,unit=""}={}){
+  const W=760,H=height,padL=42,padR=12,padT=16,padB=30,max=Math.max(...values,1),min=Math.min(...values,0),range=max-min||1;
+  const x=i=>padL+(values.length===1?(W-padL-padR)/2:i*(W-padL-padR)/(values.length-1));
+  const y=v=>H-padB-(v-min)/range*(H-padT-padB);
+  const points=values.map((v,i)=>`${x(i)},${y(v)}`).join(" ");
+  const step=Math.max(1,Math.ceil(labels.length/6));
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    ${[0,.25,.5,.75,1].map(v=>`<line class="chart-grid" x1="${padL}" x2="${W-padR}" y1="${H-padB-v*(H-padT-padB)}" y2="${H-padB-v*(H-padT-padB)}"/>`).join("")}
+    <polyline class="chart-line" style="stroke:${color}" points="${points}"/>
+    ${values.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${values.length<15?4:2.7}" fill="${color}"><title>${esc(labels[i])}: ${v}${unit}</title></circle>`).join("")}
+    ${labels.map((d,i)=>i%step===0?`<text class="chart-label" x="${x(i)}" y="${H-8}" text-anchor="middle">${esc(Dates.label(d,{day:"numeric",month:"short"}))}</text>`:"").join("")}
+  </svg></div>`;
+}
+function sqBars(values,labels){
+  const W=760,H=220,pad=28,max=Math.max(...values,1),bw=Math.max(3,(W-pad*2)/Math.max(values.length,1)*.62);
+  const step=Math.max(1,Math.ceil(labels.length/7));
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+  ${values.map((v,i)=>{const x=pad+i*(W-pad*2)/values.length,y=H-pad-v/max*(H-pad*2);return `<rect class="bar" x="${x}" y="${y}" width="${bw}" height="${H-pad-y}" rx="3"><title>${esc(labels[i])}: ${v} XP</title></rect>`}).join("")}
+  ${labels.map((d,i)=>i%step===0?`<text class="chart-label" x="${pad+i*(W-pad*2)/values.length}" y="${H-6}" text-anchor="middle">${esc(Dates.label(d,{day:"numeric",month:"short"}))}</text>`:"").join("")}
+  </svg></div>`;
+}
+
+/* ---------- App overrides ---------- */
+App.page=App.page||"home";
+App.analyticsPeriod=30;App.weightPeriod="30";App.calendarJournal="";App.taskFilters={status:"all",journal:"",goal:"",search:""};
+
+App.render=function(){this.renderPage();this.fillFormLists();this.bindDynamic()};
+App.renderPage=function(){
+  const fn={home:this.home,analytics:this.analytics,calendar:this.calendar,journals:this.journals,goals:this.goals,notes:this.notes,settings:this.settings,weight:this.weight}[this.page];
+  if(fn)fn.call(this);
+  this.bindDynamic();
+};
+App.bindDynamic=function(){
+  document.querySelectorAll(".complete").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();Data.complete(b.dataset.id,b.dataset.date);
+  });
+  document.querySelectorAll(".undo-complete").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();Data.uncomplete(b.dataset.id,b.dataset.date);
+  });
+};
+App.init=function(){
+  this.render();
+  Data.on(()=>this.renderPage());
+  document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>this.go(b.dataset.page));
+  document.getElementById("themeBtn").onclick=()=>this.toggleTheme();
+  document.getElementById("avatarBtn").onclick=()=>this.avatar();
+  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>this.close(b.dataset.close));
+  document.getElementById("taskForm").onsubmit=e=>{e.preventDefault();this.saveTask()};
+  document.getElementById("noteForm").onsubmit=e=>{e.preventDefault();this.saveNote()};
+  setInterval(()=>Data.autoMiss(),60000);Data.autoMiss();Data.rebuildStreak();this.render();
+};
+App.go=function(page){this.page=page;document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));this.renderPage()};
+App.fillFormLists=function(){
+  const j=document.getElementById("fJournal");j.innerHTML=this.journalsOptions(Data.journals);
+  const g=document.getElementById("fGoal");g.innerHTML='<option value="">Без цели</option>'+Data.goals.map(x=>`<option value="${esc(x.id)}">${esc(x.title)}</option>`).join("");
+  document.getElementById("fDays").innerHTML=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"].map((x,i)=>`<button type="button" class="chip day-chip" data-day="${i}">${x}</button>`).join("");
+  document.querySelectorAll(".day-chip").forEach(c=>c.onclick=()=>c.classList.toggle("active"));
+};
+App.taskHTML=function(t,date){
+  const st=Data.status(t,date),j=Data.journal(t.journal)||{icon:"📌"};
+  const edit=`<button class="btn secondary sm" onclick="App.editTask('${esc(t.id)}')">Изм.</button>`;
+  const del=`<button class="btn danger sm" onclick="App.deleteTask('${esc(t.id)}')">Удал.</button>`;
+  const action=st==="done"?`<button class="btn secondary sm undo-complete" data-id="${esc(t.id)}" data-date="${date}">Отменить</button>`:
+    (date<=SQ.today()?`<button class="btn success sm complete" data-id="${esc(t.id)}" data-date="${date}">${st==="missed"?"Выполнить":"Выполнить"}</button>`:"");
+  return `<div class="task"><div class="task-icon">${j.icon}</div><div class="task-main"><div class="task-title">${esc(t.title)}</div><div class="task-meta">${esc(t.journal)} · ${t.duration} мин${t.time?" · "+esc(t.time):""}${t.goalId?" · 🎯":""}</div>${t.note?`<div class="subtle">${esc(t.note)}</div>`:""}</div><span class="task-status ${st}">${st==="done"?"Выполнено":st==="missed"?"Пропущено":"В плане"}</span><div class="task-actions">${action}${edit}${del}</div></div>`;
+};
+App.taskList=function(tasks,date){
+  if(!tasks.length)return `<div class="empty"><strong>Ничего не найдено</strong>Измени фильтры или добавь задачу.</div>`;
+  return tasks.map(t=>this.taskHTML(t,date)).join("");
+};
+App.home=function(){
+  const s=Data.stats(),p=Data.profile(),lv=Data.recalcLevel(),prog=SQ.clamp(lv.xp/lv.need*100,0,100),today=Data.tasksForDate();
+  document.getElementById("home").innerHTML=`<div class="card hero"><div class="hero-row"><div><div class="eyebrow">${Dates.label(SQ.today(),{weekday:"long",day:"numeric",month:"long"})}</div><h2>Привет, ${esc(p.name)} 👋</h2><p>Сегодня главное — сделать следующий маленький шаг.</p></div><div class="level-ring" style="--p:${prog}%"><b>${lv.level}</b></div></div><div style="margin-top:20px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span>Прогресс уровня</span><b>${Math.floor(lv.xp)} / ${lv.need} XP</b></div><div class="progress" style="background:rgba(255,255,255,.18)"><i style="width:${prog}%;background:#fff"></i></div></div></div>
+  <div class="metric-grid" style="margin-top:16px"><div class="metric"><span>Уровень</span><b>${lv.level}</b></div><div class="metric"><span>XP</span><b>${Math.floor(p.totalExp)}</b></div><div class="metric"><span>Streak</span><b>🔥 ${p.streak}</b></div><div class="metric"><span>Всего задач</span><b>${s.tasks}</b></div><div class="metric"><span>Выполнено</span><b>${s.done}</b></div><div class="metric"><span>Процент</span><b>${s.rate}%</b></div></div>
+  <div class="section-head"><div><h2>Сегодня</h2><p>${today.length?today.length+" задач в плане":"План на сегодня свободен"}</p></div><button class="btn" onclick="App.openTask()">+ Задача</button></div><div class="card">${this.taskList(today,SQ.today())}</div>
+  <div class="section-head"><div><h2>Быстрый обзор</h2><p>Текущая динамика</p></div><button class="btn secondary sm" onclick="App.go('analytics')">Открыть аналитику</button></div>
+  <div class="grid g2"><div class="card"><h2 style="font-size:16px">Вес</h2>${this.weightMini()}</div><div class="card"><h2 style="font-size:16px">Цели</h2>${Data.goals.length?Data.goals.slice(0,3).map(g=>{const x=Data.goalProgress(g);return `<div style="margin-top:12px"><div style="display:flex;justify-content:space-between;font-size:12px"><b>${g.achieved?"🏆":"🎯"} ${esc(g.title)}</b><span>${x.rate}%</span></div><div class="progress" style="margin-top:6px"><i style="width:${x.rate}%"></i></div></div>`}).join(""):`<div class="empty" style="padding:18px">Целей пока нет</div>`}</div></div>`;
+  this.bindDynamic();
+};
+App.weightMini=function(){
+  const w=Data.weightStats("30"),l=w.last;return `<div class="weight-kpis" style="margin-top:12px"><div class="weight-kpi"><span>Последний</span><b>${l?l.weight.toFixed(1)+" кг":"—"}</b></div><div class="weight-kpi"><span>Изменение</span><b>${w.change==null?"—":(w.change>0?"+":"")+w.change.toFixed(1)}</b></div></div><button class="btn secondary sm" style="margin-top:12px" onclick="App.go('weight')">Журнал веса</button>`;
+};
+
+/* ---------- Analytics ---------- */
+App.analytics=function(){
+  const period=this.analyticsPeriod,a=Data.analytics(period),s=Data.stats(),p=Data.profile(),lv=Data.recalcLevel();
+  const xpPeriod=a.xp.reduce((x,y)=>x+y,0);
+  document.getElementById("analytics").innerHTML=`<div class="section-head"><div><h2>Аналитика</h2><p>Данные SkillQuest за выбранный период</p></div><div class="toolbar"><div class="segmented">${[7,30,90].map(n=>`<button class="${period===n?"active":""}" onclick="App.setAnalyticsPeriod(${n})">${n}D</button>`).join("")}</div><button class="btn" onclick="App.openTask()">+ Задача</button></div></div>
+  <div class="metric-grid"><div class="metric"><span>Уровень</span><b>${lv.level}</b></div><div class="metric"><span>Общий XP</span><b>${Math.floor(p.totalExp)}</b></div><div class="metric"><span>XP за период</span><b>${xpPeriod.toFixed(1)}</b></div><div class="metric"><span>Streak</span><b>🔥 ${p.streak}</b></div><div class="metric"><span>Задач</span><b>${s.tasks}</b></div><div class="metric"><span>Выполнение</span><b>${s.rate}%</b></div></div>
+  <div class="grid g2" style="margin-top:16px"><div class="card"><div class="section-head" style="margin-top:0"><div><h2>Активность</h2><p>Выполнено и пропущено</p></div></div>${this.activityChart(period)}</div><div class="card"><div class="section-head" style="margin-top:0"><div><h2>Выполненные / пропущенные</h2></div></div>${this.donutChart(s)}</div></div>
+  <div class="grid g2" style="margin-top:16px"><div class="card"><div class="section-head" style="margin-top:0"><div><h2>XP по дням</h2><p>За ${period} дней</p></div></div>${this.xpPeriodChart(period)}</div><div class="card"><div class="section-head" style="margin-top:0"><div><h2>Журналы</h2><p>Результативность</p></div></div>${this.journalBars(a.journal)}</div></div>
+  <div class="card" style="margin-top:16px"><div class="section-head" style="margin-top:0"><div><h2>Динамика веса</h2><p>Реальные измерения пользователя</p></div><div class="segmented">${["7","30","90","all"].map(x=>`<button class="${this.weightPeriod===x?"active":""}" onclick="App.setWeightPeriod('${x}')">${x==="all"?"ALL":x+"D"}</button>`).join("")}</div></div>${this.weightChart(this.weightPeriod)}</div>
+  <div class="section-head"><div><h2>Аналитика журналов</h2><p>Нажми «Открыть» для детальной статистики</p></div></div><div class="grid g2">${Data.journals.map(j=>{const x=this.journalAnalytics(j.name,period);return `<div class="card"><div class="journal-head"><div class="journal-icon">${j.icon}</div><div><h3>${esc(j.name)}</h3><small>${x.rate}% выполнения</small></div><div class="xp">${x.xp.toFixed(1)} XP</div></div><div class="progress" style="margin-top:12px"><i style="width:${x.rate}%"></i></div><div class="data-actions" style="margin-top:12px"><span class="subtle">${x.tasks} задач · ${x.done} выполнено · ${x.missed} пропущено</span><button class="btn secondary sm" onclick="App.openJournalAnalytics('${esc(j.name)}')">Открыть</button></div></div>`}).join("")}</div>`;
+};
+App.setAnalyticsPeriod=function(n){this.analyticsPeriod=n;this.renderPage()};
+App.activityChart=function(period){
+  const end=SQ.today(),start=Dates.add(end,-(period-1)),labels=[],done=[],miss=[];
+  for(let i=0;i<period;i++){const d=Dates.add(start,i);labels.push(d);let a=0,b=0;Data.tasks.forEach(t=>{if(Data.isScheduled(t,d)){if(t.completedDates.includes(d))a++;else if(t.missedDates.includes(d)||d<end)b++}});done.push(a);miss.push(b)}
+  const W=760,H=220,pad=36,max=Math.max(...done,...miss,1),step=Math.max(1,Math.ceil(period/7)),x=i=>pad+i*(W-pad*2)/(period-1),y=v=>H-30-v/max*(H-50);
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${done.map((v,i)=>i%step===0?`<text class="chart-label" x="${x(i)}" y="${H-6}" text-anchor="middle">${esc(Dates.label(labels[i],{day:"numeric",month:"short"}))}</text>`:"").join("")}<polyline class="chart-line" points="${done.map((v,i)=>`${x(i)},${y(v)}`).join(" ")}"/><polyline class="chart-line" style="stroke:var(--danger);stroke-width:2" points="${miss.map((v,i)=>`${x(i)},${y(v)}`).join(" ")}"/>${done.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="2.5" fill="var(--primary)"><title>${labels[i]}: ${v}</title></circle>`).join("")}</svg></div><div class="subtle">● выполнено &nbsp; <span style="color:var(--danger)">●</span> пропущено</div>`;
+};
+App.donutChart=function(s){
+  const total=s.done+s.miss||1,rate=Math.round(s.done/total*100);
+  return `<div class="donut-wrap"><div class="donut" style="--done:${s.done/total*100}%;--total:100%"><div class="donut-center"><b>${rate}%</b><span>успех</span></div></div><div class="legend"><div><span><i class="dot"></i>Выполнено</span><b>${s.done}</b></div><div><span><i class="dot red"></i>Пропущено</span><b>${s.miss}</b></div><div><span><i class="dot gray"></i>Запланировано</span><b>${s.scheduled}</b></div></div></div>`;
+};
+App.xpPeriodChart=function(period){
+  const a=Data.analytics(period);return sqBars(a.xp,a.labels);
+};
+App.weightChart=function(period){
+  const w=Data.weightStats(period),rows=w.rows;
+  if(!rows.length)return `<div class="empty"><strong>Пока нет измерений</strong>Добавь первое значение веса, и график появится автоматически.</div>`;
+  const values=rows.map(x=>x.weight),labels=rows.map(x=>x.date);
+  return `<div class="weight-kpis"><div class="weight-kpi"><span>Последний</span><b>${w.last.weight.toFixed(1)} кг</b></div><div class="weight-kpi"><span>Изменение</span><b>${w.change==null?"—":(w.change>0?"+":"")+w.change.toFixed(1)} кг</b></div><div class="weight-kpi"><span>Минимум</span><b>${w.min.toFixed(1)} кг</b></div><div class="weight-kpi"><span>Максимум</span><b>${w.max.toFixed(1)} кг</b></div></div>${sqLineChart(values,labels,{unit:" кг"})}`;
+};
+App.setWeightPeriod=function(p){this.weightPeriod=p;this.renderPage()};
+App.journalAnalytics=function(name,period){
+  const start=Dates.add(SQ.today(),-(period-1)),tasks=Data.tasks.filter(t=>t.journal===name);
+  let done=0,missed=0,xp=0;
+  tasks.forEach(t=>{t.completedDates.forEach(d=>{if(d>=start&&d<=SQ.today()){done++;xp+=t.duration*.005}});t.missedDates.forEach(d=>{if(d>=start&&d<=SQ.today())missed++})});
+  return {tasks:tasks.length,done,missed,xp,rate:done+missed?Math.round(done/(done+missed)*100):0};
+};
+App.openJournalAnalytics=function(name){
+  const period=this.analyticsPeriod,x=this.journalAnalytics(name,period),a=Data.analytics(period),j=Data.journal(name)||{icon:"📌"};
+  const activity=a.labels.map((d,i)=>{let n=0;Data.tasks.filter(t=>t.journal===name).forEach(t=>{if(t.completedDates.includes(d))n++});return n});
+  document.getElementById("analytics").innerHTML=`<div class="section-head"><div><h2>${j.icon} ${esc(name)}</h2><p>Детальная аналитика за ${period} дней</p></div><button class="btn secondary" onclick="App.analytics()">← Назад</button></div><div class="metric-grid"><div class="metric"><span>Задач</span><b>${x.tasks}</b></div><div class="metric"><span>Выполнено</span><b>${x.done}</b></div><div class="metric"><span>Пропущено</span><b>${x.missed}</b></div><div class="metric"><span>Выполнение</span><b>${x.rate}%</b></div><div class="metric"><span>XP</span><b>${x.xp.toFixed(1)}</b></div><div class="metric"><span>Streak</span><b>🔥 ${this.journalStreak(name)}</b></div></div><div class="card" style="margin-top:16px"><h2 style="font-size:17px">Активность по дням</h2>${sqLineChart(activity,a.labels)}</div>`;
+};
+App.journalStreak=function(name){
+  const set=new Set(Data.tasks.filter(t=>t.journal===name).flatMap(t=>t.completedDates).filter(d=>d<=SQ.today()));let n=0,d=SQ.today();while(set.has(d)){n++;d=Dates.add(d,-1)}return n;
+};
+
+/* ---------- Weight page ---------- */
+App.weight=function(){
+  const w=Data.weightStats(this.weightPeriod),rows=w.all.slice().reverse();
+  document.getElementById("weight").innerHTML=`<div class="section-head"><div><h2>Журнал веса</h2><p>История измерений и динамика</p></div><button class="btn" onclick="App.openWeight()">+ Измерение</button></div>
+  <div class="card"><div class="section-head" style="margin-top:0"><div><h2>Динамика веса</h2><p>График обновляется после каждого измерения</p></div><div class="segmented">${["7","30","90","all"].map(x=>`<button class="${this.weightPeriod===x?"active":""}" onclick="App.setWeightPeriod('${x}')">${x==="all"?"ALL":x+"D"}</button>`).join("")}</div></div>${this.weightChart(this.weightPeriod)}</div>
+  <div class="section-head"><div><h2>История</h2><p>${rows.length} измерений</p></div></div><div class="card">${rows.length?`<div class="table-wrap"><table class="mini-table"><thead><tr><th>Дата</th><th>Вес</th><th>Изменение</th><th>Действия</th></tr></thead><tbody>${rows.map((r,i)=>{const newer=rows[i-1];const ch=newer?r.weight-newer.weight:null;return `<tr><td>${esc(Dates.label(r.date,{day:"numeric",month:"short",year:"numeric"}))}</td><td><b>${r.weight.toFixed(1)} кг</b></td><td>${ch==null?"—":(ch>0?"+":"")+ch.toFixed(1)+" кг"}</td><td><button class="btn secondary sm" onclick="App.editWeight('${r.id}')">Изм.</button> <button class="btn danger sm" onclick="App.removeWeight('${r.id}')">Удал.</button></td></tr>`}).join("")}</tbody></table></div>`:`<div class="empty"><strong>Журнал веса пуст</strong>Добавь первое измерение.</div>`}</div>`;
+};
+App.openWeight=function(wid=null){
+  const w=wid?Data.state.weightLog.find(x=>x.id===wid):null;
+  const title=w?"Изменить измерение":"Новое измерение";
+  document.getElementById("weightModalTitle").textContent=title;
+  document.getElementById("wId").value=w?.id||"";
+  document.getElementById("wValue").value=w?.weight??Data.profile().weight??"";
+  document.getElementById("wDate").value=w?.date||SQ.today();
+  document.getElementById("wNote").value=w?.note||"";
+  this.open("weightModal");
+};
+App.editWeight=function(id){this.openWeight(id)};
+App.removeWeight=function(id){if(confirm("Удалить это измерение?"))Data.deleteWeight(id)};
+App.saveWeight=function(){
+  const idv=document.getElementById("wId").value,weight=SQ.safeNum(document.getElementById("wValue").value),date=document.getElementById("wDate").value,note=document.getElementById("wNote").value.trim();
+  if(weight<=0||!date||date>SQ.today()){Toast("Проверь значение веса и дату","error");return}
+  if(idv)Data.updateWeight(idv,weight,date,note);else Data.addWeight(weight,date,note);
+  this.close("weightModal");this.renderPage();
+};
+
+/* ---------- Calendar with journal filter + day statistics ---------- */
+App.calendar=function(){
+  const d=this.calMonth,year=d.getFullYear(),month=d.getMonth(),first=new Date(year,month,1).getDay(),days=new Date(year,month+1,0).getDate(),prev=new Date(year,month,0).getDate();
+  let cells=[];for(let i=first-1;i>=0;i--)cells.push({day:prev-i,other:1,date:Dates.localDate(new Date(year,month-1,prev-i))});
+  for(let x=1;x<=days;x++)cells.push({day:x,other:0,date:`${year}-${Dates.pad(month+1)}-${Dates.pad(x)}`});
+  while(cells.length%7){const n=cells.length-days-first+1;cells.push({day:n,other:1,date:`${year}-${Dates.pad(month+2)}-${Dates.pad(n)}`})}
+  const heads=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
+  const filtered=dte=>Data.tasksForDate(dte,this.calendarJournal);
+  const monthTasks=[...new Set(cells.filter(c=>!c.other).flatMap(c=>filtered(c.date).map(t=>t.id)))];
+  const done=monthTasks.filter(idv=>{const t=Data.tasks.find(x=>x.id===idv);return t&&t.completedDates.some(x=>x.slice(0,7)===`${year}-${Dates.pad(month+1)}`)}).length;
+  document.getElementById("calendar").innerHTML=`<div class="section-head"><div><h2>Календарь</h2><p>План, факт и пропуски</p></div><button class="btn" onclick="App.openTask()">+ Задача</button></div>
+  <div class="card"><div class="toolbar" style="margin-bottom:12px"><label class="subtle">Фильтр журнала</label><select class="input" onchange="App.calendarJournal=this.value;App.calendar()"><option value="">Все журналы</option>${Data.journals.map(j=>`<option value="${esc(j.name)}" ${this.calendarJournal===j.name?"selected":""}>${j.icon} ${esc(j.name)}</option>`).join("")}</select></div>
+  <div class="calendar-toolbar"><button class="btn secondary sm" onclick="App.calMove(-1)">←</button><div class="calendar-title">${d.toLocaleDateString("ru-RU",{month:"long",year:"numeric"})}</div><div style="display:flex;gap:6px"><button class="btn secondary sm" onclick="App.calToday()">Сегодня</button><button class="btn secondary sm" onclick="App.calMove(1)">→</button></div></div>
+  <div class="cal-grid">${heads.map(h=>`<div class="cal-head">${h}</div>`).join("")}${cells.map(c=>{const ts=filtered(c.date),isToday=c.date===SQ.today();return `<div class="cal-cell ${c.other?"other":""} ${isToday?"today":""}" onclick="App.day('${c.date}')"><div class="day">${c.day}</div><div class="cal-dots">${ts.slice(0,8).map(t=>`<i class="cal-dot ${Data.status(t,c.date)}" title="${esc(t.title)}"></i>`).join("")}</div></div>`}).join("")}</div>
+  <div class="subtle" style="margin-top:12px">Задач в выбранном месяце: ${monthTasks.length} · выполнено: ${done}</div></div><div id="dayDetail"></div>`;
+};
+App.day=function(date){
+  const ts=Data.tasksForDate(date,this.calendarJournal);
+  document.getElementById("dayDetail").innerHTML=`<div class="section-head"><div><h2>${Dates.label(date,{weekday:"long",day:"numeric",month:"long"})}</h2><p>${ts.length} задач${this.calendarJournal?" · "+esc(this.calendarJournal):""}</p></div></div><div class="card">${this.taskList(ts,date)}</div>`;
+  this.bindDynamic();
+};
+
+/* ---------- Task filters ---------- */
+App.taskFiltersHTML=function(){
+  const f=this.taskFilters;
+  return `<div class="card" style="margin-bottom:14px"><div class="toolbar"><input class="input" placeholder="Поиск задач…" value="${esc(f.search)}" oninput="App.taskFilters.search=this.value;App.renderTaskFiltered()"><select class="input" onchange="App.taskFilters.status=this.value;App.renderTaskFiltered()"><option value="all" ${f.status==="all"?"selected":""}>Все</option><option value="done" ${f.status==="done"?"selected":""}>Выполненные</option><option value="pending" ${f.status==="pending"?"selected":""}>Невыполненные</option><option value="missed" ${f.status==="missed"?"selected":""}>Просроченные</option><option value="today" ${f.status==="today"?"selected":""}>Сегодня</option><option value="future" ${f.status==="future"?"selected":""}>Будущие</option></select><select class="input" onchange="App.taskFilters.journal=this.value;App.renderTaskFiltered()"><option value="">Все журналы</option>${Data.journals.map(j=>`<option value="${esc(j.name)}" ${f.journal===j.name?"selected":""}>${j.icon} ${esc(j.name)}</option>`).join("")}</select><select class="input" onchange="App.taskFilters.goal=this.value;App.renderTaskFiltered()"><option value="">Все цели</option>${Data.goals.map(g=>`<option value="${esc(g.id)}" ${f.goal===g.id?"selected":""}>🎯 ${esc(g.title)}</option>`).join("")}</select></div></div>`;
+};
+App.renderTaskFiltered=function(){
+  const box=document.getElementById("taskFilterResults");if(!box)return;
+  const f=this.taskFilters,today=SQ.today(),q=f.search.toLowerCase();
+  let arr=Data.tasks.filter(t=>(!f.journal||t.journal===f.journal)&&(!f.goal||t.goalId===f.goal)&&(!q||t.title.toLowerCase().includes(q)||t.note.toLowerCase().includes(q)));
+  arr=arr.filter(t=>{if(f.status==="today")return Data.isScheduled(t,today);if(f.status==="future")return Data.occurrences(t).some(d=>d>today);if(f.status==="done")return t.completedDates.length>0;if(f.status==="missed")return t.missedDates.length>0;if(f.status==="pending")return Data.occurrences(t).some(d=>d>=today&&!t.completedDates.includes(d));return true});
+  arr.sort((a,b)=>a.startDate.localeCompare(b.startDate));
+  box.innerHTML=this.taskList(arr,today);
+  this.bindDynamic();
+};
+
+/* ---------- Journals page gets task filtering ---------- */
+const oldJournals=App.journals;
+App.journals=function(){
+  const js=Data.journals.slice().sort((a,b)=>b.exp-a.exp);
+  document.getElementById("journals").innerHTML=`<div class="section-head"><div><h2>Журналы</h2><p>Твои сферы развития</p></div><button class="btn" onclick="App.openTask()">+ Задача</button></div><div class="grid g2">${js.map(j=>this.journalCard(j)).join("")}</div>
+  <div class="section-head"><div><h2>Задачи</h2><p>Фильтры комбинируются</p></div></div>${this.taskFiltersHTML()}<div class="card" id="taskFilterResults"></div>`;
+  this.renderTaskFiltered();
+};
+
+/* ---------- Goals full CRUD ---------- */
+App.goals=function(){
+  const gs=Data.goals;
+  document.getElementById("goals").innerHTML=`<div class="section-head"><div><h2>Цели</h2><p>Цель достигается только выполнением условий, а не датой</p></div><button class="btn" onclick="App.openGoal()">+ Цель</button></div><div class="list">${gs.length?gs.map(g=>{const x=Data.goalProgress(g),deadline=g.deadline?Dates.label(g.deadline,{day:"numeric",month:"short",year:"numeric"}):"Без дедлайна";return `<div class="goal"><div class="goal-top"><div><h3>${g.achieved?"🏆 ":"🎯 "}${esc(g.title)}</h3><p>${esc(g.desc||"")}</p></div><b>${x.rate}%</b></div><div class="progress"><i style="width:${x.rate}%"></i></div><div class="goal-foot"><span>${x.done} / ${x.required} обязательных дней · ${esc(deadline)}</span><span>${g.achieved?"Достигнута":"В процессе"} · +${SQ.safeNum(g.rewardXP,.05)} XP</span></div><div class="data-actions" style="margin-top:10px"><button class="btn secondary sm" onclick="App.openGoal('${g.id}')">Изменить</button><button class="btn danger sm" onclick="App.deleteGoal('${g.id}')">Удалить</button></div></div>`}).join(""):`<div class="card empty"><strong>Целей пока нет</strong>Создай первую цель и привяжи к ней задачи.</div>`}</div>`;
+};
+App.openGoal=function(gid=null){
+  const g=gid?Data.goals.find(x=>x.id===gid):null;
+  const title=g?"Изменить цель":"Новая цель";
+  document.getElementById("goalModalTitle").textContent=title;
+  document.getElementById("gId").value=g?.id||"";document.getElementById("gTitle").value=g?.title||"";
+  document.getElementById("gDesc").value=g?.desc||"";document.getElementById("gDeadline").value=g?.deadline||"";
+  document.getElementById("gReward").value=g?.rewardXP??1;this.open("goalModal");
+};
+App.saveGoal=function(){
+  const gid=document.getElementById("gId").value,title=document.getElementById("gTitle").value.trim(),desc=document.getElementById("gDesc").value.trim(),deadline=document.getElementById("gDeadline").value,reward=Math.max(0,SQ.safeNum(document.getElementById("gReward").value,1));
+  if(!title){Toast("Введите название цели","error");return}
+  if(deadline&&deadline<SQ.today()){Toast("Дедлайн не должен быть в прошлом","error");return}
+  if(gid)Data.updateGoal(gid,{title,desc,deadline,rewardXP:reward});else Data.goals.push({id:id(),title,desc,deadline,rewardXP:reward,achieved:false,achievedAt:null,createdAt:SQ.dateTimeNow()});
+  Data.save();this.close("goalModal");Toast("Цель сохранена","success");
+};
+App.deleteGoal=function(idv){if(confirm("Удалить цель? Привязанные задачи останутся, но потеряют привязку."))Data.deleteGoal(idv)};
+
+/* ---------- Task editing/deletion ---------- */
+App.editTask=function(tid){
+  const t=Data.tasks.find(x=>x.id===tid);if(!t)return;
+  this.fillFormLists();this.editingTask=tid;document.getElementById("taskModalTitle").textContent="Изменить задачу";
+  document.getElementById("fTitle").value=t.title;document.getElementById("fJournal").value=t.journal;document.getElementById("fDuration").value=t.duration;
+  document.getElementById("fStart").value=t.startDate;document.getElementById("fEnd").value=t.endDate;document.getElementById("fTime").value=t.time;
+  document.getElementById("fGoal").value=t.goalId||"";document.getElementById("fNote").value=t.note||"";
+  document.querySelectorAll(".day-chip").forEach(c=>c.classList.toggle("active",(t.daysOfWeek||[]).includes(Number(c.dataset.day))));this.open("taskModal");
+};
+App.deleteTask=function(tid){if(confirm("Удалить задачу и её историю выполнения?")){Data.deleteTask(tid);Toast("Задача удалена","success")}};
+
+/* ---------- Notes with edit/search/date/journal ---------- */
+App.notes=function(){
+  const ns=Data.state.notes.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  document.getElementById("notes").innerHTML=`<div class="section-head"><div><h2>Заметки</h2><p>Мысли, наблюдения и итоги</p></div><button class="btn" onclick="App.openNote()">+ Заметка</button></div><div class="card"><div class="toolbar"><input class="input" id="noteSearch" placeholder="Поиск заметок…" oninput="App.filterNotes()"><select class="input" id="noteJournal" onchange="App.filterNotes()"><option value="">Все журналы</option>${Data.journals.map(j=>`<option value="${esc(j.name)}">${j.icon} ${esc(j.name)}</option>`).join("")}</select></div></div><div class="list" id="noteResults" style="margin-top:12px"></div>`;
+  this.filterNotes();
+};
+App.filterNotes=function(){
+  const q=(document.getElementById("noteSearch")?.value||"").toLowerCase(),j=document.getElementById("noteJournal")?.value||"",box=document.getElementById("noteResults");if(!box)return;
+  const ns=Data.state.notes.slice().reverse().filter(n=>(!j||n.journal===j)&&(!q||n.text.toLowerCase().includes(q)));
+  box.innerHTML=ns.length?ns.map(n=>`<div class="note"><div style="display:flex;justify-content:space-between;gap:10px"><div><h3>${esc(Dates.label(n.date||n.createdAt.slice(0,10),{day:"numeric",month:"long",year:"numeric"}))}</h3><div class="note-meta">${n.journal?esc(n.journal):"Без журнала"}</div></div><div class="data-actions"><button class="btn secondary sm" onclick="App.editNote('${n.id}')">Изм.</button><button class="btn danger sm" onclick="Data.deleteNote('${n.id}')">Удал.</button></div></div><p>${esc(n.text)}</p></div>`).join(""):`<div class="card empty"><strong>Заметок не найдено</strong>Попробуй другой запрос.</div>`;
+};
+App.openNote=function(nid=null){
+  const n=nid?Data.state.notes.find(x=>x.id===nid):null;
+  document.getElementById("noteModalTitle").textContent=n?"Изменить заметку":"Новая заметка";
+  document.getElementById("nId").value=n?.id||"";document.getElementById("nText").value=n?.text||"";
+  document.getElementById("nDate").value=n?.date||SQ.today();document.getElementById("nJournal").value=n?.journal||"";this.open("noteModal");
+};
+App.editNote=function(idv){this.openNote(idv)};
+App.saveNote=function(){
+  const idv=document.getElementById("nId").value,text=document.getElementById("nText").value.trim(),date=document.getElementById("nDate").value,journal=document.getElementById("nJournal").value;
+  if(!text||!date){Toast("Заполни текст и дату","error");return}
+  if(idv)Data.updateNote(idv,text,date,journal);else Data.addNote(text,date,journal);
+  this.close("noteModal");this.renderPage();Toast("Заметка сохранена","success");
+};
+
+/* ---------- Profile / import-export hardening ---------- */
+App.saveProfile=function(){
+  const p=Data.profile();p.name=document.getElementById("pName").value.trim()||"Герой";p.age=Math.max(0,SQ.safeNum(document.getElementById("pAge").value));p.weight=Math.max(0,SQ.safeNum(document.getElementById("pWeight").value));p.height=Math.max(0,SQ.safeNum(document.getElementById("pHeight").value));
+  if(p.weight)Data.addWeight(p.weight,SQ.today(),"Синхронизация из профиля");else Data.save();Toast("Профиль сохранён","success");
+};
+App.import=function(file){
+  if(!file)return;const r=new FileReader();
+  r.onload=()=>{try{
+    const obj=JSON.parse(r.result);if(!obj||typeof obj!=="object")throw new Error();
+    const base=Data.defaults();
+    const merged={...base,...obj,profile:{...base.profile,...(obj.profile||{})},
+      journals:Array.isArray(obj.journals)?obj.journals:base.journals,tasks:Array.isArray(obj.tasks)?obj.tasks:[],
+      goals:Array.isArray(obj.goals)?obj.goals:[],weightLog:Array.isArray(obj.weightLog)?obj.weightLog:[],
+      notes:Array.isArray(obj.notes)?obj.notes:[],photos:Array.isArray(obj.photos)?obj.photos:[]};
+    localStorage.setItem(Data.key,JSON.stringify(merged));Data.load();Data.save();Toast("Данные импортированы и мигрированы","success");
+  }catch(e){Toast("Не удалось импортировать: повреждённый или неподдерживаемый JSON","error")}};
+  r.readAsText(file);
+};
+App.settings=function(){
+  const p=Data.profile();
+  document.getElementById("settings").innerHTML=`<div class="section-head"><div><h2>Ещё</h2><p>Профиль, данные и внешний вид</p></div></div><div class="grid g2"><div class="card"><h2 style="font-size:17px;margin-bottom:12px">Профиль</h2><div class="form-grid"><div class="field"><label>Имя</label><input class="input" id="pName" value="${esc(p.name)}"></div><div class="field"><label>Возраст</label><input class="input" id="pAge" type="number" min="0" value="${p.age||0}"></div><div class="field"><label>Вес, кг</label><input class="input" id="pWeight" type="number" min="0" step=".1" value="${p.weight||0}"></div><div class="field"><label>Рост, см</label><input class="input" id="pHeight" type="number" min="0" value="${p.height||0}"></div><div class="field full"><button class="btn" onclick="App.saveProfile()">Сохранить профиль</button></div></div></div>
+  <div class="card"><h2 style="font-size:17px;margin-bottom:12px">Данные</h2><div class="settings-row"><span>Экспорт</span><button class="btn secondary sm" onclick="App.export()">Скачать JSON</button></div><div class="settings-row"><span>Импорт</span><button class="btn secondary sm" onclick="document.getElementById('importFile').click()">Загрузить JSON</button></div><input id="importFile" type="file" accept=".json,application/json" hidden onchange="App.import(this.files[0])"><div class="settings-row"><span>Тема</span><button class="btn secondary sm" onclick="App.toggleTheme()">Сменить</button></div><div class="settings-row"><span>Версия данных</span><span class="subtle">${Data.state.version} · миграция включена</span></div><div class="settings-row"><span>Сброс</span><button class="btn danger sm" onclick="App.reset()">Удалить всё</button></div></div></div>`;
+};
+App.export=function(){
+  const payload={...Data.state,exportedAt:SQ.dateTimeNow(),exportVersion:Data.version};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=`skillquest-backup-${SQ.today()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);Toast("Резервная копия создана","success");
+};
+
+/* ---------- Modal markup injection ---------- */
+(function injectProUI(){
+  if(!document.getElementById("weight")){const sec=document.createElement("section");sec.id="weight";sec.className="page";document.querySelector(".app").appendChild(sec)}
+  const nav=document.querySelector(".nav");
+  if(!document.querySelector('[data-page="weight"]')){
+    const b=document.createElement("button");b.dataset.page="weight";b.innerHTML="<b>⚖</b>Вес";nav.appendChild(b);
+  }
+  const modals=document.createElement("div");
+  modals.innerHTML=`<div class="modal-bg" id="weightModal"><div class="modal"><div class="modal-head"><h2 id="weightModalTitle">Новое измерение</h2><button class="icon-btn" data-close="weightModal">×</button></div><form id="weightForm" class="form-grid"><input id="wId" type="hidden"><div class="field"><label>Вес, кг</label><input class="input" id="wValue" type="number" min=".1" max="500" step=".1" required></div><div class="field"><label>Дата</label><input class="input" id="wDate" type="date" required></div><div class="field full"><label>Заметка</label><input class="input" id="wNote" class="input" maxlength="200"></div><div class="field full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn secondary" data-close="weightModal">Отмена</button><button class="btn">Сохранить</button></div></form></div></div>
+  <div class="modal-bg" id="goalModal"><div class="modal"><div class="modal-head"><h2 id="goalModalTitle">Новая цель</h2><button class="icon-btn" data-close="goalModal">×</button></div><form id="goalForm" class="form-grid"><input id="gId" type="hidden"><div class="field full"><label>Название</label><input class="input" id="gTitle" required maxlength="120"></div><div class="field full"><label>Описание</label><textarea class="input" id="gDesc" rows="3" maxlength="500"></textarea></div><div class="field"><label>Дедлайн</label><input class="input" id="gDeadline" type="date"></div><div class="field"><label>Награда XP</label><input class="input" id="gReward" type="number" min="0" step=".1" value="1"></div><div class="field full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn secondary" data-close="goalModal">Отмена</button><button class="btn">Сохранить</button></div></form></div></div>`;
+  document.body.appendChild(modals);
+  const note=document.getElementById("noteModal"),head=note.querySelector(".modal-head h2");head.id="noteModalTitle";
+  const form=document.getElementById("noteForm"),text=document.getElementById("nText");
+  form.insertAdjacentHTML("afterbegin",`<input id="nId" type="hidden"><div class="field"><label>Дата</label><input class="input" id="nDate" type="date" required></div><div class="field"><label>Журнал</label><select class="input" id="nJournal"><option value="">Без журнала</option>${Data.journals.map(j=>`<option value="${esc(j.name)}">${j.icon} ${esc(j.name)}</option>`).join("")}</select></div>`);
+  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>App.close(b.dataset.close));
+  document.getElementById("weightForm").onsubmit=e=>{e.preventDefault();App.saveWeight()};
+  document.getElementById("goalForm").onsubmit=e=>{e.preventDefault();App.saveGoal()};
+})();
+
+/* Replace avatar button contents after render. */
+App.avatar=function(){
+  const input=document.createElement("input");input.type="file";input.accept="image/*";
+  input.onchange=()=>{const f=input.files[0];if(!f)return;if(f.size>3*1024*1024){Toast("Изображение слишком большое (макс. 3 МБ)","error");return}
+    const r=new FileReader();r.onload=()=>{Data.profile().avatar=r.result;Data.save();Toast("Аватар обновлён","success")};r.readAsDataURL(f)};
+  input.click();
+};
+const originalRenderHeader=App.render;
+App.render=function(){originalRenderHeader.call(this);const a=document.getElementById("avatarBtn");if(a){a.innerHTML=Data.profile().avatar?`<img src="${SQ.escapeAttr(Data.profile().avatar)}" alt="">`:esc((Data.profile().name||"Г").charAt(0).toUpperCase())}};
+
+/* Rebind navigation after weight button injection and boot again. */
+(function finalBoot(){
+  if(localStorage.getItem("skillquest_dark")==="1")document.documentElement.classList.add("dark");
+  document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>App.go(b.dataset.page));
+  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>App.close(b.dataset.close));
+  App.init();
+})();
+</script>
+
 </body>
 </html>
