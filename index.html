@@ -2231,3 +2231,108 @@ body{padding-bottom:calc(var(--nav) + var(--sq-secondary-nav) + 28px + env(safe-
 <script id="sq-navigation-redesign-behavior">
 (function(){"use strict";const $=s=>document.querySelector(s);const routes=[['home','🏠','Главная'],['tasks','✅','Задачи'],['goals','🎯','Цели'],['statistics','📊','Статистика'],['gallery','🖼️','Галерея']];function install(){let r=$('#sqSecondaryNav');if(!r){r=document.createElement('div');r.id='sqSecondaryNav';r.className='sq-secondary-nav';r.setAttribute('aria-label','Быстрый доступ');r.innerHTML='<div class="sq-secondary-inner">'+routes.map(x=>`<button type="button" data-sq-route="${x[0]}" aria-label="${x[2]}"><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')+'</div>';document.body.appendChild(r);r.addEventListener('click',e=>{const b=e.target.closest('[data-sq-route]');if(b&&window.App&&typeof App.go==='function')App.go(b.dataset.sqRoute)})}r.querySelectorAll('[data-sq-route]').forEach(b=>b.classList.toggle('active',b.dataset.sqRoute===App.page))}const oldGo=App.go;App.go=function(page){oldGo.call(this,page);requestAnimationFrame(install)};const oldRender=App.renderPage;App.renderPage=function(){oldRender.call(this);requestAnimationFrame(install)};install();setTimeout(install,100);setTimeout(install,400)})();
 </script>
+
+<!-- FINAL NAVIGATION / QUICK ACCESS FIX -->
+<style id="sq-final-quick-access-css">
+  .sq-secondary-nav{display:none!important}
+  #sqWorkspaceDock{display:none!important}
+  .sq-quick-menu{position:fixed;inset:0;z-index:1000;display:none;align-items:flex-end;justify-content:center;background:rgba(10,10,20,.28);backdrop-filter:blur(3px)}
+  .sq-quick-menu.open{display:flex}
+  .sq-quick-panel{width:min(620px,100%);max-height:min(78vh,720px);overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:24px 24px 0 0;box-shadow:0 -18px 50px rgba(20,20,50,.22);padding:14px 14px calc(18px + env(safe-area-inset-bottom));animation:sqSheetIn .18s ease-out}
+  .sq-quick-handle{width:42px;height:4px;border-radius:999px;background:var(--border);margin:0 auto 12px}
+  .sq-quick-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .sq-quick-head h2{font-size:18px;margin:0}.sq-quick-head p{margin:3px 0 0;color:var(--muted);font-size:11px}
+  .sq-quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+  .sq-quick-item{min-height:82px;border:1px solid var(--border);border-radius:16px;background:var(--surface2);color:var(--text);padding:11px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:3px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .sq-quick-item b{font-size:22px;line-height:1}.sq-quick-item strong{font-size:12px}.sq-quick-item small{font-size:10px;color:var(--muted);line-height:1.2}
+  .sq-quick-item:active{transform:scale(.97)}.sq-quick-item.active{border-color:color-mix(in srgb,var(--primary) 48%,var(--border));background:color-mix(in srgb,var(--primary) 9%,var(--surface2))}
+  @keyframes sqSheetIn{from{transform:translateY(16px);opacity:.7}to{transform:translateY(0);opacity:1}}
+  @media(min-width:700px){.sq-quick-menu{align-items:flex-end;padding-bottom:calc(76px + env(safe-area-inset-bottom));padding-right:18px}.sq-quick-panel{border-radius:22px;width:min(560px,calc(100% - 36px));max-height:70vh}}
+  @media(max-width:520px){.sq-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sq-quick-panel{padding-left:10px;padding-right:10px}}
+</style>
+<script id="sq-final-quick-access-js">
+(function(){
+  'use strict';
+  const ROUTES={
+    home:'home', profile:'profile', analytics:'analytics', statistics:'statistics', calendar:'calendar',
+    journals:'journals', goals:'goals', notes:'notes', weight:'weight', settings:'settings',
+    tasks:'tasks', gallery:'gallery'
+  };
+  const ITEMS=[
+    ['home','🏠','Главная','Сегодня и задачи'],
+    ['tasks','✅','Все задачи','Создание и управление'],
+    ['calendar','📅','Календарь','День · неделя · месяц · год'],
+    ['journals','📚','Журналы','Сферы и категории'],
+    ['goals','🎯','Цели','Прогресс и достижения'],
+    ['analytics','📊','Аналитика','XP и статистика'],
+    ['notes','📝','Заметки','Записи и поиск'],
+    ['weight','⚖️','Вес','История и график'],
+    ['gallery','🖼️','Галерея','Фото достижений'],
+    ['profile','👤','Профиль','Прогресс и аватар'],
+    ['settings','⚙️','Настройки','Тема и данные']
+  ];
+
+  function closeQuick(){const m=document.getElementById('sqQuickMenu');if(m)m.classList.remove('open');document.body.classList.remove('sq-quick-open')}
+  function openQuick(){
+    let m=document.getElementById('sqQuickMenu');
+    if(!m){
+      m=document.createElement('div');m.id='sqQuickMenu';m.className='sq-quick-menu';m.setAttribute('aria-hidden','true');
+      m.innerHTML='<div class="sq-quick-panel" role="dialog" aria-modal="true" aria-labelledby="sqQuickTitle"><div class="sq-quick-handle"></div><div class="sq-quick-head"><div><h2 id="sqQuickTitle">Быстрый доступ</h2><p>Все функции SkillQuest в одном месте</p></div><button type="button" class="icon-btn" data-sq-close="1" aria-label="Закрыть">×</button></div><div class="sq-quick-grid"></div></div>';
+      document.body.appendChild(m);
+      m.addEventListener('click',function(e){
+        if(e.target===m){closeQuick();return}
+        const close=e.target.closest('[data-sq-close]');if(close){closeQuick();return}
+        const item=e.target.closest('[data-sq-quick]');if(!item)return;
+        const route=ROUTES[item.dataset.sqQuick];
+        closeQuick();
+        if(route&&window.App&&typeof App.go==='function')App.go(route);
+      });
+    }
+    const grid=m.querySelector('.sq-quick-grid');
+    grid.innerHTML=ITEMS.map(x=>`<button type="button" class="sq-quick-item${App.page===ROUTES[x[0]]?' active':''}" data-sq-quick="${x[0]}"><b>${x[1]}</b><strong>${x[2]}</strong><small>${x[3]}</small></button>`).join('');
+    m.classList.add('open');m.setAttribute('aria-hidden','false');document.body.classList.add('sq-quick-open');
+  }
+
+  // One canonical five-item bottom navigation. The fifth item is always Quick Access.
+  window.installBottomNav=function(){
+    const nav=document.querySelector('.bottom-nav .nav');if(!nav)return;
+    nav.innerHTML=`
+      <button type="button" data-page="home" aria-label="Главная"><b>⌂</b><span>Главная</span></button>
+      <button type="button" data-page="analytics" aria-label="Аналитика"><b>◔</b><span>Аналитика</span></button>
+      <button type="button" data-page="calendar" aria-label="Календарь"><b>▦</b><span>Календарь</span></button>
+      <button type="button" data-page="journals" aria-label="Журналы"><b>◉</b><span>Журналы</span></button>
+      <button type="button" id="navMore" class="nav-more" aria-label="Быстрый доступ" aria-haspopup="dialog" aria-expanded="false"><b>•••</b><span>Ещё</span></button>`;
+    nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',function(){closeQuick();App.go(this.dataset.page)}));
+    const more=nav.querySelector('#navMore');
+    more.addEventListener('click',function(){
+      const menu=document.getElementById('sqQuickMenu');
+      if(menu&&menu.classList.contains('open')){closeQuick();this.setAttribute('aria-expanded','false')}
+      else{openQuick();this.setAttribute('aria-expanded','true')}
+    });
+    nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.page===App.page));
+    more.classList.toggle('active',false);
+  };
+
+  // Override any older Quick Access handlers that were attached before this final layer.
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeQuick()});
+  const oldGo=App.go.bind(App);
+  App.go=function(page){
+    closeQuick();
+    const result=oldGo(page);
+    requestAnimationFrame(function(){if(window.installBottomNav)window.installBottomNav()});
+    return result;
+  };
+
+  // Make sure the final navigation survives every existing render cycle.
+  const oldRenderPage=App.renderPage.bind(App);
+  App.renderPage=function(){const result=oldRenderPage();requestAnimationFrame(()=>window.installBottomNav&&window.installBottomNav());return result};
+
+  window.addEventListener('resize',function(){
+    const m=document.getElementById('sqQuickMenu');if(m&&m.classList.contains('open'))m.querySelectorAll('.sq-quick-item').forEach(b=>b.classList.toggle('active',b.dataset.sqQuick===App.page));
+  });
+
+  // Initial install after the existing boot sequence has finished.
+  setTimeout(function(){if(window.installBottomNav)window.installBottomNav()},0);
+  setTimeout(function(){if(window.installBottomNav)window.installBottomNav()},250);
+})();
+</script>
