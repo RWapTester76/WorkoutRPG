@@ -1357,34 +1357,6 @@ App.setScheme=function(name){setScheme(name);this.renderPage()};
   const $=s=>document.querySelector(s);
   const $$=s=>document.querySelectorAll(s);
 
-  // Touch-friendly "More" screen launcher: no horizontal scrolling on iPhone.
-  function openMore(){
-    let sheet=$("#screenSheet");
-    if(!sheet){
-      sheet=document.createElement("div");
-      sheet.id="screenSheet"; sheet.className="screen-sheet";
-      sheet.innerHTML=`<div class="screen-sheet-panel" role="dialog" aria-modal="true" aria-label="Экраны">
-        <div class="screen-sheet-head"><div><h2 style="margin:0;font-size:20px">Все экраны</h2><p class="subtle" style="margin:3px 0 0">Выбери раздел одним касанием</p></div><button class="icon-btn" id="closeScreenSheet">×</button></div>
-        <div class="screen-sheet-grid">
-          <button class="screen-link" data-screen="goals"><b>◇</b><span>Цели<small>Планы и достижения</small></span></button>
-          <button class="screen-link" data-screen="notes"><b>✎</b><span>Заметки<small>Тексты и материалы</small></span></button>
-          <button class="screen-link" data-screen="settings"><b>⚙</b><span>Профиль<small>Настройки и данные</small></span></button>
-          <button class="screen-link" data-screen="weight"><b>⚖</b><span>Вес<small>Журнал измерений</small></span></button>
-        </div>
-      </div>`;
-      document.body.appendChild(sheet);
-      sheet.addEventListener("click",e=>{
-        if(e.target===sheet) sheet.classList.remove("open");
-        const b=e.target.closest("[data-screen]");
-        if(b){sheet.classList.remove("open");App.go(b.dataset.screen)}
-      });
-      $("#closeScreenSheet").onclick=()=>sheet.classList.remove("open");
-    }
-    sheet.classList.add("open");
-  }
-
-  const more=$("#navMore"); if(more) more.onclick=openMore;
-
   // Add a persistent, thumb-friendly task action.
   if(!$("#sqFabTask")){
     const fab=document.createElement("button");fab.id="sqFabTask";fab.className="fab-task";fab.title="Добавить задачу";fab.setAttribute("aria-label","Добавить задачу");fab.textContent="+";
@@ -1593,138 +1565,10 @@ App.setScheme=function(name){setScheme(name);this.renderPage()};
   const journalColor=n=>{const j=Data.journal(n);return j?.color||SQ_JCOLORS[n]||"#8b5cf6"};
   const journalLabel=n=>{const j=Data.journal(n);return j?`${j.icon} ${j.name.charAt(0).toUpperCase()+j.name.slice(1)}`:"Без журнала"};
 
-  /* Exact bottom navigation requested by the product spec. */
-  function installBottomNav(){
-    const nav=$(".bottom-nav .nav"); if(!nav)return;
-    nav.innerHTML=`
-      <button data-page="profile" aria-label="Профиль"><b>👤</b><span>Профиль</span></button>
-      <button data-page="calendar" aria-label="Календарь"><b>📅</b><span>Календарь</span></button>
-      <button data-page="journals" aria-label="Журналы"><b>📚</b><span>Журналы</span></button>
-      <button data-page="notes" aria-label="Заметки"><b>📝</b><span>Заметки</span></button>
-      <button data-page="settings" aria-label="Настройки"><b>⚙️</b><span>Настройки</span></button>`;
-    nav.querySelectorAll("button").forEach(b=>b.onclick=()=>App.go(b.dataset.page));
-    document.querySelectorAll(".bottom-nav,.bottom-nav .nav").forEach(el=>{el.scrollLeft=0;el.scrollTop=0});
-  }
-  installBottomNav();
-
   /* Profile is a real page, while analytics/goals/weight remain one tap away. */
   if(!$("#profile")){
     const sec=document.createElement("section");sec.id="profile";sec.className="page";$(".app").appendChild(sec);
   }
-
-  App.go=function(page){
-    this.page=page;
-    document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));
-    document.querySelectorAll(".bottom-nav .nav button[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-    this.renderPage();
-  };
-
-  App.renderPage=function(){
-    const fn={home:this.home,analytics:this.analytics,calendar:this.calendar,journals:this.journals,goals:this.goals,notes:this.notes,settings:this.settings,weight:this.weight,profile:this.profile}[this.page];
-    if(fn)fn.call(this);this.bindDynamic();installBottomNav();
-  };
-
-  App.render=function(){this.renderPage();this.fillFormLists();this.bindDynamic();installBottomNav()};
-
-  App.profile=function(){
-    const p=Data.profile(),lv=Data.recalcLevel(),s=Data.stats(),ws=Data.weightStats("all"),last=ws.last,change=ws.change;
-    const avatar=p.avatar?`<img src="${SQ.escapeAttr(p.avatar)}" alt="Аватар">`:`${escSafe((p.name||"Г").charAt(0).toUpperCase())}`;
-    const goalCount=Data.goals.length,noteCount=Data.state.notes.length;
-    document.getElementById("profile").innerHTML=`
-      <div class="section-head"><div><h2>Профиль</h2><p>Твой прогресс, статистика и быстрый доступ к разделам</p></div><button class="btn secondary sm" onclick="App.avatar()">Изменить аватар</button></div>
-      <div class="profile-layout">
-        <div class="card">
-          <div class="profile-hero"><div class="profile-avatar">${avatar}</div><div><div class="profile-name">${escSafe(p.name||"Герой")}</div><div class="profile-sub">${p.age?escSafe(p.age)+" лет · ":""}${p.height?escSafe(p.height)+" см":""}</div><div class="profile-sub">${goalCount} целей · ${noteCount} заметок</div></div><div><div class="profile-level">Ур. ${lv.level}</div><div class="profile-xp">${Math.floor(lv.xp)} / ${lv.need} XP</div></div></div>
-          <div style="margin-top:14px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px"><span>Прогресс уровня</span><b style="color:var(--text)">${Math.round(SQ.clamp(lv.xp/lv.need*100,0,100))}%</b></div><div class="progress"><i style="width:${SQ.clamp(lv.xp/lv.need*100,0,100)}%"></i></div></div>
-          <div class="profile-stat-grid" style="margin-top:12px"><div class="profile-stat"><b>${Math.floor(p.totalExp||0)}</b><span>XP</span></div><div class="profile-stat"><b>🔥 ${p.streak||0}</b><span>streak</span></div><div class="profile-stat"><b>${s.done}</b><span>выполнено</span></div><div class="profile-stat"><b>${s.rate}%</b><span>успешность</span></div></div>
-        </div>
-        <div class="card"><div class="section-head" style="margin-top:0"><div><h2>Вес</h2><p>Журнал измерений находится в профиле</p></div><span style="font-size:24px">⚖️</span></div>
-          <div class="weight-profile-card"><div><div class="subtle">Последнее значение</div><strong style="font-size:24px">${last?last.weight.toFixed(1)+" кг":"Нет измерений"}</strong><div class="subtle">Изменение: ${change==null?"—":(change>0?"+":"")+change.toFixed(1)+" кг"}</div></div><button class="btn" onclick="App.go('weight')">Открыть журнал веса</button></div>
-        </div>
-      </div>
-      <div class="section-head"><div><h2>Быстрый доступ</h2><p>Все ключевые разделы без скрытой навигации</p></div></div>
-      <div class="card"><div class="profile-launcher">
-        <button onclick="App.go('goals')"><b>🎯</b>Цели<small>${goalCount} целей</small></button>
-        <button onclick="App.go('analytics')"><b>📊</b>Аналитика<small>XP и статистика</small></button>
-        <button onclick="App.go('home')"><b>🏠</b>Главная<small>Сегодня и задачи</small></button>
-        <button onclick="App.go('weight')"><b>⚖️</b>Вес<small>График и история</small></button>
-        <button onclick="App.openTask()"><b>➕</b>Задача<small>Создать быстро</small></button>
-        <button onclick="App.go('settings')"><b>⚙️</b>Настройки<small>Данные и темы</small></button>
-      </div></div>`;
-  };
-
-  /* Goal overview: all requested metadata + reader on tap. */
-  App.goals=function(){
-    const gs=Data.goals.filter(g=>!this.goalJournalFilter||g.journal===this.goalJournalFilter);
-    document.getElementById("goals").innerHTML=`<div class="section-head"><div><h2>Цели</h2><p>Открывай цель для полного просмотра</p></div><button class="btn" onclick="App.openGoal()">+ Цель</button></div>
-      <div class="card goal-filter-row"><span class="subtle">Фильтр журнала</span><select class="input" onchange="App.goalJournalFilter=this.value;App.goals()"><option value="">Все журналы</option>${Data.journals.map(j=>`<option value="${escSafe(j.name)}" ${this.goalJournalFilter===j.name?"selected":""}>${j.icon} ${escSafe(j.name)}</option>`).join("")}</select></div>
-      <div class="list" style="margin-top:10px">${gs.length?gs.map(g=>{const x=Data.goalProgress(g),j=g.journal?Data.journal(g.journal):null,c=journalColor(g.journal||"другое"),deadline=g.deadline?Dates.label(g.deadline,{day:"numeric",month:"short",year:"numeric"}):"Без дедлайна";return `<div class="goal goal-card card" style="--jcolor:${c};border-left:5px solid ${c}" onclick="App.openGoalReader('${escSafe(g.id)}')"><div class="goal-top"><div><h3>${g.achieved?"🏆 ":"🎯 "}${escSafe(g.title)}</h3><p>${escSafe(g.desc||"Описание отсутствует")}</p><div class="goal-meta"><span>${j?j.icon+" "+escSafe(j.name):"Без журнала"}</span><span>📅 ${escSafe(deadline)}</span><span>⚡ ${SQ.safeNum(g.rewardXP,1)} XP</span><span>🧩 ${x.tasks.length} задач</span><span>${g.achieved?"✓ Достигнута":"◷ В процессе"}</span></div></div><b style="font-size:18px">${x.rate}%</b></div><div class="progress"><i style="width:${x.rate}%;background:${c}"></i></div><div class="goal-foot"><span>${x.done} / ${x.required} дней</span><span>Нажми для просмотра →</span></div><div class="data-actions" style="margin-top:10px" onclick="event.stopPropagation()"><button class="btn secondary sm" onclick="App.openGoal('${escSafe(g.id)}')">Изменить</button><button class="btn danger sm" onclick="App.deleteGoal('${escSafe(g.id)}')">Удалить</button></div></div>`}).join(""):`<div class="card empty"><strong>Целей не найдено</strong>Создай цель или измени фильтр.</div>`}</div>`;
-  };
-
-  /* Notes: compact list, search, journal filter, full reader, edit/delete. */
-  App.notes=function(){
-    document.getElementById("notes").innerHTML=`<div class="section-head"><div><h2>Заметки</h2><p>Длинные тексты читаются целиком в reader view</p></div><button class="btn" onclick="App.openNote()">+ Заметка</button></div>
-      <div class="card"><div class="note-toolbar"><input class="input" id="noteSearch" placeholder="Поиск по заметкам…" oninput="App.filterNotes()"><select class="input" id="noteJournal" onchange="App.notesJournalFilter=this.value;App.filterNotes()"><option value="">Все журналы</option>${Data.journals.map(j=>`<option value="${escSafe(j.name)}" ${this.notesJournalFilter===j.name?"selected":""}>${j.icon} ${escSafe(j.name)}</option>`).join("")}</select></div></div><div class="list" id="noteResults" style="margin-top:10px"></div>`;
-    this.filterNotes();
-  };
-  App.filterNotes=function(){
-    const q=(document.getElementById("noteSearch")?.value||"").trim().toLowerCase(),j=App.notesJournalFilter||"",box=document.getElementById("noteResults");if(!box)return;
-    const ns=Data.state.notes.slice().sort((a,b)=>(b.date||b.createdAt||"").localeCompare(a.date||a.createdAt||"")).filter(n=>(!j||n.journal===j)&&(!q||(`${n.text} ${n.journal||""}`).toLowerCase().includes(q)));
-    box.innerHTML=ns.length?ns.map(n=>{const jj=n.journal?Data.journal(n.journal):null,title=(n.text.split(/\r?\n/)[0]||"Заметка").slice(0,90);return `<article class="note card note-list-item" style="border-left:4px solid ${journalColor(n.journal||"другое")}" onclick="App.openNoteReader('${escSafe(n.id)}')"><div style="display:flex;justify-content:space-between;gap:9px;align-items:flex-start"><div style="min-width:0"><h3>${escSafe(title)}</h3><div class="note-meta">${escSafe(n.date||"")} · ${jj?jj.icon+" "+escSafe(jj.name):"Без журнала"}</div></div><div class="data-actions" onclick="event.stopPropagation()"><button class="btn secondary sm" onclick="App.editNote('${escSafe(n.id)}')">Изм.</button><button class="btn danger sm" onclick="Data.deleteNote('${escSafe(n.id)}')">Удал.</button></div></div><div class="note-excerpt">${escSafe(n.text)}</div></article>`}).join(""):`<div class="card empty"><strong>Заметок не найдено</strong>Попробуй другой запрос или журнал.</div>`;
-  };
-  App.openNoteReader=function(nid){
-    const n=Data.state.notes.find(x=>x.id===nid);if(!n)return;const j=n.journal?Data.journal(n.journal):null;
-    $("#noteReaderTitle").textContent=(n.text.split(/\r?\n/)[0]||"Заметка").slice(0,100);
-    $("#noteReaderBody").innerHTML=`<div class="reader-meta">${escSafe(n.date||"")} · ${j?j.icon+" "+escSafe(j.name):"Без журнала"}</div><div class="note-body">${escSafe(n.text)}</div><div class="reader-actions"><button class="btn" onclick="App.close('noteReaderModal');App.editNote('${escSafe(n.id)}')">Редактировать</button><button class="btn danger" onclick="App.close('noteReaderModal');Data.deleteNote('${escSafe(n.id)}')">Удалить</button></div>`;
-    App.open("noteReaderModal");
-  };
-
-  /* Settings: seven themes + dark mode + data actions. */
-  App.settings=function(){
-    const p=Data.profile();
-    document.getElementById("settings").innerHTML=`<div class="section-head"><div><h2>Настройки</h2><p>Внешний вид, профиль и резервные копии</p></div></div>
-      <div class="grid g2">
-        <div class="card"><h2 style="font-size:17px;margin-bottom:10px">Профиль</h2><div class="form-grid"><div class="field"><label>Имя</label><input class="input" id="pName" value="${escSafe(p.name)}"></div><div class="field"><label>Возраст</label><input class="input" id="pAge" type="number" min="0" value="${p.age||0}"></div><div class="field"><label>Вес, кг</label><input class="input" id="pWeight" type="number" min="0" step=".1" value="${p.weight||0}"></div><div class="field"><label>Рост, см</label><input class="input" id="pHeight" type="number" min="0" value="${p.height||0}"></div><div class="field full"><button class="btn" onclick="App.saveProfile()">Сохранить профиль</button></div></div></div>
-        <div class="card"><h2 style="font-size:17px;margin-bottom:10px">Данные</h2><div class="settings-row"><span>Экспорт</span><button class="btn secondary sm" onclick="App.export()">Скачать JSON</button></div><div class="settings-row"><span>Импорт</span><button class="btn secondary sm" onclick="document.getElementById('importFile').click()">Загрузить JSON</button></div><input id="importFile" type="file" accept=".json,application/json" hidden onchange="App.import(this.files[0])"><div class="settings-row"><span>Dark Mode</span><button class="btn secondary sm" onclick="App.toggleTheme()">${document.documentElement.classList.contains("dark")?"Выключить":"Включить"}</button></div><div class="settings-row"><span>Версия данных</span><span class="subtle">${Data.state.version} · миграция включена</span></div><div class="settings-row"><span>Сброс</span><button class="btn danger sm" onclick="App.reset()">Удалить всё</button></div></div>
-      </div>
-      <div class="card" style="margin-top:12px"><h2 style="font-size:17px">Цветовая схема</h2><p class="subtle" style="margin-top:3px">Применяется сразу и сохраняется в localStorage.</p><div class="scheme-grid">${SQ_SCHEMES.map(x=>`<button class="scheme-btn ${document.documentElement.dataset.scheme===x[0]?"active":""}" data-scheme="${x[0]}" onclick="App.setScheme('${x[0]}')"><span class="scheme-dot" style="background:linear-gradient(135deg,${x[2]},${x[3]})"></span><span>${x[1]}</span></button>`).join("")}</div></div>`;
-  };
-  App.setScheme=function(name){
-    const allowed=SQ_SCHEMES.map(x=>x[0]);if(!allowed.includes(name))name="violet";document.documentElement.dataset.scheme=name;localStorage.setItem("skillquest_scheme",name);this.renderPage();Toast(`${name.charAt(0).toUpperCase()+name.slice(1)} · тема применена`,"success");
-  };
-
-  /* Calendar: fix the existing week view so it never needs horizontal swiping. */
-  App.calendarViewHTML=function(){
-    if(this.calendarView==="day"){
-      const ts=Data.tasksForDate(this.calDate,this.calendarJournal);return `<div class="card"><div class="cal-day-list">${this.taskList(ts,this.calDate)}</div></div>`;
-    }
-    if(this.calendarView==="week"){
-      const start=this.weekStart(this.calDate);return `<div class="card"><div class="cal-week">${Array.from({length:7},(_,i)=>{const date=Dates.add(start,i),ts=Data.tasksForDate(date,this.calendarJournal);return `<div class="cal-week-day ${date===SQ.today()?"today":""}" onclick="App.day('${date}')"><b>${headsLabel(date)}</b>${ts.length?ts.slice(0,4).map(t=>`<div class="cal-task-mini" style="--jcolor:${journalColor(t.journal)}">${(Data.journal(t.journal)||{}).icon||"📌"} ${escSafe(t.title)}</div>`).join(""):`<div class="subtle" style="margin-top:8px">—</div>`}${ts.length>4?`<div class="subtle" style="margin-top:4px">+${ts.length-4}</div>`:""}</div>`}).join("")}</div></div>`;
-    }
-    if(this.calendarView==="year"){
-      const y=this.calMonth.getFullYear();return `<div class="card"><div class="year-grid">${Array.from({length:12},(_,m)=>{const total=new Date(y,m+1,0).getDate();let active=0;for(let d=1;d<=total;d++){const date=`${y}-${Dates.pad(m+1)}-${Dates.pad(d)}`;if(Data.tasksForDate(date,this.calendarJournal).length)active++}return `<div class="year-month" onclick="App.openMonth(${y},${m})"><div class="year-month-head"><span>${new Date(y,m,1).toLocaleDateString("ru-RU",{month:"long"})}</span><span>${active}</span></div><div class="mini-month">${Array.from({length:total},(_,d)=>{const date=`${y}-${Dates.pad(m+1)}-${Dates.pad(d+1)}`;return `<i class="${Data.tasksForDate(date,this.calendarJournal).length?"has":""}"></i>`}).join("")}</div></div>`}).join("")}</div></div>`;
-    }
-    const y=this.calMonth.getFullYear(),m=this.calMonth.getMonth(),first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),prev=new Date(y,m,0).getDate();let cells=[];
-    for(let i=first-1;i>=0;i--)cells.push({day:prev-i,other:1,date:Dates.localDate(new Date(y,m-1,prev-i))});
-    for(let x=1;x<=days;x++)cells.push({day:x,other:0,date:`${y}-${Dates.pad(m+1)}-${Dates.pad(x)}`});
-    while(cells.length%7){const n=cells.length-days-first+1;cells.push({day:n,other:1,date:`${y}-${Dates.pad(m+2)}-${Dates.pad(n)}`})}
-    return `<div class="card"><div class="cal-grid">${["Вс","Пн","Вт","Ср","Чт","Пт","Сб"].map(h=>`<div class="cal-head">${h}</div>`).join("")}${cells.map(c=>{const ts=Data.tasksForDate(c.date,this.calendarJournal),today=c.date===SQ.today();return `<div class="cal-cell ${c.other?"other":""} ${today?"today":""}" onclick="App.day('${c.date}')"><div class="day">${c.day}</div><div class="cal-dots">${ts.slice(0,8).map(t=>`<i class="cal-dot ${Data.status(t,c.date)}" style="background:${journalColor(t.journal)}" title="${escSafe(t.title)}"></i>`).join("")}</div></div>`}).join("")}</div><div id="dayDetail"></div></div>`;
-  };
-
-  /* Add visual journal identity to filters without changing their data semantics. */
-  const baseCalendar=App.calendar.bind(App);
-  App.calendar=function(){
-    baseCalendar();
-    const select=document.querySelector('#calendar .toolbar select.input');
-    if(select){const c=this.calendarJournal?journalColor(this.calendarJournal):'var(--border)';select.style.borderColor=c;select.style.boxShadow=this.calendarJournal?`0 0 0 2px color-mix(in srgb,${c} 12%,transparent)`:'';}
-  };
-  const baseNotes=this.notes.bind(this);
-  App.notes=function(){baseNotes();const select=document.getElementById('noteJournal');if(select){const c=this.notesJournalFilter?journalColor(this.notesJournalFilter):'var(--border)';select.style.borderColor=c;}};
-
-  /* Keep profile as the active page after initial boot and preserve current page on data changes. */
-  const oldInit=App.init.bind(App);
-  App.init=function(){oldInit();installBottomNav();this.page=this.page||"profile";this.go(this.page);};
-  installBottomNav();
   setTimeout(()=>{installBottomNav();if(App.page==="home"||!App.page)App.go("profile");},0);
 })();
 </script>
@@ -1814,38 +1658,7 @@ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
   .sq-workspace-btn b{font-size:18px}.bottom-nav .nav button{height:54px;min-height:54px}.bottom-nav .nav button b{font-size:19px}.bottom-nav .nav button span{font-size:9px}
 }
 </style>
-<script id="sq-premium-redesign-behavior">
-(function(){
-  "use strict";
-  const $=s=>document.querySelector(s);
-  const routes=[
-    ["tasks","✅","Задачи","CRUD · recurring"],
-    ["goals","🎯","Цели","Прогресс · XP"],
-    ["statistics","📊","Статистика","Аналитика"],
-    ["gallery","🖼️","Галерея","Достижения"],
-    ["weight","⚖️","Вес","Журнал · график"],
-    ["home","🏠","Главная","Сегодня · XP"]
-  ];
-  function mount(){
-    const app=$(".app"); if(!app)return;
-    let dock=$("#sqWorkspaceDock");
-    if(!dock){
-      dock=document.createElement("div");dock.id="sqWorkspaceDock";dock.className="sq-workspace-dock";
-      const topbar=app.querySelector(".topbar");
-      if(topbar)topbar.insertAdjacentElement("afterend",dock); else app.prepend(dock);
-    }
-    dock.innerHTML=`<div class="sq-workspace-head"><strong>Быстрый доступ</strong><span>Все важные функции всегда под рукой</span></div><div class="sq-workspace-grid">${routes.map(r=>`<button class="sq-workspace-btn" type="button" data-sq-work="${r[0]}" aria-label="${r[2]}"><b>${r[1]}</b><span>${r[2]}</span><small>${r[3]}</small></button>`).join("")}</div>`;
-    dock.querySelectorAll("[data-sq-work]").forEach(b=>b.onclick=()=>window.App&&App.go(b.dataset.sqWork));
-    dock.querySelectorAll("[data-sq-work]").forEach(b=>b.classList.toggle("active",b.dataset.sqWork===App.page));
-  }
-  const oldGo=App.go;
-  App.go=function(page){oldGo.call(this,page);requestAnimationFrame(mount)};
-  const oldRender=App.renderPage;
-  App.renderPage=function(){oldRender.call(this);requestAnimationFrame(mount)};
-  mount();
-  setTimeout(mount,100);setTimeout(mount,500);
-})();
-</script>
+
 
 
 <style id="sq-final-hardening-ui">
@@ -1919,23 +1732,6 @@ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
     document.getElementById("gallery").innerHTML=`<div class="section-head"><div><h2>Галерея</h2><p>Фото достижений из твоих целей</p></div><button class="btn secondary" onclick="App.go('goals')">Открыть цели</button></div>`+
       (items.length?`<div class="sq-gallery-grid">${items.map(({g,ph})=>`<figure class="sq-gallery-card"><img src="${safe(ph.data)}" alt="${esc(ph.caption||g.title)}"><figcaption><b>${esc(g.title)}</b>${ph.caption?`<br>${esc(ph.caption)}`:""}</figcaption></figure>`).join("")}</div>`:'<div class="card sq-gallery-empty"><strong>Галерея пока пуста</strong><br>Добавь фото в разделе «Цели» — они появятся здесь автоматически.</div>');
   };
-
-  // Make navigation resilient: unknown routes no longer produce a blank screen.
-  const originalGo=App.go.bind(App);
-  App.go=function(page){
-    ensurePage(page);
-    const allowed=["home","analytics","statistics","calendar","journals","goals","notes","settings","weight","profile","tasks","gallery"];
-    if(!allowed.includes(page))page="home";
-    originalGo(page);
-  };
-  const originalRenderPage=App.renderPage.bind(App);
-  App.renderPage=function(){
-    const fn={home:this.home,analytics:this.analytics,statistics:this.statistics,calendar:this.calendar,journals:this.journals,goals:this.goals,notes:this.notes,settings:this.settings,weight:this.weight,profile:this.profile,tasks:this.tasks,gallery:this.gallery}[this.page];
-    if(typeof fn==="function")fn.call(this);else this.page="home",this.home();
-    if(typeof this.bindDynamic==="function")this.bindDynamic();
-    if(typeof installBottomNav==="function")installBottomNav();
-  };
-
   // Fix the weight preview bug: the model uses `weight`, not `value`.
   const oldSettings=App.settings.bind(App);
   App.settings=function(){
@@ -1957,10 +1753,6 @@ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
   // Close modal when tapping the backdrop and support Escape.
   document.addEventListener("click",e=>{if(e.target.classList&&e.target.classList.contains("modal-bg"))e.target.classList.remove("open");});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal-bg.open,.screen-sheet.open").forEach(x=>x.classList.remove("open"));});
-
-  // Reinstall the five-item navigation after every render, but keep all screens reachable via Profile/Quick Access.
-  if(typeof installBottomNav==="function")installBottomNav();
-  setTimeout(()=>{if(App.page)App.go(App.page);},0);
 })();
 </script>
 
@@ -1968,58 +1760,6 @@ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
 <script id="sq-button-reliability-fix">
 (function () {
   "use strict";
-
-  // ---- Route aliases: every visible shortcut must lead somewhere real.
-  const ROUTES = {
-    statistics: "analytics",
-    stats: "analytics",
-    tasks: "tasks",
-    home: "home",
-    profile: "profile",
-    calendar: "calendar",
-    journals: "journals",
-    notes: "notes",
-    settings: "settings",
-    goals: "goals",
-    gallery: "gallery",
-    weight: "weight",
-    analytics: "analytics"
-  };
-
-  const originalGo = App.go.bind(App);
-  App.go = function (page) {
-    const target = ROUTES[page] || page;
-    const el = document.getElementById(target);
-    if (!el) {
-      // Never leave the interface in a broken/blank state.
-      return originalGo("home");
-    }
-    return originalGo(target);
-  };
-
-  // ---- Make all navigation buttons use the same route resolver.
-  document.addEventListener("click", function (event) {
-    const button = event.target.closest("button[data-page], [data-sq-route]");
-    if (!button) return;
-
-    const route = button.dataset.page || button.dataset.sqRoute;
-    if (!route) return;
-
-    // The existing handler may already have run. Re-apply through the
-    // canonical router so aliases such as "statistics" cannot dead-end.
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    App.go(route);
-  }, true);
-
-  // ---- Generic data-action support for future/hidden buttons.
-  document.addEventListener("click", function (event) {
-    const button = event.target.closest("[data-route]");
-    if (!button) return;
-    event.preventDefault();
-    App.go(button.dataset.route);
-  }, true);
-
   // ---- Modal close buttons: work even after a page re-render.
   document.addEventListener("click", function (event) {
     const button = event.target.closest("[data-close]");
@@ -2034,37 +1774,6 @@ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
     const bg = event.target.closest(".modal-bg");
     if (bg && event.target === bg) bg.classList.remove("open");
   }, true);
-
-  // ---- Keep page state valid after every render.
-  const oldRender = App.renderPage.bind(App);
-  App.renderPage = function () {
-    const valid = ROUTES[this.page] || this.page;
-    if (!document.getElementById(valid)) this.page = "home";
-    oldRender();
-    requestAnimationFrame(function () {
-      document.querySelectorAll(".bottom-nav .nav button[data-page]").forEach(function (b) {
-        b.classList.toggle("active", (ROUTES[b.dataset.page] || b.dataset.page) === App.page);
-      });
-    });
-  };
-
-  // ---- Explicitly repair the secondary quick-navigation bar.
-  const repairQuickNav = function () {
-    const nav = document.getElementById("sqSecondaryNav");
-    if (!nav) return;
-    nav.querySelectorAll("[data-sq-route]").forEach(function (b) {
-      b.onclick = function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        App.go(b.dataset.sqRoute);
-      };
-    });
-  };
-
-  repairQuickNav();
-  setTimeout(repairQuickNav, 100);
-  setTimeout(repairQuickNav, 500);
-
   // ---- If a dynamically rendered form exists, ensure Enter/Save works.
   document.addEventListener("submit", function (event) {
     const form = event.target;
@@ -2096,8 +1805,7 @@ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
 })();
 </script>
 
-</body>
-</html>
+
 
 <!-- SkillQuest Pro — restoration / access / QA hardening layer -->
 <style id="sq-restoration-ui">
@@ -2155,16 +1863,6 @@ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
 
   // Statistics is a stable access alias to the existing full analytics engine.
   App.statistics=function(){this.analytics();document.getElementById("statistics").innerHTML=document.getElementById("analytics").innerHTML};
-
-  // Make navigation routes know about restored screens.
-  const oldRenderPage=App.renderPage;
-  App.renderPage=function(){
-    const fn={home:this.home,analytics:this.analytics,statistics:this.statistics,calendar:this.calendar,journals:this.journals,goals:this.goals,notes:this.notes,settings:this.settings,weight:this.weight,profile:this.profile,tasks:this.tasks,gallery:this.gallery}[this.page];
-    if(fn)fn.call(this);
-    this.bindDynamic();
-    if(typeof installBottomNav==="function")installBottomNav();
-  };
-
   // Profile is the central launcher so no existing function becomes hidden again.
   const oldProfile=App.profile;
   App.profile=function(){
@@ -2208,37 +1906,17 @@ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
     Data.recalcLevel();
     Data.save();
   }catch(e){console.warn("SkillQuest restoration migration skipped",e)}
-
-  // Keep the requested exact five bottom buttons and expose all secondary areas from Profile.
-  setTimeout(()=>{
-    if(typeof installBottomNav==="function")installBottomNav();
-    App.go(App.page||"profile");
-  },0);
 })();
 </script>
-<style id="sq-navigation-redesign">
-:root{--sq-secondary-nav:56px}
-body{padding-bottom:calc(var(--nav) + var(--sq-secondary-nav) + 28px + env(safe-area-inset-bottom))}
-.bottom-nav{height:calc(var(--nav) + env(safe-area-inset-bottom));padding-bottom:max(8px,env(safe-area-inset-bottom));overflow:hidden}
-.bottom-nav .nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;width:100%;max-width:var(--max);overflow:hidden}
-.bottom-nav .nav button{width:100%;max-width:none;min-width:0;min-height:54px;padding:6px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:14px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.bottom-nav .nav button b{font-size:20px;line-height:21px;margin:0}.bottom-nav .nav button span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
-.sq-secondary-nav{position:fixed;z-index:29;left:0;right:0;bottom:calc(var(--nav) + env(safe-area-inset-bottom));min-height:var(--sq-secondary-nav);padding:6px max(10px,calc((100vw - var(--max))/2));background:rgba(255,255,255,.92);border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(20,20,40,.06);backdrop-filter:blur(18px);overflow:hidden}.dark .sq-secondary-nav{background:rgba(17,20,29,.94)}
-.sq-secondary-inner{width:100%;max-width:var(--max);margin:auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.sq-secondary-nav button{min-width:0;height:42px;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 7px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-size:11px;font-weight:850;touch-action:manipulation}.sq-secondary-nav button b{font-size:16px;line-height:1}.sq-secondary-nav button.active{color:var(--primary);border-color:color-mix(in srgb,var(--primary) 45%,var(--border));background:var(--primary-bg)}.sq-secondary-nav button:active,.bottom-nav .nav button:active{transform:scale(.97)}
-@media(max-width:600px){.sq-secondary-nav{padding:6px 8px}.sq-secondary-inner{gap:4px}.sq-secondary-nav button{height:42px;padding:5px 2px;gap:2px;flex-direction:column;font-size:9px}.sq-secondary-nav button b{font-size:16px}.bottom-nav{padding-left:7px;padding-right:7px}.bottom-nav .nav{gap:2px}.bottom-nav .nav button{min-height:52px;padding:5px 1px}.bottom-nav .nav button b{font-size:18px}.bottom-nav .nav button span{font-size:10px}}
-@media(max-width:360px){.sq-secondary-nav button span{font-size:8px}.bottom-nav .nav button span{font-size:9px}}
-</style>
-<script id="sq-navigation-redesign-behavior">
-(function(){"use strict";const $=s=>document.querySelector(s);const routes=[['home','🏠','Главная'],['tasks','✅','Задачи'],['goals','🎯','Цели'],['statistics','📊','Статистика'],['gallery','🖼️','Галерея']];function install(){let r=$('#sqSecondaryNav');if(!r){r=document.createElement('div');r.id='sqSecondaryNav';r.className='sq-secondary-nav';r.setAttribute('aria-label','Быстрый доступ');r.innerHTML='<div class="sq-secondary-inner">'+routes.map(x=>`<button type="button" data-sq-route="${x[0]}" aria-label="${x[2]}"><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')+'</div>';document.body.appendChild(r);r.addEventListener('click',e=>{const b=e.target.closest('[data-sq-route]');if(b&&window.App&&typeof App.go==='function')App.go(b.dataset.sqRoute)})}r.querySelectorAll('[data-sq-route]').forEach(b=>b.classList.toggle('active',b.dataset.sqRoute===App.page))}const oldGo=App.go;App.go=function(page){oldGo.call(this,page);requestAnimationFrame(install)};const oldRender=App.renderPage;App.renderPage=function(){oldRender.call(this);requestAnimationFrame(install)};install();setTimeout(install,100);setTimeout(install,400)})();
-</script>
 
-<!-- FINAL NAVIGATION / QUICK ACCESS FIX -->
-<style id="sq-final-quick-access-css">
-  .sq-secondary-nav{display:none!important}
-  #sqWorkspaceDock{display:none!important}
-  .sq-quick-menu{position:fixed;inset:0;z-index:1000;display:none;align-items:flex-end;justify-content:center;background:rgba(10,10,20,.28);backdrop-filter:blur(3px)}
+
+<!-- SkillQuest Pro — CANONICAL NAVIGATION / QUICK ACCESS -->
+<style id="sq-canonical-navigation">
+  .screen-sheet{display:none!important}
+  #sqWorkspaceDock,#sqSecondaryNav{display:none!important}
+  .sq-quick-menu{position:fixed;inset:0;z-index:1000;display:none;align-items:flex-end;justify-content:center;background:rgba(10,10,20,.30);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
   .sq-quick-menu.open{display:flex}
-  .sq-quick-panel{width:min(620px,100%);max-height:min(78vh,720px);overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:24px 24px 0 0;box-shadow:0 -18px 50px rgba(20,20,50,.22);padding:14px 14px calc(18px + env(safe-area-inset-bottom));animation:sqSheetIn .18s ease-out}
+  .sq-quick-panel{width:min(640px,100%);max-height:min(78dvh,720px);overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:24px 24px 0 0;box-shadow:0 -18px 50px rgba(20,20,50,.22);padding:14px 14px calc(18px + env(safe-area-inset-bottom));animation:sqSheetIn .18s ease-out}
   .sq-quick-handle{width:42px;height:4px;border-radius:999px;background:var(--border);margin:0 auto 12px}
   .sq-quick-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
   .sq-quick-head h2{font-size:18px;margin:0}.sq-quick-head p{margin:3px 0 0;color:var(--muted);font-size:11px}
@@ -2250,13 +1928,13 @@ body{padding-bottom:calc(var(--nav) + var(--sq-secondary-nav) + 28px + env(safe-
   @media(min-width:700px){.sq-quick-menu{align-items:flex-end;padding-bottom:calc(76px + env(safe-area-inset-bottom));padding-right:18px}.sq-quick-panel{border-radius:22px;width:min(560px,calc(100% - 36px));max-height:70vh}}
   @media(max-width:520px){.sq-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sq-quick-panel{padding-left:10px;padding-right:10px}}
 </style>
-<script id="sq-final-quick-access-js">
+<script id="sq-canonical-navigation-js">
 (function(){
   'use strict';
   const ROUTES={
-    home:'home', profile:'profile', analytics:'analytics', statistics:'statistics', calendar:'calendar',
-    journals:'journals', goals:'goals', notes:'notes', weight:'weight', settings:'settings',
-    tasks:'tasks', gallery:'gallery'
+    home:'home', profile:'profile', analytics:'analytics', statistics:'analytics', stats:'analytics',
+    calendar:'calendar', journals:'journals', goals:'goals', notes:'notes', weight:'weight',
+    settings:'settings', tasks:'tasks', gallery:'gallery'
   };
   const ITEMS=[
     ['home','🏠','Главная','Сегодня и задачи'],
@@ -2271,8 +1949,22 @@ body{padding-bottom:calc(var(--nav) + var(--sq-secondary-nav) + 28px + env(safe-
     ['profile','👤','Профиль','Прогресс и аватар'],
     ['settings','⚙️','Настройки','Тема и данные']
   ];
-
-  function closeQuick(){const m=document.getElementById('sqQuickMenu');if(m)m.classList.remove('open');document.body.classList.remove('sq-quick-open')}
+  const canonical=p=>ROUTES[p]||'home';
+  const pageMap={home:'home',analytics:'analytics',calendar:'calendar',journals:'journals',goals:'goals',notes:'notes',settings:'settings',weight:'weight',profile:'profile',tasks:'tasks',gallery:'gallery'};
+  function ensurePage(id){
+    if(!document.getElementById(id)){
+      const app=document.querySelector('.app');
+      if(app){const el=document.createElement('section');el.id=id;el.className='page';app.appendChild(el)}
+    }
+  }
+  Object.keys(pageMap).forEach(ensurePage);
+  function closeQuick(){
+    const m=document.getElementById('sqQuickMenu');
+    if(m){m.classList.remove('open');m.setAttribute('aria-hidden','true')}
+    const more=document.getElementById('navMore');
+    if(more)more.setAttribute('aria-expanded','false');
+    document.body.classList.remove('sq-quick-open');
+  }
   function openQuick(){
     let m=document.getElementById('sqQuickMenu');
     if(!m){
@@ -2281,19 +1973,18 @@ body{padding-bottom:calc(var(--nav) + var(--sq-secondary-nav) + 28px + env(safe-
       document.body.appendChild(m);
       m.addEventListener('click',function(e){
         if(e.target===m){closeQuick();return}
-        const close=e.target.closest('[data-sq-close]');if(close){closeQuick();return}
-        const item=e.target.closest('[data-sq-quick]');if(!item)return;
-        const route=ROUTES[item.dataset.sqQuick];
+        if(e.target.closest('[data-sq-close]')){closeQuick();return}
+        const item=e.target.closest('[data-sq-quick]');
+        if(!item)return;
+        const route=canonical(item.dataset.sqQuick);
         closeQuick();
-        if(route&&window.App&&typeof App.go==='function')App.go(route);
+        App.go(route);
       });
     }
     const grid=m.querySelector('.sq-quick-grid');
-    grid.innerHTML=ITEMS.map(x=>`<button type="button" class="sq-quick-item${App.page===ROUTES[x[0]]?' active':''}" data-sq-quick="${x[0]}"><b>${x[1]}</b><strong>${x[2]}</strong><small>${x[3]}</small></button>`).join('');
+    grid.innerHTML=ITEMS.map(x=>`<button type="button" class="sq-quick-item${App.page===canonical(x[0])?' active':''}" data-sq-quick="${x[0]}"><b>${x[1]}</b><strong>${x[2]}</strong><small>${x[3]}</small></button>`).join('');
     m.classList.add('open');m.setAttribute('aria-hidden','false');document.body.classList.add('sq-quick-open');
   }
-
-  // One canonical five-item bottom navigation. The fifth item is always Quick Access.
   window.installBottomNav=function(){
     const nav=document.querySelector('.bottom-nav .nav');if(!nav)return;
     nav.innerHTML=`
@@ -2302,37 +1993,40 @@ body{padding-bottom:calc(var(--nav) + var(--sq-secondary-nav) + 28px + env(safe-
       <button type="button" data-page="calendar" aria-label="Календарь"><b>▦</b><span>Календарь</span></button>
       <button type="button" data-page="journals" aria-label="Журналы"><b>◉</b><span>Журналы</span></button>
       <button type="button" id="navMore" class="nav-more" aria-label="Быстрый доступ" aria-haspopup="dialog" aria-expanded="false"><b>•••</b><span>Ещё</span></button>`;
-    nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',function(){closeQuick();App.go(this.dataset.page)}));
-    const more=nav.querySelector('#navMore');
-    more.addEventListener('click',function(){
-      const menu=document.getElementById('sqQuickMenu');
-      if(menu&&menu.classList.contains('open')){closeQuick();this.setAttribute('aria-expanded','false')}
-      else{openQuick();this.setAttribute('aria-expanded','true')}
+    nav.querySelectorAll('button[data-page]').forEach(b=>b.addEventListener('click',()=>App.go(canonical(b.dataset.page))));
+    nav.querySelector('#navMore').addEventListener('click',()=>{
+      const m=document.getElementById('sqQuickMenu');
+      if(m&&m.classList.contains('open'))closeQuick();else openQuick();
     });
-    nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.page===App.page));
-    more.classList.toggle('active',false);
+    nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',canonical(b.dataset.page||'')===App.page));
   };
-
-  // Override any older Quick Access handlers that were attached before this final layer.
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeQuick()});
-  const oldGo=App.go.bind(App);
+  // One and only canonical router. Existing page renderers remain untouched.
   App.go=function(page){
+    const target=canonical(page);
+    ensurePage(target);
+    this.page=target;
     closeQuick();
-    const result=oldGo(page);
-    requestAnimationFrame(function(){if(window.installBottomNav)window.installBottomNav()});
-    return result;
+    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===target));
+    const fn=pageMap[target]&&this[pageMap[target]];
+    if(typeof fn==='function')fn.call(this);
+    if(typeof this.bindDynamic==='function')this.bindDynamic();
+    installBottomNav();
+    window.scrollTo({top:0,behavior:'instant'});
+    return target;
   };
-
-  // Make sure the final navigation survives every existing render cycle.
-  const oldRenderPage=App.renderPage.bind(App);
-  App.renderPage=function(){const result=oldRenderPage();requestAnimationFrame(()=>window.installBottomNav&&window.installBottomNav());return result};
-
-  window.addEventListener('resize',function(){
-    const m=document.getElementById('sqQuickMenu');if(m&&m.classList.contains('open'))m.querySelectorAll('.sq-quick-item').forEach(b=>b.classList.toggle('active',b.dataset.sqQuick===App.page));
-  });
-
-  // Initial install after the existing boot sequence has finished.
-  setTimeout(function(){if(window.installBottomNav)window.installBottomNav()},0);
-  setTimeout(function(){if(window.installBottomNav)window.installBottomNav()},250);
+  App.renderPage=function(){return this.go(this.page||'home');};
+  App.render=function(){this.renderPage();if(typeof this.fillFormLists==='function')this.fillFormLists();if(typeof this.bindDynamic==='function')this.bindDynamic();};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeQuick()});
+  document.addEventListener('click',e=>{
+    if(e.target.closest('[data-route]')){e.preventDefault();App.go(e.target.closest('[data-route]').dataset.route);return}
+    if(e.target.closest('[data-page]')&&!e.target.closest('.bottom-nav')){e.preventDefault();App.go(e.target.closest('[data-page]').dataset.page)}
+  },true);
+  window.installBottomNav();
+  setTimeout(()=>window.installBottomNav(),0);
+  setTimeout(()=>window.installBottomNav(),200);
 })();
 </script>
+
+
+</body>
+</html>
