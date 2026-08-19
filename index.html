@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>RPG Планировщик v3</title>
+    <title>RPG Планировщик v4</title>
     <style>
         /* ===== ГЛОБАЛЬНЫЕ ===== */
         * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, sans-serif; }
@@ -25,9 +25,18 @@
 
         /* ===== КАЛЕНДАРЬ ===== */
         #calendar-wrap { background:#14142a; border-radius:20px; padding:12px; margin-bottom:14px; border:1px solid #2a2a44; }
-        .cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-        .cal-header button { background:#2a2a44; border:none; color:#fff; font-size:20px; padding:0 14px; border-radius:30px; cursor:pointer; line-height:34px; }
-        .cal-header .month-year { font-weight:700; font-size:17px; }
+        .cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:4px; }
+        .cal-header .nav-group { display:flex; align-items:center; gap:4px; }
+        .cal-header button { background:#2a2a44; border:none; color:#fff; font-size:18px; padding:0 12px; border-radius:30px; cursor:pointer; line-height:32px; }
+        .cal-header .month-year { font-weight:700; font-size:16px; min-width:120px; text-align:center; }
+        .view-tabs { display:flex; gap:4px; margin-bottom:8px; }
+        .view-tabs button { flex:1; padding:4px 0; border:none; border-radius:30px; background:#1f1f3a; color:#888; font-size:12px; font-weight:600; cursor:pointer; transition:0.2s; }
+        .view-tabs button.active { background:#7c5cfc; color:#fff; }
+
+        /* Содержимое календаря */
+        #calendar-content { min-height:180px; }
+
+        /* Месяц */
         .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; text-align:center; }
         .cal-grid .weekday { font-weight:600; color:#8888aa; font-size:11px; padding:4px 0; }
         .cal-grid .day { padding:6px 0; border-radius:20px; background:#1a1a32; font-size:13px; transition:0.15s; cursor:pointer; position:relative; }
@@ -41,7 +50,30 @@
         .cal-grid .day .dot.finance { background:#ffa502; }
         .cal-grid .day .dot.debts { background:#ff6348; }
 
-        /* ===== ЭКРАНЫ ===== */
+        /* День (почасовой) */
+        .hour-grid { display:flex; flex-direction:column; gap:2px; }
+        .hour-row { display:flex; align-items:center; gap:6px; font-size:12px; background:#1a1a32; padding:4px 8px; border-radius:12px; }
+        .hour-row .hour-label { min-width:36px; color:#888; }
+        .hour-row .hour-tasks { flex:1; display:flex; flex-wrap:wrap; gap:3px; }
+        .hour-tasks .task-tag { background:#2a2a44; padding:1px 8px; border-radius:30px; font-size:11px; border-left:3px solid; white-space:nowrap; }
+
+        /* Неделя */
+        .week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+        .week-day { background:#1a1a32; border-radius:12px; padding:6px; min-height:80px; }
+        .week-day .day-label { font-size:12px; font-weight:600; color:#aaa; text-align:center; }
+        .week-day .day-tasks { font-size:11px; color:#ccc; margin-top:4px; }
+        .week-day .day-tasks .task-mini { background:#252540; border-radius:8px; padding:2px 6px; margin-bottom:2px; border-left:3px solid; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+        /* Год */
+        .year-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+        .month-card { background:#1a1a32; border-radius:16px; padding:10px; cursor:pointer; transition:0.2s; }
+        .month-card:active { transform:scale(0.96); }
+        .month-card .month-name { font-weight:700; font-size:14px; text-align:center; }
+        .month-card .stats-row { display:flex; flex-wrap:wrap; gap:3px; justify-content:center; margin-top:4px; }
+        .month-card .stats-row .stat-item { font-size:10px; background:#252540; padding:1px 6px; border-radius:20px; display:flex; align-items:center; gap:3px; }
+        .stat-item .color-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+
+        /* ===== ЭКРАНЫ ЖУРНАЛОВ ===== */
         .screen { display:none; flex-direction:column; gap:10px; }
         .screen.active { display:flex; }
 
@@ -102,6 +134,9 @@
             #app { padding:12px 8px 70px; }
             .modal { padding:14px; }
             .task-title { font-size:14px; }
+            .cal-header .month-year { font-size:14px; min-width:80px; }
+            .hour-row { font-size:11px; }
+            .week-day { min-height:60px; }
         }
     </style>
 </head>
@@ -130,15 +165,29 @@
 
     <!-- ===== КАЛЕНДАРЬ ===== -->
     <div id="calendar-wrap">
-        <div class="cal-header">
-            <button id="calPrev">◀</button>
-            <span class="month-year" id="calTitle">Январь 2026</span>
-            <button id="calNext">▶</button>
+        <!-- Переключатель режимов -->
+        <div class="view-tabs">
+            <button class="view-btn active" data-view="month">Месяц</button>
+            <button class="view-btn" data-view="week">Неделя</button>
+            <button class="view-btn" data-view="day">День</button>
+            <button class="view-btn" data-view="year">Год</button>
         </div>
-        <div class="cal-grid" id="calGrid"></div>
+
+        <!-- Заголовок и навигация -->
+        <div class="cal-header">
+            <div class="nav-group">
+                <button id="calPrev">◀</button>
+                <button id="calNext">▶</button>
+            </div>
+            <span class="month-year" id="calTitle">Январь 2026</span>
+            <div style="width:40px;"></div> <!-- пусто для баланса -->
+        </div>
+
+        <!-- Контейнер для содержимого -->
+        <div id="calendar-content"></div>
     </div>
 
-    <!-- ===== ЭКРАНЫ ===== -->
+    <!-- ===== ЭКРАНЫ ЖУРНАЛОВ (без изменений) ===== -->
     <!-- 1. ТЕЛО -->
     <div class="screen active" id="screen-body">
         <div class="screen-header">
@@ -250,7 +299,7 @@
     // ============================================================
     // 1. ДАННЫЕ
     // ============================================================
-    const STORAGE_KEY = 'rpg_journal_v3';
+    const STORAGE_KEY = 'rpg_journal_v4';
     const COLORS = {
         body: '#ff4757',
         hobby: '#a29bfe',
@@ -259,14 +308,7 @@
         finance: '#ffa502',
         debts: '#ff6348'
     };
-    const COLOR_NAMES = {
-        body: 'body',
-        hobby: 'hobby',
-        business: 'business',
-        food: 'food',
-        finance: 'finance',
-        debts: 'debts'
-    };
+    const CATEGORIES = ['body','hobby','business','food','finance','debts'];
 
     function getDefaultData() {
         return {
@@ -347,112 +389,346 @@
     }
 
     // ============================================================
-    // 4. КАЛЕНДАРЬ
+    // 4. ФУНКЦИИ РАБОТЫ С ЗАДАЧАМИ
     // ============================================================
-    let calYear = 2026, calMonth = 0;
-
-    function renderCalendar() {
-        const grid = document.getElementById('calGrid');
-        const title = document.getElementById('calTitle');
-        const months = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-        title.textContent = months[calMonth] + ' ' + calYear;
-
-        const firstDay = new Date(calYear, calMonth, 1).getDay();
-        const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-        const daysInPrev = new Date(calYear, calMonth, 0).getDate();
-
-        let startOffset = (firstDay === 0) ? 6 : firstDay - 1;
-        let html = '';
-        ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(w => {
-            html += `<div class="weekday">${w}</div>`;
-        });
-
-        for (let i = 0; i < startOffset; i++) {
-            const d = daysInPrev - startOffset + i + 1;
-            html += `<div class="day other-month">${d}</div>`;
-        }
-
-        const today = new Date();
-        // Собираем задачи по датам
-        const tasksByDate = {};
-        Object.keys(data.tasks).forEach(cat => {
+    function getTasksForDate(dateStr) {
+        // Возвращает массив задач из всех журналов, запланированных на эту дату
+        const result = [];
+        CATEGORIES.forEach(cat => {
             data.tasks[cat].forEach(task => {
-                if (task.date) {
-                    const d = new Date(task.date);
-                    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-                    if (!tasksByDate[key]) tasksByDate[key] = [];
-                    tasksByDate[key].push(cat);
+                // Проверяем точную дату
+                if (task.date === dateStr) {
+                    result.push({ ...task, category: cat });
                 }
+                // Проверяем повторяющиеся дни недели
                 if (task.days && task.days.length) {
-                    // Для периодических задач — показываем маркеры на все дни месяца
-                    for (let d = 1; d <= daysInMonth; d++) {
-                        const dateObj = new Date(calYear, calMonth, d);
-                        const dayOfWeek = dateObj.getDay(); // 0=вс
-                        const dayIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
-                        const daysMap = ['mon','tue','wed','thu','fri','sat','sun'];
-                        if (task.days.includes(daysMap[dayIndex])) {
-                            const key = `${calYear}-${calMonth}-${d}`;
-                            if (!tasksByDate[key]) tasksByDate[key] = [];
-                            if (!tasksByDate[key].includes(cat)) tasksByDate[key].push(cat);
+                    const d = new Date(dateStr);
+                    const dayOfWeek = d.getDay(); // 0=вс
+                    const dayIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
+                    const daysMap = ['mon','tue','wed','thu','fri','sat','sun'];
+                    if (task.days.includes(daysMap[dayIndex])) {
+                        // Добавляем, если ещё нет
+                        if (!result.some(t => t === task && t.category === cat)) {
+                            result.push({ ...task, category: cat });
                         }
                     }
                 }
             });
         });
+        return result;
+    }
 
-        for (let d = 1; d <= daysInMonth; d++) {
-            const isToday = (d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear());
-            const key = `${calYear}-${calMonth}-${d}`;
-            const cats = tasksByDate[key] || [];
-            let dots = cats.map(c => `<span class="dot ${c}"></span>`).join('');
-            const cls = 'day' + (isToday ? ' today' : '');
-            html += `<div class="${cls}" data-date="${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}">${d}${dots ? '<br>'+dots : ''}</div>`;
+    function getTasksForWeek(startDateStr) {
+        // Возвращает объект { dateStr: [tasks] } для 7 дней
+        const start = new Date(startDateStr);
+        const week = {};
+        for (let i=0; i<7; i++) {
+            const d = new Date(start);
+            d.setDate(d.getDate() + i);
+            const key = d.toISOString().split('T')[0];
+            week[key] = getTasksForDate(key);
+        }
+        return week;
+    }
+
+    function getMonthStats(year, month) {
+        // Статистика по журналам за месяц: количество задач (всех статусов)
+        const stats = {};
+        CATEGORIES.forEach(cat => stats[cat] = 0);
+        const daysInMonth = new Date(year, month+1, 0).getDate();
+        for (let d=1; d<=daysInMonth; d++) {
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const tasks = getTasksForDate(dateStr);
+            tasks.forEach(task => {
+                if (task.category && stats[task.category] !== undefined) {
+                    stats[task.category]++;
+                }
+            });
+        }
+        return stats;
+    }
+
+    // ============================================================
+    // 5. КАЛЕНДАРЬ: УПРАВЛЕНИЕ РЕЖИМАМИ
+    // ============================================================
+    let viewMode = 'month';      // 'month', 'day', 'week', 'year'
+    let selectedDate = new Date(); // для режима day
+    let currentYear = selectedDate.getFullYear();
+    let currentMonth = selectedDate.getMonth();
+    let currentWeekStart = getWeekStart(selectedDate); // понедельник
+
+    function getWeekStart(date) {
+        const d = new Date(date);
+        const day = d.getDay(); // 0=вс
+        const diff = (day === 0) ? 6 : day - 1; // понедельник
+        d.setDate(d.getDate() - diff);
+        d.setHours(0,0,0,0);
+        return d;
+    }
+
+    function formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    // ============================================================
+    // 6. РЕНДЕРИНГ КАЛЕНДАРЯ
+    // ============================================================
+    const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+    const shortMonthNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+
+    function renderCalendar() {
+        const container = document.getElementById('calendar-content');
+        const title = document.getElementById('calTitle');
+
+        switch (viewMode) {
+            case 'month': renderMonthView(container, title); break;
+            case 'day': renderDayView(container, title); break;
+            case 'week': renderWeekView(container, title); break;
+            case 'year': renderYearView(container, title); break;
+        }
+        updateNavButtons();
+    }
+
+    // ---------- МЕСЯЦ ----------
+    function renderMonthView(container, title) {
+        title.textContent = monthNames[currentMonth] + ' ' + currentYear;
+
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+        const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
+        let startOffset = (firstDay === 0) ? 6 : firstDay - 1;
+
+        let html = `<div class="cal-grid">`;
+        ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(w => {
+            html += `<div class="weekday">${w}</div>`;
+        });
+
+        for (let i=0; i<startOffset; i++) {
+            const d = daysInPrev - startOffset + i + 1;
+            html += `<div class="day other-month">${d}</div>`;
         }
 
-        grid.innerHTML = html;
+        const today = new Date();
+        for (let d=1; d<=daysInMonth; d++) {
+            const dateObj = new Date(currentYear, currentMonth, d);
+            const dateStr = formatDate(dateObj);
+            const isToday = (d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear());
+            const tasks = getTasksForDate(dateStr);
+            const dots = tasks.map(t => `<span class="dot ${t.category}"></span>`).join('');
+            const cls = 'day' + (isToday ? ' today' : '');
+            html += `<div class="${cls}" data-date="${dateStr}">${d}${dots ? '<br>'+dots : ''}</div>`;
+        }
 
-        // Клик по дню — открываем задачи на этот день
-        grid.querySelectorAll('.day:not(.other-month)').forEach(el => {
+        html += `</div>`;
+        container.innerHTML = html;
+
+        // Клик по дню -> переключиться в режим дня
+        container.querySelectorAll('.day:not(.other-month)').forEach(el => {
             el.addEventListener('click', () => {
                 const dateStr = el.dataset.date;
-                if (dateStr) filterByDate(dateStr);
+                if (dateStr) {
+                    selectedDate = new Date(dateStr);
+                    viewMode = 'day';
+                    renderCalendar();
+                }
             });
         });
     }
 
-    function filterByDate(dateStr) {
-        const currentScreen = document.querySelector('.screen.active');
-        if (!currentScreen) return;
-        const cat = currentScreen.id.replace('screen-', '');
-        const list = document.getElementById(`list-${cat}`);
-        const tasks = data.tasks[cat] || [];
-        const filtered = tasks.filter(t => {
-            if (t.date === dateStr) return true;
-            if (t.days && t.days.length) {
-                const d = new Date(dateStr);
-                const dayOfWeek = d.getDay();
-                const dayIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
-                const daysMap = ['mon','tue','wed','thu','fri','sat','sun'];
-                return t.days.includes(daysMap[dayIndex]);
+    // ---------- ДЕНЬ (почасовой) ----------
+    function renderDayView(container, title) {
+        const dateStr = formatDate(selectedDate);
+        const parts = dateStr.split('-');
+        const year = parseInt(parts[0]), month = parseInt(parts[1])-1, day = parseInt(parts[2]);
+        title.textContent = `${day} ${monthNames[month]} ${year}`;
+
+        const tasks = getTasksForDate(dateStr);
+        // Группируем по часам (если время указано)
+        const byHour = {};
+        const noTime = [];
+        tasks.forEach(task => {
+            if (task.time) {
+                const hour = parseInt(task.time.split(':')[0]);
+                if (!byHour[hour]) byHour[hour] = [];
+                byHour[hour].push(task);
+            } else {
+                noTime.push(task);
             }
-            return false;
         });
-        renderTasksList(list, filtered, cat);
+
+        let html = `<div class="hour-grid">`;
+        // Часы 0-23
+        for (let h=0; h<24; h++) {
+            const hourTasks = byHour[h] || [];
+            const tasksHtml = hourTasks.map(t =>
+                `<span class="task-tag" style="border-left-color:${COLORS[t.category]}; background:${COLORS[t.category]}22;">${t.title}</span>`
+            ).join('');
+            html += `
+                <div class="hour-row">
+                    <span class="hour-label">${String(h).padStart(2,'0')}:00</span>
+                    <div class="hour-tasks">${tasksHtml}</div>
+                </div>
+            `;
+        }
+        // Задачи без времени
+        if (noTime.length) {
+            html += `<div class="hour-row" style="background:#2a2a44;"><span class="hour-label">📌</span><div class="hour-tasks">`;
+            noTime.forEach(t => {
+                html += `<span class="task-tag" style="border-left-color:${COLORS[t.category]}; background:${COLORS[t.category]}22;">${t.title}</span>`;
+            });
+            html += `</div></div>`;
+        }
+        html += `</div>`;
+        container.innerHTML = html;
     }
 
-    document.getElementById('calPrev').addEventListener('click', ()=>{
-        calMonth--;
-        if (calMonth < 0) { calMonth = 11; calYear--; }
+    // ---------- НЕДЕЛЯ ----------
+    function renderWeekView(container, title) {
+        const start = new Date(currentWeekStart);
+        const end = new Date(start);
+        end.setDate(end.getDate() + 6);
+        title.textContent = `${start.getDate()} ${monthNames[start.getMonth()]} – ${end.getDate()} ${monthNames[end.getMonth()]} ${start.getFullYear()}`;
+
+        const weekData = getTasksForWeek(formatDate(start));
+
+        let html = `<div class="week-grid">`;
+        const daysMap = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+        for (let i=0; i<7; i++) {
+            const d = new Date(start);
+            d.setDate(d.getDate() + i);
+            const dateStr = formatDate(d);
+            const tasks = weekData[dateStr] || [];
+            const dayTasks = tasks.map(t =>
+                `<div class="task-mini" style="border-left-color:${COLORS[t.category]};">${t.title}</div>`
+            ).join('');
+            const isToday = (dateStr === formatDate(new Date()));
+            html += `
+                <div class="week-day" style="${isToday ? 'border:2px solid #7c5cfc;' : ''}">
+                    <div class="day-label">${daysMap[i]}<br><small>${d.getDate()}</small></div>
+                    <div class="day-tasks">${dayTasks || '<span style="color:#555;">нет задач</span>'}</div>
+                </div>
+            `;
+        }
+        html += `</div>`;
+        container.innerHTML = html;
+
+        // Клик по дню -> переключиться в день
+        container.querySelectorAll('.week-day').forEach((el, idx) => {
+            el.addEventListener('click', () => {
+                const d = new Date(start);
+                d.setDate(d.getDate() + idx);
+                selectedDate = d;
+                viewMode = 'day';
+                renderCalendar();
+            });
+        });
+    }
+
+    // ---------- ГОД ----------
+    function renderYearView(container, title) {
+        title.textContent = currentYear;
+
+        let html = `<div class="year-grid">`;
+        for (let m=0; m<12; m++) {
+            const stats = getMonthStats(currentYear, m);
+            let statsHtml = '';
+            CATEGORIES.forEach(cat => {
+                if (stats[cat] > 0) {
+                    statsHtml += `<span class="stat-item"><span class="color-dot" style="background:${COLORS[cat]};"></span>${stats[cat]}</span>`;
+                }
+            });
+            if (!statsHtml) statsHtml = '<span style="color:#555;font-size:10px;">нет задач</span>';
+            html += `
+                <div class="month-card" data-year="${currentYear}" data-month="${m}">
+                    <div class="month-name">${shortMonthNames[m]}</div>
+                    <div class="stats-row">${statsHtml}</div>
+                </div>
+            `;
+        }
+        html += `</div>`;
+        container.innerHTML = html;
+
+        // Клик по месяцу -> переключиться в месяц
+        container.querySelectorAll('.month-card').forEach(el => {
+            el.addEventListener('click', () => {
+                const year = parseInt(el.dataset.year);
+                const month = parseInt(el.dataset.month);
+                currentYear = year;
+                currentMonth = month;
+                viewMode = 'month';
+                renderCalendar();
+            });
+        });
+    }
+
+    // ============================================================
+    // 7. НАВИГАЦИЯ ПО КАЛЕНДАРЮ
+    // ============================================================
+    function updateNavButtons() {
+        // Просто перерисовываем, кнопки уже есть
+    }
+
+    document.getElementById('calPrev').addEventListener('click', () => {
+        switch (viewMode) {
+            case 'month':
+                currentMonth--;
+                if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                break;
+            case 'day':
+                selectedDate.setDate(selectedDate.getDate() - 1);
+                break;
+            case 'week':
+                currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+                break;
+            case 'year':
+                currentYear--;
+                break;
+        }
         renderCalendar();
     });
-    document.getElementById('calNext').addEventListener('click', ()=>{
-        calMonth++;
-        if (calMonth > 11) { calMonth = 0; calYear++; }
+
+    document.getElementById('calNext').addEventListener('click', () => {
+        switch (viewMode) {
+            case 'month':
+                currentMonth++;
+                if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                break;
+            case 'day':
+                selectedDate.setDate(selectedDate.getDate() + 1);
+                break;
+            case 'week':
+                currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+                break;
+            case 'year':
+                currentYear++;
+                break;
+        }
         renderCalendar();
     });
 
     // ============================================================
-    // 5. ОТРИСОВКА ЗАДАЧ
+    // 8. ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ
+    // ============================================================
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const newMode = btn.dataset.view;
+            viewMode = newMode;
+            // При переключении в день, устанавливаем selectedDate на сегодня (или сохраняем)
+            if (newMode === 'day') {
+                // оставляем текущий selectedDate
+            } else if (newMode === 'week') {
+                currentWeekStart = getWeekStart(selectedDate);
+            } else if (newMode === 'year') {
+                // оставляем currentYear
+            }
+            renderCalendar();
+        });
+    });
+
+    // ============================================================
+    // 9. ОТРИСОВКА ЗАДАЧ В ЖУРНАЛАХ (без изменений, но с учётом фильтров)
     // ============================================================
     function renderTasksList(listEl, tasks, category) {
         if (!tasks.length) {
@@ -536,11 +812,13 @@
         const filter = filterBtn ? filterBtn.dataset.filter : 'all';
         renderTasks(cat, filter);
         updateCharacterUI();
+        // Календарь обновляется только при необходимости (например, после изменения задач)
+        // Но мы можем перерисовать его, если нужно обновить точки
         renderCalendar();
     }
 
     // ============================================================
-    // 6. НАВИГАЦИЯ
+    // 10. НАВИГАЦИЯ ПО ЖУРНАЛАМ
     // ============================================================
     function switchScreen(screenName) {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
@@ -569,7 +847,7 @@
     });
 
     // ============================================================
-    // 7. МОДАЛЬНОЕ ОКНО (динамические формы)
+    // 11. МОДАЛЬНОЕ ОКНО (динамические формы)
     // ============================================================
     let currentModalScreen = 'body';
 
@@ -645,7 +923,7 @@
             }
         });
 
-        // Общие поля для всех форм
+        // Общие поля
         html += `
             <label>Дата</label>
             <input type="date" id="f_date" />
@@ -671,7 +949,6 @@
 
         document.getElementById('modalFields').innerHTML = html;
 
-        // Установить сегодняшнюю дату
         const now = new Date();
         document.getElementById('f_date').value = now.toISOString().split('T')[0];
         document.getElementById('f_time').value = now.toTimeString().slice(0,5);
@@ -700,7 +977,6 @@
             days.push(cb.value);
         });
 
-        // Собираем кастомные поля из формы
         const custom = {};
         const form = FORMS[currentModalScreen];
         form.fields.forEach(f => {
@@ -724,7 +1000,6 @@
             createdAt: new Date().toISOString()
         };
 
-        // Определяем приоритет из кастомных полей, если есть
         if (custom.priority) {
             const map = { 'Низкий':'low', 'Средний':'medium', 'Высокий':'high' };
             task.priority = map[custom.priority] || 'medium';
@@ -737,7 +1012,7 @@
     });
 
     // ============================================================
-    // 8. ИНИЦИАЛИЗАЦИЯ
+    // 12. ИНИЦИАЛИЗАЦИЯ
     // ============================================================
     function init() {
         document.getElementById('charName').addEventListener('input', (e) => {
@@ -750,8 +1025,10 @@
         });
 
         const now = new Date();
-        calYear = now.getFullYear();
-        calMonth = now.getMonth();
+        selectedDate = now;
+        currentYear = now.getFullYear();
+        currentMonth = now.getMonth();
+        currentWeekStart = getWeekStart(now);
 
         updateCharacterUI();
         renderCalendar();
@@ -759,7 +1036,7 @@
     }
 
     init();
-    console.log('🔥 RPG Планировщик v3 загружен!');
+    console.log('🔥 RPG Планировщик v4 загружен!');
 </script>
 </body>
 </html>
