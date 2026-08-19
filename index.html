@@ -3,9 +3,52 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>RPG Планировщик v5</title>
+    <title>RPG Планировщик v6</title>
     <style>
-        /* ===== ГЛОБАЛЬНЫЕ ===== */
+        /* ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===== */
+        :root {
+            /* Основные (зависят от темы) */
+            --bg-primary: #0e0e1a;
+            --bg-secondary: rgba(22, 22, 40, 0.85);
+            --bg-card: rgba(30, 30, 58, 0.7);
+            --bg-modal: rgba(22, 22, 44, 0.95);
+            --bg-input: rgba(10, 10, 26, 0.7);
+            --text-primary: #eef0f8;
+            --text-secondary: #8899bb;
+            --text-muted: #667799;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --shadow-color: rgba(0, 0, 0, 0.7);
+
+            /* Акцент (изменяемый) */
+            --accent: #6C5CE7;
+            --accent-light: #A29BFE;
+            --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
+            --accent-shadow: rgba(108, 92, 231, 0.4);
+
+            /* Цвета журналов (можно будет сделать настраиваемыми позже) */
+            --color-body: #ff4757;
+            --color-hobby: #a29bfe;
+            --color-business: #4a8bfe;
+            --color-food: #2ed573;
+            --color-finance: #ffa502;
+            --color-debts: #ff6348;
+        }
+
+        /* Светлая тема */
+        [data-theme="light"] {
+            --bg-primary: #f0f2f8;
+            --bg-secondary: rgba(255, 255, 255, 0.9);
+            --bg-card: rgba(255, 255, 255, 0.7);
+            --bg-modal: rgba(255, 255, 255, 0.95);
+            --bg-input: rgba(240, 240, 248, 0.8);
+            --text-primary: #1a1a2e;
+            --text-secondary: #445566;
+            --text-muted: #667799;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --shadow-color: rgba(0, 0, 0, 0.15);
+        }
+
+        /* ===== СБРОС И БАЗА ===== */
         * {
             margin: 0;
             padding: 0;
@@ -14,29 +57,48 @@
         }
 
         body {
-            background: #0e0e1a;
-            color: #eef0f8;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             padding: 12px;
+            transition: background 0.3s, color 0.3s;
         }
 
         #app {
             max-width: 440px;
             width: 100%;
-            background: rgba(22, 22, 40, 0.85);
+            background: var(--bg-secondary);
             backdrop-filter: blur(12px);
             border-radius: 36px;
             padding: 20px 16px 80px;
             position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 60px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        /* ===== КНОПКА НАСТРОЕК ===== */
+        #settingsToggle {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 30px;
+            transition: 0.2s;
+            margin-left: auto;
+            display: block;
+        }
+        #settingsToggle:active {
+            transform: scale(0.9);
         }
 
         /* ===== ПЕРСОНАЖ ===== */
         #character-card {
-            background: rgba(30, 30, 58, 0.7);
+            background: var(--bg-card);
             backdrop-filter: blur(6px);
             border-radius: 24px;
             padding: 14px 18px;
@@ -45,8 +107,9 @@
             flex-wrap: wrap;
             align-items: center;
             gap: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+            transition: background 0.3s, border-color 0.3s;
         }
 
         .avatar {
@@ -70,7 +133,7 @@
             background: transparent;
             border: none;
             border-bottom: 2px solid rgba(108, 92, 231, 0.4);
-            color: #fff;
+            color: var(--text-primary);
             font-size: 18px;
             font-weight: 600;
             width: 120px;
@@ -80,13 +143,13 @@
         }
 
         .char-info input:focus {
-            border-bottom-color: #6C5CE7;
+            border-bottom-color: var(--accent);
         }
 
         .char-info select {
-            background: rgba(40, 40, 70, 0.8);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
             border-radius: 30px;
             padding: 2px 12px;
             font-size: 14px;
@@ -102,25 +165,28 @@
         }
 
         .stats span {
-            background: rgba(40, 40, 70, 0.6);
+            background: rgba(40, 40, 70, 0.4);
             padding: 2px 14px;
             border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
         }
 
         .level-badge {
-            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+            background: var(--accent-gradient);
             padding: 2px 16px;
             border-radius: 30px;
             font-weight: 700;
             font-size: 14px;
             border: none;
+            color: #fff;
+            box-shadow: 0 4px 12px var(--accent-shadow);
         }
 
         .xp-bar {
             width: 100%;
             height: 6px;
-            background: rgba(40, 40, 70, 0.6);
+            background: rgba(40, 40, 70, 0.4);
             border-radius: 10px;
             margin-top: 8px;
             overflow: hidden;
@@ -129,26 +195,27 @@
         .xp-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #6C5CE7, #A29BFE);
+            background: var(--accent-gradient);
             border-radius: 10px;
             transition: width 0.6s ease;
         }
 
         .xp-text {
             font-size: 12px;
-            color: #999;
+            color: var(--text-muted);
             margin-top: 2px;
         }
 
         /* ===== КАЛЕНДАРЬ ===== */
         #calendar-wrap {
-            background: rgba(20, 20, 42, 0.7);
+            background: var(--bg-card);
             backdrop-filter: blur(6px);
             border-radius: 24px;
             padding: 14px;
             margin-bottom: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+            transition: background 0.3s, border-color 0.3s;
         }
 
         .view-tabs {
@@ -162,8 +229,8 @@
             padding: 6px 0;
             border: none;
             border-radius: 30px;
-            background: rgba(40, 40, 70, 0.5);
-            color: #8899bb;
+            background: rgba(40, 40, 70, 0.4);
+            color: var(--text-muted);
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
@@ -171,9 +238,9 @@
         }
 
         .view-tabs button.active {
-            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+            background: var(--accent-gradient);
             color: #fff;
-            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.4);
+            box-shadow: 0 4px 16px var(--accent-shadow);
         }
 
         .cal-header {
@@ -184,9 +251,9 @@
         }
 
         .cal-header button {
-            background: rgba(40, 40, 70, 0.6);
+            background: rgba(40, 40, 70, 0.4);
             border: none;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 18px;
             padding: 0 16px;
             border-radius: 30px;
@@ -203,6 +270,7 @@
             font-weight: 700;
             font-size: 17px;
             letter-spacing: 0.5px;
+            color: var(--text-primary);
         }
 
         /* Месяц */
@@ -215,7 +283,7 @@
 
         .cal-grid .weekday {
             font-weight: 600;
-            color: #667799;
+            color: var(--text-muted);
             font-size: 11px;
             padding: 6px 0;
         }
@@ -223,17 +291,19 @@
         .cal-grid .day {
             padding: 8px 0;
             border-radius: 30px;
-            background: rgba(26, 26, 50, 0.6);
+            background: rgba(26, 26, 50, 0.4);
             font-size: 14px;
             transition: 0.2s;
             cursor: pointer;
             position: relative;
+            color: var(--text-primary);
         }
 
         .cal-grid .day.today {
-            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+            background: var(--accent-gradient);
             font-weight: 700;
-            box-shadow: 0 0 20px rgba(108, 92, 231, 0.5);
+            box-shadow: 0 0 20px var(--accent-shadow);
+            color: #fff;
         }
 
         .cal-grid .day.other-month {
@@ -251,12 +321,12 @@
             transform: translateX(-50%);
         }
 
-        .cal-grid .day .dot.body { background: #ff4757; }
-        .cal-grid .day .dot.hobby { background: #a29bfe; }
-        .cal-grid .day .dot.business { background: #4a8bfe; }
-        .cal-grid .day .dot.food { background: #2ed573; }
-        .cal-grid .day .dot.finance { background: #ffa502; }
-        .cal-grid .day .dot.debts { background: #ff6348; }
+        .cal-grid .day .dot.body { background: var(--color-body); }
+        .cal-grid .day .dot.hobby { background: var(--color-hobby); }
+        .cal-grid .day .dot.business { background: var(--color-business); }
+        .cal-grid .day .dot.food { background: var(--color-food); }
+        .cal-grid .day .dot.finance { background: var(--color-finance); }
+        .cal-grid .day .dot.debts { background: var(--color-debts); }
 
         /* День (почасовой) */
         .hour-grid {
@@ -270,15 +340,15 @@
             align-items: center;
             gap: 8px;
             font-size: 13px;
-            background: rgba(26, 26, 50, 0.6);
+            background: rgba(26, 26, 50, 0.4);
             padding: 6px 12px;
             border-radius: 16px;
-            transition: 0.2s;
+            color: var(--text-primary);
         }
 
         .hour-row .hour-label {
             min-width: 40px;
-            color: #8899bb;
+            color: var(--text-muted);
             font-weight: 600;
         }
 
@@ -290,13 +360,14 @@
         }
 
         .hour-tasks .task-tag {
-            background: rgba(40, 40, 70, 0.7);
+            background: rgba(40, 40, 70, 0.5);
             padding: 2px 12px;
             border-radius: 30px;
             font-size: 12px;
             border-left: 3px solid;
             white-space: nowrap;
             backdrop-filter: blur(4px);
+            color: var(--text-primary);
         }
 
         /* Неделя */
@@ -307,13 +378,14 @@
         }
 
         .week-day {
-            background: rgba(26, 26, 50, 0.6);
+            background: rgba(26, 26, 50, 0.4);
             border-radius: 16px;
             padding: 8px 4px;
             min-height: 80px;
             cursor: pointer;
             transition: 0.2s;
             border: 1px solid transparent;
+            color: var(--text-primary);
         }
 
         .week-day:active {
@@ -321,25 +393,25 @@
         }
 
         .week-day.today {
-            border-color: #6C5CE7;
-            box-shadow: 0 0 20px rgba(108, 92, 231, 0.2);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-shadow);
         }
 
         .week-day .day-label {
             font-size: 12px;
             font-weight: 600;
-            color: #8899bb;
+            color: var(--text-muted);
             text-align: center;
         }
 
         .week-day .day-tasks {
             font-size: 11px;
-            color: #ccc;
+            color: var(--text-secondary);
             margin-top: 4px;
         }
 
         .week-day .day-tasks .task-mini {
-            background: rgba(40, 40, 70, 0.5);
+            background: rgba(40, 40, 70, 0.3);
             border-radius: 8px;
             padding: 2px 6px;
             margin-bottom: 2px;
@@ -348,6 +420,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             font-size: 10px;
+            color: var(--text-primary);
         }
 
         /* Год */
@@ -358,13 +431,14 @@
         }
 
         .month-card {
-            background: rgba(26, 26, 50, 0.6);
+            background: rgba(26, 26, 50, 0.4);
             border-radius: 16px;
             padding: 12px 6px;
             cursor: pointer;
             transition: 0.2s;
             border: 1px solid transparent;
             text-align: center;
+            color: var(--text-primary);
         }
 
         .month-card:active {
@@ -386,12 +460,13 @@
 
         .month-card .stats-row .stat-item {
             font-size: 10px;
-            background: rgba(40, 40, 70, 0.5);
+            background: rgba(40, 40, 70, 0.3);
             padding: 1px 8px;
             border-radius: 20px;
             display: flex;
             align-items: center;
             gap: 4px;
+            color: var(--text-secondary);
         }
 
         .stat-item .color-dot {
@@ -429,6 +504,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--text-primary);
         }
 
         .screen-header .color-badge {
@@ -447,8 +523,8 @@
             height: 48px;
             border-radius: 40px;
             cursor: pointer;
-            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
-            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+            background: var(--accent-gradient);
+            box-shadow: 0 4px 20px var(--accent-shadow);
             transition: 0.2s;
         }
 
@@ -466,8 +542,8 @@
             padding: 6px 0;
             border: none;
             border-radius: 30px;
-            background: rgba(40, 40, 70, 0.4);
-            color: #8899bb;
+            background: rgba(40, 40, 70, 0.3);
+            color: var(--text-muted);
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
@@ -476,8 +552,8 @@
         }
 
         .filter-tabs button.active {
-            color: #fff;
-            border-bottom-color: #6C5CE7;
+            color: var(--text-primary);
+            border-bottom-color: var(--accent);
             background: rgba(108, 92, 231, 0.15);
         }
 
@@ -495,21 +571,23 @@
         }
 
         .task-list::-webkit-scrollbar-thumb {
-            background: #6C5CE7;
+            background: var(--accent);
             border-radius: 10px;
         }
 
         .task-item {
-            background: rgba(26, 26, 50, 0.7);
+            background: var(--bg-card);
             backdrop-filter: blur(4px);
             border-radius: 18px;
             padding: 12px 16px;
-            border-left: 5px solid #6C5CE7;
+            border-left: 5px solid var(--accent);
             display: flex;
             flex-direction: column;
             gap: 4px;
             transition: 0.2s;
             animation: slideUp 0.25s ease;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
         }
 
         @keyframes slideUp {
@@ -541,18 +619,18 @@
             flex-wrap: wrap;
             gap: 4px 12px;
             font-size: 12px;
-            color: #99aabb;
+            color: var(--text-secondary);
         }
 
         .task-meta span {
-            background: rgba(40, 40, 70, 0.4);
+            background: rgba(40, 40, 70, 0.3);
             padding: 0 10px;
             border-radius: 30px;
         }
 
         .task-days {
             font-size: 11px;
-            color: #A29BFE;
+            color: var(--accent-light);
         }
 
         .task-actions {
@@ -591,7 +669,7 @@
             color: #ccb;
         }
 
-        /* ===== МОДАЛЬНОЕ ОКНО ===== */
+        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -599,7 +677,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(8px);
             justify-content: center;
             align-items: center;
@@ -612,7 +690,7 @@
         }
 
         .modal {
-            background: rgba(22, 22, 44, 0.95);
+            background: var(--bg-modal);
             backdrop-filter: blur(12px);
             border-radius: 32px;
             padding: 24px 20px;
@@ -620,14 +698,16 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px var(--shadow-color);
+            color: var(--text-primary);
+            transition: background 0.3s;
         }
 
         .modal h3 {
             font-size: 20px;
             margin-bottom: 16px;
-            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -635,7 +715,7 @@
         .modal label {
             font-size: 13px;
             font-weight: 500;
-            color: #99aabb;
+            color: var(--text-secondary);
             display: block;
             margin-top: 10px;
         }
@@ -646,9 +726,9 @@
             width: 100%;
             padding: 10px 14px;
             border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(10, 10, 26, 0.7);
-            color: #fff;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-primary);
             font-size: 15px;
             margin-top: 4px;
             outline: none;
@@ -658,7 +738,7 @@
         .modal input:focus,
         .modal select:focus,
         .modal textarea:focus {
-            border-color: #6C5CE7;
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
         }
 
@@ -680,17 +760,18 @@
             gap: 4px;
             font-size: 13px;
             font-weight: 400;
-            background: rgba(40, 40, 70, 0.4);
+            background: rgba(40, 40, 70, 0.3);
             padding: 4px 12px;
             border-radius: 30px;
             cursor: pointer;
             margin-top: 0;
+            color: var(--text-primary);
         }
 
         .modal .days-check input[type="checkbox"] {
             width: 16px;
             height: 16px;
-            accent-color: #6C5CE7;
+            accent-color: var(--accent);
             margin: 0;
         }
 
@@ -716,17 +797,45 @@
         }
 
         .btn-save-task {
-            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+            background: var(--accent-gradient);
             color: #fff;
-            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+            box-shadow: 0 4px 20px var(--accent-shadow);
         }
 
         .btn-cancel {
-            background: rgba(40, 40, 70, 0.6);
-            color: #99aabb;
+            background: rgba(40, 40, 70, 0.4);
+            color: var(--text-secondary);
         }
 
-        /* ===== НИЖНИЙ БАР ===== */
+        /* Специальные стили для кнопок выбора цвета в настройках */
+        .color-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .color-btn:active {
+            transform: scale(0.9);
+        }
+        .theme-btn {
+            padding: 8px;
+            border-radius: 30px;
+            border: 2px solid transparent;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+        }
+        .theme-btn.active {
+            border-color: var(--accent);
+            background: var(--accent-gradient);
+            color: #fff;
+        }
+
+        /* ===== НИЖНИЙ ТАБ-БАР ===== */
         #bottom-bar {
             position: absolute;
             bottom: 0;
@@ -734,17 +843,18 @@
             width: 100%;
             background: rgba(12, 12, 26, 0.9);
             backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            border-top: 1px solid var(--border-color);
             border-radius: 0 0 36px 36px;
             padding: 6px 4px 10px;
             display: flex;
             justify-content: space-around;
+            transition: background 0.3s, border-color 0.3s;
         }
 
         #bottom-bar button {
             background: transparent;
             border: none;
-            color: #667799;
+            color: var(--text-muted);
             font-size: 10px;
             display: flex;
             flex-direction: column;
@@ -768,8 +878,8 @@
         }
 
         #bottom-bar button.active {
-            color: #fff;
-            background: rgba(108, 92, 231, 0.2);
+            color: var(--accent);
+            background: rgba(108, 92, 231, 0.15);
         }
 
         #bottom-bar button:active {
@@ -802,6 +912,11 @@
 </head>
 <body>
 <div id="app">
+
+    <!-- ===== КНОПКА НАСТРОЕК ===== -->
+    <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+        <button id="settingsToggle" title="Настройки темы и цвета">⚙️</button>
+    </div>
 
     <!-- ===== КАРТОЧКА ПЕРСОНАЖА ===== -->
     <div id="character-card">
@@ -843,7 +958,7 @@
     <!-- Тело -->
     <div class="screen active" id="screen-body">
         <div class="screen-header">
-            <h2><span class="color-badge" style="background:#ff4757;color:#ff4757;"></span> Тело</h2>
+            <h2><span class="color-badge" style="background:var(--color-body);color:var(--color-body);"></span> Тело</h2>
             <button class="btn-new" data-screen="body">➕</button>
         </div>
         <div class="filter-tabs">
@@ -857,7 +972,7 @@
     <!-- Хобби -->
     <div class="screen" id="screen-hobby">
         <div class="screen-header">
-            <h2><span class="color-badge" style="background:#a29bfe;color:#a29bfe;"></span> Хобби</h2>
+            <h2><span class="color-badge" style="background:var(--color-hobby);color:var(--color-hobby);"></span> Хобби</h2>
             <button class="btn-new" data-screen="hobby">➕</button>
         </div>
         <div class="filter-tabs">
@@ -871,7 +986,7 @@
     <!-- Бизнес -->
     <div class="screen" id="screen-business">
         <div class="screen-header">
-            <h2><span class="color-badge" style="background:#4a8bfe;color:#4a8bfe;"></span> Бизнес</h2>
+            <h2><span class="color-badge" style="background:var(--color-business);color:var(--color-business);"></span> Бизнес</h2>
             <button class="btn-new" data-screen="business">➕</button>
         </div>
         <div class="filter-tabs">
@@ -885,7 +1000,7 @@
     <!-- Питание -->
     <div class="screen" id="screen-food">
         <div class="screen-header">
-            <h2><span class="color-badge" style="background:#2ed573;color:#2ed573;"></span> Питание</h2>
+            <h2><span class="color-badge" style="background:var(--color-food);color:var(--color-food);"></span> Питание</h2>
             <button class="btn-new" data-screen="food">➕</button>
         </div>
         <div class="filter-tabs">
@@ -899,7 +1014,7 @@
     <!-- Финансы -->
     <div class="screen" id="screen-finance">
         <div class="screen-header">
-            <h2><span class="color-badge" style="background:#ffa502;color:#ffa502;"></span> Финансы</h2>
+            <h2><span class="color-badge" style="background:var(--color-finance);color:var(--color-finance);"></span> Финансы</h2>
             <button class="btn-new" data-screen="finance">➕</button>
         </div>
         <div class="filter-tabs">
@@ -913,7 +1028,7 @@
     <!-- Долги -->
     <div class="screen" id="screen-debts">
         <div class="screen-header">
-            <h2><span class="color-badge" style="background:#ff6348;color:#ff6348;"></span> Долги</h2>
+            <h2><span class="color-badge" style="background:var(--color-debts);color:var(--color-debts);"></span> Долги</h2>
             <button class="btn-new" data-screen="debts">➕</button>
         </div>
         <div class="filter-tabs">
@@ -934,7 +1049,7 @@
         <button class="tab-btn" data-screen="debts"><span class="icon">📋</span><span class="label">Долги</span></button>
     </div>
 
-    <!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
+    <!-- ===== МОДАЛЬНОЕ ОКНО ЗАДАЧ ===== -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal" id="modalContent">
             <h3 id="modalTitle">➕ Новая задача</h3>
@@ -945,13 +1060,40 @@
             </div>
         </div>
     </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО НАСТРОЕК ===== -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal" style="max-width:340px;">
+            <h3 style="margin-bottom:16px;">⚙️ Настройки</h3>
+
+            <label style="display:block; margin-top:8px;">Тема</label>
+            <div style="display:flex; gap:8px; margin-top:4px;">
+                <button class="theme-btn active" data-theme="dark">🌙 Тёмная</button>
+                <button class="theme-btn" data-theme="light">☀️ Светлая</button>
+            </div>
+
+            <label style="display:block; margin-top:16px;">Акцентный цвет</label>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+                <button class="color-btn" data-color="#6C5CE7" style="background:#6C5CE7;" title="Фиолетовый"></button>
+                <button class="color-btn" data-color="#4A8BFE" style="background:#4A8BFE;" title="Синий"></button>
+                <button class="color-btn" data-color="#2ED573" style="background:#2ED573;" title="Зелёный"></button>
+                <button class="color-btn" data-color="#FFA502" style="background:#FFA502;" title="Оранжевый"></button>
+                <button class="color-btn" data-color="#FF4757" style="background:#FF4757;" title="Красный"></button>
+                <button class="color-btn" data-color="#FD79A8" style="background:#FD79A8;" title="Розовый"></button>
+            </div>
+
+            <div class="modal-actions" style="margin-top:20px;">
+                <button class="btn-cancel" id="settingsClose" style="flex:1;">Закрыть</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     // ============================================================
     // 1. ДАННЫЕ
     // ============================================================
-    const STORAGE_KEY = 'rpg_journal_v5';
+    const STORAGE_KEY = 'rpg_journal_v6';
     const COLORS = {
         body: '#ff4757',
         hobby: '#a29bfe',
@@ -1212,7 +1354,7 @@
             `;
         }
         if (noTime.length) {
-            html += `<div class="hour-row" style="background:rgba(40,40,70,0.5);"><span class="hour-label">📌</span><div class="hour-tasks">`;
+            html += `<div class="hour-row" style="background:rgba(40,40,70,0.3);"><span class="hour-label">📌</span><div class="hour-tasks">`;
             noTime.forEach(t => {
                 html += `<span class="task-tag" style="border-left-color:${COLORS[t.category]}; background:${COLORS[t.category]}22;">${t.title}</span>`;
             });
@@ -1245,7 +1387,7 @@
             html += `
                 <div class="week-day ${isToday ? 'today' : ''}">
                     <div class="day-label">${daysMap[i]}<br><small>${d.getDate()}</small></div>
-                    <div class="day-tasks">${dayTasks || '<span style="color:#555;">нет задач</span>'}</div>
+                    <div class="day-tasks">${dayTasks || '<span style="color:var(--text-muted);">нет задач</span>'}</div>
                 </div>
             `;
         }
@@ -1276,7 +1418,7 @@
                     statsHtml += `<span class="stat-item"><span class="color-dot" style="background:${COLORS[cat]};"></span>${stats[cat]}</span>`;
                 }
             });
-            if (!statsHtml) statsHtml = '<span style="color:#555;font-size:10px;">нет задач</span>';
+            if (!statsHtml) statsHtml = '<span style="color:var(--text-muted);font-size:10px;">нет задач</span>';
             html += `
                 <div class="month-card" data-year="${currentYear}" data-month="${m}">
                     <div class="month-name">${shortMonthNames[m]}</div>
@@ -1356,7 +1498,7 @@
     // ============================================================
     function renderTasksList(listEl, tasks, category) {
         if (!tasks.length) {
-            listEl.innerHTML = `<div style="color:#667799;text-align:center;padding:20px;font-size:14px;">Нет задач</div>`;
+            listEl.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:20px;font-size:14px;">Нет задач</div>`;
             return;
         }
 
@@ -1369,7 +1511,7 @@
                 <div class="task-item ${statusClass}" style="border-left-color:${COLORS[category]};">
                     <div class="task-top">
                         <span class="task-title">${priorityEmoji} ${task.title}</span>
-                        <span style="font-size:11px;color:#667799;">${task.date || 'без даты'}</span>
+                        <span style="font-size:11px;color:var(--text-muted);">${task.date || 'без даты'}</span>
                     </div>
                     <div class="task-meta">
                         ${task.duration ? `<span>⏱ ${task.duration} мин</span>` : ''}
@@ -1469,7 +1611,7 @@
     });
 
     // ============================================================
-    // 8. МОДАЛЬНОЕ ОКНО (динамические формы)
+    // 8. МОДАЛЬНОЕ ОКНО ЗАДАЧ
     // ============================================================
     let currentModalScreen = 'body';
 
@@ -1634,7 +1776,88 @@
     });
 
     // ============================================================
-    // 9. ИНИЦИАЛИЗАЦИЯ
+    // 9. НАСТРОЙКИ ТЕМЫ И АКЦЕНТА
+    // ============================================================
+    function loadThemeSettings() {
+        const savedTheme = localStorage.getItem('app_theme') || 'dark';
+        const savedAccent = localStorage.getItem('app_accent') || '#6C5CE7';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.style.setProperty('--accent', savedAccent);
+        // Вычисляем светлый вариант акцента (для градиента)
+        document.documentElement.style.setProperty('--accent-light', lightenColor(savedAccent, 30));
+        // Обновляем кнопки
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === savedTheme);
+        });
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.style.borderColor = (btn.dataset.color === savedAccent) ? '#fff' : 'transparent';
+        });
+        // Обновляем динамические градиенты
+        updateGradients();
+    }
+
+    function lightenColor(hex, percent) {
+        const num = parseInt(hex.slice(1), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = Math.min(255, (num >> 16) + amt);
+        const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+        const B = Math.min(255, (num & 0x0000FF) + amt);
+        return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+    }
+
+    function updateGradients() {
+        // Применяем градиент к элементам, которые используют var(--accent-gradient)
+        // (они уже обновятся через CSS-переменные, но для инлайн-стилей нужно обновить)
+        document.querySelectorAll('.btn-new, .btn-save-task, .level-badge, .view-tabs .active').forEach(el => {
+            if (el.classList.contains('view-tabs') && el.classList.contains('active')) {
+                // уже через CSS
+            } else {
+                el.style.background = 'var(--accent-gradient)';
+            }
+        });
+    }
+
+    // Переключение темы
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const theme = btn.dataset.theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('app_theme', theme);
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    // Выбор акцентного цвета
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const color = btn.dataset.color;
+            document.documentElement.style.setProperty('--accent', color);
+            document.documentElement.style.setProperty('--accent-light', lightenColor(color, 30));
+            localStorage.setItem('app_accent', color);
+            document.querySelectorAll('.color-btn').forEach(b => b.style.borderColor = 'transparent');
+            btn.style.borderColor = '#fff';
+            updateGradients();
+        });
+    });
+
+    // Открытие/закрытие модалки настроек
+    document.getElementById('settingsToggle').addEventListener('click', () => {
+        document.getElementById('settingsModal').classList.add('open');
+        // Обновляем активные кнопки в модалке
+        loadThemeSettings();
+    });
+    document.getElementById('settingsClose').addEventListener('click', () => {
+        document.getElementById('settingsModal').classList.remove('open');
+    });
+    document.getElementById('settingsModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            document.getElementById('settingsModal').classList.remove('open');
+        }
+    });
+
+    // ============================================================
+    // 10. ИНИЦИАЛИЗАЦИЯ
     // ============================================================
     function init() {
         document.getElementById('charName').addEventListener('input', (e) => {
@@ -1652,13 +1875,16 @@
         currentMonth = now.getMonth();
         currentWeekStart = getWeekStart(now);
 
+        // Загружаем настройки темы и акцента
+        loadThemeSettings();
+
         updateCharacterUI();
         renderCalendar();
         switchScreen('body');
     }
 
     init();
-    console.log('🔥 RPG Планировщик v5 загружен!');
+    console.log('🔥 RPG Планировщик v6 (с цветовыми схемами) загружен!');
 </script>
 </body>
 </html>
