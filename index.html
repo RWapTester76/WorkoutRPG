@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>RPG Планировщик v8</title>
+    <title>RPG Планировщик v9</title>
     <style>
-        /* ===== ПЕРЕМЕННЫЕ (будут переопределяться схемами) ===== */
+        /* ===== ПЕРЕМЕННЫЕ ===== */
         :root {
-            /* Базовые цвета (схема "Классическая") */
             --bg: #f5f6fa;
             --surface: #ffffff;
             --surface2: #f0f1f5;
@@ -24,10 +23,9 @@
             --radius-sm: 16px;
             --transition: 0.25s ease;
             --font-size: 16px;
-            --first-day: 1; /* 1 = ПН, 0 = ВС */
+            --first-day: 1;
         }
 
-        /* ----- ТЁМНАЯ ТЕМА (базовая) ----- */
         [data-theme="dark"] {
             --bg: #0e0e1a;
             --surface: rgba(22, 22, 44, 0.85);
@@ -39,36 +37,30 @@
             --shadow: 0 8px 30px rgba(0,0,0,0.5);
         }
 
-        /* ===== ЦВЕТОВЫЕ СХЕМЫ (пресеты) ===== */
-        /* Классическая (по умолчанию) */
         [data-scheme="classic"] {
             --accent: #6C5CE7;
             --accent-light: #A29BFE;
             --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
             --accent-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
         }
-        /* Океан */
         [data-scheme="ocean"] {
             --accent: #0984e3;
             --accent-light: #74b9ff;
             --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
             --accent-shadow: 0 6px 20px rgba(9, 132, 227, 0.3);
         }
-        /* Лес */
         [data-scheme="forest"] {
             --accent: #00b894;
             --accent-light: #55efc4;
             --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
             --accent-shadow: 0 6px 20px rgba(0, 184, 148, 0.3);
         }
-        /* Закат */
         [data-scheme="sunset"] {
             --accent: #e17055;
             --accent-light: #fab1a0;
             --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
             --accent-shadow: 0 6px 20px rgba(225, 112, 85, 0.3);
         }
-        /* Ночь */
         [data-scheme="night"] {
             --accent: #6c5ce7;
             --accent-light: #a29bfe;
@@ -83,7 +75,6 @@
             --border: rgba(255,255,255,0.04);
             --shadow: 0 8px 30px rgba(0,0,0,0.7);
         }
-        /* Неон */
         [data-scheme="neon"] {
             --accent: #fd79a8;
             --accent-light: #ffb8d0;
@@ -99,7 +90,6 @@
             --shadow: 0 8px 30px rgba(0,0,0,0.8);
         }
 
-        /* ===== ГЛОБАЛЬНЫЕ СТИЛИ ===== */
         * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
         body {
             background: var(--bg);
@@ -124,7 +114,6 @@
             transition: 0.3s;
         }
 
-        /* ===== ВЕРХНИЙ БАР ===== */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -154,7 +143,6 @@
         }
         .top-bar .actions button:active { transform: scale(0.9); }
 
-        /* ===== ВКЛАДКИ ===== */
         .tabs {
             display: flex;
             gap: 6px;
@@ -187,7 +175,6 @@
             margin-bottom: 2px;
         }
 
-        /* ===== КОНТЕЙНЕРЫ ВКЛАДОК ===== */
         .tab-content {
             display: none;
             flex-direction: column;
@@ -197,7 +184,6 @@
         .tab-content.active { display: flex; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-        /* ===== КАРТОЧКИ ЖУРНАЛОВ ===== */
         .journal-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -217,7 +203,6 @@
         .journal-card .name { font-weight: 600; margin-top: 4px; }
         .journal-card .count { font-size: 13px; color: var(--text3); }
 
-        /* ===== ЭКРАН ЖУРНАЛА ===== */
         .journal-screen {
             display: none;
             flex-direction: column;
@@ -271,7 +256,6 @@
             color: #fff;
         }
 
-        /* ===== ЗАДАЧИ ===== */
         .task-list {
             display: flex;
             flex-direction: column;
@@ -333,7 +317,6 @@
         .btn-skip { background: #7d2e2e; color: #fff; }
         .btn-del { background: rgba(60,30,40,0.8); color: #ccb; }
 
-        /* ===== КАЛЕНДАРЬ ===== */
         #calendar-wrap {
             background: var(--surface2);
             border-radius: var(--radius-sm);
@@ -356,7 +339,20 @@
             cursor: pointer;
             line-height: 30px;
         }
-        .cal-header .month-year { font-weight: 700; }
+        .cal-header .month-year {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cal-header .month-year .year-nav {
+            font-size: 14px;
+            background: none;
+            border: none;
+            color: var(--text2);
+            cursor: pointer;
+            padding: 0 4px;
+        }
         .cal-grid {
             display: grid;
             grid-template-columns: repeat(7,1fr);
@@ -395,7 +391,6 @@
             transform: translateX(-50%);
         }
 
-        /* ===== ПРОФИЛЬ ===== */
         .profile-card {
             background: var(--surface2);
             border-radius: var(--radius-sm);
@@ -404,8 +399,8 @@
             border: 1px solid var(--border);
         }
         .profile-card .avatar { font-size: 56px; margin-bottom: 4px; }
-        .profile-card .name { font-size: 22px; font-weight: 700; }
-        .profile-card .gender { color: var(--text3); }
+        .profile-card .name { font-size: 22px; font-weight: 700; cursor: pointer; }
+        .profile-card .gender { color: var(--text3); cursor: pointer; }
         .profile-card .level {
             background: var(--accent-gradient);
             color: #fff;
@@ -461,7 +456,6 @@
             transition: width 0.5s;
         }
 
-        /* ===== ЗАМЕТКИ ===== */
         .note-item {
             background: var(--surface2);
             border-radius: var(--radius-sm);
@@ -503,7 +497,6 @@
             cursor: pointer;
         }
 
-        /* ===== ГАЛЕРЕЯ ===== */
         .photo-grid {
             display: grid;
             grid-template-columns: repeat(3,1fr);
@@ -540,7 +533,6 @@
             cursor: pointer;
         }
 
-        /* ===== СТАТИСТИКА ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -582,7 +574,6 @@
             transition: width 0.8s;
         }
 
-        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -683,7 +674,6 @@
             color: var(--text2);
         }
 
-        /* ===== НАСТРОЙКИ ===== */
         .settings-section {
             margin-bottom: 18px;
         }
@@ -758,7 +748,58 @@
         }
         .settings-section .color-schemes button:active { transform: scale(0.9); }
 
-        /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
+        .goal-item {
+            background: var(--surface2);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .goal-item .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .goal-item .goal-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .goal-item .goal-progress {
+            font-size: 14px;
+            color: var(--text2);
+        }
+        .goal-item .goal-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--surface);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .goal-item .goal-bar .fill {
+            height: 100%;
+            background: var(--accent-gradient);
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        .goal-item .goal-tasks {
+            font-size: 12px;
+            color: var(--text3);
+            margin-top: 4px;
+        }
+        .goal-item .goal-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .goal-item .goal-actions button {
+            background: none;
+            border: none;
+            color: var(--text2);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
         #bottom-nav {
             position: absolute;
             bottom: 0;
@@ -796,7 +837,6 @@
         }
         #bottom-nav button:active { transform: scale(0.9); }
 
-        /* ===== АДАПТИВ ===== */
         @media (max-width:400px) {
             #app { padding: 16px 12px 70px; }
             .journal-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -808,7 +848,6 @@
 <body>
 <div id="app">
 
-    <!-- ===== ВЕРХНИЙ БАР ===== -->
     <div class="top-bar">
         <span class="logo">📋 RPG Planner</span>
         <div class="actions">
@@ -816,17 +855,16 @@
         </div>
     </div>
 
-    <!-- ===== ВКЛАДКИ ===== -->
     <div class="tabs" id="mainTabs">
         <button class="active" data-tab="journals"><span class="tab-icon">📚</span>Журналы</button>
+        <button data-tab="goals"><span class="tab-icon">🎯</span>Цели</button>
         <button data-tab="profile"><span class="tab-icon">👤</span>Профиль</button>
         <button data-tab="notes"><span class="tab-icon">📝</span>Заметки</button>
         <button data-tab="gallery"><span class="tab-icon">🖼️</span>Галерея</button>
         <button data-tab="stats"><span class="tab-icon">📊</span>Статистика</button>
     </div>
 
-    <!-- ===== КОНТЕНТ ===== -->
-    <!-- Вкладка: Журналы -->
+    <!-- ===== ВКЛАДКА ЖУРНАЛЫ ===== -->
     <div class="tab-content active" id="tab-journals">
         <div class="journal-grid" id="journalGrid"></div>
         <div id="journalScreen" class="journal-screen">
@@ -840,12 +878,15 @@
                 <button data-filter="active">Активные</button>
                 <button data-filter="done">Выполненные</button>
             </div>
-            <!-- Календарь -->
             <div id="calendar-wrap">
                 <div class="cal-header">
-                    <button id="calPrev">◀</button>
-                    <span class="month-year" id="calTitle">Январь 2026</span>
-                    <button id="calNext">▶</button>
+                    <button id="calPrevMonth">◀</button>
+                    <span class="month-year">
+                        <span id="calTitle">Январь 2026</span>
+                        <button class="year-nav" id="calPrevYear">◀◀</button>
+                        <button class="year-nav" id="calNextYear">▶▶</button>
+                    </span>
+                    <button id="calNextMonth">▶</button>
                 </div>
                 <div id="calendarContent"></div>
             </div>
@@ -853,7 +894,16 @@
         </div>
     </div>
 
-    <!-- Вкладка: Профиль -->
+    <!-- ===== ВКЛАДКА ЦЕЛИ ===== -->
+    <div class="tab-content" id="tab-goals">
+        <div style="display:flex; gap:8px; align-items:center;">
+            <input type="text" id="goalInput" placeholder="Название цели..." style="flex:1; padding:10px 14px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface2); color:var(--text); outline:none;" />
+            <button id="goalAddBtn" style="padding:10px 18px; border:none; border-radius:var(--radius-sm); background:var(--accent-gradient); color:#fff; font-weight:600; cursor:pointer;">➕</button>
+        </div>
+        <div id="goalList"></div>
+    </div>
+
+    <!-- ===== ВКЛАДКА ПРОФИЛЬ ===== -->
     <div class="tab-content" id="tab-profile">
         <div class="profile-card" id="profileCard">
             <div class="avatar" id="profileAvatar">🧙</div>
@@ -873,7 +923,7 @@
         <div class="journal-stats" id="journalStats"></div>
     </div>
 
-    <!-- Вкладка: Заметки -->
+    <!-- ===== ВКЛАДКА ЗАМЕТКИ ===== -->
     <div class="tab-content" id="tab-notes">
         <div class="note-input">
             <input type="text" id="noteInput" placeholder="Текст заметки..." />
@@ -882,7 +932,7 @@
         <div id="noteList"></div>
     </div>
 
-    <!-- Вкладка: Галерея -->
+    <!-- ===== ВКЛАДКА ГАЛЕРЕЯ ===== -->
     <div class="tab-content" id="tab-gallery">
         <div class="photo-upload">
             <input type="file" id="galleryFileInput" accept="image/*" multiple />
@@ -891,7 +941,7 @@
         <div class="photo-grid" id="galleryGrid"></div>
     </div>
 
-    <!-- Вкладка: Статистика -->
+    <!-- ===== ВКЛАДКА СТАТИСТИКА ===== -->
     <div class="tab-content" id="tab-stats">
         <div class="stats-grid" id="statsGrid">
             <div class="stat-card"><div class="num" id="statsTotal">0</div><div class="label">Всего задач</div></div>
@@ -908,6 +958,7 @@
     <!-- ===== НИЖНЯЯ НАВИГАЦИЯ ===== -->
     <div id="bottom-nav">
         <button class="active" data-tab="journals"><span class="icon">📚</span><span class="label">Журналы</span></button>
+        <button data-tab="goals"><span class="icon">🎯</span><span class="label">Цели</span></button>
         <button data-tab="profile"><span class="icon">👤</span><span class="label">Профиль</span></button>
         <button data-tab="notes"><span class="icon">📝</span><span class="label">Заметки</span></button>
         <button data-tab="gallery"><span class="icon">🖼️</span><span class="label">Галерея</span></button>
@@ -926,12 +977,10 @@
         </div>
     </div>
 
-    <!-- ===== МОДАЛЬНОЕ ОКНО НАСТРОЕК (РАСШИРЕННОЕ) ===== -->
+    <!-- ===== МОДАЛЬНОЕ ОКНО НАСТРОЕК ===== -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal" style="max-width:380px;">
             <h3>⚙️ Настройки</h3>
-
-            <!-- Цветовые схемы -->
             <div class="settings-section">
                 <div class="section-title">🎨 Цветовая схема</div>
                 <div class="color-schemes" id="schemeButtons">
@@ -943,8 +992,6 @@
                     <button data-scheme="neon" style="background:linear-gradient(135deg,#fd79a8,#ffb8d0);">НЕ</button>
                 </div>
             </div>
-
-            <!-- Тема -->
             <div class="settings-section">
                 <div class="section-title">🌓 Тема</div>
                 <div class="setting-row">
@@ -955,8 +1002,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Отображение -->
             <div class="settings-section">
                 <div class="section-title">📐 Отображение</div>
                 <div class="setting-row">
@@ -988,8 +1033,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Уведомления (заглушка) -->
             <div class="settings-section">
                 <div class="section-title">🔔 Уведомления</div>
                 <div class="setting-row">
@@ -1002,8 +1045,6 @@
                 </div>
                 <div style="font-size:12px; color:var(--text3); margin-top:4px;">(Заглушка – в будущем будут приходить уведомления)</div>
             </div>
-
-            <!-- Умные девайсы (заглушка) -->
             <div class="settings-section">
                 <div class="section-title">📱 Умные девайсы</div>
                 <div class="setting-row">
@@ -1016,8 +1057,6 @@
                 </div>
                 <div style="font-size:12px; color:var(--text3); margin-top:4px;">(Заглушка – в будущем будет синхронизация с шагами и сном)</div>
             </div>
-
-            <!-- Импорт/Экспорт -->
             <div class="settings-section">
                 <div class="section-title">💾 Данные</div>
                 <div class="setting-row">
@@ -1040,17 +1079,14 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Информация -->
             <div class="settings-section">
                 <div class="section-title">ℹ️ О приложении</div>
                 <div style="font-size:14px; color:var(--text2);">
-                    RPG Планировщик v8<br />
+                    RPG Планировщик v9<br />
                     Разработчик: AI-сеньор<br />
                     Данные хранятся локально в браузере.
                 </div>
             </div>
-
             <div class="modal-actions" style="margin-top:20px;">
                 <button class="btn-cancel" id="settingsClose">Закрыть</button>
             </div>
@@ -1063,15 +1099,17 @@
     // ============================================================
     // 1. ДАННЫЕ И МИГРАЦИЯ
     // ============================================================
-    const STORAGE_KEY = 'rpg_journal_v8';
-    const CATEGORIES = ['body','hobby','business','food','finance','debts'];
+    const STORAGE_KEY = 'rpg_journal_v9';
+    const CATEGORIES = ['body','hobby','business','food','finance','debts','travel','misc'];
     const COLORS = {
         body: '#ff4757',
         hobby: '#a29bfe',
         business: '#4a8bfe',
         food: '#2ed573',
         finance: '#ffa502',
-        debts: '#ff6348'
+        debts: '#ff6348',
+        travel: '#00cec9',
+        misc: '#fdcb6e'
     };
     const ICONS = {
         body: '💪',
@@ -1079,7 +1117,9 @@
         business: '📈',
         food: '🥗',
         finance: '💰',
-        debts: '📋'
+        debts: '📋',
+        travel: '✈️',
+        misc: '📦'
     };
     const NAMES = {
         body: 'Тело',
@@ -1087,7 +1127,9 @@
         business: 'Бизнес',
         food: 'Питание',
         finance: 'Финансы',
-        debts: 'Долги'
+        debts: 'Долги',
+        travel: 'Путешествия',
+        misc: 'Разное'
     };
 
     function getDefaultData() {
@@ -1099,10 +1141,13 @@
                 business: [],
                 food: [],
                 finance: [],
-                debts: []
+                debts: [],
+                travel: [],
+                misc: []
             },
             notes: [],
-            gallery: []
+            gallery: [],
+            goals: [] // { id, title, taskIds: [], createdAt }
         };
     }
 
@@ -1119,6 +1164,15 @@
                 }
                 for (let cat in def.tasks) {
                     if (!(cat in parsed.tasks)) parsed.tasks[cat] = [];
+                }
+                // Миграция: добавляем id задачам, у которых его нет
+                for (let cat in parsed.tasks) {
+                    parsed.tasks[cat] = parsed.tasks[cat].map(task => {
+                        if (!task.id) {
+                            task.id = 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                        }
+                        return task;
+                    });
                 }
                 return parsed;
             }
@@ -1171,12 +1225,12 @@
                     const dayOfWeek = d.getDay();
                     const firstDay = parseInt(localStorage.getItem('app_firstDay') || '1');
                     let dayIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
-                    if (firstDay === 0) { // воскресенье
+                    if (firstDay === 0) {
                         dayIndex = dayOfWeek;
                     }
                     const daysMap = ['mon','tue','wed','thu','fri','sat','sun'];
                     if (task.days.includes(daysMap[dayIndex])) {
-                        if (!result.some(t => t === task && t.category === cat)) {
+                        if (!result.some(t => t.id === task.id && t.category === cat)) {
                             result.push({ ...task, category: cat });
                         }
                     }
@@ -1210,11 +1264,20 @@
         return result;
     }
 
+    function getTaskById(id) {
+        for (let cat of CATEGORIES) {
+            const found = data.tasks[cat].find(t => t.id === id);
+            if (found) return { ...found, category: cat };
+        }
+        return null;
+    }
+
     // ============================================================
     // 4. ОБНОВЛЕНИЕ ВСЕГО UI
     // ============================================================
     function updateAllUI() {
         renderJournalGrid();
+        renderGoals();
         renderProfile();
         renderNotes();
         renderGallery();
@@ -1318,9 +1381,10 @@
                 const cat = btn.dataset.cat;
                 const idx = parseInt(btn.dataset.idx);
                 const action = btn.dataset.action;
+                const task = data.tasks[cat][idx];
+                if (!task) return;
                 if (action === 'done') {
-                    const task = data.tasks[cat][idx];
-                    if (task && task.status === 'active') {
+                    if (task.status === 'active') {
                         task.status = 'done';
                         const xp = getPriorityXP(task.priority);
                         addXP(xp);
@@ -1329,18 +1393,19 @@
                         renderJournalTasks(cat, getCurrentFilter());
                     }
                 } else if (action === 'skip') {
-                    const task = data.tasks[cat][idx];
-                    if (task && task.status === 'active') {
+                    if (task.status === 'active') {
                         task.status = 'skipped';
                         saveData();
                         updateAllUI();
                         renderJournalTasks(cat, getCurrentFilter());
                     }
                 } else if (action === 'delete') {
-                    data.tasks[cat].splice(idx, 1);
-                    saveData();
-                    updateAllUI();
-                    renderJournalTasks(cat, getCurrentFilter());
+                    if (confirm('Удалить задачу?')) {
+                        data.tasks[cat].splice(idx, 1);
+                        saveData();
+                        updateAllUI();
+                        renderJournalTasks(cat, getCurrentFilter());
+                    }
                 }
             });
         });
@@ -1361,7 +1426,7 @@
     });
 
     // ============================================================
-    // 6. КАЛЕНДАРЬ
+    // 6. КАЛЕНДАРЬ (с переключением года)
     // ============================================================
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
@@ -1375,17 +1440,16 @@
         const firstDay = new Date(calYear, calMonth, 1).getDay();
         const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
         const daysInPrev = new Date(calYear, calMonth, 0).getDate();
-        const firstDayOfWeek = parseInt(localStorage.getItem('app_firstDay') || '1'); // 1=пн, 0=вс
+        const firstDayOfWeek = parseInt(localStorage.getItem('app_firstDay') || '1');
         let startOffset = (firstDay === 0) ? 6 : firstDay - 1;
         if (firstDayOfWeek === 0) {
-            startOffset = firstDay; // воскресенье
+            startOffset = firstDay;
         }
 
         let html = `<div class="cal-grid">`;
         const weekDays = firstDayOfWeek === 1 ? ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'] : ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
         weekDays.forEach(w => { html += `<div class="weekday">${w}</div>`; });
 
-        // Пустые дни
         for (let i=0; i<startOffset; i++) {
             const d = daysInPrev - startOffset + i + 1;
             html += `<div class="day other-month">${d}</div>`;
@@ -1405,19 +1469,109 @@
         container.innerHTML = html;
     }
 
-    document.getElementById('calPrev').addEventListener('click', () => {
+    document.getElementById('calPrevMonth').addEventListener('click', () => {
         calMonth--;
         if (calMonth < 0) { calMonth = 11; calYear--; }
         renderCalendar();
     });
-    document.getElementById('calNext').addEventListener('click', () => {
+    document.getElementById('calNextMonth').addEventListener('click', () => {
         calMonth++;
         if (calMonth > 11) { calMonth = 0; calYear++; }
         renderCalendar();
     });
+    document.getElementById('calPrevYear').addEventListener('click', () => {
+        calYear--;
+        renderCalendar();
+    });
+    document.getElementById('calNextYear').addEventListener('click', () => {
+        calYear++;
+        renderCalendar();
+    });
 
     // ============================================================
-    // 7. ПРОФИЛЬ
+    // 7. ЦЕЛИ
+    // ============================================================
+    function renderGoals() {
+        const container = document.getElementById('goalList');
+        if (!data.goals.length) {
+            container.innerHTML = '<div style="color:var(--text3); text-align:center; padding:20px;">Нет целей. Создайте первую!</div>';
+            return;
+        }
+        container.innerHTML = data.goals.map((goal, idx) => {
+            const totalTasks = goal.taskIds ? goal.taskIds.length : 0;
+            let doneTasks = 0;
+            if (totalTasks > 0) {
+                goal.taskIds.forEach(id => {
+                    const task = getTaskById(id);
+                    if (task && task.status === 'done') doneTasks++;
+                });
+            }
+            const pct = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
+            const taskList = goal.taskIds && goal.taskIds.length ? goal.taskIds.map(id => {
+                const t = getTaskById(id);
+                return t ? `${t.title} (${NAMES[t.category]})` : '?';
+            }).join(', ') : 'нет задач';
+            return `
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-title">🎯 ${goal.title}</span>
+                        <span class="goal-progress">${doneTasks}/${totalTasks}</span>
+                    </div>
+                    <div class="goal-bar"><div class="fill" style="width:${pct}%;"></div></div>
+                    <div class="goal-tasks">Задачи: ${taskList}</div>
+                    <div class="goal-actions">
+                        <button class="goal-edit" data-idx="${idx}">✏️</button>
+                        <button class="goal-del" data-idx="${idx}">🗑</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        container.querySelectorAll('.goal-del').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx);
+                if (confirm('Удалить цель?')) {
+                    data.goals.splice(idx, 1);
+                    saveData();
+                    renderGoals();
+                }
+            });
+        });
+        container.querySelectorAll('.goal-edit').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx);
+                const goal = data.goals[idx];
+                // Простое редактирование: можно переименовать и изменить список задач
+                const newTitle = prompt('Название цели:', goal.title);
+                if (newTitle && newTitle.trim()) {
+                    goal.title = newTitle.trim();
+                    saveData();
+                    renderGoals();
+                }
+                // Добавляем возможность привязать задачи по ID (пока просто показываем список)
+                alert('Для привязки задач к цели используйте консоль или дождитесь следующей версии с расширенным интерфейсом.\n' +
+                      'Сейчас можно вручную добавить ID задачи в массив taskIds.');
+            });
+        });
+    }
+
+    document.getElementById('goalAddBtn').addEventListener('click', () => {
+        const input = document.getElementById('goalInput');
+        const title = input.value.trim();
+        if (!title) return;
+        data.goals.push({
+            id: 'goal_' + Date.now(),
+            title: title,
+            taskIds: [],
+            createdAt: new Date().toISOString()
+        });
+        saveData();
+        input.value = '';
+        renderGoals();
+    });
+
+    // ============================================================
+    // 8. ПРОФИЛЬ
     // ============================================================
     function renderProfile() {
         const c = data.character;
@@ -1453,8 +1607,25 @@
         }).join('');
     }
 
+    document.getElementById('profileName').addEventListener('click', () => {
+        const newName = prompt('Введите имя:', data.character.name);
+        if (newName !== null && newName.trim()) {
+            data.character.name = newName.trim();
+            saveData();
+            renderProfile();
+        }
+    });
+    document.getElementById('profileGender').addEventListener('click', () => {
+        const newGender = prompt('Введите пол (М/Ж):', data.character.gender);
+        if (newGender !== null && newGender.trim()) {
+            data.character.gender = newGender.trim();
+            saveData();
+            renderProfile();
+        }
+    });
+
     // ============================================================
-    // 8. ЗАМЕТКИ
+    // 9. ЗАМЕТКИ
     // ============================================================
     function renderNotes() {
         const list = document.getElementById('noteList');
@@ -1490,7 +1661,7 @@
     });
 
     // ============================================================
-    // 9. ГАЛЕРЕЯ
+    // 10. ГАЛЕРЕЯ
     // ============================================================
     function renderGallery() {
         const grid = document.getElementById('galleryGrid');
@@ -1533,7 +1704,7 @@
     });
 
     // ============================================================
-    // 10. СТАТИСТИКА
+    // 11. СТАТИСТИКА
     // ============================================================
     function renderStats() {
         const stats = getStats();
@@ -1558,7 +1729,7 @@
     }
 
     // ============================================================
-    // 11. МОДАЛЬНОЕ ОКНО ЗАДАЧ
+    // 12. МОДАЛЬНОЕ ОКНО ЗАДАЧ (с id)
     // ============================================================
     let currentModalScreen = 'body';
 
@@ -1612,6 +1783,21 @@
                 { label: 'Тип', type: 'select', id: 'f_type', options: ['Я должен','Должны мне'] },
                 { label: 'Сумма', type: 'number', id: 'f_amount', placeholder: '3000' },
                 { label: 'Кому/От кого', type: 'text', id: 'f_whom', placeholder: 'Имя' }
+            ]
+        },
+        travel: {
+            title: '✈️ Новая поездка',
+            fields: [
+                { label: 'Название', type: 'text', id: 'f_title', placeholder: 'Поездка в горы' },
+                { label: 'Страна', type: 'text', id: 'f_country', placeholder: 'Страна' },
+                { label: 'Город', type: 'text', id: 'f_city', placeholder: 'Город' }
+            ]
+        },
+        misc: {
+            title: '📦 Разное',
+            fields: [
+                { label: 'Название', type: 'text', id: 'f_title', placeholder: 'Любая задача' },
+                { label: 'Категория', type: 'text', id: 'f_misc_cat', placeholder: 'Тематика' }
             ]
         }
     };
@@ -1692,6 +1878,7 @@
         });
 
         const task = {
+            id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
             title: title,
             date: document.getElementById('f_date').value || '',
             endDate: document.getElementById('f_enddate').value || '',
@@ -1720,9 +1907,8 @@
     });
 
     // ============================================================
-    // 12. НАСТРОЙКИ (расширенные)
+    // 13. НАСТРОЙКИ (как в v8)
     // ============================================================
-    // --- Тема ---
     function loadThemeSettings() {
         const savedTheme = localStorage.getItem('app_theme') || 'dark';
         const savedScheme = localStorage.getItem('app_scheme') || 'classic';
@@ -1743,7 +1929,6 @@
         document.querySelectorAll('#schemeButtons button').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.scheme === savedScheme);
         });
-        // Обновляем календарь при смене первого дня
         renderCalendar();
     }
 
@@ -1757,7 +1942,6 @@
         });
     });
 
-    // --- Цветовые схемы ---
     document.querySelectorAll('#schemeButtons button').forEach(btn => {
         btn.addEventListener('click', () => {
             const scheme = btn.dataset.scheme;
@@ -1765,12 +1949,10 @@
             localStorage.setItem('app_scheme', scheme);
             document.querySelectorAll('#schemeButtons button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            // Обновляем динамические элементы
             updateAllUI();
         });
     });
 
-    // --- Отображение ---
     document.getElementById('firstDaySelect').addEventListener('change', (e) => {
         localStorage.setItem('app_firstDay', e.target.value);
         renderCalendar();
@@ -1778,7 +1960,6 @@
     });
     document.getElementById('timeFormatSelect').addEventListener('change', (e) => {
         localStorage.setItem('app_timeFormat', e.target.value);
-        // Здесь можно добавить логику для формата времени, пока просто сохраняем
     });
     document.getElementById('fontSizeSelect').addEventListener('change', (e) => {
         const size = e.target.value;
@@ -1786,12 +1967,9 @@
         localStorage.setItem('app_fontSize', size);
     });
 
-    // --- Уведомления (заглушка) ---
     document.getElementById('notifToggle').addEventListener('change', (e) => {
         localStorage.setItem('app_notif', e.target.checked ? 'on' : 'off');
     });
-
-    // --- Умные девайсы (заглушка) ---
     document.getElementById('smartSyncToggle').addEventListener('change', (e) => {
         localStorage.setItem('app_smartSync', e.target.checked ? 'on' : 'off');
         if (e.target.checked) {
@@ -1799,7 +1977,6 @@
         }
     });
 
-    // --- Импорт/Экспорт ---
     document.getElementById('exportBtn').addEventListener('click', () => {
         const json = JSON.stringify(data, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
@@ -1821,10 +1998,18 @@
         reader.onload = (ev) => {
             try {
                 const imported = JSON.parse(ev.target.result);
-                // Проверка структуры
                 if (imported.tasks && imported.character) {
                     if (confirm('Восстановить данные из файла? Текущие данные будут заменены.')) {
                         data = imported;
+                        // Применяем миграцию
+                        for (let cat in data.tasks) {
+                            data.tasks[cat] = data.tasks[cat].map(task => {
+                                if (!task.id) {
+                                    task.id = 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                                }
+                                return task;
+                            });
+                        }
                         saveData();
                         updateAllUI();
                         alert('✅ Данные успешно импортированы!');
@@ -1840,9 +2025,8 @@
         e.target.value = '';
     });
 
-    // --- Сброс данных ---
     document.getElementById('resetBtn').addEventListener('click', () => {
-        if (confirm('⚠️ Вы уверены, что хотите удалить ВСЕ данные (задачи, заметки, фото)? Это действие необратимо.')) {
+        if (confirm('⚠️ Вы уверены, что хотите удалить ВСЕ данные (задачи, заметки, фото, цели)? Это действие необратимо.')) {
             if (confirm('Ещё раз: удалить всё?')) {
                 data = getDefaultData();
                 saveData();
@@ -1852,13 +2036,9 @@
         }
     });
 
-    // ============================================================
-    // 13. ОТКРЫТИЕ/ЗАКРЫТИЕ НАСТРОЕК
-    // ============================================================
     document.getElementById('settingsToggle').addEventListener('click', () => {
         document.getElementById('settingsModal').classList.add('open');
         loadThemeSettings();
-        // Состояние чекбоксов
         const notif = localStorage.getItem('app_notif') !== 'off';
         document.getElementById('notifToggle').checked = notif;
         const smart = localStorage.getItem('app_smartSync') === 'on';
@@ -1883,6 +2063,7 @@
         if (tabName === 'journals') {
             closeJournal();
         }
+        if (tabName === 'goals') renderGoals();
         if (tabName === 'profile') renderProfile();
         if (tabName === 'notes') renderNotes();
         if (tabName === 'gallery') renderGallery();
@@ -1900,36 +2081,14 @@
     // 15. ИНИЦИАЛИЗАЦИЯ
     // ============================================================
     function init() {
-        // Привязка имени и пола (в профиле они редактируются)
-        // Добавим обработчики на клик по имени и полу (можно сделать редактируемыми)
-        // Пока оставим как есть – в профиле они отображаются, но редактируются через карточку персонажа? 
-        // У нас нет ввода в профиле, но можно добавить возможность редактирования, но для простоты оставим так.
-        // Пользователь может редактировать имя через карточку персонажа, которая скрыта в новой версии? 
-        // Мы убрали карточку персонажа из шапки, но она есть в профиле. Сделаем редактирование кликом.
-        document.getElementById('profileName').addEventListener('click', () => {
-            const newName = prompt('Введите имя:', data.character.name);
-            if (newName !== null && newName.trim()) {
-                data.character.name = newName.trim();
-                saveData();
-                renderProfile();
-            }
-        });
-        document.getElementById('profileGender').addEventListener('click', () => {
-            const newGender = prompt('Введите пол (М/Ж):', data.character.gender);
-            if (newGender !== null && newGender.trim()) {
-                data.character.gender = newGender.trim();
-                saveData();
-                renderProfile();
-            }
-        });
-
         loadThemeSettings();
         updateAllUI();
         switchTab('journals');
+        // Сохраняем данные при любом изменении (уже сохранение встроено)
+        console.log('🔥 RPG Планировщик v9 загружен. Данные сохранены.');
     }
 
     init();
-    console.log('🔥 RPG Планировщик v8 — расширенные настройки и цветовые схемы');
 </script>
 </body>
 </html>
