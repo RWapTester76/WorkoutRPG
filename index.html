@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>RPG Планировщик v7</title>
+    <title>RPG Планировщик v8</title>
     <style>
-        /* ===== ПЕРЕМЕННЫЕ ===== */
+        /* ===== ПЕРЕМЕННЫЕ (будут переопределяться схемами) ===== */
         :root {
+            /* Базовые цвета (схема "Классическая") */
             --bg: #f5f6fa;
             --surface: #ffffff;
             --surface2: #f0f1f5;
@@ -15,15 +16,18 @@
             --text3: #8899bb;
             --border: rgba(0,0,0,0.06);
             --shadow: 0 8px 30px rgba(0,0,0,0.08);
-            --radius: 24px;
-            --radius-sm: 16px;
             --accent: #6C5CE7;
             --accent-light: #A29BFE;
             --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
             --accent-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
+            --radius: 24px;
+            --radius-sm: 16px;
             --transition: 0.25s ease;
+            --font-size: 16px;
+            --first-day: 1; /* 1 = ПН, 0 = ВС */
         }
 
+        /* ----- ТЁМНАЯ ТЕМА (базовая) ----- */
         [data-theme="dark"] {
             --bg: #0e0e1a;
             --surface: rgba(22, 22, 44, 0.85);
@@ -35,13 +39,68 @@
             --shadow: 0 8px 30px rgba(0,0,0,0.5);
         }
 
-        /* ===== ОБЩИЕ СТИЛИ ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        /* ===== ЦВЕТОВЫЕ СХЕМЫ (пресеты) ===== */
+        /* Классическая (по умолчанию) */
+        [data-scheme="classic"] {
+            --accent: #6C5CE7;
+            --accent-light: #A29BFE;
+            --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
+            --accent-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
         }
+        /* Океан */
+        [data-scheme="ocean"] {
+            --accent: #0984e3;
+            --accent-light: #74b9ff;
+            --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
+            --accent-shadow: 0 6px 20px rgba(9, 132, 227, 0.3);
+        }
+        /* Лес */
+        [data-scheme="forest"] {
+            --accent: #00b894;
+            --accent-light: #55efc4;
+            --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
+            --accent-shadow: 0 6px 20px rgba(0, 184, 148, 0.3);
+        }
+        /* Закат */
+        [data-scheme="sunset"] {
+            --accent: #e17055;
+            --accent-light: #fab1a0;
+            --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
+            --accent-shadow: 0 6px 20px rgba(225, 112, 85, 0.3);
+        }
+        /* Ночь */
+        [data-scheme="night"] {
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
+            --accent-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
+            --bg: #0b0b12;
+            --surface: rgba(16, 16, 30, 0.9);
+            --surface2: rgba(24, 24, 44, 0.7);
+            --text: #d0d4e8;
+            --text2: #8899bb;
+            --text3: #556688;
+            --border: rgba(255,255,255,0.04);
+            --shadow: 0 8px 30px rgba(0,0,0,0.7);
+        }
+        /* Неон */
+        [data-scheme="neon"] {
+            --accent: #fd79a8;
+            --accent-light: #ffb8d0;
+            --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
+            --accent-shadow: 0 6px 20px rgba(253, 121, 168, 0.3);
+            --bg: #0b0b12;
+            --surface: rgba(20, 10, 20, 0.85);
+            --surface2: rgba(40, 20, 40, 0.6);
+            --text: #f0e0f0;
+            --text2: #c0a0c0;
+            --text3: #806080;
+            --border: rgba(255, 128, 200, 0.15);
+            --shadow: 0 8px 30px rgba(0,0,0,0.8);
+        }
+
+        /* ===== ГЛОБАЛЬНЫЕ СТИЛИ ===== */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
         body {
             background: var(--bg);
             color: var(--text);
@@ -49,14 +108,15 @@
             display: flex;
             justify-content: center;
             padding: 12px;
-            transition: background 0.3s;
+            transition: background 0.3s, color 0.3s;
+            font-size: var(--font-size);
         }
         #app {
             max-width: 440px;
             width: 100%;
             background: var(--surface);
             backdrop-filter: blur(12px);
-            border-radius: 36px;
+            border-radius: var(--radius);
             padding: 20px 16px 80px;
             position: relative;
             box-shadow: var(--shadow);
@@ -92,9 +152,7 @@
             padding: 4px;
             border-radius: 30px;
         }
-        .top-bar .actions button:active {
-            transform: scale(0.9);
-        }
+        .top-bar .actions button:active { transform: scale(0.9); }
 
         /* ===== ВКЛАДКИ ===== */
         .tabs {
@@ -136,14 +194,8 @@
             gap: 16px;
             animation: fadeIn 0.3s ease;
         }
-        .tab-content.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .tab-content.active { display: flex; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
         /* ===== КАРТОЧКИ ЖУРНАЛОВ ===== */
         .journal-grid {
@@ -160,30 +212,18 @@
             transition: 0.2s;
             border: 1px solid var(--border);
         }
-        .journal-card:active {
-            transform: scale(0.96);
-        }
-        .journal-card .icon {
-            font-size: 32px;
-        }
-        .journal-card .name {
-            font-weight: 600;
-            margin-top: 4px;
-        }
-        .journal-card .count {
-            font-size: 13px;
-            color: var(--text3);
-        }
+        .journal-card:active { transform: scale(0.96); }
+        .journal-card .icon { font-size: 32px; }
+        .journal-card .name { font-weight: 600; margin-top: 4px; }
+        .journal-card .count { font-size: 13px; color: var(--text3); }
 
-        /* ===== ЭКРАН ЖУРНАЛА (список задач) ===== */
+        /* ===== ЭКРАН ЖУРНАЛА ===== */
         .journal-screen {
             display: none;
             flex-direction: column;
             gap: 12px;
         }
-        .journal-screen.active {
-            display: flex;
-        }
+        .journal-screen.active { display: flex; }
         .journal-screen .back {
             background: none;
             border: none;
@@ -240,13 +280,8 @@
             overflow-y: auto;
             padding-right: 4px;
         }
-        .task-list::-webkit-scrollbar {
-            width: 3px;
-        }
-        .task-list::-webkit-scrollbar-thumb {
-            background: var(--accent);
-            border-radius: 10px;
-        }
+        .task-list::-webkit-scrollbar { width: 3px; }
+        .task-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
         .task-item {
             background: var(--surface2);
             border-radius: var(--radius-sm);
@@ -265,10 +300,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        .task-title {
-            font-weight: 600;
-            font-size: 15px;
-        }
+        .task-title { font-weight: 600; font-size: 15px; }
         .task-meta {
             display: flex;
             flex-wrap: wrap;
@@ -301,7 +333,7 @@
         .btn-skip { background: #7d2e2e; color: #fff; }
         .btn-del { background: rgba(60,30,40,0.8); color: #ccb; }
 
-        /* ===== КАЛЕНДАРЬ (внутри журнала) ===== */
+        /* ===== КАЛЕНДАРЬ ===== */
         #calendar-wrap {
             background: var(--surface2);
             border-radius: var(--radius-sm);
@@ -371,17 +403,9 @@
             text-align: center;
             border: 1px solid var(--border);
         }
-        .profile-card .avatar {
-            font-size: 56px;
-            margin-bottom: 4px;
-        }
-        .profile-card .name {
-            font-size: 22px;
-            font-weight: 700;
-        }
-        .profile-card .gender {
-            color: var(--text3);
-        }
+        .profile-card .avatar { font-size: 56px; margin-bottom: 4px; }
+        .profile-card .name { font-size: 22px; font-weight: 700; }
+        .profile-card .gender { color: var(--text3); }
         .profile-card .level {
             background: var(--accent-gradient);
             color: #fff;
@@ -403,14 +427,8 @@
             padding: 10px;
             border: 1px solid var(--border);
         }
-        .profile-stats .stat .num {
-            font-size: 20px;
-            font-weight: 700;
-        }
-        .profile-stats .stat .label {
-            font-size: 11px;
-            color: var(--text3);
-        }
+        .profile-stats .stat .num { font-size: 20px; font-weight: 700; }
+        .profile-stats .stat .label { font-size: 11px; color: var(--text3); }
         .journal-stats {
             display: flex;
             flex-direction: column;
@@ -535,14 +553,8 @@
             text-align: center;
             border: 1px solid var(--border);
         }
-        .stats-grid .stat-card .num {
-            font-size: 28px;
-            font-weight: 700;
-        }
-        .stats-grid .stat-card .label {
-            font-size: 13px;
-            color: var(--text3);
-        }
+        .stats-grid .stat-card .num { font-size: 28px; font-weight: 700; }
+        .stats-grid .stat-card .label { font-size: 13px; color: var(--text3); }
         .stats-chart {
             background: var(--surface2);
             border-radius: var(--radius-sm);
@@ -555,10 +567,7 @@
             gap: 8px;
             margin: 4px 0;
         }
-        .stats-chart .chart-bar .label {
-            width: 60px;
-            font-size: 13px;
-        }
+        .stats-chart .chart-bar .label { width: 60px; font-size: 13px; }
         .stats-chart .chart-bar .track {
             flex: 1;
             height: 8px;
@@ -573,11 +582,12 @@
             transition: width 0.8s;
         }
 
-        /* ===== МОДАЛЬНОЕ ОКНО ===== */
+        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
             backdrop-filter: blur(6px);
             justify-content: center;
@@ -673,6 +683,81 @@
             color: var(--text2);
         }
 
+        /* ===== НАСТРОЙКИ ===== */
+        .settings-section {
+            margin-bottom: 18px;
+        }
+        .settings-section .section-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: var(--text2);
+        }
+        .settings-section .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .settings-section .setting-row .label {
+            font-size: 14px;
+        }
+        .settings-section .setting-row .control {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .settings-section .setting-row .control select {
+            padding: 4px 8px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 13px;
+        }
+        .settings-section .setting-row .control button {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text);
+            transition: 0.2s;
+        }
+        .settings-section .setting-row .control button:active { transform: scale(0.95); }
+        .settings-section .setting-row .control button.primary {
+            background: var(--accent-gradient);
+            color: #fff;
+            border: none;
+        }
+        .settings-section .color-schemes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .settings-section .color-schemes button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface2);
+            color: var(--text);
+        }
+        .settings-section .color-schemes button.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--accent-shadow);
+        }
+        .settings-section .color-schemes button:active { transform: scale(0.9); }
+
         /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
         #bottom-nav {
             position: absolute;
@@ -682,7 +767,7 @@
             background: var(--surface);
             backdrop-filter: blur(12px);
             border-top: 1px solid var(--border);
-            border-radius: 0 0 36px 36px;
+            border-radius: 0 0 var(--radius) var(--radius);
             padding: 6px 4px 10px;
             display: flex;
             justify-content: space-around;
@@ -741,7 +826,6 @@
     </div>
 
     <!-- ===== КОНТЕНТ ===== -->
-
     <!-- Вкладка: Журналы -->
     <div class="tab-content active" id="tab-journals">
         <div class="journal-grid" id="journalGrid"></div>
@@ -756,7 +840,7 @@
                 <button data-filter="active">Активные</button>
                 <button data-filter="done">Выполненные</button>
             </div>
-            <!-- Календарь внутри журнала -->
+            <!-- Календарь -->
             <div id="calendar-wrap">
                 <div class="cal-header">
                     <button id="calPrev">◀</button>
@@ -842,36 +926,144 @@
         </div>
     </div>
 
-    <!-- ===== МОДАЛЬНОЕ ОКНО НАСТРОЕК ===== -->
+    <!-- ===== МОДАЛЬНОЕ ОКНО НАСТРОЕК (РАСШИРЕННОЕ) ===== -->
     <div class="modal-overlay" id="settingsModal">
-        <div class="modal" style="max-width:340px;">
-            <h3 style="margin-bottom:16px;">⚙️ Настройки</h3>
-            <label>Тема</label>
-            <div style="display:flex; gap:8px; margin-top:4px;">
-                <button class="theme-btn active" data-theme="dark">🌙 Тёмная</button>
-                <button class="theme-btn" data-theme="light">☀️ Светлая</button>
+        <div class="modal" style="max-width:380px;">
+            <h3>⚙️ Настройки</h3>
+
+            <!-- Цветовые схемы -->
+            <div class="settings-section">
+                <div class="section-title">🎨 Цветовая схема</div>
+                <div class="color-schemes" id="schemeButtons">
+                    <button data-scheme="classic" style="background:linear-gradient(135deg,#6C5CE7,#A29BFE);">К</button>
+                    <button data-scheme="ocean" style="background:linear-gradient(135deg,#0984e3,#74b9ff);">О</button>
+                    <button data-scheme="forest" style="background:linear-gradient(135deg,#00b894,#55efc4);">Л</button>
+                    <button data-scheme="sunset" style="background:linear-gradient(135deg,#e17055,#fab1a0);">З</button>
+                    <button data-scheme="night" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe);">Н</button>
+                    <button data-scheme="neon" style="background:linear-gradient(135deg,#fd79a8,#ffb8d0);">НЕ</button>
+                </div>
             </div>
-            <label style="margin-top:16px;">Акцентный цвет</label>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
-                <button class="color-btn" data-color="#6C5CE7" style="background:#6C5CE7;"></button>
-                <button class="color-btn" data-color="#4A8BFE" style="background:#4A8BFE;"></button>
-                <button class="color-btn" data-color="#2ED573" style="background:#2ED573;"></button>
-                <button class="color-btn" data-color="#FFA502" style="background:#FFA502;"></button>
-                <button class="color-btn" data-color="#FF4757" style="background:#FF4757;"></button>
-                <button class="color-btn" data-color="#FD79A8" style="background:#FD79A8;"></button>
+
+            <!-- Тема -->
+            <div class="settings-section">
+                <div class="section-title">🌓 Тема</div>
+                <div class="setting-row">
+                    <span class="label">Режим</span>
+                    <div class="control">
+                        <button class="theme-btn" data-theme="dark">🌙 Тёмная</button>
+                        <button class="theme-btn" data-theme="light">☀️ Светлая</button>
+                    </div>
+                </div>
             </div>
+
+            <!-- Отображение -->
+            <div class="settings-section">
+                <div class="section-title">📐 Отображение</div>
+                <div class="setting-row">
+                    <span class="label">Первый день недели</span>
+                    <div class="control">
+                        <select id="firstDaySelect">
+                            <option value="1">Понедельник</option>
+                            <option value="0">Воскресенье</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span class="label">Формат времени</span>
+                    <div class="control">
+                        <select id="timeFormatSelect">
+                            <option value="24">24-часовой</option>
+                            <option value="12">12-часовой</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span class="label">Размер шрифта</span>
+                    <div class="control">
+                        <select id="fontSizeSelect">
+                            <option value="14">Маленький</option>
+                            <option value="16" selected>Средний</option>
+                            <option value="18">Большой</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Уведомления (заглушка) -->
+            <div class="settings-section">
+                <div class="section-title">🔔 Уведомления</div>
+                <div class="setting-row">
+                    <span class="label">Напоминания</span>
+                    <div class="control">
+                        <label style="display:flex; align-items:center; gap:6px; font-size:14px;">
+                            <input type="checkbox" id="notifToggle" checked /> Вкл.
+                        </label>
+                    </div>
+                </div>
+                <div style="font-size:12px; color:var(--text3); margin-top:4px;">(Заглушка – в будущем будут приходить уведомления)</div>
+            </div>
+
+            <!-- Умные девайсы (заглушка) -->
+            <div class="settings-section">
+                <div class="section-title">📱 Умные девайсы</div>
+                <div class="setting-row">
+                    <span class="label">Apple Health / Google Fit</span>
+                    <div class="control">
+                        <label style="display:flex; align-items:center; gap:6px; font-size:14px;">
+                            <input type="checkbox" id="smartSyncToggle" /> Синхронизация
+                        </label>
+                    </div>
+                </div>
+                <div style="font-size:12px; color:var(--text3); margin-top:4px;">(Заглушка – в будущем будет синхронизация с шагами и сном)</div>
+            </div>
+
+            <!-- Импорт/Экспорт -->
+            <div class="settings-section">
+                <div class="section-title">💾 Данные</div>
+                <div class="setting-row">
+                    <span class="label">Экспорт (JSON)</span>
+                    <div class="control">
+                        <button class="primary" id="exportBtn">Скачать</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span class="label">Импорт (JSON)</span>
+                    <div class="control">
+                        <button id="importBtn">Загрузить</button>
+                        <input type="file" id="importFileInput" accept=".json" style="display:none;" />
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span class="label">Сброс данных</span>
+                    <div class="control">
+                        <button id="resetBtn" style="background:#c0392b; color:#fff; border:none;">🗑 Очистить</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Информация -->
+            <div class="settings-section">
+                <div class="section-title">ℹ️ О приложении</div>
+                <div style="font-size:14px; color:var(--text2);">
+                    RPG Планировщик v8<br />
+                    Разработчик: AI-сеньор<br />
+                    Данные хранятся локально в браузере.
+                </div>
+            </div>
+
             <div class="modal-actions" style="margin-top:20px;">
                 <button class="btn-cancel" id="settingsClose">Закрыть</button>
             </div>
         </div>
     </div>
+
 </div>
 
 <script>
     // ============================================================
     // 1. ДАННЫЕ И МИГРАЦИЯ
     // ============================================================
-    const STORAGE_KEY = 'rpg_journal_v7';
+    const STORAGE_KEY = 'rpg_journal_v8';
     const CATEGORIES = ['body','hobby','business','food','finance','debts'];
     const COLORS = {
         body: '#ff4757',
@@ -910,7 +1102,7 @@
                 debts: []
             },
             notes: [],
-            gallery: [] // base64 images
+            gallery: []
         };
     }
 
@@ -922,7 +1114,6 @@
             if (raw) {
                 const parsed = JSON.parse(raw);
                 const def = getDefaultData();
-                // Миграция: добавляем недостающие поля
                 for (let key in def) {
                     if (!(key in parsed)) parsed[key] = def[key];
                 }
@@ -940,7 +1131,7 @@
     }
 
     // ============================================================
-    // 2. РПГ СИСТЕМА
+    // 2. РПГ
     // ============================================================
     function addXP(amount) {
         data.character.xp += amount;
@@ -962,7 +1153,7 @@
     }
 
     // ============================================================
-    // 3. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    // 3. ВСПОМОГАТЕЛЬНЫЕ
     // ============================================================
     function formatDate(date) {
         return date.toISOString().split('T')[0];
@@ -978,7 +1169,11 @@
                 if (task.days && task.days.length) {
                     const d = new Date(dateStr);
                     const dayOfWeek = d.getDay();
-                    const dayIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
+                    const firstDay = parseInt(localStorage.getItem('app_firstDay') || '1');
+                    let dayIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
+                    if (firstDay === 0) { // воскресенье
+                        dayIndex = dayOfWeek;
+                    }
                     const daysMap = ['mon','tue','wed','thu','fri','sat','sun'];
                     if (task.days.includes(daysMap[dayIndex])) {
                         if (!result.some(t => t === task && t.category === cat)) {
@@ -989,10 +1184,6 @@
             });
         });
         return result;
-    }
-
-    function getTasksByCategory(cat) {
-        return data.tasks[cat] || [];
     }
 
     function getStats() {
@@ -1020,7 +1211,7 @@
     }
 
     // ============================================================
-    // 4. UI ОБНОВЛЕНИЕ
+    // 4. ОБНОВЛЕНИЕ ВСЕГО UI
     // ============================================================
     function updateAllUI() {
         renderJournalGrid();
@@ -1029,18 +1220,16 @@
         renderGallery();
         renderStats();
         renderCalendar();
-        // Если открыт экран журнала, обновить список задач
-        const currentJournal = document.getElementById('journalScreen').dataset.currentJournal;
-        if (currentJournal) renderJournalTasks(currentJournal);
+        if (currentJournalCategory) renderJournalTasks(currentJournalCategory, getCurrentFilter());
     }
 
     // ============================================================
-    // 5. ЖУРНАЛЫ (сетка)
+    // 5. ЖУРНАЛЫ
     // ============================================================
     function renderJournalGrid() {
         const grid = document.getElementById('journalGrid');
         grid.innerHTML = CATEGORIES.map(cat => {
-            const count = getTasksByCategory(cat).length;
+            const count = (data.tasks[cat] || []).length;
             return `
                 <div class="journal-card" data-category="${cat}">
                     <div class="icon">${ICONS[cat]}</div>
@@ -1054,9 +1243,6 @@
         });
     }
 
-    // ============================================================
-    // 6. ОТКРЫТИЕ ЖУРНАЛА
-    // ============================================================
     let currentJournalCategory = null;
 
     function openJournal(category) {
@@ -1067,11 +1253,9 @@
         screen.dataset.currentJournal = category;
         document.getElementById('journalTitle').textContent = NAMES[category];
         document.getElementById('journalColor').style.background = COLORS[category];
-        // Фильтры
         document.querySelectorAll('#journalFilters button').forEach(b => b.classList.remove('active'));
         document.querySelector('#journalFilters button[data-filter="all"]').classList.add('active');
         renderJournalTasks(category);
-        // Календарь
         renderCalendar();
     }
 
@@ -1079,16 +1263,19 @@
         document.getElementById('journalGrid').style.display = 'grid';
         document.getElementById('journalScreen').style.display = 'none';
         document.getElementById('journalScreen').dataset.currentJournal = '';
+        currentJournalCategory = null;
     }
 
     document.getElementById('journalBack').addEventListener('click', closeJournal);
 
-    // ============================================================
-    // 7. ЗАДАЧИ В ЖУРНАЛЕ
-    // ============================================================
+    function getCurrentFilter() {
+        const active = document.querySelector('#journalFilters .active');
+        return active ? active.dataset.filter : 'all';
+    }
+
     function renderJournalTasks(category, filter = 'all') {
         const list = document.getElementById('journalTaskList');
-        let tasks = getTasksByCategory(category);
+        let tasks = data.tasks[category] || [];
         if (filter === 'active') tasks = tasks.filter(t => t.status === 'active');
         else if (filter === 'done') tasks = tasks.filter(t => t.status === 'done' || t.status === 'skipped');
 
@@ -1126,7 +1313,6 @@
             `;
         }).join('');
 
-        // Обработчики
         list.querySelectorAll('[data-action]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cat = btn.dataset.cat;
@@ -1160,12 +1346,6 @@
         });
     }
 
-    function getCurrentFilter() {
-        const active = document.querySelector('#journalFilters .active');
-        return active ? active.dataset.filter : 'all';
-    }
-
-    // Фильтры в журнале
     document.querySelectorAll('#journalFilters button').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('#journalFilters button').forEach(b => b.classList.remove('active'));
@@ -1176,16 +1356,16 @@
         });
     });
 
-    // Добавление задачи (кнопка + в журнале)
     document.getElementById('journalAddBtn').addEventListener('click', () => {
         if (currentJournalCategory) openModal(currentJournalCategory);
     });
 
     // ============================================================
-    // 8. КАЛЕНДАРЬ (в журнале)
+    // 6. КАЛЕНДАРЬ
     // ============================================================
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
+    const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 
     function renderCalendar() {
         const container = document.getElementById('calendarContent');
@@ -1195,13 +1375,17 @@
         const firstDay = new Date(calYear, calMonth, 1).getDay();
         const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
         const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+        const firstDayOfWeek = parseInt(localStorage.getItem('app_firstDay') || '1'); // 1=пн, 0=вс
         let startOffset = (firstDay === 0) ? 6 : firstDay - 1;
+        if (firstDayOfWeek === 0) {
+            startOffset = firstDay; // воскресенье
+        }
 
         let html = `<div class="cal-grid">`;
-        ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(w => {
-            html += `<div class="weekday">${w}</div>`;
-        });
+        const weekDays = firstDayOfWeek === 1 ? ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'] : ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+        weekDays.forEach(w => { html += `<div class="weekday">${w}</div>`; });
 
+        // Пустые дни
         for (let i=0; i<startOffset; i++) {
             const d = daysInPrev - startOffset + i + 1;
             html += `<div class="day other-month">${d}</div>`;
@@ -1232,10 +1416,8 @@
         renderCalendar();
     });
 
-    const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-
     // ============================================================
-    // 9. ПРОФИЛЬ
+    // 7. ПРОФИЛЬ
     // ============================================================
     function renderProfile() {
         const c = data.character;
@@ -1253,7 +1435,6 @@
         document.getElementById('statDone').textContent = stats.done;
         document.getElementById('statActive').textContent = stats.active;
 
-        // Статистика по журналам
         const catStats = getCategoryStats();
         const container = document.getElementById('journalStats');
         container.innerHTML = CATEGORIES.map(cat => {
@@ -1273,7 +1454,7 @@
     }
 
     // ============================================================
-    // 10. ЗАМЕТКИ
+    // 8. ЗАМЕТКИ
     // ============================================================
     function renderNotes() {
         const list = document.getElementById('noteList');
@@ -1309,7 +1490,7 @@
     });
 
     // ============================================================
-    // 11. ГАЛЕРЕЯ
+    // 9. ГАЛЕРЕЯ
     // ============================================================
     function renderGallery() {
         const grid = document.getElementById('galleryGrid');
@@ -1352,7 +1533,7 @@
     });
 
     // ============================================================
-    // 12. СТАТИСТИКА
+    // 10. СТАТИСТИКА
     // ============================================================
     function renderStats() {
         const stats = getStats();
@@ -1361,7 +1542,6 @@
         document.getElementById('statsActive').textContent = stats.active;
         document.getElementById('statsProductivity').textContent = stats.productivity + '%';
 
-        // График по журналам
         const catStats = getCategoryStats();
         const container = document.getElementById('chartBars');
         container.innerHTML = CATEGORIES.map(cat => {
@@ -1378,7 +1558,7 @@
     }
 
     // ============================================================
-    // 13. МОДАЛЬНОЕ ОКНО ЗАДАЧ
+    // 11. МОДАЛЬНОЕ ОКНО ЗАДАЧ
     // ============================================================
     let currentModalScreen = 'body';
 
@@ -1454,7 +1634,6 @@
             }
         });
 
-        // Общие поля
         html += `
             <label>Дата</label>
             <input type="date" id="f_date" />
@@ -1541,29 +1720,31 @@
     });
 
     // ============================================================
-    // 14. НАСТРОЙКИ ТЕМЫ И АКЦЕНТА
+    // 12. НАСТРОЙКИ (расширенные)
     // ============================================================
+    // --- Тема ---
     function loadThemeSettings() {
         const savedTheme = localStorage.getItem('app_theme') || 'dark';
-        const savedAccent = localStorage.getItem('app_accent') || '#6C5CE7';
+        const savedScheme = localStorage.getItem('app_scheme') || 'classic';
+        const savedFirstDay = localStorage.getItem('app_firstDay') || '1';
+        const savedTimeFormat = localStorage.getItem('app_timeFormat') || '24';
+        const savedFontSize = localStorage.getItem('app_fontSize') || '16';
+
         document.documentElement.setAttribute('data-theme', savedTheme);
-        document.documentElement.style.setProperty('--accent', savedAccent);
-        document.documentElement.style.setProperty('--accent-light', lightenColor(savedAccent, 30));
+        document.documentElement.setAttribute('data-scheme', savedScheme);
+        document.documentElement.style.setProperty('--font-size', savedFontSize + 'px');
+        document.getElementById('firstDaySelect').value = savedFirstDay;
+        document.getElementById('timeFormatSelect').value = savedTimeFormat;
+        document.getElementById('fontSizeSelect').value = savedFontSize;
+
         document.querySelectorAll('.theme-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.theme === savedTheme);
         });
-        document.querySelectorAll('.color-btn').forEach(btn => {
-            btn.style.borderColor = (btn.dataset.color === savedAccent) ? '#fff' : 'transparent';
+        document.querySelectorAll('#schemeButtons button').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.scheme === savedScheme);
         });
-    }
-
-    function lightenColor(hex, percent) {
-        const num = parseInt(hex.slice(1), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = Math.min(255, (num >> 16) + amt);
-        const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
-        const B = Math.min(255, (num & 0x0000FF) + amt);
-        return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+        // Обновляем календарь при смене первого дня
+        renderCalendar();
     }
 
     document.querySelectorAll('.theme-btn').forEach(btn => {
@@ -1576,20 +1757,112 @@
         });
     });
 
-    document.querySelectorAll('.color-btn').forEach(btn => {
+    // --- Цветовые схемы ---
+    document.querySelectorAll('#schemeButtons button').forEach(btn => {
         btn.addEventListener('click', () => {
-            const color = btn.dataset.color;
-            document.documentElement.style.setProperty('--accent', color);
-            document.documentElement.style.setProperty('--accent-light', lightenColor(color, 30));
-            localStorage.setItem('app_accent', color);
-            document.querySelectorAll('.color-btn').forEach(b => b.style.borderColor = 'transparent');
-            btn.style.borderColor = '#fff';
+            const scheme = btn.dataset.scheme;
+            document.documentElement.setAttribute('data-scheme', scheme);
+            localStorage.setItem('app_scheme', scheme);
+            document.querySelectorAll('#schemeButtons button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // Обновляем динамические элементы
+            updateAllUI();
         });
     });
 
+    // --- Отображение ---
+    document.getElementById('firstDaySelect').addEventListener('change', (e) => {
+        localStorage.setItem('app_firstDay', e.target.value);
+        renderCalendar();
+        updateAllUI();
+    });
+    document.getElementById('timeFormatSelect').addEventListener('change', (e) => {
+        localStorage.setItem('app_timeFormat', e.target.value);
+        // Здесь можно добавить логику для формата времени, пока просто сохраняем
+    });
+    document.getElementById('fontSizeSelect').addEventListener('change', (e) => {
+        const size = e.target.value;
+        document.documentElement.style.setProperty('--font-size', size + 'px');
+        localStorage.setItem('app_fontSize', size);
+    });
+
+    // --- Уведомления (заглушка) ---
+    document.getElementById('notifToggle').addEventListener('change', (e) => {
+        localStorage.setItem('app_notif', e.target.checked ? 'on' : 'off');
+    });
+
+    // --- Умные девайсы (заглушка) ---
+    document.getElementById('smartSyncToggle').addEventListener('change', (e) => {
+        localStorage.setItem('app_smartSync', e.target.checked ? 'on' : 'off');
+        if (e.target.checked) {
+            alert('🔮 Синхронизация с умными девайсами будет доступна в следующих версиях.');
+        }
+    });
+
+    // --- Импорт/Экспорт ---
+    document.getElementById('exportBtn').addEventListener('click', () => {
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `rpg_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+        document.getElementById('importFileInput').click();
+    });
+    document.getElementById('importFileInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const imported = JSON.parse(ev.target.result);
+                // Проверка структуры
+                if (imported.tasks && imported.character) {
+                    if (confirm('Восстановить данные из файла? Текущие данные будут заменены.')) {
+                        data = imported;
+                        saveData();
+                        updateAllUI();
+                        alert('✅ Данные успешно импортированы!');
+                    }
+                } else {
+                    alert('❌ Неверный формат файла.');
+                }
+            } catch (err) {
+                alert('❌ Ошибка чтения файла.');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    // --- Сброс данных ---
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        if (confirm('⚠️ Вы уверены, что хотите удалить ВСЕ данные (задачи, заметки, фото)? Это действие необратимо.')) {
+            if (confirm('Ещё раз: удалить всё?')) {
+                data = getDefaultData();
+                saveData();
+                updateAllUI();
+                alert('🗑 Все данные сброшены.');
+            }
+        }
+    });
+
+    // ============================================================
+    // 13. ОТКРЫТИЕ/ЗАКРЫТИЕ НАСТРОЕК
+    // ============================================================
     document.getElementById('settingsToggle').addEventListener('click', () => {
         document.getElementById('settingsModal').classList.add('open');
         loadThemeSettings();
+        // Состояние чекбоксов
+        const notif = localStorage.getItem('app_notif') !== 'off';
+        document.getElementById('notifToggle').checked = notif;
+        const smart = localStorage.getItem('app_smartSync') === 'on';
+        document.getElementById('smartSyncToggle').checked = smart;
     });
     document.getElementById('settingsClose').addEventListener('click', () => {
         document.getElementById('settingsModal').classList.remove('open');
@@ -1599,7 +1872,7 @@
     });
 
     // ============================================================
-    // 15. НАВИГАЦИЯ ПО ВКЛАДКАМ
+    // 14. НАВИГАЦИЯ ПО ВКЛАДКАМ
     // ============================================================
     function switchTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1607,11 +1880,9 @@
             el.classList.toggle('active', el.dataset.tab === tabName);
         });
         document.getElementById('tab-' + tabName).classList.add('active');
-        // Если переключились на журналы, закрываем экран журнала
         if (tabName === 'journals') {
             closeJournal();
         }
-        // Обновляем UI для соответствующих вкладок
         if (tabName === 'profile') renderProfile();
         if (tabName === 'notes') renderNotes();
         if (tabName === 'gallery') renderGallery();
@@ -1626,30 +1897,39 @@
     });
 
     // ============================================================
-    // 16. ИНИЦИАЛИЗАЦИЯ
+    // 15. ИНИЦИАЛИЗАЦИЯ
     // ============================================================
     function init() {
-        // Сохранение имени и пола
-        document.getElementById('charName')?.addEventListener('input', (e) => {
-            data.character.name = e.target.value;
-            saveData();
-            updateAllUI();
+        // Привязка имени и пола (в профиле они редактируются)
+        // Добавим обработчики на клик по имени и полу (можно сделать редактируемыми)
+        // Пока оставим как есть – в профиле они отображаются, но редактируются через карточку персонажа? 
+        // У нас нет ввода в профиле, но можно добавить возможность редактирования, но для простоты оставим так.
+        // Пользователь может редактировать имя через карточку персонажа, которая скрыта в новой версии? 
+        // Мы убрали карточку персонажа из шапки, но она есть в профиле. Сделаем редактирование кликом.
+        document.getElementById('profileName').addEventListener('click', () => {
+            const newName = prompt('Введите имя:', data.character.name);
+            if (newName !== null && newName.trim()) {
+                data.character.name = newName.trim();
+                saveData();
+                renderProfile();
+            }
         });
-        document.getElementById('charGender')?.addEventListener('change', (e) => {
-            data.character.gender = e.target.value;
-            saveData();
-            updateAllUI();
+        document.getElementById('profileGender').addEventListener('click', () => {
+            const newGender = prompt('Введите пол (М/Ж):', data.character.gender);
+            if (newGender !== null && newGender.trim()) {
+                data.character.gender = newGender.trim();
+                saveData();
+                renderProfile();
+            }
         });
 
         loadThemeSettings();
         updateAllUI();
-        // Стартовая вкладка
         switchTab('journals');
     }
 
-    // Запускаем
     init();
-    console.log('🔥 RPG Планировщик v7 — современный дизайн и новые функции');
+    console.log('🔥 RPG Планировщик v8 — расширенные настройки и цветовые схемы');
 </script>
 </body>
 </html>
