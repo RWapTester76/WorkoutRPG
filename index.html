@@ -67,7 +67,7 @@ button:active{transform:scale(.98)}
 .bottom{display:none}
 .muted{color:var(--muted)}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.danger{color:var(--danger)}.good{color:var(--good)}
 @media(max-width:760px){
- .app{padding:12px 12px 92px}.layout{display:block}.sidebar{display:none}.bottom{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);bottom:0;left:0;right:0;z-index:15;padding:8px max(8px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));background:rgba(9,11,16,.92);backdrop-filter:blur(20px);border-top:1px solid var(--line)}.bottom button{border:0;background:transparent;color:var(--muted);font-size:10px;padding:5px 2px;border-radius:12px}.bottom button.active{color:#fff;background:rgba(139,92,246,.16)}.bottom i{display:block;font-style:normal;font-size:19px;margin-bottom:2px}.header{margin-bottom:12px}.hero{padding:18px}.hero-top{align-items:flex-start}.quick{grid-template-columns:1fr 1fr 1fr}.grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.quest{grid-template-columns:38px 1fr auto}.check{width:38px;height:38px}
+ .app{padding:12px 12px 92px}.layout{display:block}.sidebar{display:none}.bottom{position:fixed;display:grid;grid-template-columns:repeat(6,1fr);bottom:0;left:0;right:0;z-index:15;padding:8px max(8px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));background:rgba(9,11,16,.92);backdrop-filter:blur(20px);border-top:1px solid var(--line)}.bottom button{border:0;background:transparent;color:var(--muted);font-size:10px;padding:5px 2px;border-radius:12px}.bottom button.active{color:#fff;background:rgba(139,92,246,.16)}.bottom i{display:block;font-style:normal;font-size:19px;margin-bottom:2px}.header{margin-bottom:12px}.hero{padding:18px}.hero-top{align-items:flex-start}.quick{grid-template-columns:1fr 1fr 1fr}.grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.quest{grid-template-columns:38px 1fr auto}.check{width:38px;height:38px}
 }
 @media(max-width:420px){.grid{gap:8px}.category{min-height:118px;padding:13px}.hero h1{font-size:29px}.quick .q{padding:10px}.q strong{font-size:17px}}
 
@@ -109,6 +109,8 @@ button:active{transform:scale(.98)}
 .danger-card{border-bottom:0}.settings-footer{display:flex;justify-content:space-between;align-items:center;padding-top:14px}.settings-footer .muted{font-size:10px}
 .compact .quest{padding:8px}.compact .card{padding:12px}.compact .section-head{margin-top:16px}
 @media(max-width:760px){.calendar-head{align-items:flex-start}.calendar-head .toolbar{flex-shrink:0}.view-switch{overflow:auto}.view-switch button{padding:8px 11px}.day-layout{grid-template-columns:48px 1fr}.week-grid{min-width:720px}.calendar-card{overflow-x:auto}.month-grid{min-width:620px}.month-cell{min-height:92px}.year-grid{grid-template-columns:repeat(2,1fr);min-width:0}.month-summary{grid-template-columns:repeat(2,1fr)}.themes{grid-template-columns:repeat(2,1fr)}.settings-actions{flex-direction:column}}
+button.mini-task,button.month-task,button.timeline-task{border-top:0;border-right:0;border-bottom:0;font:inherit;cursor:pointer}
+button.mini-task:hover,button.month-task:hover,button.timeline-task:hover{filter:brightness(1.12)}
 .period-day:checked + span{background:rgba(139,92,246,.25);color:#fff}.calendar-head h1{font-size:30px}@media(max-width:760px){.calendar-head h1{font-size:25px}}</style>
 </head>
 <body>
@@ -292,7 +294,10 @@ function normalize(d){let x=defaults();x={...x,...d,character:{...x.character,..
 let data=load();
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
 function allTasks(){return Object.entries(data.tasks).flatMap(([cat,arr])=>arr.map((t,i)=>({...t,cat,i})))}
-function today(){return new Date().toISOString().slice(0,10)}
+function today(){
+ const d=new Date();
+ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
 function xpNeed(){return 100+data.character.level*20}
 function xpPct(){return Math.min(100,data.character.xp/xpNeed()*100)}
 function gainXP(n){data.character.xp+=n;data.character.totalXp=(data.character.totalXp||0)+n;while(data.character.xp>=xpNeed()){data.character.xp-=xpNeed();data.character.level++;toast('LEVEL UP! ⚡ Уровень '+data.character.level)}save()}
@@ -300,7 +305,13 @@ function toast(t){const e=document.createElement('div');e.className='toast';e.te
 function switchPage(p){
  document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id==='page-'+p));
  document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
- if(p==='home')renderHome();if(p==='quests')renderQuests();if(p==='goals')renderGoals();if(p==='character')renderCharacter();if(p==='notes')renderNotes();if(p==='stats')renderStats()
+ if(p==='home')renderHome();
+ if(p==='calendar')renderCalendar();
+ if(p==='quests')renderQuests();
+ if(p==='goals')renderGoals();
+ if(p==='character')renderCharacter();
+ if(p==='notes')renderNotes();
+ if(p==='stats')renderStats();
 }
 document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
 
@@ -326,7 +337,20 @@ function renderQuests(forceCat){
  if(q)list=list.filter(t=>(t.title||'').toLowerCase().includes(q));if(f==='active')list=list.filter(t=>t.status!=='done');if(f==='done')list=list.filter(t=>t.status==='done');if(forceCat)list=list.filter(t=>t.cat===forceCat);
  document.getElementById('allQuests').innerHTML=list.length?list.map(t=>questHTML(t,t.cat,t.i)).join(''):'<div class="empty">Квестов не найдено.</div>'
 }
-function toggleTask(cat,i){const t=data.tasks[cat][i];if(!t)return;if(t.status!=='done'){t.status='done';gainXP(t.xp||10);data.streak=(data.streak||0)+1;toast('Квест выполнен · +'+(t.xp||10)+' XP')}else{t.status='active'}save();renderHome();renderQuests();renderStats()}
+function toggleTask(cat,i){
+ const t=data.tasks[cat]?.[i];if(!t)return;
+ if(t.status!=='done'){
+   t.status='done';
+   gainXP(t.xp||10);
+   data.streak=(data.streak||0)+1;
+   toast('Квест выполнен · +'+(t.xp||10)+' XP');
+ }else{
+   t.status='active';
+ }
+ save();
+ renderHome();renderQuests();renderGoals();renderCharacter();renderStats();
+ if(document.getElementById('page-calendar')?.classList.contains('active'))renderCalendar();
+}
 function renderGoals(){
  const el=document.getElementById('goalList');if(!data.goals.length){el.innerHTML='<div class="card empty" style="grid-column:1/-1">Создай большую цель и преврати её в приключение.</div>';return}
  el.innerHTML=data.goals.map((g,i)=>{const ids=g.taskIds||[];const ts=ids.map(id=>allTasks().find(t=>t.id===id)).filter(Boolean);const done=ts.filter(t=>t.status==='done').length;const pct=ts.length?Math.round(done/ts.length*100):0;return `<div class="card goal"><div class="goal-top"><div class="goal-title">◈ ${esc(g.title)}</div><div class="goal-pct">${done}/${ts.length}</div></div><div class="track"><div class="fill" style="width:${pct}%"></div></div><div class="muted">${pct}% прогресса</div><button class="ghost" onclick="manageGoal(${i})">Управлять квестами</button></div>`}).join('')
@@ -371,14 +395,22 @@ function applyTheme(key){
  prefs.theme=key;localStorage.setItem('lvlup_prefs',JSON.stringify(prefs));document.querySelectorAll('.theme').forEach(x=>x.classList.toggle('selected',x.dataset.theme===key));
 }
 function renderThemes(){document.getElementById('themeGrid').innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="theme ${prefs.theme===k||(!prefs.theme&&k==='violet')?'selected':''}" data-theme="${k}"><div class="theme-preview" style="--tc1:${t.a};--tc2:${t.b}"></div><small>${t.name}</small></button>`).join('');document.querySelectorAll('.theme').forEach(b=>b.onclick=()=>applyTheme(b.dataset.theme))}
-document.getElementById('settingsBtn').onclick=()=>{document.getElementById('nameInput').value=data.character.name;renderThemes();document.getElementById('showCompleted').checked=prefs.showCompleted!==false;document.getElementById('autoBackup').checked=prefs.autoBackup!==false;document.getElementById('mainQuestMode').checked=prefs.mainQuestMode!==false;document.getElementById('settings').classList.add('open')}
+document.getElementById('settingsBtn').onclick=()=>{
+ document.getElementById('nameInput').value=data.character.name;
+ renderThemes();
+ document.getElementById('showCompleted').checked=prefs.showCompleted!==false;
+ document.getElementById('autoBackup').checked=prefs.autoBackup!==false;
+ document.getElementById('mainQuestMode').checked=prefs.mainQuestMode!==false;
+ document.querySelectorAll('[data-density]').forEach(x=>x.classList.toggle('active',x.dataset.density===(prefs.density||'cozy')));
+ document.getElementById('settings').classList.add('open');
+}
 document.getElementById('settingsClose').onclick=()=>document.getElementById('settings').classList.remove('open')
 document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-stab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.settings-panel').forEach(x=>x.classList.toggle('active',x.id==='stab-'+b.dataset.stab))})
 document.querySelectorAll('[data-density]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-density]').forEach(x=>x.classList.toggle('active',x===b));document.body.classList.toggle('compact',b.dataset.density==='compact');prefs.density=b.dataset.density;localStorage.setItem('lvlup_prefs',JSON.stringify(prefs))})
 document.getElementById('saveSettings').onclick=()=>{data.character.name=document.getElementById('nameInput').value.trim()||'Герой';prefs.showCompleted=document.getElementById('showCompleted').checked;prefs.autoBackup=document.getElementById('autoBackup').checked;prefs.mainQuestMode=document.getElementById('mainQuestMode').checked;localStorage.setItem('lvlup_prefs',JSON.stringify(prefs));save();document.getElementById('settings').classList.remove('open');renderHome();renderCharacter();toast('Настройки сохранены')}
 document.getElementById('exportFull').onclick=exportData;document.getElementById('exportBtn2').onclick=exportData;document.getElementById('exportBtn').onclick=exportData
 document.getElementById('importFull').onclick=()=>document.getElementById('importFile').click()
-document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{if(prefs.autoBackup)localStorage.setItem('lvlup_backup_before_import',JSON.stringify(data));data=normalize(JSON.parse(r.result));save();renderHome();renderQuests();renderGoals();renderCharacter();renderNotes();renderStats();renderCalendar();toast('↧ Данные импортированы')}catch(err){toast('Не удалось импортировать JSON')}};r.readAsText(f)}
+document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{if(prefs.autoBackup)localStorage.setItem('lvlup_backup_before_import',JSON.stringify(data));data=normalize(JSON.parse(r.result));save();renderHome();renderQuests();renderGoals();renderCharacter();renderNotes();renderStats();renderCalendar();renderCalendar();toast('↧ Данные импортированы')}catch(err){toast('Не удалось импортировать JSON')}};r.readAsText(f)}
 document.getElementById('resetBtn').onclick=()=>{if(confirm('Сбросить все данные LVLUP?')){data=defaults();save();renderHome();renderGoals();renderCharacter();renderStats();toast('Данные сброшены')}}
 function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='lvlup-backup-'+today()+'.json';a.click();toast('💾 JSON сохранён')}
 if(prefs.theme)applyTheme(prefs.theme);if(prefs.density==='compact')document.body.classList.add('compact');
@@ -398,16 +430,16 @@ function renderCalendar(){
 function renderDay(el){
  const d=calState.date,ts=tasksOn(d),hourTasks=ts.filter(t=>t.time);
  let html='<div class="day-layout"><div class="time-col">'+Array.from({length:14},(_,i)=>`<div>${pad(i+7)}:00</div>`).join('')+'</div><div class="timeline">';
- ts.filter(t=>!t.time).forEach((t,i)=>html+=`<div class="mini-task" style="margin:7px 9px;border-left-color:${taskColor(t)}">${CAT[t.cat].i} ${esc(t.title)}</div>`);
- hourTasks.forEach(t=>{const m=t.time.match(/(\d{1,2}):(\d{2})/);if(!m)return;const h=+m[1],min=+m[2];const top=((h-7)*52)+(min/60*52);const dur=Math.max(28,(t.duration||30)/60*52);html+=`<div class="timeline-task" style="top:${top}px;height:${dur}px;border-left-color:${taskColor(t)}"><b>${esc(t.title)}</b><span>${t.time} · ${CAT[t.cat].n} · +${t.xp||10} XP</span></div>`});
+ ts.filter(t=>!t.time).forEach(t=>html+=`<button class="mini-task" onclick="toggleTask('${t.cat}',${t.i})" style="margin:7px 9px;border-left-color:${taskColor(t)};width:calc(100% - 18px);text-align:left;color:var(--text)">${CAT[t.cat].i} ${esc(t.title)}</button>`);
+ hourTasks.forEach(t=>{const m=String(t.time).match(/(\d{1,2}):(\d{2})/);if(!m)return;const h=+m[1],min=+m[2];const top=((h-7)*52)+(min/60*52);const dur=Math.max(28,(t.duration||30)/60*52);html+=`<button class="timeline-task" onclick="toggleTask('${t.cat}',${t.i})" style="top:${top}px;height:${dur}px;border-left-color:${taskColor(t)};width:calc(100% - 18px);text-align:left;color:var(--text)"><b>${esc(t.title)}</b><span>${t.time} · ${CAT[t.cat].n} · +${t.xp||10} XP</span></button>`});
  html+='</div></div>';el.innerHTML=html
 }
 function renderWeek(el){
- const s=startWeek(calState.date);let html='<div class="week-grid">';for(let i=0;i<7;i++){const d=new Date(s);d.setDate(s.getDate()+i);const ts=tasksOn(d);html+=`<div class="week-day"><div class="week-head">${DOW[i]}<strong>${d.getDate()}</strong></div><div class="week-tasks">${ts.map(t=>`<div class="mini-task ${t.status==='done'?'done':''}" style="border-left-color:${taskColor(t)}">${esc(t.title)}<br><span>${t.time||'весь день'}</span></div>`).join('')||'<span class="muted" style="font-size:10px;padding:5px">—</span>'}</div></div>`}html+='</div>';el.innerHTML=html
+ const s=startWeek(calState.date);let html='<div class="week-grid">';for(let i=0;i<7;i++){const d=new Date(s);d.setDate(s.getDate()+i);const ts=tasksOn(d);html+=`<div class="week-day"><div class="week-head">${DOW[i]}<strong>${d.getDate()}</strong></div><div class="week-tasks">${ts.map(t=>`<button class="mini-task ${t.status==='done'?'done':''}" onclick="toggleTask('${t.cat}',${t.i})" style="border-left-color:${taskColor(t)};color:var(--text);text-align:left">${esc(t.title)}<br><span>${t.time||'весь день'}</span></button>`).join('')||'<span class="muted" style="font-size:10px;padding:5px">—</span>'}</div></div>`}html+='</div>';el.innerHTML=html
 }
 function renderMonth(el){
  const y=calState.date.getFullYear(),m=calState.date.getMonth(),first=new Date(y,m,1),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();let html='<div class="month-grid">'+DOW.map(x=>`<div class="month-dow">${x}</div>`).join('');
- for(let i=0;i<42;i++){const n=i-offset+1,d=new Date(y,m,n),other=d.getMonth()!==m,ts=tasksOn(d),today=iso(d)===today();html+=`<div class="month-cell ${other?'other':''} ${today?'today':''}" onclick="jumpDay('${iso(d)}')"><div class="date-num ${today?'today-dot':''}">${d.getDate()}</div>${ts.slice(0,5).map(t=>`<div class="month-task" style="border-left-color:${taskColor(t)}">${CAT[t.cat].i} ${esc(t.title)}</div>`).join('')}${ts.length>5?`<div class="muted" style="font-size:9px">+${ts.length-5} ещё</div>`:''}</div>`}
+ for(let i=0;i<42;i++){const n=i-offset+1,d=new Date(y,m,n),other=d.getMonth()!==m,ts=tasksOn(d),today=iso(d)===today();html+=`<div class="month-cell ${other?'other':''} ${today?'today':''}" onclick="jumpDay('${iso(d)}')"><div class="date-num ${today?'today-dot':''}">${d.getDate()}</div>${ts.slice(0,5).map(t=>`<button class="month-task" onclick="event.stopPropagation();toggleTask('${t.cat}',${t.i})" style="border-left-color:${taskColor(t)};width:100%;text-align:left;color:var(--text)">${CAT[t.cat].i} ${esc(t.title)}</button>`).join('')}${ts.length>5?`<div class="muted" style="font-size:9px">+${ts.length-5} ещё</div>`:''}</div>`}
  html+='</div>';const monthTasks=allTasks().filter(t=>t.date&&t.date.startsWith(`${y}-${pad(m+1)}`));const done=monthTasks.filter(t=>t.status==='done').length;html+=`<div class="month-summary"><div class="summary-pill"><b>${monthTasks.length}</b><span>квестов</span></div><div class="summary-pill"><b>${done}</b><span>выполнено</span></div><div class="summary-pill"><b>${monthTasks.reduce((a,t)=>a+(+t.xp||10),0)}</b><span>XP запланировано</span></div><div class="summary-pill"><b>${monthTasks.filter(t=>t.status!=='done').length}</b><span>осталось</span></div></div>`;el.innerHTML=html
 }
 function renderYear(el){
@@ -420,7 +452,7 @@ document.getElementById('calPrev').onclick=()=>{const d=calState.date;if(calStat
 document.getElementById('calNext').onclick=()=>{const d=calState.date;if(calState.view==='day')d.setDate(d.getDate()+1);else if(calState.view==='week')d.setDate(d.getDate()+7);else if(calState.view==='month')d.setMonth(d.getMonth()+1);else d.setFullYear(d.getFullYear()+1);renderCalendar()}
 document.getElementById('calToday').onclick=()=>{calState.date=new Date();renderCalendar()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-renderHome();renderQuests();renderGoals();renderCharacter();renderNotes();renderStats();
+renderHome();renderQuests();renderGoals();renderCharacter();renderNotes();renderStats();renderCalendar();
 </script>
 </body>
 </html>
