@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0d12">
-<title>LVLUP v13.2 — Life RPG</title>
+<title>LVLUP v13.3 — Life RPG</title>
 <style>
 :root{
   --bg:#090b10;--panel:#11151d;--panel2:#171c26;--line:rgba(255,255,255,.08);
@@ -152,6 +152,19 @@ button:active{transform:scale(.98)}
 .avail-export-cell.weekend{opacity:.5}
 .avail-export-caption{font-size:9px;color:var(--muted);margin-top:6px}
 .avail-export-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+
+/* Journal Progress */
+.journal-progress{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+.journal-progress-item{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.journal-progress-item .jp-icon{font-size:20px;text-align:center}
+.journal-progress-item .jp-info{display:flex;flex-direction:column}
+.journal-progress-item .jp-name{font-size:12px;font-weight:600}
+.journal-progress-item .jp-level{font-size:10px;color:var(--muted)}
+.journal-progress-item .jp-bar{height:4px;background:rgba(255,255,255,.06);border-radius:99px;margin-top:3px;overflow:hidden}
+.journal-progress-item .jp-bar .jp-fill{height:100%;border-radius:99px;transition:width .4s}
+.journal-progress-item .jp-xp{font-size:10px;color:var(--muted);text-align:right}
+.journal-progress-item .jp-xp strong{color:var(--text)}
+.version-badge{text-align:center;font-size:10px;color:var(--muted);margin-top:12px;padding:4px 0;border-top:1px solid var(--line);opacity:.6}
 </style>
 </head>
 <body>
@@ -176,6 +189,7 @@ button:active{transform:scale(.98)}
     </nav></aside>
 
     <main class="main">
+      <!-- HOME -->
       <section class="page active" id="page-home">
         <div class="hero">
           <div class="hero-top">
@@ -191,8 +205,16 @@ button:active{transform:scale(.98)}
         </div>
         <div class="section-head"><h2>📋 Главные задачи</h2><span id="questHint">На сегодня</span></div>
         <div class="quest-list" id="homeQuests"></div>
+
+        <!-- ЖУРНАЛЫ НА ГЛАВНОЙ -->
+        <div class="section-head"><h2>📊 Журналы</h2><span id="journalHint">прогресс</span></div>
+        <div class="journal-progress" id="journalProgress"></div>
+
+        <!-- ВЕРСИЯ -->
+        <div class="version-badge">LVLUP v13.3 · local-first</div>
       </section>
 
+      <!-- CALENDAR -->
       <section class="page" id="page-calendar">
         <div class="calendar-head">
           <div>
@@ -214,6 +236,7 @@ button:active{transform:scale(.98)}
         <div class="calendar-card" id="calendarBody"></div>
       </section>
 
+      <!-- QUESTS -->
       <section class="page" id="page-quests">
         <div class="section-head"><h2>▤ Задачи</h2><button class="add" id="newQuestBtn">+ Задача</button></div>
         <div class="toolbar">
@@ -228,11 +251,13 @@ button:active{transform:scale(.98)}
         <div class="card" style="margin-top:12px"><div class="quest-list" id="allQuests"></div></div>
       </section>
 
+      <!-- GOALS -->
       <section class="page" id="page-goals">
         <div class="section-head"><h2>◈ Цели</h2><button class="add" id="newGoalBtn">+ Цель</button></div>
         <div class="grid" id="goalList"></div>
       </section>
 
+      <!-- NOTES -->
       <section class="page" id="page-notes">
         <div class="section-head"><h2>✎ Заметки</h2><button class="add" id="newNoteBtn">+ Заметка</button></div>
         <div class="toolbar">
@@ -242,11 +267,13 @@ button:active{transform:scale(.98)}
         <div class="card" style="margin-top:12px"><div class="quest-list" id="notesList"></div></div>
       </section>
 
+      <!-- GALLERY -->
       <section class="page" id="page-gallery">
         <div class="section-head"><h2>▣ Галерея</h2></div>
         <div class="gallery-grid" id="galleryGrid"></div>
       </section>
 
+      <!-- CHARACTER -->
       <section class="page" id="page-character">
         <div class="hero">
           <div class="hero-top"><div><div class="eyebrow">Твой герой</div><h1 id="charName">Герой</h1><p>Прокачивай реальную жизнь действиями.</p></div><div style="font-size:64px">🧙</div></div>
@@ -256,11 +283,13 @@ button:active{transform:scale(.98)}
         <div class="stats" id="charStats"></div>
       </section>
 
+      <!-- JOURNALS -->
       <section class="page" id="page-journals">
         <div class="section-head"><h2>▦ Твои направления</h2></div>
         <div class="grid" id="journalGrid"></div>
       </section>
 
+      <!-- AVAILABILITY -->
       <section class="page" id="page-availability">
         <div class="section-head">
           <h2>☀ Доступность</h2>
@@ -289,16 +318,18 @@ button:active{transform:scale(.98)}
         </div>
       </section>
 
+      <!-- MORE -->
       <section class="page" id="page-more">
         <div class="section-head"><h2>••• Ещё</h2></div>
         <div class="card">
           <div class="row"><div><b>📊 Статистика</b><div class="muted">Твой прогресс по направлениям</div></div><button class="ghost" id="statsBtn">Открыть</button></div>
           <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
           <div class="row"><div><b>💾 Резервная копия</b><div class="muted">Данные сохраняются локально</div></div><button class="ghost" id="exportBtn2">Экспорт</button></div>
-          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v13.2 · local-first</div>
+          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v13.3 · local-first</div>
         </div>
       </section>
 
+      <!-- STATS -->
       <section class="page" id="page-stats">
         <div class="section-head"><h2>📊 Статистика</h2></div>
         <div class="stats" id="statsCards"></div>
@@ -365,317 +396,638 @@ button:active{transform:scale(.98)}
     <div class="settings-section"><b>Начало недели</b><div class="segmented"><button class="active">Пн</button><button>Вс</button></div></div>
     <div class="settings-section"><b>Первый экран</b><div class="segmented"><button class="active">Главная</button><button>Календарь</button></div></div>
   </div>
-  <div class="settings-footer"><span class="muted">LVLUP v13.2 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
+  <div class="settings-footer"><span class="muted">LVLUP v13.3 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
 </div></div>
 
 <script>
 // ============================================================
-// LVLUP v13.2 — СТАБИЛЬНАЯ ВЕРСИЯ
-// Исправлены: дублирование заметок и фото
+// LVLUP v13.3 — НОВАЯ RPG-СИСТЕМА
 // ============================================================
 
-// ============================================================
+  // ============================================================
 // 1. КОНСТАНТЫ
 // ============================================================
-const KEY='lvlup_v13';
-const DEFAULT_CATEGORIES=[
- {id:'body',name:'Тело',icon:'💪',color:'#fb7185'},
- {id:'hobby',name:'Хобби',icon:'🎨',color:'#a78bfa'},
- {id:'business',name:'Бизнес',icon:'📈',color:'#60a5fa'},
- {id:'food',name:'Питание',icon:'🥗',color:'#34d399'},
- {id:'finance',name:'Финансы',icon:'💰',color:'#fbbf24'},
- {id:'debts',name:'Долги',icon:'📋',color:'#fb923c'},
- {id:'travel',name:'Путешествия',icon:'✈️',color:'#22d3ee'},
- {id:'misc',name:'Разное',icon:'📦',color:'#facc15'}
+const KEY = 'lvlup_v13';
+const APP_VERSION = 'v13.3';
+
+const DEFAULT_CATEGORIES = [
+  { id: 'body', name: 'Тело', icon: '💪', color: '#fb7185' },
+  { id: 'hobby', name: 'Хобби', icon: '🎨', color: '#a78bfa' },
+  { id: 'business', name: 'Бизнес', icon: '📈', color: '#60a5fa' },
+  { id: 'food', name: 'Питание', icon: '🥗', color: '#34d399' },
+  { id: 'finance', name: 'Финансы', icon: '💰', color: '#fbbf24' },
+  { id: 'debts', name: 'Долги', icon: '📋', color: '#fb923c' },
+  { id: 'travel', name: 'Путешествия', icon: '✈️', color: '#22d3ee' },
+  { id: 'misc', name: 'Разное', icon: '📦', color: '#facc15' }
 ];
 
 const AVAIL_TYPES = {
- work: { label:'Работа', icon:'💼', color:'#3b82f6' },
- rest: { label:'Отдых', icon:'🧘', color:'#8b5cf6' },
- walk: { label:'Прогулка', icon:'🚶', color:'#22d3ee' },
- meeting: { label:'Встреча', icon:'🤝', color:'#f59e0b' },
- sport: { label:'Спорт', icon:'🏃', color:'#10b981' },
- other: { label:'Другое', icon:'📌', color:'#6b7280' }
+  work: { label: 'Работа', icon: '💼', color: '#3b82f6' },
+  rest: { label: 'Отдых', icon: '🧘', color: '#8b5cf6' },
+  walk: { label: 'Прогулка', icon: '🚶', color: '#22d3ee' },
+  meeting: { label: 'Встреча', icon: '🤝', color: '#f59e0b' },
+  sport: { label: 'Спорт', icon: '🏃', color: '#10b981' },
+  other: { label: 'Другое', icon: '📌', color: '#6b7280' }
 };
 
-function genId(){return typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,8)}
-function today(){return new Date().toISOString().slice(0,10)}
-function iso(d){return d.toISOString().slice(0,10)}
-function pad(n){return String(n).padStart(2,'0')}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-
-// ============================================================
-// 2. ДАННЫЕ
-// ============================================================
-function emptyData(){
- return {
-  version:'v13',
-  user:{id:genId(),name:'Герой',level:1,xp:0,totalXp:0,streak:0,createdAt:new Date().toISOString()},
-  categories:DEFAULT_CATEGORIES.map(c=>({...c})),
-  tasks:[],
-  goals:[],
-  notes:[],
-  media:[],
-  availability:[],
-  _meta:{lastBackup:null,lastReset:null,migrations:[]}
- };
+function genId() {
+  return typeof crypto !== 'undefined' && crypto.randomUUID ?
+    crypto.randomUUID() :
+    'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
 }
 
-function migrateV12toV13(oldData){
- const nd=emptyData();
- nd.user.name=oldData.character?.name||'Герой';
- nd.user.level=oldData.character?.level||1;
- nd.user.xp=oldData.character?.xp||0;
- nd.user.totalXp=oldData.character?.totalXp||0;
- nd.user.streak=oldData.streak||0;
- nd.user.createdAt=oldData.character?.createdAt||new Date().toISOString();
+function today() { return new Date().toISOString().slice(0, 10); }
+function iso(d) { return d.toISOString().slice(0, 10); }
+function pad(n) { return String(n).padStart(2, '0'); }
 
- const taskMap={};
- for(const [cat, arr] of Object.entries(oldData.tasks||{})){
-  for(const t of arr){
-   const id=t.id||genId();
-   taskMap[id]=true;
-   nd.tasks.push({
-    id,title:t.title||'Без названия',category:cat,
-    date:t.date||null,time:t.time||null,
-    xp:t.xp||10,note:t.note||'',
-    status:t.status==='done'?'done':'active',
-    completedAt:t.status==='done'?new Date().toISOString():null,
-    createdAt:t.createdAt||new Date().toISOString(),
-    updatedAt:new Date().toISOString()
-   });
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  })[m]);
+}
+
+// ============================================================
+// 2. RPG-СИСТЕМА
+// ============================================================
+
+// Опыт для уровня журнала: уровень 1 → 100 XP, далее +50 за уровень
+function xpNeedForCategory(level) {
+  return 100 + (level - 1) * 50;
+}
+
+// Опыт для общего уровня: уровень 1 → 200 XP, далее +80 за уровень
+function xpNeedForUser(level) {
+  return 200 + (level - 1) * 80;
+}
+
+// Бонус за развитые журналы (чем больше журналов ≥ уровня 5, тем выше бонус)
+function getJournalBonus() {
+  const cats = getCategories();
+  const developed = cats.filter(c => c.level >= 5).length;
+  const bonuses = {
+    0: 0,
+    1: 5,
+    2: 12,
+    3: 20,
+    4: 30,
+    5: 42,
+    6: 55,
+    7: 70,
+    8: 85
+  };
+  return bonuses[Math.min(developed, 8)] || 0;
+}
+
+// Глобальный бонус от общего уровня
+function getGlobalLevelBonus() {
+  const level = data.user.level;
+  if (level >= 50) return 50;
+  if (level >= 20) return 20;
+  if (level >= 10) return 10;
+  if (level >= 5) return 5;
+  return 0;
+}
+
+// Начисление опыта за выполненную задачу
+function completeTaskWithTime(taskId, minutesSpent) {
+  const task = getTask(taskId);
+  if (!task) return;
+  if (task.status === 'done') return toast('⚠️ Задача уже выполнена');
+
+  const cat = getCategory(task.category);
+  if (!cat) return;
+
+  // === 1. Опыт в журнал (1 XP = 1 минута) ===
+  const journalXP = Math.round(minutesSpent);
+  cat.xp = (cat.xp || 0) + journalXP;
+  cat.totalXp = (cat.totalXp || 0) + journalXP;
+  cat.minutesSpent = (cat.minutesSpent || 0) + minutesSpent;
+  cat.tasksCompleted = (cat.tasksCompleted || 0) + 1;
+
+  // Повышение уровня журнала
+  let leveledUp = false;
+  while (cat.xp >= xpNeedForCategory(cat.level)) {
+    cat.xp -= xpNeedForCategory(cat.level);
+    cat.level++;
+    leveledUp = true;
+    toast(`📈 ${cat.icon} ${cat.name} достиг ${cat.level} уровня!`);
   }
- }
 
- for(const g of oldData.goals||[]){
-  const validIds=(g.taskIds||[]).filter(id=>taskMap[id]);
-  nd.goals.push({
-   id:g.id||genId(),title:g.title||'Цель',
-   deadline:g.deadline||null,
-   taskIds:validIds,
-   status:'active',
-   completedAt:null,
-   createdAt:g.createdAt||new Date().toISOString(),
-   updatedAt:new Date().toISOString()
-  });
- }
+  // === 2. Общий опыт (10% от минут + бонусы) ===
+  const baseGlobalXP = Math.round(minutesSpent * 0.1);
+  const journalBonus = getJournalBonus();
+  const globalLevelBonus = getGlobalLevelBonus();
+  const totalBonus = journalBonus + globalLevelBonus;
+  const finalGlobalXP = Math.round(baseGlobalXP * (1 + totalBonus / 100));
 
- for(const n of oldData.notes||[]){
-  const targetId=n.taskId||null;
-  const targetType=targetId?'task':'none';
-  nd.notes.push({
-   id:n.id||genId(),text:n.text||'',
-   category:n.cat||null,
-   targetType,targetId,
-   date:n.date||new Date().toLocaleDateString('ru-RU'),
-   createdAt:n.createdAt||new Date().toISOString(),
-   updatedAt:new Date().toISOString()
-  });
- }
+  data.user.xp = (data.user.xp || 0) + finalGlobalXP;
+  data.user.totalXp = (data.user.totalXp || 0) + finalGlobalXP;
 
- for(const m of oldData.media||[]){
-  const targetId=m.taskId||m.goalId||null;
-  const targetType=m.taskId?'task':(m.goalId?'goal':'none');
-  nd.media.push({
-   id:m.id||genId(),dataUrl:m.dataUrl||'',
-   caption:m.caption||'',
-   targetType,targetId,
-   createdAt:m.createdAt||new Date().toISOString()
-  });
- }
+  // Повышение общего уровня
+  let userLeveledUp = false;
+  while (data.user.xp >= xpNeedForUser(data.user.level)) {
+    data.user.xp -= xpNeedForUser(data.user.level);
+    data.user.level++;
+    userLeveledUp = true;
+    toast(`⚡ Общий уровень ${data.user.level}!`);
+  }
 
- nd.availability=oldData.availability||[];
- nd._meta.migrations=['v12','v13'];
- nd._meta.lastReset=oldData.lastReset||null;
- return nd;
-}
+  // === 3. Отметить задачу выполненной ===
+  task.status = 'done';
+  task.completedAt = new Date().toISOString();
+  task.minutesSpent = minutesSpent;
+  task.journalXPEarned = journalXP;
+  task.globalXPEarned = finalGlobalXP;
 
-function loadData(){
- try{
-  const raw=localStorage.getItem(KEY);
-  if(!raw)return migrateV12toV13(loadV12());
-  const d=JSON.parse(raw);
-  if(d.version!=='v13')return migrateV12toV13(d);
-  return normalizeData(d);
- }catch(e){return migrateV12toV13(loadV12())}
-}
+  data.user.streak = (data.user.streak || 0) + 1;
+  saveData();
 
-function loadV12(){
- try{
-  const raw=localStorage.getItem('lvlup_v12')||localStorage.getItem('lvlup_v11');
-  if(raw)return JSON.parse(raw);
- }catch(e){}
- return {character:{},tasks:{},goals:[],notes:[],media:[],streak:0,availability:[]};
-}
+  // === 4. Уведомление ===
+  let msg = `✅ "${task.title}" выполнена!`;
+  msg += `\n📚 ${cat.icon} +${journalXP} XP (${cat.level} ур.)`;
+  msg += `\n⭐ +${finalGlobalXP} XP глобально`;
+  if (leveledUp) msg += `\n🎉 Уровень журнала повышен!`;
+  if (userLeveledUp) msg += `\n🎉 Общий уровень повышен!`;
+  toast(msg);
 
-function normalizeData(d){
- const nd=emptyData();
- nd.user={...nd.user,...d.user};
- nd.categories=Array.isArray(d.categories)?d.categories:DEFAULT_CATEGORIES.map(c=>({...c}));
- nd.tasks=Array.isArray(d.tasks)?d.tasks:[];
- nd.goals=Array.isArray(d.goals)?d.goals.map(g=>({...g,taskIds:Array.isArray(g.taskIds)?g.taskIds:[]})):[];
- nd.notes=Array.isArray(d.notes)?d.notes:[];
- nd.media=Array.isArray(d.media)?d.media:[];
- nd.availability=Array.isArray(d.availability)?d.availability:[];
- nd._meta={...nd._meta,...d._meta};
- if(!nd._meta.migrations.includes('v13'))nd._meta.migrations.push('v13');
- return nd;
-}
-
-let data=loadData();
-function saveData(){
- localStorage.setItem(KEY,JSON.stringify(data));
- data=normalizeData(data);
+  renderAll();
 }
 
 // ============================================================
-// 3. API
+// 3. ДАННЫЕ
 // ============================================================
-function getTasks(filter={}){
- let tasks=data.tasks;
- if(filter.category)tasks=tasks.filter(t=>t.category===filter.category);
- if(filter.status)tasks=tasks.filter(t=>t.status===filter.status);
- if(filter.date)tasks=tasks.filter(t=>t.date===filter.date);
- if(filter.search)tasks=tasks.filter(t=>t.title.toLowerCase().includes(filter.search.toLowerCase()));
- if(filter.excludeStatus)tasks=tasks.filter(t=>t.status!==filter.excludeStatus);
- return tasks;
-}
-function getTask(id){return data.tasks.find(t=>t.id===id)}
-function addTask(task){
- const nt={id:genId(),...task,status:'active',completedAt:null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
- data.tasks.push(nt);saveData();return nt;
-}
-function updateTask(id,updates){
- const t=getTask(id);if(!t)return null;
- Object.assign(t,updates);t.updatedAt=new Date().toISOString();
- if(updates.status==='done'&&!t.completedAt)t.completedAt=new Date().toISOString();
- saveData();return t;
-}
-function deleteTask(id,soft=true){
- const t=getTask(id);if(!t)return;
- if(soft){t.status='deleted';t.updatedAt=new Date().toISOString();saveData();return}
- data.goals.forEach(g=>g.taskIds=g.taskIds.filter(tid=>tid!==id));
- data.notes.forEach(n=>{if(n.targetId===id){n.targetId=null;n.targetType='none'}});
- data.media.forEach(m=>{if(m.targetId===id){m.targetId=null;m.targetType='none'}});
- data.tasks=data.tasks.filter(t=>t.id!==id);
- saveData();
+
+function emptyData() {
+  return {
+    version: 'v13',
+    user: {
+      id: genId(),
+      name: 'Герой',
+      level: 1,
+      xp: 0,
+      totalXp: 0,
+      streak: 0,
+      createdAt: new Date().toISOString()
+    },
+    categories: DEFAULT_CATEGORIES.map(c => ({
+      ...c,
+      level: 1,
+      xp: 0,
+      totalXp: 0,
+      tasksCompleted: 0,
+      minutesSpent: 0
+    })),
+    tasks: [],
+    goals: [],
+    notes: [],
+    media: [],
+    availability: [],
+    _meta: { lastBackup: null, lastReset: null, migrations: [] }
+  };
 }
 
-function getUser(){return data.user}
-function gainXP(n){
- const u=data.user;
- u.xp+=n;u.totalXp=(u.totalXp||0)+n;
- const need=100+u.level*20;
- while(u.xp>=need){u.xp-=need;u.level++;toast('LEVEL UP! ⚡ Уровень '+u.level)}
- saveData();
-}
-function getCategories(){return data.categories}
-function getCategory(id){return data.categories.find(c=>c.id===id)}
-function getGoals(){return data.goals}
-function getGoal(id){return data.goals.find(g=>g.id===id)}
-function addGoal(goal){
- const ng={id:genId(),...goal,taskIds:goal.taskIds||[],status:'active',completedAt:null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
- data.goals.push(ng);saveData();return ng;
-}
-function updateGoal(id,updates){
- const g=getGoal(id);if(!g)return null;
- Object.assign(g,updates);g.updatedAt=new Date().toISOString();
- if(updates.status==='completed'&&!g.completedAt)g.completedAt=new Date().toISOString();
- saveData();return g;
-}
-function deleteGoal(id){data.goals=data.goals.filter(g=>g.id!==id);saveData()}
+function migrateV12toV13(oldData) {
+  const nd = emptyData();
+  nd.user.name = oldData.character?.name || 'Герой';
+  nd.user.level = oldData.character?.level || 1;
+  nd.user.xp = oldData.character?.xp || 0;
+  nd.user.totalXp = oldData.character?.totalXp || 0;
+  nd.user.streak = oldData.streak || 0;
+  nd.user.createdAt = oldData.character?.createdAt || new Date().toISOString();
 
-function getNotes(filter={}){
- let notes=data.notes;
- if(filter.category)notes=notes.filter(n=>n.category===filter.category);
- if(filter.targetType)notes=notes.filter(n=>n.targetType===filter.targetType);
- if(filter.targetId)notes=notes.filter(n=>n.targetId===filter.targetId);
- return notes;
-}
-function addNote(note){
- const nn={id:genId(),...note,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
- data.notes.push(nn);saveData();return nn;
-}
-function deleteNote(id){data.notes=data.notes.filter(n=>n.id!==id);saveData()}
+  // Категории с уровнями
+  const catMap = {};
+  for (const c of nd.categories) {
+    catMap[c.id] = c;
+  }
 
-function getMedia(){return data.media}
-function addMedia(media){
- const nm={id:genId(),...media,createdAt:new Date().toISOString()};
- data.media.push(nm);saveData();return nm;
-}
-function deleteMedia(id){data.media=data.media.filter(m=>m.id!==id);saveData()}
+  const taskMap = {};
+  for (const [cat, arr] of Object.entries(oldData.tasks || {})) {
+    for (const t of arr) {
+      const id = t.id || genId();
+      taskMap[id] = true;
+      const catObj = catMap[cat];
+      nd.tasks.push({
+        id,
+        title: t.title || 'Без названия',
+        category: cat,
+        date: t.date || null,
+        time: t.time || null,
+        xp: t.xp || 10,
+        note: t.note || '',
+        status: t.status === 'done' ? 'done' : 'active',
+        completedAt: t.status === 'done' ? new Date().toISOString() : null,
+        minutesSpent: t.minutesSpent || 0,
+        journalXPEarned: t.journalXPEarned || 0,
+        globalXPEarned: t.globalXPEarned || 0,
+        createdAt: t.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      // Если задача выполнена — добавляем XP в журнал
+      if (t.status === 'done' && catObj) {
+        const xp = t.journalXPEarned || t.xp || 10;
+        catObj.xp += xp;
+        catObj.totalXp += xp;
+        catObj.tasksCompleted += 1;
+        catObj.minutesSpent += t.minutesSpent || 0;
+        while (catObj.xp >= xpNeedForCategory(catObj.level)) {
+          catObj.xp -= xpNeedForCategory(catObj.level);
+          catObj.level++;
+        }
+      }
+    }
+  }
 
-function getAvailability(date){
- return data.availability.find(a=>a.date===date);
-}
-function setAvailability(date,slots){
- const existing=getAvailability(date);
- if(existing){existing.slots=slots;}
- else{data.availability.push({id:genId(),date,slots});}
- saveData();
-}
-function removeAvailability(date){
- data.availability=data.availability.filter(a=>a.date!==date);
- saveData();
-}
-function getAllAvailability(){return data.availability}
-function getAvailType(id){return AVAIL_TYPES[id]||AVAIL_TYPES.other}
+  for (const g of oldData.goals || []) {
+    const validIds = (g.taskIds || []).filter(id => taskMap[id]);
+    nd.goals.push({
+      id: g.id || genId(),
+      title: g.title || 'Цель',
+      deadline: g.deadline || null,
+      taskIds: validIds,
+      status: 'active',
+      completedAt: null,
+      createdAt: g.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  }
 
-function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
-function xpNeed(){return 100+data.user.level*20}
-function xpPct(){return Math.min(100,data.user.xp/xpNeed()*100)}
-function isOverdue(date){return date && date<today()}
-function getTaskNoteCount(taskId){return data.notes.filter(n=>n.targetId===taskId).length}
-function getTaskMediaCount(taskId){return data.media.filter(m=>m.targetId===taskId).length}
+  for (const n of oldData.notes || []) {
+    const targetId = n.taskId || null;
+    const targetType = targetId ? 'task' : 'none';
+    nd.notes.push({
+      id: n.id || genId(),
+      text: n.text || '',
+      category: n.cat || null,
+      targetType: targetType,
+      targetId: targetId,
+      date: n.date || new Date().toLocaleDateString('ru-RU'),
+      createdAt: n.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  for (const m of oldData.media || []) {
+    const targetId = m.taskId || m.goalId || null;
+    const targetType = m.taskId ? 'task' : (m.goalId ? 'goal' : 'none');
+    nd.media.push({
+      id: m.id || genId(),
+      dataUrl: m.dataUrl || '',
+      caption: m.caption || '',
+      targetType: targetType,
+      targetId: targetId,
+      createdAt: m.createdAt || new Date().toISOString()
+    });
+  }
+
+  nd.availability = oldData.availability || [];
+  nd._meta.migrations = ['v12', 'v13'];
+  nd._meta.lastReset = oldData.lastReset || null;
+  return nd;
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return migrateV12toV13(loadV12());
+    const d = JSON.parse(raw);
+    if (d.version !== 'v13') return migrateV12toV13(d);
+    return normalizeData(d);
+  } catch (e) { return migrateV12toV13(loadV12()); }
+}
+
+function loadV12() {
+  try {
+    const raw = localStorage.getItem('lvlup_v12') || localStorage.getItem('lvlup_v11');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return { character: {}, tasks: {}, goals: [], notes: [], media: [], streak: 0, availability: [] };
+}
+
+function normalizeData(d) {
+  const nd = emptyData();
+  nd.user = { ...nd.user, ...d.user };
+  nd.categories = Array.isArray(d.categories) ?
+    d.categories.map(c => ({
+      ...c,
+      level: c.level || 1,
+      xp: c.xp || 0,
+      totalXp: c.totalXp || 0,
+      tasksCompleted: c.tasksCompleted || 0,
+      minutesSpent: c.minutesSpent || 0
+    })) :
+    DEFAULT_CATEGORIES.map(c => ({ ...c, level: 1, xp: 0, totalXp: 0, tasksCompleted: 0, minutesSpent: 0 }));
+  nd.tasks = Array.isArray(d.tasks) ? d.tasks : [];
+  nd.goals = Array.isArray(d.goals) ? d.goals.map(g => ({ ...g, taskIds: Array.isArray(g.taskIds) ? g.taskIds : [] })) : [];
+  nd.notes = Array.isArray(d.notes) ? d.notes : [];
+  nd.media = Array.isArray(d.media) ? d.media : [];
+  nd.availability = Array.isArray(d.availability) ? d.availability : [];
+  nd._meta = { ...nd._meta, ...d._meta };
+  if (!nd._meta.migrations.includes('v13')) nd._meta.migrations.push('v13');
+  return nd;
+}
+
+let data = loadData();
+
+function saveData() {
+  localStorage.setItem(KEY, JSON.stringify(data));
+  data = normalizeData(data);
+}
 
 // ============================================================
-// 4. НАВИГАЦИЯ
+// 4. API
 // ============================================================
-function switchPage(p){
- document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id==='page-'+p));
- document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
- const renders={home:renderHome,quests:renderQuests,goals:renderGoals,character:renderCharacter,notes:renderNotes,gallery:renderGallery,journals:renderJournals,availability:renderAvailability,stats:renderStats};
- if(renders[p])renders[p]();
- if(p==='calendar')renderCalendar();
+
+function getTasks(filter = {}) {
+  let tasks = data.tasks;
+  if (filter.category) tasks = tasks.filter(t => t.category === filter.category);
+  if (filter.status) tasks = tasks.filter(t => t.status === filter.status);
+  if (filter.date) tasks = tasks.filter(t => t.date === filter.date);
+  if (filter.search) tasks = tasks.filter(t => t.title.toLowerCase().includes(filter.search.toLowerCase()));
+  if (filter.excludeStatus) tasks = tasks.filter(t => t.status !== filter.excludeStatus);
+  return tasks;
 }
-document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
+
+function getTask(id) { return data.tasks.find(t => t.id === id); }
+
+function addTask(task) {
+  const nt = {
+    id: genId(),
+    ...task,
+    status: 'active',
+    completedAt: null,
+    minutesSpent: 0,
+    journalXPEarned: 0,
+    globalXPEarned: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  data.tasks.push(nt);
+  saveData();
+  return nt;
+}
+
+function updateTask(id, updates) {
+  const t = getTask(id);
+  if (!t) return null;
+  Object.assign(t, updates);
+  t.updatedAt = new Date().toISOString();
+  if (updates.status === 'done' && !t.completedAt) {
+    t.completedAt = new Date().toISOString();
+  }
+  saveData();
+  return t;
+}
+
+function deleteTask(id, soft = true) {
+  const t = getTask(id);
+  if (!t) return;
+  if (soft) {
+    t.status = 'deleted';
+    t.updatedAt = new Date().toISOString();
+    saveData();
+    return;
+  }
+  data.goals.forEach(g => g.taskIds = g.taskIds.filter(tid => tid !== id));
+  data.notes.forEach(n => { if (n.targetId === id) { n.targetId = null;
+      n.targetType = 'none'; } });
+  data.media.forEach(m => { if (m.targetId === id) { m.targetId = null;
+      m.targetType = 'none'; } });
+  data.tasks = data.tasks.filter(t => t.id !== id);
+  saveData();
+}
+
+function getUser() { return data.user; }
+
+function getCategories() { return data.categories; }
+
+function getCategory(id) { return data.categories.find(c => c.id === id); }
+
+function getGoals() { return data.goals; }
+
+function getGoal(id) { return data.goals.find(g => g.id === id); }
+
+function addGoal(goal) {
+  const ng = {
+    id: genId(),
+    ...goal,
+    taskIds: goal.taskIds || [],
+    status: 'active',
+    completedAt: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  data.goals.push(ng);
+  saveData();
+  return ng;
+}
+
+function updateGoal(id, updates) {
+  const g = getGoal(id);
+  if (!g) return null;
+  Object.assign(g, updates);
+  g.updatedAt = new Date().toISOString();
+  if (updates.status === 'completed' && !g.completedAt) {
+    g.completedAt = new Date().toISOString();
+  }
+  saveData();
+  return g;
+}
+
+function deleteGoal(id) {
+  data.goals = data.goals.filter(g => g.id !== id);
+  saveData();
+}
+
+function getNotes(filter = {}) {
+  let notes = data.notes;
+  if (filter.category) notes = notes.filter(n => n.category === filter.category);
+  if (filter.targetType) notes = notes.filter(n => n.targetType === filter.targetType);
+  if (filter.targetId) notes = notes.filter(n => n.targetId === filter.targetId);
+  return notes;
+}
+
+function addNote(note) {
+  const nn = {
+    id: genId(),
+    ...note,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  data.notes.push(nn);
+  saveData();
+  return nn;
+}
+
+function deleteNote(id) {
+  data.notes = data.notes.filter(n => n.id !== id);
+  saveData();
+}
+
+function getMedia() { return data.media; }
+
+function addMedia(media) {
+  const nm = {
+    id: genId(),
+    ...media,
+    createdAt: new Date().toISOString()
+  };
+  data.media.push(nm);
+  saveData();
+  return nm;
+}
+
+function deleteMedia(id) {
+  data.media = data.media.filter(m => m.id !== id);
+  saveData();
+}
+
+function getAvailability(date) {
+  return data.availability.find(a => a.date === date);
+}
+
+function setAvailability(date, slots) {
+  const existing = getAvailability(date);
+  if (existing) {
+    existing.slots = slots;
+  } else {
+    data.availability.push({ id: genId(), date, slots });
+  }
+  saveData();
+}
+
+function removeAvailability(date) {
+  data.availability = data.availability.filter(a => a.date !== date);
+  saveData();
+}
+
+function getAllAvailability() { return data.availability; }
+
+function getAvailType(id) { return AVAIL_TYPES[id] || AVAIL_TYPES.other; }
+
+function toast(t) {
+  const e = document.createElement('div');
+  e.className = 'toast';
+  e.textContent = t;
+  document.body.appendChild(e);
+  setTimeout(() => e.remove(), 1800);
+}
+
+function xpNeed() { return xpNeedForUser(data.user.level); }
+
+function xpPct() { return Math.min(100, data.user.xp / xpNeed() * 100); }
+
+function isOverdue(date) { return date && date < today(); }
+
+function getTaskNoteCount(taskId) { return data.notes.filter(n => n.targetId === taskId).length; }
+
+function getTaskMediaCount(taskId) { return data.media.filter(m => m.targetId === taskId).length; }
 
 // ============================================================
-// 5. ЗАДАЧИ
+// 5. НАВИГАЦИЯ
 // ============================================================
-let questsPage=0;
-const QUESTS_PER_PAGE=20;
 
-function taskHTML(t){
- const cat=getCategory(t.category);
- const overdue=isOverdue(t.date)&&t.status==='active';
- const noteCount=getTaskNoteCount(t.id);
- const mediaCount=getTaskMediaCount(t.id);
- const status=t.status==='done'?'done':'';
- return `<div class="quest ${status} ${overdue?'overdue':''}" onclick="editTask('${t.id}')">
- <button class="check" onclick="event.stopPropagation();toggleTask('${t.id}')">${t.status==='done'?'✓':'○'}</button>
+function switchPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.toggle('active', x.id === 'page-' + p));
+  document.querySelectorAll('[data-page]').forEach(x => x.classList.toggle('active', x.dataset.page === p));
+  const renders = {
+    home: renderHome,
+    quests: renderQuests,
+    goals: renderGoals,
+    character: renderCharacter,
+    notes: renderNotes,
+    gallery: renderGallery,
+    journals: renderJournals,
+    availability: renderAvailability,
+    stats: renderStats
+  };
+  if (renders[p]) renders[p]();
+  if (p === 'calendar') renderCalendar();
+}
+
+document.querySelectorAll('[data-page]').forEach(b => b.onclick = () => switchPage(b.dataset.page));
+
+// ============================================================
+// 6. ЗАДАЧИ
+// ============================================================
+
+let questsPage = 0;
+const QUESTS_PER_PAGE = 20;
+
+function taskHTML(t) {
+  const cat = getCategory(t.category);
+  const overdue = isOverdue(t.date) && t.status === 'active';
+  const noteCount = getTaskNoteCount(t.id);
+  const mediaCount = getTaskMediaCount(t.id);
+  const status = t.status === 'done' ? 'done' : '';
+  return `<div class="quest ${status} ${overdue?'overdue':''}" onclick="editTask('${t.id}')">
+ <button class="check" onclick="event.stopPropagation();completeTaskUI('${t.id}')">${t.status === 'done' ? '✓' : '○'}</button>
  <div><div class="quest-title">${esc(t.title)}</div>
- <div class="quest-meta">${cat?cat.icon+' '+cat.name:'📋'} · ${t.date||'без даты'}${t.time?' · '+esc(t.time):''}${t.note?' · '+esc(t.note):''}${overdue?' · ⏰ просрочен':''}${noteCount?' · ✎':''}${mediaCount?' · ▣':''}</div></div>
+ <div class="quest-meta">${cat ? cat.icon + ' ' + cat.name : '📋'} · ${t.date || 'без даты'}${t.time ? ' · ' + esc(t.time) : ''}${t.note ? ' · ' + esc(t.note) : ''}${overdue ? ' · ⏰ просрочен' : ''}${t.minutesSpent ? ' · ⏱ ' + t.minutesSpent + 'м' : ''}${noteCount ? ' · ✎' : ''}${mediaCount ? ' · ▣' : ''}</div></div>
  <div style="display:flex;gap:6px;align-items:center">
-  <span class="reward">+${t.xp||10} XP</span>
+  <span class="reward">+${t.xp || 10} XP</span>
   <button class="ghost" style="padding:4px 8px;font-size:12px" onclick="event.stopPropagation();addNoteToTask('${t.id}')">✎</button>
   <button class="ghost" style="padding:4px 8px;font-size:12px" onclick="event.stopPropagation();addPhotoToTask('${t.id}')">▣</button>
   <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteTaskUI('${t.id}')">✕</button>
- </div></div>`
+ </div></div>`;
 }
 
-function editTask(id){
- const t=getTask(id);if(!t)return;
- const cats=getCategories();
- openModal('✎ Редактировать задачу',`<div class="form">
+function completeTaskUI(id) {
+  const t = getTask(id);
+  if (!t) return;
+  if (t.status === 'done') {
+    toast('⚠️ Задача уже выполнена');
+    return;
+  }
+
+  // Открываем модалку для ввода времени
+  openModal('⏱ Время на задачу', `<div class="form">
+   <div class="field"><label>Сколько минут ты потратил на задачу?</label>
+    <input id="taskMinutes" type="number" value="15" min="1" step="1" style="font-size:24px;text-align:center">
+   </div>
+   <div class="field" style="font-size:12px;color:var(--muted);text-align:center">
+    📚 Опыт в журнал: <strong>1 XP = 1 минута</strong><br>
+    ⭐ Глобальный опыт: <strong>10% от минут + бонусы</strong>
+   </div>
+   <button class="add" onclick="confirmCompleteTask('${id}')">✅ Завершить задачу</button>
+   <button class="ghost" onclick="closeModal()">Отмена</button>
+  </div>`);
+
+  // Фокус на поле ввода
+  setTimeout(() => {
+    const input = document.getElementById('taskMinutes');
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }, 100);
+}
+
+function confirmCompleteTask(id) {
+  const input = document.getElementById('taskMinutes');
+  const minutes = parseInt(input?.value || 15);
+  if (minutes < 1) return toast('Введи хотя бы 1 минуту');
+  closeModal();
+  completeTaskWithTime(id, minutes);
+}
+
+function editTask(id) {
+  const t = getTask(id);
+  if (!t) return;
+  const cats = getCategories();
+  openModal('✎ Редактировать задачу', `<div class="form">
   <div class="field"><label>Название</label><input id="etitle" value="${esc(t.title)}" autofocus></div>
-  <div class="field"><label>Направление</label><select id="ecat">${cats.map(c=>`<option value="${c.id}" ${c.id===t.category?'selected':''}>${c.icon} ${c.name}</option>`).join('')}</select></div>
+  <div class="field"><label>Направление</label><select id="ecat">${cats.map(c => `<option value="${c.id}" ${c.id === t.category ? 'selected' : ''}>${c.icon} ${c.name}</option>`).join('')}</select></div>
   <div class="grid">
-   <div class="field"><label>Дата</label><input id="edate" type="date" value="${t.date||''}"></div>
-   <div class="field"><label>Время</label><input id="etime" type="time" value="${t.time||''}"></div>
+   <div class="field"><label>Дата</label><input id="edate" type="date" value="${t.date || ''}"></div>
+   <div class="field"><label>Время</label><input id="etime" type="time" value="${t.time || ''}"></div>
   </div>
-  <div class="field"><label>Награда XP</label><select id="exp">${[5,10,20,30].map(x=>`<option value="${x}" ${x===t.xp?'selected':''}>${x} XP</option>`).join('')}</select></div>
-  <div class="field"><label>Заметка</label><textarea id="enote" placeholder="Что нужно сделать?">${esc(t.note||'')}</textarea></div>
+  <div class="field"><label>Награда XP</label><select id="exp">${[5, 10, 20, 30].map(x => `<option value="${x}" ${x === t.xp ? 'selected' : ''}>${x} XP</option>`).join('')}</select></div>
+  <div class="field"><label>Заметка</label><textarea id="enote" placeholder="Что нужно сделать?">${esc(t.note || '')}</textarea></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
    <button class="add" onclick="saveTaskEdit('${id}')">💾 Сохранить</button>
    <button class="ghost" style="color:var(--danger)" onclick="deleteTaskUI('${id}');closeModal();">🗑 Удалить</button>
@@ -683,169 +1035,197 @@ function editTask(id){
  </div>`);
 }
 
-function saveTaskEdit(id){
- const t=getTask(id);if(!t)return;
- const title=document.getElementById('etitle').value.trim();
- if(!title)return toast('Назови задачу');
- updateTask(id,{
-  title,
-  category:document.getElementById('ecat').value,
-  date:document.getElementById('edate').value||null,
-  time:document.getElementById('etime').value||null,
-  xp:+document.getElementById('exp').value,
-  note:document.getElementById('enote').value.trim()
- });
- closeModal();
- renderHome();renderQuests();renderGoals();renderStats();renderCalendar();
- toast('✅ Задача обновлена');
+function saveTaskEdit(id) {
+  const t = getTask(id);
+  if (!t) return;
+  const title = document.getElementById('etitle').value.trim();
+  if (!title) return toast('Назови задачу');
+  updateTask(id, {
+    title,
+    category: document.getElementById('ecat').value,
+    date: document.getElementById('edate').value || null,
+    time: document.getElementById('etime').value || null,
+    xp: +document.getElementById('exp').value,
+    note: document.getElementById('enote').value.trim()
+  });
+  closeModal();
+  renderAll();
+  toast('✅ Задача обновлена');
 }
 
-function toggleTask(id){
- const t=getTask(id);if(!t)return;
- if(t.status!=='done'){
-  updateTask(id,{status:'done'});
-  gainXP(t.xp||10);
-  data.user.streak=(data.user.streak||0)+1;
-  saveData();
-  toast('Задача выполнена · +'+(t.xp||10)+' XP');
- }else{
-  updateTask(id,{status:'active'});
- }
- renderHome();renderQuests();renderGoals();renderStats();renderCalendar();
+function deleteTaskUI(id) {
+  const t = getTask(id);
+  if (!t) return;
+  if (!confirm(`Удалить задачу "${t.title}"?`)) return;
+  deleteTask(id, false);
+  renderAll();
+  toast('🗑 Задача удалена');
 }
 
-function deleteTaskUI(id){
- const t=getTask(id);if(!t)return;
- if(!confirm(`Удалить задачу "${t.title}"?`))return;
- deleteTask(id,false);
- renderHome();renderQuests();renderGoals();renderStats();renderCalendar();
- toast('🗑 Задача удалена');
+function renderQuests(forceCat) {
+  const search = document.getElementById('questSearch')?.value || '';
+  const filter = document.getElementById('questFilter')?.value || 'today';
+  let list = getTasks({ excludeStatus: 'deleted' });
+
+  if (filter === 'today') list = list.filter(t => t.date === today() && t.status !== 'done');
+  else if (filter === 'active') list = list.filter(t => t.status !== 'done');
+  else if (filter === 'done') list = list.filter(t => t.status === 'done');
+
+  if (forceCat) list = list.filter(t => t.category === forceCat);
+  if (search) list = list.filter(t => t.title.toLowerCase().includes(search.toLowerCase()));
+
+  list.sort((a, b) => {
+    const aOver = isOverdue(a.date) && a.status !== 'done';
+    const bOver = isOverdue(b.date) && b.status !== 'done';
+    if (aOver && !bOver) return -1;
+    if (!aOver && bOver) return 1;
+    if (a.date && b.date) return b.date.localeCompare(a.date);
+    return 0;
+  });
+
+  const total = list.length;
+  const start = questsPage * QUESTS_PER_PAGE;
+  const end = Math.min(start + QUESTS_PER_PAGE, total);
+  const pageItems = list.slice(start, end);
+  const hasMore = end < total;
+
+  const el = document.getElementById('allQuests');
+  if (!total) {
+    const msgs = { today: 'На сегодня нет активных задач. 📋', active: 'Нет активных задач. ✨', done: 'Нет выполненных задач. 💪', all: 'Задач не найдено.' };
+    el.innerHTML = `<div class="empty">${msgs[filter] || msgs.all}</div>`;
+    return;
+  }
+  let html = pageItems.map(t => taskHTML(t)).join('');
+  if (hasMore) html +=
+    `<div style="text-align:center;padding:12px 0"><button class="ghost" onclick="questsPage++;renderQuests();" style="padding:10px 20px">Показать ещё (${total - end} осталось)</button></div>`;
+  if (questsPage > 0) html +=
+    `<div style="text-align:center;padding:4px 0"><button class="ghost" onclick="questsPage=0;renderQuests();" style="padding:6px 14px;font-size:12px;color:var(--muted)">← Показать первые ${QUESTS_PER_PAGE}</button></div>`;
+  el.innerHTML = html;
 }
 
-function renderQuests(forceCat){
- const search=document.getElementById('questSearch')?.value||'';
- const filter=document.getElementById('questFilter')?.value||'today';
- let list=getTasks({excludeStatus:'deleted'});
+document.getElementById('questSearch').oninput = () => { questsPage = 0;
+  renderQuests(); };
+document.getElementById('questFilter').onchange = () => { questsPage = 0;
+  renderQuests(); };
 
- if(filter==='today')list=list.filter(t=>t.date===today()&&t.status!=='done');
- else if(filter==='active')list=list.filter(t=>t.status!=='done');
- else if(filter==='done')list=list.filter(t=>t.status==='done');
-
- if(forceCat)list=list.filter(t=>t.category===forceCat);
- if(search)list=list.filter(t=>t.title.toLowerCase().includes(search.toLowerCase()));
-
- list.sort((a,b)=>{
-  const aOver=isOverdue(a.date)&&a.status!=='done';
-  const bOver=isOverdue(b.date)&&b.status!=='done';
-  if(aOver&&!bOver)return -1;
-  if(!aOver&&bOver)return 1;
-  if(a.date&&b.date)return b.date.localeCompare(a.date);
-  return 0;
- });
-
- const total=list.length;
- const start=questsPage*QUESTS_PER_PAGE;
- const end=Math.min(start+QUESTS_PER_PAGE,total);
- const pageItems=list.slice(start,end);
- const hasMore=end<total;
-
- const el=document.getElementById('allQuests');
- if(!total){
-  const msgs={today:'На сегодня нет активных задач. 📋',active:'Нет активных задач. ✨',done:'Нет выполненных задач. 💪',all:'Задач не найдено.'};
-  el.innerHTML=`<div class="empty">${msgs[filter]||msgs.all}</div>`;
-  return;
- }
- let html=pageItems.map(t=>taskHTML(t)).join('');
- if(hasMore)html+=`<div style="text-align:center;padding:12px 0"><button class="ghost" onclick="questsPage++;renderQuests();" style="padding:10px 20px">Показать ещё (${total-end} осталось)</button></div>`;
- if(questsPage>0)html+=`<div style="text-align:center;padding:4px 0"><button class="ghost" onclick="questsPage=0;renderQuests();" style="padding:6px 14px;font-size:12px;color:var(--muted)">← Показать первые ${QUESTS_PER_PAGE}</button></div>`;
- el.innerHTML=html;
-}
-
-document.getElementById('questSearch').oninput=()=>{questsPage=0;renderQuests();};
-document.getElementById('questFilter').onchange=()=>{questsPage=0;renderQuests();};
-
-function openCategory(cat){
- switchPage('quests');
- document.getElementById('questSearch').value='';
- document.getElementById('questFilter').value='today';
- questsPage=0;
- renderQuests(cat);
+function openCategory(cat) {
+  switchPage('quests');
+  document.getElementById('questSearch').value = '';
+  document.getElementById('questFilter').value = 'today';
+  questsPage = 0;
+  renderQuests(cat);
 }
 
 // ============================================================
-// 6. HOME
+// 7. HOME
 // ============================================================
-function renderHome(){
- const u=data.user;
- document.getElementById('heroName').textContent=u.name;
- document.getElementById('heroLevel').textContent=u.level;
- document.getElementById('xpText').textContent=`${u.xp} / ${xpNeed()}`;
- document.getElementById('xpFill').style.width=xpPct()+'%';
- const todayTasks=getTasks({date:today(),excludeStatus:'deleted'});
- const done=todayTasks.filter(t=>t.status==='done').length;
- document.getElementById('todayDone').textContent=`${done}/${todayTasks.length}`;
- document.getElementById('streak').textContent=(u.streak||0)+' 🔥';
- document.getElementById('totalXp').textContent=u.totalXp||0;
- const active=todayTasks.filter(t=>t.status!=='done').slice(0,4);
- const el=document.getElementById('homeQuests');
- el.innerHTML=active.length?active.map(t=>taskHTML(t)).join(''):'<div class="card empty">На сегодня задач нет. Отличный момент создать одну. 📋</div>';
+
+function renderHome() {
+  const u = data.user;
+  document.getElementById('heroName').textContent = u.name;
+  document.getElementById('heroLevel').textContent = u.level;
+  document.getElementById('xpText').textContent = `${u.xp} / ${xpNeed()}`;
+  document.getElementById('xpFill').style.width = xpPct() + '%';
+
+  const todayTasks = getTasks({ date: today(), excludeStatus: 'deleted' });
+  const done = todayTasks.filter(t => t.status === 'done').length;
+  document.getElementById('todayDone').textContent = `${done}/${todayTasks.length}`;
+  document.getElementById('streak').textContent = (u.streak || 0) + ' 🔥';
+  document.getElementById('totalXp').textContent = u.totalXp || 0;
+
+  const active = todayTasks.filter(t => t.status !== 'done').slice(0, 4);
+  const el = document.getElementById('homeQuests');
+  el.innerHTML = active.length ? active.map(t => taskHTML(t)).join('') :
+    '<div class="card empty">На сегодня задач нет. Отличный момент создать одну. 📋</div>';
+
+  // Журналы на главной
+  renderJournalProgress();
+}
+
+function renderJournalProgress() {
+  const el = document.getElementById('journalProgress');
+  const cats = getCategories();
+  el.innerHTML = cats.map(c => {
+    const need = xpNeedForCategory(c.level);
+    const pct = Math.min(100, (c.xp / need) * 100);
+    return `<div class="journal-progress-item">
+     <div class="jp-icon">${c.icon}</div>
+     <div class="jp-info">
+      <div class="jp-name">${c.name}</div>
+      <div class="jp-level">Ур. ${c.level} · ${c.tasksCompleted} задач · ${c.minutesSpent || 0} мин</div>
+      <div class="jp-bar"><div class="jp-fill" style="width:${pct}%;background:${c.color}"></div></div>
+     </div>
+     <div class="jp-xp"><strong>${c.xp}</strong> / ${need} XP</div>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
-// 7. СОЗДАНИЕ ЗАДАЧ
+// 8. СОЗДАНИЕ ЗАДАЧ
 // ============================================================
-const DOW=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-document.getElementById('newQuestBtn').onclick=()=>{
- const cats=getCategories();
- openModal('📋 Новая задача',`<div class="form">
+
+const DOW = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+document.getElementById('newQuestBtn').onclick = () => {
+  const cats = getCategories();
+  openModal('📋 Новая задача', `<div class="form">
   <div class="field"><label>Название</label><input id="qtitle" autofocus placeholder="Например: тренировка 30 минут"></div>
-  <div class="field"><label>Направление</label><select id="qcat">${cats.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
+  <div class="field"><label>Направление</label><select id="qcat">${cats.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
   <div class="grid"><div class="field"><label>С даты</label><input id="qfrom" type="date" value="${today()}"></div>
   <div class="field"><label>По дату</label><input id="qto" type="date" value="${today()}"></div></div>
   <div class="field"><label>Время</label><input id="qtime" type="time" value="10:00"></div>
-  <div class="field"><label>Дни периода</label><div class="segmented" style="flex-wrap:wrap">${DOW.map((d,i)=>`<label style="flex:1;text-align:center;min-width:32px"><input class="period-day" type="checkbox" value="${i}" style="display:none"><span style="display:block;padding:8px;border-radius:9px;font-size:11px">${d}</span></label>`).join('')}</div><span class="muted" style="font-size:10px">— если не выбрать, каждый день</span></div>
+  <div class="field"><label>Дни периода</label><div class="segmented" style="flex-wrap:wrap">${DOW.map((d, i) => `<label style="flex:1;text-align:center;min-width:32px"><input class="period-day" type="checkbox" value="${i}" style="display:none"><span style="display:block;padding:8px;border-radius:9px;font-size:11px">${d}</span></label>`).join('')}</div><span class="muted" style="font-size:10px">— если не выбрать, каждый день</span></div>
   <div class="field"><label>Награда XP</label><select id="qxp"><option value="5">5 XP · лёгкий</option><option value="10" selected>10 XP · обычный</option><option value="20">20 XP · важный</option><option value="30">30 XP · босс</option></select></div>
   <div class="field"><label>Заметка</label><textarea id="qnote" placeholder="Что нужно сделать?"></textarea></div>
   <button class="add" onclick="createQuest()">Создать на период</button>
  </div>`);
 }
-function createQuest(){
- const title=document.getElementById('qtitle').value.trim();if(!title)return toast('Назови задачу');
- const cat=document.getElementById('qcat').value;
- const from=document.getElementById('qfrom').value,to=document.getElementById('qto').value||from;
- const time=document.getElementById('qtime').value||'';
- const days=[...document.querySelectorAll('.period-day:checked')].map(x=>+x.value);
- const xp=+document.getElementById('qxp').value;
- const note=document.getElementById('qnote').value.trim();
- let cur=new Date(from+'T12:00:00'),end=new Date(to+'T12:00:00'),count=0;
- while(cur<=end){
-  const wd=(cur.getDay()+6)%7;
-  if(!days.length||days.includes(wd)){
-   addTask({title,category:cat,date:iso(cur),time,xp,note});
-   count++;
+
+function createQuest() {
+  const title = document.getElementById('qtitle').value.trim();
+  if (!title) return toast('Назови задачу');
+  const cat = document.getElementById('qcat').value;
+  const from = document.getElementById('qfrom').value,
+    to = document.getElementById('qto').value || from;
+  const time = document.getElementById('qtime').value || '';
+  const days = [...document.querySelectorAll('.period-day:checked')].map(x => +x.value);
+  const xp = +document.getElementById('qxp').value;
+  const note = document.getElementById('qnote').value.trim();
+  let cur = new Date(from + 'T12:00:00'),
+    end = new Date(to + 'T12:00:00'),
+    count = 0;
+  while (cur <= end) {
+    const wd = (cur.getDay() + 6) % 7;
+    if (!days.length || days.includes(wd)) {
+      addTask({ title, category: cat, date: iso(cur), time, xp, note });
+      count++;
+    }
+    cur.setDate(cur.getDate() + 1);
   }
-  cur.setDate(cur.getDate()+1);
- }
- closeModal();
- toast('📋 Создано дней: '+count);
- renderHome();renderQuests();renderCalendar();
+  closeModal();
+  toast('📋 Создано дней: ' + count);
+  renderAll();
 }
 
 // ============================================================
-// 8. ЦЕЛИ
+// 9. ЦЕЛИ
 // ============================================================
-function renderGoals(){
- const el=document.getElementById('goalList');
- if(!data.goals.length){el.innerHTML='<div class="card empty" style="grid-column:1/-1">Создай большую цель и преврати её в приключение.</div>';return}
- el.innerHTML=data.goals.map((g,i)=>{
-  const tasks=g.taskIds.map(id=>getTask(id)).filter(Boolean);
-  const done=tasks.filter(t=>t.status==='done').length;
-  const pct=tasks.length?Math.round(done/tasks.length*100):0;
-  const deadline=g.deadline?`🎯 ${g.deadline}`:'';
-  const hasMedia=data.media.some(m=>m.targetId===g.id&&m.targetType==='goal');
-  return `<div class="card goal">
+
+function renderGoals() {
+  const el = document.getElementById('goalList');
+  if (!data.goals.length) {
+    el.innerHTML = '<div class="card empty" style="grid-column:1/-1">Создай большую цель и преврати её в приключение.</div>';
+    return;
+  }
+  el.innerHTML = data.goals.map((g, i) => {
+    const tasks = g.taskIds.map(id => getTask(id)).filter(Boolean);
+    const done = tasks.filter(t => t.status === 'done').length;
+    const pct = tasks.length ? Math.round(done / tasks.length * 100) : 0;
+    const deadline = g.deadline ? `🎯 ${g.deadline}` : '';
+    const hasMedia = data.media.some(m => m.targetId === g.id && m.targetType === 'goal');
+    return `<div class="card goal">
    <div class="goal-top"><div class="goal-title">◈ ${esc(g.title)}</div><div class="goal-pct">${done}/${tasks.length}</div></div>
-   <div class="goal-deadline">${deadline}${hasMedia?' ▣':''}</div>
+   <div class="goal-deadline">${deadline}${hasMedia ? ' ▣' : ''}</div>
    <div class="track"><div class="fill" style="width:${pct}%"></div></div>
    <div class="muted">${pct}% прогресса</div>
    <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -853,168 +1233,198 @@ function renderGoals(){
     <button class="ghost" onclick="addPhotoToGoal('${g.id}')">▣</button>
     <button class="ghost" style="color:var(--danger)" onclick="deleteGoalUI('${g.id}')">✕</button>
    </div>
-  </div>`
- }).join('');
+  </div>`;
+  }).join('');
 }
-function deleteGoalUI(id){if(!confirm('Удалить цель?'))return;deleteGoal(id);renderGoals();toast('◈ Цель удалена')}
-function manageGoal(id){
- const g=getGoal(id);if(!g)return;
- const all=getTasks({excludeStatus:'deleted'});
- const showDone=document.getElementById('goalShowDone')?.checked||false;
- let list=all;if(!showDone)list=list.filter(t=>t.status!=='done');
- openModal('Управление целью',`<div class="form">
+
+function deleteGoalUI(id) { if (!confirm('Удалить цель?')) return;
+  deleteGoal(id);
+  renderGoals();
+  toast('◈ Цель удалена'); }
+
+function manageGoal(id) {
+  const g = getGoal(id);
+  if (!g) return;
+  const all = getTasks({ excludeStatus: 'deleted' });
+  const showDone = document.getElementById('goalShowDone')?.checked || false;
+  let list = all;
+  if (!showDone) list = list.filter(t => t.status !== 'done');
+  openModal('Управление целью', `<div class="form">
   <div class="field"><label>Название</label><input id="gname" value="${esc(g.title)}"></div>
-  <div class="field"><label>Дедлайн</label><input id="gdeadline" type="date" value="${g.deadline||''}"></div>
-  <div class="field"><label><input type="checkbox" id="goalShowDone" ${showDone?'checked':''} onchange="manageGoal('${id}')"> Показывать выполненные</label></div>
-  <div class="field"><label>Задачи</label><div class="quest-list">${list.map(t=>`<label class="quest" style="cursor:pointer"><input type="checkbox" data-gid="${t.id}" ${g.taskIds.includes(t.id)?'checked':''}><span>${esc(t.title)}</span><span class="muted">${(getCategory(t.category)||{name:'?'}).name}${t.status==='done'?' ✓':''}</span></label>`).join('')}</div></div>
+  <div class="field"><label>Дедлайн</label><input id="gdeadline" type="date" value="${g.deadline || ''}"></div>
+  <div class="field"><label><input type="checkbox" id="goalShowDone" ${showDone ? 'checked' : ''} onchange="manageGoal('${id}')"> Показывать выполненные</label></div>
+  <div class="field"><label>Задачи</label><div class="quest-list">${list.map(t => `<label class="quest" style="cursor:pointer"><input type="checkbox" data-gid="${t.id}" ${g.taskIds.includes(t.id) ? 'checked' : ''}><span>${esc(t.title)}</span><span class="muted">${(getCategory(t.category) || { name: '?' }).name}${t.status === 'done' ? ' ✓' : ''}</span></label>`).join('')}</div></div>
   <button class="add" onclick="saveGoal('${id}')">Сохранить</button>
  </div>`);
 }
-function saveGoal(id){
- const g=getGoal(id);if(!g)return;
- g.title=document.getElementById('gname').value.trim()||g.title;
- g.deadline=document.getElementById('gdeadline').value||null;
- g.taskIds=[...document.querySelectorAll('[data-gid]:checked')].map(x=>x.dataset.gid);
- g.updatedAt=new Date().toISOString();
- saveData();closeModal();renderGoals();toast('Цель обновлена');
+
+function saveGoal(id) {
+  const g = getGoal(id);
+  if (!g) return;
+  g.title = document.getElementById('gname').value.trim() || g.title;
+  g.deadline = document.getElementById('gdeadline').value || null;
+  g.taskIds = [...document.querySelectorAll('[data-gid]:checked')].map(x => x.dataset.gid);
+  g.updatedAt = new Date().toISOString();
+  saveData();
+  closeModal();
+  renderGoals();
+  toast('Цель обновлена');
 }
-document.getElementById('newGoalBtn').onclick=()=>openModal('◈ Новая цель',`<div class="form">
+
+document.getElementById('newGoalBtn').onclick = () => openModal('◈ Новая цель', `<div class="form">
  <div class="field"><label>Название цели</label><input id="newGoalName" autofocus placeholder="Например: Похудеть на 5 кг"></div>
  <div class="field"><label>Дедлайн</label><input id="newGoalDeadline" type="date" value="${today()}"></div>
  <button class="add" onclick="createGoal()">Создать цель</button>
 </div>`);
-function createGoal(){
- const title=document.getElementById('newGoalName').value.trim();if(!title)return toast('Назови цель');
- addGoal({title,deadline:document.getElementById('newGoalDeadline').value||null,taskIds:[]});
- closeModal();renderGoals();toast('◈ Цель создана');
+
+function createGoal() {
+  const title = document.getElementById('newGoalName').value.trim();
+  if (!title) return toast('Назови цель');
+  addGoal({ title, deadline: document.getElementById('newGoalDeadline').value || null, taskIds: [] });
+  closeModal();
+  renderGoals();
+  toast('◈ Цель создана');
 }
 
 // ============================================================
-// 9. ЗАМЕТКИ (ИСПРАВЛЕННЫЕ — БЕЗ ДУБЛЕЙ)
+// 10. ЗАМЕТКИ
 // ============================================================
 
-function renderNotes(){
- const el=document.getElementById('notesList');
- const catFilter=document.getElementById('noteFilterCat')?.value||'all';
- const sort=document.getElementById('noteFilterSort')?.value||'date';
- let notes=[...data.notes];
- if(catFilter!=='all')notes=notes.filter(n=>n.category===catFilter);
- if(sort==='date')notes.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
- else notes.sort((a,b)=>new Date(a.createdAt||0)-new Date(b.createdAt||0));
- if(!notes.length){el.innerHTML='<div class="empty">Заметок пока нет. Создай первую ✎</div>';return}
- el.innerHTML=notes.map(n=>{
-  const task=n.targetId&&n.targetType==='task'?getTask(n.targetId):null;
-  const cat=getCategory(n.category);
-  return `<div class="quest">
+function renderNotes() {
+  const el = document.getElementById('notesList');
+  const catFilter = document.getElementById('noteFilterCat')?.value || 'all';
+  const sort = document.getElementById('noteFilterSort')?.value || 'date';
+  let notes = [...data.notes];
+  if (catFilter !== 'all') notes = notes.filter(n => n.category === catFilter);
+  if (sort === 'date') notes.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  else notes.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+  if (!notes.length) {
+    el.innerHTML = '<div class="empty">Заметок пока нет. Создай первую ✎</div>';
+    return;
+  }
+  el.innerHTML = notes.map(n => {
+    const task = n.targetId && n.targetType === 'task' ? getTask(n.targetId) : null;
+    const cat = getCategory(n.category);
+    return `<div class="quest">
    <div class="check">✎</div>
    <div><div class="quest-title">${esc(n.text)}</div>
-   <div class="quest-meta">${n.date||''}${cat?' · '+cat.icon+' '+cat.name:''}${task?' · задача: '+esc(task.title):''}</div></div>
+   <div class="quest-meta">${n.date || ''}${cat ? ' · ' + cat.icon + ' ' + cat.name : ''}${task ? ' · задача: ' + esc(task.title) : ''}</div></div>
    <div style="display:flex;gap:4px;align-items:center">
-    ${task?`<button class="ghost" style="padding:4px 6px;font-size:11px" onclick="switchPage('quests')">🔗</button>`:''}
+    ${task ? `<button class="ghost" style="padding:4px 6px;font-size:11px" onclick="switchPage('quests')">🔗</button>` : ''}
     <button class="ghost" style="padding:4px 6px;font-size:12px;color:var(--danger)" onclick="deleteNoteUI('${n.id}')">✕</button>
    </div>
-  </div>`
- }).join('');
+  </div>`;
+  }).join('');
 }
 
-function deleteNoteUI(id){deleteNote(id);renderNotes();toast('🗑 Заметка удалена')}
+function deleteNoteUI(id) { deleteNote(id);
+  renderNotes();
+  toast('🗑 Заметка удалена'); }
 
-function addNoteToTask(taskId){
- const task=getTask(taskId);if(!task)return;
- const cats=getCategories();
- const modalContent = `<div class="form">
+function addNoteToTask(taskId) {
+  const task = getTask(taskId);
+  if (!task) return;
+  const cats = getCategories();
+  openModal('✎ Заметка к задаче', `<div class="form">
   <div class="field"><label>Задача: ${esc(task.title)}</label></div>
   <div class="field"><label>Текст</label><textarea id="noteTextTask" autofocus placeholder="Что важно запомнить?"></textarea></div>
-  <div class="field"><label>Журнал</label><select id="noteCatTask">${cats.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
+  <div class="field"><label>Журнал</label><select id="noteCatTask">${cats.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
   <button class="add" onclick="saveNoteToTask('${taskId}')">💾 Сохранить заметку</button>
- </div>`;
- openModal('✎ Заметка к задаче', modalContent);
+ </div>`);
 }
 
-function saveNoteToTask(taskId){
- const text=document.getElementById('noteTextTask').value.trim();
- if(!text)return toast('Напиши заметку');
- addNote({
-  text,
-  category:document.getElementById('noteCatTask').value,
-  targetType:'task',
-  targetId:taskId,
-  date:new Date().toLocaleDateString('ru-RU')
- });
- closeModal();
- renderNotes();
- toast('✎ Заметка сохранена');
+function saveNoteToTask(taskId) {
+  const text = document.getElementById('noteTextTask').value.trim();
+  if (!text) return toast('Напиши заметку');
+  addNote({
+    text,
+    category: document.getElementById('noteCatTask').value,
+    targetType: 'task',
+    targetId: taskId,
+    date: new Date().toLocaleDateString('ru-RU')
+  });
+  closeModal();
+  renderNotes();
+  toast('✎ Заметка сохранена');
 }
 
-document.getElementById('newNoteBtn').onclick=()=>{
- const cats=getCategories();const tasks=getTasks({excludeStatus:'deleted'});
- const modalContent = `<div class="form">
+document.getElementById('newNoteBtn').onclick = () => {
+  const cats = getCategories();
+  const tasks = getTasks({ excludeStatus: 'deleted' });
+  openModal('✎ Новая заметка', `<div class="form">
   <div class="field"><label>Текст</label><textarea id="noteText" autofocus placeholder="Идея, мысль, наблюдение…"></textarea></div>
-  <div class="field"><label>Журнал</label><select id="noteCat">${cats.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
-  <div class="field"><label>Привязать к задаче</label><select id="noteTask"><option value="">— без привязки —</option>${tasks.map(t=>`<option value="${t.id}">${esc(t.title)} (${(getCategory(t.category)||{name:'?'}).name})</option>`).join('')}</select></div>
+  <div class="field"><label>Журнал</label><select id="noteCat">${cats.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
+  <div class="field"><label>Привязать к задаче</label><select id="noteTask"><option value="">— без привязки —</option>${tasks.map(t => `<option value="${t.id}">${esc(t.title)} (${(getCategory(t.category) || { name: '?' }).name})</option>`).join('')}</select></div>
   <button class="add" onclick="createNote()">💾 Сохранить</button>
- </div>`;
- openModal('✎ Новая заметка', modalContent);
+ </div>`);
 };
 
-function createNote(){
- const text=document.getElementById('noteText').value.trim();
- if(!text)return toast('Напиши заметку');
- const taskId=document.getElementById('noteTask').value||null;
- addNote({
-  text,
-  category:document.getElementById('noteCat').value,
-  targetType:taskId?'task':'none',
-  targetId:taskId,
-  date:new Date().toLocaleDateString('ru-RU')
- });
- closeModal();
- renderNotes();
- toast('✎ Сохранено');
+function createNote() {
+  const text = document.getElementById('noteText').value.trim();
+  if (!text) return toast('Напиши заметку');
+  const taskId = document.getElementById('noteTask').value || null;
+  addNote({
+    text,
+    category: document.getElementById('noteCat').value,
+    targetType: taskId ? 'task' : 'none',
+    targetId: taskId,
+    date: new Date().toLocaleDateString('ru-RU')
+  });
+  closeModal();
+  renderNotes();
+  toast('✎ Сохранено');
 }
 
-document.getElementById('noteFilterCat')?.addEventListener('change',renderNotes);
-document.getElementById('noteFilterSort')?.addEventListener('change',renderNotes);
+document.getElementById('noteFilterCat')?.addEventListener('change', renderNotes);
+document.getElementById('noteFilterSort')?.addEventListener('change', renderNotes);
 
-function updateNoteFilterCats(){
- const sel=document.getElementById('noteFilterCat');if(!sel)return;
- const cats=getCategories();const current=sel.value;
- sel.innerHTML='<option value="all">Все журналы</option>'+cats.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
- sel.value=current;
+function updateNoteFilterCats() {
+  const sel = document.getElementById('noteFilterCat');
+  if (!sel) return;
+  const cats = getCategories();
+  const current = sel.value;
+  sel.innerHTML = '<option value="all">Все журналы</option>' + cats.map(c =>
+    `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+  sel.value = current;
 }
 
 // ============================================================
-// 10. ГАЛЕРЕЯ (ИСПРАВЛЕННАЯ — БЕЗ ДУБЛЕЙ)
+// 11. ГАЛЕРЕЯ
 // ============================================================
 
-function renderGallery(){
- const el=document.getElementById('galleryGrid');
- if(!data.media.length){el.innerHTML='<div class="gallery-empty">▣ Галерея пуста<br><span class="muted" style="font-size:12px">Добавляй фото к задачам и целям</span></div>';return}
- el.innerHTML=data.media.map((m,i)=>{
-  const task=m.targetType==='task'?getTask(m.targetId):null;
-  const goal=m.targetType==='goal'?getGoal(m.targetId):null;
-  let label='';
-  if(task)label=`📋 ${esc(task.title)}`;
-  else if(goal)label=`◈ ${esc(goal.title)}`;
-  else label='📷 Без привязки';
-  return `<div class="gallery-item" onclick="viewGalleryPhoto(${i})">
-   <img src="${m.dataUrl}" alt="${esc(m.caption||'Фото')}" loading="lazy">
-   <div class="gallery-badge"><span class="badge-icon">${task?'📋':goal?'◈':'📷'}</span> ${esc(label)}</div>
-  </div>`
- }).join('');
+function renderGallery() {
+  const el = document.getElementById('galleryGrid');
+  if (!data.media.length) {
+    el.innerHTML =
+      '<div class="gallery-empty">▣ Галерея пуста<br><span class="muted" style="font-size:12px">Добавляй фото к задачам и целям</span></div>';
+    return;
+  }
+  el.innerHTML = data.media.map((m, i) => {
+    const task = m.targetType === 'task' ? getTask(m.targetId) : null;
+    const goal = m.targetType === 'goal' ? getGoal(m.targetId) : null;
+    let label = '';
+    if (task) label = `📋 ${esc(task.title)}`;
+    else if (goal) label = `◈ ${esc(goal.title)}`;
+    else label = '📷 Без привязки';
+    return `<div class="gallery-item" onclick="viewGalleryPhoto(${i})">
+   <img src="${m.dataUrl}" alt="${esc(m.caption || 'Фото')}" loading="lazy">
+   <div class="gallery-badge"><span class="badge-icon">${task ? '📋' : goal ? '◈' : '📷'}</span> ${esc(label)}</div>
+  </div>`;
+  }).join('');
 }
 
-function viewGalleryPhoto(i){
- const m=data.media[i];if(!m)return;
- const task=m.targetType==='task'?getTask(m.targetId):null;
- const goal=m.targetType==='goal'?getGoal(m.targetId):null;
- let meta='';
- if(task)meta=`📋 Задача: ${esc(task.title)}`;
- else if(goal)meta=`◈ Цель: ${esc(goal.title)}`;
- else meta='📷 Без привязки';
- openModal('▣ Фото',`<div style="text-align:center">
+function viewGalleryPhoto(i) {
+  const m = data.media[i];
+  if (!m) return;
+  const task = m.targetType === 'task' ? getTask(m.targetId) : null;
+  const goal = m.targetType === 'goal' ? getGoal(m.targetId) : null;
+  let meta = '';
+  if (task) meta = `📋 Задача: ${esc(task.title)}`;
+  else if (goal) meta = `◈ Цель: ${esc(goal.title)}`;
+  else meta = '📷 Без привязки';
+  openModal('▣ Фото', `<div style="text-align:center">
   <img src="${m.dataUrl}" class="gallery-full">
-  <div class="gallery-meta">${m.caption?esc(m.caption)+' · ':''}${meta} · ${m.createdAt?new Date(m.createdAt).toLocaleDateString('ru-RU'):''}</div>
+  <div class="gallery-meta">${m.caption ? esc(m.caption) + ' · ' : ''}${meta} · ${m.createdAt ? new Date(m.createdAt).toLocaleDateString('ru-RU') : ''}</div>
   <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
    <button class="ghost danger" onclick="deletePhotoUI('${m.id}')">🗑 Удалить</button>
    <button class="ghost" onclick="closeModal()">Закрыть</button>
@@ -1022,142 +1432,170 @@ function viewGalleryPhoto(i){
  </div>`);
 }
 
-function deletePhotoUI(id){if(!confirm('Удалить фото?'))return;deleteMedia(id);renderGallery();toast('▣ Фото удалено')}
+function deletePhotoUI(id) { if (!confirm('Удалить фото?')) return;
+  deleteMedia(id);
+  renderGallery();
+  toast('▣ Фото удалено'); }
 
-function addPhotoToTask(taskId){
- const task=getTask(taskId);if(!task)return;
- const modalContent = `<div class="form">
+function addPhotoToTask(taskId) {
+  const task = getTask(taskId);
+  if (!task) return;
+  openModal('▣ Добавить фото к задаче', `<div class="form">
   <div class="field"><label>Задача: ${esc(task.title)}</label></div>
   <div class="field"><label>Подпись</label><input id="photoCaption" placeholder="Что на фото?"></div>
   <div class="field"><label>Фото</label><input id="photoFile" type="file" accept="image/*"></div>
   <button class="add" onclick="savePhotoToTask('${taskId}')">💾 Добавить фото</button>
- </div>`;
- openModal('▣ Добавить фото к задаче', modalContent);
+ </div>`);
 }
 
-function savePhotoToTask(taskId){
- const file=document.getElementById('photoFile').files[0];
- if(!file)return toast('Выбери фото');
- const reader=new FileReader();
- reader.onload=function(){
-  addMedia({
-   dataUrl:reader.result,
-   caption:document.getElementById('photoCaption').value.trim(),
-   targetType:'task',
-   targetId:taskId
-  });
-  closeModal();
-  renderGallery();
-  toast('▣ Фото добавлено');
- };
- reader.readAsDataURL(file);
+function savePhotoToTask(taskId) {
+  const file = document.getElementById('photoFile').files[0];
+  if (!file) return toast('Выбери фото');
+  const reader = new FileReader();
+  reader.onload = function() {
+    addMedia({
+      dataUrl: reader.result,
+      caption: document.getElementById('photoCaption').value.trim(),
+      targetType: 'task',
+      targetId: taskId
+    });
+    closeModal();
+    renderGallery();
+    toast('▣ Фото добавлено');
+  };
+  reader.readAsDataURL(file);
 }
 
-function addPhotoToGoal(goalId){
- const goal=getGoal(goalId);if(!goal)return;
- const modalContent = `<div class="form">
+function addPhotoToGoal(goalId) {
+  const goal = getGoal(goalId);
+  if (!goal) return;
+  openModal('▣ Добавить фото к цели', `<div class="form">
   <div class="field"><label>Цель: ${esc(goal.title)}</label></div>
   <div class="field"><label>Подпись</label><input id="photoCaptionGoal" placeholder="Что на фото?"></div>
   <div class="field"><label>Фото</label><input id="photoFileGoal" type="file" accept="image/*"></div>
   <button class="add" onclick="savePhotoToGoal('${goalId}')">💾 Добавить фото</button>
- </div>`;
- openModal('▣ Добавить фото к цели', modalContent);
+ </div>`);
 }
 
-function savePhotoToGoal(goalId){
- const file=document.getElementById('photoFileGoal').files[0];
- if(!file)return toast('Выбери фото');
- const reader=new FileReader();
- reader.onload=function(){
-  addMedia({
-   dataUrl:reader.result,
-   caption:document.getElementById('photoCaptionGoal').value.trim(),
-   targetType:'goal',
-   targetId:goalId
-  });
-  closeModal();
-  renderGallery();
-  toast('▣ Фото добавлено');
- };
- reader.readAsDataURL(file);
+function savePhotoToGoal(goalId) {
+  const file = document.getElementById('photoFileGoal').files[0];
+  if (!file) return toast('Выбери фото');
+  const reader = new FileReader();
+  reader.onload = function() {
+    addMedia({
+      dataUrl: reader.result,
+      caption: document.getElementById('photoCaptionGoal').value.trim(),
+      targetType: 'goal',
+      targetId: goalId
+    });
+    closeModal();
+    renderGallery();
+    toast('▣ Фото добавлено');
+  };
+  reader.readAsDataURL(file);
 }
 
 // ============================================================
-// 11. ЖУРНАЛЫ
+// 12. ЖУРНАЛЫ
 // ============================================================
-function renderJournals(){
- const el=document.getElementById('journalGrid');
- const cats=getCategories();
- el.innerHTML=cats.map(c=>{
-  const n=getTasks({category:c.id,excludeStatus:'deleted'}).length;
-  return `<button class="card category" style="text-align:left;color:var(--text);border-left:3px solid ${c.color}" onclick="openCategory('${c.id}')">
-   <div><div class="big">${c.icon}</div><h3>${c.name}</h3><p>${n} задач</p></div>
+
+function renderJournals() {
+  const el = document.getElementById('journalGrid');
+  const cats = getCategories();
+  el.innerHTML = cats.map(c => {
+    const n = getTasks({ category: c.id, excludeStatus: 'deleted' }).length;
+    return `<button class="card category" style="text-align:left;color:var(--text);border-left:3px solid ${c.color}" onclick="openCategory('${c.id}')">
+   <div><div class="big">${c.icon}</div><h3>${c.name}</h3>
+   <p>${n} задач · ${c.level} ур. · ${c.totalXp || 0} XP</p></div>
    <div class="count">Открыть →</div>
-  </button>`
- }).join('');
+  </button>`;
+  }).join('');
 }
 
 // ============================================================
-// 12. СТАТИСТИКА И ПЕРСОНАЖ
+// 13. СТАТИСТИКА И ПЕРСОНАЖ
 // ============================================================
-function renderStats(){
- const tasks=getTasks({excludeStatus:'deleted'});
- const done=tasks.filter(t=>t.status==='done').length;
- document.getElementById('statsCards').innerHTML=`
+
+function renderStats() {
+  const tasks = getTasks({ excludeStatus: 'deleted' });
+  const done = tasks.filter(t => t.status === 'done').length;
+  const cats = getCategories();
+  const totalJournalXp = cats.reduce((sum, c) => sum + (c.totalXp || 0), 0);
+
+  document.getElementById('statsCards').innerHTML = `
   <div class="stat"><b>${tasks.length}</b><span>Всего задач</span></div>
   <div class="stat"><b>${done}</b><span>Выполнено</span></div>
-  <div class="stat"><b>${tasks.length?Math.round(done/tasks.length*100):0}%</b><span>Продуктивность</span></div>
-  <div class="stat"><b>${data.user.totalXp||0}</b><span>Получено XP</span></div>`;
- const cats=getCategories();
- document.getElementById('statsBars').innerHTML=cats.map(c=>{
-  const a=getTasks({category:c.id,excludeStatus:'deleted'});
-  const d=a.filter(t=>t.status==='done').length;
-  const p=a.length?Math.round(d/a.length*100):0;
-  return `<div style="margin:0 0 14px"><div class="row" style="font-size:13px"><span>${c.icon} ${c.name}</span><span class="muted">${d}/${a.length}</span></div><div class="track" style="margin-top:6px"><div class="fill" style="width:${p}%;background:${c.color}"></div></div></div>`
- }).join('');
+  <div class="stat"><b>${tasks.length ? Math.round(done / tasks.length * 100) : 0}%</b><span>Продуктивность</span></div>
+  <div class="stat"><b>${totalJournalXp}</b><span>XP в журналах</span></div>`;
+
+  document.getElementById('statsBars').innerHTML = cats.map(c => {
+    const a = getTasks({ category: c.id, excludeStatus: 'deleted' });
+    const d = a.filter(t => t.status === 'done').length;
+    const p = a.length ? Math.round(d / a.length * 100) : 0;
+    const need = xpNeedForCategory(c.level);
+    const pct = Math.min(100, (c.xp / need) * 100);
+    return `<div style="margin:0 0 14px">
+    <div class="row" style="font-size:13px">
+      <span>${c.icon} ${c.name} (ур.${c.level})</span>
+      <span class="muted">${d}/${a.length} задач · ${c.xp}/${need} XP</span>
+    </div>
+    <div class="track" style="margin-top:6px">
+      <div class="fill" style="width:${pct}%;background:${c.color}"></div>
+    </div>
+   </div>`;
+  }).join('');
 }
-function renderCharacter(){
- const u=data.user;
- document.getElementById('charName').textContent=u.name;
- document.getElementById('charLevel').textContent=u.level;
- document.getElementById('charXp').textContent=u.xp+' XP';
- document.getElementById('charFill').style.width=xpPct()+'%';
- const tasks=getTasks({excludeStatus:'deleted'});
- const done=tasks.filter(t=>t.status==='done').length;
- document.getElementById('charStats').innerHTML=`
-  <div class="stat"><b>${u.level}</b><span>Уровень</span></div>
-  <div class="stat"><b>${u.totalXp||0}</b><span>Всего XP</span></div>
+
+function renderCharacter() {
+  const u = data.user;
+  document.getElementById('charName').textContent = u.name;
+  document.getElementById('charLevel').textContent = u.level;
+  document.getElementById('charXp').textContent = u.xp + ' XP';
+  document.getElementById('charFill').style.width = xpPct() + '%';
+
+  const tasks = getTasks({ excludeStatus: 'deleted' });
+  const done = tasks.filter(t => t.status === 'done').length;
+  const cats = getCategories();
+  const developed = cats.filter(c => c.level >= 5).length;
+  const bonus = getJournalBonus();
+
+  document.getElementById('charStats').innerHTML = `
+  <div class="stat"><b>${u.level}</b><span>Общий уровень</span></div>
+  <div class="stat"><b>${u.totalXp || 0}</b><span>Всего XP</span></div>
   <div class="stat"><b>${tasks.length}</b><span>Задач</span></div>
-  <div class="stat"><b>${done}</b><span>Выполнено</span></div>`;
+  <div class="stat"><b>${done}</b><span>Выполнено</span></div>
+  <div class="stat"><b>${developed}/8</b><span>Журналов ≥5 ур.</span></div>
+  <div class="stat"><b>+${bonus}%</b><span>Бонус к глобальному XP</span></div>`;
 }
 
 // ============================================================
-// 13. AVAILABILITY
+// 14. AVAILABILITY
 // ============================================================
-function renderAvailability(){
- const el=document.getElementById('availList');
- const allAvail=getAllAvailability().sort((a,b)=>a.date.localeCompare(b.date));
- if(!allAvail.length){
-  el.innerHTML='<div class="empty">☀ Нет данных о доступности. Добавь слоты на нужные дни.</div>';
-  return;
- }
- el.innerHTML=allAvail.map(a=>{
-  const slots=a.slots.map(s=>{
-   const type=getAvailType(s.type);
-   return `<span style="display:inline-block;padding:2px 8px;border-radius:99px;background:${type.color}22;border:1px solid ${type.color}44;font-size:10px;margin:2px">${type.icon} ${s.from}-${s.to}</span>`;
-  }).join(' ');
-  return `<div class="quest" style="cursor:default;grid-template-columns:auto 1fr auto">
+
+function renderAvailability() {
+  const el = document.getElementById('availList');
+  const allAvail = getAllAvailability().sort((a, b) => a.date.localeCompare(b.date));
+  if (!allAvail.length) {
+    el.innerHTML = '<div class="empty">☀ Нет данных о доступности. Добавь слоты на нужные дни.</div>';
+    return;
+  }
+  el.innerHTML = allAvail.map(a => {
+    const slots = a.slots.map(s => {
+      const type = getAvailType(s.type);
+      return `<span style="display:inline-block;padding:2px 8px;border-radius:99px;background:${type.color}22;border:1px solid ${type.color}44;font-size:10px;margin:2px">${type.icon} ${s.from}-${s.to}</span>`;
+    }).join(' ');
+    return `<div class="quest" style="cursor:default;grid-template-columns:auto 1fr auto">
    <div style="font-weight:600;font-size:14px">${a.date}</div>
-   <div>${slots||'<span class="muted">нет слотов</span>'}</div>
+   <div>${slots || '<span class="muted">нет слотов</span>'}</div>
    <button class="ghost" style="color:var(--danger);padding:4px 8px" onclick="removeAvailability('${a.date}');renderAvailability();renderCalendar();">✕</button>
-  </div>`
- }).join('');
+  </div>`;
+  }).join('');
 }
 
-document.getElementById('availAddBtn').onclick=()=>{
- openModal('☀ Добавить слот доступности',`<div class="form">
+document.getElementById('availAddBtn').onclick = () => {
+  openModal('☀ Добавить слот доступности', `<div class="form">
   <div class="field"><label>Дата</label><input id="availDate" type="date" value="${today()}"></div>
-  <div class="field"><label>Тип</label><select id="availType">${Object.entries(AVAIL_TYPES).map(([k,v])=>`<option value="${k}">${v.icon} ${v.label}</option>`).join('')}</select></div>
+  <div class="field"><label>Тип</label><select id="availType">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join('')}</select></div>
   <div class="grid">
    <div class="field"><label>С</label><input id="availFrom" type="time" value="10:00"></div>
    <div class="field"><label>До</label><input id="availTo" type="time" value="12:00"></div>
@@ -1167,197 +1605,254 @@ document.getElementById('availAddBtn').onclick=()=>{
  </div>`);
 };
 
-function saveAvailSlot(){
- const date=document.getElementById('availDate').value;
- if(!date)return toast('Выбери дату');
- const type=document.getElementById('availType').value;
- const from=document.getElementById('availFrom').value;
- const to=document.getElementById('availTo').value;
- if(!from||!to)return toast('Укажи время');
- const existing=getAvailability(date);
- const slots=existing?existing.slots:[];
- slots.push({from,to,type});
- setAvailability(date,slots);
- closeModal();
- renderAvailability();
- renderCalendar();
- toast('☀ Слот добавлен');
+function saveAvailSlot() {
+  const date = document.getElementById('availDate').value;
+  if (!date) return toast('Выбери дату');
+  const type = document.getElementById('availType').value;
+  const from = document.getElementById('availFrom').value;
+  const to = document.getElementById('availTo').value;
+  if (!from || !to) return toast('Укажи время');
+  const existing = getAvailability(date);
+  const slots = existing ? existing.slots : [];
+  slots.push({ from, to, type });
+  setAvailability(date, slots);
+  closeModal();
+  renderAvailability();
+  renderCalendar();
+  toast('☀ Слот добавлен');
 }
 
-document.getElementById('availExportBtn').onclick=()=>{
- const card=document.getElementById('availExportCard');
- card.style.display='block';
- renderAvailabilityExport();
+document.getElementById('availExportBtn').onclick = () => {
+  const card = document.getElementById('availExportCard');
+  card.style.display = 'block';
+  renderAvailabilityExport();
 };
-document.getElementById('availExportClose').onclick=()=>{
- document.getElementById('availExportCard').style.display='none';
+document.getElementById('availExportClose').onclick = () => {
+  document.getElementById('availExportCard').style.display = 'none';
 };
 
-function renderAvailabilityExport(){
- const el=document.getElementById('availExportContent');
- const now=new Date();
- const year=now.getFullYear();
- const month=now.getMonth();
- const first=new Date(year,month,1);
- const daysInMonth=new Date(year,month+1,0).getDate();
- const offset=(first.getDay()+6)%7;
+function renderAvailabilityExport() {
+  const el = document.getElementById('availExportContent');
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const first = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const offset = (first.getDay() + 6) % 7;
 
- let html=`<div style="font-size:14px;font-weight:600;margin-bottom:6px">${['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][month]} ${year}</div>`;
- html+=`<div class="avail-export-grid">`;
- for(const d of DOW)html+=`<div style="font-size:9px;color:var(--muted);text-align:center;padding:4px 0">${d}</div>`;
- for(let i=0;i<offset;i++)html+=`<div class="avail-export-cell" style="opacity:.2"></div>`;
- for(let d=1;d<=daysInMonth;d++){
-  const dateStr=`${year}-${pad(month+1)}-${pad(d)}`;
-  const avail=getAvailability(dateStr);
-  const isWeekend=(new Date(year,month,d).getDay()+6)%7>=5;
-  const slots=avail?avail.slots:[];
-  html+=`<div class="avail-export-cell ${isWeekend?'weekend':''}">
+  let html = `<div style="font-size:14px;font-weight:600;margin-bottom:6px">${['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][month]} ${year}</div>`;
+  html += `<div class="avail-export-grid">`;
+  for (const d of DOW) html += `<div style="font-size:9px;color:var(--muted);text-align:center;padding:4px 0">${d}</div>`;
+  for (let i = 0; i < offset; i++) html += `<div class="avail-export-cell" style="opacity:.2"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${pad(month + 1)}-${pad(d)}`;
+    const avail = getAvailability(dateStr);
+    const isWeekend = (new Date(year, month, d).getDay() + 6) % 7 >= 5;
+    const slots = avail ? avail.slots : [];
+    html += `<div class="avail-export-cell ${isWeekend ? 'weekend' : ''}">
    <div class="day-num">${d}</div>
-   ${slots.length?`<div class="avail-indicator">${slots.map(s=>`<div class="seg ${s.type}" style="background:${getAvailType(s.type).color}"></div>`).join('')}</div>`:'<div style="font-size:8px;color:var(--muted)">—</div>'}
-   ${slots.length?`<div class="avail-export-caption">${slots.length} слот${slots.length>1?'а':''}</div>`:''}
+   ${slots.length ? `<div class="avail-indicator">${slots.map(s => `<div class="seg ${s.type}" style="background:${getAvailType(s.type).color}"></div>`).join('')}</div>` : '<div style="font-size:8px;color:var(--muted)">—</div>'}
+   ${slots.length ? `<div class="avail-export-caption">${slots.length} слот${slots.length > 1 ? 'а' : ''}</div>` : ''}
   </div>`;
- }
- html+=`</div>`;
- html+=`<div class="avail-legend">${Object.entries(AVAIL_TYPES).map(([k,v])=>`<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
- html+=`<div class="avail-export-actions">
+  }
+  html += `</div>`;
+  html += `<div class="avail-legend">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
+  html += `<div class="avail-export-actions">
   <button class="add" onclick="downloadAvailImage()" style="font-size:12px;padding:8px 16px">📥 Скачать как изображение</button>
   <button class="ghost" onclick="copyAvailText()" style="font-size:12px;padding:8px 16px">📋 Копировать текст</button>
  </div>`;
- el.innerHTML=html;
+  el.innerHTML = html;
 }
 
-function downloadAvailImage(){
- toast('📥 Для экспорта изображения открой на компьютере и сделай скриншот');
- copyAvailText();
+function downloadAvailImage() {
+  toast('📥 Для экспорта изображения открой на компьютере и сделай скриншот');
+  copyAvailText();
 }
 
-function copyAvailText(){
- const el=document.getElementById('availExportContent');
- const text=el.textContent.trim().replace(/\s+/g,' ');
- navigator.clipboard?.writeText(text).then(()=>toast('📋 Скопировано')).catch(()=>toast('📋 Выдели текст и скопируй'));
+function copyAvailText() {
+  const el = document.getElementById('availExportContent');
+  const text = el.textContent.trim().replace(/\s+/g, ' ');
+  navigator.clipboard?.writeText(text).then(() => toast('📋 Скопировано')).catch(() => toast(
+  '📋 Выдели текст и скопируй'));
 }
 
 // ============================================================
-// 14. КАЛЕНДАРЬ
+// 15. КАЛЕНДАРЬ
 // ============================================================
-let calState={view:'month',date:new Date()};
-const MON=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 
-function tasksOn(day){
- const s=iso(day);
- return getTasks({date:s,excludeStatus:'deleted'}).filter(t=>prefs.showCompleted!==false||t.status!=='done');
-}
-function goalsOn(day){const s=iso(day);return data.goals.filter(g=>g.deadline===s)}
-function availOn(day){const s=iso(day);const a=getAvailability(s);return a?a.slots:[]}
-function taskColor(t){const c=getCategory(t.category);return c?c.color:'#8e98a9'}
-function calLabel(){const d=calState.date;if(calState.view==='day')return d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});if(calState.view==='week'){const s=startWeek(d),e=new Date(s);e.setDate(e.getDate()+6);return `${s.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})} — ${e.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'})}`};if(calState.view==='month')return `${MON[d.getMonth()]} ${d.getFullYear()}`;return String(d.getFullYear())}
-function startWeek(d){const x=new Date(d);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x}
+let calState = { view: 'month', date: new Date() };
+const MON = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
-function renderCalendar(){
- document.getElementById('calRangeLabel').textContent=calLabel();
- document.querySelectorAll('#calendarModes button').forEach(b=>b.classList.toggle('active',b.dataset.view===calState.view));
- const body=document.getElementById('calendarBody');
- if(calState.view==='day')renderDay(body);
- else if(calState.view==='week')renderWeek(body);
- else if(calState.view==='month')renderMonthIOS(body);
- else if(calState.view==='year')renderYear(body);
- else if(calState.view==='avail')renderAvailabilityCalendar(body);
+function tasksOn(day) {
+  const s = iso(day);
+  return getTasks({ date: s, excludeStatus: 'deleted' }).filter(t => prefs.showCompleted !== false || t.status !== 'done');
 }
 
-function renderDay(el){
- const d=calState.date,ts=tasksOn(d),hourTasks=ts.filter(t=>t.time&&t.time.length>0);
- let html='<div class="day-layout"><div class="time-col">'+Array.from({length:14},(_,i)=>`<div>${pad(i+7)}:00</div>`).join('')+'</div><div class="timeline">';
- ts.filter(t=>!t.time||!t.time.length).forEach(t=>html+=`<div class="mini-task" style="margin:7px 9px;border-left-color:${taskColor(t)}">${(getCategory(t.category)||{icon:'📋'}).icon} ${esc(t.title)}</div>`);
- hourTasks.forEach(t=>{const m=t.time.match(/(\d{1,2}):(\d{2})/);if(!m)return;const h=+m[1],min=+m[2];const top=((h-7)*52)+(min/60*52);const dur=Math.max(28,(t.duration||30)/60*52);html+=`<div class="timeline-task" style="top:${top}px;height:${dur}px;border-left-color:${taskColor(t)}"><b>${esc(t.title)}</b><span>${t.time} · ${(getCategory(t.category)||{name:'?'}).name} · +${t.xp||10} XP</span></div>`});
- html+='</div></div>';el.innerHTML=html;
+function goalsOn(day) { const s = iso(day); return data.goals.filter(g => g.deadline === s); }
+
+function availOn(day) { const s = iso(day); const a = getAvailability(s); return a ? a.slots : []; }
+
+function taskColor(t) { const c = getCategory(t.category); return c ? c.color : '#8e98a9'; }
+
+function calLabel() {
+  const d = calState.date;
+  if (calState.view === 'day') return d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long',
+    year: 'numeric' });
+  if (calState.view === 'week') { const s = startWeek(d),
+      e = new Date(s);
+    e.setDate(e.getDate() + 6); return `${s.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} — ${e.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}` };
+  if (calState.view === 'month') return `${MON[d.getMonth()]} ${d.getFullYear()}`;
+  return String(d.getFullYear());
 }
 
-function renderWeek(el){
- const s=startWeek(calState.date);let html='<div class="week-grid">';
- for(let i=0;i<7;i++){const d=new Date(s);d.setDate(s.getDate()+i);const ts=tasksOn(d);html+=`<div class="week-day"><div class="week-head">${DOW[i]}<strong>${d.getDate()}</strong></div><div class="week-tasks">${ts.map(t=>`<div class="mini-task ${t.status==='done'?'done':''}" style="border-left-color:${taskColor(t)}"><button class="check-small ${t.status==='done'?'done':''}" onclick="toggleTask('${t.id}');renderCalendar()">${t.status==='done'?'✓':''}</button>${esc(t.title)}${t.time?' <span class="muted">'+esc(t.time)+'</span>':''}</div>`).join('')||'<span class="muted" style="font-size:10px;padding:5px">—</span>'}</div></div>`}html+='</div>';el.innerHTML=html;
+function startWeek(d) { const x = new Date(d); const day = (x.getDay() + 6) % 7;
+  x.setDate(x.getDate() - day);
+  x.setHours(0, 0, 0, 0); return x; }
+
+function renderCalendar() {
+  document.getElementById('calRangeLabel').textContent = calLabel();
+  document.querySelectorAll('#calendarModes button').forEach(b => b.classList.toggle('active', b.dataset.view === calState
+    .view));
+  const body = document.getElementById('calendarBody');
+  if (calState.view === 'day') renderDay(body);
+  else if (calState.view === 'week') renderWeek(body);
+  else if (calState.view === 'month') renderMonthIOS(body);
+  else if (calState.view === 'year') renderYear(body);
+  else if (calState.view === 'avail') renderAvailabilityCalendar(body);
 }
 
-function renderMonthIOS(el){
- const y=calState.date.getFullYear(),m=calState.date.getMonth();
- const first=new Date(y,m,1);
- const offset=(first.getDay()+6)%7;
- const daysInMonth=new Date(y,m+1,0).getDate();
- const daysInPrev=new Date(y,m,0).getDate();
- const todayStr=today();
- let html='<div class="month-ios-grid">';
- for(const d of DOW)html+=`<div class="month-ios-dow">${d}</div>`;
- for(let i=offset-1;i>=0;i--){const d=new Date(y,m-1,daysInPrev-i);html+=`<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span>${renderCellDots(d)}</div>`;}
- for(let i=1;i<=daysInMonth;i++){const d=new Date(y,m,i);const isToday=iso(d)===todayStr;html+=`<div class="month-ios-cell ${isToday?'today':''}" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${i}</span>${renderCellDots(d)}${goalsOn(d).map(g=>`<div class="cell-goal-label">🏆 ${esc(g.title)}</div>`).join('')}</div>`;}
- const totalCells=Math.ceil((offset+daysInMonth)/7)*7;
- for(let i=offset+daysInMonth;i<totalCells;i++){const d=new Date(y,m+1,i-offset-daysInMonth+1);html+=`<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span>${renderCellDots(d)}</div>`;}
- html+='</div>';
- const monthTasks=getTasks({excludeStatus:'deleted'}).filter(t=>t.date&&t.date.startsWith(`${y}-${pad(m+1)}`));
- const done=monthTasks.filter(t=>t.status==='done').length;
- const monthGoals=data.goals.filter(g=>g.deadline&&g.deadline.startsWith(`${y}-${pad(m+1)}`));
- html+=`<div class="month-summary"><div class="summary-pill"><b>${monthTasks.length}</b><span>задач</span></div><div class="summary-pill"><b>${done}</b><span>выполнено</span></div><div class="summary-pill"><b>${monthTasks.reduce((a,t)=>a+(+t.xp||10),0)}</b><span>XP</span></div><div class="summary-pill"><b>${monthGoals.length}</b><span>целей 🏆</span></div></div>`;
- el.innerHTML=html;
+function renderDay(el) {
+  const d = calState.date,
+    ts = tasksOn(d),
+    hourTasks = ts.filter(t => t.time && t.time.length > 0);
+  let html = '<div class="day-layout"><div class="time-col">' + Array.from({ length: 14 }, (_, i) =>
+      `<div>${pad(i + 7)}:00</div>`).join('') + '</div><div class="timeline">';
+  ts.filter(t => !t.time || !t.time.length).forEach(t => html +=
+    `<div class="mini-task" style="margin:7px 9px;border-left-color:${taskColor(t)}">${(getCategory(t.category) || { icon: '📋' }).icon} ${esc(t.title)}</div>`
+    );
+  hourTasks.forEach(t => { const m = t.time.match(/(\d{1,2}):(\d{2})/); if (!m) return; const h = +m[1],
+      min = +m[2]; const top = ((h - 7) * 52) + (min / 60 * 52); const dur = Math.max(28, (t.duration || 30) / 60 * 52);
+    html +=
+      `<div class="timeline-task" style="top:${top}px;height:${dur}px;border-left-color:${taskColor(t)}"><b>${esc(t.title)}</b><span>${t.time} · ${(getCategory(t.category) || { name: '?' }).name} · +${t.xp || 10} XP</span></div>`
+      });
+  html += '</div></div>';
+  el.innerHTML = html;
 }
 
-function renderCellDots(d){
- const ts=tasksOn(d);
- const gs=goalsOn(d);
- if(!ts.length&&!gs.length)return'<div class="cell-dots"></div>';
- let html='<div class="cell-dots">';
- const dots=ts.slice(0,3);
- for(const t of dots)html+=`<span class="cell-dot" style="background:${taskColor(t)}"></span>`;
- if(ts.length>3)html+=`<span class="cell-dot" style="background:var(--muted);font-size:7px;display:inline-flex;align-items:center;justify-content:center;color:#fff">+${ts.length-3}</span>`;
- if(gs.length){const label=gs.length>1?`${gs.length}🏆`:'🏆';html+=`<span class="cell-dot goal-dot ${gs.length>1?'small':''}">${label}</span>`;}
- html+='</div>';return html;
+function renderWeek(el) {
+  const s = startWeek(calState.date);
+  let html = '<div class="week-grid">';
+  for (let i = 0; i < 7; i++) { const d = new Date(s);
+    d.setDate(s.getDate() + i); const ts = tasksOn(d);
+    html += `<div class="week-day"><div class="week-head">${DOW[i]}<strong>${d.getDate()}</strong></div><div class="week-tasks">${ts.map(t => `<div class="mini-task ${t.status === 'done' ? 'done' : ''}" style="border-left-color:${taskColor(t)}"><button class="check-small ${t.status === 'done' ? 'done' : ''}" onclick="completeTaskUI('${t.id}');renderCalendar()">${t.status === 'done' ? '✓' : ''}</button>${esc(t.title)}${t.time ? ' <span class="muted">' + esc(t.time) + '</span>' : ''}</div>`).join('') || '<span class="muted" style="font-size:10px;padding:5px">—</span>'}</div></div>` }
+  html += '</div>';
+  el.innerHTML = html;
 }
 
-function renderYear(el){
- const y=calState.date.getFullYear();let html='<div class="year-grid">';
- for(let m=0;m<12;m++){const days=new Date(y,m+1,0).getDate();let heat='';for(let i=1;i<=days;i++){const d=new Date(y,m,i),n=tasksOn(d).length;heat+=`<i class="${n>=5?'l3':n>=2?'l2':n?'l1':''}"></i>`}const goalCount=data.goals.filter(g=>g.deadline&&g.deadline.startsWith(`${y}-${pad(m+1)}`)).length;html+=`<div class="year-month" onclick="jumpMonth(${m})"><h4>${MON[m]}${goalCount?' 🏆':''}</h4><div class="heat">${heat}</div><div class="muted" style="font-size:9px;margin-top:7px">${getTasks({excludeStatus:'deleted'}).filter(t=>t.date&&t.date.startsWith(`${y}-${pad(m+1)}`)).length} задач</div></div>`}
- html+='</div>';el.innerHTML=html;
+function renderMonthIOS(el) {
+  const y = calState.date.getFullYear(),
+    m = calState.date.getMonth();
+  const first = new Date(y, m, 1);
+  const offset = (first.getDay() + 6) % 7;
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const daysInPrev = new Date(y, m, 0).getDate();
+  const todayStr = today();
+  let html = '<div class="month-ios-grid">';
+  for (const d of DOW) html += `<div class="month-ios-dow">${d}</div>`;
+  for (let i = offset - 1; i >= 0; i--) { const d = new Date(y, m - 1, daysInPrev - i);
+    html +=
+      `<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span>${renderCellDots(d)}</div>`; }
+  for (let i = 1; i <= daysInMonth; i++) { const d = new Date(y, m, i); const isToday = iso(d) === todayStr;
+    html +=
+      `<div class="month-ios-cell ${isToday ? 'today' : ''}" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${i}</span>${renderCellDots(d)}${goalsOn(d).map(g => `<div class="cell-goal-label">🏆 ${esc(g.title)}</div>`).join('')}</div>`; }
+  const totalCells = Math.ceil((offset + daysInMonth) / 7) * 7;
+  for (let i = offset + daysInMonth; i < totalCells; i++) { const d = new Date(y, m + 1, i - offset - daysInMonth + 1);
+    html +=
+      `<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span>${renderCellDots(d)}</div>`; }
+  html += '</div>';
+  const monthTasks = getTasks({ excludeStatus: 'deleted' }).filter(t => t.date && t.date.startsWith(`${y}-${pad(m + 1)}`));
+  const done = monthTasks.filter(t => t.status === 'done').length;
+  const monthGoals = data.goals.filter(g => g.deadline && g.deadline.startsWith(`${y}-${pad(m + 1)}`));
+  html += `<div class="month-summary"><div class="summary-pill"><b>${monthTasks.length}</b><span>задач</span></div><div class="summary-pill"><b>${done}</b><span>выполнено</span></div><div class="summary-pill"><b>${monthTasks.reduce((a, t) => a + (+t.xp || 10), 0)}</b><span>XP</span></div><div class="summary-pill"><b>${monthGoals.length}</b><span>целей 🏆</span></div></div>`;
+  el.innerHTML = html;
 }
 
-function renderAvailabilityCalendar(el){
- const y=calState.date.getFullYear(),m=calState.date.getMonth();
- const first=new Date(y,m,1);
- const offset=(first.getDay()+6)%7;
- const daysInMonth=new Date(y,m+1,0).getDate();
- const daysInPrev=new Date(y,m,0).getDate();
- let html=`<div style="margin-bottom:8px;color:var(--gold);font-size:13px">☀ Режим доступности — отметь, когда ты свободен</div>`;
- html+='<div class="month-ios-grid">';
- for(const d of DOW)html+=`<div class="month-ios-dow">${d}</div>`;
- for(let i=offset-1;i>=0;i--){const d=new Date(y,m-1,daysInPrev-i);html+=`<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span></div>`;}
- for(let i=1;i<=daysInMonth;i++){
-  const d=new Date(y,m,i);
-  const dateStr=iso(d);
-  const slots=availOn(d);
-  const isToday=dateStr===today();
-  html+=`<div class="month-ios-cell ${isToday?'today':''}" onclick="editAvailDay('${dateStr}')">
+function renderCellDots(d) {
+  const ts = tasksOn(d);
+  const gs = goalsOn(d);
+  if (!ts.length && !gs.length) return '<div class="cell-dots"></div>';
+  let html = '<div class="cell-dots">';
+  const dots = ts.slice(0, 3);
+  for (const t of dots) html += `<span class="cell-dot" style="background:${taskColor(t)}"></span>`;
+  if (ts.length > 3) html +=
+    `<span class="cell-dot" style="background:var(--muted);font-size:7px;display:inline-flex;align-items:center;justify-content:center;color:#fff">+${ts.length - 3}</span>`;
+  if (gs.length) { const label = gs.length > 1 ? `${gs.length}🏆` : '🏆';
+    html += `<span class="cell-dot goal-dot ${gs.length > 1 ? 'small' : ''}">${label}</span>`; }
+  html += '</div>';
+  return html;
+}
+
+function renderYear(el) {
+  const y = calState.date.getFullYear();
+  let html = '<div class="year-grid">';
+  for (let m = 0; m < 12; m++) { const days = new Date(y, m + 1, 0).getDate(); let heat = ''; for (let i = 1; i <= days; i++) {
+      const d = new Date(y, m, i),
+        n = tasksOn(d).length;
+      heat += `<i class="${n >= 5 ? 'l3' : n >= 2 ? 'l2' : n ? 'l1' : ''}"></i>` } const goalCount = data.goals.filter(g =>
+      g.deadline && g.deadline.startsWith(`${y}-${pad(m + 1)}`)).length;
+    html += `<div class="year-month" onclick="jumpMonth(${m})"><h4>${MON[m]}${goalCount ? ' 🏆' : ''}</h4><div class="heat">${heat}</div><div class="muted" style="font-size:9px;margin-top:7px">${getTasks({ excludeStatus: 'deleted' }).filter(t => t.date && t.date.startsWith(`${y}-${pad(m + 1)}`)).length} задач</div></div>` }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function renderAvailabilityCalendar(el) {
+  const y = calState.date.getFullYear(),
+    m = calState.date.getMonth();
+  const first = new Date(y, m, 1);
+  const offset = (first.getDay() + 6) % 7;
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const daysInPrev = new Date(y, m, 0).getDate();
+  let html =
+    `<div style="margin-bottom:8px;color:var(--gold);font-size:13px">☀ Режим доступности — отметь, когда ты свободен</div>`;
+  html += '<div class="month-ios-grid">';
+  for (const d of DOW) html += `<div class="month-ios-dow">${d}</div>`;
+  for (let i = offset - 1; i >= 0; i--) { const d = new Date(y, m - 1, daysInPrev - i);
+    html += `<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span></div>`; }
+  for (let i = 1; i <= daysInMonth; i++) {
+    const d = new Date(y, m, i);
+    const dateStr = iso(d);
+    const slots = availOn(d);
+    const isToday = dateStr === today();
+    html += `<div class="month-ios-cell ${isToday ? 'today' : ''}" onclick="editAvailDay('${dateStr}')">
    <span class="cell-number">${i}</span>
-   ${slots.length?`<div class="avail-bar">${slots.map(s=>`<div class="avail-slot ${s.type}" style="flex:${s.from&&s.to?1:0.5}"></div>`).join('')}</div>`:'<div style="font-size:8px;color:var(--muted);margin-top:3px">—</div>'}
-   ${slots.length?`<div style="font-size:7px;color:var(--muted);margin-top:1px">${slots.length} слот${slots.length>1?'а':''}</div>`:''}
+   ${slots.length ? `<div class="avail-bar">${slots.map(s => `<div class="avail-slot ${s.type}" style="flex:${s.from && s.to ? 1 : 0.5}"></div>`).join('')}</div>` : '<div style="font-size:8px;color:var(--muted);margin-top:3px">—</div>'}
+   ${slots.length ? `<div style="font-size:7px;color:var(--muted);margin-top:1px">${slots.length} слот${slots.length > 1 ? 'а' : ''}</div>` : ''}
   </div>`;
- }
- const totalCells=Math.ceil((offset+daysInMonth)/7)*7;
- for(let i=offset+daysInMonth;i<totalCells;i++){const d=new Date(y,m+1,i-offset-daysInMonth+1);html+=`<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span></div>`;}
- html+='</div>';
- html+=`<div class="avail-legend" style="padding-top:8px">${Object.entries(AVAIL_TYPES).map(([k,v])=>`<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
- html+=`<div style="margin-top:8px;font-size:10px;color:var(--muted)">👆 Кликни на день, чтобы добавить слоты доступности</div>`;
- el.innerHTML=html;
+  }
+  const totalCells = Math.ceil((offset + daysInMonth) / 7) * 7;
+  for (let i = offset + daysInMonth; i < totalCells; i++) { const d = new Date(y, m + 1, i - offset - daysInMonth + 1);
+    html += `<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span></div>`; }
+  html += '</div>';
+  html +=
+    `<div class="avail-legend" style="padding-top:8px">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
+  html +=
+    `<div style="margin-top:8px;font-size:10px;color:var(--muted)">👆 Кликни на день, чтобы добавить слоты доступности</div>`;
+  el.innerHTML = html;
 }
 
-function editAvailDay(dateStr){
- const slots=getAvailability(dateStr)?.slots||[];
- const types=Object.entries(AVAIL_TYPES);
- openModal(`☀ Доступность: ${dateStr}`,`<div class="form">
+function editAvailDay(dateStr) {
+  const slots = getAvailability(dateStr)?.slots || [];
+  const types = Object.entries(AVAIL_TYPES);
+  openModal(`☀ Доступность: ${dateStr}`, `<div class="form">
   <div class="field"><label>Существующие слоты:</label>
-   ${slots.length?slots.map((s,i)=>`<div style="display:flex;gap:6px;align-items:center;padding:6px;background:var(--panel2);border-radius:8px;margin:2px 0">
+   ${slots.length ? slots.map((s, i) => `<div style="display:flex;gap:6px;align-items:center;padding:6px;background:var(--panel2);border-radius:8px;margin:2px 0">
     <span style="font-size:12px">${getAvailType(s.type).icon} ${s.from}-${s.to}</span>
     <button class="ghost" style="color:var(--danger);padding:2px 6px;font-size:10px" onclick="removeAvailSlot('${dateStr}',${i});editAvailDay('${dateStr}')">✕</button>
-   </div>`).join(''):'<span class="muted">Нет слотов</span>'}
+   </div>`).join('') : '<span class="muted">Нет слотов</span>'}
   </div>
   <div class="field"><label>Добавить слот</label></div>
   <div class="grid">
-   <div class="field"><label>Тип</label><select id="eavailType">${types.map(([k,v])=>`<option value="${k}">${v.icon} ${v.label}</option>`).join('')}</select></div>
+   <div class="field"><label>Тип</label><select id="eavailType">${types.map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join('')}</select></div>
    <div class="field"><label>С</label><input id="eavailFrom" type="time" value="10:00"></div>
    <div class="field"><label>До</label><input id="eavailTo" type="time" value="12:00"></div>
   </div>
@@ -1366,180 +1861,221 @@ function editAvailDay(dateStr){
  </div>`);
 }
 
-function addAvailSlot(dateStr){
- const type=document.getElementById('eavailType').value;
- const from=document.getElementById('eavailFrom').value;
- const to=document.getElementById('eavailTo').value;
- if(!from||!to)return toast('Укажи время');
- const slots=getAvailability(dateStr)?.slots||[];
- slots.push({from,to,type});
- setAvailability(dateStr,slots);
- closeModal();
- renderAvailability();
- renderCalendar();
- toast('☀ Слот добавлен');
+function addAvailSlot(dateStr) {
+  const type = document.getElementById('eavailType').value;
+  const from = document.getElementById('eavailFrom').value;
+  const to = document.getElementById('eavailTo').value;
+  if (!from || !to) return toast('Укажи время');
+  const slots = getAvailability(dateStr)?.slots || [];
+  slots.push({ from, to, type });
+  setAvailability(dateStr, slots);
+  closeModal();
+  renderAvailability();
+  renderCalendar();
+  toast('☀ Слот добавлен');
 }
 
-function removeAvailSlot(dateStr,index){
- const a=getAvailability(dateStr);if(!a)return;
- a.slots.splice(index,1);
- if(!a.slots.length){removeAvailability(dateStr);}
- else{setAvailability(dateStr,a.slots);}
- renderAvailability();
- renderCalendar();
+function removeAvailSlot(dateStr, index) {
+  const a = getAvailability(dateStr);
+  if (!a) return;
+  a.slots.splice(index, 1);
+  if (!a.slots.length) { removeAvailability(dateStr); } else { setAvailability(dateStr, a.slots); }
+  renderAvailability();
+  renderCalendar();
 }
 
-function jumpDay(s){calState.date=new Date(s+'T12:00:00');calState.view='day';renderCalendar();}
-function jumpMonth(m){calState.date=new Date(calState.date.getFullYear(),m,1);calState.view='month';renderCalendar();}
+function jumpDay(s) { calState.date = new Date(s + 'T12:00:00');
+  calState.view = 'day';
+  renderCalendar(); }
 
-document.querySelectorAll('#calendarModes button').forEach(b=>b.onclick=()=>{calState.view=b.dataset.view;renderCalendar();});
-document.getElementById('calPrev').onclick=()=>{const d=calState.date;if(calState.view==='day')d.setDate(d.getDate()-1);else if(calState.view==='week')d.setDate(d.getDate()-7);else if(calState.view==='month'||calState.view==='avail')d.setMonth(d.getMonth()-1);else d.setFullYear(d.getFullYear()-1);renderCalendar();};
-document.getElementById('calNext').onclick=()=>{const d=calState.date;if(calState.view==='day')d.setDate(d.getDate()+1);else if(calState.view==='week')d.setDate(d.getDate()+7);else if(calState.view==='month'||calState.view==='avail')d.setMonth(d.getMonth()+1);else d.setFullYear(d.getFullYear()+1);renderCalendar();};
-document.getElementById('calToday').onclick=()=>{calState.date=new Date();renderCalendar();};
+function jumpMonth(m) { calState.date = new Date(calState.date.getFullYear(), m, 1);
+  calState.view = 'month';
+  renderCalendar(); }
+
+document.querySelectorAll('#calendarModes button').forEach(b => b.onclick = () => { calState.view = b.dataset.view;
+  renderCalendar(); });
+document.getElementById('calPrev').onclick = () => { const d = calState.date; if (calState.view === 'day') d.setDate(d.getDate() -
+    1); else if (calState.view === 'week') d.setDate(d.getDate() - 7); else if (calState.view === 'month' || calState.view ===
+    'avail') d.setMonth(d.getMonth() - 1); else d.setFullYear(d.getFullYear() - 1);
+  renderCalendar(); };
+document.getElementById('calNext').onclick = () => { const d = calState.date; if (calState.view === 'day') d.setDate(d.getDate() +
+    1); else if (calState.view === 'week') d.setDate(d.getDate() + 7); else if (calState.view === 'month' || calState.view ===
+    'avail') d.setMonth(d.getMonth() + 1); else d.setFullYear(d.getFullYear() + 1);
+  renderCalendar(); };
+document.getElementById('calToday').onclick = () => { calState.date = new Date();
+  renderCalendar(); };
 
 // ============================================================
-// 15. МОДАЛКИ
+// 16. МОДАЛКИ
 // ============================================================
-function openModal(title,body){
- document.getElementById('modalTitle').textContent=title;
- document.getElementById('modalBody').innerHTML=body;
- document.getElementById('modal').classList.add('open');
+
+function openModal(title, body) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modal').classList.add('open');
 }
-function closeModal(){
- document.getElementById('modal').classList.remove('open');
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
 }
-document.getElementById('modalClose').onclick=closeModal;
-document.getElementById('modal').onclick=e=>{
- if(e.target.id==='modal') closeModal();
+
+document.getElementById('modalClose').onclick = closeModal;
+document.getElementById('modal').onclick = e => {
+  if (e.target.id === 'modal') closeModal();
 };
 
 // ============================================================
-// 16. НАСТРОЙКИ И ТЕМЫ
+// 17. НАСТРОЙКИ И ТЕМЫ
 // ============================================================
-const THEMES={
- violet:{name:'Violet',a:'#8b5cf6',b:'#c084fc',bg:'#090b10',panel:'#11151d'},
- ocean:{name:'Ocean',a:'#0ea5e9',b:'#38bdf8',bg:'#071016',panel:'#0d1820'},
- forest:{name:'Forest',a:'#10b981',b:'#34d399',bg:'#07100d',panel:'#0d1814'},
- ember:{name:'Ember',a:'#f97316',b:'#fb7185',bg:'#110a08',panel:'#19100e'},
- gold:{name:'Gold',a:'#eab308',b:'#fbbf24',bg:'#100e06',panel:'#18150a'},
- ice:{name:'Ice',a:'#60a5fa',b:'#a5b4fc',bg:'#080d16',panel:'#101827'},
- neon:{name:'Neon',a:'#d946ef',b:'#22d3ee',bg:'#0c0810',panel:'#160e19'},
- mono:{name:'Mono',a:'#e5e7eb',b:'#9ca3af',bg:'#090909',panel:'#151515'}
+
+const THEMES = {
+  violet: { name: 'Violet', a: '#8b5cf6', b: '#c084fc', bg: '#090b10', panel: '#11151d' },
+  ocean: { name: 'Ocean', a: '#0ea5e9', b: '#38bdf8', bg: '#071016', panel: '#0d1820' },
+  forest: { name: 'Forest', a: '#10b981', b: '#34d399', bg: '#07100d', panel: '#0d1814' },
+  ember: { name: 'Ember', a: '#f97316', b: '#fb7185', bg: '#110a08', panel: '#19100e' },
+  gold: { name: 'Gold', a: '#eab308', b: '#fbbf24', bg: '#100e06', panel: '#18150a' },
+  ice: { name: 'Ice', a: '#60a5fa', b: '#a5b4fc', bg: '#080d16', panel: '#101827' },
+  neon: { name: 'Neon', a: '#d946ef', b: '#22d3ee', bg: '#0c0810', panel: '#160e19' },
+  mono: { name: 'Mono', a: '#e5e7eb', b: '#9ca3af', bg: '#090909', panel: '#151515' }
 };
 
-let prefs=JSON.parse(localStorage.getItem('lvlup_prefs')||'{}');
+let prefs = JSON.parse(localStorage.getItem('lvlup_prefs') || '{}');
 
-function applyTheme(key){
- const t=THEMES[key]||THEMES.violet;
- document.documentElement.style.setProperty('--accent',t.a);
- document.documentElement.style.setProperty('--accent2',t.b);
- document.documentElement.style.setProperty('--bg',t.bg);
- document.documentElement.style.setProperty('--panel',t.panel);
- prefs.theme=key;
- localStorage.setItem('lvlup_prefs',JSON.stringify(prefs));
- document.querySelectorAll('.theme').forEach(x=>x.classList.toggle('selected',x.dataset.theme===key));
+function applyTheme(key) {
+  const t = THEMES[key] || THEMES.violet;
+  document.documentElement.style.setProperty('--accent', t.a);
+  document.documentElement.style.setProperty('--accent2', t.b);
+  document.documentElement.style.setProperty('--bg', t.bg);
+  document.documentElement.style.setProperty('--panel', t.panel);
+  prefs.theme = key;
+  localStorage.setItem('lvlup_prefs', JSON.stringify(prefs));
+  document.querySelectorAll('.theme').forEach(x => x.classList.toggle('selected', x.dataset.theme === key));
 }
 
-function renderThemes(){
- document.getElementById('themeGrid').innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="theme ${prefs.theme===k||(!prefs.theme&&k==='violet')?'selected':''}" data-theme="${k}"><div class="theme-preview" style="--tc1:${t.a};--tc2:${t.b}"></div><small>${t.name}</small></button>`).join('');
- document.querySelectorAll('.theme').forEach(b=>b.onclick=()=>applyTheme(b.dataset.theme));
+function renderThemes() {
+  document.getElementById('themeGrid').innerHTML = Object.entries(THEMES).map(([k, t]) =>
+    `<button class="theme ${prefs.theme === k || (!prefs.theme && k === 'violet') ? 'selected' : ''}" data-theme="${k}"><div class="theme-preview" style="--tc1:${t.a};--tc2:${t.b}"></div><small>${t.name}</small></button>`
+    ).join('');
+  document.querySelectorAll('.theme').forEach(b => b.onclick = () => applyTheme(b.dataset.theme));
 }
 
-document.getElementById('settingsBtn').onclick=()=>{
- document.getElementById('nameInput').value=data.user.name;
- renderThemes();
- document.getElementById('showCompleted').checked=prefs.showCompleted!==false;
- document.getElementById('autoBackup').checked=prefs.autoBackup!==false;
- document.getElementById('mainQuestMode').checked=prefs.mainQuestMode!==false;
- document.getElementById('settings').classList.add('open');
+document.getElementById('settingsBtn').onclick = () => {
+  document.getElementById('nameInput').value = data.user.name;
+  renderThemes();
+  document.getElementById('showCompleted').checked = prefs.showCompleted !== false;
+  document.getElementById('autoBackup').checked = prefs.autoBackup !== false;
+  document.getElementById('mainQuestMode').checked = prefs.mainQuestMode !== false;
+  document.getElementById('settings').classList.add('open');
 };
-document.getElementById('settingsClose').onclick=()=>document.getElementById('settings').classList.remove('open');
+document.getElementById('settingsClose').onclick = () => document.getElementById('settings').classList.remove('open');
 
-document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>{
- document.querySelectorAll('[data-stab]').forEach(x=>x.classList.toggle('active',x===b));
- document.querySelectorAll('.settings-panel').forEach(x=>x.classList.toggle('active',x.id==='stab-'+b.dataset.stab));
+document.querySelectorAll('[data-stab]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-stab]').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.settings-panel').forEach(x => x.classList.toggle('active', x.id === 'stab-' + b.dataset.stab));
 });
 
-document.querySelectorAll('[data-density]').forEach(b=>b.onclick=()=>{
- document.querySelectorAll('[data-density]').forEach(x=>x.classList.toggle('active',x===b));
- document.body.classList.toggle('compact',b.dataset.density==='compact');
- prefs.density=b.dataset.density;
- localStorage.setItem('lvlup_prefs',JSON.stringify(prefs));
+document.querySelectorAll('[data-density]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-density]').forEach(x => x.classList.toggle('active', x === b));
+  document.body.classList.toggle('compact', b.dataset.density === 'compact');
+  prefs.density = b.dataset.density;
+  localStorage.setItem('lvlup_prefs', JSON.stringify(prefs));
 });
 
-document.getElementById('saveSettings').onclick=()=>{
- data.user.name=document.getElementById('nameInput').value.trim()||'Герой';
- prefs.showCompleted=document.getElementById('showCompleted').checked;
- prefs.autoBackup=document.getElementById('autoBackup').checked;
- prefs.mainQuestMode=document.getElementById('mainQuestMode').checked;
- localStorage.setItem('lvlup_prefs',JSON.stringify(prefs));
- saveData();
- document.getElementById('settings').classList.remove('open');
- renderHome();renderCharacter();
- toast('Настройки сохранены');
-};
-
-document.getElementById('exportFull').onclick=exportData;
-document.getElementById('importFull').onclick=()=>document.getElementById('importFile').click();
-
-document.getElementById('importFile').onchange=e=>{
- const f=e.target.files[0];if(!f)return;
- const r=new FileReader();
- r.onload=()=>{
-  try{
-   const parsed=JSON.parse(r.result);
-   if(!parsed.user&&!parsed.character)throw new Error('Нет данных пользователя');
-   if(!parsed.tasks||!Array.isArray(parsed.tasks))throw new Error('Нет tasks');
-   if(!parsed.goals||!Array.isArray(parsed.goals))throw new Error('Нет goals');
-   if(!parsed.notes||!Array.isArray(parsed.notes))throw new Error('Нет notes');
-   if(prefs.autoBackup)localStorage.setItem('lvlup_backup_before_import',JSON.stringify(data));
-   data=normalizeData(parsed);
-   saveData();
-   renderHome();renderQuests();renderGoals();renderCharacter();renderNotes();renderGallery();renderStats();renderCalendar();
-   toast('↧ Данные импортированы');
-  }catch(err){toast('❌ Ошибка: '+err.message)}
- };
- r.readAsText(f);
-};
-
-document.getElementById('resetBtn').onclick=()=>{
- if(confirm('Сбросить все данные LVLUP?')){
-  data=emptyData();
+document.getElementById('saveSettings').onclick = () => {
+  data.user.name = document.getElementById('nameInput').value.trim() || 'Герой';
+  prefs.showCompleted = document.getElementById('showCompleted').checked;
+  prefs.autoBackup = document.getElementById('autoBackup').checked;
+  prefs.mainQuestMode = document.getElementById('mainQuestMode').checked;
+  localStorage.setItem('lvlup_prefs', JSON.stringify(prefs));
   saveData();
-  renderHome();renderGoals();renderCharacter();renderStats();
-  toast('Данные сброшены');
- }
+  document.getElementById('settings').classList.remove('open');
+  renderAll();
+  toast('Настройки сохранены');
 };
 
-document.getElementById('statsBtn').onclick=()=>switchPage('stats');
-document.getElementById('exportBtn2').onclick=exportData;
-document.getElementById('exportBtn').onclick=exportData;
+document.getElementById('exportFull').onclick = exportData;
+document.getElementById('importFull').onclick = () => document.getElementById('importFile').click();
 
-function exportData(){
- const a=document.createElement('a');
- a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
- a.download='lvlup-backup-'+today()+'.json';
- a.click();
- toast('💾 JSON сохранён');
+document.getElementById('importFile').onchange = e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const parsed = JSON.parse(r.result);
+      if (!parsed.user && !parsed.character) throw new Error('Нет данных пользователя');
+      if (!parsed.tasks || !Array.isArray(parsed.tasks)) throw new Error('Нет tasks');
+      if (!parsed.goals || !Array.isArray(parsed.goals)) throw new Error('Нет goals');
+      if (!parsed.notes || !Array.isArray(parsed.notes)) throw new Error('Нет notes');
+      if (prefs.autoBackup) localStorage.setItem('lvlup_backup_before_import', JSON.stringify(data));
+      data = normalizeData(parsed);
+      saveData();
+      renderAll();
+      toast('↧ Данные импортированы');
+    } catch (err) { toast('❌ Ошибка: ' + err.message) }
+  };
+  r.readAsText(f);
+};
+
+document.getElementById('resetBtn').onclick = () => {
+  if (confirm('Сбросить все данные LVLUP?')) {
+    data = emptyData();
+    saveData();
+    renderAll();
+    toast('Данные сброшены');
+  }
+};
+
+document.getElementById('statsBtn').onclick = () => switchPage('stats');
+document.getElementById('exportBtn2').onclick = exportData;
+document.getElementById('exportBtn').onclick = exportData;
+
+function exportData() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+  a.download = 'lvlup-backup-' + today() + '.json';
+  a.click();
+  toast('💾 JSON сохранён');
 }
 
-if(prefs.theme)applyTheme(prefs.theme);
-if(prefs.density==='compact')document.body.classList.add('compact');
+if (prefs.theme) applyTheme(prefs.theme);
+if (prefs.density === 'compact') document.body.classList.add('compact');
 
 // ============================================================
-// 17. ИНИЦИАЛИЗАЦИЯ
+// 18. ОБЩИЙ РЕНДЕР
 // ============================================================
+
+function renderAll() {
+  renderHome();
+  renderQuests();
+  renderGoals();
+  renderCharacter();
+  renderNotes();
+  renderGallery();
+  renderJournals();
+  renderAvailability();
+  renderStats();
+  renderCalendar();
+}
+
+// ============================================================
+// 19. ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+
 updateNoteFilterCats();
-renderHome();
-renderQuests();
-renderGoals();
-renderCharacter();
-renderNotes();
-renderGallery();
-renderJournals();
-renderAvailability();
-renderStats();
-renderCalendar();
+renderAll();
+
+console.log('⚡ LVLUP v13.3 загружен!');
+console.log('📊 Журналов:', getCategories().length);
+console.log('📋 Задач:', getTasks({ excludeStatus: 'deleted' }).length);
+console.log('🎯 Целей:', data.goals.length);
+console.log('✎ Заметок:', data.notes.length);
+console.log('▣ Фото:', data.media.length);
+console.log('☀ Слотов доступности:', data.availability.length);
+console.log('👤 Уровень персонажа:', data.user.level);
+console.log('📈 Бонус за журналы:', getJournalBonus(), '%');
+console.log('⭐ Глобальный бонус:', getGlobalLevelBonus(), '%');
 </script>
 </body>
-</html>
+</html>  
+  
