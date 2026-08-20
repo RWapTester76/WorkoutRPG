@@ -2,1817 +2,848 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>RPG Планировщик v12</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Платформа учёта долгов</title>
     <style>
-        /* ===== БАЗОВЫЕ ПЕРЕМЕННЫЕ ===== */
-        :root {
-            --bg: #f5f6fa;
-            --surface: #ffffff;
-            --surface2: #f0f1f5;
-            --text: #1a1a2e;
-            --text2: #445566;
-            --text3: #8899bb;
-            --border: rgba(0,0,0,0.06);
-            --shadow: 0 8px 30px rgba(0,0,0,0.08);
-            --accent: #6C5CE7;
-            --accent-light: #A29BFE;
-            --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
-            --accent-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
-            --radius: 24px;
-            --radius-sm: 16px;
-            --transition: 0.25s ease;
-            --font-size: 16px;
-            --first-day: 1;
+        /* ===== ГЛОБАЛЬНЫЕ СТИЛИ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
 
-        [data-theme="dark"] {
-            --bg: #0e0e1a;
-            --surface: rgba(22, 22, 44, 0.85);
-            --surface2: rgba(30, 30, 58, 0.7);
-            --text: #eef0f8;
-            --text2: #8899bb;
-            --text3: #667799;
-            --border: rgba(255,255,255,0.06);
-            --shadow: 0 8px 30px rgba(0,0,0,0.5);
+        body {
+            background: #f4f7fc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
         }
 
-        [data-scheme="classic"] { --accent: #6C5CE7; --accent-light: #A29BFE; }
-        [data-scheme="ocean"] { --accent: #0984e3; --accent-light: #74b9ff; }
-        [data-scheme="forest"] { --accent: #00b894; --accent-light: #55efc4; }
-        [data-scheme="sunset"] { --accent: #e17055; --accent-light: #fab1a0; }
-        [data-scheme="night"] { --accent: #6c5ce7; --accent-light: #a29bfe; --bg: #0b0b12; --surface: rgba(16, 16, 30, 0.9); --surface2: rgba(24, 24, 44, 0.7); --text: #d0d4e8; --text2: #8899bb; --text3: #556688; --border: rgba(255,255,255,0.04); --shadow: 0 8px 30px rgba(0,0,0,0.7); }
-        [data-scheme="neon"] { --accent: #fd79a8; --accent-light: #ffb8d0; --bg: #0b0b12; --surface: rgba(20, 10, 20, 0.85); --surface2: rgba(40, 20, 40, 0.6); --text: #f0e0f0; --text2: #c0a0c0; --text3: #806080; --border: rgba(255, 128, 200, 0.15); --shadow: 0 8px 30px rgba(0,0,0,0.8); }
+        .app {
+            max-width: 1300px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
 
-        * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; padding: 12px; transition: background 0.3s, color 0.3s; font-size: var(--font-size); }
-        #app { max-width: 440px; width: 100%; background: var(--surface); backdrop-filter: blur(12px); border-radius: var(--radius); padding: 20px 16px 80px; position: relative; box-shadow: var(--shadow); border: 1px solid var(--border); transition: 0.3s; }
+        /* ===== ШАПКА ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eef2f7;
+        }
 
-        /* ===== ТОСТЫ ===== */
-        .toast-container { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; width: 90%; max-width: 400px; }
-        .toast { background: var(--surface); color: var(--text); padding: 12px 20px; border-radius: var(--radius-sm); box-shadow: var(--shadow); border-left: 5px solid var(--accent); animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.5s forwards; font-size: 14px; font-weight: 500; width: 100%; text-align: center; pointer-events: auto; border: 1px solid var(--border); }
-        .toast.success { border-left-color: #2ed573; }
-        .toast.error { border-left-color: #ff4757; }
-        .toast.info { border-left-color: var(--accent); }
-        @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
-        @keyframes fadeOut { to { opacity:0; transform: translateY(-20px); } }
+        .logo h1 {
+            font-size: 26px;
+            color: #0b1e33;
+        }
+        .logo span {
+            color: #2a7de1;
+        }
 
-        /* ===== ВЕРХНИЙ БАР ===== */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .top-bar .logo { font-weight: 700; font-size: 20px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .top-bar .actions { display: flex; gap: 8px; }
-        .top-bar .actions button { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text2); transition: 0.2s; padding: 4px; border-radius: 30px; }
-        .top-bar .actions button:active { transform: scale(0.9); }
-
-        .tabs { display: flex; gap: 6px; margin-bottom: 16px; background: var(--surface2); padding: 4px; border-radius: 40px; border: 1px solid var(--border); }
-        .tabs button { flex: 1; padding: 8px 0; border: none; background: transparent; border-radius: 30px; font-size: 12px; font-weight: 600; color: var(--text3); cursor: pointer; transition: 0.3s; }
-        .tabs button.active { background: var(--accent-gradient); color: #fff; box-shadow: var(--accent-shadow); }
-        .tabs button .tab-icon { display: block; font-size: 18px; margin-bottom: 2px; }
-
-        .tab-content { display: none; flex-direction: column; gap: 16px; animation: fadeIn 0.3s ease; }
-        .tab-content.active { display: flex; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-
-        /* ===== ЖУРНАЛЫ ===== */
-        .journal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .journal-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 16px 12px; text-align: center; cursor: pointer; transition: 0.2s; border: 1px solid var(--border); }
-        .journal-card:active { transform: scale(0.96); }
-        .journal-card .icon { font-size: 32px; }
-        .journal-card .name { font-weight: 600; margin-top: 4px; }
-        .journal-card .count { font-size: 13px; color: var(--text3); }
-
-        .journal-screen { display: none; flex-direction: column; gap: 12px; }
-        .journal-screen.active { display: flex; }
-        .journal-screen .back { background: none; border: none; font-size: 18px; color: var(--text2); cursor: pointer; align-self: flex-start; padding: 4px 8px; }
-        .journal-screen .header { display: flex; justify-content: space-between; align-items: center; }
-        .journal-screen .header h2 { font-size: 20px; display: flex; align-items: center; gap: 8px; }
-        .journal-screen .header .color-badge { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
-        .journal-screen .filter-tabs { display: flex; gap: 6px; }
-        .journal-screen .filter-tabs button { flex: 1; padding: 4px 0; border: none; border-radius: 30px; background: var(--surface2); color: var(--text3); font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .journal-screen .filter-tabs button.active { background: var(--accent-gradient); color: #fff; }
-
-        .task-list { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding-right: 4px; }
-        .task-list::-webkit-scrollbar { width: 3px; }
-        .task-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-        .task-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; border-left: 5px solid var(--accent); display: flex; flex-direction: column; gap: 4px; transition: 0.2s; border: 1px solid var(--border); }
-        .task-item.done { opacity: 0.6; }
-        .task-item.skipped { opacity: 0.4; }
-        .task-top { display: flex; justify-content: space-between; align-items: center; }
-        .task-title { font-weight: 600; font-size: 15px; }
-        .task-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--text2); }
-        .task-meta span { background: var(--surface); padding: 0 10px; border-radius: 30px; }
-        .task-actions { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-        .task-actions button { border: none; padding: 4px 14px; border-radius: 30px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .task-actions button:active { transform: scale(0.92); }
-        .btn-done { background: #2e7d32; color: #fff; }
-        .btn-skip { background: #7d2e2e; color: #fff; }
-        .btn-del { background: rgba(60,30,40,0.8); color: #ccb; }
-        .btn-edit { background: #2d7d7d; color: #fff; }
-
-        #calendar-wrap { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .cal-header button { background: var(--surface); border: none; color: var(--text); font-size: 16px; padding: 0 12px; border-radius: 30px; cursor: pointer; line-height: 30px; }
-        .cal-header .month-year { font-weight: 700; display: flex; align-items: center; gap: 6px; }
-        .cal-header .month-year .year-nav { font-size: 14px; background: none; border: none; color: var(--text2); cursor: pointer; padding: 0 4px; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; text-align: center; }
-        .cal-grid .weekday { font-weight: 600; color: var(--text3); font-size: 11px; padding: 4px 0; }
-        .cal-grid .day { padding: 6px 0; border-radius: 30px; background: var(--surface); font-size: 13px; transition: 0.2s; cursor: pointer; position: relative; }
-        .cal-grid .day.today { background: var(--accent-gradient); color: #fff; box-shadow: var(--accent-shadow); }
-        .cal-grid .day.other-month { opacity: 0.2; }
-        .cal-grid .day .dot { display: inline-block; width: 4px; height: 4px; border-radius: 50%; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); }
-
-        /* ===== ПРОФИЛЬ ===== */
-        .profile-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 20px; text-align: center; border: 1px solid var(--border); }
-        .profile-card .avatar { font-size: 56px; margin-bottom: 4px; }
-        .profile-card .name { font-size: 22px; font-weight: 700; cursor: pointer; }
-        .profile-card .gender { color: var(--text3); cursor: pointer; }
-        .profile-card .level { background: var(--accent-gradient); color: #fff; padding: 2px 16px; border-radius: 30px; display: inline-block; margin-top: 4px; font-weight: 700; }
-        .profile-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
-        .profile-stats .stat { background: var(--surface); border-radius: var(--radius-sm); padding: 10px; border: 1px solid var(--border); }
-        .profile-stats .stat .num { font-size: 20px; font-weight: 700; }
-        .profile-stats .stat .label { font-size: 11px; color: var(--text3); }
-        .journal-stats { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
-        .journal-stats .row { display: flex; align-items: center; gap: 8px; background: var(--surface); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-        .journal-stats .row .icon { font-size: 20px; }
-        .journal-stats .row .info { flex: 1; font-size: 14px; }
-        .journal-stats .row .info small { color: var(--text3); display: block; font-size: 12px; }
-        .journal-stats .row .bar { width: 60px; height: 6px; background: var(--surface2); border-radius: 10px; overflow: hidden; }
-        .journal-stats .row .bar .fill { height: 100%; background: var(--accent-gradient); border-radius: 10px; transition: width 0.5s; }
-
-        /* ===== ЗАМЕТКИ ===== */
-        .note-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; transition: 0.2s; }
-        .note-item .note-header { display: flex; justify-content: space-between; align-items: center; }
-        .note-item .note-text { font-size: 15px; cursor: pointer; word-break: break-word; }
-        .note-item .note-text:hover { opacity: 0.7; }
-        .note-item .note-meta { display: flex; gap: 8px; font-size: 12px; color: var(--text3); flex-wrap: wrap; }
-        .note-item .note-actions { display: flex; gap: 6px; }
-        .note-item .note-actions button { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text3); padding: 2px 4px; transition: 0.2s; }
-        .note-item .note-actions button:hover { color: var(--text); }
-
-        /* ===== ЦЕЛИ ===== */
-        .goal-filters { display: flex; gap: 6px; margin-bottom: 4px; }
-        .goal-filters button { flex: 1; padding: 6px 0; border: none; border-radius: 30px; background: var(--surface2); color: var(--text3); font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .goal-filters button.active { background: var(--accent-gradient); color: #fff; }
-
-        .goal-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
-        .goal-item.done { opacity: 0.6; }
-        .goal-item.failed { opacity: 0.5; border-left: 4px solid #ff4757; }
-        .goal-item.overdue { border-left: 4px solid #ffa502; }
-        .goal-item .goal-header { display: flex; justify-content: space-between; align-items: center; }
-        .goal-item .goal-title { font-weight: 600; font-size: 16px; }
-        .goal-item .goal-meta { font-size: 12px; color: var(--text3); display: flex; gap: 8px; flex-wrap: wrap; }
-        .goal-item .goal-meta .journal-tag { background: var(--surface); padding: 0 10px; border-radius: 30px; }
-        .goal-item .goal-progress { display: flex; justify-content: space-between; font-size: 14px; color: var(--text2); }
-        .goal-item .goal-bar { width: 100%; height: 6px; background: var(--surface); border-radius: 10px; overflow: hidden; }
-        .goal-item .goal-bar .fill { height: 100%; background: var(--accent-gradient); border-radius: 10px; transition: width 0.5s; }
-        .goal-item .goal-tasks { font-size: 12px; color: var(--text3); margin-top: 4px; display: flex; flex-direction: column; gap: 4px; }
-        .goal-item .goal-tasks .task-check { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
-        .goal-item .goal-tasks .task-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
-        .goal-item .goal-tasks .task-check .task-title { font-size: 13px; }
-        .goal-item .goal-tasks .task-check .task-title.done { text-decoration: line-through; opacity: 0.6; }
-        .goal-item .goal-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-        .goal-item .goal-actions button { background: none; border: none; color: var(--text2); font-size: 13px; cursor: pointer; padding: 4px 10px; border-radius: 30px; transition: 0.2s; background: var(--surface); }
-        .goal-item .goal-actions button:hover { background: var(--surface); opacity: 0.7; }
-        .goal-item .goal-actions button.primary { background: var(--accent-gradient); color: #fff; }
-
-        /* ===== ГАЛЕРЕЯ ===== */
-        .photo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-        .photo-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; }
-        .photo-upload { display: flex; gap: 8px; margin-top: 8px; }
-        .photo-upload input[type="file"] { display: none; }
-        .photo-upload button { padding: 12px 18px; border: none; border-radius: var(--radius-sm); background: var(--accent-gradient); color: #fff; font-weight: 600; cursor: pointer; width: 100%; }
-
-        /* ===== СТАТИСТИКА ===== */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stats-grid .stat-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 16px; text-align: center; border: 1px solid var(--border); }
-        .stats-grid .stat-card .num { font-size: 28px; font-weight: 700; }
-        .stats-grid .stat-card .label { font-size: 13px; color: var(--text3); }
-        .stats-chart { background: var(--surface2); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border); }
-        .stats-chart .chart-bar { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-        .stats-chart .chart-bar .label { width: 60px; font-size: 13px; }
-        .stats-chart .chart-bar .track { flex: 1; height: 8px; background: var(--surface); border-radius: 10px; overflow: hidden; }
-        .stats-chart .chart-bar .track .fill { height: 100%; background: var(--accent-gradient); border-radius: 10px; transition: width 0.8s; }
-
-        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); justify-content: center; align-items: center; z-index: 999; padding: 16px; }
-        .modal-overlay.open { display: flex; }
-        .modal { background: var(--surface); border-radius: var(--radius); padding: 24px 20px; max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); box-shadow: var(--shadow); }
-        .modal h3 { font-size: 20px; margin-bottom: 16px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .modal label { display: block; font-size: 13px; color: var(--text2); margin-top: 10px; }
-        .modal input, .modal select, .modal textarea { width: 100%; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 15px; margin-top: 4px; outline: none; transition: 0.2s; }
-        .modal input:focus, .modal select:focus, .modal textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,92,231,0.2); }
-        .modal .task-check-list { display: flex; flex-direction: column; gap: 4px; max-height: 120px; overflow-y: auto; padding: 4px; background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border); }
-        .modal .task-check-list label { display: flex; align-items: center; gap: 6px; font-weight: 400; margin-top: 0; padding: 2px 6px; font-size: 14px; }
-        .modal .task-check-list input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
-        .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
-        .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 40px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        .modal-actions button:active { transform: scale(0.94); }
-        .btn-save-task { background: var(--accent-gradient); color: #fff; box-shadow: var(--accent-shadow); }
-        .btn-cancel { background: var(--surface2); color: var(--text2); }
-
-        /* Модалка заметок — большая */
-        .modal.notes-modal { max-width: 440px; }
-        .modal.notes-modal textarea { min-height: 200px; font-size: 16px; line-height: 1.6; }
-
-        /* ===== КНОПКА + В НИЖНЕМ ПРАВОМ УГЛУ ===== */
-        .fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            border: none;
-            background: var(--accent-gradient);
-            color: #fff;
-            font-size: 28px;
-            font-weight: 700;
-            box-shadow: var(--accent-shadow);
-            cursor: pointer;
-            transition: 0.2s;
-            z-index: 100;
+        .user-info {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 15px;
         }
-        .fab:active { transform: scale(0.9); }
-        .fab.goal-fab { bottom: 145px; }
+        .user-info .name {
+            font-weight: 600;
+            color: #1a2b3c;
+        }
+        .btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #eef2f7;
+            color: #1a2b3c;
+        }
+        .btn-primary {
+            background: #2a7de1;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1b62b5;
+        }
+        .btn-danger {
+            background: #e14a4a;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #b52b2b;
+        }
+        .btn-success {
+            background: #20b87a;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #159a64;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #2a7de1;
+            color: #2a7de1;
+        }
+        .btn-outline:hover {
+            background: #2a7de1;
+            color: white;
+        }
 
-        /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
-        #bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--surface); backdrop-filter: blur(12px); border-top: 1px solid var(--border); border-radius: 0 0 var(--radius) var(--radius); padding: 6px 4px 10px; display: flex; justify-content: space-around; transition: 0.3s; }
-        #bottom-nav button { background: transparent; border: none; color: var(--text3); font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 6px; cursor: pointer; transition: 0.2s; flex: 1; border-radius: 16px; }
-        #bottom-nav button .icon { font-size: 22px; line-height: 1; }
-        #bottom-nav button .label { font-size: 9px; font-weight: 500; }
-        #bottom-nav button.active { color: var(--accent); background: rgba(108,92,231,0.12); }
-        #bottom-nav button:active { transform: scale(0.9); }
+        /* ===== СТАТИСТИКА ===== */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: #f9faff;
+            padding: 18px 16px;
+            border-radius: 16px;
+            border-left: 5px solid #2a7de1;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+        .stat-card .label {
+            font-size: 13px;
+            color: #6f7e91;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0b1e33;
+            margin-top: 4px;
+        }
+        .stat-card.danger {
+            border-left-color: #e14a4a;
+        }
+        .stat-card.success {
+            border-left-color: #20b87a;
+        }
+        .stat-card.warning {
+            border-left-color: #f3a83b;
+        }
 
-        @media (max-width:400px) {
-            #app { padding: 16px 12px 70px; }
-            .journal-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .journal-card { padding: 12px 8px; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .fab { width: 48px; height: 48px; font-size: 24px; bottom: 75px; right: 16px; }
-            .fab.goal-fab { bottom: 135px; }
+        /* ===== ФИЛЬТРЫ + ДОБАВЛЕНИЕ ===== */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+            align-items: center;
+        }
+        .toolbar .filter-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .toolbar .filter-group .btn {
+            padding: 8px 18px;
+            font-size: 13px;
+            background: #f0f4fa;
+            color: #1f3348;
+        }
+        .toolbar .filter-group .btn.active {
+            background: #2a7de1;
+            color: white;
+        }
+        .toolbar .search-box {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+        .toolbar .search-box input {
+            padding: 10px 16px;
+            border: 2px solid #e0e7ef;
+            border-radius: 40px;
+            font-size: 14px;
+            width: 200px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .toolbar .search-box input:focus {
+            border-color: #2a7de1;
+        }
+
+        /* ===== ТАБЛИЦА ===== */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #eaeef4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 600px;
+        }
+        th {
+            background: #f8fafd;
+            text-align: left;
+            padding: 14px 16px;
+            color: #1f3348;
+            font-weight: 600;
+            border-bottom: 2px solid #e0e7ef;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #edf2f8;
+            vertical-align: middle;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background: #f9fcff;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status.active {
+            background: #fff1e0;
+            color: #c97c1e;
+        }
+        .status.paid {
+            background: #e0f7ec;
+            color: #10945f;
+        }
+        .status.overdue {
+            background: #fee6e6;
+            color: #c92a2a;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .actions .btn {
+            padding: 5px 12px;
+            font-size: 12px;
+            border-radius: 30px;
+            background: #eef2f7;
+        }
+        .actions .btn-edit {
+            background: #dbeafe;
+            color: #1b62b5;
+        }
+        .actions .btn-edit:hover {
+            background: #b9d6fd;
+        }
+        .actions .btn-delete {
+            background: #fee6e6;
+            color: #b52b2b;
+        }
+        .actions .btn-delete:hover {
+            background: #fccccc;
+        }
+
+        /* ===== МОДАЛКА ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            border-radius: 28px;
+            padding: 36px 40px;
+            max-width: 540px;
+            width: 95%;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
+            animation: fadeUp 0.25s ease;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #0b1e33;
+        }
+        .modal label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f3348;
+            display: block;
+            margin: 14px 0 4px;
+        }
+        .modal input,
+        .modal select,
+        .modal textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e7ef;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .modal input:focus,
+        .modal select:focus,
+        .modal textarea:focus {
+            border-color: #2a7de1;
+        }
+        .modal textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .modal .form-row {
+            display: flex;
+            gap: 12px;
+        }
+        .modal .form-row > * {
+            flex: 1;
+        }
+        .modal .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+
+        /* ===== ПУСТОЕ СОСТОЯНИЕ ===== */
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6f7e91;
+        }
+        .empty .emoji {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 700px) {
+            .app {
+                padding: 16px;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .toolbar .search-box {
+                margin-left: 0;
+            }
+            .toolbar .search-box input {
+                width: 100%;
+            }
+            .modal {
+                padding: 24px 18px;
+            }
+            .modal .form-row {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-<div id="app">
 
-    <div class="top-bar">
-        <span class="logo">📋 RPG Planner</span>
-        <div class="actions">
-            <button id="settingsToggle" title="Настройки">⚙️</button>
-        </div>
-    </div>
-
-    <div class="tabs" id="mainTabs">
-        <button class="active" data-tab="journals"><span class="tab-icon">📚</span>Журналы</button>
-        <button data-tab="goals"><span class="tab-icon">🎯</span>Цели</button>
-        <button data-tab="profile"><span class="tab-icon">👤</span>Профиль</button>
-        <button data-tab="notes"><span class="tab-icon">📝</span>Заметки</button>
-        <button data-tab="gallery"><span class="tab-icon">🖼️</span>Галерея</button>
-        <button data-tab="stats"><span class="tab-icon">📊</span>Статистика</button>
-    </div>
-
-    <!-- ===== ВКЛАДКА ЖУРНАЛЫ ===== -->
-    <div class="tab-content active" id="tab-journals">
-        <div class="journal-grid" id="journalGrid"></div>
-        <div id="journalScreen" class="journal-screen">
-            <button class="back" id="journalBack">← Назад</button>
-            <div class="header">
-                <h2><span class="color-badge" id="journalColor" style="background:var(--accent);"></span> <span id="journalTitle">Журнал</span></h2>
-                <button class="btn-new" id="journalAddBtn" style="background:var(--accent-gradient); color:#fff; border:none; font-size:24px; width:44px; height:44px; border-radius:40px; cursor:pointer; box-shadow:var(--accent-shadow);">➕</button>
+    <div class="app" id="app">
+        <!-- ===== ШАПКА ===== -->
+        <header class="header">
+            <div class="logo">
+                <h1>💰 <span>Долги</span>.Про</h1>
             </div>
-            <div class="filter-tabs" id="journalFilters">
-                <button class="active" data-filter="all">Все</button>
-                <button data-filter="active">Активные</button>
-                <button data-filter="done">Выполненные</button>
+            <div class="user-info">
+                <span class="name">👤 Александр</span>
+                <button class="btn btn-outline" id="logoutBtn">Выйти</button>
             </div>
-            <div id="calendar-wrap">
-                <div class="cal-header">
-                    <button id="calPrevMonth">◀</button>
-                    <span class="month-year">
-                        <span id="calTitle">Январь 2026</span>
-                        <button class="year-nav" id="calPrevYear">◀◀</button>
-                        <button class="year-nav" id="calNextYear">▶▶</button>
-                    </span>
-                    <button id="calNextMonth">▶</button>
-                </div>
-                <div id="calendarContent"></div>
+        </header>
+
+        <!-- ===== СТАТИСТИКА ===== -->
+        <div class="stats" id="statsContainer">
+            <div class="stat-card">
+                <div class="label">Всего долгов</div>
+                <div class="value" id="totalDebts">0</div>
             </div>
-            <div class="task-list" id="journalTaskList"></div>
-        </div>
-    </div>
-
-    <!-- ===== ВКЛАДКА ЦЕЛИ ===== -->
-    <div class="tab-content" id="tab-goals">
-        <div class="goal-filters">
-            <button class="active" data-filter="all">Все</button>
-            <button data-filter="active">Активные</button>
-            <button data-filter="done">Выполненные</button>
-        </div>
-        <div id="goalList"></div>
-        <!-- FAB для добавления цели -->
-        <button class="fab goal-fab" id="goalAddFab">🎯</button>
-    </div>
-
-    <!-- ===== ВКЛАДКА ПРОФИЛЬ ===== -->
-    <div class="tab-content" id="tab-profile">
-        <div class="profile-card" id="profileCard">
-            <div class="avatar" id="profileAvatar">🧙</div>
-            <div class="name" id="profileName">Герой</div>
-            <div class="gender" id="profileGender">М</div>
-            <div class="level">Уровень <span id="profileLevel">1</span></div>
-            <div class="xp-bar" style="width:100%; height:6px; background:var(--surface); border-radius:10px; margin-top:10px; overflow:hidden;">
-                <div class="xp-fill" id="profileXpFill" style="width:0%; height:100%; background:var(--accent-gradient); border-radius:10px; transition:width 0.6s;"></div>
+            <div class="stat-card warning">
+                <div class="label">Активных</div>
+                <div class="value" id="activeDebts">0</div>
             </div>
-            <div style="font-size:13px; color:var(--text3); margin-top:4px;">Опыт: <span id="profileXp">0</span></div>
+            <div class="stat-card danger">
+                <div class="label">Просрочено</div>
+                <div class="value" id="overdueDebts">0</div>
+            </div>
+            <div class="stat-card success">
+                <div class="label">Погашено</div>
+                <div class="value" id="paidDebts">0</div>
+            </div>
         </div>
-        <div class="profile-stats" id="profileStats">
-            <div class="stat"><div class="num" id="statTotal">0</div><div class="label">Всего задач</div></div>
-            <div class="stat"><div class="num" id="statDone">0</div><div class="label">Выполнено</div></div>
-            <div class="stat"><div class="num" id="statActive">0</div><div class="label">Активно</div></div>
+
+        <!-- ===== ИНСТРУМЕНТЫ ===== -->
+        <div class="toolbar">
+            <div class="filter-group" id="filterGroup">
+                <button class="btn active" data-filter="all">Все</button>
+                <button class="btn" data-filter="active">Активные</button>
+                <button class="btn" data-filter="overdue">Просроченные</button>
+                <button class="btn" data-filter="paid">Погашенные</button>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Поиск по названию..." />
+                <button class="btn btn-primary" id="addDebtBtn">+ Добавить</button>
+            </div>
         </div>
-        <div class="journal-stats" id="journalStats"></div>
+
+        <!-- ===== ТАБЛИЦА ===== -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Сумма</th>
+                        <th>Тип</th>
+                        <th>Контрагент</th>
+                        <th>Срок</th>
+                        <th>Статус</th>
+                        <th style="min-width:120px;">Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="debtTableBody">
+                    <!-- строки рендерятся через JS -->
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" id="emptyState" style="display:none;">
+            <span class="emoji">📭</span>
+            <p>Нет долгов. Добавьте первый!</p>
+        </div>
     </div>
 
-    <!-- ===== ВКЛАДКА ЗАМЕТКИ ===== -->
-    <div class="tab-content" id="tab-notes">
-        <button class="btn-new" id="noteAddBtn" style="background:var(--accent-gradient); color:#fff; border:none; font-size:24px; width:44px; height:44px; border-radius:40px; cursor:pointer; box-shadow:var(--accent-shadow); align-self:flex-end; margin-bottom:8px;">➕</button>
-        <div id="noteList"></div>
-    </div>
-
-    <!-- ===== ВКЛАДКА ГАЛЕРЕЯ ===== -->
-    <div class="tab-content" id="tab-gallery">
-        <div class="photo-upload">
-            <button id="galleryUploadBtn">📸 Загрузить фото</button>
-            <input type="file" id="galleryFileInput" accept="image/*" multiple />
-        </div>
-        <div class="photo-grid" id="galleryGrid"></div>
-    </div>
-
-    <!-- ===== ВКЛАДКА СТАТИСТИКА ===== -->
-    <div class="tab-content" id="tab-stats">
-        <div class="stats-grid" id="statsGrid">
-            <div class="stat-card"><div class="num" id="statsTotal">0</div><div class="label">Всего задач</div></div>
-            <div class="stat-card"><div class="num" id="statsDone">0</div><div class="label">Выполнено</div></div>
-            <div class="stat-card"><div class="num" id="statsActive">0</div><div class="label">Активно</div></div>
-            <div class="stat-card"><div class="num" id="statsProductivity">0%</div><div class="label">Продуктивность</div></div>
-        </div>
-        <div class="stats-chart" id="statsChart">
-            <div style="font-weight:600; margin-bottom:8px;">Прогресс по журналам</div>
-            <div id="chartBars"></div>
-        </div>
-    </div>
-
-    <!-- ===== НИЖНЯЯ НАВИГАЦИЯ ===== -->
-    <div id="bottom-nav">
-        <button class="active" data-tab="journals"><span class="icon">📚</span><span class="label">Журналы</span></button>
-        <button data-tab="goals"><span class="icon">🎯</span><span class="label">Цели</span></button>
-        <button data-tab="profile"><span class="icon">👤</span><span class="label">Профиль</span></button>
-        <button data-tab="notes"><span class="icon">📝</span><span class="label">Заметки</span></button>
-        <button data-tab="gallery"><span class="icon">🖼️</span><span class="label">Галерея</span></button>
-        <button data-tab="stats"><span class="icon">📊</span><span class="label">Статистика</span></button>
-    </div>
-
-    <!-- ===== МОДАЛЬНОЕ ОКНО ЗАДАЧ ===== -->
+    <!-- ===== МОДАЛЬНОЕ ОКНО (ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ) ===== -->
     <div class="modal-overlay" id="modalOverlay">
-        <div class="modal" id="modalContent">
-            <h3 id="modalTitle">➕ Новая задача</h3>
-            <div id="modalFields"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" id="modalCancel">Отмена</button>
-                <button class="btn-save-task" id="modalSave">Сохранить</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== МОДАЛЬНОЕ ОКНО ДНЯ ===== -->
-    <div class="modal-overlay" id="dayModal">
-        <div class="modal" style="max-width:360px;">
-            <h3 id="dayModalTitle">Задачи на день</h3>
-            <div id="dayModalList" style="display:flex; flex-direction:column; gap:8px; max-height:400px; overflow-y:auto;"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" id="dayModalClose">Закрыть</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== МОДАЛЬНОЕ ОКНО ЦЕЛИ ===== -->
-    <div class="modal-overlay" id="goalModal">
         <div class="modal">
-            <h3 id="goalModalTitle">🎯 Новая цель</h3>
-            <label>Название цели</label>
-            <input type="text" id="goalModalTitleInput" placeholder="Например: Стать сильнее" />
+            <h2 id="modalTitle">Новый долг</h2>
+            <form id="debtForm">
+                <input type="hidden" id="editId" value="" />
 
-            <label>Журнал</label>
-            <select id="goalModalJournal"></select>
+                <label for="debtName">Название *</label>
+                <input type="text" id="debtName" placeholder="Например: Долг за аренду" required />
 
-            <label>Задачи (выберите из журнала)</label>
-            <div class="task-check-list" id="goalModalTasks"></div>
+                <label for="debtAmount">Сумма (₽) *</label>
+                <input type="number" id="debtAmount" placeholder="5000" required min="0" step="0.01" />
 
-            <label>Дедлайн</label>
-            <input type="date" id="goalModalDeadline" />
+                <div class="form-row">
+                    <div>
+                        <label for="debtType">Тип</label>
+                        <select id="debtType">
+                            <option value="owed_to_me">Должен мне</option>
+                            <option value="i_owe">Я должен</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="debtCounterparty">Контрагент *</label>
+                        <input type="text" id="debtCounterparty" placeholder="Иван Петров" required />
+                    </div>
+                </div>
 
-            <div class="modal-actions">
-                <button class="btn-cancel" id="goalModalCancel">Отмена</button>
-                <button class="btn-save-task" id="goalModalSave">Сохранить</button>
-            </div>
+                <label for="debtDueDate">Дата возврата *</label>
+                <input type="date" id="debtDueDate" required />
+
+                <label for="debtNote">Примечание (опционально)</label>
+                <textarea id="debtNote" placeholder="Ссылка на расписку, фото чека..."></textarea>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn" id="cancelModalBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary" id="saveDebtBtn">Сохранить</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- ===== МОДАЛЬНОЕ ОКНО ЗАМЕТКИ (БОЛЬШОЕ) ===== -->
-    <div class="modal-overlay" id="noteModal">
-        <div class="modal notes-modal">
-            <h3 id="noteModalTitle">📝 Заметка</h3>
-            <textarea id="noteModalText" placeholder="Введите текст заметки..."></textarea>
-            <div class="modal-actions">
-                <button class="btn-cancel" id="noteModalCancel">Отмена</button>
-                <button class="btn-save-task" id="noteModalSave">Сохранить</button>
-            </div>
-        </div>
-    </div>
+    <script>
+        // ================================================================
+        //  ГЛАВНЫЙ JS — УПРАВЛЕНИЕ ДОЛГАМИ
+        //  Храним всё в localStorage, чтобы данные не терялись
+        // ================================================================
 
-    <!-- ===== НАСТРОЙКИ ===== -->
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal" style="max-width:380px;">
-            <h3>⚙️ Настройки</h3>
-            <div class="settings-section">
-                <div class="section-title">🎨 Цветовая схема</div>
-                <div class="color-schemes" id="schemeButtons">
-                    <button data-scheme="classic" style="background:linear-gradient(135deg,#6C5CE7,#A29BFE);">К</button>
-                    <button data-scheme="ocean" style="background:linear-gradient(135deg,#0984e3,#74b9ff);">О</button>
-                    <button data-scheme="forest" style="background:linear-gradient(135deg,#00b894,#55efc4);">Л</button>
-                    <button data-scheme="sunset" style="background:linear-gradient(135deg,#e17055,#fab1a0);">З</button>
-                    <button data-scheme="night" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe);">Н</button>
-                    <button data-scheme="neon" style="background:linear-gradient(135deg,#fd79a8,#ffb8d0);">НЕ</button>
-                </div>
-            </div>
-            <div class="settings-section">
-                <div class="section-title">🌓 Тема</div>
-                <div class="setting-row">
-                    <span class="label">Режим</span>
-                    <div class="control">
-                        <button class="theme-btn" data-theme="dark">🌙 Тёмная</button>
-                        <button class="theme-btn" data-theme="light">☀️ Светлая</button>
-                    </div>
-                </div>
-            </div>
-            <div class="settings-section">
-                <div class="section-title">📐 Отображение</div>
-                <div class="setting-row">
-                    <span class="label">Первый день недели</span>
-                    <div class="control">
-                        <select id="firstDaySelect">
-                            <option value="1">Понедельник</option>
-                            <option value="0">Воскресенье</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="setting-row">
-                    <span class="label">Формат времени</span>
-                    <div class="control">
-                        <select id="timeFormatSelect">
-                            <option value="24">24-часовой</option>
-                            <option value="12">12-часовой</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="setting-row">
-                    <span class="label">Размер шрифта</span>
-                    <div class="control">
-                        <select id="fontSizeSelect">
-                            <option value="14">Маленький</option>
-                            <option value="16" selected>Средний</option>
-                            <option value="18">Большой</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="settings-section">
-                <div class="section-title">🔔 Уведомления</div>
-                <div class="setting-row">
-                    <span class="label">Напоминания</span>
-                    <div class="control">
-                        <label style="display:flex; align-items:center; gap:6px; font-size:14px;">
-                            <input type="checkbox" id="notifToggle" checked /> Вкл.
-                        </label>
-                    </div>
-                </div>
-                <div style="font-size:12px; color:var(--text3); margin-top:4px;">(Заглушка)</div>
-            </div>
-            <div class="settings-section">
-                <div class="section-title">📱 Умные девайсы</div>
-                <div class="setting-row">
-                    <span class="label">Apple Health / Google Fit</span>
-                    <div class="control">
-                        <label style="display:flex; align-items:center; gap:6px; font-size:14px;">
-                            <input type="checkbox" id="smartSyncToggle" /> Синхронизация
-                        </label>
-                    </div>
-                </div>
-                <div style="font-size:12px; color:var(--text3); margin-top:4px;">(Заглушка)</div>
-            </div>
-            <div class="settings-section">
-                <div class="section-title">💾 Данные</div>
-                <div class="setting-row">
-                    <span class="label">Экспорт (JSON)</span>
-                    <div class="control">
-                        <button class="primary" id="exportBtn">Скачать</button>
-                    </div>
-                </div>
-                <div class="setting-row">
-                    <span class="label">Импорт (JSON)</span>
-                    <div class="control">
-                        <button id="importBtn">Загрузить</button>
-                        <input type="file" id="importFileInput" accept=".json" style="display:none;" />
-                    </div>
-                </div>
-                <div class="setting-row">
-                    <span class="label">Сброс данных</span>
-                    <div class="control">
-                        <button id="resetBtn" style="background:#c0392b; color:#fff; border:none;">🗑 Очистить</button>
-                    </div>
-                </div>
-            </div>
-            <div class="settings-section">
-                <div class="section-title">ℹ️ О приложении</div>
-                <div style="font-size:14px; color:var(--text2);">
-                    RPG Планировщик v12<br />
-                    Разработчик: AI-сеньор
-                </div>
-            </div>
-            <div class="modal-actions" style="margin-top:20px;">
-                <button class="btn-cancel" id="settingsClose">Закрыть</button>
-            </div>
-        </div>
-    </div>
+        // ---- КЛЮЧИ ДЛЯ ХРАНЕНИЯ ----
+        const STORAGE_KEY = 'debts_data';
+        const USER_KEY = 'debts_user';
 
-</div>
+        // ---- СОСТОЯНИЕ ----
+        let debts = [];
+        let currentFilter = 'all';
+        let searchQuery = '';
 
-<script>
-    // ============================================================
-    // 1. ДАННЫЕ
-    // ============================================================
-    const STORAGE_KEY = 'rpg_journal_v12';
-    const CATEGORIES = ['body','hobby','business','food','finance','debts','travel','misc'];
-    const COLORS = { body: '#ff4757', hobby: '#a29bfe', business: '#4a8bfe', food: '#2ed573', finance: '#ffa502', debts: '#ff6348', travel: '#00cec9', misc: '#fdcb6e' };
-    const ICONS = { body: '💪', hobby: '🎨', business: '📈', food: '🥗', finance: '💰', debts: '📋', travel: '✈️', misc: '📦' };
-    const NAMES = { body: 'Тело', hobby: 'Хобби', business: 'Бизнес', food: 'Питание', finance: 'Финансы', debts: 'Долги', travel: 'Путешествия', misc: 'Разное' };
+        // ---- DOM-ЭЛЕМЕНТЫ ----
+        const tbody = document.getElementById('debtTableBody');
+        const emptyState = document.getElementById('emptyState');
+        const totalEl = document.getElementById('totalDebts');
+        const activeEl = document.getElementById('activeDebts');
+        const overdueEl = document.getElementById('overdueDebts');
+        const paidEl = document.getElementById('paidDebts');
 
-    function getDefaultData() {
-        return {
-            character: { name: 'Герой', gender: 'М', hp: 100, str: 10, int: 10, end: 10, level: 1, xp: 0 },
-            tasks: { body: [], hobby: [], business: [], food: [], finance: [], debts: [], travel: [], misc: [] },
-            notes: [],
-            gallery: [],
-            goals: []
-        };
-    }
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const debtForm = document.getElementById('debtForm');
+        const editId = document.getElementById('editId');
+        const debtName = document.getElementById('debtName');
+        const debtAmount = document.getElementById('debtAmount');
+        const debtType = document.getElementById('debtType');
+        const debtCounterparty = document.getElementById('debtCounterparty');
+        const debtDueDate = document.getElementById('debtDueDate');
+        const debtNote = document.getElementById('debtNote');
 
-    let data = loadData();
+        const filterGroup = document.getElementById('filterGroup');
+        const searchInput = document.getElementById('searchInput');
+        const addBtn = document.getElementById('addDebtBtn');
+        const cancelBtn = document.getElementById('cancelModalBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
 
-    function loadData() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                const def = getDefaultData();
-                for (let key in def) {
-                    if (!(key in parsed)) parsed[key] = def[key];
-                }
-                for (let cat in def.tasks) {
-                    if (!(cat in parsed.tasks)) parsed.tasks[cat] = [];
-                }
-                // Миграция целей
-                if (parsed.goals) {
-                    parsed.goals = parsed.goals.map(g => {
-                        if (!g.id) g.id = 'goal_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-                        if (!g.category) g.category = 'Другое';
-                        if (!g.status) g.status = 'active';
-                        if (!g.tasks) g.tasks = [];
-                        if (!g.deadline) g.deadline = '';
-                        if (!g.journal) g.journal = 'body';
-                        // Миграция из старого формата
-                        if (g.taskIds && !g.tasks.length) {
-                            g.tasks = g.taskIds.map(id => {
-                                const task = getTaskById(id);
-                                return task ? { id: task.id, title: task.title, done: task.status === 'done' } : null;
-                            }).filter(Boolean);
-                            delete g.taskIds;
-                        }
-                        return g;
-                    });
-                }
-                return parsed;
-            }
-        } catch(e) {}
-        return getDefaultData();
-    }
-
-    function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-
-    // ============================================================
-    // 2. ВСПОМОГАТЕЛЬНЫЕ
-    // ============================================================
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('toastContainer') || (() => {
-            const c = document.createElement('div');
-            c.id = 'toastContainer';
-            c.className = 'toast-container';
-            document.body.appendChild(c);
-            return c;
-        })();
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-        container.appendChild(toast);
-        setTimeout(() => { toast.remove(); }, 3000);
-    }
-
-    function addXP(amount) {
-        data.character.xp += amount;
-        const xpNeeded = 100 + data.character.level * 20;
-        while (data.character.xp >= xpNeeded) {
-            data.character.xp -= xpNeeded;
-            data.character.level += 1;
-            const stats = ['hp','str','int','end'];
-            const s = stats[Math.floor(Math.random() * stats.length)];
-            data.character[s] += 1;
-        }
-        saveData();
-        updateAllUI();
-        showToast(`+${amount} XP!`, 'success');
-    }
-
-    function getPriorityXP(priority) {
-        const map = { low: 5, medium: 10, high: 20 };
-        return map[priority] || 10;
-    }
-
-    function formatDate(date) {
-        return date.toISOString().split('T')[0];
-    }
-
-    function getTasksForDate(dateStr) {
-        const result = [];
-        CATEGORIES.forEach(cat => {
-            data.tasks[cat].forEach(task => {
-                if (task.date === dateStr) {
-                    result.push({ ...task, category: cat });
-                }
-                if (task.days && task.days.length) {
-                    const d = new Date(dateStr);
-                    const dayOfWeek = d.getDay();
-                    const firstDay = parseInt(localStorage.getItem('app_firstDay') || '1');
-                    let dayIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
-                    if (firstDay === 0) dayIndex = dayOfWeek;
-                    const daysMap = ['mon','tue','wed','thu','fri','sat','sun'];
-                    if (task.days.includes(daysMap[dayIndex])) {
-                        if (!result.some(t => t.id === task.id && t.category === cat)) {
-                            result.push({ ...task, category: cat });
-                        }
-                    }
-                }
-            });
-        });
-        return result;
-    }
-
-    function getStats() {
-        let total = 0, done = 0, active = 0;
-        CATEGORIES.forEach(cat => {
-            const tasks = data.tasks[cat] || [];
-            total += tasks.length;
-            tasks.forEach(t => {
-                if (t.status === 'done') done++;
-                else if (t.status === 'active') active++;
-            });
-        });
-        return { total, done, active, productivity: total ? Math.round((done / total) * 100) : 0 };
-    }
-
-    function getCategoryStats() {
-        const result = {};
-        CATEGORIES.forEach(cat => {
-            const tasks = data.tasks[cat] || [];
-            const total = tasks.length;
-            const done = tasks.filter(t => t.status === 'done').length;
-            result[cat] = { total, done, active: total - done - tasks.filter(t => t.status === 'skipped').length };
-        });
-        return result;
-    }
-
-    function getTaskById(id) {
-        for (let cat of CATEGORIES) {
-            const found = data.tasks[cat].find(t => t.id === id);
-            if (found) return { ...found, category: cat };
-        }
-        return null;
-    }
-
-    function getTasksByJournal(journal) {
-        return data.tasks[journal] || [];
-    }
-
-    // ============================================================
-    // 3. ОБНОВЛЕНИЕ ВСЕГО UI
-    // ============================================================
-    function updateAllUI() {
-        renderJournalGrid();
-        renderGoals();
-        renderProfile();
-        renderNotes();
-        renderGallery();
-        renderStats();
-        renderCalendar();
-        if (currentJournalCategory) renderJournalTasks(currentJournalCategory, getCurrentFilter());
-    }
-
-    // ============================================================
-    // 4. ЖУРНАЛЫ (как в v11)
-    // ============================================================
-    function renderJournalGrid() {
-        const grid = document.getElementById('journalGrid');
-        grid.innerHTML = CATEGORIES.map(cat => {
-            const count = (data.tasks[cat] || []).length;
-            return `<div class="journal-card" data-category="${cat}"><div class="icon">${ICONS[cat]}</div><div class="name">${NAMES[cat]}</div><div class="count">${count} задач</div></div>`;
-        }).join('');
-        grid.querySelectorAll('.journal-card').forEach(el => {
-            el.addEventListener('click', () => openJournal(el.dataset.category));
-        });
-    }
-
-    let currentJournalCategory = null;
-
-    function openJournal(category) {
-        currentJournalCategory = category;
-        document.getElementById('journalGrid').style.display = 'none';
-        const screen = document.getElementById('journalScreen');
-        screen.style.display = 'flex';
-        screen.dataset.currentJournal = category;
-        document.getElementById('journalTitle').textContent = NAMES[category];
-        document.getElementById('journalColor').style.background = COLORS[category];
-        document.querySelectorAll('#journalFilters button').forEach(b => b.classList.remove('active'));
-        document.querySelector('#journalFilters button[data-filter="all"]').classList.add('active');
-        renderJournalTasks(category);
-        renderCalendar();
-    }
-
-    function closeJournal() {
-        document.getElementById('journalGrid').style.display = 'grid';
-        document.getElementById('journalScreen').style.display = 'none';
-        document.getElementById('journalScreen').dataset.currentJournal = '';
-        currentJournalCategory = null;
-    }
-
-    document.getElementById('journalBack').addEventListener('click', closeJournal);
-
-    function getCurrentFilter() {
-        const active = document.querySelector('#journalFilters .active');
-        return active ? active.dataset.filter : 'all';
-    }
-
-    function renderJournalTasks(category, filter = 'all') {
-        const list = document.getElementById('journalTaskList');
-        let tasks = data.tasks[category] || [];
-        if (filter === 'active') tasks = tasks.filter(t => t.status === 'active');
-        else if (filter === 'done') tasks = tasks.filter(t => t.status === 'done' || t.status === 'skipped');
-
-        if (!tasks.length) {
-            list.innerHTML = `<div style="color:var(--text3); text-align:center; padding:20px;">Нет задач</div>`;
-            return;
+        // ---- ИНИЦИАЛИЗАЦИЯ ----
+        function init() {
+            loadData();
+            render();
+            bindEvents();
         }
 
-        list.innerHTML = tasks.map((task, idx) => {
-            const realIdx = data.tasks[category].indexOf(task);
-            const statusClass = task.status === 'done' ? 'done' : (task.status === 'skipped' ? 'skipped' : '');
-            const priorityEmoji = { low: '🟢', medium: '🟡', high: '🔴' }[task.priority] || '';
-            const daysDisplay = task.days && task.days.length ? ` 📅 ${task.days.map(d => ({mon:'Пн',tue:'Вт',wed:'Ср',thu:'Чт',fri:'Пт',sat:'Сб',sun:'Вс'})[d]).join(' ')}` : '';
-            return `
-                <div class="task-item ${statusClass}" style="border-left-color:${COLORS[category]};">
-                    <div class="task-top">
-                        <span class="task-title">${priorityEmoji} ${task.title}</span>
-                        <span style="font-size:11px;color:var(--text3);">${task.date || 'без даты'}</span>
-                    </div>
-                    <div class="task-meta">
-                        ${task.duration ? `<span>⏱ ${task.duration} мин</span>` : ''}
-                        ${task.status === 'done' ? '✅ Выполнено' : (task.status === 'skipped' ? '⏭ Пропущено' : '⏳ Активно')}
-                        ${task.note ? `<span>📝 ${task.note}</span>` : ''}
-                        ${task.endDate ? `<span>🔚 ${task.endDate}</span>` : ''}
-                    </div>
-                    ${task.days && task.days.length ? `<div class="task-days" style="font-size:11px;color:var(--accent-light);">${daysDisplay}</div>` : ''}
-                    <div class="task-actions">
-                        ${task.status === 'active' ? `
-                            <button class="btn-done" data-cat="${category}" data-idx="${realIdx}" data-action="done">✅ Выполнить</button>
-                            <button class="btn-skip" data-cat="${category}" data-idx="${realIdx}" data-action="skip">⏭ Пропустить</button>
-                        ` : ''}
-                        <button class="btn-edit" data-cat="${category}" data-idx="${realIdx}" data-action="edit">✏️</button>
-                        <button class="btn-del" data-cat="${category}" data-idx="${realIdx}" data-action="delete">🗑</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        list.querySelectorAll('[data-action]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const cat = btn.dataset.cat;
-                const idx = parseInt(btn.dataset.idx);
-                const action = btn.dataset.action;
-                const task = data.tasks[cat][idx];
-                if (!task) return;
-                if (action === 'done') {
-                    if (task.status === 'active') {
-                        task.status = 'done';
-                        const xp = getPriorityXP(task.priority);
-                        addXP(xp);
-                        saveData();
-                        updateAllUI();
-                        renderJournalTasks(cat, getCurrentFilter());
-                        showToast(`✅ Задача выполнена! +${xp} XP`, 'success');
-                    }
-                } else if (action === 'skip') {
-                    if (task.status === 'active') {
-                        task.status = 'skipped';
-                        saveData();
-                        updateAllUI();
-                        renderJournalTasks(cat, getCurrentFilter());
-                        showToast('⏭ Задача пропущена', 'info');
-                    }
-                } else if (action === 'edit') {
-                    openEditModal(cat, idx);
-                } else if (action === 'delete') {
-                    if (confirm('Удалить задачу?')) {
-                        data.goals.forEach(goal => {
-                            goal.tasks = goal.tasks.filter(t => t.id !== task.id);
-                        });
-                        data.tasks[cat].splice(idx, 1);
-                        saveData();
-                        updateAllUI();
-                        renderJournalTasks(cat, getCurrentFilter());
-                        showToast('🗑 Задача удалена', 'info');
-                    }
-                }
-            });
-        });
-    }
-
-    document.querySelectorAll('#journalFilters button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#journalFilters button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if (currentJournalCategory) {
-                renderJournalTasks(currentJournalCategory, btn.dataset.filter);
-            }
-        });
-    });
-
-    document.getElementById('journalAddBtn').addEventListener('click', () => {
-        if (currentJournalCategory) openCreateModal(currentJournalCategory);
-    });
-
-    // ============================================================
-    // 5. КАЛЕНДАРЬ
-    // ============================================================
-    let calYear = new Date().getFullYear();
-    let calMonth = new Date().getMonth();
-    const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-
-    function renderCalendar() {
-        const container = document.getElementById('calendarContent');
-        const title = document.getElementById('calTitle');
-        title.textContent = monthNames[calMonth] + ' ' + calYear;
-
-        const firstDay = new Date(calYear, calMonth, 1).getDay();
-        const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
-        const daysInPrev = new Date(calYear, calMonth, 0).getDate();
-        const firstDayOfWeek = parseInt(localStorage.getItem('app_firstDay') || '1');
-        let startOffset = (firstDay === 0) ? 6 : firstDay - 1;
-        if (firstDayOfWeek === 0) startOffset = firstDay;
-
-        let html = `<div class="cal-grid">`;
-        const weekDays = firstDayOfWeek === 1 ? ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'] : ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-        weekDays.forEach(w => { html += `<div class="weekday">${w}</div>`; });
-
-        for (let i=0; i<startOffset; i++) {
-            const d = daysInPrev - startOffset + i + 1;
-            html += `<div class="day other-month">${d}</div>`;
-        }
-
-        const today = new Date();
-        for (let d=1; d<=daysInMonth; d++) {
-            const dateObj = new Date(calYear, calMonth, d);
-            const dateStr = formatDate(dateObj);
-            const isToday = (d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear());
-            const tasks = getTasksForDate(dateStr);
-            const dots = tasks.map(t => `<span class="dot" style="background:${COLORS[t.category]};"></span>`).join('');
-            const cls = 'day' + (isToday ? ' today' : '');
-            html += `<div class="${cls}" data-date="${dateStr}">${d}${dots ? '<br>'+dots : ''}</div>`;
-        }
-        html += `</div>`;
-        container.innerHTML = html;
-
-        container.querySelectorAll('.day:not(.other-month)').forEach(el => {
-            el.addEventListener('click', () => {
-                const dateStr = el.dataset.date;
-                if (dateStr) showDayTasks(dateStr);
-            });
-        });
-    }
-
-    function showDayTasks(dateStr) {
-        const tasks = getTasksForDate(dateStr);
-        const list = document.getElementById('dayModalList');
-        if (!tasks.length) {
-            list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;">Нет задач на этот день</div>';
-        } else {
-            list.innerHTML = tasks.map(t => `
-                <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px;border-left:4px solid ${COLORS[t.category]};display:flex;justify-content:space-between;">
-                    <span>${t.title} <small style="color:var(--text3);">(${NAMES[t.category]})</small></span>
-                    <span style="font-size:12px;color:var(--text3);">${t.status === 'done' ? '✅' : (t.status === 'skipped' ? '⏭' : '⏳')}</span>
-                </div>
-            `).join('');
-        }
-        document.getElementById('dayModalTitle').textContent = `📅 ${dateStr}`;
-        document.getElementById('dayModal').classList.add('open');
-    }
-
-    document.getElementById('dayModalClose').addEventListener('click', () => {
-        document.getElementById('dayModal').classList.remove('open');
-    });
-    document.getElementById('dayModal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) document.getElementById('dayModal').classList.remove('open');
-    });
-
-    document.getElementById('calPrevMonth').addEventListener('click', () => {
-        calMonth--;
-        if (calMonth < 0) { calMonth = 11; calYear--; }
-        renderCalendar();
-    });
-    document.getElementById('calNextMonth').addEventListener('click', () => {
-        calMonth++;
-        if (calMonth > 11) { calMonth = 0; calYear++; }
-        renderCalendar();
-    });
-    document.getElementById('calPrevYear').addEventListener('click', () => {
-        calYear--;
-        renderCalendar();
-    });
-    document.getElementById('calNextYear').addEventListener('click', () => {
-        calYear++;
-        renderCalendar();
-    });
-
-    // ============================================================
-    // 6. ЦЕЛИ (НОВАЯ ЛОГИКА)
-    // ============================================================
-    let goalsFilter = 'all';
-
-    function renderGoals() {
-        const container = document.getElementById('goalList');
-        let filtered = data.goals;
-        if (goalsFilter === 'active') filtered = filtered.filter(g => g.status === 'active');
-        else if (goalsFilter === 'done') filtered = filtered.filter(g => g.status === 'done');
-
-        if (!filtered.length) {
-            container.innerHTML = '<div style="color:var(--text3); text-align:center; padding:30px;">Нет целей. Нажмите 🎯 в правом нижнем углу, чтобы создать.</div>';
-            return;
-        }
-
-        container.innerHTML = filtered.map((goal, idx) => {
-            const realIdx = data.goals.indexOf(goal);
-            const totalTasks = goal.tasks ? goal.tasks.length : 0;
-            const doneTasks = goal.tasks ? goal.tasks.filter(t => t.done).length : 0;
-            const pct = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
-            const statusClass = goal.status === 'done' ? 'done' : (goal.status === 'failed' ? 'failed' : '');
-            const isOverdue = goal.deadline && goal.status === 'active' && new Date(goal.deadline) < new Date();
-
-            return `
-                <div class="goal-item ${statusClass} ${isOverdue ? 'overdue' : ''}">
-                    <div class="goal-header">
-                        <span class="goal-title">🎯 ${goal.title}</span>
-                        <span class="goal-progress">${doneTasks}/${totalTasks} (${pct}%)</span>
-                    </div>
-                    <div class="goal-meta">
-                        <span class="journal-tag">${ICONS[goal.journal] || '📌'} ${NAMES[goal.journal] || 'Журнал'}</span>
-                        ${goal.deadline ? `<span>⏰ ${goal.deadline} ${isOverdue ? '⚠️ Просрочена!' : ''}</span>` : ''}
-                        <span>${goal.status === 'done' ? '✅ Выполнена' : (goal.status === 'failed' ? '❌ Провалена' : '⏳ Активна')}</span>
-                    </div>
-                    <div class="goal-bar"><div class="fill" style="width:${pct}%;"></div></div>
-                    <div class="goal-tasks">
-                        ${(goal.tasks || []).map((task, tidx) => `
-                            <div class="task-check">
-                                <input type="checkbox" ${task.done ? 'checked' : ''} data-goal-idx="${realIdx}" data-task-idx="${tidx}" />
-                                <span class="task-title ${task.done ? 'done' : ''}">${task.title}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="goal-actions">
-                        ${goal.status === 'active' && isOverdue ? `<button class="primary" data-idx="${realIdx}" data-action="postpone">⏰ Отложить</button>` : ''}
-                        <button data-idx="${realIdx}" data-action="edit">✏️</button>
-                        <button data-idx="${realIdx}" data-action="status">📊</button>
-                        <button data-idx="${realIdx}" data-action="delete">🗑</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        // Чекбоксы задач
-        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            cb.addEventListener('change', (e) => {
-                const goalIdx = parseInt(e.target.dataset.goalIdx);
-                const taskIdx = parseInt(e.target.dataset.taskIdx);
-                const goal = data.goals[goalIdx];
-                if (goal && goal.tasks[taskIdx]) {
-                    goal.tasks[taskIdx].done = e.target.checked;
-                    updateGoalStatus(goal);
-                    saveData();
-                    renderGoals();
-                    if (e.target.checked) {
-                        addXP(3);
-                    }
-                }
-            });
-        });
-
-        // Действия с целями
-        container.querySelectorAll('[data-action]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const idx = parseInt(btn.dataset.idx);
-                const goal = data.goals[idx];
-                const action = btn.dataset.action;
-
-                if (action === 'delete') {
-                    if (confirm('Удалить цель?')) {
-                        data.goals.splice(idx, 1);
-                        saveData();
-                        renderGoals();
-                        showToast('Цель удалена', 'info');
-                    }
-                } else if (action === 'edit') {
-                    openGoalEditModal(idx);
-                } else if (action === 'status') {
-                    const statuses = ['active', 'done', 'failed'];
-                    const labels = ['Активна', 'Выполнена', 'Провалена'];
-                    const currentIdx = statuses.indexOf(goal.status);
-                    const nextIdx = (currentIdx + 1) % statuses.length;
-                    goal.status = statuses[nextIdx];
-                    saveData();
-                    renderGoals();
-                    showToast(`Статус цели: ${labels[nextIdx]}`, 'info');
-                } else if (action === 'postpone') {
-                    const newDeadline = prompt('Новый дедлайн (ГГГГ-ММ-ДД):', goal.deadline);
-                    if (newDeadline && newDeadline.trim()) {
-                        goal.deadline = newDeadline.trim();
-                        // Штраф за откладывание
-                        addXP(-5);
-                        saveData();
-                        renderGoals();
-                        showToast('⏰ Цель отложена. -5 XP', 'info');
-                    }
-                }
-            });
-        });
-    }
-
-    function updateGoalStatus(goal) {
-        const total = goal.tasks ? goal.tasks.length : 0;
-        const done = goal.tasks ? goal.tasks.filter(t => t.done).length : 0;
-        if (total > 0 && done === total) {
-            goal.status = 'done';
-        } else if (total > 0 && done === 0) {
-            // остаётся активной
-        } else {
-            goal.status = 'active';
-        }
-    }
-
-    // ============================================================
-    // 7. МОДАЛЬНОЕ ОКНО СОЗДАНИЯ/РЕДАКТИРОВАНИЯ ЦЕЛИ
-    // ============================================================
-    let editingGoalIdx = null;
-
-    function openGoalModal(idx = null) {
-        editingGoalIdx = idx;
-        const modal = document.getElementById('goalModal');
-        const title = document.getElementById('goalModalTitle');
-        const titleInput = document.getElementById('goalModalTitleInput');
-        const journalSelect = document.getElementById('goalModalJournal');
-        const tasksContainer = document.getElementById('goalModalTasks');
-        const deadlineInput = document.getElementById('goalModalDeadline');
-
-        if (idx !== null) {
-            const goal = data.goals[idx];
-            title.textContent = '✏️ Редактировать цель';
-            titleInput.value = goal.title;
-            journalSelect.value = goal.journal || 'body';
-            deadlineInput.value = goal.deadline || '';
-        } else {
-            title.textContent = '🎯 Новая цель';
-            titleInput.value = '';
-            journalSelect.value = 'body';
-            deadlineInput.value = '';
-        }
-
-        // Заполняем журналы
-        journalSelect.innerHTML = CATEGORIES.map(cat =>
-            `<option value="${cat}">${ICONS[cat]} ${NAMES[cat]}</option>`
-        ).join('');
-
-        // Заполняем задачи из выбранного журнала
-        function fillTasks() {
-            const journal = journalSelect.value;
-            const tasks = getTasksByJournal(journal);
-            const selectedIds = idx !== null ? data.goals[idx].tasks.map(t => t.id) : [];
-            tasksContainer.innerHTML = tasks.map(task =>
-                `<label><input type="checkbox" value="${task.id}" ${selectedIds.includes(task.id) ? 'checked' : ''} /> ${task.title}</label>`
-            ).join('');
-            if (!tasks.length) {
-                tasksContainer.innerHTML = '<div style="color:var(--text3); padding:8px;">Нет задач в этом журнале</div>';
-            }
-        }
-
-        journalSelect.addEventListener('change', fillTasks);
-        fillTasks();
-
-        modal.classList.add('open');
-    }
-
-    function openGoalEditModal(idx) {
-        openGoalModal(idx);
-    }
-
-    document.getElementById('goalAddFab').addEventListener('click', () => {
-        openGoalModal(null);
-    });
-
-    document.getElementById('goalModalCancel').addEventListener('click', () => {
-        document.getElementById('goalModal').classList.remove('open');
-        editingGoalIdx = null;
-    });
-    document.getElementById('goalModal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-            document.getElementById('goalModal').classList.remove('open');
-            editingGoalIdx = null;
-        }
-    });
-
-    document.getElementById('goalModalSave').addEventListener('click', () => {
-        const title = document.getElementById('goalModalTitleInput').value.trim();
-        if (!title) { showToast('Введите название цели', 'error'); return; }
-
-        const journal = document.getElementById('goalModalJournal').value;
-        const deadline = document.getElementById('goalModalDeadline').value;
-        const checkboxes = document.querySelectorAll('#goalModalTasks input[type="checkbox"]:checked');
-        const selectedTaskIds = Array.from(checkboxes).map(cb => cb.value);
-        const tasks = selectedTaskIds.map(id => {
-            const task = getTaskById(id);
-            return task ? { id: task.id, title: task.title, done: false } : null;
-        }).filter(Boolean);
-
-        if (editingGoalIdx !== null) {
-            const goal = data.goals[editingGoalIdx];
-            goal.title = title;
-            goal.journal = journal;
-            goal.deadline = deadline;
-            // Обновляем задачи (сохраняем статус done для существующих)
-            const oldTasks = goal.tasks || [];
-            goal.tasks = tasks.map(t => {
-                const old = oldTasks.find(ot => ot.id === t.id);
-                return { ...t, done: old ? old.done : false };
-            });
-            saveData();
-            renderGoals();
-            document.getElementById('goalModal').classList.remove('open');
-            editingGoalIdx = null;
-            showToast('✅ Цель обновлена', 'success');
-        } else {
-            data.goals.push({
-                id: 'goal_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                title: title,
-                journal: journal,
-                deadline: deadline,
-                status: 'active',
-                tasks: tasks.map(t => ({ ...t, done: false }))
-            });
-            saveData();
-            renderGoals();
-            document.getElementById('goalModal').classList.remove('open');
-            showToast('🎯 Цель создана', 'success');
-        }
-    });
-
-    // Фильтры целей
-    document.querySelectorAll('.goal-filters button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.goal-filters button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            goalsFilter = btn.dataset.filter;
-            renderGoals();
-        });
-    });
-
-    // ============================================================
-    // 8. ЗАМЕТКИ (БОЛЬШАЯ МОДАЛКА)
-    // ============================================================
-    let editingNoteIdx = null;
-
-    function openNoteModal(text = '', idx = null) {
-        editingNoteIdx = idx;
-        document.getElementById('noteModalTitle').textContent = idx !== null ? '✏️ Редактировать заметку' : '📝 Новая заметка';
-        document.getElementById('noteModalText').value = text;
-        document.getElementById('noteModal').classList.add('open');
-    }
-
-    document.getElementById('noteAddBtn').addEventListener('click', () => {
-        openNoteModal('');
-    });
-
-    document.getElementById('noteModalCancel').addEventListener('click', () => {
-        document.getElementById('noteModal').classList.remove('open');
-        editingNoteIdx = null;
-    });
-    document.getElementById('noteModal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-            document.getElementById('noteModal').classList.remove('open');
-            editingNoteIdx = null;
-        }
-    });
-
-    document.getElementById('noteModalSave').addEventListener('click', () => {
-        const text = document.getElementById('noteModalText').value.trim();
-        if (!text) { showToast('Введите текст заметки', 'error'); return; }
-
-        if (editingNoteIdx !== null) {
-            data.notes[editingNoteIdx].text = text;
-            data.notes[editingNoteIdx].date = new Date().toISOString();
-            saveData();
-            renderNotes();
-            document.getElementById('noteModal').classList.remove('open');
-            editingNoteIdx = null;
-            showToast('✅ Заметка обновлена', 'success');
-        } else {
-            data.notes.push({
-                id: 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                text: text,
-                date: new Date().toISOString()
-            });
-            saveData();
-            renderNotes();
-            document.getElementById('noteModal').classList.remove('open');
-            showToast('📝 Заметка добавлена', 'success');
-        }
-    });
-
-    function renderNotes() {
-        const list = document.getElementById('noteList');
-        if (!data.notes.length) {
-            list.innerHTML = '<div style="color:var(--text3); text-align:center; padding:20px;">Нет заметок</div>';
-            return;
-        }
-        list.innerHTML = data.notes.map((note, idx) => `
-            <div class="note-item">
-                <div class="note-header">
-                    <div class="note-text" data-idx="${idx}">${note.text}</div>
-                    <div class="note-actions">
-                        <button class="note-del" data-idx="${idx}" title="Удалить">✕</button>
-                    </div>
-                </div>
-                <div class="note-meta">
-                    <span>📅 ${new Date(note.date).toLocaleDateString()}</span>
-                </div>
-            </div>
-        `).join('');
-
-        list.querySelectorAll('.note-text').forEach(el => {
-            el.addEventListener('click', () => {
-                const idx = parseInt(el.dataset.idx);
-                const note = data.notes[idx];
-                if (note) openNoteModal(note.text, idx);
-            });
-        });
-
-        list.querySelectorAll('.note-del').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const idx = parseInt(btn.dataset.idx);
-                if (confirm('Удалить заметку?')) {
-                    data.notes.splice(idx, 1);
-                    saveData();
-                    renderNotes();
-                    showToast('Заметка удалена', 'info');
-                }
-            });
-        });
-    }
-
-    // ============================================================
-    // 9. ГАЛЕРЕЯ (ОДНА КНОПКА)
-    // ============================================================
-    function renderGallery() {
-        const grid = document.getElementById('galleryGrid');
-        if (!data.gallery.length) {
-            grid.innerHTML = '<div style="color:var(--text3); text-align:center; padding:20px; grid-column:1/-1;">Нет фото</div>';
-            return;
-        }
-        grid.innerHTML = data.gallery.map((src, i) => `
-            <img src="${src}" alt="Фото ${i}" onclick="removeGalleryItem(${i})" />
-        `).join('');
-    }
-
-    window.removeGalleryItem = function(idx) {
-        if (confirm('Удалить фото?')) {
-            data.gallery.splice(idx, 1);
-            saveData();
-            renderGallery();
-            showToast('Фото удалено', 'info');
-        }
-    };
-
-    document.getElementById('galleryUploadBtn').addEventListener('click', () => {
-        document.getElementById('galleryFileInput').click();
-    });
-
-    document.getElementById('galleryFileInput').addEventListener('change', (e) => {
-        const files = e.target.files;
-        if (!files.length) return;
-        const readers = [];
-        for (let f of files) {
-            if (!f.type.startsWith('image/')) continue;
-            const reader = new FileReader();
-            readers.push(new Promise((resolve) => {
-                reader.onload = (ev) => {
-                    data.gallery.push(ev.target.result);
-                    resolve();
-                };
-                reader.readAsDataURL(f);
-            }));
-        }
-        Promise.all(readers).then(() => {
-            saveData();
-            renderGallery();
-            e.target.value = '';
-            showToast(`🖼️ Загружено ${files.length} фото`, 'success');
-        });
-    });
-
-    // ============================================================
-    // 10. ПРОФИЛЬ
-    // ============================================================
-    function renderProfile() {
-        const c = data.character;
-        document.getElementById('profileAvatar').textContent = '🧙';
-        document.getElementById('profileName').textContent = c.name;
-        document.getElementById('profileGender').textContent = c.gender;
-        document.getElementById('profileLevel').textContent = c.level;
-        const xpNeeded = 100 + c.level * 20;
-        const pct = Math.min(100, (c.xp / xpNeeded) * 100);
-        document.getElementById('profileXpFill').style.width = pct + '%';
-        document.getElementById('profileXp').textContent = c.xp;
-
-        const stats = getStats();
-        document.getElementById('statTotal').textContent = stats.total;
-        document.getElementById('statDone').textContent = stats.done;
-        document.getElementById('statActive').textContent = stats.active;
-
-        const catStats = getCategoryStats();
-        const container = document.getElementById('journalStats');
-        container.innerHTML = CATEGORIES.map(cat => {
-            const s = catStats[cat];
-            const pct = s.total ? Math.round((s.done / s.total) * 100) : 0;
-            return `
-                <div class="row">
-                    <span class="icon">${ICONS[cat]}</span>
-                    <div class="info">
-                        ${NAMES[cat]}
-                        <small>${s.done}/${s.total} выполнено</small>
-                    </div>
-                    <div class="bar"><div class="fill" style="width:${pct}%;"></div></div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    document.getElementById('profileName').addEventListener('click', () => {
-        const newName = prompt('Введите имя:', data.character.name);
-        if (newName !== null && newName.trim()) {
-            data.character.name = newName.trim();
-            saveData();
-            renderProfile();
-            showToast('Имя обновлено', 'success');
-        }
-    });
-    document.getElementById('profileGender').addEventListener('click', () => {
-        const newGender = prompt('Введите пол (М/Ж):', data.character.gender);
-        if (newGender !== null && newGender.trim()) {
-            data.character.gender = newGender.trim();
-            saveData();
-            renderProfile();
-            showToast('Пол обновлён', 'success');
-        }
-    });
-
-    // ============================================================
-    // 11. СТАТИСТИКА
-    // ============================================================
-    function renderStats() {
-        const stats = getStats();
-        document.getElementById('statsTotal').textContent = stats.total;
-        document.getElementById('statsDone').textContent = stats.done;
-        document.getElementById('statsActive').textContent = stats.active;
-        document.getElementById('statsProductivity').textContent = stats.productivity + '%';
-
-        const catStats = getCategoryStats();
-        const container = document.getElementById('chartBars');
-        container.innerHTML = CATEGORIES.map(cat => {
-            const s = catStats[cat];
-            const pct = s.total ? Math.round((s.done / s.total) * 100) : 0;
-            return `
-                <div class="chart-bar">
-                    <span class="label">${ICONS[cat]} ${NAMES[cat]}</span>
-                    <div class="track"><div class="fill" style="width:${pct}%;"></div></div>
-                    <span style="font-size:12px; color:var(--text3);">${pct}%</span>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // ============================================================
-    // 12. МОДАЛЬНЫЕ ОКНА ЗАДАЧ (как в v11)
-    // ============================================================
-    let editingTask = null;
-    let currentModalScreen = 'body';
-
-    function openCreateModal(category) {
-        editingTask = null;
-        currentModalScreen = category;
-        fillModal(category, null);
-        document.getElementById('modalOverlay').classList.add('open');
-    }
-
-    function openEditModal(category, index) {
-        editingTask = { category, index };
-        currentModalScreen = category;
-        const task = data.tasks[category][index];
-        fillModal(category, task);
-        document.getElementById('modalOverlay').classList.add('open');
-    }
-
-    const FORMS = {
-        body: { title: '💪 Новая тренировка', fields: [
-            { label: 'Название', type: 'text', id: 'f_title', placeholder: 'Приседания 3x12' },
-            { label: 'Группа мышц', type: 'select', id: 'f_muscle', options: ['Грудь','Спина','Ноги','Плечи','Пресс','Руки'] },
-            { label: 'Подходы', type: 'number', id: 'f_sets', placeholder: '3' },
-            { label: 'Повторы', type: 'number', id: 'f_reps', placeholder: '12' }
-        ]},
-        hobby: { title: '🎨 Новое хобби', fields: [
-            { label: 'Название', type: 'text', id: 'f_title', placeholder: 'Игра на гитаре' },
-            { label: 'Навык', type: 'select', id: 'f_skill', options: ['Начальный','Средний','Продвинутый','Эксперт'] },
-            { label: 'Уровень сложности', type: 'select', id: 'f_difficulty', options: ['Легкий','Средний','Сложный'] }
-        ]},
-        business: { title: '📈 Бизнес-задача', fields: [
-            { label: 'Название', type: 'text', id: 'f_title', placeholder: 'Презентация проекта' },
-            { label: 'Проект', type: 'text', id: 'f_project', placeholder: 'Название проекта' },
-            { label: 'Приоритет', type: 'select', id: 'f_priority', options: ['Низкий','Средний','Высокий'] }
-        ]},
-        food: { title: '🥗 Приём пищи', fields: [
-            { label: 'Блюдо', type: 'text', id: 'f_title', placeholder: 'Овсянка с фруктами' },
-            { label: 'Калории', type: 'number', id: 'f_calories', placeholder: '350' },
-            { label: 'Тип', type: 'select', id: 'f_mealtype', options: ['Завтрак','Обед','Ужин','Перекус'] }
-        ]},
-        finance: { title: '💰 Финансовая операция', fields: [
-            { label: 'Название', type: 'text', id: 'f_title', placeholder: 'Зарплата' },
-            { label: 'Тип', type: 'select', id: 'f_type', options: ['Доход','Расход'] },
-            { label: 'Сумма', type: 'number', id: 'f_amount', placeholder: '5000' },
-            { label: 'Категория', type: 'select', id: 'f_category', options: ['Еда','Транспорт','Развлечения','Сбережения','Другое'] }
-        ]},
-        debts: { title: '📋 Долг', fields: [
-            { label: 'Название', type: 'text', id: 'f_title', placeholder: 'Долг другу' },
-            { label: 'Тип', type: 'select', id: 'f_type', options: ['Я должен','Должны мне'] },
-            { label: 'Сумма', type: 'number', id: 'f_amount', placeholder: '3000' },
-            { label: 'Кому/От кого', type: 'text', id: 'f_whom', placeholder: 'Имя' }
-        ]},
-        travel: { title: '✈️ Новая поездка', fields: [
-            { label: 'Название', type: 'text', id: 'f_title', placeholder: 'Поездка в горы' },
-            { label: 'Страна', type: 'text', id: 'f_country', placeholder: 'Страна' },
-            { label: 'Город', type: 'text', id: 'f_city', placeholder: 'Город' }
-        ]},
-        misc: { title: '📦 Разное', fields: [
-            { label: 'Название', type: 'text', id: 'f_title', placeholder: 'Любая задача' },
-            { label: 'Категория', type: 'text', id: 'f_misc_cat', placeholder: 'Тематика' }
-        ]}
-    };
-
-    function fillModal(category, task) {
-        const form = FORMS[category];
-        document.getElementById('modalTitle').textContent = task ? '✏️ Редактировать задачу' : form.title;
-
-        let html = '';
-        form.fields.forEach(f => {
-            const value = task ? (task.custom ? task.custom[f.id.replace('f_', '')] || '' : '') : '';
-            if (f.type === 'text' || f.type === 'number') {
-                html += `<label>${f.label}</label><input type="${f.type}" id="${f.id}" placeholder="${f.placeholder || ''}" value="${value}" />`;
-            } else if (f.type === 'select') {
-                html += `<label>${f.label}</label><select id="${f.id}">`;
-                f.options.forEach(opt => {
-                    const selected = (value === opt) ? 'selected' : '';
-                    html += `<option value="${opt}" ${selected}>${opt}</option>`;
-                });
-                html += `</select>`;
-            }
-        });
-
-        html += `
-            <label>Дата</label>
-            <input type="date" id="f_date" value="${task ? task.date || '' : ''}" />
-            <label>Дата окончания</label>
-            <input type="date" id="f_enddate" value="${task ? task.endDate || '' : ''}" />
-            <label>Время</label>
-            <input type="time" id="f_time" value="${task ? task.time || '' : ''}" />
-            <label>Продолжительность (минут)</label>
-            <input type="number" id="f_duration" placeholder="30" value="${task ? task.duration || '' : ''}" />
-            <label>Дни недели</label>
-            <div class="days-check">
-                ${['mon','tue','wed','thu','fri','sat','sun'].map(d => {
-                    const checked = task && task.days && task.days.includes(d) ? 'checked' : '';
-                    const label = {mon:'Пн',tue:'Вт',wed:'Ср',thu:'Чт',fri:'Пт',sat:'Сб',sun:'Вс'}[d];
-                    return `<label><input type="checkbox" value="${d}" ${checked} /> ${label}</label>`;
-                }).join('')}
-            </div>
-            <label>Заметка</label>
-            <textarea id="f_note" placeholder="Дополнительная информация...">${task ? task.note || '' : ''}</textarea>
-            <label>Приоритет</label>
-            <select id="f_priority">
-                <option value="low" ${task && task.priority === 'low' ? 'selected' : ''}>🟢 Низкий</option>
-                <option value="medium" ${task && task.priority === 'medium' ? 'selected' : ''}>🟡 Средний</option>
-                <option value="high" ${task && task.priority === 'high' ? 'selected' : ''}>🔴 Высокий</option>
-            </select>
-        `;
-
-        document.getElementById('modalFields').innerHTML = html;
-
-        if (!task) {
-            const now = new Date();
-            document.getElementById('f_date').value = now.toISOString().split('T')[0];
-            document.getElementById('f_time').value = now.toTimeString().slice(0,5);
-        }
-    }
-
-    document.getElementById('modalCancel').addEventListener('click', () => {
-        document.getElementById('modalOverlay').classList.remove('open');
-        editingTask = null;
-    });
-    document.getElementById('modalOverlay').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-            document.getElementById('modalOverlay').classList.remove('open');
-            editingTask = null;
-        }
-    });
-
-    document.getElementById('modalSave').addEventListener('click', () => {
-        const title = document.getElementById('f_title')?.value.trim();
-        if (!title) { showToast('Введите название задачи', 'error'); return; }
-
-        const days = [];
-        document.querySelectorAll('.days-check input[type="checkbox"]:checked').forEach(cb => {
-            days.push(cb.value);
-        });
-
-        const custom = {};
-        const form = FORMS[currentModalScreen];
-        form.fields.forEach(f => {
-            if (f.id !== 'f_title') {
-                const el = document.getElementById(f.id);
-                if (el) custom[f.id.replace('f_', '')] = el.value;
-            }
-        });
-
-        const taskData = {
-            title: title,
-            date: document.getElementById('f_date').value || '',
-            endDate: document.getElementById('f_enddate').value || '',
-            time: document.getElementById('f_time').value || '',
-            duration: parseInt(document.getElementById('f_duration').value) || 0,
-            days: days,
-            note: document.getElementById('f_note').value.trim(),
-            priority: document.getElementById('f_priority').value,
-            custom: custom,
-            status: 'active'
-        };
-
-        if (editingTask) {
-            const { category, index } = editingTask;
-            const oldTask = data.tasks[category][index];
-            taskData.id = oldTask.id;
-            taskData.status = oldTask.status;
-            taskData.createdAt = oldTask.createdAt;
-            data.tasks[category][index] = taskData;
-            saveData();
-            updateAllUI();
-            if (currentJournalCategory) renderJournalTasks(currentJournalCategory, getCurrentFilter());
-            document.getElementById('modalOverlay').classList.remove('open');
-            editingTask = null;
-            showToast('✅ Задача обновлена', 'success');
-        } else {
-            taskData.id = 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-            taskData.createdAt = new Date().toISOString();
-            data.tasks[currentModalScreen].push(taskData);
-            saveData();
-            updateAllUI();
-            if (currentJournalCategory === currentModalScreen) {
-                renderJournalTasks(currentModalScreen, getCurrentFilter());
-            }
-            document.getElementById('modalOverlay').classList.remove('open');
-            showToast('➕ Задача создана', 'success');
-        }
-    });
-
-    // ============================================================
-    // 13. НАСТРОЙКИ
-    // ============================================================
-    function loadThemeSettings() {
-        const savedTheme = localStorage.getItem('app_theme') || 'dark';
-        const savedScheme = localStorage.getItem('app_scheme') || 'classic';
-        const savedFirstDay = localStorage.getItem('app_firstDay') || '1';
-        const savedTimeFormat = localStorage.getItem('app_timeFormat') || '24';
-        const savedFontSize = localStorage.getItem('app_fontSize') || '16';
-
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        document.documentElement.setAttribute('data-scheme', savedScheme);
-        document.documentElement.style.setProperty('--font-size', savedFontSize + 'px');
-        document.getElementById('firstDaySelect').value = savedFirstDay;
-        document.getElementById('timeFormatSelect').value = savedTimeFormat;
-        document.getElementById('fontSizeSelect').value = savedFontSize;
-
-        document.querySelectorAll('.theme-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.theme === savedTheme);
-        });
-        document.querySelectorAll('#schemeButtons button').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.scheme === savedScheme);
-        });
-        renderCalendar();
-    }
-
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const theme = btn.dataset.theme;
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('app_theme', theme);
-            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            showToast(`Тема: ${theme === 'dark' ? 'Тёмная' : 'Светлая'}`, 'info');
-        });
-    });
-
-    document.querySelectorAll('#schemeButtons button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const scheme = btn.dataset.scheme;
-            document.documentElement.setAttribute('data-scheme', scheme);
-            localStorage.setItem('app_scheme', scheme);
-            document.querySelectorAll('#schemeButtons button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            updateAllUI();
-            showToast('🎨 Схема обновлена', 'success');
-        });
-    });
-
-    document.getElementById('firstDaySelect').addEventListener('change', (e) => {
-        localStorage.setItem('app_firstDay', e.target.value);
-        renderCalendar();
-        updateAllUI();
-        showToast('Первый день недели обновлён', 'info');
-    });
-    document.getElementById('timeFormatSelect').addEventListener('change', (e) => {
-        localStorage.setItem('app_timeFormat', e.target.value);
-        showToast('Формат времени обновлён', 'info');
-    });
-    document.getElementById('fontSizeSelect').addEventListener('change', (e) => {
-        const size = e.target.value;
-        document.documentElement.style.setProperty('--font-size', size + 'px');
-        localStorage.setItem('app_fontSize', size);
-        showToast('Размер шрифта обновлён', 'info');
-    });
-
-    document.getElementById('notifToggle').addEventListener('change', (e) => {
-        localStorage.setItem('app_notif', e.target.checked ? 'on' : 'off');
-        showToast(e.target.checked ? 'Уведомления включены' : 'Уведомления выключены', 'info');
-    });
-    document.getElementById('smartSyncToggle').addEventListener('change', (e) => {
-        localStorage.setItem('app_smartSync', e.target.checked ? 'on' : 'off');
-        if (e.target.checked) {
-            showToast('🔮 Синхронизация с умными девайсами пока в разработке', 'info');
-        }
-    });
-
-    document.getElementById('exportBtn').addEventListener('click', () => {
-        const json = JSON.stringify(data, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `rpg_backup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('💾 Данные экспортированы', 'success');
-    });
-
-    document.getElementById('importBtn').addEventListener('click', () => {
-        document.getElementById('importFileInput').click();
-    });
-    document.getElementById('importFileInput').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            try {
-                const imported = JSON.parse(ev.target.result);
-                if (imported.tasks && imported.character) {
-                    if (confirm('Восстановить данные из файла? Текущие данные будут заменены.')) {
-                        data = imported;
-                        for (let cat in data.tasks) {
-                            data.tasks[cat] = data.tasks[cat].map(task => {
-                                if (!task.id) task.id = 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-                                return task;
-                            });
-                        }
-                        saveData();
-                        updateAllUI();
-                        showToast('✅ Данные импортированы', 'success');
-                    }
-                } else {
-                    showToast('❌ Неверный формат файла', 'error');
-                }
-            } catch (err) {
-                showToast('❌ Ошибка чтения файла', 'error');
-            }
-        };
-        reader.readAsText(file);
-        e.target.value = '';
-    });
-
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        if (confirm('⚠️ Вы уверены, что хотите удалить ВСЕ данные? Это действие необратимо.')) {
-            if (confirm('Ещё раз: удалить всё?')) {
-                data = getDefaultData();
+        // ---- ЗАГРУЗКА / СОХРАНЕНИЕ ----
+        function loadData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try { debts = JSON.parse(stored); } catch (e) { debts = []; }
+            } else {
+                // Стартовые демо-данные
+                debts = [{
+                    id: '1',
+                    name: 'Аренда офиса',
+                    amount: 15000,
+                    type: 'owed_to_me',
+                    counterparty: 'ООО "Ромашка"',
+                    dueDate: '2026-09-15',
+                    note: 'Договор аренды №23',
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                }, {
+                    id: '2',
+                    name: 'Заём у друга',
+                    amount: 5000,
+                    type: 'i_owe',
+                    counterparty: 'Сергей',
+                    dueDate: '2026-08-10',
+                    note: 'Вернуть до зарплаты',
+                    status: 'overdue',
+                    createdAt: new Date().toISOString()
+                }, {
+                    id: '3',
+                    name: 'Продажа ноутбука',
+                    amount: 32000,
+                    type: 'owed_to_me',
+                    counterparty: 'Анна',
+                    dueDate: '2026-07-20',
+                    note: 'Оплата частями',
+                    status: 'paid',
+                    createdAt: new Date().toISOString()
+                }];
                 saveData();
-                updateAllUI();
-                showToast('🗑 Все данные сброшены', 'info');
             }
         }
-    });
 
-    document.getElementById('settingsToggle').addEventListener('click', () => {
-        document.getElementById('settingsModal').classList.add('open');
-        loadThemeSettings();
-        const notif = localStorage.getItem('app_notif') !== 'off';
-        document.getElementById('notifToggle').checked = notif;
-        const smart = localStorage.getItem('app_smartSync') === 'on';
-        document.getElementById('smartSyncToggle').checked = smart;
-    });
-    document.getElementById('settingsClose').addEventListener('click', () => {
-        document.getElementById('settingsModal').classList.remove('open');
-    });
-    document.getElementById('settingsModal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) document.getElementById('settingsModal').classList.remove('open');
-    });
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(debts));
+        }
 
-    // ============================================================
-    // 14. НАВИГАЦИЯ
-    // ============================================================
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tabs button, #bottom-nav button').forEach(el => {
-            el.classList.toggle('active', el.dataset.tab === tabName);
-        });
-        document.getElementById('tab-' + tabName).classList.add('active');
-        if (tabName === 'journals') closeJournal();
-        if (tabName === 'goals') renderGoals();
-        if (tabName === 'profile') renderProfile();
-        if (tabName === 'notes') renderNotes();
-        if (tabName === 'gallery') renderGallery();
-        if (tabName === 'stats') renderStats();
-    }
+        // ---- ГЕНЕРАТОР ID ----
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
 
-    document.querySelectorAll('.tabs button, #bottom-nav button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tab = btn.dataset.tab;
-            if (tab) switchTab(tab);
-        });
-    });
+        // ---- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----
+        function getStatus(debt) {
+            // Если уже помечен как paid — не меняем
+            if (debt.status === 'paid') return 'paid';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const due = new Date(debt.dueDate + 'T00:00:00');
+            if (due < today) return 'overdue';
+            return 'active';
+        }
 
-    // ============================================================
-    // 15. ИНИЦИАЛИЗАЦИЯ
-    // ============================================================
-    function init() {
-        loadThemeSettings();
-        updateAllUI();
-        switchTab('journals');
-        console.log('🔥 RPG Планировщик v12 — улучшенные цели, заметки и галерея');
-    }
+        function updateStatuses() {
+            debts.forEach(d => {
+                if (d.status !== 'paid') {
+                    d.status = getStatus(d);
+                }
+            });
+        }
 
-    init();
-</script>
+        function getFilteredAndSearched() {
+            let result = debts.slice();
+
+            // Фильтр
+            if (currentFilter !== 'all') {
+                result = result.filter(d => d.status === currentFilter);
+            }
+
+            // Поиск
+            if (searchQuery.trim()) {
+                const q = searchQuery.trim().toLowerCase();
+                result = result.filter(d =>
+                    d.name.toLowerCase().includes(q) ||
+                    d.counterparty.toLowerCase().includes(q) ||
+                    d.note.toLowerCase().includes(q)
+                );
+            }
+
+            return result;
+        }
+
+        // ---- РАСЧЁТ СТАТИСТИКИ ----
+        function calcStats() {
+            const total = debts.length;
+            const active = debts.filter(d => d.status === 'active').length;
+            const overdue = debts.filter(d => d.status === 'overdue').length;
+            const paid = debts.filter(d => d.status === 'paid').length;
+            return { total, active, overdue, paid };
+        }
+
+        // ---- ОТРИСОВКА ----
+        function render() {
+            updateStatuses();
+            saveData();
+
+            const filtered = getFilteredAndSearched();
+            const stats = calcStats();
+
+            // Статистика
+            totalEl.textContent = stats.total;
+            activeEl.textContent = stats.active;
+            overdueEl.textContent = stats.overdue;
+            paidEl.textContent = stats.paid;
+
+            // Таблица
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            emptyState.style.display = 'none';
+
+            tbody.innerHTML = filtered.map(d => {
+                const statusLabel = {
+                    active: 'Активный',
+                    overdue: 'Просрочен',
+                    paid: 'Погашен'
+                } [d.status] || d.status;
+
+                const typeLabel = d.type === 'owed_to_me' ? 'Должен мне' : 'Я должен';
+                const amountStr = d.type === 'owed_to_me' ? `+${d.amount} ₽` : `-${d.amount} ₽`;
+                const amountColor = d.type === 'owed_to_me' ? '#20b87a' : '#e14a4a';
+
+                const dueDateFormatted = new Date(d.dueDate + 'T00:00:00').toLocaleDateString('ru-RU');
+
+                return `
+                        <tr>
+                            <td><strong>${escapeHtml(d.name)}</strong></td>
+                            <td style="font-weight:600;color:${amountColor};">${amountStr}</td>
+                            <td>${typeLabel}</td>
+                            <td>${escapeHtml(d.counterparty)}</td>
+                            <td>${dueDateFormatted}</td>
+                            <td><span class="status ${d.status}">${statusLabel}</span></td>
+                            <td>
+                                <div class="actions">
+                                    <button class="btn btn-edit" data-id="${d.id}">✎</button>
+                                    <button class="btn btn-delete" data-id="${d.id}">✕</button>
+                                    ${d.status !== 'paid' ? `<button class="btn btn-success mark-paid" data-id="${d.id}">✅</button>` : ''}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+            }).join('');
+
+            // Навешиваем события на кнопки в таблице (делегирование)
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+            });
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', () => deleteDebt(btn.dataset.id));
+            });
+            document.querySelectorAll('.mark-paid').forEach(btn => {
+                btn.addEventListener('click', () => markAsPaid(btn.dataset.id));
+            });
+        }
+
+        // ---- ПРОСТАЯ ЗАЩИТА ОТ XSS ----
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // ---- ДЕЙСТВИЯ С ДОЛГАМИ ----
+        function deleteDebt(id) {
+            if (!confirm('Удалить эту запись?')) return;
+            debts = debts.filter(d => d.id !== id);
+            saveData();
+            render();
+        }
+
+        function markAsPaid(id) {
+            const debt = debts.find(d => d.id === id);
+            if (!debt) return;
+            debt.status = 'paid';
+            saveData();
+            render();
+        }
+
+        function openEditModal(id) {
+            const debt = debts.find(d => d.id === id);
+            if (!debt) return;
+            modalTitle.textContent = 'Редактировать долг';
+            editId.value = debt.id;
+            debtName.value = debt.name;
+            debtAmount.value = debt.amount;
+            debtType.value = debt.type;
+            debtCounterparty.value = debt.counterparty;
+            debtDueDate.value = debt.dueDate;
+            debtNote.value = debt.note || '';
+            modalOverlay.classList.add('open');
+        }
+
+        function openCreateModal() {
+            modalTitle.textContent = 'Новый долг';
+            editId.value = '';
+            debtForm.reset();
+            debtDueDate.value = new Date().toISOString().slice(0, 10);
+            modalOverlay.classList.add('open');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('open');
+        }
+
+        // ---- ОБРАБОТЧИК ФОРМЫ ----
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const name = debtName.value.trim();
+            const amount = parseFloat(debtAmount.value);
+            const type = debtType.value;
+            const counterparty = debtCounterparty.value.trim();
+            const dueDate = debtDueDate.value;
+            const note = debtNote.value.trim();
+
+            if (!name || !amount || !counterparty || !dueDate) {
+                alert('Заполните все обязательные поля (*)');
+                return;
+            }
+
+            const editIdVal = editId.value;
+
+            if (editIdVal) {
+                // Редактирование
+                const idx = debts.findIndex(d => d.id === editIdVal);
+                if (idx === -1) return;
+                debts[idx] = {
+                    ...debts[idx],
+                    name,
+                    amount,
+                    type,
+                    counterparty,
+                    dueDate,
+                    note,
+                    status: getStatus({ ...debts[idx], dueDate }) // пересчитаем статус
+                };
+            } else {
+                // Создание
+                const newDebt = {
+                    id: generateId(),
+                    name,
+                    amount,
+                    type,
+                    counterparty,
+                    dueDate,
+                    note,
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                };
+                newDebt.status = getStatus(newDebt);
+                debts.push(newDebt);
+            }
+
+            saveData();
+            closeModal();
+            render();
+        }
+
+        // ---- СОБЫТИЯ ----
+        function bindEvents() {
+            // Фильтры
+            filterGroup.addEventListener('click', (e) => {
+                const btn = e.target.closest('.btn');
+                if (!btn || !btn.dataset.filter) return;
+                filterGroup.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                render();
+            });
+
+            // Поиск
+            searchInput.addEventListener('input', () => {
+                searchQuery = searchInput.value;
+                render();
+            });
+
+            // Добавить
+            addBtn.addEventListener('click', openCreateModal);
+
+            // Отмена в модалке
+            cancelBtn.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+            // Сабмит формы
+            debtForm.addEventListener('submit', handleFormSubmit);
+
+            // Выход (имитация)
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('Выйти из аккаунта? Данные останутся в браузере.')) {
+                    alert('Вы вышли (демо-режим)');
+                }
+            });
+        }
+
+        // ---- СТАРТ ----
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
 </body>
 </html>
