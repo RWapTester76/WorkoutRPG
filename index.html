@@ -169,13 +169,18 @@
         .calendar-day .dot.partial {
             background: #ff9500;
         }
+        .calendar-day .dot.borrow {
+            background: #ff3b30;
+        }
+        .calendar-day .dot.lent {
+            background: #007aff;
+        }
         .calendar-day.selected {
             background: #e8f0fe;
             border: 2px solid #007aff;
         }
         .calendar-day.has-debt {
             font-weight: 700;
-            color: #1a1a2e;
         }
 
         /* ===== ИНФО О ВЫБРАННОМ ДНЕ ===== */
@@ -212,6 +217,11 @@
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
             border-left: 4px solid #007aff;
             display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .event-item .event-row {
+            display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 10px;
@@ -227,6 +237,11 @@
         .event-item .event-info .event-sub {
             font-size: 12px;
             color: #6c7a8d;
+            margin-top: 2px;
+        }
+        .event-item .event-info .event-dates {
+            font-size: 11px;
+            color: #8e98a3;
             margin-top: 2px;
         }
         .event-item .event-amount {
@@ -267,6 +282,7 @@
             align-items: center;
             justify-content: center;
             font-size: 18px;
+            flex-shrink: 0;
         }
         .event-item .event-photo img {
             width: 100%;
@@ -285,6 +301,12 @@
         .event-item .return-badge.partial {
             background: #fff5e6;
             color: #b26a00;
+        }
+        .event-item .event-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
         }
 
         /* ===== МОДАЛКА ===== */
@@ -330,7 +352,7 @@
             padding: 28px 24px 34px;
             max-width: 500px;
             width: 100%;
-            max-height: 90vh;
+            max-height: 92vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease;
         }
@@ -352,6 +374,11 @@
             color: #2c3e50;
             display: block;
             margin: 12px 0 4px;
+        }
+        .modal .label-hint {
+            font-weight: 400;
+            font-size: 12px;
+            color: #8e98a3;
         }
         .modal input,
         .modal select,
@@ -499,7 +526,6 @@
             }
             .event-item {
                 padding: 10px 12px;
-                flex-wrap: wrap;
             }
             .event-item .event-amount {
                 font-size: 14px;
@@ -552,7 +578,6 @@
             <h2 id="modalTitle">➕ Добавить запись</h2>
             <form id="eventForm">
                 <input type="hidden" id="editId" value="" />
-                <input type="hidden" id="eventDate" value="" />
 
                 <label for="eventType">Тип операции</label>
                 <select id="eventType">
@@ -568,8 +593,20 @@
                 <label for="eventAmount">Сумма (₽) *</label>
                 <input type="number" id="eventAmount" placeholder="5000" required min="0" step="0.01" />
 
+                <!-- ===== ДВЕ ДАТЫ ===== -->
+                <div class="form-row">
+                    <div>
+                        <label>Дата операции <span class="label-hint">(когда занял/дал)</span></label>
+                        <input type="date" id="eventStartDate" required />
+                    </div>
+                    <div>
+                        <label>Дата возврата <span class="label-hint">(когда отдать)</span></label>
+                        <input type="date" id="eventReturnDate" />
+                    </div>
+                </div>
+
                 <label for="eventNote">Примечание</label>
-                <input type="text" id="eventNote" placeholder="За какой товар / услугу" />
+                <input type="text" id="eventNote" placeholder="За что, цель, условия" />
 
                 <!-- ===== ЗАГРУЗКА ФОТО ===== -->
                 <label>Фото чека / расписки</label>
@@ -590,11 +627,11 @@
 
     <script>
         // ================================================================
-        //  ГЛАВНЫЙ JS — КАЛЕНДАРЬ ДОЛГОВ
+        //  ГЛАВНЫЙ JS — КАЛЕНДАРЬ ДОЛГОВ С ДВУМЯ ДАТАМИ
         // ================================================================
 
         // ---- ХРАНЕНИЕ ----
-        const STORAGE_KEY = 'debt_calendar_data';
+        const STORAGE_KEY = 'debt_calendar_data_v2';
 
         // ---- СОСТОЯНИЕ ----
         let events = [];
@@ -612,10 +649,11 @@
         const modalTitle = document.getElementById('modalTitle');
         const eventForm = document.getElementById('eventForm');
         const editId = document.getElementById('editId');
-        const eventDate = document.getElementById('eventDate');
         const eventType = document.getElementById('eventType');
         const eventCounterparty = document.getElementById('eventCounterparty');
         const eventAmount = document.getElementById('eventAmount');
+        const eventStartDate = document.getElementById('eventStartDate');
+        const eventReturnDate = document.getElementById('eventReturnDate');
         const eventNote = document.getElementById('eventNote');
         const photoInput = document.getElementById('photoInput');
         const photoPreview = document.getElementById('photoPreview');
@@ -626,7 +664,6 @@
         // ---- ИНИЦИАЛИЗАЦИЯ ----
         function init() {
             loadData();
-            // Если нет событий — добавим демо
             if (events.length === 0) {
                 addDemoData();
             }
@@ -646,7 +683,8 @@
 
             events = [{
                 id: '1',
-                date: `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,
+                startDate: `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,
+                returnDate: `${y}-${String(m+1).padStart(2,'0')}-${String(d+14).padStart(2,'0')}`,
                 type: 'lent',
                 counterparty: 'Анна',
                 amount: 15000,
@@ -654,7 +692,8 @@
                 photo: null
             }, {
                 id: '2',
-                date: `${y}-${String(m+1).padStart(2,'0')}-${String(d-3).padStart(2,'0')}`,
+                startDate: `${y}-${String(m+1).padStart(2,'0')}-${String(d-3).padStart(2,'0')}`,
+                returnDate: `${y}-${String(m+1).padStart(2,'0')}-${String(d+7).padStart(2,'0')}`,
                 type: 'borrowed',
                 counterparty: 'Сергей',
                 amount: 5000,
@@ -662,7 +701,8 @@
                 photo: null
             }, {
                 id: '3',
-                date: `${y}-${String(m+1).padStart(2,'0')}-${String(d+2).padStart(2,'0')}`,
+                startDate: `${y}-${String(m+1).padStart(2,'0')}-${String(d-10).padStart(2,'0')}`,
+                returnDate: `${y}-${String(m+1).padStart(2,'0')}-${String(d-10).padStart(2,'0')}`,
                 type: 'return_full',
                 counterparty: 'Анна',
                 amount: 15000,
@@ -691,7 +731,7 @@
         // ---- ПОЛУЧИТЬ СОБЫТИЯ ДЛЯ ДНЯ ----
         function getEventsForDate(year, month, day) {
             const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-            return events.filter(e => e.date === dateStr);
+            return events.filter(e => e.startDate === dateStr || e.returnDate === dateStr);
         }
 
         function hasEventsForDate(year, month, day) {
@@ -703,7 +743,7 @@
             const firstDay = new Date(currentYear, currentMonth, 1);
             const lastDay = new Date(currentYear, currentMonth + 1, 0);
             const daysInMonth = lastDay.getDate();
-            const startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Пн=0
+            const startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
 
             const today = new Date();
             const todayY = today.getFullYear();
@@ -714,7 +754,6 @@
 
             let html = '';
 
-            // Пустые ячейки до первого дня
             for (let i = 0; i < startOffset; i++) {
                 html += `<div class="calendar-day other-month"></div>`;
             }
@@ -731,12 +770,19 @@
                     const dayEvents = getEventsForDate(currentYear, currentMonth, day);
                     const hasReturn = dayEvents.some(e => e.type === 'return_full' || e.type === 'return_partial');
                     const hasPartial = dayEvents.some(e => e.type === 'return_partial');
+                    const hasLent = dayEvents.some(e => e.type === 'lent');
+                    const hasBorrowed = dayEvents.some(e => e.type === 'borrowed');
+
                     if (hasReturn && hasPartial) {
                         dotHtml = `<span class="dot return partial"></span>`;
                     } else if (hasReturn) {
                         dotHtml = `<span class="dot return"></span>`;
                     } else if (hasPartial) {
                         dotHtml = `<span class="dot partial"></span>`;
+                    } else if (hasLent) {
+                        dotHtml = `<span class="dot lent"></span>`;
+                    } else if (hasBorrowed) {
+                        dotHtml = `<span class="dot borrow"></span>`;
                     } else {
                         dotHtml = `<span class="dot"></span>`;
                     }
@@ -757,7 +803,6 @@
 
             grid.innerHTML = html;
 
-            // Навешиваем клики на дни
             grid.querySelectorAll('.calendar-day').forEach(btn => {
                 if (btn.classList.contains('other-month')) return;
                 btn.addEventListener('click', function() {
@@ -781,14 +826,16 @@
 
             const { year, month, day } = selectedDate;
             const dateObj = new Date(year, month, day);
-            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const dayEvents = getEventsForDate(year, month, day);
 
             const weekdays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
             const wd = dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1;
 
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const dateDisplay = `${weekdays[wd]}, ${day} ${getMonthName(month)} ${year}`;
+
             selectedDateLabel.innerHTML = `
-                    ${weekdays[wd]}, ${day} ${getMonthName(month)} ${year}
+                    ${dateDisplay}
                     <small style="font-weight:400;color:#8e98a3;margin-left:8px;">
                         ${dayEvents.length} записей
                     </small>
@@ -805,7 +852,6 @@
             }
 
             let html = '';
-            // Сортируем: сначала возвраты, потом остальные
             const sorted = [...dayEvents].sort((a, b) => {
                 const order = { 'return_full': 0, 'return_partial': 1, 'lent': 2, 'borrowed': 3 };
                 return (order[a.type] || 2) - (order[b.type] || 2);
@@ -823,6 +869,18 @@
                 const colorClass = (e.type === 'lent' || e.type === 'return_full') ? 'positive' : 'negative';
                 const amountDisplay = `${sign}${Number(e.amount).toLocaleString('ru-RU')} ₽`;
 
+                // Определяем, какая дата совпадает с выбранным днём
+                const isStartDate = e.startDate === dateStr;
+                const isReturnDate = e.returnDate === dateStr;
+                let dateHint = '';
+                if (isStartDate && isReturnDate) {
+                    dateHint = '📅 Дата операции и возврата';
+                } else if (isStartDate) {
+                    dateHint = '📌 Дата операции';
+                } else if (isReturnDate) {
+                    dateHint = '⏰ Дата возврата';
+                }
+
                 let photoHtml = '';
                 if (e.photo) {
                     photoHtml = `<div class="event-photo" onclick="viewPhoto('${e.photo}')">
@@ -839,28 +897,38 @@
                     returnBadge = `<span class="return-badge partial">🔄 Частичный</span>`;
                 }
 
+                const startDateFormatted = formatDate(e.startDate);
+                const returnDateFormatted = e.returnDate ? formatDate(e.returnDate) : 'не указана';
+
                 html += `
                         <div class="event-item" style="border-left-color: ${e.type === 'return_full' ? '#34c759' : e.type === 'return_partial' ? '#ff9500' : '#007aff'}">
-                            <div class="event-info">
-                                <div class="event-title">
-                                    ${typeLabels[e.type] || e.type}
-                                    ${returnBadge}
+                            <div class="event-top">
+                                <div class="event-info">
+                                    <div class="event-title">
+                                        ${typeLabels[e.type] || e.type}
+                                        ${returnBadge}
+                                    </div>
+                                    <div class="event-sub">
+                                        ${e.counterparty} ${e.note ? '· ' + e.note : ''}
+                                    </div>
+                                    <div class="event-dates">
+                                        📆 ${startDateFormatted} → ${returnDateFormatted}
+                                        ${dateHint ? ' · ' + dateHint : ''}
+                                    </div>
                                 </div>
-                                <div class="event-sub">
-                                    ${e.counterparty} ${e.note ? '· ' + e.note : ''}
-                                </div>
+                                <div class="event-amount ${colorClass}">${amountDisplay}</div>
                             </div>
-                            ${photoHtml}
-                            <div class="event-amount ${colorClass}">${amountDisplay}</div>
-                            <div class="event-actions">
-                                <button onclick="editEvent('${e.id}')" title="Редактировать">✎</button>
-                                <button onclick="deleteEvent('${e.id}')" title="Удалить">✕</button>
+                            <div class="event-row">
+                                ${photoHtml}
+                                <div class="event-actions">
+                                    <button onclick="editEvent('${e.id}')" title="Редактировать">✎</button>
+                                    <button onclick="deleteEvent('${e.id}')" title="Удалить">✕</button>
+                                </div>
                             </div>
                         </div>
                     `;
             });
 
-            // Кнопка добавления
             html += `
                     <button class="btn-save" style="margin-top:10px;padding:10px 20px;border:none;border-radius:14px;background:#007aff;color:white;font-weight:600;cursor:pointer;font-size:14px;width:100%;" onclick="openCreateModalForDate(${year},${month},${day})">
                         ＋ Добавить запись
@@ -878,6 +946,15 @@
             return names[month];
         }
 
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            const parts = dateStr.split('-');
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            const wd = d.getDay() === 0 ? 6 : d.getDay() - 1;
+            return `${weekdays[wd]}, ${parseInt(parts[2])} ${getMonthName(parseInt(parts[1])-1).slice(0,3)} ${parts[0]}`;
+        }
+
         function changeMonth(delta) {
             currentMonth += delta;
             if (currentMonth < 0) { currentMonth = 11;
@@ -885,13 +962,9 @@
             if (currentMonth > 11) { currentMonth = 0;
                 currentYear++; }
             renderCalendar();
-            // если выбранный день не в этом месяце — сбрасываем
             if (selectedDate && (selectedDate.month !== currentMonth || selectedDate.year !== currentYear)) {
-                // сохраняем день если он есть в этом месяце
                 const maxDay = new Date(currentYear, currentMonth + 1, 0).getDate();
-                if (selectedDate.day <= maxDay) {
-                    // оставляем
-                } else {
+                if (selectedDate.day > maxDay) {
                     // сбрасываем
                 }
                 renderDayDetails();
@@ -922,15 +995,16 @@
             modalTitle.textContent = '➕ Добавить запись';
             editId.value = '';
             eventForm.reset();
-            eventDate.value = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            eventStartDate.value = dateStr;
+            // Дата возврата по умолчанию +14 дней
+            const returnDate = new Date(year, month, day + 14);
+            eventReturnDate.value = `${returnDate.getFullYear()}-${String(returnDate.getMonth()+1).padStart(2,'0')}-${String(returnDate.getDate()).padStart(2,'0')}`;
             eventType.value = 'lent';
             currentPhotoData = null;
             photoPreview.style.display = 'none';
             photoPlaceholder.style.display = 'block';
             removePhotoBtn.style.display = 'none';
-            // Ставим дату по умолчанию
-            const dateObj = new Date(year, month, day);
-            // Добавляем подсказку в поле
             modalOverlay.classList.add('open');
             eventCounterparty.focus();
         }
@@ -940,7 +1014,8 @@
             if (!e) return;
             modalTitle.textContent = '✎ Редактировать запись';
             editId.value = e.id;
-            eventDate.value = e.date;
+            eventStartDate.value = e.startDate;
+            eventReturnDate.value = e.returnDate || '';
             eventType.value = e.type;
             eventCounterparty.value = e.counterparty;
             eventAmount.value = e.amount;
@@ -977,13 +1052,14 @@
         function handleFormSubmit(e) {
             e.preventDefault();
 
-            const date = eventDate.value;
+            const startDate = eventStartDate.value;
+            const returnDate = eventReturnDate.value;
             const type = eventType.value;
             const counterparty = eventCounterparty.value.trim();
             const amount = parseFloat(eventAmount.value);
             const note = eventNote.value.trim();
 
-            if (!date || !counterparty || !amount || amount <= 0) {
+            if (!startDate || !counterparty || !amount || amount <= 0) {
                 showToast('⚠️ Заполните все обязательные поля');
                 return;
             }
@@ -991,12 +1067,12 @@
             const editIdVal = editId.value;
 
             if (editIdVal) {
-                // Редактирование
                 const idx = events.findIndex(ev => ev.id === editIdVal);
                 if (idx === -1) return;
                 events[idx] = {
                     ...events[idx],
-                    date,
+                    startDate,
+                    returnDate: returnDate || null,
                     type,
                     counterparty,
                     amount,
@@ -1005,10 +1081,10 @@
                 };
                 showToast('✅ Запись обновлена');
             } else {
-                // Создание
                 const newEvent = {
                     id: generateId(),
-                    date,
+                    startDate,
+                    returnDate: returnDate || null,
                     type,
                     counterparty,
                     amount,
@@ -1023,21 +1099,9 @@
             closeModal();
             renderCalendar();
 
-            // Обновляем детали дня если выбран тот же день
-            if (selectedDate) {
-                const [y, m, d] = date.split('-').map(Number);
-                if (selectedDate.year === y && selectedDate.month === (m - 1) && selectedDate.day === d) {
-                    renderDayDetails();
-                } else {
-                    // Если изменился день — переключаемся на него
-                    selectedDate = { year: y, month: m - 1, day: d };
-                    renderDayDetails();
-                }
-            } else {
-                const [y, m, d] = date.split('-').map(Number);
-                selectedDate = { year: y, month: m - 1, day: d };
-                renderDayDetails();
-            }
+            const [y, m, d] = startDate.split('-').map(Number);
+            selectedDate = { year: y, month: m - 1, day: d };
+            renderDayDetails();
         }
 
         // ---- ФОТО ----
@@ -1086,17 +1150,13 @@
         // ---- СОБЫТИЯ ----
         function bindEvents() {
             eventForm.addEventListener('submit', handleFormSubmit);
-
             photoInput.addEventListener('change', handlePhotoUpload);
-
             removePhotoBtn.addEventListener('click', removePhoto);
 
-            // Закрытие по клику на фон
             modalOverlay.addEventListener('click', function(e) {
                 if (e.target === modalOverlay) closeModal();
             });
 
-            // Закрытие по свайпу вниз на модалке
             let touchStartY = 0;
             const modalEl = document.querySelector('.modal');
             modalEl.addEventListener('touchstart', function(e) {
@@ -1113,7 +1173,6 @@
         // ---- СТАРТ ----
         document.addEventListener('DOMContentLoaded', init);
 
-        // Доступ к функциям из onclick
         window.changeMonth = changeMonth;
         window.goToToday = goToToday;
         window.openCreateModal = openCreateModal;
