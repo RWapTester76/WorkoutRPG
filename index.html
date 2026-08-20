@@ -9,7 +9,7 @@
 :root{
   --bg:#090b10;--panel:#11151d;--panel2:#171c26;--line:rgba(255,255,255,.08);
   --text:#f5f7fb;--muted:#8e98a9;--accent:#8b5cf6;--accent2:#c084fc;
-  --good:#34d399;--warn:#fbbf24;--danger:#fb7185;--cyan:#38bdf8;
+  --good:#34d399;--warn:#fbbf24;--danger:#fb7185;--cyan:#38bdf8;--gold:#fbbf24;
   --radius:22px;--shadow:0 20px 70px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
@@ -57,7 +57,7 @@ button:active{transform:scale(.98)}
 .category .count{font-size:12px;color:var(--muted)}
 .add{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:11px 15px;border-radius:14px;font-weight:800;box-shadow:0 10px 25px rgba(139,92,246,.2)}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar input,.toolbar select,.input{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:14px;padding:11px 13px;outline:0}.toolbar input{flex:1;min-width:180px}
-.goal{display:grid;gap:10px}.goal-top{display:flex;justify-content:space-between;gap:10px}.goal-title{font-weight:800}.goal-pct{color:var(--muted);font-size:12px}
+.goal{display:grid;gap:10px}.goal-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.goal-title{font-weight:800}.goal-pct{color:var(--muted);font-size:12px}.goal-deadline{font-size:11px;color:var(--gold)}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}.stat b{font-size:26px}.stat span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
 .form{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{font-size:12px;color:var(--muted)}.field input,.field textarea,.field select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:13px;padding:11px 12px;outline:0}.field textarea{min-height:90px;resize:vertical}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}.modal.open{display:flex}.modal-box{width:min(520px,100%);max-height:90vh;overflow:auto;background:#11151d;border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:var(--shadow)}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.modal-head h3{margin:0}
@@ -71,11 +71,29 @@ button:active{transform:scale(.98)}
 }
 @media(max-width:420px){.grid{gap:8px}.category{min-height:118px;padding:13px}.hero h1{font-size:29px}.quick .q{padding:10px}.q strong{font-size:17px}}
 
+/* ===== КАЛЕНДАРЬ — iOS СТИЛЬ ===== */
 .calendar-head{display:flex;justify-content:space-between;align-items:flex-end;gap:15px;margin-bottom:12px}
 .view-switch{display:flex;gap:5px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:4px;border-radius:15px;margin-bottom:12px}
 .view-switch button{border:0;background:transparent;color:var(--muted);padding:9px 14px;border-radius:11px}
 .view-switch button.active{background:var(--panel2);color:#fff;box-shadow:0 4px 18px rgba(0,0,0,.2)}
-.calendar-card{background:rgba(17,21,29,.82);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.calendar-card{background:rgba(17,21,29,.82);border:1px solid var(--line);border-radius:22px;overflow:hidden;padding:12px}
+
+/* iOS-style month grid */
+.month-ios-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0;text-align:center}
+.month-ios-dow{padding:12px 4px 8px;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.month-ios-cell{padding:6px 2px;min-height:76px;border-top:1px solid rgba(255,255,255,.06);cursor:pointer;position:relative;transition:background .15s}
+.month-ios-cell:hover{background:rgba(255,255,255,.03)}
+.month-ios-cell.other-month .cell-number{color:var(--muted);opacity:.35}
+.month-ios-cell.today .cell-number{color:var(--accent2);font-weight:800}
+.month-ios-cell.today .cell-number::after{content:'';display:block;width:28px;height:3px;border-radius:99px;background:var(--accent);margin:2px auto 0}
+.cell-number{font-size:16px;font-weight:600;margin-bottom:4px;display:block}
+.cell-dots{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-top:2px}
+.cell-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.cell-dot.goal-dot{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#f59e0b);display:flex;align-items:center;justify-content:center;font-size:8px;color:#0b0d12;font-weight:900;box-shadow:0 2px 10px rgba(251,191,36,.4)}
+.cell-dot.goal-dot.small{width:14px;height:14px;font-size:6px}
+.cell-goal-label{font-size:8px;color:var(--gold);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* Day view */
 .day-layout{display:grid;grid-template-columns:72px 1fr;min-height:650px}
 .time-col{border-right:1px solid var(--line);color:var(--muted);font-size:10px}
 .time-col div{height:52px;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.045)}
@@ -91,19 +109,13 @@ button:active{transform:scale(.98)}
 .mini-task .check-small{width:14px;height:14px;border-radius:4px;border:1px solid var(--line);background:transparent;display:grid;place-items:center;font-size:10px;color:var(--muted);padding:0;flex-shrink:0}
 .mini-task .check-small.done{background:rgba(52,211,153,.2);border-color:var(--good);color:var(--good)}
 .mini-task.done{opacity:.45;text-decoration:line-through}
-.month-grid{display:grid;grid-template-columns:repeat(7,1fr)}
-.month-dow{padding:9px 5px;text-align:center;color:var(--muted);font-size:10px;border-bottom:1px solid var(--line)}
-.month-cell{min-height:112px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px}
-.month-cell:nth-child(7n){border-right:0}.month-cell.other{opacity:.35}.month-cell.today{background:rgba(139,92,246,.08)}
-.date-num{font-size:11px;font-weight:800;margin-bottom:5px}.date-num.today-dot{color:var(--accent2)}
-.month-task{font-size:9px;padding:4px 5px;border-radius:6px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--accent);display:flex;align-items:center;gap:4px}
-.month-task .check-small{width:12px;height:12px;border-radius:3px;border:1px solid var(--line);background:transparent;font-size:8px;padding:0;color:var(--muted);display:grid;place-items:center;flex-shrink:0}
-.month-task .check-small.done{background:rgba(52,211,153,.2);border-color:var(--good);color:var(--good)}
 .year-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px}
 .year-month{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:10px;cursor:pointer}.year-month:hover{border-color:rgba(255,255,255,.18)}
 .year-month h4{margin:0 0 8px;font-size:12px}.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.heat i{height:8px;border-radius:2px;background:rgba(255,255,255,.06)}.heat i.l1{background:rgba(139,92,246,.28)}.heat i.l2{background:rgba(139,92,246,.55)}.heat i.l3{background:rgba(192,132,252,.85)}
 .month-summary{padding:12px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .summary-pill{background:var(--panel2);border-radius:12px;padding:10px}.summary-pill b{display:block;font-size:18px}.summary-pill span{font-size:10px;color:var(--muted)}
+
+/* ===== НАСТРОЙКИ ===== */
 .settings-tabs{display:flex;gap:5px;overflow:auto;margin-bottom:15px;padding-bottom:2px}.settings-tabs button{border:0;background:transparent;color:var(--muted);padding:9px 11px;border-radius:12px;white-space:nowrap}.settings-tabs button.active{background:rgba(139,92,246,.16);color:#fff}
 .settings-panel{display:none}.settings-panel.active{display:block}.settings-section{padding:14px 0;border-bottom:1px solid var(--line)}.settings-section:first-child{padding-top:0}
 .themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:11px}.theme{border:1px solid var(--line);border-radius:14px;padding:8px;background:var(--panel2);text-align:left;color:#fff}.theme.selected{outline:2px solid var(--accent)}.theme-preview{height:34px;border-radius:9px;margin-bottom:7px;background:linear-gradient(135deg,var(--tc1),var(--tc2));position:relative}.theme-preview:after{content:"";position:absolute;right:7px;bottom:7px;width:18px;height:6px;border-radius:9px;background:rgba(255,255,255,.65)}.theme small{font-size:10px}
@@ -112,8 +124,12 @@ button:active{transform:scale(.98)}
 .settings-actions{display:flex;gap:8px;margin-top:11px}.settings-actions>*{flex:1}.device-card{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:8px}.device-icon{font-size:24px;width:34px;text-align:center}.device-card>div:nth-child(2){flex:1}.device-card b{font-size:13px}.device-card .muted{font-size:10px;margin-top:2px}.soon{font-size:8px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:4px 6px}
 .danger-card{border-bottom:0}.settings-footer{display:flex;justify-content:space-between;align-items:center;padding-top:14px}.settings-footer .muted{font-size:10px}
 .compact .quest{padding:8px}.compact .card{padding:12px}.compact .section-head{margin-top:16px}
-@media(max-width:760px){.calendar-head{align-items:flex-start}.calendar-head .toolbar{flex-shrink:0}.view-switch{overflow:auto}.view-switch button{padding:8px 11px}.day-layout{grid-template-columns:48px 1fr}.week-grid{min-width:720px}.calendar-card{overflow-x:auto}.month-grid{min-width:620px}.month-cell{min-height:92px}.year-grid{grid-template-columns:repeat(2,1fr);min-width:0}.month-summary{grid-template-columns:repeat(2,1fr)}.themes{grid-template-columns:repeat(2,1fr)}.settings-actions{flex-direction:column}}
+@media(max-width:760px){.calendar-head{align-items:flex-start}.calendar-head .toolbar{flex-shrink:0}.view-switch{overflow:auto}.view-switch button{padding:8px 11px}.day-layout{grid-template-columns:48px 1fr}.week-grid{min-width:720px}.calendar-card{overflow-x:auto}.month-ios-cell{min-height:60px;padding:4px 1px}.cell-number{font-size:13px}.month-ios-dow{padding:8px 2px 4px;font-size:9px}.year-grid{grid-template-columns:repeat(2,1fr);min-width:0}.month-summary{grid-template-columns:repeat(2,1fr)}.themes{grid-template-columns:repeat(2,1fr)}.settings-actions{flex-direction:column}}
 .period-day:checked + span{background:rgba(139,92,246,.25);color:#fff}.calendar-head h1{font-size:30px}@media(max-width:760px){.calendar-head h1{font-size:25px}}
+
+/* ===== ЗАМЕТКИ ===== */
+.note-tag{font-size:9px;background:rgba(255,255,255,.06);padding:2px 8px;border-radius:99px;color:var(--muted)}
+.note-cat{font-size:9px;padding:2px 8px;border-radius:99px;font-weight:600}
 </style>
 </head>
 <body>
@@ -129,6 +145,7 @@ button:active{transform:scale(.98)}
       <button data-page="calendar"><span class="ico">▦</span>Календарь</button>
       <button data-page="quests"><span class="ico">⚔</span>Квесты</button>
       <button data-page="goals"><span class="ico">◈</span>Цели</button>
+      <button data-page="notes"><span class="ico">📝</span>Заметки</button>
       <button data-page="character"><span class="ico">♙</span>Персонаж</button>
       <button data-page="more"><span class="ico">•••</span>Ещё</button>
     </nav></aside>
@@ -137,7 +154,7 @@ button:active{transform:scale(.98)}
       <section class="page active" id="page-home">
         <div class="hero">
           <div class="hero-top">
-            <div><div class="eyebrow">Добро пожаловать в свою игрy</div><h1 id="heroName">Герой</h1><p id="heroQuote">Сегодня стань на один уровень сильнее.</p></div>
+            <div><div class="eyebrow">Добро пожаловать в свою игру</div><h1 id="heroName">Герой</h1><p id="heroQuote">Сегодня стань на один уровень сильнее.</p></div>
             <div class="level-badge"><b id="heroLevel">1</b><span>level</span></div>
           </div>
           <div class="xp"><div class="xp-row"><span>XP до следующего уровня</span><span id="xpText">0 / 120</span></div><div class="track"><div class="fill" id="xpFill" style="width:0%"></div></div></div>
@@ -181,6 +198,15 @@ button:active{transform:scale(.98)}
         <div class="grid" id="goalList"></div>
       </section>
 
+      <section class="page" id="page-notes">
+        <div class="section-head"><h2>📝 Заметки</h2><button class="add" id="newNoteBtn">+ Заметка</button></div>
+        <div class="toolbar">
+          <select id="noteFilterCat"><option value="all">Все журналы</option>${CATS.map(c=>`<option value="${c.id}">${c.i} ${c.n}</option>`).join('')}</select>
+          <select id="noteFilterSort"><option value="date">По дате ↓</option><option value="date_asc">По дате ↑</option></select>
+        </div>
+        <div class="card" style="margin-top:12px"><div class="quest-list" id="notesList"></div></div>
+      </section>
+
       <section class="page" id="page-character">
         <div class="hero">
           <div class="hero-top"><div><div class="eyebrow">Твой герой</div><h1 id="charName">Герой</h1><p>Прокачивай реальную жизнь действиями.</p></div><div style="font-size:64px">🧙</div></div>
@@ -193,25 +219,11 @@ button:active{transform:scale(.98)}
       <section class="page" id="page-more">
         <div class="section-head"><h2>••• Ещё</h2></div>
         <div class="card">
-          <div class="row"><div><b>📝 Заметки</b><div class="muted">Быстрые мысли и идеи</div></div><button class="ghost" id="notesBtn">Открыть</button></div>
-          <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
           <div class="row"><div><b>📊 Статистика</b><div class="muted">Твой прогресс по направлениям</div></div><button class="ghost" id="statsBtn">Открыть</button></div>
           <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
           <div class="row"><div><b>💾 Резервная копия</b><div class="muted">Данные сохраняются локально</div></div><button class="ghost" id="exportBtn2">Экспорт</button></div>
-          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v12 Prototype · local-first · GitHub Pages friendly</div>
+          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v12 · local-first</div>
         </div>
-      </section>
-
-      <section class="page" id="page-notes">
-        <div class="section-head"><h2>📝 Заметки</h2><button class="add" id="newNoteBtn">+ Заметка</button></div>
-        <div class="card"><div class="quest-list" id="notesList"></div></div>
-      </section>
-
-      <section class="page" id="page-stats">
-        <div class="section-head"><h2>📊 Статистика</h2></div>
-        <div class="stats" id="statsCards"></div>
-        <div class="section-head"><h2>Прогресс по направлениям</h2></div>
-        <div class="card" id="statsBars"></div>
       </section>
     </main>
   </div>
@@ -222,7 +234,7 @@ button:active{transform:scale(.98)}
  <button data-page="calendar"><i>▦</i>Месяц</button>
  <button data-page="quests"><i>⚔</i>Квесты</button>
  <button data-page="goals"><i>◈</i>Цели</button>
- <button data-page="character"><i>♙</i>Герой</button>
+ <button data-page="notes"><i>📝</i>Заметки</button>
  <button data-page="more"><i>•••</i>Ещё</button>
 </nav>
 
@@ -245,33 +257,33 @@ button:active{transform:scale(.98)}
     <div class="settings-section"><div><b>Плотность интерфейса</b><div class="muted">Компактно — больше информации; просторно — легче читать</div></div>
       <div class="segmented" id="density"><button data-density="cozy" class="active">Просторно</button><button data-density="compact">Компактно</button></div>
     </div>
-    <div class="settings-section"><div><b>Календарь</b><div class="muted">Цвет задач берётся из журнала — как в современных календарях задач</div></div>
+    <div class="settings-section"><div><b>Календарь</b><div class="muted">Цвет задач берётся из журнала</div></div>
       <label class="switchline"><span>Показывать завершённые</span><input id="showCompleted" type="checkbox"></label>
     </div>
   </div>
   <div class="settings-panel" id="stab-data">
-    <div class="settings-section"><b>Резервная копия</b><div class="muted">Экспортируй данные перед крупными изменениями или переносом на другой браузер.</div>
+    <div class="settings-section"><b>Резервная копия</b><div class="muted">Экспортируй данные перед крупными изменениями</div>
       <div class="settings-actions"><button class="add" id="exportFull">↥ Экспорт JSON</button><button class="ghost" id="importFull">↧ Импорт JSON</button><input type="file" id="importFile" accept=".json" hidden></div>
     </div>
-    <div class="settings-section"><b>Автобэкап</b><div class="muted">Локальная копия в браузере перед каждым импортом.</div>
+    <div class="settings-section"><b>Автобэкап</b><div class="muted">Локальная копия перед каждым импортом.</div>
       <label class="switchline"><span>Создавать резервную копию автоматически</span><input id="autoBackup" type="checkbox" checked></label>
     </div>
     <div class="settings-section danger-card"><b>Сброс данных</b><div class="muted">Удалит локальные данные LVLUP на этом устройстве.</div><button class="ghost danger" id="resetBtn">Сбросить всё</button></div>
   </div>
   <div class="settings-panel" id="stab-devices">
     <div class="device-card"><div class="device-icon">⌚</div><div><b>Умные часы</b><div class="muted">Заглушка: быстрый чек-ин квеста, streak и XP.</div></div><span class="soon">СКОРО</span></div>
-    <div class="device-card"><div class="device-icon">❤️</div><div><b>Здоровье</b><div class="muted">Apple Health / Google Health Connect: шаги, тренировки, сон.</div></div><span class="soon">СКОРО</span></div>
-    <div class="device-card"><div class="device-icon">🏃</div><div><b>Фитнес</b><div class="muted">Garmin / Fitbit / Strava-подобные источники для журнала «Тело».</div></div><span class="soon">СКОРО</span></div>
+    <div class="device-card"><div class="device-icon">❤️</div><div><b>Здоровье</b><div class="muted">Apple Health / Google Health Connect.</div></div><span class="soon">СКОРО</span></div>
+    <div class="device-card"><div class="device-icon">🏃</div><div><b>Фитнес</b><div class="muted">Garmin / Fitbit / Strava-подобные источники.</div></div><span class="soon">СКОРО</span></div>
     <div class="device-card"><div class="device-icon">🔔</div><div><b>Уведомления</b><div class="muted">Напоминания и «пора на следующий квест».</div></div><span class="soon">СКОРО</span></div>
   </div>
   <div class="settings-panel" id="stab-behavior">
-    <div class="settings-section"><b>Умный планировщик</b><div class="muted">Будущий AI Game Master сможет предлагать 3 главных квеста дня вместо длинного списка.</div>
+    <div class="settings-section"><b>Умный планировщик</b><div class="muted">Будущий AI Game Master.</div>
       <label class="switchline"><span>Показывать «Главный квест дня»</span><input id="mainQuestMode" type="checkbox" checked></label>
     </div>
     <div class="settings-section"><b>Начало недели</b><div class="segmented"><button class="active">Пн</button><button>Вс</button></div></div>
     <div class="settings-section"><b>Первый экран</b><div class="segmented"><button class="active">Главная</button><button>Календарь</button></div></div>
   </div>
-  <div class="settings-footer"><span class="muted">LVLUP v12 Prototype · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
+  <div class="settings-footer"><span class="muted">LVLUP v12 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
 </div></div>
 
 <script>
@@ -284,7 +296,6 @@ const CATS=[
 ];
 const CAT=Object.fromEntries(CATS.map(x=>[x.id,x]));
 
-// Генератор ID с fallback
 function genId(){return typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,8)}
 
 function defaults(){return {version:'v12',character:{name:'Герой',level:1,xp:0,totalXp:0},tasks:{body:[],hobby:[],business:[],food:[],finance:[],debts:[],travel:[],misc:[]},goals:[],notes:[],streak:0,lastReset:null}}
@@ -303,22 +314,21 @@ function migrateFromLegacy(old){
  let d=defaults();
  if(old){
   d.character={...d.character,...(old.character||{})};
-  d.goals=Array.isArray(old.goals)?old.goals:[];
-  d.notes=Array.isArray(old.notes)?old.notes:[];
+  d.goals=Array.isArray(old.goals)?old.goals.map(g=>({...g,deadline:g.deadline||null})):[];
+  d.notes=Array.isArray(old.notes)?old.notes.map(n=>({...n,cat:n.cat||null,taskId:n.taskId||null})):[];
   d.streak=old.streak||0;
   const tasks=old.tasks||{};
   for(const c of Object.keys(CAT)){
    d.tasks[c]=Array.isArray(tasks[c])?tasks[c].map(t=>({...t,id:t.id||genId()})):[];
   }
  }
- // Пробуем v11 если есть
  try{
   const v11=JSON.parse(localStorage.getItem('lvlup_v11')||'null');
   if(v11){
    const merged=defaults();
    merged.character={...merged.character,...v11.character};
-   merged.goals=v11.goals||[];
-   merged.notes=v11.notes||[];
+   merged.goals=Array.isArray(v11.goals)?v11.goals.map(g=>({...g,deadline:g.deadline||null})):[];
+   merged.notes=Array.isArray(v11.notes)?v11.notes.map(n=>({...n,cat:n.cat||null,taskId:n.taskId||null})):[];
    merged.streak=v11.streak||0;
    for(const c of Object.keys(CAT)){
     merged.tasks[c]=Array.isArray(v11.tasks?.[c])?v11.tasks[c].map(t=>({...t,id:t.id||genId()})):[];
@@ -333,9 +343,13 @@ function normalize(d){
  let x=defaults();
  x={...x,...d,character:{...x.character,...(d.character||{})},version:'v12'};
  for(const c of Object.keys(x.tasks))x.tasks[c]=Array.isArray(x.tasks[c])?x.tasks[c]:[];
- // Очищаем битые ссылки в целях
  for(const g of x.goals){
   if(g.taskIds) g.taskIds=g.taskIds.filter(id=>allTasks().some(t=>t.id===id));
+  if(!g.deadline) g.deadline=null;
+ }
+ for(const n of x.notes){
+  if(!n.cat) n.cat=null;
+  if(!n.taskId) n.taskId=null;
  }
  return x;
 }
@@ -343,7 +357,7 @@ function normalize(d){
 let data=load();
 function save(){localStorage.setItem(KEY,JSON.stringify(data));data=normalize(data)}
 
-function allTasks(){return Object.entries(data.tasks).flatMap(([cat,arr])=>arr.map(t=>({...t,cat,i:arr.indexOf(t)})))}
+function allTasks(){return Object.entries(data.tasks).flatMap(([cat,arr])=>arr.map((t,i)=>({...t,cat,i:arr.indexOf(t)})))}
 function findTask(id){return allTasks().find(t=>t.id===id)}
 function getTaskIndex(cat,id){const arr=data.tasks[cat]||[];return arr.findIndex(t=>t.id===id)}
 function today(){return new Date().toISOString().slice(0,10)}
@@ -364,12 +378,14 @@ document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>switchPage(b.d
 function questHTML(t,cat,i,showDelete=true){
  const c=CAT[cat]||CAT.misc;
  const overdue=isOverdue(t.date) && t.status!=='done';
+ const hasNote=data.notes.some(n=>n.taskId===t.id);
  return `<div class="quest ${t.status==='done'?'done':''} ${overdue?'overdue':''}">
  <button class="check" onclick="toggleTask('${cat}',${i})">${t.status==='done'?'✓':'○'}</button>
  <div><div class="quest-title">${esc(t.title||'Без названия')}</div>
- <div class="quest-meta">${c.i} ${c.n} · ${t.date||'без даты'}${t.time?' · '+esc(t.time):''}${t.note?' · '+esc(t.note):''}${overdue?' · ⏰ просрочен':''}</div></div>
+ <div class="quest-meta">${c.i} ${c.n} · ${t.date||'без даты'}${t.time?' · '+esc(t.time):''}${t.note?' · '+esc(t.note):''}${overdue?' · ⏰ просрочен':''}${hasNote?' · 📝':''}</div></div>
  <div style="display:flex;gap:6px;align-items:center">
   <span class="reward">+${t.xp||10} XP</span>
+  <button class="ghost" style="padding:4px 8px;font-size:12px" onclick="addNoteToTask('${t.id}')">📝</button>
   ${showDelete?`<button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="deleteTask('${cat}',${i})">✕</button>`:''}
  </div></div>`
 }
@@ -396,7 +412,6 @@ function toggleTask(cat,i){
 function deleteTask(cat,i){
  const t=data.tasks[cat][i];if(!t)return;
  if(!confirm(`Удалить квест "${t.title}"?`))return;
- // Очищаем ссылки в целях
  for(const g of data.goals){
   if(g.taskIds) g.taskIds=g.taskIds.filter(id=>id!==t.id);
  }
@@ -425,27 +440,72 @@ function createQuest(){
  save();closeModal();toast('⚔ Создано дней: '+count);renderHome();renderQuests();renderCalendar()
 }
 
-// ===== ЦЕЛИ =====
+// ===== ЦЕЛИ С ДЕДЛАЙНОМ =====
 
 function renderGoals(){
  const el=document.getElementById('goalList');if(!data.goals.length){el.innerHTML='<div class="card empty" style="grid-column:1/-1">Создай большую цель и преврати её в приключение.</div>';return}
- el.innerHTML=data.goals.map((g,i)=>{const ids=g.taskIds||[];const ts=ids.map(id=>findTask(id)).filter(Boolean);const done=ts.filter(t=>t.status==='done').length;const pct=ts.length?Math.round(done/ts.length*100):0;return `<div class="card goal"><div class="goal-top"><div class="goal-title">◈ ${esc(g.title)}</div><div class="goal-pct">${done}/${ts.length}</div></div><div class="track"><div class="fill" style="width:${pct}%"></div></div><div class="muted">${pct}% прогресса</div><div style="display:flex;gap:6px"><button class="ghost" onclick="manageGoal(${i})">Управлять квестами</button><button class="ghost" style="color:var(--danger)" onclick="deleteGoal(${i})">✕</button></div></div>`}).join('')
+ el.innerHTML=data.goals.map((g,i)=>{const ids=g.taskIds||[];const ts=ids.map(id=>findTask(id)).filter(Boolean);const done=ts.filter(t=>t.status==='done').length;const pct=ts.length?Math.round(done/ts.length*100):0;const deadline=g.deadline?`🎯 ${g.deadline}`:'';return `<div class="card goal"><div class="goal-top"><div class="goal-title">◈ ${esc(g.title)}</div><div class="goal-pct">${done}/${ts.length}</div></div><div class="goal-deadline">${deadline}</div><div class="track"><div class="fill" style="width:${pct}%"></div></div><div class="muted">${pct}% прогресса</div><div style="display:flex;gap:6px"><button class="ghost" onclick="manageGoal(${i})">Управлять квестами</button><button class="ghost" style="color:var(--danger)" onclick="deleteGoal(${i})">✕</button></div></div>`}).join('')
 }
 function deleteGoal(i){if(!confirm('Удалить цель?'))return;data.goals.splice(i,1);save();renderGoals();toast('◈ Цель удалена')}
 function manageGoal(i){const g=data.goals[i];const all=allTasks();const showDone=document.getElementById('goalShowDone')?.checked||false;
  let list=all;if(!showDone)list=list.filter(t=>t.status!=='done');
- openModal('Управление целью',`<div class="form"><div class="field"><label>Название</label><input id="gname" value="${esc(g.title)}"></div><div class="field"><label><input type="checkbox" id="goalShowDone" ${showDone?'checked':''} onchange="manageGoal(${i})"> Показывать выполненные</label></div><div class="field"><label>Квесты</label><div class="quest-list">${list.map(t=>`<label class="quest" style="cursor:pointer"><input type="checkbox" data-gid="${t.id}" ${(g.taskIds||[]).includes(t.id)?'checked':''}><span>${esc(t.title)}</span><span class="muted">${CAT[t.cat].n}${t.status==='done'?' ✓':''}</span></label>`).join('')}</div></div><button class="add" onclick="saveGoal(${i})">Сохранить</button></div>`)
+ openModal('Управление целью',`<div class="form"><div class="field"><label>Название</label><input id="gname" value="${esc(g.title)}"></div><div class="field"><label>Дедлайн (дата завершения)</label><input id="gdeadline" type="date" value="${g.deadline||''}"></div><div class="field"><label><input type="checkbox" id="goalShowDone" ${showDone?'checked':''} onchange="manageGoal(${i})"> Показывать выполненные</label></div><div class="field"><label>Квесты (выбери из любого журнала)</label><div class="quest-list">${list.map(t=>`<label class="quest" style="cursor:pointer"><input type="checkbox" data-gid="${t.id}" ${(g.taskIds||[]).includes(t.id)?'checked':''}><span>${esc(t.title)}</span><span class="muted">${CAT[t.cat].n}${t.status==='done'?' ✓':''}</span></label>`).join('')}</div></div><button class="add" onclick="saveGoal(${i})">Сохранить</button></div>`)
 }
-function saveGoal(i){const g=data.goals[i];g.title=document.getElementById('gname').value.trim()||g.title;g.taskIds=[...document.querySelectorAll('[data-gid]:checked')].map(x=>x.dataset.gid);save();closeModal();renderGoals();toast('Цель обновлена')}
-document.getElementById('newGoalBtn').onclick=()=>openModal('◈ Новая цель',`<div class="form"><div class="field"><label>Название цели</label><input id="newGoalName" autofocus placeholder="Например: Запустить бизнес"></div><button class="add" onclick="createGoal()">Создать цель</button></div>`)
-function createGoal(){const title=document.getElementById('newGoalName').value.trim();if(!title)return toast('Назови цель');data.goals.push({id:genId(),title,taskIds:[],createdAt:new Date().toISOString()});save();closeModal();renderGoals();toast('◈ Цель создана')}
+function saveGoal(i){const g=data.goals[i];g.title=document.getElementById('gname').value.trim()||g.title;g.deadline=document.getElementById('gdeadline').value||null;g.taskIds=[...document.querySelectorAll('[data-gid]:checked')].map(x=>x.dataset.gid);save();closeModal();renderGoals();toast('Цель обновлена')}
+document.getElementById('newGoalBtn').onclick=()=>openModal('◈ Новая цель',`<div class="form"><div class="field"><label>Название цели</label><input id="newGoalName" autofocus placeholder="Например: Похудеть на 5 кг"></div><div class="field"><label>Дедлайн (дата завершения)</label><input id="newGoalDeadline" type="date" value="${today()}"></div><button class="add" onclick="createGoal()">Создать цель</button></div>`)
+function createGoal(){const title=document.getElementById('newGoalName').value.trim();if(!title)return toast('Назови цель');const deadline=document.getElementById('newGoalDeadline').value||null;data.goals.push({id:genId(),title,deadline,taskIds:[],createdAt:new Date().toISOString()});save();closeModal();renderGoals();toast('◈ Цель создана')}
 
-// ===== ЗАМЕТКИ =====
+// ===== ЗАМЕТКИ (полноценное меню) =====
 
-function renderNotes(){const el=document.getElementById('notesList');el.innerHTML=data.notes.length?data.notes.map((n,i)=>`<div class="quest"><div class="check">📝</div><div><div class="quest-title">${esc(n.text)}</div><div class="quest-meta">${n.date||''}</div></div><button class="ghost" onclick="deleteNote(${i})">✕</button></div>`).join(''):'<div class="empty">Заметок пока нет.</div>'}
-function deleteNote(i){data.notes.splice(i,1);save();renderNotes()}
-document.getElementById('newNoteBtn').onclick=()=>openModal('📝 Новая заметка',`<div class="form"><div class="field"><label>Текст</label><textarea id="noteText" autofocus placeholder="Идея, мысль, наблюдение…"></textarea></div><button class="add" onclick="createNote()">Сохранить</button></div>`)
-function createNote(){const text=document.getElementById('noteText').value.trim();if(!text)return;data.notes.unshift({text,date:new Date().toLocaleDateString('ru-RU')});save();closeModal();renderNotes();toast('📝 Сохранено')}
+function renderNotes(){
+ const el=document.getElementById('notesList');
+ const catFilter=document.getElementById('noteFilterCat')?.value||'all';
+ const sort=document.getElementById('noteFilterSort')?.value||'date';
+ let notes=[...data.notes];
+ if(catFilter!=='all')notes=notes.filter(n=>n.cat===catFilter);
+ if(sort==='date')notes.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+ else if(sort==='date_asc')notes.sort((a,b)=>new Date(a.createdAt||0)-new Date(b.createdAt||0));
+ if(!notes.length){el.innerHTML='<div class="empty">Заметок пока нет. Создай первую ✍️</div>';return}
+ el.innerHTML=notes.map((n,i)=>{
+  const task=n.taskId?findTask(n.taskId):null;
+  const cat=CAT[n.cat]||null;
+  return `<div class="quest">
+   <div class="check">📝</div>
+   <div>
+    <div class="quest-title">${esc(n.text)}</div>
+    <div class="quest-meta">${n.date||''}${cat?' · '+cat.i+' '+cat.n:''}${task?' · квест: '+esc(task.title):''}</div>
+   </div>
+   <div style="display:flex;gap:4px;align-items:center">
+    ${task?`<button class="ghost" style="padding:4px 6px;font-size:11px" onclick="switchPage('quests')">🔗</button>`:''}
+    <button class="ghost" style="padding:4px 6px;font-size:12px;color:var(--danger)" onclick="deleteNote(${i})">✕</button>
+   </div>
+  </div>`
+ }).join('')
+}
+
+function addNoteToTask(taskId){
+ const task=findTask(taskId);if(!task)return;
+ openModal('📝 Заметка к квесту',`<div class="form"><div class="field"><label>Квест: ${esc(task.title)}</label></div><div class="field"><label>Текст заметки</label><textarea id="noteTextTask" autofocus placeholder="Что важно запомнить?"></textarea></div><div class="field"><label>Журнал</label><select id="noteCatTask">${CATS.map(c=>`<option value="${c.id}">${c.i} ${c.n}</option>`).join('')}</select></div><button class="add" onclick="saveNoteToTask('${taskId}')">Сохранить заметку</button></div>`)
+}
+function saveNoteToTask(taskId){
+ const text=document.getElementById('noteTextTask').value.trim();if(!text)return toast('Напиши заметку');
+ const cat=document.getElementById('noteCatTask').value;
+ data.notes.push({id:genId(),text,cat,taskId,date:new Date().toLocaleDateString('ru-RU'),createdAt:new Date().toISOString()});
+ save();closeModal();renderNotes();toast('📝 Заметка сохранена')
+}
+
+document.getElementById('newNoteBtn').onclick=()=>openModal('📝 Новая заметка',`<div class="form"><div class="field"><label>Текст</label><textarea id="noteText" autofocus placeholder="Идея, мысль, наблюдение…"></textarea></div><div class="field"><label>Журнал</label><select id="noteCat">${CATS.map(c=>`<option value="${c.id}">${c.i} ${c.n}</option>`).join('')}</select></div><div class="field"><label>Привязать к квесту (опционально)</label><select id="noteTask"><option value="">— без привязки —</option>${allTasks().map(t=>`<option value="${t.id}">${esc(t.title)} (${CAT[t.cat].n})</option>`).join('')}</select></div><button class="add" onclick="createNote()">Сохранить</button></div>`)
+function createNote(){
+ const text=document.getElementById('noteText').value.trim();if(!text)return toast('Напиши заметку');
+ const cat=document.getElementById('noteCat').value;
+ const taskId=document.getElementById('noteTask').value||null;
+ data.notes.unshift({id:genId(),text,cat,taskId,date:new Date().toLocaleDateString('ru-RU'),createdAt:new Date().toISOString()});
+ save();closeModal();renderNotes();toast('📝 Сохранено')
+}
+function deleteNote(i){data.notes.splice(i,1);save();renderNotes();toast('🗑 Заметка удалена')}
+
+document.getElementById('noteFilterCat')?.addEventListener('change',renderNotes);
+document.getElementById('noteFilterSort')?.addEventListener('change',renderNotes);
 
 // ===== СТАТИСТИКА =====
 
@@ -467,10 +527,9 @@ document.getElementById('modalClose').onclick=closeModal;document.getElementById
 // ===== НАСТРОЙКИ =====
 
 document.getElementById('questSearch').oninput=()=>renderQuests();document.getElementById('questFilter').onchange=()=>renderQuests()
-document.getElementById('notesBtn').onclick=()=>switchPage('notes');document.getElementById('statsBtn').onclick=()=>switchPage('stats');
+document.getElementById('statsBtn').onclick=()=>switchPage('stats');
 document.getElementById('exportBtn2').onclick=exportData;document.getElementById('exportBtn').onclick=exportData
 
-// ЕДИНСТВЕННАЯ ФУНКЦИЯ ЭКСПОРТА
 function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='lvlup-backup-'+today()+'.json';a.click();toast('💾 JSON сохранён')}
 
 // ===== ТЕМЫ =====
@@ -503,12 +562,10 @@ document.getElementById('importFile').onchange=e=>{
  r.onload=()=>{
   try{
    const parsed=JSON.parse(r.result);
-   // Валидация структуры
    if(!parsed.character||typeof parsed.character!=='object')throw new Error('Нет character');
    if(!parsed.tasks||typeof parsed.tasks!=='object')throw new Error('Нет tasks');
    if(!parsed.goals||!Array.isArray(parsed.goals))throw new Error('Нет goals');
    if(!parsed.notes||!Array.isArray(parsed.notes))throw new Error('Нет notes');
-   // Проверяем категории
    for(const c of Object.keys(CAT)){
     if(!Array.isArray(parsed.tasks[c]))throw new Error(`Нет категории ${c}`);
    }
@@ -523,7 +580,7 @@ document.getElementById('importFile').onchange=e=>{
 document.getElementById('resetBtn').onclick=()=>{if(confirm('Сбросить все данные LVLUP?')){data=defaults();save();renderHome();renderGoals();renderCharacter();renderStats();toast('Данные сброшены')}}
 if(prefs.theme)applyTheme(prefs.theme);if(prefs.density==='compact')document.body.classList.add('compact');
 
-// ===== КАЛЕНДАРЬ =====
+// ===== КАЛЕНДАРЬ (iOS СТИЛЬ) =====
 
 let calState={view:'month',date:new Date()};
 const DOW=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],MON=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
@@ -531,13 +588,17 @@ function pad(n){return String(n).padStart(2,'0')}
 function iso(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function startWeek(d){const x=new Date(d);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x}
 function tasksOn(day){const s=iso(day);return allTasks().filter(t=>t.date===s && (prefs.showCompleted!==false||t.status!=='done'))}
+function goalsOn(day){const s=iso(day);return data.goals.filter(g=>g.deadline===s)}
 function taskColor(t){return (CAT[t.cat]||CAT.misc).c}
 function calLabel(){const d=calState.date;if(calState.view==='day')return d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});if(calState.view==='week'){const s=startWeek(d),e=new Date(s);e.setDate(e.getDate()+6);return `${s.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})} — ${e.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'})}`};if(calState.view==='month')return `${MON[d.getMonth()]} ${d.getFullYear()}`;return String(d.getFullYear())}
 
 function renderCalendar(){
  document.getElementById('calRangeLabel').textContent=calLabel();document.querySelectorAll('#calendarModes button').forEach(b=>b.classList.toggle('active',b.dataset.view===calState.view));
  const body=document.getElementById('calendarBody');
- if(calState.view==='day')renderDay(body);else if(calState.view==='week')renderWeek(body);else if(calState.view==='month')renderMonth(body);else renderYear(body)
+ if(calState.view==='day')renderDay(body);
+ else if(calState.view==='week')renderWeek(body);
+ else if(calState.view==='month')renderMonthIOS(body);
+ else renderYear(body)
 }
 
 function renderDay(el){
@@ -554,13 +615,88 @@ function renderWeek(el){
 }
 function toggleTaskByCat(cat,i){toggleTask(cat,i);renderCalendar()}
 
-function renderMonth(el){
- const y=calState.date.getFullYear(),m=calState.date.getMonth(),first=new Date(y,m,1),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();let html='<div class="month-grid">'+DOW.map(x=>`<div class="month-dow">${x}</div>`).join('');
- for(let i=0;i<42;i++){const n=i-offset+1,d=new Date(y,m,n),other=d.getMonth()!==m,ts=tasksOn(d),today=iso(d)===today();html+=`<div class="month-cell ${other?'other':''} ${today?'today':''}" onclick="jumpDay('${iso(d)}')"><div class="date-num ${today?'today-dot':''}">${d.getDate()}</div>${ts.slice(0,5).map(t=>`<div class="month-task" style="border-left-color:${taskColor(t)}"><button class="check-small ${t.status==='done'?'done':''}" onclick="event.stopPropagation();toggleTaskByCat('${t.cat}',${t.i})">${t.status==='done'?'✓':''}</button>${esc(t.title)}</div>`).join('')}${ts.length>5?`<div class="muted" style="font-size:9px">+${ts.length-5} ещё</div>`:''}</div>`}
- html+='</div>';const monthTasks=allTasks().filter(t=>t.date&&t.date.startsWith(`${y}-${pad(m+1)}`));const done=monthTasks.filter(t=>t.status==='done').length;html+=`<div class="month-summary"><div class="summary-pill"><b>${monthTasks.length}</b><span>квестов</span></div><div class="summary-pill"><b>${done}</b><span>выполнено</span></div><div class="summary-pill"><b>${monthTasks.reduce((a,t)=>a+(+t.xp||10),0)}</b><span>XP запланировано</span></div><div class="summary-pill"><b>${monthTasks.filter(t=>t.status!=='done').length}</b><span>осталось</span></div></div>`;el.innerHTML=html
+// ===== MONTH — iOS СТИЛЬ =====
+function renderMonthIOS(el){
+ const y=calState.date.getFullYear(),m=calState.date.getMonth();
+ const first=new Date(y,m,1);
+ const offset=(first.getDay()+6)%7;
+ const daysInMonth=new Date(y,m+1,0).getDate();
+ const daysInPrev=new Date(y,m,0).getDate();
+ const todayStr=today();
+
+ let html=`<div class="month-ios-grid">`;
+ // Дни недели
+ for(const d of DOW) html+=`<div class="month-ios-dow">${d}</div>`;
+
+ // Дни предыдущего месяца
+ for(let i=offset-1;i>=0;i--){
+  const d=new Date(y,m-1,daysInPrev-i);
+  html+=`<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')">
+   <span class="cell-number">${d.getDate()}</span>
+   ${renderCellDots(d,false)}
+  </div>`;
+ }
+
+ // Дни текущего месяца
+ for(let i=1;i<=daysInMonth;i++){
+  const d=new Date(y,m,i);
+  const isToday=iso(d)===todayStr;
+  const ts=tasksOn(d);
+  const gs=goalsOn(d);
+  html+=`<div class="month-ios-cell ${isToday?'today':''}" onclick="jumpDay('${iso(d)}')">
+   <span class="cell-number">${i}</span>
+   ${renderCellDots(d,true)}
+   ${gs.map(g=>`<div class="cell-goal-label">🏆 ${esc(g.title)}</div>`).join('')}
+  </div>`;
+ }
+
+ // Дни следующего месяца
+ const totalCells=Math.ceil((offset+daysInMonth)/7)*7;
+ for(let i=offset+daysInMonth;i<totalCells;i++){
+  const d=new Date(y,m+1,i-offset-daysInMonth+1);
+  html+=`<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')">
+   <span class="cell-number">${d.getDate()}</span>
+   ${renderCellDots(d,false)}
+  </div>`;
+ }
+
+ html+='</div>';
+
+ // Сводка
+ const monthTasks=allTasks().filter(t=>t.date&&t.date.startsWith(`${y}-${pad(m+1)}`));
+ const done=monthTasks.filter(t=>t.status==='done').length;
+ const monthGoals=data.goals.filter(g=>g.deadline&&g.deadline.startsWith(`${y}-${pad(m+1)}`));
+ html+=`<div class="month-summary">
+  <div class="summary-pill"><b>${monthTasks.length}</b><span>квестов</span></div>
+  <div class="summary-pill"><b>${done}</b><span>выполнено</span></div>
+  <div class="summary-pill"><b>${monthTasks.reduce((a,t)=>a+(+t.xp||10),0)}</b><span>XP</span></div>
+  <div class="summary-pill"><b>${monthGoals.length}</b><span>целей 🏆</span></div>
+ </div>`;
+ el.innerHTML=html;
 }
+
+function renderCellDots(d,isCurrent){
+ const ts=tasksOn(d);
+ const gs=goalsOn(d);
+ if(!ts.length && !gs.length) return '<div class="cell-dots"></div>';
+ let html='<div class="cell-dots">';
+ // Точки задач (максимум 3, потом +)
+ const dots=ts.slice(0,3);
+ for(const t of dots){
+  html+=`<span class="cell-dot" style="background:${taskColor(t)}"></span>`;
+ }
+ if(ts.length>3) html+=`<span class="cell-dot" style="background:var(--muted);font-size:7px;display:inline-flex;align-items:center;justify-content:center;color:#fff">+${ts.length-3}</span>`;
+ // Золотые бейджи целей
+ if(gs.length){
+  const label=gs.length>1?`${gs.length}🏆`:'🏆';
+  html+=`<span class="cell-dot goal-dot ${gs.length>1?'small':''}">${label}</span>`;
+ }
+ html+='</div>';
+ return html;
+}
+
 function renderYear(el){
- const y=calState.date.getFullYear();let html='<div class="year-grid">';for(let m=0;m<12;m++){const days=new Date(y,m+1,0).getDate();let heat='';for(let i=1;i<=days;i++){const d=new Date(y,m,i),n=tasksOn(d).length;heat+=`<i class="${n>=5?'l3':n>=2?'l2':n?'l1':''}"></i>`}html+=`<div class="year-month" onclick="jumpMonth(${m})"><h4>${MON[m]}</h4><div class="heat">${heat}</div><div class="muted" style="font-size:9px;margin-top:7px">${allTasks().filter(t=>t.date&&t.date.startsWith(`${y}-${pad(m+1)}`)).length} задач</div></div>`}html+='</div>';el.innerHTML=html
+ const y=calState.date.getFullYear();let html='<div class="year-grid">';for(let m=0;m<12;m++){const days=new Date(y,m+1,0).getDate();let heat='';for(let i=1;i<=days;i++){const d=new Date(y,m,i),n=tasksOn(d).length;heat+=`<i class="${n>=5?'l3':n>=2?'l2':n?'l1':''}"></i>`}const goalCount=data.goals.filter(g=>g.deadline&&g.deadline.startsWith(`${y}-${pad(m+1)}`)).length;html+=`<div class="year-month" onclick="jumpMonth(${m})"><h4>${MON[m]}${goalCount?' 🏆':''}</h4><div class="heat">${heat}</div><div class="muted" style="font-size:9px;margin-top:7px">${allTasks().filter(t=>t.date&&t.date.startsWith(`${y}-${pad(m+1)}`)).length} задач</div></div>`}html+='</div>';el.innerHTML=html
 }
 function jumpDay(s){calState.date=new Date(s+'T12:00:00');calState.view='day';renderCalendar()}
 function jumpMonth(m){calState.date=new Date(calState.date.getFullYear(),m,1);calState.view='month';renderCalendar()}
