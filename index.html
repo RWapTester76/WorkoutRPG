@@ -92,8 +92,6 @@ button:active{transform:scale(.98)}
 .cell-dot.goal-dot{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#f59e0b);display:flex;align-items:center;justify-content:center;font-size:8px;color:#0b0d12;font-weight:900;box-shadow:0 2px 10px rgba(251,191,36,.4)}
 .cell-dot.goal-dot.small{width:14px;height:14px;font-size:6px}
 .cell-goal-label{font-size:8px;color:var(--gold);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-
-/* Availability стили */
 .avail-bar{height:4px;border-radius:99px;margin-top:3px;width:100%;display:flex;gap:1px;overflow:hidden}
 .avail-slot{height:100%;border-radius:2px;flex:1;min-width:2px}
 .avail-slot.work{background:#3b82f6}
@@ -105,7 +103,6 @@ button:active{transform:scale(.98)}
 .avail-legend{display:flex;gap:12px;flex-wrap:wrap;padding:8px 0 4px;font-size:10px;color:var(--muted)}
 .avail-legend span{display:flex;align-items:center;gap:4px}
 .avail-legend .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
-
 .day-layout{display:grid;grid-template-columns:72px 1fr;min-height:650px}
 .time-col{border-right:1px solid var(--line);color:var(--muted);font-size:10px}
 .time-col div{height:52px;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.045)}
@@ -126,7 +123,6 @@ button:active{transform:scale(.98)}
 .year-month h4{margin:0 0 8px;font-size:12px}.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.heat i{height:8px;border-radius:2px;background:rgba(255,255,255,.06)}.heat i.l1{background:rgba(139,92,246,.28)}.heat i.l2{background:rgba(139,92,246,.55)}.heat i.l3{background:rgba(192,132,252,.85)}
 .month-summary{padding:12px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .summary-pill{background:var(--panel2);border-radius:12px;padding:10px}.summary-pill b{display:block;font-size:18px}.summary-pill span{font-size:10px;color:var(--muted)}
-
 .settings-tabs{display:flex;gap:5px;overflow:auto;margin-bottom:15px;padding-bottom:2px}.settings-tabs button{border:0;background:transparent;color:var(--muted);padding:9px 11px;border-radius:12px;white-space:nowrap}.settings-tabs button.active{background:rgba(139,92,246,.16);color:#fff}
 .settings-panel{display:none}.settings-panel.active{display:block}.settings-section{padding:14px 0;border-bottom:1px solid var(--line)}.settings-section:first-child{padding-top:0}
 .themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:11px}.theme{border:1px solid var(--line);border-radius:14px;padding:8px;background:var(--panel2);text-align:left;color:#fff}.theme.selected{outline:2px solid var(--accent)}.theme-preview{height:34px;border-radius:9px;margin-bottom:7px;background:linear-gradient(135deg,var(--tc1),var(--tc2));position:relative}.theme-preview:after{content:"";position:absolute;right:7px;bottom:7px;width:18px;height:6px;border-radius:9px;background:rgba(255,255,255,.65)}.theme small{font-size:10px}
@@ -148,8 +144,6 @@ button:active{transform:scale(.98)}
 .gallery-empty{grid-column:1/-1;text-align:center;padding:48px;color:var(--muted)}
 .gallery-full{max-width:90vw;max-height:80vh;object-fit:contain;border-radius:12px}
 .gallery-meta{margin-top:12px;font-size:12px;color:var(--muted)}
-
-/* Availability экспорт */
 .avail-export-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin:12px 0}
 .avail-export-cell{padding:6px 2px;text-align:center;background:var(--panel);border-radius:6px;font-size:10px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .avail-export-cell .day-num{font-weight:700;font-size:13px}
@@ -339,7 +333,54 @@ button:active{transform:scale(.98)}
 
 <!-- MODALS -->
 <div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><h3 id="modalTitle">Новая задача</h3><button class="icon-btn" id="modalClose">✕</button></div><div id="modalBody"></div></div></div>
-<div class="modal" id="settings"><div class="modal-box settings-box">...</div></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal" id="settings"><div class="modal-box settings-box">
+  <div class="modal-head"><div><div class="eyebrow">Персонализация</div><h3 style="margin:4px 0 0">⚙ Настройки LVLUP</h3></div><button class="icon-btn" id="settingsClose">✕</button></div>
+  <div class="settings-tabs">
+    <button class="active" data-stab="appearance">🎨 Вид</button>
+    <button data-stab="data">💾 Данные</button>
+    <button data-stab="devices">⌚ Девайсы</button>
+    <button data-stab="behavior">🧠 Поведение</button>
+  </div>
+  <div class="settings-panel active" id="stab-appearance">
+    <div class="settings-section"><div class="row"><div><b>Имя героя</b><div class="muted">Так приложение будет обращаться к тебе</div></div></div>
+      <input class="input" id="nameInput" style="margin-top:9px">
+    </div>
+    <div class="settings-section"><div><b>Цветовая схема</b><div class="muted">Меняет акцент, прогресс, активную навигацию</div></div>
+      <div class="themes" id="themeGrid"></div>
+    </div>
+    <div class="settings-section"><div><b>Плотность интерфейса</b></div>
+      <div class="segmented" id="density"><button data-density="cozy" class="active">Просторно</button><button data-density="compact">Компактно</button></div>
+    </div>
+    <div class="settings-section"><div><b>Календарь</b></div>
+      <label class="switchline"><span>Показывать завершённые</span><input id="showCompleted" type="checkbox"></label>
+    </div>
+  </div>
+  <div class="settings-panel" id="stab-data">
+    <div class="settings-section"><b>Резервная копия</b>
+      <div class="settings-actions"><button class="add" id="exportFull">↥ Экспорт JSON</button><button class="ghost" id="importFull">↧ Импорт JSON</button><input type="file" id="importFile" accept=".json" hidden></div>
+    </div>
+    <div class="settings-section"><b>Автобэкап</b>
+      <label class="switchline"><span>Создавать резервную копию автоматически</span><input id="autoBackup" type="checkbox" checked></label>
+    </div>
+    <div class="settings-section danger-card"><b>Сброс данных</b><button class="ghost danger" id="resetBtn">Сбросить всё</button></div>
+  </div>
+  <div class="settings-panel" id="stab-devices">
+    <div class="device-card"><div class="device-icon">⌚</div><div><b>Умные часы</b><div class="muted">Заглушка: быстрый чек-ин</div></div><span class="soon">СКОРО</span></div>
+    <div class="device-card"><div class="device-icon">❤️</div><div><b>Здоровье</b><div class="muted">Apple Health / Google Health</div></div><span class="soon">СКОРО</span></div>
+    <div class="device-card"><div class="device-icon">🏃</div><div><b>Фитнес</b><div class="muted">Garmin / Fitbit / Strava</div></div><span class="soon">СКОРО</span></div>
+    <div class="device-card"><div class="device-icon">🔔</div><div><b>Уведомления</b><div class="muted">Напоминания</div></div><span class="soon">СКОРО</span></div>
+  </div>
+  <div class="settings-panel" id="stab-behavior">
+    <div class="settings-section"><b>Умный планировщик</b>
+      <label class="switchline"><span>Показывать «Главная задача дня»</span><input id="mainQuestMode" type="checkbox" checked></label>
+    </div>
+    <div class="settings-section"><b>Начало недели</b><div class="segmented"><button class="active">Пн</button><button>Вс</button></div></div>
+    <div class="settings-section"><b>Первый экран</b><div class="segmented"><button class="active">Главная</button><button>Календарь</button></div></div>
+  </div>
+  <div class="settings-footer"><span class="muted">LVLUP v13 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
+</div></div>
 
 <script>
 // ============================================================
@@ -573,21 +614,13 @@ function addMedia(media){
 }
 function deleteMedia(id){data.media=data.media.filter(m=>m.id!==id);saveData()}
 
-// ===== AVAILABILITY API =====
 function getAvailability(date){
  return data.availability.find(a=>a.date===date);
 }
-function getAvailabilityForMonth(year,month){
- const prefix=`${year}-${pad(month+1)}`;
- return data.availability.filter(a=>a.date.startsWith(prefix));
-}
 function setAvailability(date,slots){
  const existing=getAvailability(date);
- if(existing){
-  existing.slots=slots;
- }else{
-  data.availability.push({id:genId(),date,slots});
- }
+ if(existing){existing.slots=slots;}
+ else{data.availability.push({id:genId(),date,slots});}
  saveData();
 }
 function removeAvailability(date){
@@ -595,7 +628,6 @@ function removeAvailability(date){
  saveData();
 }
 function getAllAvailability(){return data.availability}
-
 function getAvailType(id){return AVAIL_TYPES[id]||AVAIL_TYPES.other}
 
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
@@ -1056,7 +1088,7 @@ function renderCharacter(){
 }
 
 // ============================================================
-// 13. AVAILABILITY (ДОСТУПНОСТЬ)
+// 13. AVAILABILITY
 // ============================================================
 function renderAvailability(){
  const el=document.getElementById('availList');
@@ -1128,11 +1160,8 @@ function renderAvailabilityExport(){
 
  let html=`<div style="font-size:14px;font-weight:600;margin-bottom:6px">${['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][month]} ${year}</div>`;
  html+=`<div class="avail-export-grid">`;
- // Дни недели
  for(const d of DOW)html+=`<div style="font-size:9px;color:var(--muted);text-align:center;padding:4px 0">${d}</div>`;
- // Пустые ячейки
  for(let i=0;i<offset;i++)html+=`<div class="avail-export-cell" style="opacity:.2"></div>`;
- // Дни месяца
  for(let d=1;d<=daysInMonth;d++){
   const dateStr=`${year}-${pad(month+1)}-${pad(d)}`;
   const avail=getAvailability(dateStr);
@@ -1145,9 +1174,7 @@ function renderAvailabilityExport(){
   </div>`;
  }
  html+=`</div>`;
- // Легенда
  html+=`<div class="avail-legend">${Object.entries(AVAIL_TYPES).map(([k,v])=>`<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
- // Действия
  html+=`<div class="avail-export-actions">
   <button class="add" onclick="downloadAvailImage()" style="font-size:12px;padding:8px 16px">📥 Скачать как изображение</button>
   <button class="ghost" onclick="copyAvailText()" style="font-size:12px;padding:8px 16px">📋 Копировать текст</button>
@@ -1156,32 +1183,7 @@ function renderAvailabilityExport(){
 }
 
 function downloadAvailImage(){
- const el=document.getElementById('availExportContent');
- const card=document.getElementById('availExportCard');
- // Сохраняем оригинальный стиль
- const origOverflow=card.style.overflow;
- const origPadding=card.style.padding;
- card.style.overflow='visible';
- card.style.padding='20px';
- // Используем html2canvas если доступен, иначе fallback
- if(typeof html2canvas!=='undefined'){
-  html2canvas(card,{backgroundColor:'#11151d',scale:2}).then(canvas=>{
-   const link=document.createElement('a');
-   link.download='availability-'+today()+'.png';
-   link.href=canvas.toDataURL('image/png');
-   link.click();
-   card.style.overflow=origOverflow;
-   card.style.padding=origPadding;
-   toast('📥 График скачан');
-  }).catch(()=>fallbackExport());
- }else{
-  fallbackExport();
- }
-}
-
-function fallbackExport(){
- toast('📥 Для экспорта изображения добавь библиотеку html2canvas (cdnjs)');
- // Показываем текст как запасной вариант
+ toast('📥 Для экспорта изображения открой на компьютере и сделай скриншот');
  copyAvailText();
 }
 
@@ -1270,7 +1272,6 @@ function renderYear(el){
  html+='</div>';el.innerHTML=html;
 }
 
-// ===== AVAILABILITY КАЛЕНДАРЬ =====
 function renderAvailabilityCalendar(el){
  const y=calState.date.getFullYear(),m=calState.date.getMonth();
  const first=new Date(y,m,1);
@@ -1295,7 +1296,6 @@ function renderAvailabilityCalendar(el){
  const totalCells=Math.ceil((offset+daysInMonth)/7)*7;
  for(let i=offset+daysInMonth;i<totalCells;i++){const d=new Date(y,m+1,i-offset-daysInMonth+1);html+=`<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span></div>`;}
  html+='</div>';
- // Легенда
  html+=`<div class="avail-legend" style="padding-top:8px">${Object.entries(AVAIL_TYPES).map(([k,v])=>`<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
  html+=`<div style="margin-top:8px;font-size:10px;color:var(--muted)">👆 Кликни на день, чтобы добавить слоты доступности</div>`;
  el.innerHTML=html;
@@ -1339,11 +1339,8 @@ function addAvailSlot(dateStr){
 function removeAvailSlot(dateStr,index){
  const a=getAvailability(dateStr);if(!a)return;
  a.slots.splice(index,1);
- if(!a.slots.length){
-  removeAvailability(dateStr);
- }else{
-  setAvailability(dateStr,a.slots);
- }
+ if(!a.slots.length){removeAvailability(dateStr);}
+ else{setAvailability(dateStr,a.slots);}
  renderAvailability();
  renderCalendar();
 }
@@ -1365,11 +1362,107 @@ document.getElementById('modalClose').onclick=closeModal;
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
 
 // ============================================================
-// 16. НАСТРОЙКИ
+// 16. НАСТРОЙКИ И ТЕМЫ
 // ============================================================
+const THEMES={
+ violet:{name:'Violet',a:'#8b5cf6',b:'#c084fc',bg:'#090b10',panel:'#11151d'},
+ ocean:{name:'Ocean',a:'#0ea5e9',b:'#38bdf8',bg:'#071016',panel:'#0d1820'},
+ forest:{name:'Forest',a:'#10b981',b:'#34d399',bg:'#07100d',panel:'#0d1814'},
+ ember:{name:'Ember',a:'#f97316',b:'#fb7185',bg:'#110a08',panel:'#19100e'},
+ gold:{name:'Gold',a:'#eab308',b:'#fbbf24',bg:'#100e06',panel:'#18150a'},
+ ice:{name:'Ice',a:'#60a5fa',b:'#a5b4fc',bg:'#080d16',panel:'#101827'},
+ neon:{name:'Neon',a:'#d946ef',b:'#22d3ee',bg:'#0c0810',panel:'#160e19'},
+ mono:{name:'Mono',a:'#e5e7eb',b:'#9ca3af',bg:'#090909',panel:'#151515'}
+};
+
+let prefs=JSON.parse(localStorage.getItem('lvlup_prefs')||'{}');
+
+function applyTheme(key){
+ const t=THEMES[key]||THEMES.violet;
+ document.documentElement.style.setProperty('--accent',t.a);
+ document.documentElement.style.setProperty('--accent2',t.b);
+ document.documentElement.style.setProperty('--bg',t.bg);
+ document.documentElement.style.setProperty('--panel',t.panel);
+ prefs.theme=key;
+ localStorage.setItem('lvlup_prefs',JSON.stringify(prefs));
+ document.querySelectorAll('.theme').forEach(x=>x.classList.toggle('selected',x.dataset.theme===key));
+}
+
+function renderThemes(){
+ document.getElementById('themeGrid').innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="theme ${prefs.theme===k||(!prefs.theme&&k==='violet')?'selected':''}" data-theme="${k}"><div class="theme-preview" style="--tc1:${t.a};--tc2:${t.b}"></div><small>${t.name}</small></button>`).join('');
+ document.querySelectorAll('.theme').forEach(b=>b.onclick=()=>applyTheme(b.dataset.theme));
+}
+
+document.getElementById('settingsBtn').onclick=()=>{
+ document.getElementById('nameInput').value=data.user.name;
+ renderThemes();
+ document.getElementById('showCompleted').checked=prefs.showCompleted!==false;
+ document.getElementById('autoBackup').checked=prefs.autoBackup!==false;
+ document.getElementById('mainQuestMode').checked=prefs.mainQuestMode!==false;
+ document.getElementById('settings').classList.add('open');
+};
+document.getElementById('settingsClose').onclick=()=>document.getElementById('settings').classList.remove('open');
+
+document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('[data-stab]').forEach(x=>x.classList.toggle('active',x===b));
+ document.querySelectorAll('.settings-panel').forEach(x=>x.classList.toggle('active',x.id==='stab-'+b.dataset.stab));
+});
+
+document.querySelectorAll('[data-density]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('[data-density]').forEach(x=>x.classList.toggle('active',x===b));
+ document.body.classList.toggle('compact',b.dataset.density==='compact');
+ prefs.density=b.dataset.density;
+ localStorage.setItem('lvlup_prefs',JSON.stringify(prefs));
+});
+
+document.getElementById('saveSettings').onclick=()=>{
+ data.user.name=document.getElementById('nameInput').value.trim()||'Герой';
+ prefs.showCompleted=document.getElementById('showCompleted').checked;
+ prefs.autoBackup=document.getElementById('autoBackup').checked;
+ prefs.mainQuestMode=document.getElementById('mainQuestMode').checked;
+ localStorage.setItem('lvlup_prefs',JSON.stringify(prefs));
+ saveData();
+ document.getElementById('settings').classList.remove('open');
+ renderHome();renderCharacter();
+ toast('Настройки сохранены');
+};
+
+document.getElementById('exportFull').onclick=exportData;
+document.getElementById('importFull').onclick=()=>document.getElementById('importFile').click();
+
+document.getElementById('importFile').onchange=e=>{
+ const f=e.target.files[0];if(!f)return;
+ const r=new FileReader();
+ r.onload=()=>{
+  try{
+   const parsed=JSON.parse(r.result);
+   if(!parsed.user&&!parsed.character)throw new Error('Нет данных пользователя');
+   if(!parsed.tasks||!Array.isArray(parsed.tasks))throw new Error('Нет tasks');
+   if(!parsed.goals||!Array.isArray(parsed.goals))throw new Error('Нет goals');
+   if(!parsed.notes||!Array.isArray(parsed.notes))throw new Error('Нет notes');
+   if(prefs.autoBackup)localStorage.setItem('lvlup_backup_before_import',JSON.stringify(data));
+   data=normalizeData(parsed);
+   saveData();
+   renderHome();renderQuests();renderGoals();renderCharacter();renderNotes();renderGallery();renderStats();renderCalendar();
+   toast('↧ Данные импортированы');
+  }catch(err){toast('❌ Ошибка: '+err.message)}
+ };
+ r.readAsText(f);
+};
+
+document.getElementById('resetBtn').onclick=()=>{
+ if(confirm('Сбросить все данные LVLUP?')){
+  data=emptyData();
+  saveData();
+  renderHome();renderGoals();renderCharacter();renderStats();
+  toast('Данные сброшены');
+ }
+};
+
 document.getElementById('statsBtn').onclick=()=>switchPage('stats');
 document.getElementById('exportBtn2').onclick=exportData;
 document.getElementById('exportBtn').onclick=exportData;
+
 function exportData(){
  const a=document.createElement('a');
  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
@@ -1378,11 +1471,8 @@ function exportData(){
  toast('💾 JSON сохранён');
 }
 
-const THEMES={...};
-let prefs=JSON.parse(localStorage.getItem('lvlup_prefs')||'{}');
-function applyTheme(key){...}
-function renderThemes(){...}
-// ... настройки (сокращено для длины, но функционал сохранён)
+if(prefs.theme)applyTheme(prefs.theme);
+if(prefs.density==='compact')document.body.classList.add('compact');
 
 // ============================================================
 // 17. ИНИЦИАЛИЗАЦИЯ
