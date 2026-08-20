@@ -2,32 +2,31 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Платформа учёта долгов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Долги — Календарь</title>
     <style>
         /* ===== ГЛОБАЛЬНЫЕ СТИЛИ ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background: #f4f7fc;
+            background: #f2f5f9;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
+            padding: 16px;
         }
 
         .app {
-            max-width: 1300px;
-            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
             background: white;
-            border-radius: 24px;
+            border-radius: 32px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-            padding: 30px;
+            padding: 20px;
+            position: relative;
         }
 
         /* ===== ШАПКА ===== */
@@ -35,225 +34,257 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eef2f7;
+            margin-bottom: 16px;
+            padding: 0 4px;
         }
-
-        .logo h1 {
-            font-size: 26px;
-            color: #0b1e33;
-        }
-        .logo span {
-            color: #2a7de1;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .user-info .name {
-            font-weight: 600;
-            color: #1a2b3c;
-        }
-        .btn {
-            padding: 10px 22px;
-            border: none;
-            border-radius: 40px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            background: #eef2f7;
-            color: #1a2b3c;
-        }
-        .btn-primary {
-            background: #2a7de1;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #1b62b5;
-        }
-        .btn-danger {
-            background: #e14a4a;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #b52b2b;
-        }
-        .btn-success {
-            background: #20b87a;
-            color: white;
-        }
-        .btn-success:hover {
-            background: #159a64;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #2a7de1;
-            color: #2a7de1;
-        }
-        .btn-outline:hover {
-            background: #2a7de1;
-            color: white;
-        }
-
-        /* ===== СТАТИСТИКА ===== */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-        .stat-card {
-            background: #f9faff;
-            padding: 18px 16px;
-            border-radius: 16px;
-            border-left: 5px solid #2a7de1;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-        }
-        .stat-card .label {
-            font-size: 13px;
-            color: #6f7e91;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .stat-card .value {
-            font-size: 28px;
+        .header h1 {
+            font-size: 22px;
             font-weight: 700;
-            color: #0b1e33;
-            margin-top: 4px;
+            color: #1a1a2e;
         }
-        .stat-card.danger {
-            border-left-color: #e14a4a;
+        .header h1 span {
+            color: #007aff;
         }
-        .stat-card.success {
-            border-left-color: #20b87a;
-        }
-        .stat-card.warning {
-            border-left-color: #f3a83b;
-        }
-
-        /* ===== ФИЛЬТРЫ + ДОБАВЛЕНИЕ ===== */
-        .toolbar {
+        .header-actions {
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 24px;
-            align-items: center;
+            gap: 10px;
         }
-        .toolbar .filter-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .toolbar .filter-group .btn {
-            padding: 8px 18px;
-            font-size: 13px;
+        .header-actions button {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 12px;
+            transition: 0.2s;
             background: #f0f4fa;
-            color: #1f3348;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .toolbar .filter-group .btn.active {
-            background: #2a7de1;
+        .header-actions button:active {
+            transform: scale(0.92);
+        }
+        .header-actions .add-btn {
+            background: #007aff;
             color: white;
         }
-        .toolbar .search-box {
-            margin-left: auto;
-            display: flex;
-            gap: 8px;
+
+        /* ===== КАЛЕНДАРЬ (СТИЛЬ КАК НА IPHONE) ===== */
+        .calendar {
+            background: white;
+            border-radius: 24px;
+            padding: 16px 12px 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            margin-bottom: 16px;
         }
-        .toolbar .search-box input {
-            padding: 10px 16px;
-            border: 2px solid #e0e7ef;
-            border-radius: 40px;
-            font-size: 14px;
-            width: 200px;
-            outline: none;
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 6px;
+        }
+        .calendar-header .month-year {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .calendar-header .nav-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 12px;
             transition: 0.2s;
+            color: #007aff;
+            font-weight: 300;
         }
-        .toolbar .search-box input:focus {
-            border-color: #2a7de1;
-        }
-
-        /* ===== ТАБЛИЦА ===== */
-        .table-wrap {
-            overflow-x: auto;
-            border-radius: 16px;
-            border: 1px solid #eaeef4;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            min-width: 600px;
-        }
-        th {
-            background: #f8fafd;
-            text-align: left;
-            padding: 14px 16px;
-            color: #1f3348;
-            font-weight: 600;
-            border-bottom: 2px solid #e0e7ef;
-        }
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #edf2f8;
-            vertical-align: middle;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        tr:hover td {
-            background: #f9fcff;
-        }
-
-        .status {
-            display: inline-block;
-            padding: 4px 14px;
-            border-radius: 40px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .status.active {
-            background: #fff1e0;
-            color: #c97c1e;
-        }
-        .status.paid {
-            background: #e0f7ec;
-            color: #10945f;
-        }
-        .status.overdue {
-            background: #fee6e6;
-            color: #c92a2a;
-        }
-
-        .actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .actions .btn {
-            padding: 5px 12px;
-            font-size: 12px;
-            border-radius: 30px;
+        .calendar-header .nav-btn:active {
             background: #eef2f7;
         }
-        .actions .btn-edit {
-            background: #dbeafe;
-            color: #1b62b5;
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #8e98a3;
+            margin-bottom: 6px;
+            padding: 0 4px;
         }
-        .actions .btn-edit:hover {
-            background: #b9d6fd;
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
         }
-        .actions .btn-delete {
-            background: #fee6e6;
-            color: #b52b2b;
+
+        .calendar-day {
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: 0.15s;
+            position: relative;
+            background: transparent;
+            border: none;
+            padding: 0;
+            min-height: 44px;
         }
-        .actions .btn-delete:hover {
-            background: #fccccc;
+        .calendar-day:active {
+            transform: scale(0.90);
+        }
+        .calendar-day.other-month {
+            color: #c0c7d1;
+        }
+        .calendar-day.today {
+            background: #007aff;
+            color: white;
+            font-weight: 700;
+        }
+        .calendar-day .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ff3b30;
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .calendar-day .dot.return {
+            background: #34c759;
+        }
+        .calendar-day .dot.partial {
+            background: #ff9500;
+        }
+        .calendar-day.selected {
+            background: #e8f0fe;
+            border: 2px solid #007aff;
+        }
+        .calendar-day.has-debt {
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        /* ===== ИНФО О ВЫБРАННОМ ДНЕ ===== */
+        .day-details {
+            background: #f8faff;
+            border-radius: 20px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            min-height: 60px;
+            transition: 0.3s;
+        }
+        .day-details .date-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+        .day-details .date-label small {
+            font-weight: 400;
+            color: #8e98a3;
+            font-size: 13px;
+        }
+        .day-details .no-events {
+            color: #8e98a3;
+            font-size: 14px;
+            padding: 8px 0;
+        }
+
+        .event-item {
+            background: white;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            border-left: 4px solid #007aff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .event-item .event-info {
+            flex: 1;
+        }
+        .event-item .event-info .event-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+        .event-item .event-info .event-sub {
+            font-size: 12px;
+            color: #6c7a8d;
+            margin-top: 2px;
+        }
+        .event-item .event-amount {
+            font-weight: 700;
+            font-size: 16px;
+            white-space: nowrap;
+        }
+        .event-item .event-amount.positive {
+            color: #34c759;
+        }
+        .event-item .event-amount.negative {
+            color: #ff3b30;
+        }
+        .event-item .event-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .event-item .event-actions button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .event-item .event-actions button:active {
+            background: #eef2f7;
+        }
+        .event-item .event-photo {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+            background: #eef2f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .event-item .event-photo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .event-item .return-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 20px;
+            background: #e8f7ef;
+            color: #1a8a4a;
+        }
+        .event-item .return-badge.partial {
+            background: #fff5e6;
+            color: #b26a00;
         }
 
         /* ===== МОДАЛКА ===== */
@@ -265,223 +296,293 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.35);
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
             z-index: 999;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(6px);
+            animation: fadeIn 0.2s ease;
         }
         .modal-overlay.open {
             display: flex;
         }
-        .modal {
-            background: white;
-            border-radius: 28px;
-            padding: 36px 40px;
-            max-width: 540px;
-            width: 95%;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
-            animation: fadeUp 0.25s ease;
-        }
-        @keyframes fadeUp {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
             }
         }
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            background: white;
+            border-radius: 32px 32px 0 0;
+            padding: 28px 24px 34px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: #d0d7e2;
+            border-radius: 4px;
+            margin: -8px auto 16px;
+        }
         .modal h2 {
-            margin-bottom: 20px;
-            color: #0b1e33;
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #1a1a2e;
         }
         .modal label {
             font-weight: 600;
             font-size: 14px;
-            color: #1f3348;
+            color: #2c3e50;
             display: block;
-            margin: 14px 0 4px;
+            margin: 12px 0 4px;
         }
         .modal input,
         .modal select,
         .modal textarea {
             width: 100%;
             padding: 12px 14px;
-            border: 2px solid #e0e7ef;
-            border-radius: 12px;
-            font-size: 14px;
+            border: 2px solid #e8edf4;
+            border-radius: 14px;
+            font-size: 15px;
             outline: none;
             transition: 0.2s;
+            background: #fafcff;
         }
         .modal input:focus,
         .modal select:focus,
         .modal textarea:focus {
-            border-color: #2a7de1;
+            border-color: #007aff;
+            background: white;
         }
         .modal textarea {
             resize: vertical;
-            min-height: 60px;
+            min-height: 50px;
         }
         .modal .form-row {
             display: flex;
             gap: 12px;
         }
-        .modal .form-row > * {
+        .modal .form-row>* {
             flex: 1;
         }
+
+        .modal .photo-upload {
+            border: 2px dashed #d0d7e2;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #fafcff;
+            margin-top: 4px;
+            position: relative;
+        }
+        .modal .photo-upload:active {
+            background: #eef2f7;
+        }
+        .modal .photo-upload input[type="file"] {
+            display: none;
+        }
+        .modal .photo-upload .preview {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 10px;
+            margin-top: 6px;
+        }
+        .modal .photo-upload .remove-photo {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
         .modal .modal-actions {
             display: flex;
             gap: 12px;
-            margin-top: 24px;
-            justify-content: flex-end;
+            margin-top: 22px;
+        }
+        .modal .modal-actions button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal .modal-actions .btn-cancel {
+            background: #eef2f7;
+            color: #2c3e50;
+        }
+        .modal .modal-actions .btn-cancel:active {
+            background: #dce3ec;
+        }
+        .modal .modal-actions .btn-save {
+            background: #007aff;
+            color: white;
+        }
+        .modal .modal-actions .btn-save:active {
+            background: #0062d1;
+        }
+        .modal .modal-actions .btn-danger {
+            background: #ff3b30;
+            color: white;
+        }
+        .modal .modal-actions .btn-danger:active {
+            background: #d63031;
         }
 
-        /* ===== ПУСТОЕ СОСТОЯНИЕ ===== */
-        .empty {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6f7e91;
+        /* ===== ВСПЛЫВАЮЩИЕ УВЕДОМЛЕНИЯ ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            opacity: 0;
+            transition: 0.4s ease;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 90%;
         }
-        .empty .emoji {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 12px;
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
         /* ===== АДАПТИВ ===== */
-        @media (max-width: 700px) {
+        @media (max-width: 420px) {
             .app {
-                padding: 16px;
-            }
-            .toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .toolbar .search-box {
-                margin-left: 0;
-            }
-            .toolbar .search-box input {
-                width: 100%;
+                padding: 12px;
+                border-radius: 24px;
             }
             .modal {
-                padding: 24px 18px;
+                padding: 20px 16px 28px;
             }
-            .modal .form-row {
-                flex-direction: column;
+            .calendar-day {
+                font-size: 14px;
+                min-height: 38px;
+            }
+            .calendar {
+                padding: 10px 6px 8px;
+            }
+            .event-item {
+                padding: 10px 12px;
+                flex-wrap: wrap;
+            }
+            .event-item .event-amount {
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
 
+    <!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
     <div class="app" id="app">
-        <!-- ===== ШАПКА ===== -->
-        <header class="header">
-            <div class="logo">
-                <h1>💰 <span>Долги</span>.Про</h1>
-            </div>
-            <div class="user-info">
-                <span class="name">👤 Александр</span>
-                <button class="btn btn-outline" id="logoutBtn">Выйти</button>
-            </div>
-        </header>
-
-        <!-- ===== СТАТИСТИКА ===== -->
-        <div class="stats" id="statsContainer">
-            <div class="stat-card">
-                <div class="label">Всего долгов</div>
-                <div class="value" id="totalDebts">0</div>
-            </div>
-            <div class="stat-card warning">
-                <div class="label">Активных</div>
-                <div class="value" id="activeDebts">0</div>
-            </div>
-            <div class="stat-card danger">
-                <div class="label">Просрочено</div>
-                <div class="value" id="overdueDebts">0</div>
-            </div>
-            <div class="stat-card success">
-                <div class="label">Погашено</div>
-                <div class="value" id="paidDebts">0</div>
+        <div class="header">
+            <h1>📅 <span>Долги</span></h1>
+            <div class="header-actions">
+                <button onclick="goToToday()" title="Сегодня">📌</button>
+                <button class="add-btn" onclick="openCreateModal()">＋</button>
             </div>
         </div>
 
-        <!-- ===== ИНСТРУМЕНТЫ ===== -->
-        <div class="toolbar">
-            <div class="filter-group" id="filterGroup">
-                <button class="btn active" data-filter="all">Все</button>
-                <button class="btn" data-filter="active">Активные</button>
-                <button class="btn" data-filter="overdue">Просроченные</button>
-                <button class="btn" data-filter="paid">Погашенные</button>
+        <!-- ===== КАЛЕНДАРЬ ===== -->
+        <div class="calendar">
+            <div class="calendar-header">
+                <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+                <span class="month-year" id="monthYear">Сентябрь 2026</span>
+                <button class="nav-btn" onclick="changeMonth(1)">›</button>
             </div>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Поиск по названию..." />
-                <button class="btn btn-primary" id="addDebtBtn">+ Добавить</button>
+            <div class="calendar-weekdays">
+                <span>Пн</span><span>Вт</span><span>Ср</span>
+                <span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
             </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
         </div>
 
-        <!-- ===== ТАБЛИЦА ===== -->
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Название</th>
-                        <th>Сумма</th>
-                        <th>Тип</th>
-                        <th>Контрагент</th>
-                        <th>Срок</th>
-                        <th>Статус</th>
-                        <th style="min-width:120px;">Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="debtTableBody">
-                    <!-- строки рендерятся через JS -->
-                </tbody>
-            </table>
-        </div>
-        <div class="empty" id="emptyState" style="display:none;">
-            <span class="emoji">📭</span>
-            <p>Нет долгов. Добавьте первый!</p>
+        <!-- ===== ДЕТАЛИ ДНЯ ===== -->
+        <div class="day-details" id="dayDetails">
+            <div class="date-label" id="selectedDateLabel">Выберите день <small>в календаре</small></div>
+            <div id="dayEvents">
+                <div class="no-events">Нет записей</div>
+            </div>
         </div>
     </div>
 
-    <!-- ===== МОДАЛЬНОЕ ОКНО (ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ) ===== -->
+    <!-- ===== ТОСТ ===== -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
-            <h2 id="modalTitle">Новый долг</h2>
-            <form id="debtForm">
+            <div class="modal-handle"></div>
+            <h2 id="modalTitle">➕ Добавить запись</h2>
+            <form id="eventForm">
                 <input type="hidden" id="editId" value="" />
+                <input type="hidden" id="eventDate" value="" />
 
-                <label for="debtName">Название *</label>
-                <input type="text" id="debtName" placeholder="Например: Долг за аренду" required />
+                <label for="eventType">Тип операции</label>
+                <select id="eventType">
+                    <option value="lent">💰 Я дал в долг</option>
+                    <option value="borrowed">📥 Я занял</option>
+                    <option value="return_full">✅ Полный возврат</option>
+                    <option value="return_partial">🔄 Частичный возврат</option>
+                </select>
 
-                <label for="debtAmount">Сумма (₽) *</label>
-                <input type="number" id="debtAmount" placeholder="5000" required min="0" step="0.01" />
+                <label for="eventCounterparty">Кому / у кого *</label>
+                <input type="text" id="eventCounterparty" placeholder="Имя или название" required />
 
-                <div class="form-row">
-                    <div>
-                        <label for="debtType">Тип</label>
-                        <select id="debtType">
-                            <option value="owed_to_me">Должен мне</option>
-                            <option value="i_owe">Я должен</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="debtCounterparty">Контрагент *</label>
-                        <input type="text" id="debtCounterparty" placeholder="Иван Петров" required />
-                    </div>
+                <label for="eventAmount">Сумма (₽) *</label>
+                <input type="number" id="eventAmount" placeholder="5000" required min="0" step="0.01" />
+
+                <label for="eventNote">Примечание</label>
+                <input type="text" id="eventNote" placeholder="За какой товар / услугу" />
+
+                <!-- ===== ЗАГРУЗКА ФОТО ===== -->
+                <label>Фото чека / расписки</label>
+                <div class="photo-upload" id="photoUpload">
+                    <span id="photoPlaceholder">📷 Нажмите, чтобы добавить фото</span>
+                    <input type="file" id="photoInput" accept="image/*" />
+                    <img class="preview" id="photoPreview" style="display:none;" />
+                    <button class="remove-photo" id="removePhotoBtn" style="display:none;">✕</button>
                 </div>
 
-                <label for="debtDueDate">Дата возврата *</label>
-                <input type="date" id="debtDueDate" required />
-
-                <label for="debtNote">Примечание (опционально)</label>
-                <textarea id="debtNote" placeholder="Ссылка на расписку, фото чека..."></textarea>
-
                 <div class="modal-actions">
-                    <button type="button" class="btn" id="cancelModalBtn">Отмена</button>
-                    <button type="submit" class="btn btn-primary" id="saveDebtBtn">Сохранить</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn-save" id="saveBtn">Сохранить</button>
                 </div>
             </form>
         </div>
@@ -489,279 +590,401 @@
 
     <script>
         // ================================================================
-        //  ГЛАВНЫЙ JS — УПРАВЛЕНИЕ ДОЛГАМИ
-        //  Храним всё в localStorage, чтобы данные не терялись
+        //  ГЛАВНЫЙ JS — КАЛЕНДАРЬ ДОЛГОВ
         // ================================================================
 
-        // ---- КЛЮЧИ ДЛЯ ХРАНЕНИЯ ----
-        const STORAGE_KEY = 'debts_data';
-        const USER_KEY = 'debts_user';
+        // ---- ХРАНЕНИЕ ----
+        const STORAGE_KEY = 'debt_calendar_data';
 
         // ---- СОСТОЯНИЕ ----
-        let debts = [];
-        let currentFilter = 'all';
-        let searchQuery = '';
+        let events = [];
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+        let selectedDate = null; // { year, month, day } или null
 
-        // ---- DOM-ЭЛЕМЕНТЫ ----
-        const tbody = document.getElementById('debtTableBody');
-        const emptyState = document.getElementById('emptyState');
-        const totalEl = document.getElementById('totalDebts');
-        const activeEl = document.getElementById('activeDebts');
-        const overdueEl = document.getElementById('overdueDebts');
-        const paidEl = document.getElementById('paidDebts');
+        // ---- DOM ----
+        const grid = document.getElementById('calendarGrid');
+        const monthYearEl = document.getElementById('monthYear');
+        const selectedDateLabel = document.getElementById('selectedDateLabel');
+        const dayEventsEl = document.getElementById('dayEvents');
 
         const modalOverlay = document.getElementById('modalOverlay');
         const modalTitle = document.getElementById('modalTitle');
-        const debtForm = document.getElementById('debtForm');
+        const eventForm = document.getElementById('eventForm');
         const editId = document.getElementById('editId');
-        const debtName = document.getElementById('debtName');
-        const debtAmount = document.getElementById('debtAmount');
-        const debtType = document.getElementById('debtType');
-        const debtCounterparty = document.getElementById('debtCounterparty');
-        const debtDueDate = document.getElementById('debtDueDate');
-        const debtNote = document.getElementById('debtNote');
-
-        const filterGroup = document.getElementById('filterGroup');
-        const searchInput = document.getElementById('searchInput');
-        const addBtn = document.getElementById('addDebtBtn');
-        const cancelBtn = document.getElementById('cancelModalBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
+        const eventDate = document.getElementById('eventDate');
+        const eventType = document.getElementById('eventType');
+        const eventCounterparty = document.getElementById('eventCounterparty');
+        const eventAmount = document.getElementById('eventAmount');
+        const eventNote = document.getElementById('eventNote');
+        const photoInput = document.getElementById('photoInput');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoPlaceholder = document.getElementById('photoPlaceholder');
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+        let currentPhotoData = null; // base64
 
         // ---- ИНИЦИАЛИЗАЦИЯ ----
         function init() {
             loadData();
-            render();
+            // Если нет событий — добавим демо
+            if (events.length === 0) {
+                addDemoData();
+            }
+            const today = new Date();
+            selectedDate = { year: today.getFullYear(), month: today.getMonth(), day: today.getDate() };
+            renderCalendar();
+            renderDayDetails();
             bindEvents();
+        }
+
+        // ---- ДЕМО-ДАННЫЕ ----
+        function addDemoData() {
+            const today = new Date();
+            const d = today.getDate();
+            const m = today.getMonth();
+            const y = today.getFullYear();
+
+            events = [{
+                id: '1',
+                date: `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,
+                type: 'lent',
+                counterparty: 'Анна',
+                amount: 15000,
+                note: 'На покупку ноутбука',
+                photo: null
+            }, {
+                id: '2',
+                date: `${y}-${String(m+1).padStart(2,'0')}-${String(d-3).padStart(2,'0')}`,
+                type: 'borrowed',
+                counterparty: 'Сергей',
+                amount: 5000,
+                note: 'До зарплаты',
+                photo: null
+            }, {
+                id: '3',
+                date: `${y}-${String(m+1).padStart(2,'0')}-${String(d+2).padStart(2,'0')}`,
+                type: 'return_full',
+                counterparty: 'Анна',
+                amount: 15000,
+                note: 'Вернул полностью',
+                photo: null
+            }];
+            saveData();
         }
 
         // ---- ЗАГРУЗКА / СОХРАНЕНИЕ ----
         function loadData() {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
-                try { debts = JSON.parse(stored); } catch (e) { debts = []; }
-            } else {
-                // Стартовые демо-данные
-                debts = [{
-                    id: '1',
-                    name: 'Аренда офиса',
-                    amount: 15000,
-                    type: 'owed_to_me',
-                    counterparty: 'ООО "Ромашка"',
-                    dueDate: '2026-09-15',
-                    note: 'Договор аренды №23',
-                    status: 'active',
-                    createdAt: new Date().toISOString()
-                }, {
-                    id: '2',
-                    name: 'Заём у друга',
-                    amount: 5000,
-                    type: 'i_owe',
-                    counterparty: 'Сергей',
-                    dueDate: '2026-08-10',
-                    note: 'Вернуть до зарплаты',
-                    status: 'overdue',
-                    createdAt: new Date().toISOString()
-                }, {
-                    id: '3',
-                    name: 'Продажа ноутбука',
-                    amount: 32000,
-                    type: 'owed_to_me',
-                    counterparty: 'Анна',
-                    dueDate: '2026-07-20',
-                    note: 'Оплата частями',
-                    status: 'paid',
-                    createdAt: new Date().toISOString()
-                }];
-                saveData();
+                try { events = JSON.parse(stored); } catch (e) { events = []; }
             }
         }
 
         function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(debts));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
         }
 
-        // ---- ГЕНЕРАТОР ID ----
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
         }
 
-        // ---- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----
-        function getStatus(debt) {
-            // Если уже помечен как paid — не меняем
-            if (debt.status === 'paid') return 'paid';
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const due = new Date(debt.dueDate + 'T00:00:00');
-            if (due < today) return 'overdue';
-            return 'active';
+        // ---- ПОЛУЧИТЬ СОБЫТИЯ ДЛЯ ДНЯ ----
+        function getEventsForDate(year, month, day) {
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            return events.filter(e => e.date === dateStr);
         }
 
-        function updateStatuses() {
-            debts.forEach(d => {
-                if (d.status !== 'paid') {
-                    d.status = getStatus(d);
+        function hasEventsForDate(year, month, day) {
+            return getEventsForDate(year, month, day).length > 0;
+        }
+
+        // ---- РЕНДЕР КАЛЕНДАРЯ ----
+        function renderCalendar() {
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Пн=0
+
+            const today = new Date();
+            const todayY = today.getFullYear();
+            const todayM = today.getMonth();
+            const todayD = today.getDate();
+
+            monthYearEl.textContent = `${getMonthName(currentMonth)} ${currentYear}`;
+
+            let html = '';
+
+            // Пустые ячейки до первого дня
+            for (let i = 0; i < startOffset; i++) {
+                html += `<div class="calendar-day other-month"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = (day === todayD && currentMonth === todayM && currentYear === todayY);
+                const isSelected = (selectedDate && day === selectedDate.day &&
+                    currentMonth === selectedDate.month &&
+                    currentYear === selectedDate.year);
+                const hasEvents = hasEventsForDate(currentYear, currentMonth, day);
+
+                let dotHtml = '';
+                if (hasEvents) {
+                    const dayEvents = getEventsForDate(currentYear, currentMonth, day);
+                    const hasReturn = dayEvents.some(e => e.type === 'return_full' || e.type === 'return_partial');
+                    const hasPartial = dayEvents.some(e => e.type === 'return_partial');
+                    if (hasReturn && hasPartial) {
+                        dotHtml = `<span class="dot return partial"></span>`;
+                    } else if (hasReturn) {
+                        dotHtml = `<span class="dot return"></span>`;
+                    } else if (hasPartial) {
+                        dotHtml = `<span class="dot partial"></span>`;
+                    } else {
+                        dotHtml = `<span class="dot"></span>`;
+                    }
                 }
+
+                let classes = 'calendar-day';
+                if (isToday) classes += ' today';
+                if (isSelected) classes += ' selected';
+                if (hasEvents) classes += ' has-debt';
+
+                html += `
+                        <button class="${classes}" data-year="${currentYear}" data-month="${currentMonth}" data-day="${day}">
+                            ${day}
+                            ${dotHtml}
+                        </button>
+                    `;
+            }
+
+            grid.innerHTML = html;
+
+            // Навешиваем клики на дни
+            grid.querySelectorAll('.calendar-day').forEach(btn => {
+                if (btn.classList.contains('other-month')) return;
+                btn.addEventListener('click', function() {
+                    const y = parseInt(this.dataset.year);
+                    const m = parseInt(this.dataset.month);
+                    const d = parseInt(this.dataset.day);
+                    selectedDate = { year: y, month: m, day: d };
+                    renderCalendar();
+                    renderDayDetails();
+                });
             });
         }
 
-        function getFilteredAndSearched() {
-            let result = debts.slice();
-
-            // Фильтр
-            if (currentFilter !== 'all') {
-                result = result.filter(d => d.status === currentFilter);
-            }
-
-            // Поиск
-            if (searchQuery.trim()) {
-                const q = searchQuery.trim().toLowerCase();
-                result = result.filter(d =>
-                    d.name.toLowerCase().includes(q) ||
-                    d.counterparty.toLowerCase().includes(q) ||
-                    d.note.toLowerCase().includes(q)
-                );
-            }
-
-            return result;
-        }
-
-        // ---- РАСЧЁТ СТАТИСТИКИ ----
-        function calcStats() {
-            const total = debts.length;
-            const active = debts.filter(d => d.status === 'active').length;
-            const overdue = debts.filter(d => d.status === 'overdue').length;
-            const paid = debts.filter(d => d.status === 'paid').length;
-            return { total, active, overdue, paid };
-        }
-
-        // ---- ОТРИСОВКА ----
-        function render() {
-            updateStatuses();
-            saveData();
-
-            const filtered = getFilteredAndSearched();
-            const stats = calcStats();
-
-            // Статистика
-            totalEl.textContent = stats.total;
-            activeEl.textContent = stats.active;
-            overdueEl.textContent = stats.overdue;
-            paidEl.textContent = stats.paid;
-
-            // Таблица
-            if (filtered.length === 0) {
-                tbody.innerHTML = '';
-                emptyState.style.display = 'block';
+        // ---- РЕНДЕР ДЕТАЛЕЙ ДНЯ ----
+        function renderDayDetails() {
+            if (!selectedDate) {
+                selectedDateLabel.textContent = 'Выберите день в календаре';
+                dayEventsEl.innerHTML = `<div class="no-events">Нет записей</div>`;
                 return;
             }
-            emptyState.style.display = 'none';
 
-            tbody.innerHTML = filtered.map(d => {
-                const statusLabel = {
-                    active: 'Активный',
-                    overdue: 'Просрочен',
-                    paid: 'Погашен'
-                } [d.status] || d.status;
+            const { year, month, day } = selectedDate;
+            const dateObj = new Date(year, month, day);
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const dayEvents = getEventsForDate(year, month, day);
 
-                const typeLabel = d.type === 'owed_to_me' ? 'Должен мне' : 'Я должен';
-                const amountStr = d.type === 'owed_to_me' ? `+${d.amount} ₽` : `-${d.amount} ₽`;
-                const amountColor = d.type === 'owed_to_me' ? '#20b87a' : '#e14a4a';
+            const weekdays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+            const wd = dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1;
 
-                const dueDateFormatted = new Date(d.dueDate + 'T00:00:00').toLocaleDateString('ru-RU');
+            selectedDateLabel.innerHTML = `
+                    ${weekdays[wd]}, ${day} ${getMonthName(month)} ${year}
+                    <small style="font-weight:400;color:#8e98a3;margin-left:8px;">
+                        ${dayEvents.length} записей
+                    </small>
+                `;
 
-                return `
-                        <tr>
-                            <td><strong>${escapeHtml(d.name)}</strong></td>
-                            <td style="font-weight:600;color:${amountColor};">${amountStr}</td>
-                            <td>${typeLabel}</td>
-                            <td>${escapeHtml(d.counterparty)}</td>
-                            <td>${dueDateFormatted}</td>
-                            <td><span class="status ${d.status}">${statusLabel}</span></td>
-                            <td>
-                                <div class="actions">
-                                    <button class="btn btn-edit" data-id="${d.id}">✎</button>
-                                    <button class="btn btn-delete" data-id="${d.id}">✕</button>
-                                    ${d.status !== 'paid' ? `<button class="btn btn-success mark-paid" data-id="${d.id}">✅</button>` : ''}
-                                </div>
-                            </td>
-                        </tr>
+            if (dayEvents.length === 0) {
+                dayEventsEl.innerHTML = `
+                        <div class="no-events">Нет записей на этот день</div>
+                        <button class="btn-save" style="margin-top:10px;padding:10px 20px;border:none;border-radius:14px;background:#007aff;color:white;font-weight:600;cursor:pointer;font-size:14px;width:100%;" onclick="openCreateModalForDate(${year},${month},${day})">
+                            ＋ Добавить запись
+                        </button>
                     `;
-            }).join('');
+                return;
+            }
 
-            // Навешиваем события на кнопки в таблице (делегирование)
-            document.querySelectorAll('.btn-edit').forEach(btn => {
-                btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+            let html = '';
+            // Сортируем: сначала возвраты, потом остальные
+            const sorted = [...dayEvents].sort((a, b) => {
+                const order = { 'return_full': 0, 'return_partial': 1, 'lent': 2, 'borrowed': 3 };
+                return (order[a.type] || 2) - (order[b.type] || 2);
             });
-            document.querySelectorAll('.btn-delete').forEach(btn => {
-                btn.addEventListener('click', () => deleteDebt(btn.dataset.id));
+
+            sorted.forEach(e => {
+                const typeLabels = {
+                    lent: '💰 Дал в долг',
+                    borrowed: '📥 Занял',
+                    return_full: '✅ Полный возврат',
+                    return_partial: '🔄 Частичный возврат'
+                };
+                const isPositive = e.type === 'lent' || e.type === 'return_partial';
+                const sign = (e.type === 'lent' || e.type === 'return_full') ? '+' : '-';
+                const colorClass = (e.type === 'lent' || e.type === 'return_full') ? 'positive' : 'negative';
+                const amountDisplay = `${sign}${Number(e.amount).toLocaleString('ru-RU')} ₽`;
+
+                let photoHtml = '';
+                if (e.photo) {
+                    photoHtml = `<div class="event-photo" onclick="viewPhoto('${e.photo}')">
+                                    <img src="${e.photo}" alt="чек" />
+                                </div>`;
+                } else {
+                    photoHtml = `<div class="event-photo" style="color:#b0b8c5;">📷</div>`;
+                }
+
+                let returnBadge = '';
+                if (e.type === 'return_full') {
+                    returnBadge = `<span class="return-badge">✅ Полный</span>`;
+                } else if (e.type === 'return_partial') {
+                    returnBadge = `<span class="return-badge partial">🔄 Частичный</span>`;
+                }
+
+                html += `
+                        <div class="event-item" style="border-left-color: ${e.type === 'return_full' ? '#34c759' : e.type === 'return_partial' ? '#ff9500' : '#007aff'}">
+                            <div class="event-info">
+                                <div class="event-title">
+                                    ${typeLabels[e.type] || e.type}
+                                    ${returnBadge}
+                                </div>
+                                <div class="event-sub">
+                                    ${e.counterparty} ${e.note ? '· ' + e.note : ''}
+                                </div>
+                            </div>
+                            ${photoHtml}
+                            <div class="event-amount ${colorClass}">${amountDisplay}</div>
+                            <div class="event-actions">
+                                <button onclick="editEvent('${e.id}')" title="Редактировать">✎</button>
+                                <button onclick="deleteEvent('${e.id}')" title="Удалить">✕</button>
+                            </div>
+                        </div>
+                    `;
             });
-            document.querySelectorAll('.mark-paid').forEach(btn => {
-                btn.addEventListener('click', () => markAsPaid(btn.dataset.id));
-            });
+
+            // Кнопка добавления
+            html += `
+                    <button class="btn-save" style="margin-top:10px;padding:10px 20px;border:none;border-radius:14px;background:#007aff;color:white;font-weight:600;cursor:pointer;font-size:14px;width:100%;" onclick="openCreateModalForDate(${year},${month},${day})">
+                        ＋ Добавить запись
+                    </button>
+                `;
+
+            dayEventsEl.innerHTML = html;
         }
 
-        // ---- ПРОСТАЯ ЗАЩИТА ОТ XSS ----
-        function escapeHtml(text) {
-            if (!text) return '';
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-            return text.replace(/[&<>"']/g, m => map[m]);
+        // ---- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----
+        function getMonthName(month) {
+            const names = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+            ];
+            return names[month];
         }
 
-        // ---- ДЕЙСТВИЯ С ДОЛГАМИ ----
-        function deleteDebt(id) {
-            if (!confirm('Удалить эту запись?')) return;
-            debts = debts.filter(d => d.id !== id);
-            saveData();
-            render();
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) { currentMonth = 11;
+                currentYear--; }
+            if (currentMonth > 11) { currentMonth = 0;
+                currentYear++; }
+            renderCalendar();
+            // если выбранный день не в этом месяце — сбрасываем
+            if (selectedDate && (selectedDate.month !== currentMonth || selectedDate.year !== currentYear)) {
+                // сохраняем день если он есть в этом месяце
+                const maxDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+                if (selectedDate.day <= maxDay) {
+                    // оставляем
+                } else {
+                    // сбрасываем
+                }
+                renderDayDetails();
+            } else {
+                renderDayDetails();
+            }
         }
 
-        function markAsPaid(id) {
-            const debt = debts.find(d => d.id === id);
-            if (!debt) return;
-            debt.status = 'paid';
-            saveData();
-            render();
+        function goToToday() {
+            const today = new Date();
+            currentYear = today.getFullYear();
+            currentMonth = today.getMonth();
+            selectedDate = { year: currentYear, month: currentMonth, day: today.getDate() };
+            renderCalendar();
+            renderDayDetails();
         }
 
-        function openEditModal(id) {
-            const debt = debts.find(d => d.id === id);
-            if (!debt) return;
-            modalTitle.textContent = 'Редактировать долг';
-            editId.value = debt.id;
-            debtName.value = debt.name;
-            debtAmount.value = debt.amount;
-            debtType.value = debt.type;
-            debtCounterparty.value = debt.counterparty;
-            debtDueDate.value = debt.dueDate;
-            debtNote.value = debt.note || '';
-            modalOverlay.classList.add('open');
-        }
-
+        // ---- ОТКРЫТИЕ МОДАЛКИ ----
         function openCreateModal() {
-            modalTitle.textContent = 'Новый долг';
+            const today = new Date();
+            const y = selectedDate ? selectedDate.year : today.getFullYear();
+            const m = selectedDate ? selectedDate.month : today.getMonth();
+            const d = selectedDate ? selectedDate.day : today.getDate();
+            openCreateModalForDate(y, m, d);
+        }
+
+        function openCreateModalForDate(year, month, day) {
+            modalTitle.textContent = '➕ Добавить запись';
             editId.value = '';
-            debtForm.reset();
-            debtDueDate.value = new Date().toISOString().slice(0, 10);
+            eventForm.reset();
+            eventDate.value = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            eventType.value = 'lent';
+            currentPhotoData = null;
+            photoPreview.style.display = 'none';
+            photoPlaceholder.style.display = 'block';
+            removePhotoBtn.style.display = 'none';
+            // Ставим дату по умолчанию
+            const dateObj = new Date(year, month, day);
+            // Добавляем подсказку в поле
+            modalOverlay.classList.add('open');
+            eventCounterparty.focus();
+        }
+
+        function editEvent(id) {
+            const e = events.find(ev => ev.id === id);
+            if (!e) return;
+            modalTitle.textContent = '✎ Редактировать запись';
+            editId.value = e.id;
+            eventDate.value = e.date;
+            eventType.value = e.type;
+            eventCounterparty.value = e.counterparty;
+            eventAmount.value = e.amount;
+            eventNote.value = e.note || '';
+            currentPhotoData = e.photo || null;
+            if (currentPhotoData) {
+                photoPreview.src = currentPhotoData;
+                photoPreview.style.display = 'block';
+                photoPlaceholder.style.display = 'none';
+                removePhotoBtn.style.display = 'block';
+            } else {
+                photoPreview.style.display = 'none';
+                photoPlaceholder.style.display = 'block';
+                removePhotoBtn.style.display = 'none';
+            }
             modalOverlay.classList.add('open');
         }
 
         function closeModal() {
             modalOverlay.classList.remove('open');
+            currentPhotoData = null;
         }
 
-        // ---- ОБРАБОТЧИК ФОРМЫ ----
+        function deleteEvent(id) {
+            if (!confirm('Удалить эту запись?')) return;
+            events = events.filter(e => e.id !== id);
+            saveData();
+            renderCalendar();
+            renderDayDetails();
+            showToast('🗑️ Запись удалена');
+        }
+
+        // ---- ОБРАБОТКА ФОРМЫ ----
         function handleFormSubmit(e) {
             e.preventDefault();
 
-            const name = debtName.value.trim();
-            const amount = parseFloat(debtAmount.value);
-            const type = debtType.value;
-            const counterparty = debtCounterparty.value.trim();
-            const dueDate = debtDueDate.value;
-            const note = debtNote.value.trim();
+            const date = eventDate.value;
+            const type = eventType.value;
+            const counterparty = eventCounterparty.value.trim();
+            const amount = parseFloat(eventAmount.value);
+            const note = eventNote.value.trim();
 
-            if (!name || !amount || !counterparty || !dueDate) {
-                alert('Заполните все обязательные поля (*)');
+            if (!date || !counterparty || !amount || amount <= 0) {
+                showToast('⚠️ Заполните все обязательные поля');
                 return;
             }
 
@@ -769,80 +992,136 @@
 
             if (editIdVal) {
                 // Редактирование
-                const idx = debts.findIndex(d => d.id === editIdVal);
+                const idx = events.findIndex(ev => ev.id === editIdVal);
                 if (idx === -1) return;
-                debts[idx] = {
-                    ...debts[idx],
-                    name,
-                    amount,
+                events[idx] = {
+                    ...events[idx],
+                    date,
                     type,
                     counterparty,
-                    dueDate,
+                    amount,
                     note,
-                    status: getStatus({ ...debts[idx], dueDate }) // пересчитаем статус
+                    photo: currentPhotoData || events[idx].photo
                 };
+                showToast('✅ Запись обновлена');
             } else {
                 // Создание
-                const newDebt = {
+                const newEvent = {
                     id: generateId(),
-                    name,
-                    amount,
+                    date,
                     type,
                     counterparty,
-                    dueDate,
+                    amount,
                     note,
-                    status: 'active',
-                    createdAt: new Date().toISOString()
+                    photo: currentPhotoData || null
                 };
-                newDebt.status = getStatus(newDebt);
-                debts.push(newDebt);
+                events.push(newEvent);
+                showToast('✅ Запись добавлена');
             }
 
             saveData();
             closeModal();
-            render();
+            renderCalendar();
+
+            // Обновляем детали дня если выбран тот же день
+            if (selectedDate) {
+                const [y, m, d] = date.split('-').map(Number);
+                if (selectedDate.year === y && selectedDate.month === (m - 1) && selectedDate.day === d) {
+                    renderDayDetails();
+                } else {
+                    // Если изменился день — переключаемся на него
+                    selectedDate = { year: y, month: m - 1, day: d };
+                    renderDayDetails();
+                }
+            } else {
+                const [y, m, d] = date.split('-').map(Number);
+                selectedDate = { year: y, month: m - 1, day: d };
+                renderDayDetails();
+            }
+        }
+
+        // ---- ФОТО ----
+        function handlePhotoUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showToast('⚠️ Пожалуйста, выберите изображение');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                currentPhotoData = ev.target.result;
+                photoPreview.src = currentPhotoData;
+                photoPreview.style.display = 'block';
+                photoPlaceholder.style.display = 'none';
+                removePhotoBtn.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto() {
+            currentPhotoData = null;
+            photoPreview.style.display = 'none';
+            photoPlaceholder.style.display = 'block';
+            removePhotoBtn.style.display = 'none';
+            photoInput.value = '';
+        }
+
+        function viewPhoto(photoData) {
+            if (!photoData) return;
+            window.open(photoData, '_blank');
+        }
+
+        // ---- ТОСТ ----
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
         }
 
         // ---- СОБЫТИЯ ----
         function bindEvents() {
-            // Фильтры
-            filterGroup.addEventListener('click', (e) => {
-                const btn = e.target.closest('.btn');
-                if (!btn || !btn.dataset.filter) return;
-                filterGroup.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentFilter = btn.dataset.filter;
-                render();
-            });
+            eventForm.addEventListener('submit', handleFormSubmit);
 
-            // Поиск
-            searchInput.addEventListener('input', () => {
-                searchQuery = searchInput.value;
-                render();
-            });
+            photoInput.addEventListener('change', handlePhotoUpload);
 
-            // Добавить
-            addBtn.addEventListener('click', openCreateModal);
+            removePhotoBtn.addEventListener('click', removePhoto);
 
-            // Отмена в модалке
-            cancelBtn.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', (e) => {
+            // Закрытие по клику на фон
+            modalOverlay.addEventListener('click', function(e) {
                 if (e.target === modalOverlay) closeModal();
             });
 
-            // Сабмит формы
-            debtForm.addEventListener('submit', handleFormSubmit);
-
-            // Выход (имитация)
-            logoutBtn.addEventListener('click', () => {
-                if (confirm('Выйти из аккаунта? Данные останутся в браузере.')) {
-                    alert('Вы вышли (демо-режим)');
+            // Закрытие по свайпу вниз на модалке
+            let touchStartY = 0;
+            const modalEl = document.querySelector('.modal');
+            modalEl.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+            });
+            modalEl.addEventListener('touchmove', function(e) {
+                const diff = e.touches[0].clientY - touchStartY;
+                if (diff > 80) {
+                    closeModal();
                 }
             });
         }
 
         // ---- СТАРТ ----
         document.addEventListener('DOMContentLoaded', init);
+
+        // Доступ к функциям из onclick
+        window.changeMonth = changeMonth;
+        window.goToToday = goToToday;
+        window.openCreateModal = openCreateModal;
+        window.openCreateModalForDate = openCreateModalForDate;
+        window.editEvent = editEvent;
+        window.deleteEvent = deleteEvent;
+        window.closeModal = closeModal;
+        window.viewPhoto = viewPhoto;
     </script>
 
 </body>
