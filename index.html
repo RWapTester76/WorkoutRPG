@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0d12">
-<title>LVLUP v13.4 — Life RPG</title>
+<title>LVLUP v13.5 — Life RPG</title>
 <style>
 :root{
   --bg:#090b10;--panel:#11151d;--panel2:#171c26;--line:rgba(255,255,255,.08);
@@ -53,7 +53,8 @@ button:active{transform:scale(.98)}
 .quest.overdue{border-color:rgba(251,113,133,.4);background:rgba(251,113,133,.08)}.quest.overdue .check{border-color:rgba(251,113,133,.3)}
 .quest-title{font-weight:750}.quest-meta{font-size:11px;color:var(--muted);margin-top:4px}.reward{font-weight:800;color:#d8b4fe;white-space:nowrap}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.category{position:relative;overflow:hidden;min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
+.category{position:relative;overflow:hidden;min-height:132px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:border-color .2s}
+.category:hover{border-color:rgba(255,255,255,.15)}
 .category .big{font-size:28px}.category h3{margin:6px 0 2px}.category p{margin:0;color:var(--muted);font-size:12px}
 .category .count{font-size:12px;color:var(--muted)}
 .add{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:11px 15px;border-radius:14px;font-weight:800;box-shadow:0 10px 25px rgba(139,92,246,.2)}
@@ -181,8 +182,9 @@ button:active{transform:scale(.98)}
       <button data-page="goals"><span class="ico">◈</span>Цели</button>
       <button data-page="notes"><span class="ico">✎</span>Заметки</button>
       <button data-page="gallery"><span class="ico">▣</span>Галерея</button>
-      <button data-page="character"><span class="ico">♙</span>Персонаж</button>
       <button data-page="journals"><span class="ico">▦</span>Журналы</button>
+      <button data-page="stats"><span class="ico">📊</span>Статистика</button>
+      <button data-page="character"><span class="ico">♙</span>Персонаж</button>
       <button data-page="availability"><span class="ico">☀</span>Доступность</button>
       <button data-page="more"><span class="ico">•••</span>Ещё</button>
     </nav></aside>
@@ -208,7 +210,7 @@ button:active{transform:scale(.98)}
         <div class="section-head"><h2>📊 Журналы</h2><span id="journalHint">прогресс</span></div>
         <div class="journal-progress" id="journalProgress"></div>
 
-        <div class="version-badge">LVLUP v13.4 · local-first</div>
+        <div class="version-badge">LVLUP v13.5 · local-first</div>
       </section>
 
       <!-- CALENDAR -->
@@ -300,6 +302,14 @@ button:active{transform:scale(.98)}
         <div class="card"><div class="quest-list" id="journalEntries"></div></div>
       </section>
 
+      <!-- STATS -->
+      <section class="page" id="page-stats">
+        <div class="section-head"><h2>📊 Статистика</h2></div>
+        <div class="stats" id="statsCards"></div>
+        <div class="section-head"><h2>Прогресс по направлениям</h2></div>
+        <div class="card" id="statsBars"></div>
+      </section>
+
       <!-- AVAILABILITY -->
       <section class="page" id="page-availability">
         <div class="section-head">
@@ -333,19 +343,9 @@ button:active{transform:scale(.98)}
       <section class="page" id="page-more">
         <div class="section-head"><h2>••• Ещё</h2></div>
         <div class="card">
-          <div class="row"><div><b>📊 Статистика</b><div class="muted">Твой прогресс по направлениям</div></div><button class="ghost" id="statsBtn">Открыть</button></div>
-          <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
           <div class="row"><div><b>💾 Резервная копия</b><div class="muted">Данные сохраняются локально</div></div><button class="ghost" id="exportBtn2">Экспорт</button></div>
-          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v13.4 · local-first</div>
+          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v13.5 · local-first</div>
         </div>
-      </section>
-
-      <!-- STATS -->
-      <section class="page" id="page-stats">
-        <div class="section-head"><h2>📊 Статистика</h2></div>
-        <div class="stats" id="statsCards"></div>
-        <div class="section-head"><h2>Прогресс по направлениям</h2></div>
-        <div class="card" id="statsBars"></div>
       </section>
     </main>
   </div>
@@ -358,6 +358,7 @@ button:active{transform:scale(.98)}
  <button data-page="goals"><i>◈</i>Цели</button>
  <button data-page="notes"><i>✎</i>Заметки</button>
  <button data-page="gallery"><i>▣</i>Галерея</button>
+ <button data-page="journals"><i>▦</i>Журналы</button>
  <button data-page="more"><i>•••</i>Ещё</button>
 </nav>
 
@@ -407,18 +408,19 @@ button:active{transform:scale(.98)}
     <div class="settings-section"><b>Начало недели</b><div class="segmented"><button class="active">Пн</button><button>Вс</button></div></div>
     <div class="settings-section"><b>Первый экран</b><div class="segmented"><button class="active">Главная</button><button>Календарь</button></div></div>
   </div>
-  <div class="settings-footer"><span class="muted">LVLUP v13.4 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
+  <div class="settings-footer"><span class="muted">LVLUP v13.5 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
 </div></div>
 
 <script>
 // ============================================================
-// LVLUP v13.4 — ЖУРНАЛЫ: ДОЛГИ, ФИНАНСЫ, ТЕЛО
+// LVLUP v13.5 — ИСПРАВЛЕННЫЙ
 // ============================================================
+
 // ============================================================
 // 1. КОНСТАНТЫ
 // ============================================================
 const KEY = 'lvlup_v13';
-const APP_VERSION = 'v13.4';
+const APP_VERSION = 'v13.5';
 
 const DEFAULT_CATEGORIES = [
   { id: 'debts', name: 'Долги', icon: '💰', color: '#fb7185' },
@@ -1101,8 +1103,8 @@ function switchPage(p) {
     notes: renderNotes,
     gallery: renderGallery,
     journals: renderJournals,
-    availability: renderAvailability,
-    stats: renderStats
+    stats: renderStats,
+    availability: renderAvailability
   };
 
   if (p === 'journal') {
@@ -1115,7 +1117,7 @@ function switchPage(p) {
 
 document.querySelectorAll('[data-page]').forEach(b => b.onclick = () => switchPage(b.dataset.page));
 
-// Открытие журнала
+// Открытие журнала — ПРАВИЛЬНАЯ ФУНКЦИЯ
 function openJournal(categoryId) {
   switchPage('journal');
   document.getElementById('journalBackBtn').dataset.journalId = categoryId;
@@ -1123,13 +1125,19 @@ function openJournal(categoryId) {
 }
 
 // Кнопка "Назад" из журнала
-document.getElementById('journalBackBtn').onclick = () => {
-  switchPage('journals');
+document.getElementById('journalBackBtn').onclick = function() {
+  const catId = this.dataset.journalId;
+  if (catId) {
+    switchPage('journals');
+  } else {
+    switchPage('journals');
+  }
 };
 
 // Кнопка "Добавить" в журнале
-document.getElementById('journalAddBtn').onclick = () => {
+document.getElementById('journalAddBtn').onclick = function() {
   const catId = document.getElementById('journalBackBtn').dataset.journalId;
+  if (!catId) return toast('Выбери журнал');
   if (catId === 'debts') {
     openDebtForm(catId);
   } else if (catId === 'finance') {
@@ -1336,7 +1344,7 @@ function renderJournalProgress() {
     const need = xpNeedForCategory(c.level);
     const pct = Math.min(100, (c.xp / need) * 100);
     const entries = c.entries?.length || 0;
-    return `<div class="journal-progress-item">
+    return `<div class="journal-progress-item" onclick="openJournal('${c.id}')" style="cursor:pointer">
      <div class="jp-icon">${c.icon}</div>
      <div class="jp-info">
       <div class="jp-name">${c.name}</div>
@@ -1347,6 +1355,7 @@ function renderJournalProgress() {
     </div>`;
   }).join('');
 }
+
 // ============================================================
 // 10. СОЗДАНИЕ ЗАДАЧ
 // ============================================================
@@ -1576,7 +1585,7 @@ function updateNoteFilterCats() {
 }
 
 // ============================================================
-// 13. ГАЛЕРЕЯ
+// 13. ГАЛЕРЕЯ (ИСПРАВЛЕННАЯ — ФОТО СОХРАНЯЮТСЯ С ПЕРВОГО РАЗА)
 // ============================================================
 
 function renderGallery() {
@@ -1631,26 +1640,27 @@ function addPhotoToTask(taskId) {
   <div class="field"><label>Задача: ${esc(task.title)}</label></div>
   <div class="field"><label>Подпись</label><input id="photoCaption" placeholder="Что на фото?"></div>
   <div class="field"><label>Фото</label><input id="photoFile" type="file" accept="image/*"></div>
-  <button class="add" onclick="savePhotoToTask('${taskId}')">💾 Добавить фото</button>
+  <button class="add" id="savePhotoTaskBtn">💾 Добавить фото</button>
  </div>`);
-}
-
-function savePhotoToTask(taskId) {
-  const file = document.getElementById('photoFile').files[0];
-  if (!file) return toast('Выбери фото');
-  const reader = new FileReader();
-  reader.onload = function() {
-    addMedia({
-      dataUrl: reader.result,
-      caption: document.getElementById('photoCaption').value.trim(),
-      targetType: 'task',
-      targetId: taskId
-    });
-    closeModal();
-    renderGallery();
-    toast('▣ Фото добавлено');
+  
+  // ИСПРАВЛЕННЫЙ ОБРАБОТЧИК — срабатывает с первого раза
+  document.getElementById('savePhotoTaskBtn').onclick = function() {
+    const file = document.getElementById('photoFile').files[0];
+    if (!file) return toast('Выбери фото');
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      addMedia({
+        dataUrl: e.target.result,
+        caption: document.getElementById('photoCaption').value.trim(),
+        targetType: 'task',
+        targetId: taskId
+      });
+      closeModal();
+      renderGallery();
+      toast('▣ Фото добавлено');
+    };
+    reader.readAsDataURL(file);
   };
-  reader.readAsDataURL(file);
 }
 
 function addPhotoToGoal(goalId) {
@@ -1660,30 +1670,30 @@ function addPhotoToGoal(goalId) {
   <div class="field"><label>Цель: ${esc(goal.title)}</label></div>
   <div class="field"><label>Подпись</label><input id="photoCaptionGoal" placeholder="Что на фото?"></div>
   <div class="field"><label>Фото</label><input id="photoFileGoal" type="file" accept="image/*"></div>
-  <button class="add" onclick="savePhotoToGoal('${goalId}')">💾 Добавить фото</button>
+  <button class="add" id="savePhotoGoalBtn">💾 Добавить фото</button>
  </div>`);
-}
-
-function savePhotoToGoal(goalId) {
-  const file = document.getElementById('photoFileGoal').files[0];
-  if (!file) return toast('Выбери фото');
-  const reader = new FileReader();
-  reader.onload = function() {
-    addMedia({
-      dataUrl: reader.result,
-      caption: document.getElementById('photoCaptionGoal').value.trim(),
-      targetType: 'goal',
-      targetId: goalId
-    });
-    closeModal();
-    renderGallery();
-    toast('▣ Фото добавлено');
+  
+  document.getElementById('savePhotoGoalBtn').onclick = function() {
+    const file = document.getElementById('photoFileGoal').files[0];
+    if (!file) return toast('Выбери фото');
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      addMedia({
+        dataUrl: e.target.result,
+        caption: document.getElementById('photoCaptionGoal').value.trim(),
+        targetType: 'goal',
+        targetId: goalId
+      });
+      closeModal();
+      renderGallery();
+      toast('▣ Фото добавлено');
+    };
+    reader.readAsDataURL(file);
   };
-  reader.readAsDataURL(file);
 }
 
 // ============================================================
-// 14. ЖУРНАЛЫ (СПИСОК)
+// 14. ЖУРНАЛЫ (СПИСОК) — ИСПРАВЛЕННЫЙ КЛИК
 // ============================================================
 
 function renderJournals() {
@@ -1700,15 +1710,25 @@ function renderJournals() {
         `<p style="font-size:11px;color:var(--muted);margin-top:2px">⬇️ ${stats.owed.toLocaleString()}₽ · ⬆️ ${stats.owes.toLocaleString()}₽</p>`;
     }
 
-    return `<button class="card category" style="text-align:left;color:var(--text);border-left:3px solid ${c.color}" onclick="openJournal('${c.id}')">
+    return `<div class="card category" style="text-align:left;color:var(--text);border-left:3px solid ${c.color}" data-category="${c.id}">
       <div><div class="big">${c.icon}</div>
       <h3>${c.name}</h3>
       ${extraInfo}
       <div style="font-size:11px;color:var(--muted)">📋 ${entries} записей</div>
       </div>
       <div class="count">Открыть →</div>
-     </button>`;
+     </div>`;
   }).join('');
+
+  // ПРАВИЛЬНЫЙ ОБРАБОТЧИК КЛИКА — через делегирование
+  el.querySelectorAll('.category').forEach(card => {
+    card.onclick = function() {
+      const catId = this.dataset.category;
+      if (catId) {
+        openJournal(catId);
+      }
+    };
+  });
 }
 
 // ============================================================
@@ -1717,7 +1737,10 @@ function renderJournals() {
 
 function renderJournal(categoryId) {
   const cat = getCategory(categoryId);
-  if (!cat) return;
+  if (!cat) {
+    toast('❌ Журнал не найден');
+    return;
+  }
 
   document.getElementById('journalTitle').textContent = `${cat.icon} ${cat.name}`;
   document.getElementById('journalCount').textContent = `${cat.entries?.length || 0} записей`;
@@ -1826,7 +1849,6 @@ function renderJournalStats(categoryId) {
       </div>
     `;
 
-    // График воды за неделю
     if (stats.last7Days.length > 0) {
       const maxWater = Math.max(...stats.last7Days.map(d => d.water), 1);
       const bars = stats.last7Days.map(d => {
@@ -2042,38 +2064,36 @@ function openDebtForm(categoryId, editEntryId = null) {
         <label>Заметка</label>
         <textarea id="debtNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea>
       </div>
-      <button class="add" onclick="saveDebtEntry('${categoryId}', '${editEntryId || ''}')">
-        ${editEntryId ? '💾 Сохранить' : '➕ Добавить долг'}
-      </button>
+      <button class="add" id="saveDebtBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить долг'}</button>
     </div>
   `);
-}
 
-function saveDebtEntry(categoryId, entryId) {
-  const data = {
-    type: document.getElementById('debtType').value,
-    counterparty: document.getElementById('debtCounterparty').value.trim(),
-    amount: parseFloat(document.getElementById('debtAmount').value) || 0,
-    interest: parseFloat(document.getElementById('debtInterest').value) || 0,
-    dateGiven: document.getElementById('debtDateGiven').value || today(),
-    dateDue: document.getElementById('debtDateDue').value || null,
-    status: document.getElementById('debtStatus').value || 'active',
-    note: document.getElementById('debtNote').value.trim()
+  document.getElementById('saveDebtBtn').onclick = function() {
+    const data = {
+      type: document.getElementById('debtType').value,
+      counterparty: document.getElementById('debtCounterparty').value.trim(),
+      amount: parseFloat(document.getElementById('debtAmount').value) || 0,
+      interest: parseFloat(document.getElementById('debtInterest').value) || 0,
+      dateGiven: document.getElementById('debtDateGiven').value || today(),
+      dateDue: document.getElementById('debtDateDue').value || null,
+      status: document.getElementById('debtStatus').value || 'active',
+      note: document.getElementById('debtNote').value.trim()
+    };
+
+    if (!data.counterparty) return toast('Укажи контрагента');
+    if (data.amount <= 0) return toast('Укажи сумму');
+
+    if (editEntryId) {
+      updateCategoryEntry(categoryId, editEntryId, data);
+      toast('💰 Долг обновлён');
+    } else {
+      addCategoryEntry(categoryId, data);
+      toast('💰 Долг добавлен');
+    }
+
+    closeModal();
+    renderJournal(categoryId);
   };
-
-  if (!data.counterparty) return toast('Укажи контрагента');
-  if (data.amount <= 0) return toast('Укажи сумму');
-
-  if (entryId) {
-    updateCategoryEntry(categoryId, entryId, data);
-    toast('💰 Долг обновлён');
-  } else {
-    addCategoryEntry(categoryId, data);
-    toast('💰 Долг добавлен');
-  }
-
-  closeModal();
-  renderJournal(categoryId);
 }
 
 // --- Финансы ---
@@ -2118,34 +2138,32 @@ function openFinanceForm(categoryId, editEntryId = null) {
         <label>Описание</label>
         <textarea id="finDescription" placeholder="Что это?">${esc(entry?.description || '')}</textarea>
       </div>
-      <button class="add" onclick="saveFinanceEntry('${categoryId}', '${editEntryId || ''}')">
-        ${editEntryId ? '💾 Сохранить' : '➕ Добавить'}
-      </button>
+      <button class="add" id="saveFinanceBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить'}</button>
     </div>
   `);
-}
 
-function saveFinanceEntry(categoryId, entryId) {
-  const data = {
-    type: document.getElementById('finType').value,
-    category: document.getElementById('finCategory').value,
-    amount: parseFloat(document.getElementById('finAmount').value) || 0,
-    date: document.getElementById('finDate').value || today(),
-    description: document.getElementById('finDescription').value.trim()
+  document.getElementById('saveFinanceBtn').onclick = function() {
+    const data = {
+      type: document.getElementById('finType').value,
+      category: document.getElementById('finCategory').value,
+      amount: parseFloat(document.getElementById('finAmount').value) || 0,
+      date: document.getElementById('finDate').value || today(),
+      description: document.getElementById('finDescription').value.trim()
+    };
+
+    if (data.amount <= 0) return toast('Укажи сумму');
+
+    if (editEntryId) {
+      updateCategoryEntry(categoryId, editEntryId, data);
+      toast('💰 Запись обновлена');
+    } else {
+      addCategoryEntry(categoryId, data);
+      toast('💰 Запись добавлена');
+    }
+
+    closeModal();
+    renderJournal(categoryId);
   };
-
-  if (data.amount <= 0) return toast('Укажи сумму');
-
-  if (entryId) {
-    updateCategoryEntry(categoryId, entryId, data);
-    toast('💰 Запись обновлена');
-  } else {
-    addCategoryEntry(categoryId, data);
-    toast('💰 Запись добавлена');
-  }
-
-  closeModal();
-  renderJournal(categoryId);
 }
 
 // --- Тело ---
@@ -2181,9 +2199,7 @@ function openBodyForm(categoryId, editEntryId = null) {
         <label>Заметка</label>
         <textarea id="bodyNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea>
       </div>
-      <button class="add" onclick="saveBodyEntry('${categoryId}', '${editEntryId || ''}')">
-        ${editEntryId ? '💾 Сохранить' : '➕ Добавить'}
-      </button>
+      <button class="add" id="saveBodyBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить'}</button>
     </div>
   `);
 
@@ -2195,32 +2211,32 @@ function openBodyForm(categoryId, editEntryId = null) {
     else if (type === 'water') unit.textContent = 'стаканов';
     else unit.textContent = 'минут';
   };
-}
 
-function saveBodyEntry(categoryId, entryId) {
-  const data = {
-    type: document.getElementById('bodyType').value,
-    value: parseFloat(document.getElementById('bodyValue').value) || 0,
-    date: document.getElementById('bodyDate').value || today(),
-    note: document.getElementById('bodyNote').value.trim()
+  document.getElementById('saveBodyBtn').onclick = function() {
+    const data = {
+      type: document.getElementById('bodyType').value,
+      value: parseFloat(document.getElementById('bodyValue').value) || 0,
+      date: document.getElementById('bodyDate').value || today(),
+      note: document.getElementById('bodyNote').value.trim()
+    };
+
+    if (data.value <= 0) return toast('Укажи значение');
+
+    if (editEntryId) {
+      updateCategoryEntry(categoryId, editEntryId, data);
+      toast('💪 Запись обновлена');
+    } else {
+      addCategoryEntry(categoryId, data);
+      toast('💪 Запись добавлена');
+    }
+
+    closeModal();
+    renderJournal(categoryId);
   };
-
-  if (data.value <= 0) return toast('Укажи значение');
-
-  if (entryId) {
-    updateCategoryEntry(categoryId, entryId, data);
-    toast('💪 Запись обновлена');
-  } else {
-    addCategoryEntry(categoryId, data);
-    toast('💪 Запись добавлена');
-  }
-
-  closeModal();
-  renderJournal(categoryId);
 }
 
 // ============================================================
-// 19. СТАТИСТИКА И ПЕРСОНАЖ
+// 19. СТАТИСТИКА
 // ============================================================
 
 function renderStats() {
@@ -2254,6 +2270,10 @@ function renderStats() {
   }).join('');
 }
 
+// ============================================================
+// 20. ПЕРСОНАЖ
+// ============================================================
+
 function renderCharacter() {
   const u = data.user;
   document.getElementById('charName').textContent = u.name;
@@ -2280,7 +2300,7 @@ function renderCharacter() {
 }
 
 // ============================================================
-// 20. AVAILABILITY
+// 21. AVAILABILITY (СОКРАЩЕНО ДЛЯ ЭКОНОМИИ МЕСТА)
 // ============================================================
 
 function renderAvailability() {
@@ -2312,26 +2332,26 @@ document.getElementById('availAddBtn').onclick = () => {
    <div class="field"><label>До</label><input id="availTo" type="time" value="12:00"></div>
   </div>
   <div class="field"><label>Несколько слотов? Добавь ещё раз после сохранения.</label></div>
-  <button class="add" onclick="saveAvailSlot()">💾 Добавить слот</button>
+  <button class="add" id="saveAvailBtn">💾 Добавить слот</button>
  </div>`);
+  
+  document.getElementById('saveAvailBtn').onclick = function() {
+    const date = document.getElementById('availDate').value;
+    if (!date) return toast('Выбери дату');
+    const type = document.getElementById('availType').value;
+    const from = document.getElementById('availFrom').value;
+    const to = document.getElementById('availTo').value;
+    if (!from || !to) return toast('Укажи время');
+    const existing = getAvailability(date);
+    const slots = existing ? existing.slots : [];
+    slots.push({ from, to, type });
+    setAvailability(date, slots);
+    closeModal();
+    renderAvailability();
+    renderCalendar();
+    toast('☀ Слот добавлен');
+  };
 };
-
-function saveAvailSlot() {
-  const date = document.getElementById('availDate').value;
-  if (!date) return toast('Выбери дату');
-  const type = document.getElementById('availType').value;
-  const from = document.getElementById('availFrom').value;
-  const to = document.getElementById('availTo').value;
-  if (!from || !to) return toast('Укажи время');
-  const existing = getAvailability(date);
-  const slots = existing ? existing.slots : [];
-  slots.push({ from, to, type });
-  setAvailability(date, slots);
-  closeModal();
-  renderAvailability();
-  renderCalendar();
-  toast('☀ Слот добавлен');
-}
 
 document.getElementById('availExportBtn').onclick = () => {
   const card = document.getElementById('availExportCard');
@@ -2390,7 +2410,7 @@ function copyAvailText() {
 }
 
 // ============================================================
-// 21. КАЛЕНДАРЬ
+// 22. КАЛЕНДАРЬ (СОКРАЩЕНО)
 // ============================================================
 
 let calState = { view: 'month', date: new Date() };
@@ -2569,23 +2589,31 @@ function editAvailDay(dateStr) {
    <div class="field"><label>С</label><input id="eavailFrom" type="time" value="10:00"></div>
    <div class="field"><label>До</label><input id="eavailTo" type="time" value="12:00"></div>
   </div>
-  <button class="add" onclick="addAvailSlot('${dateStr}')">➕ Добавить слот</button>
-  <button class="ghost" style="color:var(--danger)" onclick="removeAvailability('${dateStr}');closeModal();renderAvailability();renderCalendar();">🗑 Удалить все слоты за день</button>
+  <button class="add" id="addAvailSlotBtn">➕ Добавить слот</button>
+  <button class="ghost" style="color:var(--danger)" id="removeAllAvailBtn">🗑 Удалить все слоты за день</button>
  </div>`);
-}
-
-function addAvailSlot(dateStr) {
-  const type = document.getElementById('eavailType').value;
-  const from = document.getElementById('eavailFrom').value;
-  const to = document.getElementById('eavailTo').value;
-  if (!from || !to) return toast('Укажи время');
-  const slots = getAvailability(dateStr)?.slots || [];
-  slots.push({ from, to, type });
-  setAvailability(dateStr, slots);
-  closeModal();
-  renderAvailability();
-  renderCalendar();
-  toast('☀ Слот добавлен');
+  
+  document.getElementById('addAvailSlotBtn').onclick = function() {
+    const type = document.getElementById('eavailType').value;
+    const from = document.getElementById('eavailFrom').value;
+    const to = document.getElementById('eavailTo').value;
+    if (!from || !to) return toast('Укажи время');
+    const slots2 = getAvailability(dateStr)?.slots || [];
+    slots2.push({ from, to, type });
+    setAvailability(dateStr, slots2);
+    closeModal();
+    renderAvailability();
+    renderCalendar();
+    toast('☀ Слот добавлен');
+  };
+  
+  document.getElementById('removeAllAvailBtn').onclick = function() {
+    if (!confirm('Удалить все слоты за этот день?')) return;
+    removeAvailability(dateStr);
+    closeModal();
+    renderAvailability();
+    renderCalendar();
+  };
 }
 
 function removeAvailSlot(dateStr, index) {
@@ -2619,7 +2647,7 @@ document.getElementById('calToday').onclick = () => { calState.date = new Date()
   renderCalendar(); };
 
 // ============================================================
-// 22. МОДАЛКИ
+// 23. МОДАЛКИ
 // ============================================================
 
 function openModal(title, body) {
@@ -2638,7 +2666,7 @@ document.getElementById('modal').onclick = e => {
 };
 
 // ============================================================
-// 23. НАСТРОЙКИ И ТЕМЫ
+// 24. НАСТРОЙКИ И ТЕМЫ
 // ============================================================
 
 const THEMES = {
@@ -2739,7 +2767,6 @@ document.getElementById('resetBtn').onclick = () => {
   }
 };
 
-document.getElementById('statsBtn').onclick = () => switchPage('stats');
 document.getElementById('exportBtn2').onclick = exportData;
 document.getElementById('exportBtn').onclick = exportData;
 
@@ -2755,7 +2782,7 @@ if (prefs.theme) applyTheme(prefs.theme);
 if (prefs.density === 'compact') document.body.classList.add('compact');
 
 // ============================================================
-// 24. ОБЩИЙ РЕНДЕР
+// 25. ОБЩИЙ РЕНДЕР
 // ============================================================
 
 function renderAll() {
@@ -2772,13 +2799,13 @@ function renderAll() {
 }
 
 // ============================================================
-// 25. ИНИЦИАЛИЗАЦИЯ
+// 26. ИНИЦИАЛИЗАЦИЯ
 // ============================================================
 
 updateNoteFilterCats();
 renderAll();
 
-console.log('⚡ LVLUP v13.4 загружен!');
+console.log('⚡ LVLUP v13.5 загружен!');
 console.log('📊 Журналов:', getCategories().length);
 console.log('📋 Задач:', getTasks({ excludeStatus: 'deleted' }).length);
 console.log('🎯 Целей:', data.goals.length);
@@ -2789,7 +2816,6 @@ console.log('👤 Уровень персонажа:', data.user.level);
 console.log('📈 Бонус за журналы:', getJournalBonus(), '%');
 console.log('⭐ Глобальный бонус:', getGlobalLevelBonus(), '%');
 
-// Подсчёт записей в журналах
 let totalEntries = 0;
 for (const c of getCategories()) {
   totalEntries += c.entries?.length || 0;
