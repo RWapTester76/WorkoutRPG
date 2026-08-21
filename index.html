@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0d12">
-<title>LVLUP v13.3 — Life RPG</title>
+<title>LVLUP v13.4 — Life RPG</title>
 <style>
 :root{
   --bg:#090b10;--panel:#11151d;--panel2:#171c26;--line:rgba(255,255,255,.08);
@@ -59,7 +59,7 @@ button:active{transform:scale(.98)}
 .add{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:11px 15px;border-radius:14px;font-weight:800;box-shadow:0 10px 25px rgba(139,92,246,.2)}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar input,.toolbar select,.input{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:14px;padding:11px 13px;outline:0}.toolbar input{flex:1;min-width:180px}
 .goal{display:grid;gap:10px}.goal-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.goal-title{font-weight:800}.goal-pct{color:var(--muted);font-size:12px}.goal-deadline{font-size:11px;color:var(--gold)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}.stat b{font-size:26px}.stat span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}.stat b{font-size:26px}.stat span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
 .form{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{font-size:12px;color:var(--muted)}.field input,.field textarea,.field select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:13px;padding:11px 12px;outline:0}.field textarea{min-height:90px;resize:vertical}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}.modal.open{display:flex}.modal-box{width:min(520px,100%);max-height:90vh;overflow:auto;background:#11151d;border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:var(--shadow)}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.modal-head h3{margin:0}
 .empty{padding:28px;text-align:center;color:var(--muted)}
@@ -153,7 +153,6 @@ button:active{transform:scale(.98)}
 .avail-export-caption{font-size:9px;color:var(--muted);margin-top:6px}
 .avail-export-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 
-/* Journal Progress */
 .journal-progress{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
 .journal-progress-item{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
 .journal-progress-item .jp-icon{font-size:20px;text-align:center}
@@ -206,12 +205,10 @@ button:active{transform:scale(.98)}
         <div class="section-head"><h2>📋 Главные задачи</h2><span id="questHint">На сегодня</span></div>
         <div class="quest-list" id="homeQuests"></div>
 
-        <!-- ЖУРНАЛЫ НА ГЛАВНОЙ -->
         <div class="section-head"><h2>📊 Журналы</h2><span id="journalHint">прогресс</span></div>
         <div class="journal-progress" id="journalProgress"></div>
 
-        <!-- ВЕРСИЯ -->
-        <div class="version-badge">LVLUP v13.3 · local-first</div>
+        <div class="version-badge">LVLUP v13.4 · local-first</div>
       </section>
 
       <!-- CALENDAR -->
@@ -283,10 +280,24 @@ button:active{transform:scale(.98)}
         <div class="stats" id="charStats"></div>
       </section>
 
-      <!-- JOURNALS -->
+      <!-- JOURNALS (список) -->
       <section class="page" id="page-journals">
         <div class="section-head"><h2>▦ Твои направления</h2></div>
         <div class="grid" id="journalGrid"></div>
+      </section>
+
+      <!-- JOURNAL (отдельный журнал) -->
+      <section class="page" id="page-journal">
+        <div class="section-head">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button class="ghost" id="journalBackBtn" style="padding:6px 10px">←</button>
+            <h2 id="journalTitle">📋 Журнал</h2>
+          </div>
+          <button class="add" id="journalAddBtn">+ Добавить</button>
+        </div>
+        <div class="stats" id="journalStats"></div>
+        <div class="section-head"><h3>📋 Записи</h3><span id="journalCount" class="muted">0</span></div>
+        <div class="card"><div class="quest-list" id="journalEntries"></div></div>
       </section>
 
       <!-- AVAILABILITY -->
@@ -325,7 +336,7 @@ button:active{transform:scale(.98)}
           <div class="row"><div><b>📊 Статистика</b><div class="muted">Твой прогресс по направлениям</div></div><button class="ghost" id="statsBtn">Открыть</button></div>
           <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
           <div class="row"><div><b>💾 Резервная копия</b><div class="muted">Данные сохраняются локально</div></div><button class="ghost" id="exportBtn2">Экспорт</button></div>
-          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v13.3 · local-first</div>
+          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v13.4 · local-first</div>
         </div>
       </section>
 
@@ -396,27 +407,26 @@ button:active{transform:scale(.98)}
     <div class="settings-section"><b>Начало недели</b><div class="segmented"><button class="active">Пн</button><button>Вс</button></div></div>
     <div class="settings-section"><b>Первый экран</b><div class="segmented"><button class="active">Главная</button><button>Календарь</button></div></div>
   </div>
-  <div class="settings-footer"><span class="muted">LVLUP v13.3 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
+  <div class="settings-footer"><span class="muted">LVLUP v13.4 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
 </div></div>
 
 <script>
 // ============================================================
-// LVLUP v13.3 — НОВАЯ RPG-СИСТЕМА
+// LVLUP v13.4 — ЖУРНАЛЫ: ДОЛГИ, ФИНАНСЫ, ТЕЛО
 // ============================================================
-
-  // ============================================================
+// ============================================================
 // 1. КОНСТАНТЫ
 // ============================================================
 const KEY = 'lvlup_v13';
-const APP_VERSION = 'v13.3';
+const APP_VERSION = 'v13.4';
 
 const DEFAULT_CATEGORIES = [
+  { id: 'debts', name: 'Долги', icon: '💰', color: '#fb7185' },
+  { id: 'finance', name: 'Финансы', icon: '📊', color: '#34d399' },
   { id: 'body', name: 'Тело', icon: '💪', color: '#fb7185' },
-  { id: 'hobby', name: 'Хобби', icon: '🎨', color: '#a78bfa' },
+  { id: 'food', name: 'Питание', icon: '🥗', color: '#fbbf24' },
   { id: 'business', name: 'Бизнес', icon: '📈', color: '#60a5fa' },
-  { id: 'food', name: 'Питание', icon: '🥗', color: '#34d399' },
-  { id: 'finance', name: 'Финансы', icon: '💰', color: '#fbbf24' },
-  { id: 'debts', name: 'Долги', icon: '📋', color: '#fb923c' },
+  { id: 'hobby', name: 'Хобби', icon: '🎨', color: '#a78bfa' },
   { id: 'travel', name: 'Путешествия', icon: '✈️', color: '#22d3ee' },
   { id: 'misc', name: 'Разное', icon: '📦', color: '#facc15' }
 ];
@@ -454,35 +464,21 @@ function esc(s) {
 // 2. RPG-СИСТЕМА
 // ============================================================
 
-// Опыт для уровня журнала: уровень 1 → 100 XP, далее +50 за уровень
 function xpNeedForCategory(level) {
   return 100 + (level - 1) * 50;
 }
 
-// Опыт для общего уровня: уровень 1 → 200 XP, далее +80 за уровень
 function xpNeedForUser(level) {
   return 200 + (level - 1) * 80;
 }
 
-// Бонус за развитые журналы (чем больше журналов ≥ уровня 5, тем выше бонус)
 function getJournalBonus() {
   const cats = getCategories();
   const developed = cats.filter(c => c.level >= 5).length;
-  const bonuses = {
-    0: 0,
-    1: 5,
-    2: 12,
-    3: 20,
-    4: 30,
-    5: 42,
-    6: 55,
-    7: 70,
-    8: 85
-  };
+  const bonuses = { 0: 0, 1: 5, 2: 12, 3: 20, 4: 30, 5: 42, 6: 55, 7: 70, 8: 85 };
   return bonuses[Math.min(developed, 8)] || 0;
 }
 
-// Глобальный бонус от общего уровня
 function getGlobalLevelBonus() {
   const level = data.user.level;
   if (level >= 50) return 50;
@@ -492,7 +488,6 @@ function getGlobalLevelBonus() {
   return 0;
 }
 
-// Начисление опыта за выполненную задачу
 function completeTaskWithTime(taskId, minutesSpent) {
   const task = getTask(taskId);
   if (!task) return;
@@ -501,14 +496,12 @@ function completeTaskWithTime(taskId, minutesSpent) {
   const cat = getCategory(task.category);
   if (!cat) return;
 
-  // === 1. Опыт в журнал (1 XP = 1 минута) ===
   const journalXP = Math.round(minutesSpent);
   cat.xp = (cat.xp || 0) + journalXP;
   cat.totalXp = (cat.totalXp || 0) + journalXP;
   cat.minutesSpent = (cat.minutesSpent || 0) + minutesSpent;
   cat.tasksCompleted = (cat.tasksCompleted || 0) + 1;
 
-  // Повышение уровня журнала
   let leveledUp = false;
   while (cat.xp >= xpNeedForCategory(cat.level)) {
     cat.xp -= xpNeedForCategory(cat.level);
@@ -517,7 +510,6 @@ function completeTaskWithTime(taskId, minutesSpent) {
     toast(`📈 ${cat.icon} ${cat.name} достиг ${cat.level} уровня!`);
   }
 
-  // === 2. Общий опыт (10% от минут + бонусы) ===
   const baseGlobalXP = Math.round(minutesSpent * 0.1);
   const journalBonus = getJournalBonus();
   const globalLevelBonus = getGlobalLevelBonus();
@@ -527,7 +519,6 @@ function completeTaskWithTime(taskId, minutesSpent) {
   data.user.xp = (data.user.xp || 0) + finalGlobalXP;
   data.user.totalXp = (data.user.totalXp || 0) + finalGlobalXP;
 
-  // Повышение общего уровня
   let userLeveledUp = false;
   while (data.user.xp >= xpNeedForUser(data.user.level)) {
     data.user.xp -= xpNeedForUser(data.user.level);
@@ -536,7 +527,6 @@ function completeTaskWithTime(taskId, minutesSpent) {
     toast(`⚡ Общий уровень ${data.user.level}!`);
   }
 
-  // === 3. Отметить задачу выполненной ===
   task.status = 'done';
   task.completedAt = new Date().toISOString();
   task.minutesSpent = minutesSpent;
@@ -546,7 +536,6 @@ function completeTaskWithTime(taskId, minutesSpent) {
   data.user.streak = (data.user.streak || 0) + 1;
   saveData();
 
-  // === 4. Уведомление ===
   let msg = `✅ "${task.title}" выполнена!`;
   msg += `\n📚 ${cat.icon} +${journalXP} XP (${cat.level} ур.)`;
   msg += `\n⭐ +${finalGlobalXP} XP глобально`;
@@ -579,7 +568,8 @@ function emptyData() {
       xp: 0,
       totalXp: 0,
       tasksCompleted: 0,
-      minutesSpent: 0
+      minutesSpent: 0,
+      entries: []
     })),
     tasks: [],
     goals: [],
@@ -599,7 +589,6 @@ function migrateV12toV13(oldData) {
   nd.user.streak = oldData.streak || 0;
   nd.user.createdAt = oldData.character?.createdAt || new Date().toISOString();
 
-  // Категории с уровнями
   const catMap = {};
   for (const c of nd.categories) {
     catMap[c.id] = c;
@@ -627,7 +616,6 @@ function migrateV12toV13(oldData) {
         createdAt: t.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       });
-      // Если задача выполнена — добавляем XP в журнал
       if (t.status === 'done' && catObj) {
         const xp = t.journalXPEarned || t.xp || 10;
         catObj.xp += xp;
@@ -718,9 +706,10 @@ function normalizeData(d) {
       xp: c.xp || 0,
       totalXp: c.totalXp || 0,
       tasksCompleted: c.tasksCompleted || 0,
-      minutesSpent: c.minutesSpent || 0
+      minutesSpent: c.minutesSpent || 0,
+      entries: Array.isArray(c.entries) ? c.entries : []
     })) :
-    DEFAULT_CATEGORIES.map(c => ({ ...c, level: 1, xp: 0, totalXp: 0, tasksCompleted: 0, minutesSpent: 0 }));
+    DEFAULT_CATEGORIES.map(c => ({ ...c, level: 1, xp: 0, totalXp: 0, tasksCompleted: 0, minutesSpent: 0, entries: [] }));
   nd.tasks = Array.isArray(d.tasks) ? d.tasks : [];
   nd.goals = Array.isArray(d.goals) ? d.goals.map(g => ({ ...g, taskIds: Array.isArray(g.taskIds) ? g.taskIds : [] })) : [];
   nd.notes = Array.isArray(d.notes) ? d.notes : [];
@@ -928,12 +917,182 @@ function getTaskNoteCount(taskId) { return data.notes.filter(n => n.targetId ===
 function getTaskMediaCount(taskId) { return data.media.filter(m => m.targetId === taskId).length; }
 
 // ============================================================
-// 5. НАВИГАЦИЯ
+// 5. API ЗАПИСЕЙ ЖУРНАЛОВ
+// ============================================================
+
+function getCategoryEntries(categoryId) {
+  const cat = getCategory(categoryId);
+  return cat ? cat.entries || [] : [];
+}
+
+function addCategoryEntry(categoryId, entry) {
+  const cat = getCategory(categoryId);
+  if (!cat) return null;
+  const newEntry = {
+    id: genId(),
+    ...entry,
+    createdAt: new Date().toISOString()
+  };
+  if (!cat.entries) cat.entries = [];
+  cat.entries.push(newEntry);
+  saveData();
+  return newEntry;
+}
+
+function updateCategoryEntry(categoryId, entryId, updates) {
+  const cat = getCategory(categoryId);
+  if (!cat) return null;
+  const idx = cat.entries.findIndex(e => e.id === entryId);
+  if (idx === -1) return null;
+  cat.entries[idx] = { ...cat.entries[idx], ...updates, updatedAt: new Date().toISOString() };
+  saveData();
+  return cat.entries[idx];
+}
+
+function deleteCategoryEntry(categoryId, entryId) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+  cat.entries = cat.entries.filter(e => e.id !== entryId);
+  saveData();
+}
+
+// ============================================================
+// 6. СТАТИСТИКА ЖУРНАЛОВ
+// ============================================================
+
+function calculateDebtStats(categoryId) {
+  const entries = getCategoryEntries(categoryId);
+  let owed = 0;
+  let owes = 0;
+  let active = 0;
+  let overdue = 0;
+
+  for (const e of entries) {
+    if (e.status === 'paid') continue;
+    if (e.type === 'owed') {
+      owed += e.amount || 0;
+    } else if (e.type === 'owes') {
+      owes += e.amount || 0;
+    }
+    active++;
+    if (e.dateDue && e.dateDue < today() && e.status !== 'paid') {
+      overdue++;
+    }
+  }
+
+  return {
+    owed: owed,
+    owes: owes,
+    balance: owes - owed,
+    active: active,
+    overdue: overdue,
+    total: entries.length
+  };
+}
+
+function calculateFinanceStats(categoryId) {
+  const entries = getCategoryEntries(categoryId);
+
+  let totalIncome = 0;
+  let totalExpense = 0;
+  let totalInvestment = 0;
+  let countIncome = 0;
+  let countExpense = 0;
+  let countInvestment = 0;
+
+  const categories = {};
+
+  for (const e of entries) {
+    const amount = e.amount || 0;
+
+    if (e.type === 'income') {
+      totalIncome += amount;
+      countIncome++;
+    } else if (e.type === 'expense') {
+      totalExpense += amount;
+      countExpense++;
+    } else if (e.type === 'investment') {
+      totalInvestment += amount;
+      countInvestment++;
+    }
+
+    if (e.type === 'expense' && e.category) {
+      if (!categories[e.category]) categories[e.category] = 0;
+      categories[e.category] += amount;
+    }
+  }
+
+  const sortedCategories = Object.entries(categories)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  return {
+    totalIncome,
+    totalExpense,
+    totalInvestment,
+    balance: totalIncome - totalExpense,
+    countIncome,
+    countExpense,
+    countInvestment,
+    total: entries.length,
+    topCategories: sortedCategories
+  };
+}
+
+function calculateBodyStats(categoryId) {
+  const entries = getCategoryEntries(categoryId);
+
+  const workouts = entries.filter(e => e.type === 'workout');
+  const weights = entries.filter(e => e.type === 'weight');
+  const sleeps = entries.filter(e => e.type === 'sleep');
+  const waters = entries.filter(e => e.type === 'water');
+
+  const last7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = iso(d);
+    const dayEntries = entries.filter(e => e.date === dateStr);
+    last7Days.push({
+      date: dateStr,
+      workouts: dayEntries.filter(e => e.type === 'workout').length,
+      water: dayEntries.filter(e => e.type === 'water').reduce((sum, e) => sum + (e.value || 0), 0),
+      sleep: dayEntries.filter(e => e.type === 'sleep').reduce((sum, e) => sum + (e.value || 0), 0) / (dayEntries.filter(
+        e => e.type === 'sleep').length || 1)
+    });
+  }
+
+  const avgSleep = sleeps.length ? sleeps.reduce((sum, e) => sum + (e.value || 0), 0) / sleeps.length : 0;
+  const avgWater = last7Days.reduce((sum, d) => sum + d.water, 0) / 7;
+
+  const sortedWeights = [...weights].sort((a, b) => a.date.localeCompare(b.date));
+  const firstWeight = sortedWeights[0]?.value || 0;
+  const lastWeight = sortedWeights[sortedWeights.length - 1]?.value || 0;
+  const weightChange = lastWeight - firstWeight;
+
+  return {
+    workouts: workouts.length,
+    weights: weights.length,
+    sleeps: sleeps.length,
+    waters: waters.length,
+    avgSleep: Math.round(avgSleep * 10) / 10,
+    avgWater: Math.round(avgWater * 10) / 10,
+    firstWeight,
+    lastWeight,
+    weightChange,
+    last7Days,
+    total: entries.length
+  };
+}
+
+// ============================================================
+// 7. НАВИГАЦИЯ
 // ============================================================
 
 function switchPage(p) {
   document.querySelectorAll('.page').forEach(x => x.classList.toggle('active', x.id === 'page-' + p));
   document.querySelectorAll('[data-page]').forEach(x => x.classList.toggle('active', x.dataset.page === p));
+
   const renders = {
     home: renderHome,
     quests: renderQuests,
@@ -945,14 +1104,45 @@ function switchPage(p) {
     availability: renderAvailability,
     stats: renderStats
   };
-  if (renders[p]) renders[p]();
+
+  if (p === 'journal') {
+    // уже открыт
+  } else if (renders[p]) {
+    renders[p]();
+  }
   if (p === 'calendar') renderCalendar();
 }
 
 document.querySelectorAll('[data-page]').forEach(b => b.onclick = () => switchPage(b.dataset.page));
 
+// Открытие журнала
+function openJournal(categoryId) {
+  switchPage('journal');
+  document.getElementById('journalBackBtn').dataset.journalId = categoryId;
+  renderJournal(categoryId);
+}
+
+// Кнопка "Назад" из журнала
+document.getElementById('journalBackBtn').onclick = () => {
+  switchPage('journals');
+};
+
+// Кнопка "Добавить" в журнале
+document.getElementById('journalAddBtn').onclick = () => {
+  const catId = document.getElementById('journalBackBtn').dataset.journalId;
+  if (catId === 'debts') {
+    openDebtForm(catId);
+  } else if (catId === 'finance') {
+    openFinanceForm(catId);
+  } else if (catId === 'body') {
+    openBodyForm(catId);
+  } else {
+    toast('⏳ Форма для этого журнала в разработке');
+  }
+};
+
 // ============================================================
-// 6. ЗАДАЧИ
+// 8. ЗАДАЧИ
 // ============================================================
 
 let questsPage = 0;
@@ -984,7 +1174,6 @@ function completeTaskUI(id) {
     return;
   }
 
-  // Открываем модалку для ввода времени
   openModal('⏱ Время на задачу', `<div class="form">
    <div class="field"><label>Сколько минут ты потратил на задачу?</label>
     <input id="taskMinutes" type="number" value="15" min="1" step="1" style="font-size:24px;text-align:center">
@@ -997,7 +1186,6 @@ function completeTaskUI(id) {
    <button class="ghost" onclick="closeModal()">Отмена</button>
   </div>`);
 
-  // Фокус на поле ввода
   setTimeout(() => {
     const input = document.getElementById('taskMinutes');
     if (input) {
@@ -1117,7 +1305,7 @@ function openCategory(cat) {
 }
 
 // ============================================================
-// 7. HOME
+// 9. HOME
 // ============================================================
 
 function renderHome() {
@@ -1138,7 +1326,6 @@ function renderHome() {
   el.innerHTML = active.length ? active.map(t => taskHTML(t)).join('') :
     '<div class="card empty">На сегодня задач нет. Отличный момент создать одну. 📋</div>';
 
-  // Журналы на главной
   renderJournalProgress();
 }
 
@@ -1148,20 +1335,20 @@ function renderJournalProgress() {
   el.innerHTML = cats.map(c => {
     const need = xpNeedForCategory(c.level);
     const pct = Math.min(100, (c.xp / need) * 100);
+    const entries = c.entries?.length || 0;
     return `<div class="journal-progress-item">
      <div class="jp-icon">${c.icon}</div>
      <div class="jp-info">
       <div class="jp-name">${c.name}</div>
-      <div class="jp-level">Ур. ${c.level} · ${c.tasksCompleted} задач · ${c.minutesSpent || 0} мин</div>
+      <div class="jp-level">Ур. ${c.level} · ${c.tasksCompleted || 0} задач · ${entries} записей</div>
       <div class="jp-bar"><div class="jp-fill" style="width:${pct}%;background:${c.color}"></div></div>
      </div>
      <div class="jp-xp"><strong>${c.xp}</strong> / ${need} XP</div>
     </div>`;
   }).join('');
 }
-
 // ============================================================
-// 8. СОЗДАНИЕ ЗАДАЧ
+// 10. СОЗДАНИЕ ЗАДАЧ
 // ============================================================
 
 const DOW = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -1208,7 +1395,7 @@ function createQuest() {
 }
 
 // ============================================================
-// 9. ЦЕЛИ
+// 11. ЦЕЛИ
 // ============================================================
 
 function renderGoals() {
@@ -1287,7 +1474,7 @@ function createGoal() {
 }
 
 // ============================================================
-// 10. ЗАМЕТКИ
+// 12. ЗАМЕТКИ
 // ============================================================
 
 function renderNotes() {
@@ -1389,7 +1576,7 @@ function updateNoteFilterCats() {
 }
 
 // ============================================================
-// 11. ГАЛЕРЕЯ
+// 13. ГАЛЕРЕЯ
 // ============================================================
 
 function renderGallery() {
@@ -1496,7 +1683,7 @@ function savePhotoToGoal(goalId) {
 }
 
 // ============================================================
-// 12. ЖУРНАЛЫ
+// 14. ЖУРНАЛЫ (СПИСОК)
 // ============================================================
 
 function renderJournals() {
@@ -1504,16 +1691,536 @@ function renderJournals() {
   const cats = getCategories();
   el.innerHTML = cats.map(c => {
     const n = getTasks({ category: c.id, excludeStatus: 'deleted' }).length;
-    return `<button class="card category" style="text-align:left;color:var(--text);border-left:3px solid ${c.color}" onclick="openCategory('${c.id}')">
-   <div><div class="big">${c.icon}</div><h3>${c.name}</h3>
-   <p>${n} задач · ${c.level} ур. · ${c.totalXp || 0} XP</p></div>
-   <div class="count">Открыть →</div>
-  </button>`;
+    const entries = c.entries?.length || 0;
+    const stats = c.id === 'debts' ? calculateDebtStats(c.id) : null;
+
+    let extraInfo = `<p>${n} задач · ${c.level} ур.</p>`;
+    if (stats) {
+      extraInfo +=
+        `<p style="font-size:11px;color:var(--muted);margin-top:2px">⬇️ ${stats.owed.toLocaleString()}₽ · ⬆️ ${stats.owes.toLocaleString()}₽</p>`;
+    }
+
+    return `<button class="card category" style="text-align:left;color:var(--text);border-left:3px solid ${c.color}" onclick="openJournal('${c.id}')">
+      <div><div class="big">${c.icon}</div>
+      <h3>${c.name}</h3>
+      ${extraInfo}
+      <div style="font-size:11px;color:var(--muted)">📋 ${entries} записей</div>
+      </div>
+      <div class="count">Открыть →</div>
+     </button>`;
   }).join('');
 }
 
 // ============================================================
-// 13. СТАТИСТИКА И ПЕРСОНАЖ
+// 15. ЖУРНАЛ (ОТДЕЛЬНАЯ СТРАНИЦА)
+// ============================================================
+
+function renderJournal(categoryId) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+
+  document.getElementById('journalTitle').textContent = `${cat.icon} ${cat.name}`;
+  document.getElementById('journalCount').textContent = `${cat.entries?.length || 0} записей`;
+  document.getElementById('journalBackBtn').dataset.journalId = categoryId;
+
+  renderJournalStats(categoryId);
+
+  const entries = cat.entries || [];
+  const el = document.getElementById('journalEntries');
+
+  if (!entries.length) {
+    el.innerHTML = `<div class="empty">Нет записей в ${cat.name}. Добавь первую! ✨</div>`;
+    return;
+  }
+
+  const sorted = [...entries].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  el.innerHTML = sorted.map(e => {
+    if (categoryId === 'debts') {
+      return renderDebtEntry(cat, e);
+    } else if (categoryId === 'finance') {
+      return renderFinanceEntry(cat, e);
+    } else if (categoryId === 'body') {
+      return renderBodyEntry(cat, e);
+    }
+    return renderGenericEntry(cat, e);
+  }).join('');
+}
+
+// ============================================================
+// 16. СТАТИСТИКА ЖУРНАЛА (РЕНДЕР)
+// ============================================================
+
+function renderJournalStats(categoryId) {
+  const el = document.getElementById('journalStats');
+
+  if (categoryId === 'debts') {
+    const stats = calculateDebtStats(categoryId);
+    el.innerHTML = `
+      <div class="stat" style="border-left:3px solid #fb7185">
+        <b>${stats.owed.toLocaleString()} ₽</b>
+        <span>⬇️ Ты должен</span>
+      </div>
+      <div class="stat" style="border-left:3px solid #34d399">
+        <b>${stats.owes.toLocaleString()} ₽</b>
+        <span>⬆️ Тебе должны</span>
+      </div>
+      <div class="stat" style="border-left:3px solid ${stats.balance >= 0 ? '#34d399' : '#fb7185'}">
+        <b>${stats.balance.toLocaleString()} ₽</b>
+        <span>⚖️ Баланс</span>
+      </div>
+      <div class="stat" style="border-left:3px solid #fbbf24">
+        <b>${stats.active}</b>
+        <span>📌 Активных</span>
+      </div>
+    `;
+  } else if (categoryId === 'finance') {
+    const stats = calculateFinanceStats(categoryId);
+    el.innerHTML = `
+      <div class="stat" style="border-left:3px solid #34d399">
+        <b>+${stats.totalIncome.toLocaleString()} ₽</b>
+        <span>📈 Доходы (${stats.countIncome})</span>
+      </div>
+      <div class="stat" style="border-left:3px solid #fb7185">
+        <b>-${stats.totalExpense.toLocaleString()} ₽</b>
+        <span>📉 Расходы (${stats.countExpense})</span>
+      </div>
+      <div class="stat" style="border-left:3px solid ${stats.balance >= 0 ? '#34d399' : '#fb7185'}">
+        <b>${stats.balance.toLocaleString()} ₽</b>
+        <span>⚖️ Баланс</span>
+      </div>
+      <div class="stat" style="border-left:3px solid #60a5fa">
+        <b>${stats.totalInvestment.toLocaleString()} ₽</b>
+        <span>📊 Инвестиции</span>
+      </div>
+    `;
+
+    if (stats.topCategories.length > 0) {
+      const topHtml = stats.topCategories.map(([cat, amount]) =>
+        `<span style="display:inline-block;background:var(--panel2);padding:4px 10px;border-radius:99px;font-size:10px;margin:2px">${cat}: ${amount.toLocaleString()} ₽</span>`
+      ).join(' ');
+      el.innerHTML += `
+        <div style="grid-column:1/-1;margin-top:6px;font-size:11px;color:var(--muted)">
+          🏷️ Топ расходов: ${topHtml}
+        </div>
+      `;
+    }
+  } else if (categoryId === 'body') {
+    const stats = calculateBodyStats(categoryId);
+    el.innerHTML = `
+      <div class="stat" style="border-left:3px solid #fb7185">
+        <b>${stats.workouts}</b>
+        <span>🏋️ Тренировок</span>
+      </div>
+      <div class="stat" style="border-left:3px solid #60a5fa">
+        <b>${stats.lastWeight || '—'}</b>
+        <span>⚖️ Текущий вес</span>
+      </div>
+      <div class="stat" style="border-left:3px solid ${stats.weightChange <= 0 ? '#34d399' : '#fb7185'}">
+        <b>${stats.weightChange > 0 ? '+' : ''}${stats.weightChange.toFixed(1)} кг</b>
+        <span>📉 Изменение веса</span>
+      </div>
+      <div class="stat" style="border-left:3px solid #a78bfa">
+        <b>${stats.avgSleep} ч</b>
+        <span>😴 Средний сон</span>
+      </div>
+    `;
+
+    // График воды за неделю
+    if (stats.last7Days.length > 0) {
+      const maxWater = Math.max(...stats.last7Days.map(d => d.water), 1);
+      const bars = stats.last7Days.map(d => {
+        const pct = Math.min(100, (d.water / maxWater) * 100);
+        return `<div style="flex:1;text-align:center">
+          <div style="height:40px;display:flex;align-items:flex-end;justify-content:center">
+            <div style="width:20px;background:var(--cyan);border-radius:4px 4px 0 0;height:${Math.max(4, pct)}%;min-height:4px"></div>
+          </div>
+          <div style="font-size:8px;color:var(--muted);margin-top:2px">${d.date.slice(5)}</div>
+          <div style="font-size:8px;color:var(--text)">${d.water}💧</div>
+        </div>`;
+      }).join('');
+      el.innerHTML += `
+        <div style="grid-column:1/-1;margin-top:8px;background:var(--panel2);border-radius:12px;padding:12px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">💧 Вода за неделю (стаканы)</div>
+          <div style="display:flex;gap:4px;align-items:flex-end;height:50px">${bars}</div>
+        </div>
+      `;
+    }
+  } else {
+    const entries = getCategoryEntries(categoryId);
+    el.innerHTML = `
+      <div class="stat"><b>${entries.length}</b><span>Всего записей</span></div>
+      <div class="stat"><b>${entries.filter(e => e.status !== 'paid' && e.status !== 'done').length}</b><span>Активных</span></div>
+      <div class="stat"><b>${entries.filter(e => e.status === 'paid' || e.status === 'done').length}</b><span>Завершено</span></div>
+      <div class="stat"><b>${new Date().toLocaleDateString('ru-RU')}</b><span>Сегодня</span></div>
+    `;
+  }
+}
+
+// ============================================================
+// 17. РЕНДЕР ЗАПИСЕЙ ЖУРНАЛОВ
+// ============================================================
+
+function renderDebtEntry(cat, e) {
+  const isOwed = e.type === 'owed';
+  const isPaid = e.status === 'paid';
+  const isOverdue = e.status === 'overdue' || (e.dateDue && e.dateDue < today() && !isPaid);
+
+  let statusColor = '#34d399';
+  let statusLabel = '✅ Погашен';
+  if (isOverdue) { statusColor = '#fb7185';
+    statusLabel = '🔴 Просрочен'; } else if (!isPaid) { statusColor = '#fbbf24';
+    statusLabel = '🟡 Активен'; }
+
+  const icon = isOwed ? '⬇️' : '⬆️';
+  const label = isOwed ? 'Я должен' : 'Мне должны';
+
+  return `
+    <div class="quest" onclick="openDebtForm('${cat.id}', '${e.id}')">
+      <div class="check" style="border-color:${statusColor};color:${statusColor}">
+        ${isPaid ? '✓' : isOverdue ? '!' : '○'}
+      </div>
+      <div>
+        <div class="quest-title">
+          ${icon} ${label} <span style="color:${statusColor};font-size:12px">${statusLabel}</span>
+        </div>
+        <div class="quest-meta">
+          ${e.counterparty} · <strong>${e.amount.toLocaleString()} ₽</strong>
+          ${e.interest ? `· ${e.interest}%` : ''}
+          ${e.dateDue ? `· до ${e.dateDue}` : ''}
+        </div>
+      </div>
+      <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
+    </div>
+  `;
+}
+
+function renderFinanceEntry(cat, e) {
+  const isIncome = e.type === 'income';
+  const isInvestment = e.type === 'investment';
+  const isExpense = e.type === 'expense';
+
+  let icon = '📉';
+  let color = '#fb7185';
+  let label = 'Расход';
+
+  if (isIncome) {
+    icon = '📈';
+    color = '#34d399';
+    label = 'Доход';
+  } else if (isInvestment) {
+    icon = '📊';
+    color = '#60a5fa';
+    label = 'Инвестиция';
+  }
+
+  const amountColor = isIncome ? 'var(--good)' : (isInvestment ? 'var(--cyan)' : 'var(--danger)');
+
+  return `
+    <div class="quest" onclick="openFinanceForm('${cat.id}', '${e.id}')">
+      <div class="check" style="border-color:${color};color:${color}">
+        ${icon}
+      </div>
+      <div>
+        <div class="quest-title">
+          ${label} · <span style="color:${amountColor};font-weight:800">${e.amount.toLocaleString()} ₽</span>
+          ${e.category ? `· ${e.category}` : ''}
+        </div>
+        <div class="quest-meta">
+          ${e.date || ''}
+          ${e.description ? `· ${esc(e.description)}` : ''}
+        </div>
+      </div>
+      <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
+    </div>
+  `;
+}
+
+function renderBodyEntry(cat, e) {
+  const typeMap = {
+    workout: { icon: '🏋️', label: 'Тренировка', color: '#fb7185' },
+    weight: { icon: '⚖️', label: 'Вес', color: '#60a5fa' },
+    sleep: { icon: '😴', label: 'Сон', color: '#a78bfa' },
+    water: { icon: '💧', label: 'Вода', color: '#22d3ee' }
+  };
+
+  const info = typeMap[e.type] || typeMap.workout;
+  const unit = e.type === 'weight' ? 'кг' : e.type === 'sleep' ? 'ч' : e.type === 'water' ? 'ст' : 'мин';
+
+  return `
+    <div class="quest" onclick="openBodyForm('${cat.id}', '${e.id}')">
+      <div class="check" style="border-color:${info.color};color:${info.color}">
+        ${info.icon}
+      </div>
+      <div>
+        <div class="quest-title">
+          ${info.label}: <strong>${e.value} ${unit}</strong>
+        </div>
+        <div class="quest-meta">
+          ${e.date || ''}
+          ${e.note ? `· ${esc(e.note)}` : ''}
+        </div>
+      </div>
+      <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
+    </div>
+  `;
+}
+
+function renderGenericEntry(cat, e) {
+  return `
+    <div class="quest" onclick="editEntry('${cat.id}','${e.id}')">
+      <div class="check">📄</div>
+      <div>
+        <div class="quest-title">${esc(e.title || e.note || 'Запись')}</div>
+        <div class="quest-meta">${e.date || ''} · ${e.type || ''}</div>
+      </div>
+      <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
+    </div>
+  `;
+}
+
+function deleteEntry(categoryId, entryId) {
+  if (!confirm('Удалить запись?')) return;
+  deleteCategoryEntry(categoryId, entryId);
+  renderJournal(categoryId);
+  toast('🗑 Запись удалена');
+}
+
+// ============================================================
+// 18. ФОРМЫ ЖУРНАЛОВ
+// ============================================================
+
+// --- Долги ---
+function openDebtForm(categoryId, editEntryId = null) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+
+  const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
+
+  openModal('💰 Долг', `
+    <div class="form">
+      <div class="field">
+        <label>Тип</label>
+        <select id="debtType">
+          <option value="owed" ${entry?.type === 'owed' ? 'selected' : ''}>Я должен</option>
+          <option value="owes" ${entry?.type === 'owes' ? 'selected' : ''}>Мне должны</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Кому / От кого</label>
+        <input id="debtCounterparty" value="${esc(entry?.counterparty || '')}" placeholder="Имя или организация">
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label>Сумма (₽)</label>
+          <input id="debtAmount" type="number" value="${entry?.amount || ''}" placeholder="0" step="0.01">
+        </div>
+        <div class="field">
+          <label>Процент (%)</label>
+          <input id="debtInterest" type="number" value="${entry?.interest || ''}" placeholder="0" step="0.1">
+        </div>
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label>Дата взятия</label>
+          <input id="debtDateGiven" type="date" value="${entry?.dateGiven || today()}">
+        </div>
+        <div class="field">
+          <label>Дата возврата</label>
+          <input id="debtDateDue" type="date" value="${entry?.dateDue || ''}">
+        </div>
+      </div>
+      <div class="field">
+        <label>Статус</label>
+        <select id="debtStatus">
+          <option value="active" ${entry?.status === 'active' ? 'selected' : ''}>Активен</option>
+          <option value="paid" ${entry?.status === 'paid' ? 'selected' : ''}>Погашен</option>
+          <option value="overdue" ${entry?.status === 'overdue' ? 'selected' : ''}>Просрочен</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Заметка</label>
+        <textarea id="debtNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea>
+      </div>
+      <button class="add" onclick="saveDebtEntry('${categoryId}', '${editEntryId || ''}')">
+        ${editEntryId ? '💾 Сохранить' : '➕ Добавить долг'}
+      </button>
+    </div>
+  `);
+}
+
+function saveDebtEntry(categoryId, entryId) {
+  const data = {
+    type: document.getElementById('debtType').value,
+    counterparty: document.getElementById('debtCounterparty').value.trim(),
+    amount: parseFloat(document.getElementById('debtAmount').value) || 0,
+    interest: parseFloat(document.getElementById('debtInterest').value) || 0,
+    dateGiven: document.getElementById('debtDateGiven').value || today(),
+    dateDue: document.getElementById('debtDateDue').value || null,
+    status: document.getElementById('debtStatus').value || 'active',
+    note: document.getElementById('debtNote').value.trim()
+  };
+
+  if (!data.counterparty) return toast('Укажи контрагента');
+  if (data.amount <= 0) return toast('Укажи сумму');
+
+  if (entryId) {
+    updateCategoryEntry(categoryId, entryId, data);
+    toast('💰 Долг обновлён');
+  } else {
+    addCategoryEntry(categoryId, data);
+    toast('💰 Долг добавлен');
+  }
+
+  closeModal();
+  renderJournal(categoryId);
+}
+
+// --- Финансы ---
+function openFinanceForm(categoryId, editEntryId = null) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+
+  const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
+
+  const categories = [
+    'Продукты', 'Транспорт', 'Жильё', 'Коммунальные',
+    'Здоровье', 'Образование', 'Одежда', 'Развлечения',
+    'Рестораны', 'Путешествия', 'Инвестиции', 'Налоги',
+    'Страховка', 'Подарки', 'Другое'
+  ];
+
+  openModal('💰 Финансы', `
+    <div class="form">
+      <div class="field">
+        <label>Тип</label>
+        <select id="finType">
+          <option value="income" ${entry?.type === 'income' ? 'selected' : ''}>📈 Доход</option>
+          <option value="expense" ${entry?.type === 'expense' ? 'selected' : ''}>📉 Расход</option>
+          <option value="investment" ${entry?.type === 'investment' ? 'selected' : ''}>📊 Инвестиция</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Категория</label>
+        <select id="finCategory">
+          ${categories.map(c => `<option value="${c}" ${entry?.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Сумма (₽)</label>
+        <input id="finAmount" type="number" value="${entry?.amount || ''}" placeholder="0" step="0.01">
+      </div>
+      <div class="field">
+        <label>Дата</label>
+        <input id="finDate" type="date" value="${entry?.date || today()}">
+      </div>
+      <div class="field">
+        <label>Описание</label>
+        <textarea id="finDescription" placeholder="Что это?">${esc(entry?.description || '')}</textarea>
+      </div>
+      <button class="add" onclick="saveFinanceEntry('${categoryId}', '${editEntryId || ''}')">
+        ${editEntryId ? '💾 Сохранить' : '➕ Добавить'}
+      </button>
+    </div>
+  `);
+}
+
+function saveFinanceEntry(categoryId, entryId) {
+  const data = {
+    type: document.getElementById('finType').value,
+    category: document.getElementById('finCategory').value,
+    amount: parseFloat(document.getElementById('finAmount').value) || 0,
+    date: document.getElementById('finDate').value || today(),
+    description: document.getElementById('finDescription').value.trim()
+  };
+
+  if (data.amount <= 0) return toast('Укажи сумму');
+
+  if (entryId) {
+    updateCategoryEntry(categoryId, entryId, data);
+    toast('💰 Запись обновлена');
+  } else {
+    addCategoryEntry(categoryId, data);
+    toast('💰 Запись добавлена');
+  }
+
+  closeModal();
+  renderJournal(categoryId);
+}
+
+// --- Тело ---
+function openBodyForm(categoryId, editEntryId = null) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+
+  const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
+
+  openModal('💪 Тело', `
+    <div class="form">
+      <div class="field">
+        <label>Тип</label>
+        <select id="bodyType">
+          <option value="workout" ${entry?.type === 'workout' ? 'selected' : ''}>🏋️ Тренировка</option>
+          <option value="weight" ${entry?.type === 'weight' ? 'selected' : ''}>⚖️ Вес</option>
+          <option value="sleep" ${entry?.type === 'sleep' ? 'selected' : ''}>😴 Сон</option>
+          <option value="water" ${entry?.type === 'water' ? 'selected' : ''}>💧 Вода</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Значение</label>
+        <input id="bodyValue" type="number" value="${entry?.value || ''}" placeholder="0" step="0.1">
+        <span class="muted" style="font-size:10px" id="bodyUnit">
+          ${entry?.type === 'weight' ? 'кг' : entry?.type === 'sleep' ? 'часов' : entry?.type === 'water' ? 'стаканов' : 'минут'}
+        </span>
+      </div>
+      <div class="field">
+        <label>Дата</label>
+        <input id="bodyDate" type="date" value="${entry?.date || today()}">
+      </div>
+      <div class="field">
+        <label>Заметка</label>
+        <textarea id="bodyNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea>
+      </div>
+      <button class="add" onclick="saveBodyEntry('${categoryId}', '${editEntryId || ''}')">
+        ${editEntryId ? '💾 Сохранить' : '➕ Добавить'}
+      </button>
+    </div>
+  `);
+
+  document.getElementById('bodyType').onchange = function() {
+    const unit = document.getElementById('bodyUnit');
+    const type = this.value;
+    if (type === 'weight') unit.textContent = 'кг';
+    else if (type === 'sleep') unit.textContent = 'часов';
+    else if (type === 'water') unit.textContent = 'стаканов';
+    else unit.textContent = 'минут';
+  };
+}
+
+function saveBodyEntry(categoryId, entryId) {
+  const data = {
+    type: document.getElementById('bodyType').value,
+    value: parseFloat(document.getElementById('bodyValue').value) || 0,
+    date: document.getElementById('bodyDate').value || today(),
+    note: document.getElementById('bodyNote').value.trim()
+  };
+
+  if (data.value <= 0) return toast('Укажи значение');
+
+  if (entryId) {
+    updateCategoryEntry(categoryId, entryId, data);
+    toast('💪 Запись обновлена');
+  } else {
+    addCategoryEntry(categoryId, data);
+    toast('💪 Запись добавлена');
+  }
+
+  closeModal();
+  renderJournal(categoryId);
+}
+
+// ============================================================
+// 19. СТАТИСТИКА И ПЕРСОНАЖ
 // ============================================================
 
 function renderStats() {
@@ -1534,10 +2241,11 @@ function renderStats() {
     const p = a.length ? Math.round(d / a.length * 100) : 0;
     const need = xpNeedForCategory(c.level);
     const pct = Math.min(100, (c.xp / need) * 100);
+    const entries = c.entries?.length || 0;
     return `<div style="margin:0 0 14px">
     <div class="row" style="font-size:13px">
       <span>${c.icon} ${c.name} (ур.${c.level})</span>
-      <span class="muted">${d}/${a.length} задач · ${c.xp}/${need} XP</span>
+      <span class="muted">${d}/${a.length} задач · ${entries} записей</span>
     </div>
     <div class="track" style="margin-top:6px">
       <div class="fill" style="width:${pct}%;background:${c.color}"></div>
@@ -1558,6 +2266,7 @@ function renderCharacter() {
   const cats = getCategories();
   const developed = cats.filter(c => c.level >= 5).length;
   const bonus = getJournalBonus();
+  const totalEntries = cats.reduce((sum, c) => sum + (c.entries?.length || 0), 0);
 
   document.getElementById('charStats').innerHTML = `
   <div class="stat"><b>${u.level}</b><span>Общий уровень</span></div>
@@ -1565,11 +2274,13 @@ function renderCharacter() {
   <div class="stat"><b>${tasks.length}</b><span>Задач</span></div>
   <div class="stat"><b>${done}</b><span>Выполнено</span></div>
   <div class="stat"><b>${developed}/8</b><span>Журналов ≥5 ур.</span></div>
-  <div class="stat"><b>+${bonus}%</b><span>Бонус к глобальному XP</span></div>`;
+  <div class="stat"><b>+${bonus}%</b><span>Бонус к глобальному XP</span></div>
+  <div class="stat" style="grid-column:span 2"><b>${totalEntries}</b><span>Всего записей в журналах</span></div>
+  `;
 }
 
 // ============================================================
-// 14. AVAILABILITY
+// 20. AVAILABILITY
 // ============================================================
 
 function renderAvailability() {
@@ -1640,7 +2351,8 @@ function renderAvailabilityExport() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const offset = (first.getDay() + 6) % 7;
 
-  let html = `<div style="font-size:14px;font-weight:600;margin-bottom:6px">${['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][month]} ${year}</div>`;
+  let html =
+    `<div style="font-size:14px;font-weight:600;margin-bottom:6px">${['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][month]} ${year}</div>`;
   html += `<div class="avail-export-grid">`;
   for (const d of DOW) html += `<div style="font-size:9px;color:var(--muted);text-align:center;padding:4px 0">${d}</div>`;
   for (let i = 0; i < offset; i++) html += `<div class="avail-export-cell" style="opacity:.2"></div>`;
@@ -1656,7 +2368,8 @@ function renderAvailabilityExport() {
   </div>`;
   }
   html += `</div>`;
-  html += `<div class="avail-legend">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
+  html +=
+    `<div class="avail-legend">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
   html += `<div class="avail-export-actions">
   <button class="add" onclick="downloadAvailImage()" style="font-size:12px;padding:8px 16px">📥 Скачать как изображение</button>
   <button class="ghost" onclick="copyAvailText()" style="font-size:12px;padding:8px 16px">📋 Копировать текст</button>
@@ -1677,7 +2390,7 @@ function copyAvailText() {
 }
 
 // ============================================================
-// 15. КАЛЕНДАРЬ
+// 21. КАЛЕНДАРЬ
 // ============================================================
 
 let calState = { view: 'month', date: new Date() };
@@ -1906,7 +2619,7 @@ document.getElementById('calToday').onclick = () => { calState.date = new Date()
   renderCalendar(); };
 
 // ============================================================
-// 16. МОДАЛКИ
+// 22. МОДАЛКИ
 // ============================================================
 
 function openModal(title, body) {
@@ -1925,7 +2638,7 @@ document.getElementById('modal').onclick = e => {
 };
 
 // ============================================================
-// 17. НАСТРОЙКИ И ТЕМЫ
+// 23. НАСТРОЙКИ И ТЕМЫ
 // ============================================================
 
 const THEMES = {
@@ -2042,7 +2755,7 @@ if (prefs.theme) applyTheme(prefs.theme);
 if (prefs.density === 'compact') document.body.classList.add('compact');
 
 // ============================================================
-// 18. ОБЩИЙ РЕНДЕР
+// 24. ОБЩИЙ РЕНДЕР
 // ============================================================
 
 function renderAll() {
@@ -2059,13 +2772,13 @@ function renderAll() {
 }
 
 // ============================================================
-// 19. ИНИЦИАЛИЗАЦИЯ
+// 25. ИНИЦИАЛИЗАЦИЯ
 // ============================================================
 
 updateNoteFilterCats();
 renderAll();
 
-console.log('⚡ LVLUP v13.3 загружен!');
+console.log('⚡ LVLUP v13.4 загружен!');
 console.log('📊 Журналов:', getCategories().length);
 console.log('📋 Задач:', getTasks({ excludeStatus: 'deleted' }).length);
 console.log('🎯 Целей:', data.goals.length);
@@ -2075,7 +2788,13 @@ console.log('☀ Слотов доступности:', data.availability.length
 console.log('👤 Уровень персонажа:', data.user.level);
 console.log('📈 Бонус за журналы:', getJournalBonus(), '%');
 console.log('⭐ Глобальный бонус:', getGlobalLevelBonus(), '%');
+
+// Подсчёт записей в журналах
+let totalEntries = 0;
+for (const c of getCategories()) {
+  totalEntries += c.entries?.length || 0;
+}
+console.log('📝 Всего записей в журналах:', totalEntries);
 </script>
 </body>
-</html>  
-  
+</html>
