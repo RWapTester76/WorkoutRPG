@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0d12">
-<title>LVLUP v13.5 — Life RPG</title>
+<title>LVLUP v13.6 — Life RPG</title>
 <style>
 :root{
   --bg:#090b10;--panel:#11151d;--panel2:#171c26;--line:rgba(255,255,255,.08);
@@ -155,7 +155,8 @@ button:active{transform:scale(.98)}
 .avail-export-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 
 .journal-progress{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
-.journal-progress-item{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.journal-progress-item{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer;transition:border-color .15s}
+.journal-progress-item:hover{border-color:rgba(255,255,255,.15)}
 .journal-progress-item .jp-icon{font-size:20px;text-align:center}
 .journal-progress-item .jp-info{display:flex;flex-direction:column}
 .journal-progress-item .jp-name{font-size:12px;font-weight:600}
@@ -210,7 +211,7 @@ button:active{transform:scale(.98)}
         <div class="section-head"><h2>📊 Журналы</h2><span id="journalHint">прогресс</span></div>
         <div class="journal-progress" id="journalProgress"></div>
 
-        <div class="version-badge">LVLUP v13.5 · local-first</div>
+        <div class="version-badge">LVLUP v13.6 · local-first</div>
       </section>
 
       <!-- CALENDAR -->
@@ -344,7 +345,7 @@ button:active{transform:scale(.98)}
         <div class="section-head"><h2>••• Ещё</h2></div>
         <div class="card">
           <div class="row"><div><b>💾 Резервная копия</b><div class="muted">Данные сохраняются локально</div></div><button class="ghost" id="exportBtn2">Экспорт</button></div>
-          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v13.5 · local-first</div>
+          <div style="margin-top:18px;font-size:12px;color:var(--muted)">LVLUP v13.6 · local-first</div>
         </div>
       </section>
     </main>
@@ -408,19 +409,19 @@ button:active{transform:scale(.98)}
     <div class="settings-section"><b>Начало недели</b><div class="segmented"><button class="active">Пн</button><button>Вс</button></div></div>
     <div class="settings-section"><b>Первый экран</b><div class="segmented"><button class="active">Главная</button><button>Календарь</button></div></div>
   </div>
-  <div class="settings-footer"><span class="muted">LVLUP v13.5 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
+  <div class="settings-footer"><span class="muted">LVLUP v13.6 · local-first</span><button class="add" id="saveSettings">Сохранить</button></div>
 </div></div>
 
 <script>
 // ============================================================
-// LVLUP v13.5 — ИСПРАВЛЕННЫЙ
+// LVLUP v13.6 — ВСЕ 8 ЖУРНАЛОВ
 // ============================================================
 
 // ============================================================
 // 1. КОНСТАНТЫ
 // ============================================================
 const KEY = 'lvlup_v13';
-const APP_VERSION = 'v13.5';
+const APP_VERSION = 'v13.6';
 
 const DEFAULT_CATEGORIES = [
   { id: 'debts', name: 'Долги', icon: '💰', color: '#fb7185' },
@@ -1087,6 +1088,116 @@ function calculateBodyStats(categoryId) {
   };
 }
 
+function calculateFoodStats(categoryId) {
+  const entries = getCategoryEntries(categoryId);
+
+  const meals = entries.filter(e => e.type === 'meal');
+  const waters = entries.filter(e => e.type === 'water');
+  const recipes = entries.filter(e => e.type === 'recipe');
+
+  const last7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = iso(d);
+    const dayMeals = meals.filter(e => e.date === dateStr);
+    const dayWater = waters.filter(e => e.date === dateStr);
+    last7Days.push({
+      date: dateStr,
+      calories: dayMeals.reduce((sum, e) => sum + (e.calories || 0), 0),
+      meals: dayMeals.length,
+      water: dayWater.reduce((sum, e) => sum + (e.amount || 0), 0)
+    });
+  }
+
+  const avgCalories = last7Days.reduce((sum, d) => sum + d.calories, 0) / 7;
+  const avgMeals = last7Days.reduce((sum, d) => sum + d.meals, 0) / 7;
+  const avgWater = last7Days.reduce((sum, d) => sum + d.water, 0) / 7;
+
+  const totalProtein = meals.reduce((sum, e) => sum + (e.protein || 0), 0);
+  const totalFat = meals.reduce((sum, e) => sum + (e.fat || 0), 0);
+  const totalCarbs = meals.reduce((sum, e) => sum + (e.carbs || 0), 0);
+
+  return {
+    totalMeals: meals.length,
+    totalWater: waters.length,
+    totalRecipes: recipes.length,
+    avgCalories: Math.round(avgCalories),
+    avgMeals: Math.round(avgMeals * 10) / 10,
+    avgWater: Math.round(avgWater * 10) / 10,
+    totalProtein: Math.round(totalProtein * 10) / 10,
+    totalFat: Math.round(totalFat * 10) / 10,
+    totalCarbs: Math.round(totalCarbs * 10) / 10,
+    last7Days,
+    total: entries.length
+  };
+}
+
+function calculateBusinessStats(categoryId) {
+  const entries = getCategoryEntries(categoryId);
+
+  const inProgress = entries.filter(e => e.status === 'В работе');
+  const done = entries.filter(e => e.status === 'Готово');
+  const postponed = entries.filter(e => e.status === 'Отложено');
+  const planned = entries.filter(e => e.status === 'Запланировано');
+  const highPriority = entries.filter(e => e.priority === 'Высокий');
+
+  return {
+    total: entries.length,
+    inProgress: inProgress.length,
+    done: done.length,
+    postponed: postponed.length,
+    planned: planned.length,
+    highPriority: highPriority.length,
+    completionRate: entries.length ? Math.round(done.length / entries.length * 100) : 0
+  };
+}
+
+function calculateHobbyStats(categoryId) {
+  const entries = getCategoryEntries(categoryId);
+  
+  const totalMinutes = entries.reduce((sum, e) => sum + (e.minutes || 0), 0);
+  const activeHobbies = new Set(entries.map(e => e.type)).size;
+  const avgMinutes = entries.length ? Math.round(totalMinutes / entries.length) : 0;
+
+  return {
+    total: entries.length,
+    totalMinutes: totalMinutes,
+    activeHobbies: activeHobbies,
+    avgMinutes: avgMinutes
+  };
+}
+
+function calculateTravelStats(categoryId) {
+  const entries = getCategoryEntries(categoryId);
+  
+  const countries = entries.filter(e => e.type === 'Страна');
+  const cities = entries.filter(e => e.type === 'Город');
+  const totalDays = entries.reduce((sum, e) => sum + (e.duration || 0), 0);
+
+  return {
+    total: entries.length,
+    countries: countries.length,
+    cities: cities.length,
+    totalDays: totalDays
+  };
+}
+
+function calculateMiscStats(categoryId) {
+  const entries = getCategoryEntries(categoryId);
+  
+  const highPriority = entries.filter(e => e.priority === 'Высокий');
+  const mediumPriority = entries.filter(e => e.priority === 'Средний');
+  const lowPriority = entries.filter(e => e.priority === 'Низкий');
+
+  return {
+    total: entries.length,
+    highPriority: highPriority.length,
+    mediumPriority: mediumPriority.length,
+    lowPriority: lowPriority.length
+  };
+}
+
 // ============================================================
 // 7. НАВИГАЦИЯ
 // ============================================================
@@ -1117,24 +1228,17 @@ function switchPage(p) {
 
 document.querySelectorAll('[data-page]').forEach(b => b.onclick = () => switchPage(b.dataset.page));
 
-// Открытие журнала — ПРАВИЛЬНАЯ ФУНКЦИЯ
+// Открытие журнала
 function openJournal(categoryId) {
   switchPage('journal');
   document.getElementById('journalBackBtn').dataset.journalId = categoryId;
   renderJournal(categoryId);
 }
 
-// Кнопка "Назад" из журнала
 document.getElementById('journalBackBtn').onclick = function() {
-  const catId = this.dataset.journalId;
-  if (catId) {
-    switchPage('journals');
-  } else {
-    switchPage('journals');
-  }
+  switchPage('journals');
 };
 
-// Кнопка "Добавить" в журнале
 document.getElementById('journalAddBtn').onclick = function() {
   const catId = document.getElementById('journalBackBtn').dataset.journalId;
   if (!catId) return toast('Выбери журнал');
@@ -1144,6 +1248,16 @@ document.getElementById('journalAddBtn').onclick = function() {
     openFinanceForm(catId);
   } else if (catId === 'body') {
     openBodyForm(catId);
+  } else if (catId === 'food') {
+    openFoodForm(catId);
+  } else if (catId === 'business') {
+    openBusinessForm(catId);
+  } else if (catId === 'hobby') {
+    openHobbyForm(catId);
+  } else if (catId === 'travel') {
+    openTravelForm(catId);
+  } else if (catId === 'misc') {
+    openMiscForm(catId);
   } else {
     toast('⏳ Форма для этого журнала в разработке');
   }
@@ -1344,7 +1458,7 @@ function renderJournalProgress() {
     const need = xpNeedForCategory(c.level);
     const pct = Math.min(100, (c.xp / need) * 100);
     const entries = c.entries?.length || 0;
-    return `<div class="journal-progress-item" onclick="openJournal('${c.id}')" style="cursor:pointer">
+    return `<div class="journal-progress-item" onclick="openJournal('${c.id}')">
      <div class="jp-icon">${c.icon}</div>
      <div class="jp-info">
       <div class="jp-name">${c.name}</div>
@@ -1585,7 +1699,7 @@ function updateNoteFilterCats() {
 }
 
 // ============================================================
-// 13. ГАЛЕРЕЯ (ИСПРАВЛЕННАЯ — ФОТО СОХРАНЯЮТСЯ С ПЕРВОГО РАЗА)
+// 13. ГАЛЕРЕЯ
 // ============================================================
 
 function renderGallery() {
@@ -1642,8 +1756,6 @@ function addPhotoToTask(taskId) {
   <div class="field"><label>Фото</label><input id="photoFile" type="file" accept="image/*"></div>
   <button class="add" id="savePhotoTaskBtn">💾 Добавить фото</button>
  </div>`);
-  
-  // ИСПРАВЛЕННЫЙ ОБРАБОТЧИК — срабатывает с первого раза
   document.getElementById('savePhotoTaskBtn').onclick = function() {
     const file = document.getElementById('photoFile').files[0];
     if (!file) return toast('Выбери фото');
@@ -1672,7 +1784,6 @@ function addPhotoToGoal(goalId) {
   <div class="field"><label>Фото</label><input id="photoFileGoal" type="file" accept="image/*"></div>
   <button class="add" id="savePhotoGoalBtn">💾 Добавить фото</button>
  </div>`);
-  
   document.getElementById('savePhotoGoalBtn').onclick = function() {
     const file = document.getElementById('photoFileGoal').files[0];
     if (!file) return toast('Выбери фото');
@@ -1693,7 +1804,7 @@ function addPhotoToGoal(goalId) {
 }
 
 // ============================================================
-// 14. ЖУРНАЛЫ (СПИСОК) — ИСПРАВЛЕННЫЙ КЛИК
+// 14. ЖУРНАЛЫ (СПИСОК)
 // ============================================================
 
 function renderJournals() {
@@ -1702,12 +1813,41 @@ function renderJournals() {
   el.innerHTML = cats.map(c => {
     const n = getTasks({ category: c.id, excludeStatus: 'deleted' }).length;
     const entries = c.entries?.length || 0;
-    const stats = c.id === 'debts' ? calculateDebtStats(c.id) : null;
+    let stats = null;
+    if (c.id === 'debts') stats = calculateDebtStats(c.id);
+    else if (c.id === 'finance') stats = calculateFinanceStats(c.id);
+    else if (c.id === 'body') stats = calculateBodyStats(c.id);
+    else if (c.id === 'food') stats = calculateFoodStats(c.id);
+    else if (c.id === 'business') stats = calculateBusinessStats(c.id);
+    else if (c.id === 'hobby') stats = calculateHobbyStats(c.id);
+    else if (c.id === 'travel') stats = calculateTravelStats(c.id);
+    else if (c.id === 'misc') stats = calculateMiscStats(c.id);
 
     let extraInfo = `<p>${n} задач · ${c.level} ур.</p>`;
-    if (stats) {
+    if (stats && c.id === 'debts') {
       extraInfo +=
         `<p style="font-size:11px;color:var(--muted);margin-top:2px">⬇️ ${stats.owed.toLocaleString()}₽ · ⬆️ ${stats.owes.toLocaleString()}₽</p>`;
+    } else if (stats && c.id === 'finance') {
+      extraInfo +=
+        `<p style="font-size:11px;color:var(--muted);margin-top:2px">📈 +${stats.totalIncome.toLocaleString()}₽ · 📉 -${stats.totalExpense.toLocaleString()}₽</p>`;
+    } else if (stats && c.id === 'body') {
+      extraInfo +=
+        `<p style="font-size:11px;color:var(--muted);margin-top:2px">🏋️ ${stats.workouts} тренировок · ⚖️ ${stats.lastWeight || '—'} кг</p>`;
+    } else if (stats && c.id === 'food') {
+      extraInfo +=
+        `<p style="font-size:11px;color:var(--muted);margin-top:2px">🍽️ ${stats.totalMeals} приёмов · 💧 ${stats.totalWater} записей</p>`;
+    } else if (stats && c.id === 'business') {
+      extraInfo +=
+        `<p style="font-size:11px;color:var(--muted);margin-top:2px">🔄 ${stats.inProgress} в работе · ✅ ${stats.done} готово</p>`;
+    } else if (stats && c.id === 'hobby') {
+      extraInfo +=
+        `<p style="font-size:11px;color:var(--muted);margin-top:2px">⏱ ${stats.totalMinutes} мин · 🎯 ${stats.activeHobbies} хобби</p>`;
+    } else if (stats && c.id === 'travel') {
+      extraInfo +=
+        `<p style="font-size:11px;color:var(--muted);margin-top:2px">🌍 ${stats.countries} стран · 📅 ${stats.totalDays} дней</p>`;
+    } else if (stats && c.id === 'misc') {
+      extraInfo +=
+        `<p style="font-size:11px;color:var(--muted);margin-top:2px">📋 ${stats.total} записей · 🔴 ${stats.highPriority} высоких</p>`;
     }
 
     return `<div class="card category" style="text-align:left;color:var(--text);border-left:3px solid ${c.color}" data-category="${c.id}">
@@ -1720,7 +1860,6 @@ function renderJournals() {
      </div>`;
   }).join('');
 
-  // ПРАВИЛЬНЫЙ ОБРАБОТЧИК КЛИКА — через делегирование
   el.querySelectorAll('.category').forEach(card => {
     card.onclick = function() {
       const catId = this.dataset.category;
@@ -1765,6 +1904,16 @@ function renderJournal(categoryId) {
       return renderFinanceEntry(cat, e);
     } else if (categoryId === 'body') {
       return renderBodyEntry(cat, e);
+    } else if (categoryId === 'food') {
+      return renderFoodEntry(cat, e);
+    } else if (categoryId === 'business') {
+      return renderBusinessEntry(cat, e);
+    } else if (categoryId === 'hobby') {
+      return renderHobbyEntry(cat, e);
+    } else if (categoryId === 'travel') {
+      return renderTravelEntry(cat, e);
+    } else if (categoryId === 'misc') {
+      return renderMiscEntry(cat, e);
     }
     return renderGenericEntry(cat, e);
   }).join('');
@@ -1780,75 +1929,35 @@ function renderJournalStats(categoryId) {
   if (categoryId === 'debts') {
     const stats = calculateDebtStats(categoryId);
     el.innerHTML = `
-      <div class="stat" style="border-left:3px solid #fb7185">
-        <b>${stats.owed.toLocaleString()} ₽</b>
-        <span>⬇️ Ты должен</span>
-      </div>
-      <div class="stat" style="border-left:3px solid #34d399">
-        <b>${stats.owes.toLocaleString()} ₽</b>
-        <span>⬆️ Тебе должны</span>
-      </div>
-      <div class="stat" style="border-left:3px solid ${stats.balance >= 0 ? '#34d399' : '#fb7185'}">
-        <b>${stats.balance.toLocaleString()} ₽</b>
-        <span>⚖️ Баланс</span>
-      </div>
-      <div class="stat" style="border-left:3px solid #fbbf24">
-        <b>${stats.active}</b>
-        <span>📌 Активных</span>
-      </div>
+      <div class="stat" style="border-left:3px solid #fb7185"><b>${stats.owed.toLocaleString()} ₽</b><span>⬇️ Ты должен</span></div>
+      <div class="stat" style="border-left:3px solid #34d399"><b>${stats.owes.toLocaleString()} ₽</b><span>⬆️ Тебе должны</span></div>
+      <div class="stat" style="border-left:3px solid ${stats.balance >= 0 ? '#34d399' : '#fb7185'}"><b>${stats.balance.toLocaleString()} ₽</b><span>⚖️ Баланс</span></div>
+      <div class="stat" style="border-left:3px solid #fbbf24"><b>${stats.active}</b><span>📌 Активных</span></div>
     `;
   } else if (categoryId === 'finance') {
     const stats = calculateFinanceStats(categoryId);
     el.innerHTML = `
-      <div class="stat" style="border-left:3px solid #34d399">
-        <b>+${stats.totalIncome.toLocaleString()} ₽</b>
-        <span>📈 Доходы (${stats.countIncome})</span>
-      </div>
-      <div class="stat" style="border-left:3px solid #fb7185">
-        <b>-${stats.totalExpense.toLocaleString()} ₽</b>
-        <span>📉 Расходы (${stats.countExpense})</span>
-      </div>
-      <div class="stat" style="border-left:3px solid ${stats.balance >= 0 ? '#34d399' : '#fb7185'}">
-        <b>${stats.balance.toLocaleString()} ₽</b>
-        <span>⚖️ Баланс</span>
-      </div>
-      <div class="stat" style="border-left:3px solid #60a5fa">
-        <b>${stats.totalInvestment.toLocaleString()} ₽</b>
-        <span>📊 Инвестиции</span>
-      </div>
+      <div class="stat" style="border-left:3px solid #34d399"><b>+${stats.totalIncome.toLocaleString()} ₽</b><span>📈 Доходы (${stats.countIncome})</span></div>
+      <div class="stat" style="border-left:3px solid #fb7185"><b>-${stats.totalExpense.toLocaleString()} ₽</b><span>📉 Расходы (${stats.countExpense})</span></div>
+      <div class="stat" style="border-left:3px solid ${stats.balance >= 0 ? '#34d399' : '#fb7185'}"><b>${stats.balance.toLocaleString()} ₽</b><span>⚖️ Баланс</span></div>
+      <div class="stat" style="border-left:3px solid #60a5fa"><b>${stats.totalInvestment.toLocaleString()} ₽</b><span>📊 Инвестиции</span></div>
     `;
-
     if (stats.topCategories.length > 0) {
       const topHtml = stats.topCategories.map(([cat, amount]) =>
         `<span style="display:inline-block;background:var(--panel2);padding:4px 10px;border-radius:99px;font-size:10px;margin:2px">${cat}: ${amount.toLocaleString()} ₽</span>`
       ).join(' ');
       el.innerHTML += `
-        <div style="grid-column:1/-1;margin-top:6px;font-size:11px;color:var(--muted)">
-          🏷️ Топ расходов: ${topHtml}
-        </div>
+        <div style="grid-column:1/-1;margin-top:6px;font-size:11px;color:var(--muted)">🏷️ Топ расходов: ${topHtml}</div>
       `;
     }
   } else if (categoryId === 'body') {
     const stats = calculateBodyStats(categoryId);
     el.innerHTML = `
-      <div class="stat" style="border-left:3px solid #fb7185">
-        <b>${stats.workouts}</b>
-        <span>🏋️ Тренировок</span>
-      </div>
-      <div class="stat" style="border-left:3px solid #60a5fa">
-        <b>${stats.lastWeight || '—'}</b>
-        <span>⚖️ Текущий вес</span>
-      </div>
-      <div class="stat" style="border-left:3px solid ${stats.weightChange <= 0 ? '#34d399' : '#fb7185'}">
-        <b>${stats.weightChange > 0 ? '+' : ''}${stats.weightChange.toFixed(1)} кг</b>
-        <span>📉 Изменение веса</span>
-      </div>
-      <div class="stat" style="border-left:3px solid #a78bfa">
-        <b>${stats.avgSleep} ч</b>
-        <span>😴 Средний сон</span>
-      </div>
+      <div class="stat" style="border-left:3px solid #fb7185"><b>${stats.workouts}</b><span>🏋️ Тренировок</span></div>
+      <div class="stat" style="border-left:3px solid #60a5fa"><b>${stats.lastWeight || '—'}</b><span>⚖️ Текущий вес</span></div>
+      <div class="stat" style="border-left:3px solid ${stats.weightChange <= 0 ? '#34d399' : '#fb7185'}"><b>${stats.weightChange > 0 ? '+' : ''}${stats.weightChange.toFixed(1)} кг</b><span>📉 Изменение веса</span></div>
+      <div class="stat" style="border-left:3px solid #a78bfa"><b>${stats.avgSleep} ч</b><span>😴 Средний сон</span></div>
     `;
-
     if (stats.last7Days.length > 0) {
       const maxWater = Math.max(...stats.last7Days.map(d => d.water), 1);
       const bars = stats.last7Days.map(d => {
@@ -1868,13 +1977,93 @@ function renderJournalStats(categoryId) {
         </div>
       `;
     }
+  } else if (categoryId === 'food') {
+    const stats = calculateFoodStats(categoryId);
+    el.innerHTML = `
+      <div class="stat" style="border-left:3px solid #fbbf24"><b>${stats.totalMeals}</b><span>🍽️ Приёмов пищи</span></div>
+      <div class="stat" style="border-left:3px solid #22d3ee"><b>${stats.totalWater}</b><span>💧 Записей о воде</span></div>
+      <div class="stat" style="border-left:3px solid #a78bfa"><b>${stats.avgCalories}</b><span>🔥 Средние ккал/день</span></div>
+      <div class="stat" style="border-left:3px solid #34d399"><b>${stats.avgMeals}</b><span>🍽️ Приёмов в день</span></div>
+    `;
+    if (stats.last7Days.length > 0) {
+      const maxCal = Math.max(...stats.last7Days.map(d => d.calories), 1);
+      const bars = stats.last7Days.map(d => {
+        const pct = Math.min(100, (d.calories / maxCal) * 100);
+        return `<div style="flex:1;text-align:center">
+          <div style="height:40px;display:flex;align-items:flex-end;justify-content:center">
+            <div style="width:20px;background:var(--warn);border-radius:4px 4px 0 0;height:${Math.max(4, pct)}%;min-height:4px"></div>
+          </div>
+          <div style="font-size:8px;color:var(--muted);margin-top:2px">${d.date.slice(5)}</div>
+          <div style="font-size:8px;color:var(--text)">${d.calories}🔥</div>
+        </div>`;
+      }).join('');
+      el.innerHTML += `
+        <div style="grid-column:1/-1;margin-top:8px;background:var(--panel2);border-radius:12px;padding:12px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">🔥 Калории за неделю</div>
+          <div style="display:flex;gap:4px;align-items:flex-end;height:50px">${bars}</div>
+        </div>
+      `;
+    }
+    if (stats.totalProtein > 0 || stats.totalFat > 0 || stats.totalCarbs > 0) {
+      const total = stats.totalProtein + stats.totalFat + stats.totalCarbs;
+      const pPct = total ? Math.round(stats.totalProtein / total * 100) : 0;
+      const fPct = total ? Math.round(stats.totalFat / total * 100) : 0;
+      const cPct = total ? Math.round(stats.totalCarbs / total * 100) : 0;
+      el.innerHTML += `
+        <div style="grid-column:1/-1;margin-top:6px;background:var(--panel2);border-radius:12px;padding:12px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">📊 Соотношение БЖУ</div>
+          <div style="display:flex;height:16px;border-radius:99px;overflow:hidden">
+            <div style="flex:${pPct};background:#fb7185;text-align:center;font-size:8px;color:#fff;line-height:16px">${pPct}%</div>
+            <div style="flex:${fPct};background:#fbbf24;text-align:center;font-size:8px;color:#fff;line-height:16px">${fPct}%</div>
+            <div style="flex:${cPct};background:#22d3ee;text-align:center;font-size:8px;color:#fff;line-height:16px">${cPct}%</div>
+          </div>
+          <div style="display:flex;justify-content:space-around;font-size:9px;color:var(--muted);margin-top:4px">
+            <span>🍖 Белки: ${stats.totalProtein}г</span>
+            <span>🧈 Жиры: ${stats.totalFat}г</span>
+            <span>🍞 Углеводы: ${stats.totalCarbs}г</span>
+          </div>
+        </div>
+      `;
+    }
+  } else if (categoryId === 'business') {
+    const stats = calculateBusinessStats(categoryId);
+    el.innerHTML = `
+      <div class="stat" style="border-left:3px solid #fbbf24"><b>${stats.total}</b><span>📋 Всего</span></div>
+      <div class="stat" style="border-left:3px solid #60a5fa"><b>${stats.inProgress}</b><span>🔄 В работе</span></div>
+      <div class="stat" style="border-left:3px solid #34d399"><b>${stats.done}</b><span>✅ Готово</span></div>
+      <div class="stat" style="border-left:3px solid #fb7185"><b>${stats.completionRate}%</b><span>📊 Завершено</span></div>
+    `;
+  } else if (categoryId === 'hobby') {
+    const stats = calculateHobbyStats(categoryId);
+    el.innerHTML = `
+      <div class="stat" style="border-left:3px solid #a78bfa"><b>${stats.total}</b><span>🎨 Всего занятий</span></div>
+      <div class="stat" style="border-left:3px solid #fbbf24"><b>${stats.totalMinutes}</b><span>⏱ Минут всего</span></div>
+      <div class="stat" style="border-left:3px solid #34d399"><b>${stats.activeHobbies}</b><span>🎯 Активных хобби</span></div>
+      <div class="stat" style="border-left:3px solid #22d3ee"><b>${stats.avgMinutes}</b><span>📊 Среднее время</span></div>
+    `;
+  } else if (categoryId === 'travel') {
+    const stats = calculateTravelStats(categoryId);
+    el.innerHTML = `
+      <div class="stat" style="border-left:3px solid #22d3ee"><b>${stats.total}</b><span>🧳 Всего поездок</span></div>
+      <div class="stat" style="border-left:3px solid #60a5fa"><b>${stats.countries}</b><span>🌍 Стран</span></div>
+      <div class="stat" style="border-left:3px solid #a78bfa"><b>${stats.cities}</b><span>🏙️ Городов</span></div>
+      <div class="stat" style="border-left:3px solid #fbbf24"><b>${stats.totalDays}</b><span>📅 Дней в пути</span></div>
+    `;
+  } else if (categoryId === 'misc') {
+    const stats = calculateMiscStats(categoryId);
+    el.innerHTML = `
+      <div class="stat" style="border-left:3px solid #facc15"><b>${stats.total}</b><span>📦 Всего записей</span></div>
+      <div class="stat" style="border-left:3px solid #fb7185"><b>${stats.highPriority}</b><span>🔴 Высокий приоритет</span></div>
+      <div class="stat" style="border-left:3px solid #fbbf24"><b>${stats.mediumPriority}</b><span>🟡 Средний</span></div>
+      <div class="stat" style="border-left:3px solid #34d399"><b>${stats.lowPriority}</b><span>🟢 Низкий</span></div>
+    `;
   } else {
     const entries = getCategoryEntries(categoryId);
     el.innerHTML = `
-      <div class="stat"><b>${entries.length}</b><span>Всего записей</span></div>
-      <div class="stat"><b>${entries.filter(e => e.status !== 'paid' && e.status !== 'done').length}</b><span>Активных</span></div>
-      <div class="stat"><b>${entries.filter(e => e.status === 'paid' || e.status === 'done').length}</b><span>Завершено</span></div>
-      <div class="stat"><b>${new Date().toLocaleDateString('ru-RU')}</b><span>Сегодня</span></div>
+      <div class="stat"><b>${entries.length}</b><span>📋 Всего записей</span></div>
+      <div class="stat"><b>${entries.filter(e => e.status !== 'paid' && e.status !== 'done').length}</b><span>🔄 Активных</span></div>
+      <div class="stat"><b>${entries.filter(e => e.status === 'paid' || e.status === 'done').length}</b><span>✅ Завершено</span></div>
+      <div class="stat"><b>${new Date().toLocaleDateString('ru-RU')}</b><span>📅 Сегодня</span></div>
     `;
   }
 }
@@ -1903,14 +2092,8 @@ function renderDebtEntry(cat, e) {
         ${isPaid ? '✓' : isOverdue ? '!' : '○'}
       </div>
       <div>
-        <div class="quest-title">
-          ${icon} ${label} <span style="color:${statusColor};font-size:12px">${statusLabel}</span>
-        </div>
-        <div class="quest-meta">
-          ${e.counterparty} · <strong>${e.amount.toLocaleString()} ₽</strong>
-          ${e.interest ? `· ${e.interest}%` : ''}
-          ${e.dateDue ? `· до ${e.dateDue}` : ''}
-        </div>
+        <div class="quest-title">${icon} ${label} <span style="color:${statusColor};font-size:12px">${statusLabel}</span></div>
+        <div class="quest-meta">${e.counterparty} · <strong>${e.amount.toLocaleString()} ₽</strong> ${e.interest ? `· ${e.interest}%` : ''} ${e.dateDue ? `· до ${e.dateDue}` : ''}</div>
       </div>
       <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
     </div>
@@ -1925,33 +2108,20 @@ function renderFinanceEntry(cat, e) {
   let icon = '📉';
   let color = '#fb7185';
   let label = 'Расход';
-
-  if (isIncome) {
-    icon = '📈';
+  if (isIncome) { icon = '📈';
     color = '#34d399';
-    label = 'Доход';
-  } else if (isInvestment) {
-    icon = '📊';
+    label = 'Доход'; } else if (isInvestment) { icon = '📊';
     color = '#60a5fa';
-    label = 'Инвестиция';
-  }
+    label = 'Инвестиция'; }
 
   const amountColor = isIncome ? 'var(--good)' : (isInvestment ? 'var(--cyan)' : 'var(--danger)');
 
   return `
     <div class="quest" onclick="openFinanceForm('${cat.id}', '${e.id}')">
-      <div class="check" style="border-color:${color};color:${color}">
-        ${icon}
-      </div>
+      <div class="check" style="border-color:${color};color:${color}">${icon}</div>
       <div>
-        <div class="quest-title">
-          ${label} · <span style="color:${amountColor};font-weight:800">${e.amount.toLocaleString()} ₽</span>
-          ${e.category ? `· ${e.category}` : ''}
-        </div>
-        <div class="quest-meta">
-          ${e.date || ''}
-          ${e.description ? `· ${esc(e.description)}` : ''}
-        </div>
+        <div class="quest-title">${label} · <span style="color:${amountColor};font-weight:800">${e.amount.toLocaleString()} ₽</span> ${e.category ? `· ${e.category}` : ''}</div>
+        <div class="quest-meta">${e.date || ''} ${e.description ? `· ${esc(e.description)}` : ''}</div>
       </div>
       <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
     </div>
@@ -1965,23 +2135,108 @@ function renderBodyEntry(cat, e) {
     sleep: { icon: '😴', label: 'Сон', color: '#a78bfa' },
     water: { icon: '💧', label: 'Вода', color: '#22d3ee' }
   };
-
   const info = typeMap[e.type] || typeMap.workout;
   const unit = e.type === 'weight' ? 'кг' : e.type === 'sleep' ? 'ч' : e.type === 'water' ? 'ст' : 'мин';
 
   return `
     <div class="quest" onclick="openBodyForm('${cat.id}', '${e.id}')">
-      <div class="check" style="border-color:${info.color};color:${info.color}">
-        ${info.icon}
-      </div>
+      <div class="check" style="border-color:${info.color};color:${info.color}">${info.icon}</div>
       <div>
-        <div class="quest-title">
-          ${info.label}: <strong>${e.value} ${unit}</strong>
-        </div>
-        <div class="quest-meta">
-          ${e.date || ''}
-          ${e.note ? `· ${esc(e.note)}` : ''}
-        </div>
+        <div class="quest-title">${info.label}: <strong>${e.value} ${unit}</strong></div>
+        <div class="quest-meta">${e.date || ''} ${e.note ? `· ${esc(e.note)}` : ''}</div>
+      </div>
+      <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
+    </div>
+  `;
+}
+
+function renderFoodEntry(cat, e) {
+  const typeMap = {
+    meal: { icon: '🍽️', label: 'Приём пищи', color: '#fbbf24' },
+    water: { icon: '💧', label: 'Вода', color: '#22d3ee' },
+    recipe: { icon: '📖', label: 'Рецепт', color: '#a78bfa' }
+  };
+  const info = typeMap[e.type] || typeMap.meal;
+
+  let details = '';
+  if (e.type === 'meal') {
+    details = `${e.mealType || ''} · ${e.calories || 0} ккал`;
+    if (e.protein || e.fat || e.carbs) {
+      details += ` · Б${e.protein || 0} Ж${e.fat || 0} У${e.carbs || 0}`;
+    }
+  } else if (e.type === 'water') {
+    details = `${e.amount || 0} стаканов`;
+  } else if (e.type === 'recipe') {
+    details = `📖 Рецепт`;
+  }
+
+  return `
+    <div class="quest" onclick="openFoodForm('${cat.id}', '${e.id}')">
+      <div class="check" style="border-color:${info.color};color:${info.color}">${info.icon}</div>
+      <div>
+        <div class="quest-title">${esc(e.title)}</div>
+        <div class="quest-meta">${e.date || ''} · ${details} ${e.note ? `· ${esc(e.note)}` : ''}</div>
+      </div>
+      <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
+    </div>
+  `;
+}
+
+function renderBusinessEntry(cat, e) {
+  const statusColors = { 'В работе': '#fbbf24', 'Готово': '#34d399', 'Отложено': '#fb7185', 'Запланировано': '#60a5fa' };
+  const priorityIcons = { 'Высокий': '🔴', 'Средний': '🟡', 'Низкий': '🟢' };
+  const color = statusColors[e.status] || '#8e98a9';
+  const priorityIcon = priorityIcons[e.priority] || '⚪';
+
+  return `
+    <div class="quest" onclick="openBusinessForm('${cat.id}', '${e.id}')">
+      <div class="check" style="border-color:${color};color:${color}">${e.type === 'Встреча' ? '🤝' : e.type === 'Идея' ? '💡' : e.type === 'Проект' ? '📊' : e.type === 'Клиент' ? '👤' : '📋'}</div>
+      <div>
+        <div class="quest-title">${esc(e.title)} <span style="font-size:10px;color:${color}">${e.status}</span> <span style="font-size:10px;color:var(--muted)">${priorityIcon} ${e.priority}</span></div>
+        <div class="quest-meta">${e.date || ''} · ${e.type || ''} ${e.note ? `· ${esc(e.note)}` : ''}</div>
+      </div>
+      <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
+    </div>
+  `;
+}
+
+function renderHobbyEntry(cat, e) {
+  return `
+    <div class="quest" onclick="openHobbyForm('${cat.id}', '${e.id}')">
+      <div class="check" style="border-color:#a78bfa;color:#a78bfa">🎨</div>
+      <div>
+        <div class="quest-title">${esc(e.title)} <span style="font-size:10px;color:var(--muted)">${e.type}</span></div>
+        <div class="quest-meta">${e.date || ''} · ⏱ ${e.minutes || 0} мин ${e.progress ? `· ${e.progress}% прогресса` : ''} ${e.note ? `· ${esc(e.note)}` : ''}</div>
+      </div>
+      <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
+    </div>
+  `;
+}
+
+function renderTravelEntry(cat, e) {
+  const duration = e.duration ? `${e.duration} дн.` : '';
+  return `
+    <div class="quest" onclick="openTravelForm('${cat.id}', '${e.id}')">
+      <div class="check" style="border-color:#22d3ee;color:#22d3ee">✈️</div>
+      <div>
+        <div class="quest-title">${esc(e.name)} <span style="font-size:10px;color:var(--muted)">${e.type}</span></div>
+        <div class="quest-meta">${e.dateFrom || ''} ${e.dateTo ? `→ ${e.dateTo}` : ''} ${duration ? `· ${duration}` : ''} ${e.note ? `· ${esc(e.note)}` : ''}</div>
+      </div>
+      <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
+    </div>
+  `;
+}
+
+function renderMiscEntry(cat, e) {
+  const priorityColors = { 'Высокий': '#fb7185', 'Средний': '#fbbf24', 'Низкий': '#34d399' };
+  const color = priorityColors[e.priority] || '#6b7280';
+
+  return `
+    <div class="quest" onclick="openMiscForm('${cat.id}', '${e.id}')">
+      <div class="check" style="border-color:${color};color:${color}">📦</div>
+      <div>
+        <div class="quest-title">${esc(e.title)} <span style="font-size:10px;color:${color}">${e.priority}</span></div>
+        <div class="quest-meta">${e.date || ''} · ${e.type || ''} ${e.note ? `· ${esc(e.note)}` : ''}</div>
       </div>
       <button class="ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="event.stopPropagation();deleteEntry('${cat.id}','${e.id}')">✕</button>
     </div>
@@ -2016,54 +2271,33 @@ function deleteEntry(categoryId, entryId) {
 function openDebtForm(categoryId, editEntryId = null) {
   const cat = getCategory(categoryId);
   if (!cat) return;
-
   const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
 
   openModal('💰 Долг', `
     <div class="form">
-      <div class="field">
-        <label>Тип</label>
+      <div class="field"><label>Тип</label>
         <select id="debtType">
           <option value="owed" ${entry?.type === 'owed' ? 'selected' : ''}>Я должен</option>
           <option value="owes" ${entry?.type === 'owes' ? 'selected' : ''}>Мне должны</option>
         </select>
       </div>
-      <div class="field">
-        <label>Кому / От кого</label>
-        <input id="debtCounterparty" value="${esc(entry?.counterparty || '')}" placeholder="Имя или организация">
+      <div class="field"><label>Кому / От кого</label><input id="debtCounterparty" value="${esc(entry?.counterparty || '')}" placeholder="Имя или организация"></div>
+      <div class="grid">
+        <div class="field"><label>Сумма (₽)</label><input id="debtAmount" type="number" value="${entry?.amount || ''}" placeholder="0" step="0.01"></div>
+        <div class="field"><label>Процент (%)</label><input id="debtInterest" type="number" value="${entry?.interest || ''}" placeholder="0" step="0.1"></div>
       </div>
       <div class="grid">
-        <div class="field">
-          <label>Сумма (₽)</label>
-          <input id="debtAmount" type="number" value="${entry?.amount || ''}" placeholder="0" step="0.01">
-        </div>
-        <div class="field">
-          <label>Процент (%)</label>
-          <input id="debtInterest" type="number" value="${entry?.interest || ''}" placeholder="0" step="0.1">
-        </div>
+        <div class="field"><label>Дата взятия</label><input id="debtDateGiven" type="date" value="${entry?.dateGiven || today()}"></div>
+        <div class="field"><label>Дата возврата</label><input id="debtDateDue" type="date" value="${entry?.dateDue || ''}"></div>
       </div>
-      <div class="grid">
-        <div class="field">
-          <label>Дата взятия</label>
-          <input id="debtDateGiven" type="date" value="${entry?.dateGiven || today()}">
-        </div>
-        <div class="field">
-          <label>Дата возврата</label>
-          <input id="debtDateDue" type="date" value="${entry?.dateDue || ''}">
-        </div>
-      </div>
-      <div class="field">
-        <label>Статус</label>
+      <div class="field"><label>Статус</label>
         <select id="debtStatus">
           <option value="active" ${entry?.status === 'active' ? 'selected' : ''}>Активен</option>
           <option value="paid" ${entry?.status === 'paid' ? 'selected' : ''}>Погашен</option>
           <option value="overdue" ${entry?.status === 'overdue' ? 'selected' : ''}>Просрочен</option>
         </select>
       </div>
-      <div class="field">
-        <label>Заметка</label>
-        <textarea id="debtNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea>
-      </div>
+      <div class="field"><label>Заметка</label><textarea id="debtNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea></div>
       <button class="add" id="saveDebtBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить долг'}</button>
     </div>
   `);
@@ -2079,18 +2313,11 @@ function openDebtForm(categoryId, editEntryId = null) {
       status: document.getElementById('debtStatus').value || 'active',
       note: document.getElementById('debtNote').value.trim()
     };
-
     if (!data.counterparty) return toast('Укажи контрагента');
     if (data.amount <= 0) return toast('Укажи сумму');
-
-    if (editEntryId) {
-      updateCategoryEntry(categoryId, editEntryId, data);
-      toast('💰 Долг обновлён');
-    } else {
-      addCategoryEntry(categoryId, data);
-      toast('💰 Долг добавлен');
-    }
-
+    if (editEntryId) { updateCategoryEntry(categoryId, editEntryId, data);
+      toast('💰 Долг обновлён'); } else { addCategoryEntry(categoryId, data);
+      toast('💰 Долг добавлен'); }
     closeModal();
     renderJournal(categoryId);
   };
@@ -2100,44 +2327,24 @@ function openDebtForm(categoryId, editEntryId = null) {
 function openFinanceForm(categoryId, editEntryId = null) {
   const cat = getCategory(categoryId);
   if (!cat) return;
-
   const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
-
-  const categories = [
-    'Продукты', 'Транспорт', 'Жильё', 'Коммунальные',
-    'Здоровье', 'Образование', 'Одежда', 'Развлечения',
-    'Рестораны', 'Путешествия', 'Инвестиции', 'Налоги',
-    'Страховка', 'Подарки', 'Другое'
-  ];
+  const categories = ['Продукты', 'Транспорт', 'Жильё', 'Коммунальные', 'Здоровье', 'Образование', 'Одежда', 'Развлечения', 'Рестораны', 'Путешествия', 'Инвестиции', 'Налоги', 'Страховка', 'Подарки', 'Другое'];
 
   openModal('💰 Финансы', `
     <div class="form">
-      <div class="field">
-        <label>Тип</label>
+      <div class="field"><label>Тип</label>
         <select id="finType">
           <option value="income" ${entry?.type === 'income' ? 'selected' : ''}>📈 Доход</option>
           <option value="expense" ${entry?.type === 'expense' ? 'selected' : ''}>📉 Расход</option>
           <option value="investment" ${entry?.type === 'investment' ? 'selected' : ''}>📊 Инвестиция</option>
         </select>
       </div>
-      <div class="field">
-        <label>Категория</label>
-        <select id="finCategory">
-          ${categories.map(c => `<option value="${c}" ${entry?.category === c ? 'selected' : ''}>${c}</option>`).join('')}
-        </select>
+      <div class="field"><label>Категория</label>
+        <select id="finCategory">${categories.map(c => `<option value="${c}" ${entry?.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
       </div>
-      <div class="field">
-        <label>Сумма (₽)</label>
-        <input id="finAmount" type="number" value="${entry?.amount || ''}" placeholder="0" step="0.01">
-      </div>
-      <div class="field">
-        <label>Дата</label>
-        <input id="finDate" type="date" value="${entry?.date || today()}">
-      </div>
-      <div class="field">
-        <label>Описание</label>
-        <textarea id="finDescription" placeholder="Что это?">${esc(entry?.description || '')}</textarea>
-      </div>
+      <div class="field"><label>Сумма (₽)</label><input id="finAmount" type="number" value="${entry?.amount || ''}" placeholder="0" step="0.01"></div>
+      <div class="field"><label>Дата</label><input id="finDate" type="date" value="${entry?.date || today()}"></div>
+      <div class="field"><label>Описание</label><textarea id="finDescription" placeholder="Что это?">${esc(entry?.description || '')}</textarea></div>
       <button class="add" id="saveFinanceBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить'}</button>
     </div>
   `);
@@ -2150,17 +2357,10 @@ function openFinanceForm(categoryId, editEntryId = null) {
       date: document.getElementById('finDate').value || today(),
       description: document.getElementById('finDescription').value.trim()
     };
-
     if (data.amount <= 0) return toast('Укажи сумму');
-
-    if (editEntryId) {
-      updateCategoryEntry(categoryId, editEntryId, data);
-      toast('💰 Запись обновлена');
-    } else {
-      addCategoryEntry(categoryId, data);
-      toast('💰 Запись добавлена');
-    }
-
+    if (editEntryId) { updateCategoryEntry(categoryId, editEntryId, data);
+      toast('💰 Запись обновлена'); } else { addCategoryEntry(categoryId, data);
+      toast('💰 Запись добавлена'); }
     closeModal();
     renderJournal(categoryId);
   };
@@ -2170,13 +2370,11 @@ function openFinanceForm(categoryId, editEntryId = null) {
 function openBodyForm(categoryId, editEntryId = null) {
   const cat = getCategory(categoryId);
   if (!cat) return;
-
   const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
 
   openModal('💪 Тело', `
     <div class="form">
-      <div class="field">
-        <label>Тип</label>
+      <div class="field"><label>Тип</label>
         <select id="bodyType">
           <option value="workout" ${entry?.type === 'workout' ? 'selected' : ''}>🏋️ Тренировка</option>
           <option value="weight" ${entry?.type === 'weight' ? 'selected' : ''}>⚖️ Вес</option>
@@ -2184,21 +2382,12 @@ function openBodyForm(categoryId, editEntryId = null) {
           <option value="water" ${entry?.type === 'water' ? 'selected' : ''}>💧 Вода</option>
         </select>
       </div>
-      <div class="field">
-        <label>Значение</label>
+      <div class="field"><label>Значение</label>
         <input id="bodyValue" type="number" value="${entry?.value || ''}" placeholder="0" step="0.1">
-        <span class="muted" style="font-size:10px" id="bodyUnit">
-          ${entry?.type === 'weight' ? 'кг' : entry?.type === 'sleep' ? 'часов' : entry?.type === 'water' ? 'стаканов' : 'минут'}
-        </span>
+        <span class="muted" style="font-size:10px" id="bodyUnit">${entry?.type === 'weight' ? 'кг' : entry?.type === 'sleep' ? 'часов' : entry?.type === 'water' ? 'стаканов' : 'минут'}</span>
       </div>
-      <div class="field">
-        <label>Дата</label>
-        <input id="bodyDate" type="date" value="${entry?.date || today()}">
-      </div>
-      <div class="field">
-        <label>Заметка</label>
-        <textarea id="bodyNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea>
-      </div>
+      <div class="field"><label>Дата</label><input id="bodyDate" type="date" value="${entry?.date || today()}"></div>
+      <div class="field"><label>Заметка</label><textarea id="bodyNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea></div>
       <button class="add" id="saveBodyBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить'}</button>
     </div>
   `);
@@ -2219,17 +2408,248 @@ function openBodyForm(categoryId, editEntryId = null) {
       date: document.getElementById('bodyDate').value || today(),
       note: document.getElementById('bodyNote').value.trim()
     };
-
     if (data.value <= 0) return toast('Укажи значение');
+    if (editEntryId) { updateCategoryEntry(categoryId, editEntryId, data);
+      toast('💪 Запись обновлена'); } else { addCategoryEntry(categoryId, data);
+      toast('💪 Запись добавлена'); }
+    closeModal();
+    renderJournal(categoryId);
+  };
+}
 
-    if (editEntryId) {
-      updateCategoryEntry(categoryId, editEntryId, data);
-      toast('💪 Запись обновлена');
+// --- Питание ---
+function openFoodForm(categoryId, editEntryId = null) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+  const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
+  const mealTypes = ['Завтрак', 'Обед', 'Ужин', 'Перекус', 'Напиток'];
+
+  openModal('🥗 Питание', `
+    <div class="form">
+      <div class="field"><label>Тип</label>
+        <select id="foodType">
+          <option value="meal" ${entry?.type === 'meal' ? 'selected' : ''}>🍽️ Приём пищи</option>
+          <option value="water" ${entry?.type === 'water' ? 'selected' : ''}>💧 Вода</option>
+          <option value="recipe" ${entry?.type === 'recipe' ? 'selected' : ''}>📖 Рецепт</option>
+        </select>
+      </div>
+      <div class="field" id="foodMealTypeField"><label>Приём</label><select id="foodMealType">${mealTypes.map(m => `<option value="${m}" ${entry?.mealType === m ? 'selected' : ''}>${m}</option>`).join('')}</select></div>
+      <div class="field"><label>Название</label><input id="foodTitle" value="${esc(entry?.title || '')}" placeholder="Название блюда"></div>
+      <div class="grid">
+        <div class="field"><label>Калории (ккал)</label><input id="foodCalories" type="number" value="${entry?.calories || ''}" placeholder="0" step="1"></div>
+        <div class="field"><label>Дата</label><input id="foodDate" type="date" value="${entry?.date || today()}"></div>
+      </div>
+      <div class="grid" id="foodMacros">
+        <div class="field"><label>Белки (г)</label><input id="foodProtein" type="number" value="${entry?.protein || ''}" placeholder="0" step="0.1"></div>
+        <div class="field"><label>Жиры (г)</label><input id="foodFat" type="number" value="${entry?.fat || ''}" placeholder="0" step="0.1"></div>
+        <div class="field"><label>Углеводы (г)</label><input id="foodCarbs" type="number" value="${entry?.carbs || ''}" placeholder="0" step="0.1"></div>
+      </div>
+      <div class="field"><label>Заметка</label><textarea id="foodNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea></div>
+      <button class="add" id="saveFoodBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить'}</button>
+    </div>
+  `);
+
+  const typeSelect = document.getElementById('foodType');
+  const mealTypeField = document.getElementById('foodMealTypeField');
+  const macrosField = document.getElementById('foodMacros');
+
+  typeSelect.onchange = function() {
+    if (this.value === 'water') {
+      mealTypeField.style.display = 'none';
+      macrosField.style.display = 'none';
+      document.getElementById('foodTitle').placeholder = 'Сколько стаканов?';
+    } else if (this.value === 'recipe') {
+      mealTypeField.style.display = 'none';
+      macrosField.style.display = 'grid';
+      document.getElementById('foodTitle').placeholder = 'Название рецепта';
     } else {
-      addCategoryEntry(categoryId, data);
-      toast('💪 Запись добавлена');
+      mealTypeField.style.display = 'block';
+      macrosField.style.display = 'grid';
+      document.getElementById('foodTitle').placeholder = 'Название блюда';
+    }
+  };
+  typeSelect.onchange();
+
+  document.getElementById('saveFoodBtn').onclick = function() {
+    const type = document.getElementById('foodType').value;
+    const data = { type: type, title: document.getElementById('foodTitle').value.trim(), date: document.getElementById('foodDate').value || today(), note: document.getElementById('foodNote').value.trim() };
+
+    if (type === 'water') {
+      data.amount = parseFloat(data.title) || 0;
+      data.title = data.amount + ' стаканов';
+      if (data.amount <= 0) return toast('Укажи количество стаканов');
+    } else {
+      data.mealType = document.getElementById('foodMealType').value;
+      data.calories = parseInt(document.getElementById('foodCalories').value) || 0;
+      data.protein = parseFloat(document.getElementById('foodProtein').value) || 0;
+      data.fat = parseFloat(document.getElementById('foodFat').value) || 0;
+      data.carbs = parseFloat(document.getElementById('foodCarbs').value) || 0;
+      if (!data.title) return toast('Назови блюдо');
     }
 
+    if (editEntryId) { updateCategoryEntry(categoryId, editEntryId, data);
+      toast('🥗 Запись обновлена'); } else { addCategoryEntry(categoryId, data);
+      toast('🥗 Запись добавлена'); }
+    closeModal();
+    renderJournal(categoryId);
+  };
+}
+
+// --- Бизнес ---
+function openBusinessForm(categoryId, editEntryId = null) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+  const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
+  const types = ['Задача', 'Встреча', 'Идея', 'Проект', 'Клиент'];
+  const statuses = ['В работе', 'Готово', 'Отложено', 'Запланировано'];
+  const priorities = ['Высокий', 'Средний', 'Низкий'];
+
+  openModal('📈 Бизнес', `
+    <div class="form">
+      <div class="field"><label>Тип</label><select id="bizType">${types.map(t => `<option value="${t}" ${entry?.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Название</label><input id="bizTitle" value="${esc(entry?.title || '')}" placeholder="Название"></div>
+      <div class="grid">
+        <div class="field"><label>Статус</label><select id="bizStatus">${statuses.map(s => `<option value="${s}" ${entry?.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+        <div class="field"><label>Приоритет</label><select id="bizPriority">${priorities.map(p => `<option value="${p}" ${entry?.priority === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label>Дата</label><input id="bizDate" type="date" value="${entry?.date || today()}"></div>
+      <div class="field"><label>Заметка</label><textarea id="bizNote" placeholder="Дополнительная информация">${esc(entry?.note || '')}</textarea></div>
+      <button class="add" id="saveBizBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить'}</button>
+    </div>
+  `);
+
+  document.getElementById('saveBizBtn').onclick = function() {
+    const data = {
+      type: document.getElementById('bizType').value,
+      title: document.getElementById('bizTitle').value.trim(),
+      status: document.getElementById('bizStatus').value,
+      priority: document.getElementById('bizPriority').value,
+      date: document.getElementById('bizDate').value || today(),
+      note: document.getElementById('bizNote').value.trim()
+    };
+    if (!data.title) return toast('Введи название');
+    if (editEntryId) { updateCategoryEntry(categoryId, editEntryId, data);
+      toast('📈 Запись обновлена'); } else { addCategoryEntry(categoryId, data);
+      toast('📈 Запись добавлена'); }
+    closeModal();
+    renderJournal(categoryId);
+  };
+}
+
+// --- Хобби ---
+function openHobbyForm(categoryId, editEntryId = null) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+  const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
+  const types = ['Рисование', 'Музыка', 'Чтение', 'Спорт', 'Рукоделие', 'Фотография', 'Программирование', 'Другое'];
+
+  openModal('🎨 Хобби', `
+    <div class="form">
+      <div class="field"><label>Тип</label><select id="hobbyType">${types.map(t => `<option value="${t}" ${entry?.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Название</label><input id="hobbyTitle" value="${esc(entry?.title || '')}" placeholder="Что делал?"></div>
+      <div class="grid">
+        <div class="field"><label>Время (мин)</label><input id="hobbyMinutes" type="number" value="${entry?.minutes || ''}" placeholder="0" step="1"></div>
+        <div class="field"><label>Дата</label><input id="hobbyDate" type="date" value="${entry?.date || today()}"></div>
+      </div>
+      <div class="field"><label>Прогресс (%)</label><input id="hobbyProgress" type="number" value="${entry?.progress || ''}" placeholder="0-100" min="0" max="100" step="1"></div>
+      <div class="field"><label>Заметка</label><textarea id="hobbyNote" placeholder="Что получилось?">${esc(entry?.note || '')}</textarea></div>
+      <button class="add" id="saveHobbyBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить'}</button>
+    </div>
+  `);
+
+  document.getElementById('saveHobbyBtn').onclick = function() {
+    const data = {
+      type: document.getElementById('hobbyType').value,
+      title: document.getElementById('hobbyTitle').value.trim(),
+      minutes: parseInt(document.getElementById('hobbyMinutes').value) || 0,
+      date: document.getElementById('hobbyDate').value || today(),
+      progress: parseInt(document.getElementById('hobbyProgress').value) || 0,
+      note: document.getElementById('hobbyNote').value.trim()
+    };
+    if (!data.title) return toast('Введи название');
+    if (editEntryId) { updateCategoryEntry(categoryId, editEntryId, data);
+      toast('🎨 Запись обновлена'); } else { addCategoryEntry(categoryId, data);
+      toast('🎨 Запись добавлена'); }
+    closeModal();
+    renderJournal(categoryId);
+  };
+}
+
+// --- Путешествия ---
+function openTravelForm(categoryId, editEntryId = null) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+  const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
+  const types = ['Страна', 'Город', 'Место', 'Маршрут'];
+
+  openModal('✈️ Путешествия', `
+    <div class="form">
+      <div class="field"><label>Тип</label><select id="travelType">${types.map(t => `<option value="${t}" ${entry?.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Название</label><input id="travelName" value="${esc(entry?.name || '')}" placeholder="Например: Париж"></div>
+      <div class="grid">
+        <div class="field"><label>Дата начала</label><input id="travelDateFrom" type="date" value="${entry?.dateFrom || ''}"></div>
+        <div class="field"><label>Дата окончания</label><input id="travelDateTo" type="date" value="${entry?.dateTo || ''}"></div>
+      </div>
+      <div class="field"><label>Заметка</label><textarea id="travelNote" placeholder="Впечатления">${esc(entry?.note || '')}</textarea></div>
+      <button class="add" id="saveTravelBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить'}</button>
+    </div>
+  `);
+
+  document.getElementById('saveTravelBtn').onclick = function() {
+    const data = {
+      type: document.getElementById('travelType').value,
+      name: document.getElementById('travelName').value.trim(),
+      dateFrom: document.getElementById('travelDateFrom').value || null,
+      dateTo: document.getElementById('travelDateTo').value || null,
+      note: document.getElementById('travelNote').value.trim()
+    };
+    if (!data.name) return toast('Введи название');
+    if (data.dateFrom && data.dateTo) {
+      const from = new Date(data.dateFrom + 'T12:00:00');
+      const to = new Date(data.dateTo + 'T12:00:00');
+      data.duration = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) || 1;
+    } else { data.duration = 1; }
+    if (editEntryId) { updateCategoryEntry(categoryId, editEntryId, data);
+      toast('✈️ Запись обновлена'); } else { addCategoryEntry(categoryId, data);
+      toast('✈️ Запись добавлена'); }
+    closeModal();
+    renderJournal(categoryId);
+  };
+}
+
+// --- Разное ---
+function openMiscForm(categoryId, editEntryId = null) {
+  const cat = getCategory(categoryId);
+  if (!cat) return;
+  const entry = editEntryId ? cat.entries.find(e => e.id === editEntryId) : null;
+  const types = ['Идея', 'Заметка', 'Напоминание', 'Ссылка', 'Другое'];
+  const priorities = ['Низкий', 'Средний', 'Высокий'];
+
+  openModal('📦 Разное', `
+    <div class="form">
+      <div class="field"><label>Тип</label><select id="miscType">${types.map(t => `<option value="${t}" ${entry?.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Название</label><input id="miscTitle" value="${esc(entry?.title || '')}" placeholder="Краткое описание"></div>
+      <div class="grid">
+        <div class="field"><label>Приоритет</label><select id="miscPriority">${priorities.map(p => `<option value="${p}" ${entry?.priority === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+        <div class="field"><label>Дата</label><input id="miscDate" type="date" value="${entry?.date || today()}"></div>
+      </div>
+      <div class="field"><label>Заметка</label><textarea id="miscNote" placeholder="Подробности">${esc(entry?.note || '')}</textarea></div>
+      <button class="add" id="saveMiscBtn">${editEntryId ? '💾 Сохранить' : '➕ Добавить'}</button>
+    </div>
+  `);
+
+  document.getElementById('saveMiscBtn').onclick = function() {
+    const data = {
+      type: document.getElementById('miscType').value,
+      title: document.getElementById('miscTitle').value.trim(),
+      priority: document.getElementById('miscPriority').value,
+      date: document.getElementById('miscDate').value || today(),
+      note: document.getElementById('miscNote').value.trim()
+    };
+    if (!data.title) return toast('Введи название');
+    if (editEntryId) { updateCategoryEntry(categoryId, editEntryId, data);
+      toast('📦 Запись обновлена'); } else { addCategoryEntry(categoryId, data);
+      toast('📦 Запись добавлена'); }
     closeModal();
     renderJournal(categoryId);
   };
@@ -2244,29 +2664,32 @@ function renderStats() {
   const done = tasks.filter(t => t.status === 'done').length;
   const cats = getCategories();
   const totalJournalXp = cats.reduce((sum, c) => sum + (c.totalXp || 0), 0);
+  const totalEntries = cats.reduce((sum, c) => sum + (c.entries?.length || 0), 0);
 
   document.getElementById('statsCards').innerHTML = `
-  <div class="stat"><b>${tasks.length}</b><span>Всего задач</span></div>
-  <div class="stat"><b>${done}</b><span>Выполнено</span></div>
-  <div class="stat"><b>${tasks.length ? Math.round(done / tasks.length * 100) : 0}%</b><span>Продуктивность</span></div>
-  <div class="stat"><b>${totalJournalXp}</b><span>XP в журналах</span></div>`;
+    <div class="stat"><b>${tasks.length}</b><span>📋 Всего задач</span></div>
+    <div class="stat"><b>${done}</b><span>✅ Выполнено</span></div>
+    <div class="stat"><b>${tasks.length ? Math.round(done / tasks.length * 100) : 0}%</b><span>📊 Продуктивность</span></div>
+    <div class="stat"><b>${totalJournalXp}</b><span>⭐ XP в журналах</span></div>
+    <div class="stat" style="grid-column:span 2"><b>${totalEntries}</b><span>📝 Всего записей в журналах</span></div>
+    <div class="stat" style="grid-column:span 2"><b>${data.media.length}</b><span>▣ Фото в галерее</span></div>
+  `;
 
   document.getElementById('statsBars').innerHTML = cats.map(c => {
     const a = getTasks({ category: c.id, excludeStatus: 'deleted' });
     const d = a.filter(t => t.status === 'done').length;
-    const p = a.length ? Math.round(d / a.length * 100) : 0;
     const need = xpNeedForCategory(c.level);
     const pct = Math.min(100, (c.xp / need) * 100);
     const entries = c.entries?.length || 0;
     return `<div style="margin:0 0 14px">
-    <div class="row" style="font-size:13px">
-      <span>${c.icon} ${c.name} (ур.${c.level})</span>
-      <span class="muted">${d}/${a.length} задач · ${entries} записей</span>
-    </div>
-    <div class="track" style="margin-top:6px">
-      <div class="fill" style="width:${pct}%;background:${c.color}"></div>
-    </div>
-   </div>`;
+      <div class="row" style="font-size:13px">
+        <span>${c.icon} ${c.name} (ур.${c.level})</span>
+        <span class="muted">${d}/${a.length} задач · ${entries} записей</span>
+      </div>
+      <div class="track" style="margin-top:6px">
+        <div class="fill" style="width:${pct}%;background:${c.color}"></div>
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -2289,18 +2712,18 @@ function renderCharacter() {
   const totalEntries = cats.reduce((sum, c) => sum + (c.entries?.length || 0), 0);
 
   document.getElementById('charStats').innerHTML = `
-  <div class="stat"><b>${u.level}</b><span>Общий уровень</span></div>
-  <div class="stat"><b>${u.totalXp || 0}</b><span>Всего XP</span></div>
-  <div class="stat"><b>${tasks.length}</b><span>Задач</span></div>
-  <div class="stat"><b>${done}</b><span>Выполнено</span></div>
-  <div class="stat"><b>${developed}/8</b><span>Журналов ≥5 ур.</span></div>
-  <div class="stat"><b>+${bonus}%</b><span>Бонус к глобальному XP</span></div>
-  <div class="stat" style="grid-column:span 2"><b>${totalEntries}</b><span>Всего записей в журналах</span></div>
+    <div class="stat"><b>${u.level}</b><span>⚡ Общий уровень</span></div>
+    <div class="stat"><b>${u.totalXp || 0}</b><span>⭐ Всего XP</span></div>
+    <div class="stat"><b>${tasks.length}</b><span>📋 Задач</span></div>
+    <div class="stat"><b>${done}</b><span>✅ Выполнено</span></div>
+    <div class="stat"><b>${developed}/8</b><span>📈 Журналов ≥5 ур.</span></div>
+    <div class="stat"><b>+${bonus}%</b><span>🎯 Бонус к глобальному XP</span></div>
+    <div class="stat" style="grid-column:span 2"><b>${totalEntries}</b><span>📝 Записей в журналах</span></div>
   `;
 }
 
 // ============================================================
-// 21. AVAILABILITY (СОКРАЩЕНО ДЛЯ ЭКОНОМИИ МЕСТА)
+// 21. AVAILABILITY (СОКРАЩЕНО)
 // ============================================================
 
 function renderAvailability() {
@@ -2316,25 +2739,23 @@ function renderAvailability() {
       return `<span style="display:inline-block;padding:2px 8px;border-radius:99px;background:${type.color}22;border:1px solid ${type.color}44;font-size:10px;margin:2px">${type.icon} ${s.from}-${s.to}</span>`;
     }).join(' ');
     return `<div class="quest" style="cursor:default;grid-template-columns:auto 1fr auto">
-   <div style="font-weight:600;font-size:14px">${a.date}</div>
-   <div>${slots || '<span class="muted">нет слотов</span>'}</div>
-   <button class="ghost" style="color:var(--danger);padding:4px 8px" onclick="removeAvailability('${a.date}');renderAvailability();renderCalendar();">✕</button>
-  </div>`;
+      <div style="font-weight:600;font-size:14px">${a.date}</div>
+      <div>${slots || '<span class="muted">нет слотов</span>'}</div>
+      <button class="ghost" style="color:var(--danger);padding:4px 8px" onclick="removeAvailability('${a.date}');renderAvailability();renderCalendar();">✕</button>
+    </div>`;
   }).join('');
 }
 
 document.getElementById('availAddBtn').onclick = () => {
   openModal('☀ Добавить слот доступности', `<div class="form">
-  <div class="field"><label>Дата</label><input id="availDate" type="date" value="${today()}"></div>
-  <div class="field"><label>Тип</label><select id="availType">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join('')}</select></div>
-  <div class="grid">
-   <div class="field"><label>С</label><input id="availFrom" type="time" value="10:00"></div>
-   <div class="field"><label>До</label><input id="availTo" type="time" value="12:00"></div>
-  </div>
-  <div class="field"><label>Несколько слотов? Добавь ещё раз после сохранения.</label></div>
-  <button class="add" id="saveAvailBtn">💾 Добавить слот</button>
- </div>`);
-  
+    <div class="field"><label>Дата</label><input id="availDate" type="date" value="${today()}"></div>
+    <div class="field"><label>Тип</label><select id="availType">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join('')}</select></div>
+    <div class="grid">
+      <div class="field"><label>С</label><input id="availFrom" type="time" value="10:00"></div>
+      <div class="field"><label>До</label><input id="availTo" type="time" value="12:00"></div>
+    </div>
+    <button class="add" id="saveAvailBtn">💾 Добавить слот</button>
+  </div>`);
   document.getElementById('saveAvailBtn').onclick = function() {
     const date = document.getElementById('availDate').value;
     if (!date) return toast('Выбери дату');
@@ -2371,8 +2792,7 @@ function renderAvailabilityExport() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const offset = (first.getDay() + 6) % 7;
 
-  let html =
-    `<div style="font-size:14px;font-weight:600;margin-bottom:6px">${['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][month]} ${year}</div>`;
+  let html = `<div style="font-size:14px;font-weight:600;margin-bottom:6px">${['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][month]} ${year}</div>`;
   html += `<div class="avail-export-grid">`;
   for (const d of DOW) html += `<div style="font-size:9px;color:var(--muted);text-align:center;padding:4px 0">${d}</div>`;
   for (let i = 0; i < offset; i++) html += `<div class="avail-export-cell" style="opacity:.2"></div>`;
@@ -2382,31 +2802,27 @@ function renderAvailabilityExport() {
     const isWeekend = (new Date(year, month, d).getDay() + 6) % 7 >= 5;
     const slots = avail ? avail.slots : [];
     html += `<div class="avail-export-cell ${isWeekend ? 'weekend' : ''}">
-   <div class="day-num">${d}</div>
-   ${slots.length ? `<div class="avail-indicator">${slots.map(s => `<div class="seg ${s.type}" style="background:${getAvailType(s.type).color}"></div>`).join('')}</div>` : '<div style="font-size:8px;color:var(--muted)">—</div>'}
-   ${slots.length ? `<div class="avail-export-caption">${slots.length} слот${slots.length > 1 ? 'а' : ''}</div>` : ''}
-  </div>`;
+      <div class="day-num">${d}</div>
+      ${slots.length ? `<div class="avail-indicator">${slots.map(s => `<div class="seg ${s.type}" style="background:${getAvailType(s.type).color}"></div>`).join('')}</div>` : '<div style="font-size:8px;color:var(--muted)">—</div>'}
+      ${slots.length ? `<div class="avail-export-caption">${slots.length} слот${slots.length > 1 ? 'а' : ''}</div>` : ''}
+    </div>`;
   }
   html += `</div>`;
-  html +=
-    `<div class="avail-legend">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
+  html += `<div class="avail-legend">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
   html += `<div class="avail-export-actions">
-  <button class="add" onclick="downloadAvailImage()" style="font-size:12px;padding:8px 16px">📥 Скачать как изображение</button>
-  <button class="ghost" onclick="copyAvailText()" style="font-size:12px;padding:8px 16px">📋 Копировать текст</button>
- </div>`;
+    <button class="add" onclick="downloadAvailImage()" style="font-size:12px;padding:8px 16px">📥 Скачать как изображение</button>
+    <button class="ghost" onclick="copyAvailText()" style="font-size:12px;padding:8px 16px">📋 Копировать текст</button>
+  </div>`;
   el.innerHTML = html;
 }
 
-function downloadAvailImage() {
-  toast('📥 Для экспорта изображения открой на компьютере и сделай скриншот');
-  copyAvailText();
-}
+function downloadAvailImage() { toast('📥 Для экспорта изображения открой на компьютере и сделай скриншот');
+  copyAvailText(); }
 
 function copyAvailText() {
   const el = document.getElementById('availExportContent');
   const text = el.textContent.trim().replace(/\s+/g, ' ');
-  navigator.clipboard?.writeText(text).then(() => toast('📋 Скопировано')).catch(() => toast(
-  '📋 Выдели текст и скопируй'));
+  navigator.clipboard?.writeText(text).then(() => toast('📋 Скопировано')).catch(() => toast('📋 Выдели текст и скопируй'));
 }
 
 // ============================================================
@@ -2429,8 +2845,7 @@ function taskColor(t) { const c = getCategory(t.category); return c ? c.color : 
 
 function calLabel() {
   const d = calState.date;
-  if (calState.view === 'day') return d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long',
-    year: 'numeric' });
+  if (calState.view === 'day') return d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   if (calState.view === 'week') { const s = startWeek(d),
       e = new Date(s);
     e.setDate(e.getDate() + 6); return `${s.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} — ${e.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}` };
@@ -2444,8 +2859,7 @@ function startWeek(d) { const x = new Date(d); const day = (x.getDay() + 6) % 7;
 
 function renderCalendar() {
   document.getElementById('calRangeLabel').textContent = calLabel();
-  document.querySelectorAll('#calendarModes button').forEach(b => b.classList.toggle('active', b.dataset.view === calState
-    .view));
+  document.querySelectorAll('#calendarModes button').forEach(b => b.classList.toggle('active', b.dataset.view === calState.view));
   const body = document.getElementById('calendarBody');
   if (calState.view === 'day') renderDay(body);
   else if (calState.view === 'week') renderWeek(body);
@@ -2458,16 +2872,11 @@ function renderDay(el) {
   const d = calState.date,
     ts = tasksOn(d),
     hourTasks = ts.filter(t => t.time && t.time.length > 0);
-  let html = '<div class="day-layout"><div class="time-col">' + Array.from({ length: 14 }, (_, i) =>
-      `<div>${pad(i + 7)}:00</div>`).join('') + '</div><div class="timeline">';
-  ts.filter(t => !t.time || !t.time.length).forEach(t => html +=
-    `<div class="mini-task" style="margin:7px 9px;border-left-color:${taskColor(t)}">${(getCategory(t.category) || { icon: '📋' }).icon} ${esc(t.title)}</div>`
-    );
+  let html = '<div class="day-layout"><div class="time-col">' + Array.from({ length: 14 }, (_, i) => `<div>${pad(i + 7)}:00</div>`).join('') + '</div><div class="timeline">';
+  ts.filter(t => !t.time || !t.time.length).forEach(t => html += `<div class="mini-task" style="margin:7px 9px;border-left-color:${taskColor(t)}">${(getCategory(t.category) || { icon: '📋' }).icon} ${esc(t.title)}</div>`);
   hourTasks.forEach(t => { const m = t.time.match(/(\d{1,2}):(\d{2})/); if (!m) return; const h = +m[1],
       min = +m[2]; const top = ((h - 7) * 52) + (min / 60 * 52); const dur = Math.max(28, (t.duration || 30) / 60 * 52);
-    html +=
-      `<div class="timeline-task" style="top:${top}px;height:${dur}px;border-left-color:${taskColor(t)}"><b>${esc(t.title)}</b><span>${t.time} · ${(getCategory(t.category) || { name: '?' }).name} · +${t.xp || 10} XP</span></div>`
-      });
+    html += `<div class="timeline-task" style="top:${top}px;height:${dur}px;border-left-color:${taskColor(t)}"><b>${esc(t.title)}</b><span>${t.time} · ${(getCategory(t.category) || { name: '?' }).name} · +${t.xp || 10} XP</span></div>` });
   html += '</div></div>';
   el.innerHTML = html;
 }
@@ -2493,15 +2902,12 @@ function renderMonthIOS(el) {
   let html = '<div class="month-ios-grid">';
   for (const d of DOW) html += `<div class="month-ios-dow">${d}</div>`;
   for (let i = offset - 1; i >= 0; i--) { const d = new Date(y, m - 1, daysInPrev - i);
-    html +=
-      `<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span>${renderCellDots(d)}</div>`; }
+    html += `<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span>${renderCellDots(d)}</div>`; }
   for (let i = 1; i <= daysInMonth; i++) { const d = new Date(y, m, i); const isToday = iso(d) === todayStr;
-    html +=
-      `<div class="month-ios-cell ${isToday ? 'today' : ''}" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${i}</span>${renderCellDots(d)}${goalsOn(d).map(g => `<div class="cell-goal-label">🏆 ${esc(g.title)}</div>`).join('')}</div>`; }
+    html += `<div class="month-ios-cell ${isToday ? 'today' : ''}" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${i}</span>${renderCellDots(d)}${goalsOn(d).map(g => `<div class="cell-goal-label">🏆 ${esc(g.title)}</div>`).join('')}</div>`; }
   const totalCells = Math.ceil((offset + daysInMonth) / 7) * 7;
   for (let i = offset + daysInMonth; i < totalCells; i++) { const d = new Date(y, m + 1, i - offset - daysInMonth + 1);
-    html +=
-      `<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span>${renderCellDots(d)}</div>`; }
+    html += `<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span>${renderCellDots(d)}</div>`; }
   html += '</div>';
   const monthTasks = getTasks({ excludeStatus: 'deleted' }).filter(t => t.date && t.date.startsWith(`${y}-${pad(m + 1)}`));
   const done = monthTasks.filter(t => t.status === 'done').length;
@@ -2517,8 +2923,7 @@ function renderCellDots(d) {
   let html = '<div class="cell-dots">';
   const dots = ts.slice(0, 3);
   for (const t of dots) html += `<span class="cell-dot" style="background:${taskColor(t)}"></span>`;
-  if (ts.length > 3) html +=
-    `<span class="cell-dot" style="background:var(--muted);font-size:7px;display:inline-flex;align-items:center;justify-content:center;color:#fff">+${ts.length - 3}</span>`;
+  if (ts.length > 3) html += `<span class="cell-dot" style="background:var(--muted);font-size:7px;display:inline-flex;align-items:center;justify-content:center;color:#fff">+${ts.length - 3}</span>`;
   if (gs.length) { const label = gs.length > 1 ? `${gs.length}🏆` : '🏆';
     html += `<span class="cell-dot goal-dot ${gs.length > 1 ? 'small' : ''}">${label}</span>`; }
   html += '</div>';
@@ -2531,8 +2936,7 @@ function renderYear(el) {
   for (let m = 0; m < 12; m++) { const days = new Date(y, m + 1, 0).getDate(); let heat = ''; for (let i = 1; i <= days; i++) {
       const d = new Date(y, m, i),
         n = tasksOn(d).length;
-      heat += `<i class="${n >= 5 ? 'l3' : n >= 2 ? 'l2' : n ? 'l1' : ''}"></i>` } const goalCount = data.goals.filter(g =>
-      g.deadline && g.deadline.startsWith(`${y}-${pad(m + 1)}`)).length;
+      heat += `<i class="${n >= 5 ? 'l3' : n >= 2 ? 'l2' : n ? 'l1' : ''}"></i>` } const goalCount = data.goals.filter(g => g.deadline && g.deadline.startsWith(`${y}-${pad(m + 1)}`)).length;
     html += `<div class="year-month" onclick="jumpMonth(${m})"><h4>${MON[m]}${goalCount ? ' 🏆' : ''}</h4><div class="heat">${heat}</div><div class="muted" style="font-size:9px;margin-top:7px">${getTasks({ excludeStatus: 'deleted' }).filter(t => t.date && t.date.startsWith(`${y}-${pad(m + 1)}`)).length} задач</div></div>` }
   html += '</div>';
   el.innerHTML = html;
@@ -2545,8 +2949,7 @@ function renderAvailabilityCalendar(el) {
   const offset = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   const daysInPrev = new Date(y, m, 0).getDate();
-  let html =
-    `<div style="margin-bottom:8px;color:var(--gold);font-size:13px">☀ Режим доступности — отметь, когда ты свободен</div>`;
+  let html = `<div style="margin-bottom:8px;color:var(--gold);font-size:13px">☀ Режим доступности — отметь, когда ты свободен</div>`;
   html += '<div class="month-ios-grid">';
   for (const d of DOW) html += `<div class="month-ios-dow">${d}</div>`;
   for (let i = offset - 1; i >= 0; i--) { const d = new Date(y, m - 1, daysInPrev - i);
@@ -2557,19 +2960,17 @@ function renderAvailabilityCalendar(el) {
     const slots = availOn(d);
     const isToday = dateStr === today();
     html += `<div class="month-ios-cell ${isToday ? 'today' : ''}" onclick="editAvailDay('${dateStr}')">
-   <span class="cell-number">${i}</span>
-   ${slots.length ? `<div class="avail-bar">${slots.map(s => `<div class="avail-slot ${s.type}" style="flex:${s.from && s.to ? 1 : 0.5}"></div>`).join('')}</div>` : '<div style="font-size:8px;color:var(--muted);margin-top:3px">—</div>'}
-   ${slots.length ? `<div style="font-size:7px;color:var(--muted);margin-top:1px">${slots.length} слот${slots.length > 1 ? 'а' : ''}</div>` : ''}
-  </div>`;
+      <span class="cell-number">${i}</span>
+      ${slots.length ? `<div class="avail-bar">${slots.map(s => `<div class="avail-slot ${s.type}" style="flex:${s.from && s.to ? 1 : 0.5}"></div>`).join('')}</div>` : '<div style="font-size:8px;color:var(--muted);margin-top:3px">—</div>'}
+      ${slots.length ? `<div style="font-size:7px;color:var(--muted);margin-top:1px">${slots.length} слот${slots.length > 1 ? 'а' : ''}</div>` : ''}
+    </div>`;
   }
   const totalCells = Math.ceil((offset + daysInMonth) / 7) * 7;
   for (let i = offset + daysInMonth; i < totalCells; i++) { const d = new Date(y, m + 1, i - offset - daysInMonth + 1);
     html += `<div class="month-ios-cell other-month" onclick="jumpDay('${iso(d)}')"><span class="cell-number">${d.getDate()}</span></div>`; }
   html += '</div>';
-  html +=
-    `<div class="avail-legend" style="padding-top:8px">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
-  html +=
-    `<div style="margin-top:8px;font-size:10px;color:var(--muted)">👆 Кликни на день, чтобы добавить слоты доступности</div>`;
+  html += `<div class="avail-legend" style="padding-top:8px">${Object.entries(AVAIL_TYPES).map(([k, v]) => `<span><span class="dot" style="background:${v.color}"></span>${v.label}</span>`).join('')}</div>`;
+  html += `<div style="margin-top:8px;font-size:10px;color:var(--muted)">👆 Кликни на день, чтобы добавить слоты доступности</div>`;
   el.innerHTML = html;
 }
 
@@ -2577,22 +2978,21 @@ function editAvailDay(dateStr) {
   const slots = getAvailability(dateStr)?.slots || [];
   const types = Object.entries(AVAIL_TYPES);
   openModal(`☀ Доступность: ${dateStr}`, `<div class="form">
-  <div class="field"><label>Существующие слоты:</label>
-   ${slots.length ? slots.map((s, i) => `<div style="display:flex;gap:6px;align-items:center;padding:6px;background:var(--panel2);border-radius:8px;margin:2px 0">
-    <span style="font-size:12px">${getAvailType(s.type).icon} ${s.from}-${s.to}</span>
-    <button class="ghost" style="color:var(--danger);padding:2px 6px;font-size:10px" onclick="removeAvailSlot('${dateStr}',${i});editAvailDay('${dateStr}')">✕</button>
-   </div>`).join('') : '<span class="muted">Нет слотов</span>'}
-  </div>
-  <div class="field"><label>Добавить слот</label></div>
-  <div class="grid">
-   <div class="field"><label>Тип</label><select id="eavailType">${types.map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join('')}</select></div>
-   <div class="field"><label>С</label><input id="eavailFrom" type="time" value="10:00"></div>
-   <div class="field"><label>До</label><input id="eavailTo" type="time" value="12:00"></div>
-  </div>
-  <button class="add" id="addAvailSlotBtn">➕ Добавить слот</button>
-  <button class="ghost" style="color:var(--danger)" id="removeAllAvailBtn">🗑 Удалить все слоты за день</button>
- </div>`);
-  
+    <div class="field"><label>Существующие слоты:</label>
+      ${slots.length ? slots.map((s, i) => `<div style="display:flex;gap:6px;align-items:center;padding:6px;background:var(--panel2);border-radius:8px;margin:2px 0">
+        <span style="font-size:12px">${getAvailType(s.type).icon} ${s.from}-${s.to}</span>
+        <button class="ghost" style="color:var(--danger);padding:2px 6px;font-size:10px" onclick="removeAvailSlot('${dateStr}',${i});editAvailDay('${dateStr}')">✕</button>
+      </div>`).join('') : '<span class="muted">Нет слотов</span>'}
+    </div>
+    <div class="field"><label>Добавить слот</label></div>
+    <div class="grid">
+      <div class="field"><label>Тип</label><select id="eavailType">${types.map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join('')}</select></div>
+      <div class="field"><label>С</label><input id="eavailFrom" type="time" value="10:00"></div>
+      <div class="field"><label>До</label><input id="eavailTo" type="time" value="12:00"></div>
+    </div>
+    <button class="add" id="addAvailSlotBtn">➕ Добавить слот</button>
+    <button class="ghost" style="color:var(--danger)" id="removeAllAvailBtn">🗑 Удалить все слоты за день</button>
+  </div>`);
   document.getElementById('addAvailSlotBtn').onclick = function() {
     const type = document.getElementById('eavailType').value;
     const from = document.getElementById('eavailFrom').value;
@@ -2606,7 +3006,6 @@ function editAvailDay(dateStr) {
     renderCalendar();
     toast('☀ Слот добавлен');
   };
-  
   document.getElementById('removeAllAvailBtn').onclick = function() {
     if (!confirm('Удалить все слоты за этот день?')) return;
     removeAvailability(dateStr);
@@ -2635,13 +3034,9 @@ function jumpMonth(m) { calState.date = new Date(calState.date.getFullYear(), m,
 
 document.querySelectorAll('#calendarModes button').forEach(b => b.onclick = () => { calState.view = b.dataset.view;
   renderCalendar(); });
-document.getElementById('calPrev').onclick = () => { const d = calState.date; if (calState.view === 'day') d.setDate(d.getDate() -
-    1); else if (calState.view === 'week') d.setDate(d.getDate() - 7); else if (calState.view === 'month' || calState.view ===
-    'avail') d.setMonth(d.getMonth() - 1); else d.setFullYear(d.getFullYear() - 1);
+document.getElementById('calPrev').onclick = () => { const d = calState.date; if (calState.view === 'day') d.setDate(d.getDate() - 1); else if (calState.view === 'week') d.setDate(d.getDate() - 7); else if (calState.view === 'month' || calState.view === 'avail') d.setMonth(d.getMonth() - 1); else d.setFullYear(d.getFullYear() - 1);
   renderCalendar(); };
-document.getElementById('calNext').onclick = () => { const d = calState.date; if (calState.view === 'day') d.setDate(d.getDate() +
-    1); else if (calState.view === 'week') d.setDate(d.getDate() + 7); else if (calState.view === 'month' || calState.view ===
-    'avail') d.setMonth(d.getMonth() + 1); else d.setFullYear(d.getFullYear() + 1);
+document.getElementById('calNext').onclick = () => { const d = calState.date; if (calState.view === 'day') d.setDate(d.getDate() + 1); else if (calState.view === 'week') d.setDate(d.getDate() + 7); else if (calState.view === 'month' || calState.view === 'avail') d.setMonth(d.getMonth() + 1); else d.setFullYear(d.getFullYear() + 1);
   renderCalendar(); };
 document.getElementById('calToday').onclick = () => { calState.date = new Date();
   renderCalendar(); };
@@ -2696,7 +3091,7 @@ function applyTheme(key) {
 function renderThemes() {
   document.getElementById('themeGrid').innerHTML = Object.entries(THEMES).map(([k, t]) =>
     `<button class="theme ${prefs.theme === k || (!prefs.theme && k === 'violet') ? 'selected' : ''}" data-theme="${k}"><div class="theme-preview" style="--tc1:${t.a};--tc2:${t.b}"></div><small>${t.name}</small></button>`
-    ).join('');
+  ).join('');
   document.querySelectorAll('.theme').forEach(b => b.onclick = () => applyTheme(b.dataset.theme));
 }
 
@@ -2805,7 +3200,7 @@ function renderAll() {
 updateNoteFilterCats();
 renderAll();
 
-console.log('⚡ LVLUP v13.5 загружен!');
+console.log('⚡ LVLUP v13.6 загружен!');
 console.log('📊 Журналов:', getCategories().length);
 console.log('📋 Задач:', getTasks({ excludeStatus: 'deleted' }).length);
 console.log('🎯 Целей:', data.goals.length);
